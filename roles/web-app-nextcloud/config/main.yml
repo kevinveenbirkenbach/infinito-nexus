@@ -43,9 +43,17 @@ compose:
     oidc:
       enabled: true
       shared: true
+      # flavor decides which OIDC plugin should be used.
+      # Available options: oidc_login, sociallogin
+      # @see https://apps.nextcloud.com/apps/oidc_login
+      # @see https://apps.nextcloud.com/apps/sociallogin
+      flavor: "oidc_login"
     coturn:
+      # Keep dedicated TURN provider statically discoverable so normal inventory
+      # generation and local iteration always pull in web-svc-coturn.
+      # Actual Talk TURN usage stays gated by plugins.spreed.enabled below.
+      enabled:  true
       shared:   true
-      enabled:  true 
     logout:
       enabled: true
       shared: true
@@ -105,14 +113,16 @@ compose:
       mem_limit:            "512m"
       pids_limit:           256
     talk:
+      enabled:              "{{ lookup('config', 'web-app-nextcloud', 'plugins.spreed.enabled', False) }}"
       name:                 "nextcloud-talk"
       image:                "nextcloud/aio-talk"
       version:              "latest"
       backup:
         no_stop_required:   false
       turn_server:
-        onboard_enabled:    true
-        standalone_enabled: false
+        # Use dedicated web-svc-coturn by default. HPB onboard TURN stays available as an explicit fallback only.
+        onboard_enabled:    false
+        standalone_enabled: true
       network_mode:         bridge
       cpus:                 "2.0"
       mem_reservation:      "1g"
@@ -149,14 +159,8 @@ compose:
       shared: true
     hcaptcha:
       enabled: "{{ HCAPTCHA_ENABLED | bool }}"
-  enabled:  "{{ applications | default({}, true) | get_app_conf('web-app-nextcloud', 'compose.services.oidc.enabled', False, True, True) }}"   # Activate OIDC for Nextcloud
-  # floavor decides which OICD plugin should be used. 
-  # Available options: oidc_login, sociallogin
-  # @see https://apps.nextcloud.com/apps/oidc_login
-  # @see https://apps.nextcloud.com/apps/sociallogin
-  flavor:                       "oidc_login"                                    # Keeping on sociallogin because the other option is not implemented yet                                             
 default_quota:                 '1000000000'                                     # Quota to assign if no quota is specified in the OIDC response (bytes)
-legacy_login_mask:   
+legacy_login_mask:
   enabled:                      False                                           # If true, then legacy  login mask is shown. Otherwise just SSO
                            
 performance:
@@ -166,8 +170,6 @@ performance:
     opcache_memory_consumption: "{{ ((ansible_facts['memtotal_mb'] | int) / 30)|int }}M" # Dynamic set memory consumption
 
 plugins_enabled:                true                                            # Implemented for speeding up testing and debugging process. For productive environments keep it true and steer the apps via the plugins config
-oidc:
-  flavor:                       "{{ _applications_nextcloud_oidc_flavor }}" 
 plugins:                                                  
 # List for Nextcloud Plugin Routine
 # Decides if plugins should be activated or deactivated
@@ -308,7 +310,7 @@ plugins:
     enabled: true
   oidc_login:
     # Nextcloud User OIDC: integrates OpenID Connect for user authentication (https://apps.nextcloud.com/apps/oidc_login)
-    enabled:    "{{ _applications_nextcloud_oidc_flavor=='oidc_login' | lower }}"
+    enabled:    "{{ lookup('config', 'web-app-nextcloud', 'compose.services.oidc.flavor', 'oidc_login') == 'oidc_login' }}"
     incompatible_plugins:  
       - user_oidc   # Will be disabled
       - sociallogin # Will be disabled
@@ -335,7 +337,7 @@ plugins:
       - fileslibreofficeedit
   sociallogin:
     # Nextcloud social login: allows authentication using social networks (https://apps.nextcloud.com/apps/sociallogin)
-    enabled:    "{{ _applications_nextcloud_oidc_flavor=='sociallogin' | lower }}"
+    enabled:    "{{ lookup('config', 'web-app-nextcloud', 'compose.services.oidc.flavor', 'oidc_login') == 'sociallogin' }}"
     incompatible_plugins:  
       - user_oidc   # Will be disabled
       - oidc_login  # Will be disabled
@@ -353,18 +355,18 @@ plugins:
   #  enabled: false
   twofactor_nextcloud_notification:
     # Nextcloud two-factor notification: sends notifications for two-factor authentication events (https://apps.nextcloud.com/apps/twofactor_nextcloud_notification)
-    enabled: "{{ not (applications | default({}, true) | get_app_conf('web-app-nextcloud', 'compose.services.oidc.enabled', False, True, True)) }}" # Deactivate 2FA if oidc is active
+    enabled: "{{ not (lookup('config', 'web-app-nextcloud', 'compose.services.oidc.enabled', False)) }}" # Deactivate 2FA if oidc is active
   twofactor_totp:
     # Nextcloud two-factor TOTP: provides time-based one-time password authentication (https://apps.nextcloud.com/apps/twofactor_totp)
-    enabled: "{{ not (applications | default({}, true) | get_app_conf('web-app-nextcloud', 'compose.services.oidc.enabled', False, True, True)) }}" # Deactivate 2FA if oidc is active
+    enabled: "{{ not (lookup('config', 'web-app-nextcloud', 'compose.services.oidc.enabled', False)) }}" # Deactivate 2FA if oidc is active
   user_ldap:
     # Nextcloud user LDAP: integrates LDAP for user management and authentication
-    enabled: "{{ applications | default({}, true) | get_app_conf('web-app-nextcloud', 'compose.services.ldap.enabled', False, True, True) }}"
+    enabled: "{{ lookup('config', 'web-app-nextcloud', 'compose.services.ldap.enabled', True) }}"
     user_directory:
       enabled:  true # Enables the LDAP User Directory Search
   user_oidc:
     # Nextcloud User OIDC: integrates OpenID Connect for user authentication (https://apps.nextcloud.com/apps/user_oidc)
-    enabled:    "{{ _applications_nextcloud_oidc_flavor=='user_oidc' | lower }}"
+    enabled:    "{{ lookup('config', 'web-app-nextcloud', 'compose.services.oidc.flavor', 'oidc_login') == 'user_oidc' }}"
     incompatible_plugins:  
       - oidc_login
       - sociallogin

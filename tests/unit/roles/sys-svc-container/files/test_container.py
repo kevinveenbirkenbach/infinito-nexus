@@ -324,6 +324,62 @@ class TestContainerWrapper(unittest.TestCase):
             os.environ.clear()
             os.environ.update(old_env)
 
+    def test_container_run_injects_ca_env_when_image_has_no_entrypoint(self):
+        """
+        When with_ca=True, CA env is available, but the image has no ENTRYPOINT,
+        container_run() must inject CA env vars and volume without an entrypoint wrapper.
+        """
+        old_env = dict(os.environ)
+        calls = []
+
+        def fake_exec_docker(cmd, debug=False):
+            calls.append(("exec_docker", cmd, debug))
+            return 0
+
+        def fake_try_inspect_no_ep(image, pull_policy):
+            return []  # no entrypoint
+
+        orig_exec_docker = container.exec_docker
+        orig_try_inspect = container.try_inspect_entrypoint_with_pull
+        try:
+            with tempfile.TemporaryDirectory() as td:
+                td_path = Path(td)
+                ca_file = td_path / "root-ca.crt"
+                wrapper_file = td_path / "with-ca-trust.sh"
+                ca_file.write_text("dummy-ca\n", encoding="utf-8")
+                wrapper_file.write_text("#!/bin/sh\necho ok\n", encoding="utf-8")
+
+                os.environ["CA_TRUST_CERT_HOST"] = str(ca_file)
+                os.environ["CA_TRUST_WRAPPER_HOST"] = str(wrapper_file)
+                os.environ["CA_TRUST_NAME"] = "test-ca"
+
+                container.exec_docker = fake_exec_docker
+                container.try_inspect_entrypoint_with_pull = fake_try_inspect_no_ep
+
+                argv = ["--rm", "playwright:v1.0", "/bin/bash", "-lc", "npm install"]
+                rc = container.container_run(argv, debug=False, with_ca=True)
+
+            self.assertEqual(rc, 0)
+            self.assertEqual(len(calls), 1)
+            cmd = calls[0][1]
+            # Must be a docker run command
+            self.assertEqual(cmd[0], "docker")
+            self.assertEqual(cmd[1], "run")
+            # Must contain NODE_EXTRA_CA_CERTS injection
+            cmd_str = " ".join(cmd)
+            self.assertIn("NODE_EXTRA_CA_CERTS", cmd_str)
+            self.assertIn("/tmp/infinito/ca/root-ca.crt", cmd_str)
+            # Must NOT use --entrypoint (no wrapper)
+            self.assertNotIn("--entrypoint", cmd_str)
+            # Image and original command must appear
+            self.assertIn("playwright:v1.0", cmd_str)
+            self.assertIn("npm install", cmd_str)
+        finally:
+            container.exec_docker = orig_exec_docker
+            container.try_inspect_entrypoint_with_pull = orig_try_inspect
+            os.environ.clear()
+            os.environ.update(old_env)
+
     def test_container_run_with_ca_false_always_plain_docker_run(self):
         """
         When with_ca=False, container_run() must always call plain container run (no env needed).

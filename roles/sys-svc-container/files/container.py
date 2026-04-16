@@ -367,9 +367,31 @@ def container_run(argv: List[str], debug: bool, with_ca: bool) -> int:
         if not ep:
             warn(
                 "Image has no ENTRYPOINT and none was provided. "
-                "Running without CA wrapper."
+                "Injecting CA env vars without entrypoint wrapper."
             )
-            return exec_docker(["docker", "run", *argv], debug=debug)
+            # Inject CA cert as a volume + env vars so Node.js (NODE_EXTRA_CA_CERTS),
+            # curl (CURL_CA_BUNDLE), Python requests (REQUESTS_CA_BUNDLE), and other
+            # tools can trust the internal CA even without a wrapper entrypoint.
+            ca_inject_opts: List[str] = [
+                "-v",
+                f"{ca_host}:{ca_container}:ro",
+                "-e",
+                f"CA_TRUST_CERT={ca_container}",
+                "-e",
+                f"CA_TRUST_NAME={trust_name}",
+                "-e",
+                f"NODE_EXTRA_CA_CERTS={ca_container}",
+                "-e",
+                f"SSL_CERT_FILE={ca_container}",
+                "-e",
+                f"REQUESTS_CA_BUNDLE={ca_container}",
+                "-e",
+                f"CURL_CA_BUNDLE={ca_container}",
+            ]
+            return exec_docker(
+                ["docker", "run"] + run_opts + ca_inject_opts + [image] + user_args,
+                debug=debug,
+            )
 
         final_cmd.extend(ep)
         final_cmd.extend(user_args)

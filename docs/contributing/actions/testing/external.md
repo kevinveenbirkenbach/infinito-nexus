@@ -67,7 +67,7 @@ make test-external
 To scope the run to one file:
 
 ```bash
-TEST_PATTERN=test_image_versions.py make test-external
+make test-external TEST_PATTERN=test_image_versions.py
 ```
 
 ## CI Workflow 🤖
