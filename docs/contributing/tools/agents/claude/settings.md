@@ -42,17 +42,26 @@ The allowlist covers non-Bash tools and the wildcarded web tools. Read-only `gh 
 
 ### Bash via Sandbox Auto-Allow
 
-Bash commands that match neither `ask` nor `deny` execute automatically because `sandbox.autoAllowBashIfSandboxed: true` treats sandbox confinement as the primary policy gate. There is no per-command `Bash(...)` allowlist to maintain.
+Bash commands that match neither `ask` nor `deny` execute automatically because `sandbox.autoAllowBashIfSandboxed: true` treats sandbox confinement as the primary policy gate. For the overwhelming majority of commands there is no per-command `Bash(...)` allowlist to maintain.
 
 This means:
 
-- **No allowlist edits** are needed when introducing new make targets, scripts, or tooling. The sandbox already bounds what they can read, write, and reach over the network.
+- **No allowlist edits** are typically needed when introducing new make targets, scripts, or tooling. The sandbox already bounds what they can read, write, and reach over the network.
 - **Read-only inspection commands** (`grep`, `find`, `ls`, `cat`, `git log`, `docker ps`, etc.) just work.
 - **Mutating commands** that stay inside `allowWrite` (e.g. `make test`, `pip install`, `docker build`) just work.
 - **Mutating commands that target paths outside `allowWrite`** (e.g. `mv ~/file /etc/`) fail at the sandbox layer with EROFS.
 - **Outbound network calls** are bounded by `sandbox.network.allowedDomains` (currently `*` — see [sandbox.md](sandbox.md)).
 
 The trade-off is documented in [sandbox.md](sandbox.md): convenience and architectural clarity at the cost of relying on the sandbox to be correct. The `deny` list below is what catches the destructive cases the sandbox cannot prevent.
+
+### Explicit Bash Allow Entries
+
+A small number of Bash allow entries exist as targeted workarounds for command shapes where sandbox auto-allow does not fire reliably (notably: leading env-variable assignments, output redirections, and `&&`-chained subcommands that each need their own match).
+
+| Permission | When | Why | Security |
+|---|---|---|---|
+| `XDG_CACHE_HOME=/tmp/* gh run view *` | Fetching CI run / job logs with the `gh` CLI cache relocated into `/tmp`. | `gh run view` is read-only, but invocations in practice combine an `XDG_CACHE_HOME=` env prefix (so the cache lands inside `allowWrite`) with a `> /tmp/...` redirect, which is not reliably covered by auto-allow. The wildcards accept any cache subdirectory under `/tmp/` and any run ID / flag combination. | Read-only GitHub API call. Cache and redirect targets are constrained to `/tmp/` by the `XDG_CACHE_HOME=/tmp/*` prefix and sandbox `allowWrite`. Outbound network bounded by `sandbox.network.allowedDomains`. |
+| `wc -l *` | Counting lines in logs or intermediate files, typically chained after the `gh run view` call above via `&&`. | `&&` splits the command line into independently-checked parts, so the right-hand side needs its own allow entry even when the left-hand side already matches. | Read-only line count. No filesystem mutation, no network. |
 
 ## Ask Permissions ⚠️
 
