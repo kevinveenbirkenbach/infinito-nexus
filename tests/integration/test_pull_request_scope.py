@@ -76,7 +76,7 @@ class TestPullRequestScope(unittest.TestCase):
         files_json = """\
 [
   {"filename":"AGENTS.md"},
-  {"filename":"docs/agents/action/debug.md"},
+  {"filename":"docs/agents/action/debug/local.md"},
   {"filename":"docs/agents/action/develop.md"}
 ]
 """
