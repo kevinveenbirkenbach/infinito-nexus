@@ -6,13 +6,15 @@
   },
   "permissions": {
     "allow": [
+      "Bash(XDG_CACHE_HOME=/tmp/* gh run view *)",
+      "Bash(gh run list *)",
+      "Bash(grep *)",
+      "Bash(wc *)",
       "Edit",
       "Read",
       "WebFetch(domain:*)",
       "WebSearch",
-      "Write",
-      "Bash(XDG_CACHE_HOME=/tmp/* gh run view *)",
-      "Bash(wc -l *)"
+      "Write"
     ],
     "deny": [
       "Bash(gh api * --method DELETE *)",
