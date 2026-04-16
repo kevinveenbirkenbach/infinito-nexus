@@ -50,6 +50,7 @@
         "*.npmjs.org",
         "*.pythonhosted.org",
         "*.taiga.io",
+        "*.windows.net",
         "cybermaster.space",
         "ghcr.io",
         "github.com",
