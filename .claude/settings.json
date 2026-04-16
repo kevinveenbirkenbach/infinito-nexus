@@ -74,8 +74,6 @@
       "Bash(mv*)",
       "Bash(pkill -f *)",
 
-      "Read(~/.cache/pre-commit/**)",
-
       "WebSearch",
       "WebFetch(domain:github.com)",
       "WebFetch(domain:raw.githubusercontent.com)",
@@ -108,6 +106,8 @@
     "deny": [
       "Bash(git push --force*)",
       "Bash(git reset --hard*)",
+      "Bash(git clean*)",
+      "Bash(git branch -D*)",
       "Bash(rm -rf*)",
       "Bash(sudo*)",
       "Bash(gh workflow enable*)",
@@ -115,6 +115,8 @@
     ]
   },
   "sandbox": {
+    "enabled": true,
+    "failIfUnavailable": true,
     "filesystem": {
       "allowWrite": [
         ".",

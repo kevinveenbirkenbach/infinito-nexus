@@ -1,7 +1,8 @@
 # Claude Code Settings 🤖
 
-This page documents every permission entry in [`.claude/settings.json`](../../../../.claude/settings.json) and explains when it applies, why it is granted at that level, and what security implications it carries.
-For general agent workflow rules, see [common.md](common.md).
+This page documents every permission entry in [`.claude/settings.json`](../../../../../.claude/settings.json) and explains when it applies, why it is granted at that level, and what security implications it carries.
+For general agent workflow rules, see [common.md](../common.md).
+For the sandbox configuration that accompanies these permissions, see [sandbox.md](sandbox.md).
 For the Claude Code permission model reference, see [docs.anthropic.com](https://docs.anthropic.com/en/docs/claude-code/settings).
 
 ## Permission Model 🔐
@@ -22,8 +23,8 @@ Claude Code evaluates each tool call against three ordered lists:
 
 | Permission | When | Why | Security |
 |---|---|---|---|
-| `Read` | Every task that inspects a file. | Core IDE operation. The agent cannot understand code without it. | Scope is limited by `denyRead` in the sandbox section. Credential directories are never readable. |
-| `Edit` | Every task that modifies an existing file. | Core IDE operation. Required for any code change. | Write scope is bounded by `allowWrite`. Changes outside `.` and `/tmp` are blocked. |
+| `Read` | Every task that inspects a file. | Core IDE operation. The agent cannot understand code without it. | Scope is limited by `denyRead` in the sandbox configuration (see [sandbox.md](sandbox.md)). Credential directories are never readable. |
+| `Edit` | Every task that modifies an existing file. | Core IDE operation. Required for any code change. | Write scope is bounded by `allowWrite` (see [sandbox.md](sandbox.md)). Changes outside `.` and `/tmp` are blocked. |
 | `Write` | Every task that creates a new file. | Core IDE operation. Required for scaffolding and new file creation. | Same sandbox boundary as `Edit`. |
 
 ### Git Commands 🗃️
@@ -50,7 +51,7 @@ Claude Code evaluates each tool call against three ordered lists:
 |---|---|---|---|
 | `gh run*` | Inspecting CI pipeline runs, viewing logs, or listing workflow run status. | Allows the agent to check whether a workflow passed without browser access. | Primarily read-only. Subcommands such as `gh run rerun` and `gh run cancel` are write operations covered by this wildcard. Operators SHOULD verify the subcommand when approving tasks. |
 | `gh workflow list*` | Listing the workflows defined in the repository. | Read-only inventory of CI workflows. Required to find workflow IDs before inspecting runs. | No side-effects. Safe to allow unconditionally. |
-| `gh workflow view*` | Inspecting a workflow definition or its run history. | Read-only view needed to understand workflow structure and recent results. | No side-effects. Safe to allow unconditionally. `gh workflow run`, `enable`, and `disable` are intentionally NOT covered by this entry — they are routed to `ask` and `deny` respectively. |
+| `gh workflow view*` | Inspecting a workflow definition or its run history. | Read-only view needed to understand workflow structure and recent results. | No side-effects. Safe to allow unconditionally. `gh workflow run`, `enable`, and `disable` are intentionally NOT covered by this entry. They are routed to `ask` and `deny` respectively. |
 
 ### Build and Scripts 🛠️
 
@@ -59,9 +60,9 @@ Claude Code evaluates each tool call against three ordered lists:
 | `make*` | Running any target defined in the repository `Makefile`. | Make is the primary command surface covering install, test, lint, build, deploy, and cleanup. | The full wildcard is broad. The `Makefile` MUST NOT expose targets that run privileged or destructive operations without explicit guards. New make targets SHOULD be reviewed before merging. |
 | `act*` | Running GitHub Actions workflows locally via Act. | Used by `make act-*` targets for local CI simulation. | Act pulls Docker images and executes workflow steps locally. Workflows MUST NOT contain untrusted third-party actions before running. |
 | `bash -n*` | Syntax-checking shell scripts before executing them. | `bash -n` is a dry-run parse that catches syntax errors safely. | No code is executed. Side-effect-free. |
-| `bash scripts/*` | Executing repository helper scripts under [`scripts/`](../../../../scripts/). | Many make targets and agent workflows invoke tracked scripts directly. | Scoped to the repository `scripts/` tree. Arbitrary script paths outside `scripts/` still require approval. Script contents MUST be reviewed before merging. |
+| `bash scripts/*` | Executing repository helper scripts under [`scripts/`](../../../../../scripts/). | Many make targets and agent workflows invoke tracked scripts directly. | Scoped to the repository `scripts/` tree. Arbitrary script paths outside `scripts/` still require approval. Script contents MUST be reviewed before merging. |
 | `source scripts/*` | Loading environment variables and shell helpers from repository scripts (e.g. `scripts/meta/env/all.sh`) into the current shell. | Some tooling exports `INVENTORY_DIR`, `INFINITO_DISTRO`, and similar variables that are only usable when sourced. | Scoped to `scripts/`. `source` executes the file in the current shell and bypasses the allowlist for nested commands, so the `scripts/` tree MUST be kept free of unreviewed content. Sourcing paths outside `scripts/` still requires approval. |
-| `scripts/*` | Directly executing repository helper scripts by path (e.g. `scripts/tests/e2e/rerun-spec.sh <role>`). | Some scripts are meant to be invoked directly (shebang-based) rather than through `bash <path>`; required for inner-loop workflows such as the Playwright spec rerunner. | Equivalent in blast radius to `bash scripts/*` — the executed script runs with the agent's full permissions. Scoped to the repository `scripts/` tree. Script contents MUST be reviewed before merging. |
+| `scripts/*` | Directly executing repository helper scripts by path (e.g. `scripts/tests/e2e/rerun-spec.sh <role>`). | Some scripts are meant to be invoked directly (shebang-based) rather than through `bash <path>`; required for inner-loop workflows such as the Playwright spec rerunner. | Equivalent in blast radius to `bash scripts/*`. The executed script runs with the agent's full permissions. Scoped to the repository `scripts/` tree. Script contents MUST be reviewed before merging. |
 | `chmod +x scripts/*` | Making repository helper scripts executable when they are newly added or lose their executable bit. | Needed so that shebang-based invocation via `scripts/<path>` works without falling back to `bash <path>`. | Modifies file mode bits inside the repo only. Bounded by the sandbox `allowWrite` constraint and the `scripts/` path prefix. Does not escalate privileges. |
 | `wait*` | Waiting for background tasks (started via `run_in_background`) to complete. | The agent starts long-running commands in the background and MUST be able to block on their completion without operator approval. | Shell built-in. No file or network side-effects on its own; only observes child process state. |
 | `break` | Exiting `until`/`while` polling loops the agent constructs around long-running checks (e.g. waiting for a file to appear). | Shell built-in required inside loop bodies; without this entry every loop construct prompts for approval. | Bare built-in with no arguments. No file, network, or process side-effects. |
@@ -102,16 +103,10 @@ Claude Code evaluates each tool call against three ordered lists:
 |---|---|---|---|
 | `grep*`, `find*`, `ls*`, `cat*`, `head*`, `tail*` | Reading and searching file content during any task. | Standard read-only inspection tools. Required for almost every task. | No write side-effects. Safe to allow unconditionally. |
 | `wc*`, `sort*`, `jq*` | Counting lines, sorting output, parsing JSON. | Common pipeline utilities used in scripts and make targets. | No write side-effects. Safe to allow unconditionally. |
-| `awk*` | Pattern-based text extraction and transformation during inspection, script output parsing, and make target post-processing. | Standard pipeline utility. Narrow per-invocation wildcards proved impractical — every unique command line (pattern + path) would require its own allowlist entry. | Not strictly read-only: awk's `system()` and `"cmd" \| getline` can execute arbitrary shell commands and reach the network, equivalent in risk class to the already-allowed `find -exec` and `tar --checkpoint-action=exec`. The sandbox `allowWrite` scope, `denyRead` credential paths, and the `rm -rf*` / `sudo*` deny rules still bound the blast radius. Review awk scripts before piping untrusted input into them. |
+| `awk*` | Pattern-based text extraction and transformation during inspection, script output parsing, and make target post-processing. | Standard pipeline utility. Narrow per-invocation wildcards proved impractical because every unique command line (pattern + path) would require its own allowlist entry. | Not strictly read-only: awk's `system()` and `"cmd" \| getline` can execute arbitrary shell commands and reach the network, equivalent in risk class to the already-allowed `find -exec` and `tar --checkpoint-action=exec`. The sandbox `allowWrite` scope, `denyRead` credential paths, and the `rm -rf*` / `sudo*` deny rules still bound the blast radius. Review awk scripts before piping untrusted input into them. |
 | `tar*` | Archiving files during build or export tasks. | Required by build and packaging scripts. | Can overwrite files when extracting. The sandbox `allowWrite` limits the blast radius to `.` and `/tmp`. |
 | `mkdir*`, `cp*`, `mv*` | Creating directories and moving or copying files during setup and build tasks. | Required by install scripts and build targets. | `mv` and `cp` can overwrite files silently. Bounded by the sandbox `allowWrite` constraint. |
-| `pkill -f *` | Aborting stuck background commands (e.g. interrupting a running pre-commit hook, `make test`, or `git commit`) without a manual approval prompt each time. | Arbitrary kill patterns proved necessary during iteration — pre-approving only specific patterns required repeated allowlist edits for every new scenario. | High-risk: `pkill -f` accepts any regex, so a broad pattern (e.g. `.`) terminates every process the user owns, including desktop sessions, browsers, SSH, and the agent itself. SIGKILL can cause data loss in unsaved work. Consciously accepted trade-off: reliance on agent judgment and the Anthropic usage policy instead of a narrow per-pattern allowlist. Agents MUST use the narrowest possible pattern and prefer `wait`/background completion over killing. |
-
-### Process Management 🔪
-
-| Permission | When | Why | Security |
-|---|---|---|---|
-| `Read(~/.cache/pre-commit/**)` | Reading pre-commit's stashed patch files to restore unstaged changes after a manually aborted hook run. | When a long-running pre-commit hook (e.g. `make test`) is killed mid-run, pre-commit leaves unstaged changes in its patch cache; reading them is required to reapply via `git apply`. | Read-only access to a local cache directory containing repo diffs. No credentials are stored there. |
+| `pkill -f *` | Aborting stuck background commands (e.g. interrupting a running pre-commit hook, `make test`, or `git commit`) without a manual approval prompt each time. | Arbitrary kill patterns proved necessary during iteration because pre-approving only specific patterns required repeated allowlist edits for every new scenario. | High-risk: `pkill -f` accepts any regex, so a broad pattern (e.g. `.`) terminates every process the user owns, including desktop sessions, browsers, SSH, and the agent itself. SIGKILL can cause data loss in unsaved work. Consciously accepted trade-off: reliance on agent judgment and the Anthropic usage policy instead of a narrow per-pattern allowlist. Agents MUST use the narrowest possible pattern and prefer `wait`/background completion over killing. |
 
 ### Web Access 🌐
 
@@ -155,28 +150,12 @@ These operations are unconditionally blocked, regardless of any `allow` entry.
 |---|---|
 | `git push --force*` | Rewrites remote history. Can permanently destroy other contributors' work. |
 | `git reset --hard*` | Discards all uncommitted local changes without any recovery path. |
+| `git clean*` | Any invocation of `git clean` is blocked. All useful variants (`-f`, `-fd`, `-xfd`) force-delete untracked files with no recovery path; the wildcard covers every flag order. Can silently wipe in-progress work the agent has not yet surfaced to the operator. |
+| `git branch -D*` | Force-deletes local branches regardless of merge status. Can destroy unmerged work with no recovery path. |
 | `rm -rf*` | Recursive force-delete with no confirmation and no undo. |
 | `sudo*` | Prevents privilege escalation to root on the host system. |
 | `gh workflow enable*` | Re-enabling a workflow can silently restart paused CI (e.g. security scans deliberately disabled during incident response) without operator review. |
 | `gh workflow disable*` | Disabling a workflow can silently turn off security-critical CI (CodeQL, security-review, lint gates). Must never be done autonomously. |
-
-## Sandbox 🏖️
-
-### Write Scope
-
-The agent MAY write to `.` (the repository root) and `/tmp`. All other paths are read-only by default. `/tmp` is the **only** location outside the repository where transient agent output (downloaded logs, scratch files, intermediate artefacts) MAY be written; see the *Temporary Files* rule in [`AGENTS.md`](../../../../AGENTS.md).
-
-### Read Restrictions
-
-The following directories are never readable, even if a task explicitly requests access:
-
-| Path | What it protects |
-|---|---|
-| `~/.ssh` | SSH private keys. |
-| `~/.gnupg` | GPG keys and keyrings. |
-| `~/.kube` | Kubernetes cluster credentials. |
-| `~/.aws` | AWS access keys and configuration. |
-| `~/.config/gcloud` | Google Cloud service account credentials. |
 
 ## Local Overrides 🖥️
 

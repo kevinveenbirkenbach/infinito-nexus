@@ -1,16 +1,29 @@
 # CLAUDE.md
 
-## Startup — MUST DO at the Start of Every Conversation
+## Startup: MUST DO at the Start of Every Conversation 🚀
 
 You MUST read `AGENTS.md` and follow all instructions in it at the start of every conversation before doing anything else. Do NOT skip this, even for short or simple requests.
 
-## Interaction Rules
+## Permission State Announcement at Session Start 📢
+
+At the start of every new conversation, after reading `AGENTS.md`, you MUST read [.claude/settings.json](.claude/settings.json) and output a concise summary of the current permission state to the operator. Do NOT hardcode the content of the summary from this document; derive it from the live settings file so the output stays accurate when the settings change.
+
+The summary MUST cover, in this order:
+
+1. Whether the sandbox is enabled (`sandbox.enabled`) and, if so, the concrete `allowWrite` and `denyRead` paths.
+2. The list of pre-authorized commands (`permissions.allow` entries).
+3. The list of commands that will prompt for approval (`permissions.ask` entries).
+4. The list of unconditionally blocked commands (`permissions.deny` entries).
+
+Present the summary once per session. Do not repeat it unless the operator explicitly asks. Do not propose the `/sandbox` command; if the sandbox config indicates it is already active, state that plainly.
+
+## Interaction Rules 💬
 
 - Questions MUST NOT lead to modifications, manipulation of files, code, or state.
 - Only explicit commands MAY trigger modifications or manipulation.
 - You MUST prefer commands that are already permitted in [.claude/settings.json](.claude/settings.json) over commands that require interactive approval. If an equivalent permitted command exists, you MUST use it instead of the restricted one.
 
-## Code Execution
+## Code Execution ⚙️
 
 - You MUST always prefer `make` targets over running underlying scripts, `docker`, `docker compose`, `ansible-playbook`, `python`, or shell invocations directly, whenever an equivalent target exists in the [`Makefile`](Makefile). Inspect the `Makefile` first and only fall back to the raw command when no target covers the operation.
 - When passing variables to `make`, you MUST pass them **after** the target as make-style arguments, NOT as a shell-env prefix before `make`. This keeps the command matchable by the `Bash(make*)` permission entry in [.claude/settings.json](.claude/settings.json) and avoids unnecessary approval prompts.
@@ -22,11 +35,11 @@ You MUST read `AGENTS.md` and follow all instructions in it at the start of ever
 - The repository is mounted into the container at `/opt/src/infinito` (see [compose.yml](compose.yml)), so code changes are immediately available there.
 - This avoids permission prompts and keeps the workflow uninterrupted.
 
-## Configuration
+## Configuration 🛠️
 
 - Project-level permissions and sandbox rules are defined in [.claude/settings.json](.claude/settings.json).
 - See [code.claude.com](https://code.claude.com/docs/en/settings) for documentation on how to modify it.
 
-## Documentation
+## Documentation 📝
 
 See the [Claude Code documentation](https://code.claude.com/docs/en/overview) for further information. For human contributor guidance on working with agents, see [here](docs/contributing/tools/agents/common.md).
