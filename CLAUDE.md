@@ -25,15 +25,10 @@ Present the summary once per session. Do not repeat it unless the operator expli
 
 ## Code Execution ⚙️
 
-- You MUST always prefer `make` targets over running underlying scripts, `docker`, `docker compose`, `ansible-playbook`, `python`, or shell invocations directly, whenever an equivalent target exists in the [`Makefile`](Makefile). Inspect the `Makefile` first and only fall back to the raw command when no target covers the operation.
-- When passing variables to `make`, you MUST pass them **after** the target as make-style arguments, NOT as a shell-env prefix before `make`. This keeps the command matchable by the `Bash(make*)` permission entry in [.claude/settings.json](.claude/settings.json) and avoids unnecessary approval prompts.
-    - ✅ `make deploy-fresh-purged-apps APPS=web-app-nextcloud SERVICES_DISABLED="matomo"`
-    - ❌ `SERVICES_DISABLED="matomo" APPS=web-app-nextcloud make deploy-fresh-purged-apps`
-    - GNU Make automatically exports both command-line variables and inherited shell-env variables to recipe shells, so both forms are functionally equivalent. The make-suffix form is REQUIRED for agent use solely because of the `Bash(make*)` permission prefix match.
-- You SHOULD run permitted commands (listed in [.claude/settings.json](.claude/settings.json)) directly on the host.
-- For commands that are NOT permitted on the host, you MUST run them inside the application containers instead. Use `make up` (or the appropriate Make target) to start the stack, then use `make exec` to open a shell inside the container.
-- The repository is mounted into the container at `/opt/src/infinito` (see [compose.yml](compose.yml)), so code changes are immediately available there.
-- This avoids permission prompts and keeps the workflow uninterrupted.
+- You MUST always prefer `make` targets over running underlying scripts, `docker`, `docker compose`, `ansible-playbook`, `python`, or shell invocations directly, whenever an equivalent target exists in the [`Makefile`](Makefile). Inspect the `Makefile` first and only fall back to the raw command when no target covers the operation. The reason is operational consistency, not permissioning: sandbox-confined Bash is auto-allowed via `sandbox.autoAllowBashIfSandboxed` (see [settings.md](docs/contributing/tools/agents/claude/settings.md)), so raw commands also execute without prompts.
+- You SHOULD run sandbox-confined commands directly on the host. The sandbox bounds what they can read, write, and reach — see [sandbox.md](docs/contributing/tools/agents/claude/sandbox.md).
+- For commands that legitimately cannot run inside the sandbox (e.g. operations needing access to `~/.ssh` or `~/.gnupg`), use `make up` to start the stack and `make exec` to drop into a container shell. The repository is mounted at `/opt/src/infinito` (see [compose.yml](compose.yml)), so code changes are immediately available there.
+- Commands listed under `permissions.ask` in [.claude/settings.json](.claude/settings.json) (e.g. `git commit`, `git push`, `curl`, `gh api`) still pause for explicit operator confirmation regardless of sandbox state.
 
 ## Configuration 🛠️
 
