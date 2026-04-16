@@ -81,7 +81,7 @@ The repository already contains a modular environment test suite at [scripts/tes
 | 2 | `make environment-bootstrap` | Prepares the host machine for local development. |
 | 3 | `make up` | Starts the development stack. |
 | 4 | `make test` | Runs the main combined validation flow. |
-| 5 | `APPS=web-app-matomo make deploy-fresh-purged-apps` | Runs the baseline validation path for one concrete app. For the retry-loop policy, see [Iteration](../../agents/action/iteration.md). |
+| 5 | `make deploy-fresh-purged-apps APPS=web-app-matomo` | Runs the baseline validation path for one concrete app. For the retry-loop policy, see [Iteration](../../agents/action/iteration.md). |
 | 6 | `make trust-ca` | Makes the generated local certificates trusted by the host browser. |
 | 7 | `make down` | Stops the running development stack. |
 | 8 | `make environment-teardown` | Cleans up host-side development environment changes. |

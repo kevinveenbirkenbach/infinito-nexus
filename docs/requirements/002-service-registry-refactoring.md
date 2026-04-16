@@ -221,7 +221,7 @@ that app. Do not carry over assumptions from the previous app.
 
 1. Read [iteration.md](../agents/action/iteration.md) before starting each app.
 2. Implement the role-local changes for the current app.
-3. Deploy: `APPS=<role> make deploy-fresh-purged-apps`
+3. Deploy: `make deploy-fresh-purged-apps APPS=<role>`
 4. Follow the inspect-fix-redeploy loop from [iteration.md](../agents/action/iteration.md) until the app works end to end.
 5. Run `make test` — all tests MUST pass before moving to the next app.
 6. Check off the relevant Acceptance Criteria above if fully covered by this app.

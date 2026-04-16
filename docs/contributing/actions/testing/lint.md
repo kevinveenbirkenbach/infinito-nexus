@@ -34,5 +34,5 @@ Use `TEST_PATTERN` to scope the lint test run to a single file:
 
 ```bash
 # Run lint tests for a specific file
-TEST_PATTERN=test_my_role.py make test-lint
+make test-lint TEST_PATTERN=test_my_role.py
 ```

@@ -31,7 +31,7 @@ class TestDashboardOidcSpot(unittest.TestCase):
             "LOGIN_PASSWORD={{ DASHBOARD_KEYCLOAK_TEST_LOGIN_PASSWORD", content
         )
         self.assertIn(
-            "MATOMO_ENABLED={{ lookup('applications') | get_app_conf(DASHBOARD_APPLICATION_ID, 'compose.services.matomo.enabled') }}",
+            "MATOMO_ENABLED={{ lookup('config', application_id, 'compose.services.matomo.enabled') }}",
             content,
         )
 

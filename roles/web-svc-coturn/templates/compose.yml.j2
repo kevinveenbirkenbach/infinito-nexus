@@ -51,10 +51,10 @@
       --no-multicast-peers
       --no-cli
       --listening-port={{ COTURN_STUN_TURN_PORT }}
-{% if COTURN_TLS_ENABLED| bool %}
-      --tls-listening-port={{ COTURN_STUN_TURN_PORT_TLS }}
       --min-port={{ COTURN_RELAY_PORT_START }}
       --max-port={{ COTURN_RELAY_PORT_END }}
+{% if COTURN_TLS_ENABLED| bool %}
+      --tls-listening-port={{ COTURN_STUN_TURN_PORT_TLS }}
       --cert={{ COTURN_TLS_CERT_PATH }}
       --pkey={{ COTURN_TLS_KEY_PATH }}
 {% endif %}

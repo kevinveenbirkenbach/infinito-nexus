@@ -9,7 +9,7 @@ For implementation guidance when writing or updating role-local files, see
 
 - [Playwright](https://playwright.dev/) runs inside Docker via the shared `test-e2e-playwright` role.
 - There is no standalone `make` target for Playwright. Tests run as part of local deploy flows
-  (e.g. `FULL_CYCLE=true APPS=web-app-matomo make deploy-fresh-purged-apps`).
+  (e.g. `make deploy-fresh-purged-apps APPS=web-app-matomo FULL_CYCLE=true`).
 
 ## When to Write ✍️
 
@@ -94,7 +94,7 @@ Generated files are persisted in the local workspace (git-ignored). Copy the rel
 2. Build hypotheses about the expected user flows before writing tests.
 3. Optionally record a draft with Playwright codegen or `playwright-recorder`.
 4. Write or update `files/playwright.spec.js` and `templates/playwright.env.j2`.
-5. Run the relevant deploy flow (e.g. `FULL_CYCLE=true APPS=<role> make deploy-fresh-purged-apps`).
+5. Run the relevant deploy flow (e.g. `make deploy-fresh-purged-apps APPS=<role> FULL_CYCLE=true`).
 6. Run `make trust-ca` and open the app in your browser to confirm the flow manually.
 7. Inspect the browser console for errors when the flow depends on injected JavaScript.
 8. Verify the suite finishes in a logged-out state.
