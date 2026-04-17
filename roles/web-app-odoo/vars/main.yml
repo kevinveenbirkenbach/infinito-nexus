@@ -73,6 +73,21 @@ ODOO_LDAP_USER_ATTR:                "uid"
 ODOO_LDAP_CREATE_USER:              true
 ODOO_LDAP_TLS:                      "{{ LDAP.SERVER.SSL }}"
 
+## LDAP Configuration (for res_company_ldap table)
+ODOO_LDAP_CONFIG:
+  name:              "OpenLDAP"
+  sequence:          1
+  company_id:        1
+  ldap_server:       "{{ ODOO_LDAP_SERVER }}"
+  ldap_server_port:  "{{ ODOO_LDAP_PORT }}"
+  ldap_binddn:       "{{ ODOO_LDAP_BIND_DN }}"
+  ldap_password:     "{{ ODOO_LDAP_BIND_PASSWORD }}"
+  ldap_base:         "{{ ODOO_LDAP_BASE_DN }}"
+  ldap_filter:       "{{ ODOO_LDAP_FILTER }}"
+  user:              "{{ ODOO_LDAP_USER_ATTR }}"
+  create_user:       "{{ ODOO_LDAP_CREATE_USER | lower }}"
+  ldap_tls:          "{{ ODOO_LDAP_TLS | lower }}"
+
 ## OIDC Settings
 ODOO_OIDC_CLIENT_ID:                "{{ OIDC.CLIENT.ID }}"
 ODOO_OIDC_CLIENT_SECRET:            "{{ OIDC.CLIENT.SECRET }}"
