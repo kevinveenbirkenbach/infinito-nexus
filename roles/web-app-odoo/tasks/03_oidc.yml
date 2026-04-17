@@ -142,11 +142,10 @@
     query: >
       SELECT id, username FROM user_entity
       WHERE realm_id = (SELECT id FROM realm WHERE name = %(realm)s)
-      AND username IN (%(admin)s, %(biber)s);
+      AND username = %(admin)s;
     named_args:
       realm: "{{ OIDC.CLIENT.REALM }}"
       admin: "{{ users.administrator.username }}"
-      biber: "{{ users.biber.username }}"
   register: keycloak_users
   when: keycloak_provider.query_result | length > 0
 
@@ -170,24 +169,3 @@
   when:
     - keycloak_provider.query_result | length > 0
     - keycloak_users.query_result | selectattr('username', 'equalto', users.administrator.username) | list | length > 0
-
-- name: "Link biber user to Keycloak in Odoo (if user exists)"
-  community.postgresql.postgresql_query:
-    db: "{{ ODOO_DB_NAME }}"
-    login_user: "{{ lookup('database', application_id, 'username') }}"
-    login_password: "{{ lookup('database', application_id, 'password') }}"
-    login_host: "{{ lookup('database', application_id, 'reach_host') }}"
-    login_port: "{{ lookup('database', application_id, 'port') }}"
-    query: >
-      UPDATE res_users SET
-        oauth_provider_id = %(provider_id)s,
-        oauth_uid = %(oauth_uid)s,
-        write_date = NOW()
-      WHERE login = %(login)s;
-    named_args:
-      provider_id: "{{ keycloak_provider.query_result[0].id }}"
-      oauth_uid: "{{ (keycloak_users.query_result | selectattr('username', 'equalto', users.biber.username) | first).id }}"
-      login: "{{ users.biber.username }}"
-  when:
-    - keycloak_provider.query_result | length > 0
-    - keycloak_users.query_result | selectattr('username', 'equalto', users.biber.username) | list | length > 0
