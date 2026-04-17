@@ -24,8 +24,9 @@
 - name: Ensure Friendica addons are in sync
   command: >
     {{ BIN_COMPOSE }} exec --user {{ FRIENDICA_USER }}
+    --workdir {{ FRIENDICA_APPLICATION_DIR }}
     {{ FRIENDICA_SERVICE }}
-    bin/console addon
+    {{ FRIENDICA_APPLICATION_DIR }}/bin/console addon
     {{ 'enable' if item.enabled else 'disable' }}
     {{ item.name }}
   args:
