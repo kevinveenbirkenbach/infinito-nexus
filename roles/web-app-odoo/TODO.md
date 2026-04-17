@@ -11,10 +11,8 @@
 ## Medium Priority
 
 - [x] Add Playwright end-to-end tests
-- [ ] Implement automated backup verification
 - [x] Add health check monitoring
 - [ ] Test Redis session store integration
-- [ ] Document custom addon development workflow
 
 ## Low Priority
 
@@ -22,3 +20,4 @@
 - [ ] Implement email template customization
 - [ ] Add custom CSS injection support
 - [ ] Document upgrade procedures between Odoo versions
+- [ ] Document custom addon development workflow
