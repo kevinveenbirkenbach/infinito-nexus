@@ -12,8 +12,8 @@ server:
         unsafe-inline: true
     whitelist:
       connect-src:
-        - "erp.{{ DOMAIN_PRIMARY }}"
-        - "wss://erp.{{ DOMAIN_PRIMARY }}"
+        - "odoo.erp.{{ DOMAIN_PRIMARY }}"
+        - "wss://odoo.erp.{{ DOMAIN_PRIMARY }}"
       frame-ancestors:
         - "{{ DOMAIN_PRIMARY }}"
         - "*.{{ DOMAIN_PRIMARY }}"
@@ -21,7 +21,7 @@ server:
         - "data:"
   domains:
     canonical:
-      - erp.{{ DOMAIN_PRIMARY }}
+      - odoo.erp.{{ DOMAIN_PRIMARY }}
     aliases: []
 email:
   from_name: "ERP ({{ DOMAIN_PRIMARY }})"
@@ -70,8 +70,8 @@ compose:
       backup:
         no_stop_required: true
     redis:
-      enabled: false
-      name: odoo-redis
+      enabled: true
+      shared: false
       cpus: "0.5"
       mem_reservation: 256m
       mem_limit: 512m
@@ -86,5 +86,3 @@ compose:
     data: odoo_data
     addons: odoo_addons
     config: odoo_config
-credentials:
-  master_password: "{{ lookup('password', '/dev/null length=32 chars=ascii_letters,digits') }}"
