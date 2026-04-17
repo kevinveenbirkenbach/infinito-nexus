@@ -43,23 +43,23 @@ As a contributor, I want all access to application and user configuration to go 
 
 ## Verification
 
-- [ ] Playwright end-to-end tests exist for the following five `web-app-*` roles, each living in the role's own `files/playwright.spec.js` and wired through the existing [test-e2e-playwright](../../roles/test-e2e-playwright) role so that merged `applications` and `users` data is exercised through a real browser session. Each spec MUST follow the baseline rules in [playwright.md](../contributing/actions/testing/playwright.md) (file layout, runner integration, `when to write` scope) and SHOULD fulfill the authoring rules in [playwright.spec.js.md](../agents/files/role/playwright.spec.js.md) and [playwright.env.j2.md](../agents/files/role/playwright.env.j2.md) wherever the application under test allows it:
-  - [ ] [web-app-keycloak](../../roles/web-app-keycloak)
-  - [ ] [web-app-dashboard](../../roles/web-app-dashboard)
-  - [ ] [web-app-matomo](../../roles/web-app-matomo)
-  - [ ] [web-app-openwebui](../../roles/web-app-openwebui)
-  - [ ] [web-app-discourse](../../roles/web-app-discourse)
-- [ ] Each of those Playwright specs MUST exercise the lookup pathway end to end by covering:
-  - [ ] a login flow that authenticates as a user sourced from `lookup('users')`, proving that merged user data reaches the rendered UI.
-  - [ ] an OIDC flow from [web-app-dashboard](../../roles/web-app-dashboard) through [web-app-keycloak](../../roles/web-app-keycloak) into the application under test (where the app supports OIDC), proving that `lookup('applications')` drives cross-app integration.
-  - [ ] at least one DOM assertion that a value originating from `applications['<application_id>']` is rendered in the UI (for example the canonical domain, display title, or a feature flag reflected in the DOM).
-- [ ] Each of those Playwright specs MUST assert the effective Content Security Policy of the rendered application, and MUST fail when the policy regresses or is missing. The assertions MUST cover:
-  - [ ] every directive that [csp_filters.build_csp_header](../../plugins/filter/csp_filters.py) currently emits, i.e. `default-src`, `connect-src`, `frame-ancestors`, `frame-src`, `script-src` (including `script-src-elem` and `script-src-attr`), `style-src` (including `style-src-elem` and `style-src-attr`), `font-src`, `worker-src`, `manifest-src`, `media-src`, and `img-src`. `form-action`, `base-uri`, and `object-src` are not emitted by the current helper and are therefore out of scope until the helper is extended.
-  - [ ] any `<meta http-equiv="Content-Security-Policy">` tag present in the rendered document, with both sources checked for parity when the application emits both.
-  - [ ] that the policy is enforced, not `Content-Security-Policy-Report-Only`.
-  - [ ] zero `securitypolicyviolation` events observed on `page` during the full test flow, captured via Playwright's `page.on('console')` and `page.on('pageerror')` listeners plus an explicit `window.addEventListener('securitypolicyviolation', ...)` hook.
-- [ ] Each of those Playwright specs MUST end in a logged-out state, MUST NOT contain `test.only` or `test.skip` in committed code, and MUST emit Playwright traces, screenshots, and video for failed runs so CI artifacts can be used for triage.
-- [ ] The five Playwright specs MUST run in the CI gate (for example as a matrix job in [.github/workflows/test-environment.yml](../../.github/workflows/test-environment.yml) or an equivalent gating workflow), MUST upload their failure artifacts to the CI run, and MUST block the merge when any of them fails.
+- [x] Playwright end-to-end tests exist for the following five `web-app-*` roles, each living in the role's own `files/playwright.spec.js` and wired through the existing [test-e2e-playwright](../../roles/test-e2e-playwright) role so that merged `applications` and `users` data is exercised through a real browser session. Each spec MUST follow the baseline rules in [playwright.md](../contributing/actions/testing/playwright.md) (file layout, runner integration, `when to write` scope) and SHOULD fulfill the authoring rules in [playwright.spec.js.md](../agents/files/role/playwright.spec.js.md) and [playwright.env.j2.md](../agents/files/role/playwright.env.j2.md) wherever the application under test allows it:
+  - [x] [web-app-keycloak](../../roles/web-app-keycloak)
+  - [x] [web-app-dashboard](../../roles/web-app-dashboard)
+  - [x] [web-app-matomo](../../roles/web-app-matomo)
+  - [x] [web-app-openwebui](../../roles/web-app-openwebui)
+  - [x] [web-app-discourse](../../roles/web-app-discourse)
+- [x] Each of those Playwright specs MUST exercise the lookup pathway end to end by covering:
+  - [x] a login flow that authenticates as a user sourced from `lookup('users')`, proving that merged user data reaches the rendered UI.
+  - [x] an OIDC flow from [web-app-dashboard](../../roles/web-app-dashboard) through [web-app-keycloak](../../roles/web-app-keycloak) into the application under test (where the app supports OIDC), proving that `lookup('applications')` drives cross-app integration.
+  - [x] at least one DOM assertion that a value originating from `applications['<application_id>']` is rendered in the UI (for example the canonical domain, display title, or a feature flag reflected in the DOM).
+- [x] Each of those Playwright specs MUST assert the effective Content Security Policy of the rendered application, and MUST fail when the policy regresses or is missing. The assertions MUST cover:
+  - [x] every directive that [csp_filters.build_csp_header](../../plugins/filter/csp_filters.py) currently emits, i.e. `default-src`, `connect-src`, `frame-ancestors`, `frame-src`, `script-src` (including `script-src-elem` and `script-src-attr`), `style-src` (including `style-src-elem` and `style-src-attr`), `font-src`, `worker-src`, `manifest-src`, `media-src`, and `img-src`. `form-action`, `base-uri`, and `object-src` are not emitted by the current helper and are therefore out of scope until the helper is extended.
+  - [x] any `<meta http-equiv="Content-Security-Policy">` tag present in the rendered document, with both sources checked for parity when the application emits both.
+  - [x] that the policy is enforced, not `Content-Security-Policy-Report-Only`.
+  - [x] zero `securitypolicyviolation` events observed on `page` during the full test flow, captured via Playwright's `page.on('console')` and `page.on('pageerror')` listeners plus an explicit `window.addEventListener('securitypolicyviolation', ...)` hook.
+- [x] Each of those Playwright specs MUST end in a logged-out state, MUST NOT contain `test.only` or `test.skip` in committed code, and MUST emit Playwright traces, screenshots, and video for failed runs so CI artifacts can be used for triage.
+- [x] The five Playwright specs MUST run in the CI gate (for example as a matrix job in [.github/workflows/test-environment.yml](../../.github/workflows/test-environment.yml) or an equivalent gating workflow), MUST upload their failure artifacts to the CI run, and MUST block the merge when any of them fails.
 
 ### Clarifications
 

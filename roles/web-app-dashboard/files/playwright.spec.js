@@ -387,6 +387,125 @@ async function findAccountLogoutItem(accountMenu) {
   );
 }
 
+function installCspViolationObserver(page) {
+  return page.addInitScript(() => {
+    window.__cspViolations = [];
+    window.addEventListener("securitypolicyviolation", (event) => {
+      window.__cspViolations.push({
+        violatedDirective: event.violatedDirective,
+        blockedURI: event.blockedURI,
+        sourceFile: event.sourceFile,
+        lineNumber: event.lineNumber,
+        originalPolicy: event.originalPolicy
+      });
+    });
+  });
+}
+
+async function readCspViolations(page) {
+  return page.evaluate(() => window.__cspViolations || []).catch(() => []);
+}
+
+const EXPECTED_CSP_DIRECTIVES = [
+  "default-src",
+  "connect-src",
+  "frame-ancestors",
+  "frame-src",
+  "script-src",
+  "script-src-elem",
+  "script-src-attr",
+  "style-src",
+  "style-src-elem",
+  "style-src-attr",
+  "font-src",
+  "worker-src",
+  "manifest-src",
+  "media-src",
+  "img-src"
+];
+
+function parseCspHeader(value) {
+  const result = {};
+
+  if (!value) {
+    return result;
+  }
+
+  for (const raw of value.split(";")) {
+    const trimmed = raw.trim();
+    if (!trimmed) continue;
+
+    const parts = trimmed.split(/\s+/);
+    const directive = parts.shift();
+    if (!directive) continue;
+
+    result[directive.toLowerCase()] = parts;
+  }
+
+  return result;
+}
+
+function assertCspResponseHeader(response, label) {
+  const headers = response.headers();
+  const cspHeader = headers["content-security-policy"];
+
+  expect(cspHeader, `${label}: Content-Security-Policy response header MUST be present`).toBeTruthy();
+
+  const reportOnly = headers["content-security-policy-report-only"];
+  expect(
+    reportOnly,
+    `${label}: Content-Security-Policy-Report-Only MUST NOT be set (policy must be enforced)`
+  ).toBeFalsy();
+
+  const parsed = parseCspHeader(cspHeader);
+  const missing = EXPECTED_CSP_DIRECTIVES.filter((directive) => !parsed[directive]);
+
+  expect(
+    missing,
+    `${label}: CSP directives missing from response header: ${missing.join(", ")}`
+  ).toEqual([]);
+
+  return parsed;
+}
+
+async function assertCspMetaParity(page, headerDirectives, label) {
+  const metaLocator = page.locator('meta[http-equiv="Content-Security-Policy"]').first();
+  const hasMeta = (await metaLocator.count().catch(() => 0)) > 0;
+
+  if (!hasMeta) {
+    return;
+  }
+
+  const metaContent = await metaLocator.getAttribute("content").catch(() => null);
+
+  if (!metaContent) {
+    return;
+  }
+
+  const metaParsed = parseCspHeader(metaContent);
+
+  for (const directive of Object.keys(metaParsed)) {
+    const headerTokens = new Set(headerDirectives[directive] || []);
+    const metaTokens = metaParsed[directive] || [];
+
+    for (const token of metaTokens) {
+      expect(
+        headerTokens.has(token),
+        `${label}: CSP meta token "${token}" for directive ${directive} MUST also appear in the response header`
+      ).toBe(true);
+    }
+  }
+}
+
+async function expectNoCspViolations(page, label) {
+  const domViolations = await readCspViolations(page);
+
+  expect(
+    domViolations,
+    `${label}: securitypolicyviolation events observed: ${JSON.stringify(domViolations)}`
+  ).toEqual([]);
+}
+
 async function confirmLogoutIfNeeded(page) {
   const logoutConfirmCandidates = [
     page.getByRole("button", { name: /logout|sign out|continue/i }),
@@ -412,6 +531,7 @@ const cdnBaseUrl = normalizeBaseUrl(process.env.CDN_BASE_URL || "");
 const dashboardJsBaseUrl = normalizeBaseUrl(process.env.DASHBOARD_JS_BASE_URL || "");
 const matomoBaseUrl = normalizeBaseUrl(process.env.MATOMO_BASE_URL || "");
 const matomoEnabled = (process.env.MATOMO_ENABLED || "").toLowerCase() === "true";
+const canonicalDomain = decodeDotenvQuotedValue(process.env.CANONICAL_DOMAIN);
 
 const sharedCssPrefix = buildAssetPathPrefix(cdnBaseUrl, "/_shared/css");
 const sharedJsPrefix = buildAssetPathPrefix(cdnBaseUrl, "/_shared/js");
@@ -428,8 +548,29 @@ test.beforeEach(async ({ page }) => {
   expect(cdnBaseUrl, "CDN_BASE_URL must be set in the Playwright env file").toBeTruthy();
   expect(dashboardJsBaseUrl, "DASHBOARD_JS_BASE_URL must be set in the Playwright env file").toBeTruthy();
   expect(matomoBaseUrl, "MATOMO_BASE_URL must be set in the Playwright env file").toBeTruthy();
+  expect(canonicalDomain, "CANONICAL_DOMAIN must be set in the Playwright env file").toBeTruthy();
 
   await page.context().clearCookies();
+  await installCspViolationObserver(page);
+});
+
+test("dashboard enforces Content-Security-Policy and exposes canonical domain from applications lookup", async ({ page }) => {
+  const response = await page.goto("/");
+  expect(response, "Expected dashboard landing response").toBeTruthy();
+  expect(response.status(), "Expected dashboard landing response to be successful").toBeLessThan(400);
+
+  const directives = assertCspResponseHeader(response, "dashboard landing");
+  await assertCspMetaParity(page, directives, "dashboard landing");
+
+  const documentHtml = await response.text();
+  const documentUrl = response.url();
+  expect(
+    documentHtml.includes(canonicalDomain) || documentUrl.includes(canonicalDomain),
+    `Expected canonical domain "${canonicalDomain}" (from applications lookup) to appear in the dashboard document`
+  ).toBe(true);
+
+  await waitForDashboardReady(page);
+  await expectNoCspViolations(page, "dashboard landing");
 });
 
 test("dashboard loads core css, javascript, simpleicons, and logo assets", async ({ page }) => {
