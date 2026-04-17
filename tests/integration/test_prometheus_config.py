@@ -144,7 +144,7 @@ class TestPrometheusNginxEndpoints(unittest.TestCase):
     Two prometheus templates are conditionally included to follow SRP:
     - location.conf.j2  — log_by_lua_block for per-request metrics; on every app vhost
                           with compose.services.prometheus.enabled = true
-    - metricz.conf.j2   — location = /metricz scrape endpoint; ONLY on the prometheus
+    - metricz.conf   — location = /metricz scrape endpoint; ONLY on the prometheus
                           domain (compose.services.prometheus.name is set)
                           Restricting /metricz to one domain prevents leaking the full
                           metrics payload from every app's public hostname.
@@ -177,7 +177,7 @@ class TestPrometheusNginxEndpoints(unittest.TestCase):
             / "web-app-prometheus"
             / "templates"
             / "nginx"
-            / "metricz.conf.j2"
+            / "metricz.conf"
         )
 
     def _healthz_conf_path(self):
@@ -270,16 +270,16 @@ class TestPrometheusNginxEndpoints(unittest.TestCase):
         )
 
     def test_prometheus_conf_includes_metricz_only_on_prometheus_domain(self):
-        """locations.conf.j2 must include metricz.conf.j2 ONLY on the prometheus domain.
+        """locations.conf.j2 must include metricz.conf ONLY on the prometheus domain.
 
         /metricz must not be exposed on every app vhost — that would leak the full
         metrics payload from 60+ public hostnames. Only the prometheus domain serves it.
         """
         content = self._prometheus_conf_path().read_text(encoding="utf-8")
         self.assertIn(
-            "roles/web-app-prometheus/templates/nginx/metricz.conf.j2",
+            "roles/web-app-prometheus/templates/nginx/metricz.conf",
             content,
-            "locations.conf.j2 must include nginx/metricz.conf.j2 for the prometheus domain "
+            "locations.conf.j2 must include nginx/metricz.conf for the prometheus domain "
             "(location = /metricz must not appear on every app vhost)",
         )
         # metricz is guarded by application_id == 'web-app-prometheus' so it only
@@ -287,19 +287,19 @@ class TestPrometheusNginxEndpoints(unittest.TestCase):
         self.assertIn(
             "application_id == 'web-app-prometheus'",
             content,
-            "locations.conf.j2 must guard metricz.conf.j2 with application_id == 'web-app-prometheus' "
+            "locations.conf.j2 must guard metricz.conf with application_id == 'web-app-prometheus' "
             "so /metricz only appears on the prometheus domain vhost",
         )
 
     def test_metricz_conf_has_metricz_endpoint(self):
-        """/metricz must be defined in metricz.conf.j2, not in location.conf.j2 or basic.conf.j2."""
+        """/metricz must be defined in metricz.conf, not in location.conf.j2 or basic.conf.j2."""
         metricz_path = self._metricz_conf_path()
         self.assertTrue(metricz_path.exists(), f"Missing: {metricz_path}")
         content = metricz_path.read_text(encoding="utf-8")
         self.assertIn(
             "location = /metricz",
             content,
-            "metricz.conf.j2 must define 'location = /metricz'",
+            "metricz.conf must define 'location = /metricz'",
         )
         # Verify it is NOT in location.conf.j2 (that would put it on every vhost)
         loc_content = self._location_conf_path().read_text(encoding="utf-8")
@@ -307,7 +307,7 @@ class TestPrometheusNginxEndpoints(unittest.TestCase):
             "location = /metricz",
             loc_content,
             "location = /metricz must NOT be in location.conf.j2 — it belongs only in "
-            "metricz.conf.j2 (included only on the prometheus domain)",
+            "metricz.conf (included only on the prometheus domain)",
         )
 
     def test_metricz_conf_exposes_stack_up_gauge(self):
@@ -316,7 +316,7 @@ class TestPrometheusNginxEndpoints(unittest.TestCase):
         self.assertIn(
             "metric_stack_up",
             content,
-            "/metricz in metricz.conf.j2 must set metric_stack_up gauge",
+            "/metricz in metricz.conf must set metric_stack_up gauge",
         )
 
     def test_metricz_conf_stack_up_checks_docker_health(self):
@@ -325,7 +325,7 @@ class TestPrometheusNginxEndpoints(unittest.TestCase):
         self.assertIn(
             "health_containers",
             content,
-            "/metricz in metricz.conf.j2 must check health_containers shared dict "
+            "/metricz in metricz.conf must check health_containers shared dict "
             "so metric_stack_up reflects Docker HEALTHCHECK state",
         )
 

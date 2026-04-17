@@ -49,12 +49,12 @@ scrape_configs:
   # Auto-discovered via the native_metrics_apps lookup plugin.
   # A scrape job is included for each deployed app that has BOTH:
   #   - native_metrics.enabled: true  (set in inventory per-app)
-  #   - roles/<app_id>/templates/prometheus.yml.j2  (owned by the app role)
+  #   - roles/<native_prometheus_application_id>/templates/prometheus.yml.j2  (owned by the app role)
   # To add a new app: set native_metrics.enabled: true in its config and create
   # a prometheus.yml.j2 fragment in its templates/ directory.
 
-{% for app_id in lookup('native_metrics_apps') %}
-{% include 'roles/' + app_id + '/templates/prometheus.yml.j2' %}
+{% for native_prometheus_application_id in lookup('native_metrics_apps') %}
+{% include 'roles/' + native_prometheus_application_id + '/templates/prometheus.yml.j2' %}
 
 {% endfor %}
 
@@ -66,13 +66,13 @@ scrape_configs:
     params:
       module: [http_ready]
     static_configs:
-{% for app_id in applications | list | sort %}
+{% for app_id in CURRENT_PLAY_APPLICATIONS | list | sort %}
 {% if app_id != application_id %}
 {% set domains_raw = canonical_map.get(app_id, []) %}
-{% set domains = (domains_raw.values() | list) if (domains_raw is mapping) else domains_raw %}
-{% if domains | length > 0 %}
+{% set canonical_probe_domains = (domains_raw.values() | list) if (domains_raw is mapping) else domains_raw %}
+{% if canonical_probe_domains | length > 0 %}
       - targets:
-{% for domain in domains %}
+{% for domain in canonical_probe_domains %}
           - "{{ lookup('tls', application_id, 'protocols.web') }}://{{ domain }}/healthz/ready"
 {% endfor %}
         labels:
