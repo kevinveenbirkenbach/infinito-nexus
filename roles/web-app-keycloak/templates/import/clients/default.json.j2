@@ -39,7 +39,24 @@
   "authenticationFlowBindingOverrides": {},
   "fullScopeAllowed": true,
   "nodeReRegistrationTimeout": -1,
+  "protocolMappers": [
+    {
+      "name": "user_id",
+      "protocol": "openid-connect",
+      "protocolMapper": "oidc-usermodel-property-mapper",
+      "consentRequired": false,
+      "config": {
+        "userinfo.token.claim": "true",
+        "user.attribute": "id",
+        "id.token.claim": "true",
+        "access.token.claim": "true",
+        "claim.name": "user_id",
+        "jsonType.label": "String"
+      }
+    }
+  ],
   "defaultClientScopes": [
+    "openid",
     "web-origins",
     "service_account",
     "acr",
