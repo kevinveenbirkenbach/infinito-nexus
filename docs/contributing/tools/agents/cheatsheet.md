@@ -102,7 +102,7 @@ SPOT: [pull-request.md](../../../agents/action/pull-request.md)
 ## Push, Trigger, Pull 📡
 
 ```
-Follow the instructions from AGENTS.md, push a branch, run it through the manual-CI draft cycle, and transition the PR to ready-for-review by following the procedure in docs/agents/action/push-trigger-pull.md. Begin by clarifying every open requirement through active listening, then act autonomously through to completion with as few follow-up questions as possible. Use mode /caveman ultra.
+Follow the instructions from AGENTS.md, push branch <branch>, run it through the manual-CI draft cycle, and transition the PR to ready-for-review by following the procedure in docs/agents/action/push-trigger-pull.md. Begin by clarifying every open requirement through active listening, then act autonomously through to completion with as few follow-up questions as possible. Use mode /caveman ultra.
 ```
 
 SPOT: [push-trigger-pull.md](../../../agents/action/push-trigger-pull.md)
