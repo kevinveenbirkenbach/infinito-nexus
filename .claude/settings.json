@@ -9,6 +9,8 @@
       "Bash(XDG_CACHE_HOME=/tmp/* gh run view *)",
       "Bash(gh run list *)",
       "Bash(grep *)",
+      "Bash(make *)",
+      "Bash(tee /tmp/*)",
       "Bash(wc *)",
       "Edit",
       "Read",
