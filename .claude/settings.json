@@ -7,6 +7,7 @@
   "permissions": {
     "allow": [
       "Bash(XDG_CACHE_HOME=* gh run view *)",
+      "Bash(docker *)",
       "Bash(echo *)",
       "Bash(gh run list *)",
       "Bash(grep *)",
@@ -50,6 +51,12 @@
       "Bash(while *)"
     ],
     "ask": [
+      "Bash(docker * build*)",
+      "Bash(docker * push*)",
+      "Bash(docker * run*)",
+      "Bash(docker build*)",
+      "Bash(docker login*)",
+      "Bash(docker push*)",
       "Bash(docker run*)",
       "Bash(gh * archive*)",
       "Bash(gh * cancel*)",
