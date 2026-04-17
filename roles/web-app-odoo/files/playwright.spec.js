@@ -28,8 +28,6 @@ const oidcIssuerUrl  = decodeDotenvQuotedValue(process.env.OIDC_ISSUER_URL);
 const odooBaseUrl    = decodeDotenvQuotedValue(process.env.ODOO_BASE_URL);
 const adminUsername  = decodeDotenvQuotedValue(process.env.ADMIN_USERNAME);
 const adminPassword  = decodeDotenvQuotedValue(process.env.ADMIN_PASSWORD);
-const biberUsername  = decodeDotenvQuotedValue(process.env.BIBER_USERNAME);
-const biberPassword  = decodeDotenvQuotedValue(process.env.BIBER_PASSWORD);
 
 // Perform SSO login via Keycloak.
 // Accepts a Page or FrameLocator (when Keycloak loads inside the dashboard iframe).
