@@ -7,3 +7,9 @@ repos:
         language: system
         pass_filenames: false
         exclude: \.(md|rst|txt)$
+      - id: make-test-lint
+        name: Run make test-lint (md-only commits)
+        entry: bash -c 'git diff --cached --name-only | grep -qv "\.md$" || make test-lint'
+        language: system
+        pass_filenames: false
+        files: \.md$
