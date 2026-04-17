@@ -6,9 +6,17 @@
   },
   "permissions": {
     "allow": [
-      "Bash(XDG_CACHE_HOME=/tmp/* gh run view *)",
+      "Bash(PYTHONPATH=* python *)",
+      "Bash(XDG_CACHE_HOME=* gh run view *)",
+      "Bash(docker *)",
+      "Bash(echo *)",
       "Bash(gh run list *)",
       "Bash(grep *)",
+      "Bash(head *)",
+      "Bash(make *)",
+      "Bash(pkill *)",
+      "Bash(tail *)",
+      "Bash(tee *)",
       "Bash(wc *)",
       "Edit",
       "Read",
@@ -17,6 +25,7 @@
       "Write"
     ],
     "deny": [
+      "Bash(for *)",
       "Bash(gh api * --method DELETE *)",
       "Bash(gh api * --method PUT *)",
       "Bash(gh api * -X DELETE *)",
@@ -40,9 +49,17 @@
       "Bash(git clean*)",
       "Bash(git push --force*)",
       "Bash(git reset --hard*)",
-      "Bash(sudo*)"
+      "Bash(sudo*)",
+      "Bash(until *)",
+      "Bash(while *)"
     ],
     "ask": [
+      "Bash(docker * build*)",
+      "Bash(docker * push*)",
+      "Bash(docker * run*)",
+      "Bash(docker build*)",
+      "Bash(docker login*)",
+      "Bash(docker push*)",
       "Bash(docker run*)",
       "Bash(gh * archive*)",
       "Bash(gh * cancel*)",
