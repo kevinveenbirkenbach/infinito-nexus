@@ -1,29 +1,9 @@
 ---
-- name: "Ensure compose directory exists for {{ application_id }}"
-  ansible.builtin.file:
-    path: "{{ lookup('container', application_id, 'files.compose') | dirname }}"
-    state: directory
-    mode: "0755"
-
-- name: "Render compose.yml for {{ application_id }}"
-  ansible.builtin.template:
-    src: "compose.yml.j2"
-    dest: "{{ lookup('container', application_id, 'files.compose') }}"
-    mode: "0640"
-  notify: compose up
-
-- name: "Ensure env directory exists for {{ application_id }}"
-  ansible.builtin.file:
-    path: "{{ lookup('container', application_id, 'files.env') | dirname }}"
-    state: directory
-    mode: "0755"
-
-- name: "Render env for {{ application_id }}"
-  ansible.builtin.template:
-    src: "env.j2"
-    dest: "{{ lookup('container', application_id, 'files.env') }}"
-    mode: "0640"
-  notify: compose up
+- name: "load docker, proxy and db for '{{ application_id }}'"
+  include_role:
+    name: sys-stk-full
+  vars:
+    docker_compose_flush_handlers: false
 
 - name: "Render allowed_hosts initializer for {{ application_id }}"
   ansible.builtin.template:
@@ -32,11 +12,8 @@
     mode: "0644"
   notify: compose up
 
-- name: "load docker, db and proxy for {{ application_id }}"
-  include_role:
-    name: sys-stk-full
-  vars:
-    docker_compose_flush_handlers: true
+- name: "flush handlers of compose"
+  meta: flush_handlers
 
 - name: "Run Decidim setup routines"
   include_tasks: 01_setup.yml

@@ -41,13 +41,6 @@ compose:
       mem_reservation:            "512m"
       mem_limit:                  "1g"
       pids_limit:                 512
-    sidekiq:
-      enabled:                    false
-      name:                       "decidim-sidekiq"
-      cpus:                       "0.5"
-      mem_reservation:            "256m"
-      mem_limit:                  "512m"
-      pids_limit:                 256
     # noqa: shared
     redis:
       backup:

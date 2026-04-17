@@ -72,32 +72,3 @@
   register: decidim_admin_result
   changed_when: "'Admin user ready' in decidim_admin_result.stdout"
 
-- name: "Decidim | Ensure biber user exists with correct credentials"
-  community.docker.docker_container_exec:
-    container: "{{ DECIDIM_CONTAINER }}"
-    command: bundle exec rails runner -
-    stdin: |
-      email    = ENV.fetch("DECIDIM_BIBER_EMAIL")
-      password = ENV.fetch("DECIDIM_BIBER_PASSWORD")
-      user = Decidim::User.find_or_initialize_by(email: email)
-      is_new = user.new_record?
-      user.name = ENV.fetch("DECIDIM_BIBER_NAME")
-      user.nickname = ENV.fetch("DECIDIM_BIBER_USERNAME")
-      user.confirmed_at = Time.current
-      user.organization = Decidim::Organization.first
-      user.tos_agreement = true
-      user.accepted_tos_version = Decidim::Organization.first.tos_version
-      if is_new || !user.valid_password?(password)
-        user.password = password
-        user.password_confirmation = password
-      end
-      user.save!
-      puts "Biber user ready: #{user.email}"
-    env:
-      RAILS_ENV: "{{ ENVIRONMENT }}"
-      DECIDIM_BIBER_EMAIL: "{{ users.biber.email }}"
-      DECIDIM_BIBER_PASSWORD: "{{ users.biber.password }}"
-      DECIDIM_BIBER_NAME: "{{ users.biber.firstname }} {{ users.biber.lastname }}"
-      DECIDIM_BIBER_USERNAME: "{{ users.biber.username }}"
-  register: decidim_biber_result
-  changed_when: "'Biber user ready' in decidim_biber_result.stdout"
