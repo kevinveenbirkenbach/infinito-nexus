@@ -52,6 +52,22 @@
   failed_when: false
   when: ODOO_OIDC_ENABLED | bool
 
+- name: "Install auth_signup module for OAuth user auto-creation"
+  command: >
+    container exec {{ ODOO_CONTAINER }}
+    odoo -i auth_signup
+    -d {{ ODOO_DB_NAME }}
+    --db_host {{ ODOO_DB_HOST }}
+    --db_port {{ ODOO_DB_PORT }}
+    --db_user {{ ODOO_DB_USER }}
+    --db_password {{ ODOO_DB_PASSWORD }}
+    --stop-after-init
+    --no-http
+  register: auth_signup_install
+  changed_when: "'loading' in auth_signup_install.stdout"
+  failed_when: false
+  when: ODOO_OIDC_ENABLED | bool
+
 - name: "Install auth_oauth_https module for HTTPS redirect URI fix"
   command: >
     container exec {{ ODOO_CONTAINER }}
