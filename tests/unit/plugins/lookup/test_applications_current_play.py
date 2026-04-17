@@ -3,7 +3,10 @@ from __future__ import annotations
 import unittest
 from unittest.mock import patch
 
-from plugins.lookup.applications_current_play import LookupModule
+from plugins.lookup.applications_current_play import (
+    LookupModule,
+    _reset_cache_for_tests,
+)
 
 
 SAMPLE_APPS = {
@@ -69,6 +72,12 @@ def _run(group_names, applications=None, meta_deps_map=None, service_registry=No
 
 
 class TestApplicationsIfGroupAndAllDeps(unittest.TestCase):
+    def setUp(self) -> None:
+        _reset_cache_for_tests()
+
+    def tearDown(self) -> None:
+        _reset_cache_for_tests()
+
     def test_direct_group_only(self):
         result = _run(["web-svc-html"])
         self.assertIn("web-svc-html", result)

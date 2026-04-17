@@ -149,6 +149,46 @@ class TestTemplatingRenderStrict(unittest.TestCase):
         )
         self.assertEqual(out, "/etc/infinito/ca/root-ca.crt")
 
+    def test_templar_merges_variables_onto_available_variables(self):
+        # Regression guard: prev available_variables (e.g. ansible_facts,
+        # hostvars) must survive the call — caller-supplied variables are
+        # layered on top, not substituted for the existing map.
+        class _FakeTemplarRecordingAvail:
+            def __init__(self, preset):
+                self.available_variables = dict(preset)
+                self.seen_on_call = None
+
+            def template(self, s, fail_on_undefined=False):
+                self.seen_on_call = dict(self.available_variables)
+                if s.strip() == "{{ CA_ROOT.cert_host }}":
+                    return self.available_variables.get("CA_ROOT", {}).get(
+                        "cert_host", s
+                    )
+                if s.strip() == "{{ ANSIBLE_FACT }}":
+                    return self.available_variables.get("ANSIBLE_FACT", s)
+                return s
+
+        preset = {"ANSIBLE_FACT": "from-prev-avail"}
+        templar = _FakeTemplarRecordingAvail(preset)
+        variables = {"CA_ROOT": {"cert_host": "/etc/infinito/ca/root-ca.crt"}}
+
+        out = render_ansible_strict(
+            templar=templar,
+            raw="{{ CA_ROOT.cert_host }}",
+            var_name="CA_TRUST.cert_host",
+            err_prefix="t",
+            variables=variables,
+        )
+        self.assertEqual(out, "/etc/infinito/ca/root-ca.crt")
+
+        # during the call, both prev and caller-supplied keys are visible
+        self.assertIn("ANSIBLE_FACT", templar.seen_on_call)
+        self.assertEqual(templar.seen_on_call["ANSIBLE_FACT"], "from-prev-avail")
+        self.assertIn("CA_ROOT", templar.seen_on_call)
+
+        # after the call, prev state is restored (no caller keys leak)
+        self.assertEqual(templar.available_variables, preset)
+
     def test_unresolved_jinja_hard_fails(self):
         # If we cannot resolve, strict mode must hard fail (this matches your runtime failures).
         with self.assertRaises(AnsibleError):

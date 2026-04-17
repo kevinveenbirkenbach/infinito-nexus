@@ -3,6 +3,7 @@ from __future__ import annotations
 import copy
 import glob
 import os
+import threading
 from collections import OrderedDict
 from pathlib import Path
 from typing import Any, Mapping, Optional
@@ -50,9 +51,92 @@ DEFAULT_TOKENS_FILE = Path("/var/lib/infinito/secrets/tokens.yml")
 _APPLICATIONS_DEFAULTS_CACHE: dict[str, dict[str, Any]] = {}
 _USERS_DEFAULTS_CACHE: dict[str, dict[str, Any]] = {}
 
+# Single-slot rendered caches. lookup('config'), lookup('applications') and
+# lookup('users') are called many times per play (sanity checks, env.j2, etc.).
+# With Ansible 2.19+ trust-tagging actually firing templar rendering, rebuilding
+# the merged+rendered payload each call dominates runtime. We cache the
+# rendered result keyed on (roles_dir_str, _stable_variables_signature(...)).
+# The signature uses id() of applications/users sub-dicts (stable across tasks
+# unless a set_fact replaces them) plus DOMAIN_PRIMARY/SYSTEM_EMAIL_DOMAIN
+# string values. templar is NOT in the key: rendering is a pure function of
+# input+variables; the templar instance is churned per-task by Ansible.
+_MERGED_APPLICATIONS_CACHE: dict[tuple, dict[str, Any]] = {}
+_MERGED_USERS_CACHE: dict[tuple, dict[str, Any]] = {}
+
+# Re-entry guards. Cross-lookups ({{ lookup('users', ...) }} inside applications
+# and vice versa) can otherwise drive unbounded recursion once strings are
+# trust-tagged and actually rendered (Ansible 2.19+). When a re-entrant call is
+# detected, callers return the pre-render (still-templated) payload, which the
+# caller's own templar will resolve lazily at use-site.
+_RENDER_GUARD = threading.local()
+
 
 def _cache_key(roles_dir: Path) -> str:
     return str(roles_dir.resolve())
+
+
+_FINGERPRINT_BY_ID: "dict[int, str]" = {}
+
+
+def _fingerprint_mapping(obj: Any) -> str:
+    """Cheap-ish content fingerprint for cache keying.
+
+    Ansible 2.19+ composes a fresh `variables` mapping per task via
+    VariableManager.get_vars() and — empirically — often reconstructs the
+    inventory-level `applications`/`users` dicts too, so keying on `id(obj)`
+    misses the cache across tasks. A content fingerprint hits across tasks
+    whenever the inventory payload is unchanged.
+
+    Fast path: id()-keyed memo (within a single task the same dict instance is
+    typically reused for multiple lookups, so we avoid re-hashing).
+    Slow path: repr-based MD5. Non-mapping values collapse to an "id:..." tag
+    so we don't accidentally collide across unrelated types.
+    """
+    if obj is None:
+        return "0"
+    obj_id = id(obj)
+    cached = _FINGERPRINT_BY_ID.get(obj_id)
+    if cached is not None:
+        return cached
+    try:
+        import hashlib
+
+        data = repr(sorted(obj.items())) if isinstance(obj, Mapping) else repr(obj)
+        digest = hashlib.md5(data.encode("utf-8", errors="replace")).hexdigest()
+    except Exception:
+        digest = f"id:{obj_id}"
+    _FINGERPRINT_BY_ID[obj_id] = digest
+    return digest
+
+
+def _stable_variables_signature(variables: Optional[Mapping[str, Any]]) -> tuple:
+    """Build a content-based cache signature from the subset of `variables`
+    that influences the merged applications/users payload.
+
+    See `_fingerprint_mapping` for why id()-only keys don't work reliably.
+    """
+    if not variables:
+        return ("0", "0", "", "")
+    return (
+        _fingerprint_mapping(variables.get("applications")),
+        _fingerprint_mapping(variables.get("users")),
+        str(variables.get("DOMAIN_PRIMARY") or ""),
+        str(variables.get("SYSTEM_EMAIL_DOMAIN") or ""),
+    )
+
+
+def _tokens_file_signature(path: Path) -> tuple:
+    """Return a cheap stat-based signature for the tokens file.
+
+    The merged-users cache must invalidate whenever sys-token-store persists a
+    new token — otherwise downstream `lookup('users', ...)` returns stale tokens
+    within the same play. stat() is cheap and captures in-place writes.
+    """
+    try:
+        st = path.stat()
+    except (FileNotFoundError, OSError):
+        return (str(path), 0, 0)
+    return (str(path), st.st_mtime_ns, st.st_size)
 
 
 def _load_yaml_mapping(path: Path) -> dict[str, Any]:
@@ -425,13 +509,23 @@ def _render_with_templar(
     if templar is None:
         return value
 
-    base_variables = dict(variables or {})
+    # Start from whatever the templar already had available so that
+    # ansible_facts/hostvars stay accessible during nested renders. Overlay the
+    # caller-supplied variables on top, then inject our raw.*_RAW helpers.
+    prev_templar_avail = getattr(templar, "available_variables", None)
+    base_variables: dict[str, Any] = (
+        dict(prev_templar_avail) if prev_templar_avail else {}
+    )
+    if variables:
+        base_variables.update(variables)
     if raw_applications is not None:
         base_variables["_INFINITO_APPLICATIONS_RAW"] = raw_applications
     if raw_users is not None:
         base_variables["_INFINITO_USERS_RAW"] = raw_users
 
     def _render_scalar(raw: Any) -> Any:
+        if isinstance(raw, str) and "{{" not in raw and "{%" not in raw:
+            return raw
         data = copy.deepcopy(raw)
         if isinstance(data, str):
             for _ in range(max_rounds):
@@ -467,15 +561,13 @@ def _render_with_templar(
             return tuple(_render_deep(item) for item in raw)
         return _render_scalar(raw)
 
-    previous_available = getattr(templar, "available_variables", None)
-
     try:
         if hasattr(templar, "available_variables"):
             templar.available_variables = base_variables
         data = _render_deep(value)
     finally:
         if hasattr(templar, "available_variables"):
-            templar.available_variables = previous_available
+            templar.available_variables = prev_templar_avail
 
     return _decrypt_ansible_encrypted_strings(data)
 
@@ -551,22 +643,44 @@ def get_merged_applications(
     templar: Any = None,
 ) -> dict[str, Any]:
     variables = variables or {}
+    resolved_roles_dir = _resolve_roles_dir(roles_dir=roles_dir)
+    cache_key = (
+        _cache_key(resolved_roles_dir),
+        _stable_variables_signature(variables),
+    )
+    cached = _MERGED_APPLICATIONS_CACHE.get(cache_key)
+    if cached is not None:
+        return cached
+
     defaults = get_application_defaults(roles_dir=roles_dir)
     overrides = _resolve_override_mapping(variables, "applications", templar=templar)
 
     merged = merge_with_defaults(defaults, overrides)
-    raw_users = get_merged_users(
-        variables=variables,
-        roles_dir=roles_dir,
-        templar=None,
-    )
-    return _render_with_templar(
-        merged,
-        templar=templar,
-        variables=variables,
-        raw_applications=merged,
-        raw_users=raw_users,
-    )
+
+    if getattr(_RENDER_GUARD, "applications", False):
+        # Re-entry via cross-lookup: return unrendered merged payload; the
+        # outer templar will resolve remaining Jinja at use-site.
+        return merged
+
+    _RENDER_GUARD.applications = True
+    try:
+        raw_users = get_merged_users(
+            variables=variables,
+            roles_dir=roles_dir,
+            templar=None,
+        )
+        rendered = _render_with_templar(
+            merged,
+            templar=templar,
+            variables=variables,
+            raw_applications=merged,
+            raw_users=raw_users,
+        )
+    finally:
+        _RENDER_GUARD.applications = False
+
+    _MERGED_APPLICATIONS_CACHE[cache_key] = rendered
+    return rendered
 
 
 def get_merged_users(
@@ -575,30 +689,58 @@ def get_merged_users(
     roles_dir: Optional[str | os.PathLike[str]] = None,
     templar: Any = None,
 ) -> dict[str, Any]:
+    source_variables = variables
     variables = dict(variables or {})
     if not variables.get("DOMAIN_PRIMARY") and variables.get("SYSTEM_EMAIL_DOMAIN"):
         variables["DOMAIN_PRIMARY"] = variables["SYSTEM_EMAIL_DOMAIN"]
+
+    resolved_roles_dir = _resolve_roles_dir(roles_dir=roles_dir)
+    tokens_file = _resolve_tokens_file(variables)
+    cache_key = (
+        _cache_key(resolved_roles_dir),
+        _stable_variables_signature(source_variables),
+        _tokens_file_signature(tokens_file),
+    )
+    cached = _MERGED_USERS_CACHE.get(cache_key)
+    if cached is not None:
+        return cached
+
     defaults = get_user_defaults(roles_dir=roles_dir)
     overrides = _resolve_override_mapping(variables, "users", templar=templar)
 
     merged = _merge_users(defaults, overrides)
     hydrated = _hydrate_users_tokens(
         merged,
-        _load_store_users(_resolve_tokens_file(variables)),
+        _load_store_users(tokens_file),
     )
-    materialized = _materialize_builtin_user_aliases(
-        hydrated,
-        variables,
-        templar=templar,
-    )
-    return _render_with_templar(
-        materialized,
-        templar=templar,
-        variables=variables,
-        raw_users=materialized,
-    )
+
+    if getattr(_RENDER_GUARD, "users", False):
+        # Re-entry via cross-lookup: skip the heavy materialize+render pass.
+        return hydrated
+
+    _RENDER_GUARD.users = True
+    try:
+        materialized = _materialize_builtin_user_aliases(
+            hydrated,
+            variables,
+            templar=templar,
+        )
+        rendered = _render_with_templar(
+            materialized,
+            templar=templar,
+            variables=variables,
+            raw_users=materialized,
+        )
+    finally:
+        _RENDER_GUARD.users = False
+
+    _MERGED_USERS_CACHE[cache_key] = rendered
+    return rendered
 
 
 def _reset_cache_for_tests() -> None:
     _APPLICATIONS_DEFAULTS_CACHE.clear()
     _USERS_DEFAULTS_CACHE.clear()
+    _MERGED_APPLICATIONS_CACHE.clear()
+    _MERGED_USERS_CACHE.clear()
+    _FINGERPRINT_BY_ID.clear()

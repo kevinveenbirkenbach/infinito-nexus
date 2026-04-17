@@ -9,6 +9,27 @@ from typing import Any, Optional
 from ansible.errors import AnsibleError
 from utils.manager.value_generator import ValueGenerator
 
+try:
+    from ansible._internal._datatag._tags import TrustedAsTemplate
+except Exception:
+    TrustedAsTemplate = None
+
+
+def _trust_as_template(s: str) -> Any:
+    """Tag a string as trusted for Jinja templating in Ansible 2.19+.
+
+    Ansible's templar refuses to render strings that aren't tagged via
+    TrustedAsTemplate. YAML loaded directly with yaml.safe_load lacks this
+    tag, so embedded {{ ... }} returns unchanged. Tagging restores rendering.
+    """
+    if TrustedAsTemplate is None or not isinstance(s, str):
+        return s
+    try:
+        return TrustedAsTemplate().tag(s)
+    except Exception:
+        return s
+
+
 # Match the "lookup('env','NAME')" head (without caring about trailing filters)
 _RE_LOOKUP_ENV_HEAD = re.compile(
     r"""^lookup\(\s*['"]env['"]\s*,\s*['"]([^'"]+)['"]\s*\)\s*""",
@@ -275,16 +296,25 @@ def _templar_render_best_effort(templar: Any, s: str, variables: dict) -> str:
     if hasattr(templar, "available_variables"):
         try:
             prev_avail = templar.available_variables
-            templar.available_variables = variables
+            # Merge additively so templar keeps access to ansible_facts /
+            # hostvars etc. from prev_avail while our caller-supplied keys
+            # (e.g. _INFINITO_APPLICATIONS_RAW) are layered on top. Replacing
+            # wholesale drops fact keys that aren't rematerialized by
+            # dict(variables) in the caller.
+            merged_avail: dict = dict(prev_avail) if prev_avail else {}
+            if variables:
+                merged_avail.update(variables)
+            templar.available_variables = merged_avail
         except Exception:
             prev_avail = None
 
     rendered: Any = s
+    trusted_input = _trust_as_template(s)
     try:
         try:
-            rendered = templar.template(s, fail_on_undefined=True)
+            rendered = templar.template(trusted_input, fail_on_undefined=True)
         except TypeError:
-            rendered = templar.template(s)
+            rendered = templar.template(trusted_input)
         except Exception:
             # If templar is present but fails unexpectedly, fall back to safe subset below.
             rendered = s
