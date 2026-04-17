@@ -35,6 +35,17 @@ def _run(applications: dict, application_id: str, group_names: list) -> bool:
     )[0]
 
 
+def _run_explicit(applications: dict, application_id: str, group_names: list) -> bool:
+    """Invoke with applications passed as an explicit positional term — the template usage pattern."""
+    return LookupModule().run(
+        [applications],
+        variables={
+            "application_id": application_id,
+            "group_names": group_names,
+        },
+    )[0]
+
+
 class TestPrometheusIntegrationActiveDeploymentCheck(unittest.TestCase):
     """group_names gate — web-app-prometheus must be on this host."""
 
@@ -85,6 +96,30 @@ class TestPrometheusIntegrationActiveServiceDep(unittest.TestCase):
         }
         result = _run(apps, "web-app-gitea", ["web-app-prometheus", "web-app-gitea"])
         self.assertFalse(result)
+
+
+class TestPrometheusIntegrationActiveExplicitTerm(unittest.TestCase):
+    """applications passed as explicit first term — matches template invocation pattern.
+
+    Templates call lookup('prometheus_integration_active', applications) to bypass the
+    Ansible scoping issue where available_variables may contain the pre-merge inventory
+    dict rather than the set_fact-merged result.
+    """
+
+    def test_true_when_app_declares_prometheus_dep_explicit(self):
+        apps = _make_applications("web-app-gitea", prometheus_deps=("web-app-gitea",))
+        result = _run_explicit(apps, "web-app-gitea", ["web-app-prometheus", "web-app-gitea"])
+        self.assertTrue(result)
+
+    def test_false_when_app_has_no_prometheus_dep_explicit(self):
+        apps = _make_applications("web-app-gitea")
+        result = _run_explicit(apps, "web-app-gitea", ["web-app-prometheus", "web-app-gitea"])
+        self.assertFalse(result)
+
+    def test_true_for_prometheus_vhost_explicit(self):
+        apps = _make_applications("web-app-prometheus")
+        result = _run_explicit(apps, "web-app-prometheus", ["web-app-prometheus"])
+        self.assertTrue(result)
 
 
 class TestPrometheusIntegrationActiveErrors(unittest.TestCase):

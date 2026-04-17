@@ -21,7 +21,7 @@
     location.conf.j2    — log_by_lua_block per-request metrics collection
     metricz.conf     — /metricz scrape endpoint (prometheus domain only); no Jinja2 — lives in files/ not templates/
   #}
-  {% if lookup('prometheus_integration_active') %}
+  {% if lookup('prometheus_integration_active', applications) %}
   {# Expose the Ansible role ID so Lua metrics handlers can attach the 'app' label. #}
   set $app_id "{{ application_id }}";
   {# Docker container name for this vhost — used by /healthz/live to query the

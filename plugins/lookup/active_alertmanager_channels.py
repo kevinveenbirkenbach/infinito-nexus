@@ -19,7 +19,13 @@ class LookupModule(LookupBase):
                         no hardcoded list anywhere).
 
     Usage in a template:
-      {% set _comm_channels = lookup('active_alertmanager_channels') %}
+      {% set _comm_channels = lookup('active_alertmanager_channels', applications) %}
+
+    The caller MUST pass the 'applications' dict as the first positional term.
+    Lookup plugins receive available_variables from the templar, which may hold
+    the pre-merge inventory dict instead of the set_fact-merged result. Passing
+    'applications' explicitly from the template context ensures the correct merged
+    dict is always used.
     """
 
     def run(
@@ -30,7 +36,13 @@ class LookupModule(LookupBase):
     ) -> List[List[str]]:
         vars_ = variables or getattr(self._templar, "available_variables", {}) or {}
 
-        applications = vars_.get("applications")
+        # Prefer explicitly passed applications (template context) over available_variables
+        # (which may be the pre-merge inventory dict in some Ansible scoping scenarios).
+        if terms and isinstance(terms[0], dict):
+            applications = terms[0]
+        else:
+            applications = vars_.get("applications")
+
         if not isinstance(applications, dict):
             raise AnsibleError(
                 "active_alertmanager_channels: required variable 'applications' must be a mapping"

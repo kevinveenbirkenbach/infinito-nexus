@@ -23,6 +23,17 @@ def _run(applications: dict, roles_dir: Path, group_names: list | None = None) -
         )[0]
 
 
+def _run_explicit(applications: dict, roles_dir: Path, group_names: list | None = None) -> list:
+    """Invoke with applications passed as explicit positional term — the template usage pattern."""
+    if group_names is None:
+        group_names = list(applications.keys())
+    with patch.object(LookupModule, "_find_roles_dir", return_value=roles_dir):
+        return LookupModule().run(
+            [applications],
+            variables={"group_names": group_names},
+        )[0]
+
+
 def _make_roles(tmp: Path, specs: dict) -> dict:
     """Create minimal role fixtures under tmp/ and return an applications dict.
 
@@ -179,6 +190,33 @@ class TestNativeMetricsApps(unittest.TestCase):
 
         with self.assertRaises(AnsibleError):
             LookupModule().run([], variables={"applications": ["not", "a", "dict"]})
+
+
+class TestNativeMetricsAppsExplicitTerm(unittest.TestCase):
+    """applications passed as explicit first term — matches template invocation pattern.
+
+    Templates call lookup('native_metrics_apps', applications) to bypass the
+    Ansible scoping issue where available_variables may contain the pre-merge inventory
+    dict rather than the set_fact-merged result.
+    """
+
+    def setUp(self):
+        self._tmpdir = tempfile.TemporaryDirectory()
+
+    def tearDown(self):
+        self._tmpdir.cleanup()
+
+    def test_returns_app_with_metrics_enabled_explicit(self):
+        roles_dir = Path(self._tmpdir.name)
+        apps = _make_roles(roles_dir, {"web-app-gitea": {"native_metrics_enabled": True, "has_fragment": True}})
+        result = _run_explicit(apps, roles_dir)
+        self.assertIn("web-app-gitea", result)
+
+    def test_excludes_app_with_metrics_disabled_explicit(self):
+        roles_dir = Path(self._tmpdir.name)
+        apps = _make_roles(roles_dir, {"web-app-gitea": {"native_metrics_enabled": False, "has_fragment": True}})
+        result = _run_explicit(apps, roles_dir)
+        self.assertNotIn("web-app-gitea", result)
 
 
 if __name__ == "__main__":

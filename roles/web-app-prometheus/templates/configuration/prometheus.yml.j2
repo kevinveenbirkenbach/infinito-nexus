@@ -53,7 +53,7 @@ scrape_configs:
   # To add a new app: set native_metrics.enabled: true in its config and create
   # a prometheus.yml.j2 fragment in its templates/ directory.
 
-{% for native_prometheus_application_id in lookup('native_metrics_apps') %}
+{% for native_prometheus_application_id in lookup('native_metrics_apps', applications) %}
 {% include 'roles/' + native_prometheus_application_id + '/templates/prometheus.yml.j2' %}
 
 {% endfor %}

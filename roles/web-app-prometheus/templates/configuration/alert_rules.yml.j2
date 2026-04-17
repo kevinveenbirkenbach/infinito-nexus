@@ -48,7 +48,7 @@ groups:
 
   - name: communication_channels
     rules:
-{% set _comm_channels = lookup('active_alertmanager_channels') %}
+{% set _comm_channels = lookup('active_alertmanager_channels', applications) %}
 {% if _comm_channels %}
       # Alert when any communication-channel app is unreachable for more than 2 minutes.
       # Channel list is discovered dynamically: apps that declare communication.channel: true

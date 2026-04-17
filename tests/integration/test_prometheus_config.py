@@ -264,9 +264,10 @@ class TestPrometheusNginxEndpoints(unittest.TestCase):
             "locations.conf.j2 must include nginx/location.conf.j2 for prometheus-enabled apps",
         )
         self.assertIn(
-            "lookup('prometheus_integration_active')",
+            "lookup('prometheus_integration_active', applications)",
             content,
-            "locations.conf.j2 outer guard must delegate to lookup('prometheus_integration_active')",
+            "locations.conf.j2 outer guard must call lookup('prometheus_integration_active', applications) "
+            "passing applications explicitly to bypass Ansible lookup variable scoping",
         )
 
     def test_prometheus_conf_includes_metricz_only_on_prometheus_domain(self):

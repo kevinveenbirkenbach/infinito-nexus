@@ -20,9 +20,15 @@ class LookupModule(LookupBase):
     that expose a native /metrics endpoint without hardcoding each app name.
 
     Usage in a template:
-      {% for app_id in lookup('native_metrics_apps') %}
+      {% for app_id in lookup('native_metrics_apps', applications) %}
       {% include 'roles/' + app_id + '/templates/prometheus.yml.j2' %}
       {% endfor %}
+
+    The caller MUST pass the 'applications' dict as the first positional term.
+    Lookup plugins receive available_variables from the templar, which may hold
+    the pre-merge inventory dict instead of the set_fact-merged result. Passing
+    'applications' explicitly from the template context ensures the correct merged
+    dict is always used.
     """
 
     def run(
@@ -33,7 +39,13 @@ class LookupModule(LookupBase):
     ) -> List[List[str]]:
         vars_ = variables or getattr(self._templar, "available_variables", {}) or {}
 
-        applications = vars_.get("applications")
+        # Prefer explicitly passed applications (template context) over available_variables
+        # (which may be the pre-merge inventory dict in some Ansible scoping scenarios).
+        if terms and isinstance(terms[0], dict):
+            applications = terms[0]
+        else:
+            applications = vars_.get("applications")
+
         if not isinstance(applications, dict):
             raise AnsibleError(
                 "native_metrics_apps: required variable 'applications' must be a mapping"

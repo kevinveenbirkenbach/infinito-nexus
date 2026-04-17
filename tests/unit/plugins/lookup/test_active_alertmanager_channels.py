@@ -25,6 +25,14 @@ def _run(applications: dict, group_names: list) -> list:
     )[0]
 
 
+def _run_explicit(applications: dict, group_names: list) -> list:
+    """Invoke with applications passed as explicit positional term — the template usage pattern."""
+    return LookupModule().run(
+        [applications],
+        variables={"group_names": group_names},
+    )[0]
+
+
 class TestActiveAlertmanagerChannelsDeploymentCheck(unittest.TestCase):
     """group_names gate — app must be deployed on this host."""
 
@@ -116,6 +124,33 @@ class TestActiveAlertmanagerChannelsEmptyInputs(unittest.TestCase):
         apps = _make_applications("web-app-gitea", "web-app-nextcloud")
         result = _run(apps, ["web-app-gitea", "web-app-nextcloud"])
         self.assertEqual(result, [])
+
+
+class TestActiveAlertmanagerChannelsExplicitTerm(unittest.TestCase):
+    """applications passed as explicit first term — matches template invocation pattern.
+
+    Templates call lookup('active_alertmanager_channels', applications) to bypass the
+    Ansible scoping issue where available_variables may contain the pre-merge inventory
+    dict rather than the set_fact-merged result.
+    """
+
+    def test_includes_channel_when_deployed_explicit(self):
+        apps = _make_applications("web-app-mattermost", channels=("web-app-mattermost",))
+        result = _run_explicit(apps, ["web-app-mattermost"])
+        self.assertIn("web-app-mattermost", result)
+
+    def test_excludes_channel_when_not_deployed_explicit(self):
+        apps = _make_applications("web-app-mattermost", channels=("web-app-mattermost",))
+        result = _run_explicit(apps, [])
+        self.assertEqual(result, [])
+
+    def test_multiple_channels_explicit(self):
+        apps = _make_applications(
+            "web-app-mattermost", "web-app-matrix",
+            channels=("web-app-mattermost", "web-app-matrix"),
+        )
+        result = _run_explicit(apps, ["web-app-mattermost", "web-app-matrix"])
+        self.assertCountEqual(result, ["web-app-mattermost", "web-app-matrix"])
 
 
 class TestActiveAlertmanagerChannelsErrors(unittest.TestCase):
