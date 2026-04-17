@@ -1,3 +1,10 @@
+# Global toggle for IPv6 across containerized services.
+# Matches the host-level policy established by `make disable-ipv6`
+# (scripts/system/network/ipv6/disable.sh, invoked via environment-bootstrap):
+# when the host disables IPv6, dependent containers must mirror that to avoid
+# stalls (e.g. Nextcloud's DnsPinMiddleware resolving AAAA and trying v6 first).
+NETWORK_IPV6_ENABLED: false
+
 defaults_networks:
   internet:
     ip4: "{{ lookup('env', 'IP4') | default('127.0.0.1', true) }}"  # Change this in inventory to the ip4 address of your server
