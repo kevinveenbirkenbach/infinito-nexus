@@ -80,9 +80,23 @@ The sandbox has `sandbox.network.allowAllUnixSockets: true` so that normal workf
 
 ## Assumption 9: `denyRead` lists every credential directory 🔐
 
-The sandbox's `denyRead` list (`~/.ssh`, `~/.gnupg`, `~/.kube`, `~/.aws`, `~/.config/gcloud`) is the single mechanism that prevents the agent from reading host credentials. Every credential store an operator uses on the host is assumed to be covered.
+The sandbox's `denyRead` list (`~/.gnupg`, `~/.kube`, `~/.aws`, `~/.config/gcloud`) is the primary mechanism that prevents the agent from reading host credentials. Every credential store an operator uses on the host is assumed to be covered, **with the documented exception of `~/.ssh`** (see Assumption 10).
 
 **If violated:** A credential directory not listed in `denyRead` (for example `~/.azure`, `~/.doctl`, `~/.config/op`) is readable by the agent, and its contents can leak into the transcript. Contributors adding a new credential store MUST extend `denyRead` in the same commit.
+
+## Assumption 10: `~/.ssh` is intentionally readable to allow `git push` on `ask` 🔑
+
+`git push`, `git fetch`, and `git clone` over SSH all require `ssh(1)` to read `~/.ssh/` (private keys, `known_hosts`, `config`). With `~/.ssh` in `denyRead`, `ssh` fails with `Host key verification failed` / `Could not read from remote repository`, which makes the `ask`-gated `Bash(git push*)` rule unreachable in practice.
+
+The chosen trade-off is to keep `~/.ssh` **out** of `denyRead` so that SSH auth works and `Bash(git push*)` in `ask` becomes the effective control point: every push pauses for operator confirmation. `allowUnsandboxedCommands: false` remains in place — there is no per-call sandbox bypass.
+
+**Cost:** The agent has read access to all files under `~/.ssh/`, including private keys. A compromised or prompt-injected agent could load those keys into the transcript via read tools (which are NOT gated by `ask`). Mitigations relied upon:
+
+- Private keys SHOULD be passphrase-protected, so exfiltration yields an encrypted blob rather than a usable key.
+- Operators MUST treat any unexplained read of `~/.ssh/id_*` in the transcript as a trust incident and rotate the affected keys.
+- Hosts that store credentials to high-blast-radius targets (production servers, infrastructure root) SHOULD NOT rely on this assumption; instead use an SSH-agent socket with `~/.ssh` left denied, or switch the git remote to HTTPS plus a narrowly-scoped token.
+
+**If violated (i.e. the cost turns out to be unacceptable on a given host):** Re-add `~/.ssh` to `denyRead` in `.claude/settings.local.json` and handle git pushes from an external terminal, or adopt the SSH-agent-socket variant. Both options preserve the deny without breaking the global policy.
 
 ## Updating Assumptions 🧹
 

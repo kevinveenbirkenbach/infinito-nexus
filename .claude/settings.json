@@ -171,8 +171,7 @@
         "~/.aws",
         "~/.config/gcloud",
         "~/.gnupg",
-        "~/.kube",
-        "~/.ssh"
+        "~/.kube"
       ]
     }
   }
