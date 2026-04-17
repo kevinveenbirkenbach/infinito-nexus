@@ -19,6 +19,7 @@ Every prompt below instructs the agent to first clarify all open requirements th
 | Operator placed a `*.log` or `*job-logs.txt` file in the workdir for ad-hoc inspection | [Log File Inspection](#log-file-inspection-) |
 | Staged changes are ready to be committed | [Commit](#commit-) |
 | A branch is ready to be opened as a pull request | [Pull Request Creation](#pull-request-creation-) |
+| A branch needs to be pushed, validated via manual CI, and transitioned through the draft → ready-for-review cycle | [Push, Trigger, Pull](#push-trigger-pull-) |
 | A new requirement needs to be written | [Requirement Creation](#requirement-creation-) |
 | An existing requirement file needs to be implemented end to end | [Requirement Implementation](#requirement-implementation-) |
 
@@ -97,6 +98,14 @@ Follow the instructions from AGENTS.md, open a pull request for the current bran
 ```
 
 SPOT: [pull-request.md](../../../agents/action/pull-request.md)
+
+## Push, Trigger, Pull 📡
+
+```
+Follow the instructions from AGENTS.md, push a branch, run it through the manual-CI draft cycle, and transition the PR to ready-for-review by following the procedure in docs/agents/action/push-trigger-pull.md. Begin by clarifying every open requirement through active listening, then act autonomously through to completion with as few follow-up questions as possible. Use mode /caveman ultra.
+```
+
+SPOT: [push-trigger-pull.md](../../../agents/action/push-trigger-pull.md)
 
 ## Requirement Creation ✍️
 

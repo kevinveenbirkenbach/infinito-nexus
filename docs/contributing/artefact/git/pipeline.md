@@ -1,6 +1,6 @@
 # Continuous Integration 🔄
 
-This document describes the CI pipeline structure, entry points, and gates used in Infinito.Nexus.
+This document describes the CI pipeline structure, entry points, and gates used in Infinito.Nexus. For the catalog of every workflow file (description, triggers, inputs) see [actions.md](../../tools/actions.md).
 
 ## Overview 🗺️
 
