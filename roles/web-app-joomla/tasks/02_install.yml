@@ -48,8 +48,21 @@
       - "--no-interaction"
       - "--site-name={{ JOOMLA_SITE_NAME }}"
   register: j_install
-  changed_when: j_install.rc == 0
-  failed_when: j_install.rc != 0
+  changed_when: j_install.rc == 0 or (j_install.stdout | default('') is search('Unable to delete installation folder'))
+  failed_when:
+    - j_install.rc is defined
+    - j_install.rc != 0
+    - not (j_install.stdout | default('') is search('Unable to delete installation folder'))
+  when:
+    - joomla_installed.rc != 0
+    - has_installer.rc == 0
+
+# Joomla 5.x CLI installer intermittently fails to remove the installation folder
+# (non-fatal — install itself completed). Force-remove as root to finish cleanup.
+- name: "Force-remove installation folder (root)"
+  command:
+    argv: [ docker, exec, "{{ JOOMLA_CONTAINER }}", rm, -rf, /var/www/html/installation ]
+  changed_when: false
   when:
     - joomla_installed.rc != 0
     - has_installer.rc == 0
