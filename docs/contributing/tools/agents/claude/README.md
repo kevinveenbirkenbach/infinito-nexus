@@ -6,7 +6,8 @@ This folder documents the Claude Code agent configuration for this project. The 
 
 | File | Purpose |
 |---|---|
-| [settings.md](settings.md) | The two-layer security model, the `allow`/`ask`/`deny` permission lists, the `env` block (incl. the GPG signing override), and the rules for `.claude/settings.local.json`. |
+| [security.md](security.md) | Trust assumptions behind the Claude Code configuration: the two-layer containment model, what each assumption enables, and what happens if it is violated. Single source for the architectural reasoning. |
+| [settings.md](settings.md) | The `allow`/`ask`/`deny` permission catalog, the `env` block (incl. the GPG signing override), and the rules for `.claude/settings.local.json`. |
 | [sandbox.md](sandbox.md) | OS-level sandbox configuration: activation guarantees, fail-closed behavior, the no-unsandboxed-escape rule, Bash auto-allow, write scope, read restrictions, and network policy. |
 
 For general agent workflow rules shared across all agents (Claude Code, Codex, Gemini, others), see [common.md](../common.md). For the Claude Code permission model reference, see [docs.anthropic.com](https://docs.anthropic.com/en/docs/claude-code/settings).
