@@ -44,54 +44,21 @@ The purpose of this role is to provide a hands-off, production-ready Odoo ERP de
 - **WebSocket Support:**
   Real-time notifications and live chat capabilities through WebSocket connections.
 
-## Configuration
+## Modules
 
-### Modules
+Odoo's functionality is delivered through a modular architecture. The following core modules are installed by default:
 
-Odoo modules can be configured via inventory variables:
+| Module | Description |
+|--------|-------------|
+| **crm** | Customer Relationship Management - track leads, opportunities, and customer interactions |
+| **contacts** | Centralized contact management for customers, vendors, and partners |
+| **sale_management** | Sales pipeline, quotations, orders, and invoicing workflows |
+| **account** | Full accounting suite including invoicing, payments, and financial reporting |
+| **website** | Website builder with drag-and-drop editor and SEO tools |
+| **project** | Project management with Kanban boards, Gantt charts, and time tracking |
+| **stock** | Inventory and warehouse management with barcode support |
 
-```yaml
-web-app-odoo:
-  modules:
-    core:
-      - crm
-      - contacts
-      - sale_management
-      - account
-      - website
-      - project
-      - stock
-    optional:
-      - hr
-      - marketing_automation
-      - purchase
-```
-
-### Authentication
-
-OIDC authentication is enabled by default. To enable LDAP instead:
-
-```yaml
-web-app-odoo:
-  compose:
-    services:
-      oidc:
-        enabled: false
-      ldap:
-        enabled: true
-```
-
-### Redis Cache
-
-For improved session management and caching in high-traffic environments:
-
-```yaml
-web-app-odoo:
-  compose:
-    services:
-      redis:
-        enabled: true
-```
+Additional modules can be enabled via the `modules.optional` configuration in the inventory.
 
 ## Deployment
 
@@ -110,7 +77,7 @@ APPS=web-app-odoo make deploy-reuse-kept-apps
 ## Access
 
 After deployment, Odoo is accessible at:
-- **URL:** `https://erp.<your-domain>/`
+- **URL:** `https://odoo.erp.<your-domain>/`
 - **Admin Login:** Uses configured administrator credentials
 - **SSO Login:** "Login with SSO" button (when OIDC is enabled)
 
@@ -141,7 +108,6 @@ docker logs odoo -f
 
 ## Credits
 
-Developed and maintained by **Kevin Veen-Birkenbach**.
-Learn more at [veen.world](https://www.veen.world).
+Developed by **Evangelos Tsakos**.
 Part of the [Infinito.Nexus Project](https://s.infinito.nexus/code).
 Licensed under the [Infinito.Nexus Community License (Non-Commercial)](https://s.infinito.nexus/license).
