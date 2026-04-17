@@ -10,6 +10,10 @@ webserver_vhost_flavour:            "ws_generic"
 webserver_websocket_location:       "/websocket"
 websocket_port:                     "{{ ports.localhost.websocket[application_id] }}"
 
+# Container ports
+container_port:                     8069
+container_websocket_port:           8072
+
 # Odoo
 
 ## Container
