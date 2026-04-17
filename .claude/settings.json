@@ -13,6 +13,7 @@
       "Bash(grep *)",
       "Bash(head *)",
       "Bash(make *)",
+      "Bash(pkill *)",
       "Bash(tee *)",
       "Bash(wc *)",
       "Edit",
