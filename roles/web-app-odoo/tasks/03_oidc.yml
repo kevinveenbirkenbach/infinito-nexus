@@ -70,6 +70,30 @@
       VALUES ('auth_oauth.oauth_providers', 'True', NOW(), NOW())
       ON CONFLICT (key) DO UPDATE SET value = 'True', write_date = NOW();
 
+- name: "Enable OAuth signup (allow user creation on first OAuth login)"
+  community.postgresql.postgresql_query:
+    db: "{{ ODOO_DB_NAME }}"
+    login_user: "{{ lookup('database', application_id, 'username') }}"
+    login_password: "{{ lookup('database', application_id, 'password') }}"
+    login_host: "{{ lookup('database', application_id, 'reach_host') }}"
+    login_port: "{{ lookup('database', application_id, 'port') }}"
+    query: >
+      INSERT INTO ir_config_parameter (key, value, create_date, write_date)
+      VALUES ('auth_signup.invitation_scope', 'b2c', NOW(), NOW())
+      ON CONFLICT (key) DO UPDATE SET value = 'b2c', write_date = NOW();
+
+- name: "Use Authorization header for OAuth token validation"
+  community.postgresql.postgresql_query:
+    db: "{{ ODOO_DB_NAME }}"
+    login_user: "{{ lookup('database', application_id, 'username') }}"
+    login_password: "{{ lookup('database', application_id, 'password') }}"
+    login_host: "{{ lookup('database', application_id, 'reach_host') }}"
+    login_port: "{{ lookup('database', application_id, 'port') }}"
+    query: >
+      INSERT INTO ir_config_parameter (key, value, create_date, write_date)
+      VALUES ('auth_oauth.authorization_header', 'True', NOW(), NOW())
+      ON CONFLICT (key) DO UPDATE SET value = 'True', write_date = NOW();
+
 - name: "Set web.base.url for HTTPS redirects"
   community.postgresql.postgresql_query:
     db: "{{ ODOO_DB_NAME }}"
@@ -95,3 +119,75 @@
       INSERT INTO ir_config_parameter (key, value, create_date, write_date)
       VALUES ('web.base.url.freeze', 'True', NOW(), NOW())
       ON CONFLICT (key) DO UPDATE SET value = 'True', write_date = NOW();
+
+# Link existing Odoo users to Keycloak for SSO
+
+- name: "Get Keycloak OAuth provider ID in Odoo"
+  community.postgresql.postgresql_query:
+    db: "{{ ODOO_DB_NAME }}"
+    login_user: "{{ lookup('database', application_id, 'username') }}"
+    login_password: "{{ lookup('database', application_id, 'password') }}"
+    login_host: "{{ lookup('database', application_id, 'reach_host') }}"
+    login_port: "{{ lookup('database', application_id, 'port') }}"
+    query: "SELECT id FROM auth_oauth_provider WHERE name = 'Keycloak' LIMIT 1;"
+  register: keycloak_provider
+
+- name: "Query Keycloak DB for user IDs"
+  community.postgresql.postgresql_query:
+    db: "{{ lookup('database', 'web-app-keycloak', 'name') }}"
+    login_user: "{{ lookup('database', 'web-app-keycloak', 'username') }}"
+    login_password: "{{ lookup('database', 'web-app-keycloak', 'password') }}"
+    login_host: "{{ lookup('database', 'web-app-keycloak', 'reach_host') }}"
+    login_port: "{{ lookup('database', 'web-app-keycloak', 'port') }}"
+    query: >
+      SELECT id, username FROM user_entity
+      WHERE realm_id = (SELECT id FROM realm WHERE name = %(realm)s)
+      AND username IN (%(admin)s, %(biber)s);
+    named_args:
+      realm: "{{ OIDC.CLIENT.REALM }}"
+      admin: "{{ users.administrator.username }}"
+      biber: "{{ users.biber.username }}"
+  register: keycloak_users
+  when: keycloak_provider.query_result | length > 0
+
+- name: "Link administrator user to Keycloak in Odoo"
+  community.postgresql.postgresql_query:
+    db: "{{ ODOO_DB_NAME }}"
+    login_user: "{{ lookup('database', application_id, 'username') }}"
+    login_password: "{{ lookup('database', application_id, 'password') }}"
+    login_host: "{{ lookup('database', application_id, 'reach_host') }}"
+    login_port: "{{ lookup('database', application_id, 'port') }}"
+    query: >
+      UPDATE res_users SET
+        oauth_provider_id = %(provider_id)s,
+        oauth_uid = %(oauth_uid)s,
+        write_date = NOW()
+      WHERE login = %(login)s;
+    named_args:
+      provider_id: "{{ keycloak_provider.query_result[0].id }}"
+      oauth_uid: "{{ (keycloak_users.query_result | selectattr('username', 'equalto', users.administrator.username) | first).id }}"
+      login: "{{ users.administrator.username }}"
+  when:
+    - keycloak_provider.query_result | length > 0
+    - keycloak_users.query_result | selectattr('username', 'equalto', users.administrator.username) | list | length > 0
+
+- name: "Link biber user to Keycloak in Odoo (if user exists)"
+  community.postgresql.postgresql_query:
+    db: "{{ ODOO_DB_NAME }}"
+    login_user: "{{ lookup('database', application_id, 'username') }}"
+    login_password: "{{ lookup('database', application_id, 'password') }}"
+    login_host: "{{ lookup('database', application_id, 'reach_host') }}"
+    login_port: "{{ lookup('database', application_id, 'port') }}"
+    query: >
+      UPDATE res_users SET
+        oauth_provider_id = %(provider_id)s,
+        oauth_uid = %(oauth_uid)s,
+        write_date = NOW()
+      WHERE login = %(login)s;
+    named_args:
+      provider_id: "{{ keycloak_provider.query_result[0].id }}"
+      oauth_uid: "{{ (keycloak_users.query_result | selectattr('username', 'equalto', users.biber.username) | first).id }}"
+      login: "{{ users.biber.username }}"
+  when:
+    - keycloak_provider.query_result | length > 0
+    - keycloak_users.query_result | selectattr('username', 'equalto', users.biber.username) | list | length > 0
