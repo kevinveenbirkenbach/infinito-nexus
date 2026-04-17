@@ -14,6 +14,7 @@
       "Bash(head *)",
       "Bash(make *)",
       "Bash(pkill *)",
+      "Bash(tail *)",
       "Bash(tee *)",
       "Bash(wc *)",
       "Edit",
