@@ -5,14 +5,11 @@
   vars:
     docker_compose_flush_handlers: false
 
-- name: "Create Odoo directories"
+- name: "Create Odoo addons directory"
   file:
-    path: "{{ item }}"
+    path: "{{ ODOO_ADDONS_HOST }}"
     state: directory
     mode: '0755'
-  loop:
-    - "{{ lookup('container', application_id, 'directories.volumes') }}"
-    - "{{ ODOO_ADDONS_HOST }}"
 
 - name: "Deploy Odoo configuration file"
   template:
