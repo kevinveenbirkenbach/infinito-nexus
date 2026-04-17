@@ -48,6 +48,9 @@
 - name: "Install core modules"
   include_tasks: 02_install_modules.yml
 
+- name: "Create administrator user"
+  include_tasks: 05_admin.yml
+
 - name: "Configure OIDC provider"
   include_tasks: 03_oidc.yml
   when: ODOO_OIDC_ENABLED | bool
@@ -55,6 +58,3 @@
 - name: "Configure LDAP authentication"
   include_tasks: 04_ldap.yml
   when: ODOO_LDAP_ENABLED | bool
-
-- name: "Create administrator user"
-  include_tasks: 05_admin.yml
