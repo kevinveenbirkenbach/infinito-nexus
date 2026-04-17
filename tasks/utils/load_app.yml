@@ -14,3 +14,6 @@
   include_role:
     name:   "{{ _load_app_id }}"
     public: false
+  vars:
+    application_id: "{{ _load_app_id }}"
+    domain: "{{ lookup('domain', _load_app_id) }}"
