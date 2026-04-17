@@ -7,10 +7,15 @@
   "permissions": {
     "allow": [
       "Bash(PYTHONPATH=* python *)",
+      "Bash(XDG_CACHE_HOME=* gh api *)",
+      "Bash(XDG_CACHE_HOME=* gh issue list *)",
+      "Bash(XDG_CACHE_HOME=* gh run list *)",
       "Bash(XDG_CACHE_HOME=* gh run view *)",
       "Bash(docker *)",
       "Bash(echo *)",
-      "Bash(gh run list *)",
+      "Bash(gh api *)",
+      "Bash(gh issue *)",
+      "Bash(gh run *)",
       "Bash(grep *)",
       "Bash(head *)",
       "Bash(make *)",
@@ -86,9 +91,15 @@
       "Bash(gh * unmark-template*)",
       "Bash(gh * unpin*)",
       "Bash(gh * upload*)",
+      "Bash(gh api * --field *)",
+      "Bash(gh api * --input *)",
       "Bash(gh api * --method *)",
+      "Bash(gh api * --raw-field *)",
+      "Bash(gh api * -F *)",
       "Bash(gh api * -X *)",
+      "Bash(gh api * -f *)",
       "Bash(gh api enterprises/*:*)",
+      "Bash(gh api graphql*)",
       "Bash(gh api orgs/*:*)",
       "Bash(gh api repos/*/actions/permissions*:*)",
       "Bash(gh api repos/*/actions/workflows/*/dispatches:*)",
@@ -109,6 +120,9 @@
       "Bash(gh workflow run*)",
       "Bash(git commit*)",
       "Bash(git push*)"
+    ],
+    "additionalDirectories": [
+      "/tmp"
     ]
   },
   "sandbox": {
@@ -157,8 +171,7 @@
         "~/.aws",
         "~/.config/gcloud",
         "~/.gnupg",
-        "~/.kube",
-        "~/.ssh"
+        "~/.kube"
       ]
     }
   }

@@ -64,11 +64,12 @@ The following directories are never readable, even if a task explicitly requests
 
 | Path | What it protects |
 |---|---|
-| `~/.ssh` | SSH private keys. |
 | `~/.gnupg` | GPG keys and keyrings. The agent therefore cannot create signed commits — see the GPG signing override in [settings.md](settings.md#environment-overrides-) for how this is reconciled with `commit.gpgsign=true` on the host. |
 | `~/.kube` | Kubernetes cluster credentials. |
 | `~/.aws` | AWS access keys and configuration. |
 | `~/.config/gcloud` | Google Cloud service account credentials. |
+
+`~/.ssh` is intentionally **not** in this list. Denying it would make `git push` over SSH unreachable and defeat the `Bash(git push*)` ask-gate. The trade-off and its mitigations are documented in [security.md](security.md#assumption-10) (Assumption 10).
 
 ## Network 🌐
 
