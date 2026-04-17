@@ -39,7 +39,7 @@ DISCOURSE_LDAP_ENABLED:             "{{ lookup('config', application_id, 'compos
 DISCOURSE_LOCAL:                    "C.UTF-8"
 
 DISCOURSE_OIDC_ENABLED:             "{{ lookup('config', application_id, 'compose.services.oidc.enabled') }}"
-DISCOURSE_OIDC_LOGOUT_REDIRECT_URL: "{{ lookup('tls', application_id, 'url.base') }}"
+DISCOURSE_OIDC_LOGOUT_REDIRECT_URL: "{{ lookup('tls', 'web-svc-logout', 'url.base') }}"
 
 # TLS
 DISCOURSE_TLS_ENABLED:              "{{ lookup('tls', application_id, 'enabled') | bool }}"
