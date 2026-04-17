@@ -3,8 +3,13 @@
     Included from basic.conf.j2, synapse.conf.j2, and any other custom vhost
     that participates in the monitoring stack.
 
-    The entire block is guarded: nothing is emitted unless the prometheus role
-    is deployed on this host ('web-app-prometheus' in group_names).
+    The outer guard emits this block only when:
+      1. The prometheus role is deployed on this host ('web-app-prometheus' in group_names), AND
+      2. Either this IS the prometheus vhost, OR the current app has prometheus
+         declared as an enabled service dependency (is_docker_service_enabled).
+    The service lookup cannot be used for the host-level check because
+    web-app-prometheus is not a registered shared-service provider in the
+    service registry.
 
     $app_id          — Ansible role ID attached as Lua metrics label.
     $container_name  — Docker container name for /healthz/live polling.
@@ -14,9 +19,9 @@
 
     healthz.conf.j2     — /healthz/live + /healthz/ready + /_live_probe
     location.conf.j2    — log_by_lua_block per-request metrics collection
-    metricz.conf     — /metricz scrape endpoint (prometheus domain only); no Jinja2 — static nginx/Lua
+    metricz.conf     — /metricz scrape endpoint (prometheus domain only); no Jinja2 — lives in files/ not templates/
   #}
-  {% if 'web-app-prometheus' in group_names %}
+  {% if lookup('prometheus_integration_active') %}
   {# Expose the Ansible role ID so Lua metrics handlers can attach the 'app' label. #}
   set $app_id "{{ application_id }}";
   {# Docker container name for this vhost — used by /healthz/live to query the
@@ -33,6 +38,6 @@
   {% include 'roles/web-app-prometheus/templates/nginx/location.conf.j2' %}
   {% if application_id == 'web-app-prometheus' %}
   {# Scrape endpoint — only on the prometheus domain itself. #}
-  {% include 'roles/web-app-prometheus/templates/nginx/metricz.conf' %}
+  {% include 'roles/web-app-prometheus/files/nginx/metricz.conf' %}
   {% endif %}
   {% endif %}

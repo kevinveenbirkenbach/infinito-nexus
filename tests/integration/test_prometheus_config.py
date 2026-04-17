@@ -175,7 +175,7 @@ class TestPrometheusNginxEndpoints(unittest.TestCase):
             Path(__file__).resolve().parent.parent.parent
             / "roles"
             / "web-app-prometheus"
-            / "templates"
+            / "files"
             / "nginx"
             / "metricz.conf"
         )
@@ -249,12 +249,13 @@ class TestPrometheusNginxEndpoints(unittest.TestCase):
         )
 
     def test_prometheus_conf_includes_location_conf_for_all_prometheus_apps(self):
-        """locations.conf.j2 must include location.conf.j2 and guard via group_names.
+        """locations.conf.j2 must include location.conf.j2 and delegate the guard to
+        the prometheus_integration_active lookup plugin.
 
-        The outer guard uses 'web-app-prometheus' in group_names so the block is only
-        emitted on hosts where prometheus is deployed. The service lookup cannot be used
-        because web-app-prometheus is not a registered shared-service provider in the
-        service registry.
+        The outer guard was refactored from an inline Jinja2 condition into the
+        reusable lookup('prometheus_integration_active') call. The actual logic
+        (group_names + is_docker_service_enabled) lives in the lookup plugin and is
+        covered by its own unit tests.
         """
         content = self._prometheus_conf_path().read_text(encoding="utf-8")
         self.assertIn(
@@ -263,10 +264,9 @@ class TestPrometheusNginxEndpoints(unittest.TestCase):
             "locations.conf.j2 must include nginx/location.conf.j2 for prometheus-enabled apps",
         )
         self.assertIn(
-            "'web-app-prometheus' in group_names",
+            "lookup('prometheus_integration_active')",
             content,
-            "locations.conf.j2 outer condition must use group_names to check if "
-            "prometheus is deployed on this host",
+            "locations.conf.j2 outer guard must delegate to lookup('prometheus_integration_active')",
         )
 
     def test_prometheus_conf_includes_metricz_only_on_prometheus_domain(self):
@@ -277,10 +277,10 @@ class TestPrometheusNginxEndpoints(unittest.TestCase):
         """
         content = self._prometheus_conf_path().read_text(encoding="utf-8")
         self.assertIn(
-            "roles/web-app-prometheus/templates/nginx/metricz.conf",
+            "roles/web-app-prometheus/files/nginx/metricz.conf",
             content,
-            "locations.conf.j2 must include nginx/metricz.conf for the prometheus domain "
-            "(location = /metricz must not appear on every app vhost)",
+            "locations.conf.j2 must include files/nginx/metricz.conf for the prometheus domain "
+            "(no Jinja2 expressions — lives in files/, not templates/)",
         )
         # metricz is guarded by application_id == 'web-app-prometheus' so it only
         # appears on the prometheus domain vhost, not on every app vhost.
@@ -432,6 +432,10 @@ class TestPrometheusNginxEndpoints(unittest.TestCase):
         The task AC requires alert rules for communication channels (Mattermost, Matrix, Mailu).
         Generic AppDown alone is insufficient — a dedicated rule makes intent explicit and allows
         different routing/escalation for communication-critical apps.
+
+        Channel list is discovered dynamically via the active_alertmanager_channels lookup plugin.
+        Each app self-declares communication.channel: true in its own config (SPOT per app —
+        no hardcoded list anywhere).
         """
         roles_dir = Path(__file__).resolve().parent.parent.parent / "roles"
         content = (
@@ -447,24 +451,21 @@ class TestPrometheusNginxEndpoints(unittest.TestCase):
             "alert_rules.yml.j2 must define a CommunicationChannelDown alert rule "
             "(task AC: alert rules for communication channels — Mattermost, Matrix, Mailu)",
         )
-        # Channel filtering (group_names + receiver state) is encapsulated in the
-        # active_alertmanager_channels lookup plugin so the template stays clean.
+        # Channel list is discovered by the plugin, not read from a hardcoded config key.
         self.assertIn(
             "active_alertmanager_channels",
             content,
-            "CommunicationChannelDown expr must use the active_alertmanager_channels "
-            "lookup plugin — it filters by group_names and configured receivers",
+            "CommunicationChannelDown must use the active_alertmanager_channels lookup plugin "
+            "for dynamic channel discovery (no hardcoded list)",
         )
-        # Channel list is derived from the plugin's RECEIVER_CONFIG — not from config.
-        # Verify the plugin itself knows about the required apps.
-        from plugins.lookup.active_alertmanager_channels import RECEIVER_CONFIG
-
-        for app_id in ("web-app-mattermost", "web-app-mailu"):
+        # Each communication-channel app self-declares communication.channel: true.
+        for app_id in ("web-app-mattermost", "web-app-mailu", "web-app-matrix"):
             with self.subTest(app_id=app_id):
-                self.assertIn(
-                    app_id,
-                    RECEIVER_CONFIG,
-                    f"active_alertmanager_channels plugin must map {app_id} in RECEIVER_CONFIG",
+                cfg = _load_config(str(roles_dir / app_id / "config" / "main.yml"))
+                self.assertTrue(
+                    (cfg.get("communication") or {}).get("channel") is True,
+                    f"{app_id}/config/main.yml must declare communication.channel: true "
+                    f"so the active_alertmanager_channels plugin discovers it",
                 )
 
     def test_blackbox_tls_is_templated(self):

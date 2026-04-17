@@ -1,17 +1,14 @@
   # Gitea — Go runtime + application metrics.
-  # Requires GITEA__metrics__ENABLED = true in the Gitea environment config.
-  # Enable via native_metrics.enabled: true in inventory.
-  # Set native_metrics.token in inventory when Gitea token auth is configured.
+  # Scraped via internal container port to bypass nginx/OAuth2 proxy.
+  # Requires GITEA__metrics__ENABLED=true (set conditionally in env.j2 when enabled).
   - job_name: "gitea"
-    scheme: {{ lookup('tls', native_prometheus_application_id, 'protocols.web') }}
+    scheme: http
     metrics_path: /metrics
-    tls_config:
-      insecure_skip_verify: {{ not (TLS_ENABLED | bool) }}
-{% set token = lookup('config', native_prometheus_application_id, 'native_metrics.token') %}
-{% if token %}
-    bearer_token: "{{ token }}"
+{% set _token = lookup('config', native_prometheus_application_id, 'native_metrics.token') %}
+{% if _token %}
+    bearer_token: "{{ _token }}"
 {% endif %}
     static_configs:
-      - targets: ["{{ lookup('domain', native_prometheus_application_id) }}"]
+      - targets: ["{{ native_prometheus_application_id | native_metrics_target(ports) }}"]
         labels:
           app: "{{ native_prometheus_application_id }}"

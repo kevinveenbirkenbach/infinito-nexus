@@ -1,12 +1,10 @@
   # Mattermost — application and Go runtime metrics.
-  # Requires MM_METRICSSETTINGS_ENABLE=true in the Mattermost environment config.
-  # Enable via native_metrics.enabled: true in inventory.
+  # Scraped via internal metrics listener to bypass nginx/OAuth2 proxy.
+  # Requires MM_METRICSSETTINGS_ENABLE=true and MM_METRICSSETTINGS_LISTENADDRESS (set in env.j2 when enabled).
   - job_name: "mattermost"
-    scheme: {{ lookup('tls', native_prometheus_application_id, 'protocols.web') }}
+    scheme: http
     metrics_path: /metrics
-    tls_config:
-      insecure_skip_verify: {{ not (TLS_ENABLED | bool) }}
     static_configs:
-      - targets: ["{{ lookup('domain', native_prometheus_application_id) }}"]
+      - targets: ["{{ native_prometheus_application_id | native_metrics_target(ports) }}"]
         labels:
           app: "{{ native_prometheus_application_id }}"

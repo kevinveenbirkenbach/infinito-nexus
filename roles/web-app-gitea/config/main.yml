@@ -83,5 +83,6 @@ compose:
   volumes:
     data:             "gitea_data"
 native_metrics:
-  enabled:          false    # Set true in inventory after enabling GITEA__metrics__ENABLED=true
+  enabled:          false    # Set true in inventory to activate metrics scraping
+  port:             3000     # Gitea metrics are on the main HTTP server port (same as app)
   token:            ""       # Optional bearer token — set in vault if Gitea token auth is enabled

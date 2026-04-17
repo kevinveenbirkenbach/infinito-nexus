@@ -12,9 +12,8 @@ server {
 
     {% include 'roles/sys-svc-proxy/templates/location/upload.conf.j2' %}
 
-  {# Synapse uses the 'synapse' service key — pass container_name so locations.conf.j2
-     uses the correct container. The prometheus guard lives inside locations.conf.j2
-     ('web-app-prometheus' in group_names); no outer guard needed here. #}
+  {# Synapse uses the 'synapse' service key, so pass container_name explicitly.
+     locations.conf.j2 guards itself via lookup('prometheus_integration_active'). #}
   {% set container_name = lookup('config', application_id, 'compose.services.synapse.name', '') %}
   {% include 'roles/web-app-prometheus/templates/nginx/locations.conf.j2' %}
 }

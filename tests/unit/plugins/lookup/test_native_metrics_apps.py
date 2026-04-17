@@ -8,12 +8,18 @@ from unittest.mock import patch
 from plugins.lookup.native_metrics_apps import LookupModule
 
 
-def _run(applications: dict, roles_dir: Path) -> list:
-    """Helper: run the lookup with a temporary roles directory."""
+def _run(applications: dict, roles_dir: Path, group_names: list | None = None) -> list:
+    """Helper: run the lookup with a temporary roles directory.
+
+    group_names defaults to all keys in applications so existing tests that
+    don't care about the deployment filter still pass without change.
+    """
+    if group_names is None:
+        group_names = list(applications.keys())
     with patch.object(LookupModule, "_find_roles_dir", return_value=roles_dir):
         return LookupModule().run(
             [],
-            variables={"applications": applications},
+            variables={"applications": applications, "group_names": group_names},
         )[0]
 
 
@@ -134,6 +140,31 @@ class TestNativeMetricsApps(unittest.TestCase):
             _run(apps, self.roles_dir),
             ["web-app-gitea", "web-app-matrix", "web-app-mattermost"],
         )
+
+    # ── group_names deployment filter ──────────────────────────────────────
+
+    def test_excludes_app_not_in_group_names(self):
+        """Apps not in group_names (not deployed on this host) must be excluded."""
+        apps = _make_roles(
+            self.roles_dir,
+            {
+                "web-app-gitea": {"native_metrics_enabled": True, "has_fragment": True},
+                "web-app-mattermost": {
+                    "native_metrics_enabled": True,
+                    "has_fragment": True,
+                },
+            },
+        )
+        result = _run(apps, self.roles_dir, group_names=["web-app-gitea"])
+        self.assertIn("web-app-gitea", result)
+        self.assertNotIn("web-app-mattermost", result)
+
+    def test_returns_empty_when_group_names_empty(self):
+        apps = _make_roles(
+            self.roles_dir,
+            {"web-app-gitea": {"native_metrics_enabled": True, "has_fragment": True}},
+        )
+        self.assertEqual(_run(apps, self.roles_dir, group_names=[]), [])
 
     # ── error handling ─────────────────────────────────────────────────────
 

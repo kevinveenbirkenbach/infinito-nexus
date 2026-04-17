@@ -68,3 +68,6 @@ compose:
     client-plugins:               "mattermost_client_plugins"
 native_metrics:
   enabled:          true
+  port:             8067     # Mattermost metrics listener (MM_METRICSSETTINGS_LISTENADDRESS)
+communication:
+  channel:          true

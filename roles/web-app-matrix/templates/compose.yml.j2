@@ -18,6 +18,9 @@
       - SYNAPSE_REPORT_STATS=no
     ports:
       - "{{ DOCKER_BIND_HOST }}:{{ports.localhost.http['web-app-matrix_synapse']}}:{{ container_port }}"
+{% if lookup('config', application_id, 'native_metrics.enabled', False) | bool %}
+      - "127.0.0.1:{{ MATRIX_SYNAPSE_METRICS_PORT }}:{{ lookup('config', application_id, 'native_metrics.port') }}"
+{% endif %}
 {% include 'roles/sys-svc-container/templates/healthcheck/curl.yml.j2' %}
 {% if MATRIX_BRIDGES | length > 0 %}
 {% for item in MATRIX_BRIDGES %}

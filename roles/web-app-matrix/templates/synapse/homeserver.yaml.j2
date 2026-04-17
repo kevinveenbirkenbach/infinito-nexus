@@ -9,6 +9,11 @@ listeners:
     resources:
       - names: [client, federation]
         compress: false
+{% if lookup('config', application_id, 'native_metrics.enabled', False) | bool %}
+  - port: {{ lookup('config', application_id, 'native_metrics.port') }}
+    type: metrics
+    bind_addresses: ['0.0.0.0']
+{% endif %}
 database:
   name: psycopg2
   args:

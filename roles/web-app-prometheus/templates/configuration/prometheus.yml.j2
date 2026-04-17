@@ -66,9 +66,9 @@ scrape_configs:
     params:
       module: [http_ready]
     static_configs:
-{% for app_id in CURRENT_PLAY_APPLICATIONS | list | sort %}
-{% if app_id != application_id %}
-{% set domains_raw = canonical_map.get(app_id, []) %}
+{% for _application_id in CURRENT_PLAY_APPLICATIONS | list | sort %}
+{% if _application_id != application_id %}
+{% set domains_raw = canonical_map.get(_application_id, []) %}
 {% set canonical_probe_domains = (domains_raw.values() | list) if (domains_raw is mapping) else domains_raw %}
 {% if canonical_probe_domains | length > 0 %}
       - targets:
@@ -76,7 +76,7 @@ scrape_configs:
           - "{{ lookup('tls', application_id, 'protocols.web') }}://{{ domain }}/healthz/ready"
 {% endfor %}
         labels:
-          app: "{{ app_id }}"
+          app: "{{ _application_id }}"
 {% endif %}
 {% endif %}
 {% endfor %}

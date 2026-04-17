@@ -26,6 +26,7 @@ MATRIX_SYNAPSE_NAME:                  "{{ lookup('config', application_id, 'comp
 MATRIX_SYNAPSE_VOLUME:                "{{ lookup('config', application_id, 'compose.volumes.synapse') }}"
 MATRIX_SYNAPSE_DOMAIN:                "{{ domains[application_id].synapse }}"
 MATRIX_SYNAPSE_PORT:                  "{{ ports.localhost.http['web-app-matrix_synapse'] }}"
+MATRIX_SYNAPSE_METRICS_PORT:          "{{ ports.localhost.metrics['web-app-matrix'] }}"
 MATRIX_SYNAPSE_CONFIG_PATH_HOST:      "{{ [ lookup('container', application_id, 'directories.config'), 'homeserver.yaml' ] | path_join }}"
 MATRIX_SYNAPSE_CONFIG_PATH_CONTAINER: "/data/homeserver.yaml"
 MATRIX_SYNAPSE_LOG_PATH_HOST:         "{{ [ lookup('container', application_id, 'directories.config'), MATRIX_SYNAPSE_DOMAIN ~'.log.config' ] | path_join }}"

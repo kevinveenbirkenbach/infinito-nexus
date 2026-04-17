@@ -39,10 +39,13 @@ class LookupModule(LookupBase):
                 "native_metrics_apps: required variable 'applications' must be a mapping"
             )
 
+        group_names: List[str] = vars_.get("group_names", [])
         roles_dir = self._find_roles_dir()
 
         result: List[str] = []
         for app_id in sorted(applications.keys()):
+            if app_id not in group_names:
+                continue
             enabled = get_app_conf(
                 applications=applications,
                 application_id=app_id,

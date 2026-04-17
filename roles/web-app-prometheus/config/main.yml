@@ -88,6 +88,3 @@ alerting:
     chat_id:                      0     # Telegram chat ID (integer)
   mattermost:
     webhook_url:                  ""    # Set in inventory to enable Mattermost alerts
-# native_metrics tokens are read from each app's own config, not from here.
-# To enable a scrape job, set native_metrics.enabled: true in the relevant
-# app's inventory vars, and (for Gitea) native_metrics.token: "<token>".

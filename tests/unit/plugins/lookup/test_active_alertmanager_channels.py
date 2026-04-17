@@ -7,18 +7,14 @@ from ansible.errors import AnsibleError
 from plugins.lookup.active_alertmanager_channels import LookupModule
 
 
-def _make_applications(webhook_url: str = "") -> dict:
-    """Build a minimal applications dict for web-app-prometheus.
+def _make_applications(*app_ids: str, channels: tuple = ()) -> dict:
+    """Build a minimal applications dict.
 
-    Candidates are derived from RECEIVER_CONFIG in the plugin itself —
-    no communication_channels key needed in config.
+    apps listed in *channels* get communication.channel: true; others do not.
     """
     return {
-        "web-app-prometheus": {
-            "alerting": {
-                "mattermost": {"webhook_url": webhook_url},
-            }
-        }
+        app_id: ({"communication": {"channel": True}} if app_id in channels else {})
+        for app_id in app_ids
     }
 
 
@@ -32,63 +28,94 @@ def _run(applications: dict, group_names: list) -> list:
 class TestActiveAlertmanagerChannelsDeploymentCheck(unittest.TestCase):
     """group_names gate — app must be deployed on this host."""
 
-    def test_includes_mailu_when_deployed(self):
-        result = _run(_make_applications(), ["web-app-mailu"])
-        self.assertIn("web-app-mailu", result)
-
-    def test_excludes_mailu_when_not_deployed(self):
-        result = _run(_make_applications(), [])
-        self.assertNotIn("web-app-mailu", result)
-
-    def test_excludes_mattermost_when_not_deployed(self):
-        apps = _make_applications(webhook_url="https://mattermost.example/hook/abc")
-        result = _run(apps, [])
-        self.assertNotIn("web-app-mattermost", result)
-
-
-class TestActiveAlertmanagerChannelsReceiverCheck(unittest.TestCase):
-    """Receiver config gate — value must be non-empty."""
-
-    def test_includes_mattermost_when_webhook_configured(self):
-        apps = _make_applications(webhook_url="https://mattermost.example/hook/abc")
+    def test_includes_channel_when_deployed(self):
+        apps = _make_applications(
+            "web-app-mattermost", channels=("web-app-mattermost",)
+        )
         result = _run(apps, ["web-app-mattermost"])
         self.assertIn("web-app-mattermost", result)
 
-    def test_excludes_mattermost_when_webhook_empty(self):
-        result = _run(_make_applications(webhook_url=""), ["web-app-mattermost"])
-        self.assertNotIn("web-app-mattermost", result)
-
-    def test_excludes_mattermost_when_webhook_whitespace_only(self):
-        result = _run(_make_applications(webhook_url="   "), ["web-app-mattermost"])
-        self.assertNotIn("web-app-mattermost", result)
-
-
-class TestActiveAlertmanagerChannelsNotInRegistry(unittest.TestCase):
-    """Apps absent from RECEIVER_CONFIG are excluded regardless of deployment."""
-
-    def test_excludes_matrix_when_deployed(self):
-        result = _run(_make_applications(), ["web-app-matrix"])
-        self.assertNotIn("web-app-matrix", result)
-
-    def test_excludes_matrix_even_with_all_groups(self):
-        result = _run(
-            _make_applications(),
-            ["web-app-mailu", "web-app-mattermost", "web-app-matrix"],
+    def test_excludes_channel_when_not_deployed(self):
+        apps = _make_applications(
+            "web-app-mattermost", channels=("web-app-mattermost",)
         )
+        result = _run(apps, [])
+        self.assertNotIn("web-app-mattermost", result)
+
+    def test_excludes_channel_when_deployed_but_not_in_group_names(self):
+        apps = _make_applications(
+            "web-app-mailu",
+            "web-app-matrix",
+            channels=("web-app-mailu", "web-app-matrix"),
+        )
+        result = _run(apps, ["web-app-mailu"])
+        self.assertIn("web-app-mailu", result)
         self.assertNotIn("web-app-matrix", result)
+
+
+class TestActiveAlertmanagerChannelsSelfDeclaration(unittest.TestCase):
+    """communication.channel flag gate — must be true in app config."""
+
+    def test_excludes_app_without_channel_flag(self):
+        apps = _make_applications("web-app-mattermost")  # no channel flag
+        result = _run(apps, ["web-app-mattermost"])
+        self.assertNotIn("web-app-mattermost", result)
+
+    def test_includes_all_declared_channels_when_deployed(self):
+        apps = _make_applications(
+            "web-app-mattermost",
+            "web-app-matrix",
+            "web-app-mailu",
+            channels=("web-app-mattermost", "web-app-matrix", "web-app-mailu"),
+        )
+        result = _run(apps, ["web-app-mattermost", "web-app-matrix", "web-app-mailu"])
+        self.assertCountEqual(
+            result, ["web-app-mattermost", "web-app-matrix", "web-app-mailu"]
+        )
+
+    def test_result_is_sorted(self):
+        apps = _make_applications(
+            "web-app-mattermost",
+            "web-app-matrix",
+            "web-app-mailu",
+            channels=("web-app-mattermost", "web-app-matrix", "web-app-mailu"),
+        )
+        result = _run(apps, ["web-app-mattermost", "web-app-matrix", "web-app-mailu"])
+        self.assertEqual(result, sorted(result))
+
+    def test_non_channel_apps_are_excluded(self):
+        apps = _make_applications(
+            "web-app-gitea",
+            "web-app-nextcloud",
+            "web-app-mattermost",
+            channels=("web-app-mattermost",),
+        )
+        result = _run(
+            apps, ["web-app-gitea", "web-app-nextcloud", "web-app-mattermost"]
+        )
+        self.assertNotIn("web-app-gitea", result)
+        self.assertNotIn("web-app-nextcloud", result)
+        self.assertIn("web-app-mattermost", result)
 
 
 class TestActiveAlertmanagerChannelsEmptyInputs(unittest.TestCase):
-    """Edge cases: missing config and empty group_names."""
+    """Edge cases: empty applications and empty group_names."""
 
     def test_returns_empty_when_group_names_empty(self):
-        result = _run(_make_applications(), [])
+        apps = _make_applications(
+            "web-app-mattermost", channels=("web-app-mattermost",)
+        )
+        result = _run(apps, [])
         self.assertEqual(result, [])
 
-    def test_excludes_mattermost_when_prometheus_missing_from_applications(self):
-        # webhook lookup returns "" when prometheus is absent — mattermost excluded.
+    def test_returns_empty_when_applications_empty(self):
         result = _run({}, ["web-app-mattermost"])
-        self.assertNotIn("web-app-mattermost", result)
+        self.assertEqual(result, [])
+
+    def test_returns_empty_when_no_channels_declared(self):
+        apps = _make_applications("web-app-gitea", "web-app-nextcloud")
+        result = _run(apps, ["web-app-gitea", "web-app-nextcloud"])
+        self.assertEqual(result, [])
 
 
 class TestActiveAlertmanagerChannelsErrors(unittest.TestCase):
