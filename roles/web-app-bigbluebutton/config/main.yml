@@ -1,6 +1,6 @@
 api_suffix:             "/bigbluebutton/"
 server:
-  ip6_enabled:          false
+  ip6_enabled:          "{{ NETWORK_IPV6_ENABLED | bool }}"
   csp:
     flags:
       script-src-elem:

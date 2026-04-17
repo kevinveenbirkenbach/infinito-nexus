@@ -2,7 +2,7 @@ services:
   webrtc-sfu:
     environment:
       MS_WORKERS: "1"
-      MS_ENABLE_IPV6: "false"
+      MS_ENABLE_IPV6: "{{ BBB_IP6_ENABLED | bool | lower }}"
       MS_WEBRTC_LISTEN_IPS: >-
         [{"ip":"0.0.0.0","announcedIp":"${EXTERNAL_IPv4}"}]
 {% if RUNTIME == 'dev' %}
