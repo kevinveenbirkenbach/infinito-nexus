@@ -6,16 +6,16 @@ Use this page when you are iterating on a local app deploy during debugging or d
 
 - Before starting the loop, you MUST propose disabling all non-necessary services via `SERVICES_DISABLED` to reduce resource usage. In the typical case, this means keeping only the database and disabling everything else. Only proceed without this proposal if the user has already confirmed a full-stack setup.
 - You MUST run `make test` before every deploy. Only proceed with the deploy if all tests pass.
-- Unless the user explicitly says to reuse the existing setup, you MUST start once with `make deploy-fresh-purged-apps APPS=<roles>` to establish the baseline inventory and clean app state. Set `FULL_CYCLE=true` to also run the async update pass (pass 2).
+- Unless the user explicitly says to reuse the existing setup, you MUST start once with `make deploy-fresh-purged-apps APPS=<roles> FULL_CYCLE=true` to establish the baseline inventory and clean app state. `FULL_CYCLE=true` adds the async update pass (pass 2) and MUST stay on unless the user explicitly asks to skip it.
 - You MUST NOT run more than one deploy command at the same time. Deployments MUST be executed serially, never in parallel.
-- To speed up debugging, you MAY pass multiple apps at once, e.g. `make deploy-fresh-purged-apps APPS="<roles> <roles>"`.
+- To speed up debugging, you MAY pass multiple apps at once, e.g. `make deploy-fresh-purged-apps APPS="<roles> <roles>" FULL_CYCLE=true`.
 - After that, you MUST use `make deploy-reuse-kept-apps APPS=<roles>` for the default edit-fix-redeploy loop.
-- Do NOT rerun `make deploy-fresh-purged-apps APPS=<roles>` just because a deploy failed or you changed code. That restarts the stack unnecessarily and burns time.
+- Do NOT rerun `make deploy-fresh-purged-apps APPS=<roles> FULL_CYCLE=true` just because a deploy failed or you changed code. That restarts the stack unnecessarily and burns time.
 - If the same failure still reproduces on the reuse path and you want to test whether app entity state is involved, use `make deploy-reuse-purged-apps APPS=<roles>` once.
 - After that targeted purge check, you MUST return to `make deploy-reuse-kept-apps APPS=<roles>`.
-- Only go back to `make deploy-fresh-purged-apps APPS=<roles>` if you have concrete evidence that the inventory or host stack is broken, or you intentionally need a fresh single-app baseline again.
-- Network or DNS failures during a local deploy count as concrete evidence that the host stack is broken. In that case, the next retry MUST be `make deploy-fresh-purged-apps APPS=<roles>` so the container stack is re-initialized.
-- If you need to validate the single-app init/deploy path separately, use `make deploy-fresh-kept-apps APPS=<roles>`. It checks the clean single-app setup apart from the faster reuse path.
+- Only go back to `make deploy-fresh-purged-apps APPS=<roles> FULL_CYCLE=true` if you have concrete evidence that the inventory or host stack is broken, or you intentionally need a fresh single-app baseline again.
+- Network or DNS failures during a local deploy count as concrete evidence that the host stack is broken. In that case, the next retry MUST be `make deploy-fresh-purged-apps APPS=<roles> FULL_CYCLE=true`.
+- If you need to validate the single-app init/deploy path separately, use `make deploy-fresh-kept-apps APPS=<roles>`.
 
 ## Playwright Spec Loop
 
@@ -24,9 +24,9 @@ Use this page when you are iterating on a local app deploy during debugging or d
 - The staged Playwright project lives at `TEST_E2E_PLAYWRIGHT_STAGE_BASE_DIR/<application_id>` (default `/tmp/test-e2e-playwright/<application_id>`) with the rendered `.env` already in place. The script overwrites `tests/playwright.spec.js` from the repo before each run; you MUST NOT hand-edit the staged copy.
 - You MUST keep iterating the spec in this inner loop until the test passes. Only spec-only changes belong in this loop.
 - If the change touches anything **outside** `files/playwright.spec.js` (role tasks, templates, vars, config, `javascript.js`, `style.css`, or any other role asset that the deploy materializes), you MUST redeploy. Inner-loop spec runs do NOT pick up role changes.
-- Prefer `make deploy-reuse-kept-apps APPS=<role>` for that redeploy. Fall back to `make deploy-fresh-purged-apps APPS=<role>` only when the reuse path has concrete evidence of broken inventory or host stack, per the rules in [Role Loop](#role-loop).
+- Prefer `make deploy-reuse-kept-apps APPS=<role>` for that redeploy. Fall back to `make deploy-fresh-purged-apps APPS=<role> FULL_CYCLE=true` only when the reuse path has concrete evidence of broken inventory or host stack, per the rules in [Role Loop](#role-loop).
 - You MUST still meet the live-application and logout-state requirements from [Agent `playwright.spec.js`](../files/role/playwright.spec.js.md) at the end of the inner loop.
-- Once the spec passes in the inner loop, you MUST run one final pass through the [Role Loop](#role-loop) with `make deploy-fresh-purged-apps APPS=<role>` to confirm the spec still passes against a freshly provisioned stack, not only against the cached staging project.
+- Once the spec passes in the inner loop, you MUST run one final pass through the [Role Loop](#role-loop) with `make deploy-fresh-purged-apps APPS=<role> FULL_CYCLE=true` to confirm the spec still passes against a freshly provisioned stack, not only against the cached staging project.
 
 ## Workflow Loop
 
