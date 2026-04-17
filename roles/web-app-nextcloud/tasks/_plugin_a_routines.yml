@@ -29,13 +29,10 @@
   until: >
     install_result.rc == 0
     or "already installed" in install_result.stdout
-    or "not compatible with this version of the server" in install_result.stdout
   failed_when: >
     install_result.rc != 0
     and
     ("already installed" not in install_result.stdout)
-    and
-    ("not compatible with this version of the server" not in install_result.stdout)
   changed_when: >
     install_result.rc == 0
     and
