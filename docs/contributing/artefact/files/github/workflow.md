@@ -1,7 +1,7 @@
 # GitHub workflow files 🔄
 
 This page is the SPOT for repository rules that govern GitHub Actions workflow files under `.github/workflows/`.
-For the catalog of every workflow (description, triggers, inputs) see [actions.md](../../../tools/actions.md).
+For the catalog of every workflow (description, triggers, inputs) see [actions.md](../../../tools/github/actions.md).
 For the script placement rule that applies to extracted shell helpers, see [scripst.md](../../scripst.md).
 
 ## Naming 🏷️
