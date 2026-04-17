@@ -2,7 +2,7 @@
 
 ## Startup: MUST DO at the Start of Every Conversation 🚀
 
-You MUST read `AGENTS.md` and follow all instructions in it at the start of every conversation before doing anything else. Do NOT skip this, even for short or simple requests.
+You MUST read `AGENTS.md` and follow all instructions in it at the start of every conversation before doing anything else.
 
 ## Permission State Announcement at Session Start 📢
 
@@ -19,23 +19,19 @@ Present the summary once per session. Do not repeat it unless the operator expli
 
 ## Interaction Rules 💬
 
-- Questions MUST NOT lead to modifications, manipulation of files, code, or state.
-- Only explicit commands MAY trigger modifications or manipulation.
-- You MUST prefer commands that are already permitted in [.claude/settings.json](.claude/settings.json) over commands that require interactive approval. If an equivalent permitted command exists, you MUST use it instead of the restricted one.
+- A question MUST NOT modify files, code, or state. Only explicit commands MAY.
+- You MUST prefer commands permitted in [.claude/settings.json](.claude/settings.json) over commands that require interactive approval when an equivalent exists.
 
 ## Code Execution ⚙️
 
-- You MUST always prefer `make` targets over running underlying scripts, `docker`, `docker compose`, `ansible-playbook`, `python`, or shell invocations directly, whenever an equivalent target exists in the [`Makefile`](Makefile). Inspect the `Makefile` first and only fall back to the raw command when no target covers the operation. The reason is operational consistency, not permissioning: sandbox-confined Bash is auto-allowed via `sandbox.autoAllowBashIfSandboxed` (see [settings.md](docs/contributing/tools/agents/claude/settings.md)), so raw commands also execute without prompts.
+- You MUST prefer `make` targets over raw `docker`/`docker compose`/`ansible-playbook`/`python`/shell invocations whenever an equivalent target exists in the [`Makefile`](Makefile). Inspect the `Makefile` first; fall back to the raw command only when no target covers the operation. The reason is operational consistency, not permissioning — raw commands also auto-allow under the sandbox.
 - You SHOULD run sandbox-confined commands directly on the host. The sandbox bounds what they can read, write, and reach — see [sandbox.md](docs/contributing/tools/agents/claude/sandbox.md).
 - For commands that legitimately cannot run inside the sandbox (e.g. operations needing access to `~/.ssh` or `~/.gnupg`), use `make up` to start the stack and `make exec` to drop into a container shell. The repository is mounted at `/opt/src/infinito` (see [compose.yml](compose.yml)), so code changes are immediately available there.
 - Commands listed under `permissions.ask` in [.claude/settings.json](.claude/settings.json) (e.g. `git commit`, `git push`, `curl`, `gh api`) still pause for explicit operator confirmation regardless of sandbox state.
-- **`for`/`while` loops in shell invocations are STRICTLY FORBIDDEN. ⛔** This is an absolute rule, not a preference. You MUST NOT use `for`, `while`, `until`, or any other shell loop construct in any Bash tool call — no exceptions, no "just this once", no matter how convenient it seems. Reason: shell control structures fall outside the sandbox auto-allow heuristic and trigger unnecessary approval prompts, even when every subcommand would individually auto-allow.
-- **Multi-statement `;` chains in shell invocations are FORBIDDEN. ⛔** You MUST NOT chain independent statements with `;` inside a single Bash tool call (e.g. `pkill foo; sleep 2; docker ps`). Reason: identical to the loop rule — the auto-allow heuristic evaluates the line as a single compound and fails to match, so the whole call drops into ask even when every individual statement would auto-allow. Split the work across **separate Bash tool calls** (one statement per call) or, if the statements are genuinely conditional, use a single-command equivalent (`xargs`, `grep` with multiple args, a make target). The same applies to `&&`/`||` chains whose right-hand side is not strictly required by the left — prefer separate calls.
-- **For searching file contents, you MUST use `grep` (or the built-in Grep tool) — never a loop.** Concretely:
-  - Preferred: the built-in **Grep** tool.
-  - Otherwise: a single `grep` invocation with multiple file arguments (e.g. `grep -nE 'pattern' file1 file2 file3`) or a recursive call with a path/glob (e.g. `grep -rnE 'pattern' path/`).
-  - Wrapping per-file `grep` calls inside `for`/`while` loops is NEVER acceptable, regardless of how many files are involved.
-- More generally, you MUST prefer single-command forms over shell control structures whenever the task can be expressed either way. Avoid `for`/`while` loops, nested pipes, and multi-statement `;`/`&&` chains for operations that have a native single-command equivalent. If you catch yourself reaching for a loop, stop and restructure the call as a single command (e.g. `grep` with multiple args, `xargs`, a glob) or split it across separate Bash invocations.
+- **Shell loops are FORBIDDEN. ⛔** You MUST NOT use `for`, `while`, `until`, or any other shell loop construct in any Bash tool call. Reason: shell control structures fall outside the sandbox auto-allow heuristic and trigger approval prompts even when every subcommand would individually auto-allow.
+- **Multi-statement chains in shell invocations are FORBIDDEN. ⛔** You MUST NOT chain independent statements inside a single Bash tool call with **any** statement separator: `;`, a literal newline, `&&`, or `||`. Subshell groups `( cmd1; cmd2 )` and brace groups `{ cmd1; cmd2; }` are the same shape with different syntax and are equally forbidden. Reason: identical to the loop rule — the auto-allow heuristic evaluates the full line as a single compound and fails to match. Split the work across **separate Bash tool calls** (one statement per call) or use a single-command equivalent (`xargs`, `grep` with multiple args, a make target). The ban applies even when the right-hand side strictly requires the left.
+- **File creation via shell heredoc is FORBIDDEN. ⛔** You MUST NOT use `cat > file <<EOF … EOF` or any variant (`tee > file <<EOF`, `printf "…" > file`, `echo "…" > file` for multi-line content) to create or overwrite files. Use the **Write tool**. For editing an existing file, use **Edit**, not `sed -i`/`awk -i`. Reason: Write/Edit land structured in the transcript and diff; heredoc + redirect shapes also fall out of the auto-allow heuristic and drop into ask.
+- **For searching file contents, use the Grep tool.** If shelling out is unavoidable, use a single `grep` invocation with multiple file arguments (e.g. `grep -nE 'pattern' file1 file2 file3`) or a recursive call with a path/glob (e.g. `grep -rnE 'pattern' path/`).
 
 ## Configuration 🛠️
 

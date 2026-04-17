@@ -2,46 +2,52 @@
 
 ## Priority and Scope 🎯
 
-- [CONTRIBUTING.md](CONTRIBUTING.md) is the SPOT for general contributor workflow, coding standards, testing, and review. You MUST read it and recursively scan all files it references under `docs/contributing/`.
-- This file extends `CONTRIBUTING.md` with agent-specific execution instructions. In case of conflict, the rules in this file take precedence because they are more specific to automated execution.
-- You MUST recursively scan all files referenced under `docs/agents/` to collect the full agent-specific execution flow.
+- [CONTRIBUTING.md](CONTRIBUTING.md) is the single source of truth for contributor workflow, coding standards, testing, and review. You MUST read it.
+- You MUST read every file under `docs/contributing/` (full directory walk, including subdirectories) for the full contributor guidance.
+- You MUST read every file under `docs/agents/` (full directory walk, including subdirectories) for the agent execution flow.
+- This file extends CONTRIBUTING.md with agent-specific instructions; on conflict between CONTRIBUTING.md and this file, this file wins.
+
+## Tool-Specific Extensions 🧩
+
+At the start of every conversation, the agent MUST load its matching extension file in addition to AGENTS.md:
+
+- Claude Code → [CLAUDE.md](CLAUDE.md)
+- Gemini CLI → [GEMINI.md](GEMINI.md)
+
+Agents MUST NOT read another tool's extension file. On conflict between AGENTS.md and the agent's own tool-specific extension file, the tool-specific file wins.
 
 ## Reloading Instructions 🔄
 
-If agent instructions change during a conversation, the agent MAY not pick up the changes automatically. To force a reload, send the following command:
+If agent instructions change mid-conversation (AGENTS.md, the tool-specific extension file, or any file referenced from them), the agent might not reload them automatically. Trigger a reload with:
 
-> "Re-read AGENTS.md and apply all updated instructions."
+> "Re-read AGENTS.md and the tool-specific extension file (CLAUDE.md or GEMINI.md) and apply all updated instructions."
 
 ## Permission Model 🔐
 
-The project defines a single, tool-independent permission policy in [`.claude/settings.json`](.claude/settings.json). Although the file lives under `.claude/`, its `permissions` section (`allow`, `ask`, `deny`) **together with** its `sandbox` section is the SPOT for what automated agents MAY do in this repository, regardless of the underlying agent (Claude Code, Codex, Gemini, or any other). The OS-level sandbox is the primary containment layer; the permission lists are the policy gate that runs on top of it.
+[`.claude/settings.json`](.claude/settings.json) is the single source of truth for agent permissions, independent of runtime. Its `permissions` (`allow`/`ask`/`deny`) and `sandbox` sections are both binding, regardless of runtime (Claude Code, Codex, Gemini, other).
 
 Every agent MUST:
 
-- Read [`.claude/settings.json`](.claude/settings.json) at the start of each conversation and treat both its `permissions` and `sandbox` objects as binding policy.
-- Match commands against the patterns exactly as Claude Code does: the command-line prefix is compared literally, `*` is a wildcard, and `deny` overrides `allow`.
-- Treat `deny` entries as unconditional blocks. Agents MUST NOT execute any command matching a `deny` pattern, even if their native tooling would otherwise permit it.
-- Treat `ask` entries as requiring an explicit, per-invocation operator confirmation in the current conversation before executing. A prior confirmation in another conversation MUST NOT be reused.
-- Treat `allow` entries as pre-authorized. For Bash specifically, `sandbox.autoAllowBashIfSandboxed: true` additionally pre-authorizes any Bash command that runs inside the sandbox and matches no `deny` or `ask` rule; agents whose runtime does not provide an equivalent OS-level sandbox MUST instead treat unmatched Bash commands as `ask`.
-- Respect the `sandbox.filesystem` section: `allowWrite` bounds the write scope, and paths listed under `denyRead` MUST NOT be read.
-- Respect the `sandbox.network` section: outbound network calls are bounded by `allowedDomains`, and the `allowAllUnixSockets` / `allowLocalBinding` flags govern local socket and bind access.
-- Respect the `sandbox.allowUnsandboxedCommands: false` setting: agents MUST NOT attempt to run Bash commands outside the sandbox via per-call escape hatches (e.g. the `dangerouslyDisableSandbox` parameter).
+- Read [`.claude/settings.json`](.claude/settings.json) at every conversation start.
+- Match commands exactly as Claude Code does: literal prefix, `*` wildcard, `deny` overrides `allow`.
+- `deny`: unconditional block. MUST NOT execute a matching command under any condition.
+- `ask`: requires per-invocation operator confirmation in the current conversation. A prior confirmation from another conversation MUST NOT be reused.
+- `allow`: pre-authorized. Additionally, `sandbox.autoAllowBashIfSandboxed: true` pre-authorizes any Bash command that runs sandboxed and matches no `deny`/`ask` rule. Agents without an equivalent OS-level sandbox MUST treat unmatched Bash as `ask`.
+- `sandbox.filesystem`: `allowWrite` bounds write scope; `denyRead` paths MUST NOT be read.
+- `sandbox.network`: outbound calls MUST go to hosts matching `allowedDomains`. Unix-socket connections are permitted only if `allowAllUnixSockets: true`; listening on local ports is permitted only if `allowLocalBinding: true`.
+- `sandbox.allowUnsandboxedCommands: false`: MUST NOT use per-call escape hatches (e.g. `dangerouslyDisableSandbox`).
 
-Agents that cannot technically enforce these rules (e.g. because their native runtime does not consult `.claude/settings.json`) MUST still follow the policy procedurally: before running a command, check it against the rules above and stop for confirmation when required.
+Agents whose runtime does not consult `.claude/settings.json` MUST still enforce the above procedurally: check each command against these rules before execution.
 
-Changes to the permission policy MUST be made by editing [`.claude/settings.json`](.claude/settings.json) so that all agents share the same source of truth. The rationale for each entry is documented in [settings.md](docs/contributing/tools/agents/claude/settings.md); the sandbox layer that accompanies these permissions is documented in [sandbox.md](docs/contributing/tools/agents/claude/sandbox.md).
+Changes to the policy MUST edit [`.claude/settings.json`](.claude/settings.json). Per-entry rationale: [settings.md](docs/contributing/tools/agents/claude/settings.md); sandbox layer: [sandbox.md](docs/contributing/tools/agents/claude/sandbox.md).
 
 ## Role-Specific Instructions 📂
 
-Individual roles MAY contain an `AGENTS.md` file with role-specific agent instructions.
-
-- Before modifying any file inside a role directory, you MUST check whether `roles/<role>/AGENTS.md` exists.
-- If it exists, you MUST read it and follow all instructions in it before making any changes to that role.
-- Role-level `AGENTS.md` files MAY contain file-specific sections with rules scoped to individual files within the role.
+- Before modifying any file under `roles/<role>/`, check for `roles/<role>/AGENTS.md`. If present, read and follow it (including any file-scoped subsections) before any change.
 
 ## Temporary Files 🗑️
 
-Agents MUST write all transient files (downloaded logs, intermediate output, scratch artefacts) under `/tmp`, never inside the repository working tree. The sandbox grants write access to `/tmp` (see [.claude/settings.json](.claude/settings.json) `sandbox.filesystem.allowWrite`); no other location outside the repo is permitted for agent-generated temp data. This keeps the working tree clean, avoids accidental commits of throwaway data, and confines agent side-effects to a single, easily-purged path.
+Agents MUST write all transient files (downloaded logs, intermediate output, scratch artefacts) to `/tmp`. The set of writable paths is defined by `sandbox.filesystem.allowWrite` in [`.claude/settings.json`](.claude/settings.json); of those entries, `/tmp` is the designated path for agent scratch data. Other entries are reserved for their respective tooling and MUST NOT be repurposed for agent temp data. The repository working tree MUST NOT hold transient files.
 
 ## Skills 🎓
 
