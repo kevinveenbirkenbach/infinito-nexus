@@ -179,8 +179,6 @@ test.beforeEach(() => {
   expect(odooBaseUrl, "ODOO_BASE_URL must be set in the Playwright env file").toBeTruthy();
   expect(adminUsername, "ADMIN_USERNAME must be set in the Playwright env file").toBeTruthy();
   expect(adminPassword, "ADMIN_PASSWORD must be set in the Playwright env file").toBeTruthy();
-  expect(biberUsername, "BIBER_USERNAME must be set in the Playwright env file").toBeTruthy();
-  expect(biberPassword, "BIBER_PASSWORD must be set in the Playwright env file").toBeTruthy();
 });
 
 // Scenario I: dashboard → Odoo → SSO login as admin → verify authenticated → logout

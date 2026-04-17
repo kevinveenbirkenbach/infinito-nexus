@@ -15,10 +15,10 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && rm -rf /var/lib/apt/lists/*
 
 RUN pip3 install --no-cache-dir --break-system-packages \
-    python3-saml>=1.15.0 \
-    oauthlib>=3.2.0 \
-    requests-oauthlib>=1.3.0 \
-    PyJWT>=2.8.0
+    python3-saml==1.16.0 \
+    oauthlib==3.2.2 \
+    requests-oauthlib==2.0.0 \
+    PyJWT==2.9.0
 
 # Create log directory
 RUN mkdir -p /var/log/odoo && \

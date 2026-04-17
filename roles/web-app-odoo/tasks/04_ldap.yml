@@ -24,7 +24,9 @@
     login_password: "{{ lookup('database', application_id, 'password') }}"
     login_host: "{{ lookup('database', application_id, 'reach_host') }}"
     login_port: "{{ lookup('database', application_id, 'port') }}"
-    query: "SELECT id FROM res_company_ldap WHERE ldap_server = '{{ ODOO_LDAP_CONFIG.ldap_server }}' LIMIT 1;"
+    query: "SELECT id FROM res_company_ldap WHERE ldap_server = %(ldap_server)s LIMIT 1;"
+    named_args:
+      ldap_server: "{{ ODOO_LDAP_CONFIG.ldap_server }}"
   register: ldap_check
 
 - name: "Update existing LDAP configuration"
@@ -36,18 +38,30 @@
     login_port: "{{ lookup('database', application_id, 'port') }}"
     query: >
       UPDATE res_company_ldap SET
-        sequence = {{ ODOO_LDAP_CONFIG.sequence }},
-        company_id = {{ ODOO_LDAP_CONFIG.company_id }},
-        ldap_server_port = {{ ODOO_LDAP_CONFIG.ldap_server_port }},
-        ldap_binddn = '{{ ODOO_LDAP_CONFIG.ldap_binddn }}',
-        ldap_password = '{{ ODOO_LDAP_CONFIG.ldap_password }}',
-        ldap_base = '{{ ODOO_LDAP_CONFIG.ldap_base }}',
-        ldap_filter = '{{ ODOO_LDAP_CONFIG.ldap_filter }}',
-        "user" = '{{ ODOO_LDAP_CONFIG.user }}',
-        create_user = {{ ODOO_LDAP_CONFIG.create_user }},
-        ldap_tls = {{ ODOO_LDAP_CONFIG.ldap_tls }},
+        sequence = %(sequence)s,
+        company_id = %(company_id)s,
+        ldap_server_port = %(ldap_server_port)s,
+        ldap_binddn = %(ldap_binddn)s,
+        ldap_password = %(ldap_password)s,
+        ldap_base = %(ldap_base)s,
+        ldap_filter = %(ldap_filter)s,
+        "user" = %(user_attr)s,
+        create_user = %(create_user)s,
+        ldap_tls = %(ldap_tls)s,
         write_date = NOW()
-      WHERE ldap_server = '{{ ODOO_LDAP_CONFIG.ldap_server }}';
+      WHERE ldap_server = %(ldap_server)s;
+    named_args:
+      sequence: "{{ ODOO_LDAP_CONFIG.sequence }}"
+      company_id: "{{ ODOO_LDAP_CONFIG.company_id }}"
+      ldap_server_port: "{{ ODOO_LDAP_CONFIG.ldap_server_port }}"
+      ldap_binddn: "{{ ODOO_LDAP_CONFIG.ldap_binddn }}"
+      ldap_password: "{{ ODOO_LDAP_CONFIG.ldap_password }}"
+      ldap_base: "{{ ODOO_LDAP_CONFIG.ldap_base }}"
+      ldap_filter: "{{ ODOO_LDAP_CONFIG.ldap_filter }}"
+      user_attr: "{{ ODOO_LDAP_CONFIG.user }}"
+      create_user: "{{ ODOO_LDAP_CONFIG.create_user }}"
+      ldap_tls: "{{ ODOO_LDAP_CONFIG.ldap_tls }}"
+      ldap_server: "{{ ODOO_LDAP_CONFIG.ldap_server }}"
   when: ldap_check.query_result | length > 0
 
 - name: "Create new LDAP configuration"
@@ -62,18 +76,30 @@
       (sequence, company_id, ldap_server, ldap_server_port, ldap_binddn, ldap_password,
        ldap_base, ldap_filter, "user", create_user, ldap_tls, create_date, write_date)
       VALUES (
-        {{ ODOO_LDAP_CONFIG.sequence }},
-        {{ ODOO_LDAP_CONFIG.company_id }},
-        '{{ ODOO_LDAP_CONFIG.ldap_server }}',
-        {{ ODOO_LDAP_CONFIG.ldap_server_port }},
-        '{{ ODOO_LDAP_CONFIG.ldap_binddn }}',
-        '{{ ODOO_LDAP_CONFIG.ldap_password }}',
-        '{{ ODOO_LDAP_CONFIG.ldap_base }}',
-        '{{ ODOO_LDAP_CONFIG.ldap_filter }}',
-        '{{ ODOO_LDAP_CONFIG.user }}',
-        {{ ODOO_LDAP_CONFIG.create_user }},
-        {{ ODOO_LDAP_CONFIG.ldap_tls }},
+        %(sequence)s,
+        %(company_id)s,
+        %(ldap_server)s,
+        %(ldap_server_port)s,
+        %(ldap_binddn)s,
+        %(ldap_password)s,
+        %(ldap_base)s,
+        %(ldap_filter)s,
+        %(user_attr)s,
+        %(create_user)s,
+        %(ldap_tls)s,
         NOW(),
         NOW()
       );
+    named_args:
+      sequence: "{{ ODOO_LDAP_CONFIG.sequence }}"
+      company_id: "{{ ODOO_LDAP_CONFIG.company_id }}"
+      ldap_server: "{{ ODOO_LDAP_CONFIG.ldap_server }}"
+      ldap_server_port: "{{ ODOO_LDAP_CONFIG.ldap_server_port }}"
+      ldap_binddn: "{{ ODOO_LDAP_CONFIG.ldap_binddn }}"
+      ldap_password: "{{ ODOO_LDAP_CONFIG.ldap_password }}"
+      ldap_base: "{{ ODOO_LDAP_CONFIG.ldap_base }}"
+      ldap_filter: "{{ ODOO_LDAP_CONFIG.ldap_filter }}"
+      user_attr: "{{ ODOO_LDAP_CONFIG.user }}"
+      create_user: "{{ ODOO_LDAP_CONFIG.create_user }}"
+      ldap_tls: "{{ ODOO_LDAP_CONFIG.ldap_tls }}"
   when: ldap_check.query_result | length == 0
