@@ -11,6 +11,7 @@ on:
       - "feature/**"
       - "hotfix/**"
       - "fix/**"
+      - "chore/**"
       - "alert-autofix-*"
 
 permissions:

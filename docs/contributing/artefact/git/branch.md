@@ -10,6 +10,7 @@ The branch prefix MUST match the type of change. The [PR workflow](pull-request.
 | `documentation` | Documentation-only changes | `**/*.md`, `**/*.rst` (outside agent paths) | Skips [ci-orchestrator](../../../../.github/workflows/ci-orchestrator.yml), finishes green through the lightweight scope gate. |
 | `feature` | New features or enhancements | `*` | Runs the full [ci-orchestrator](../../../../.github/workflows/ci-orchestrator.yml) pipeline. |
 | `fix` | Bug fixes | `*` | Runs the full [ci-orchestrator](../../../../.github/workflows/ci-orchestrator.yml) pipeline. |
+| `chore` | Maintenance, dependency, and tooling updates (incl. branches created by [update.yml](../../../../.github/workflows/update.yml)) | `*` | Runs the full [ci-orchestrator](../../../../.github/workflows/ci-orchestrator.yml) pipeline. |
 | `alert-autofix` | Automated alert-triggered fixes | `*` | Runs the full [ci-orchestrator](../../../../.github/workflows/ci-orchestrator.yml) pipeline. |
 | `dependabot` | Automated dependency updates | `*` | Runs the full [ci-orchestrator](../../../../.github/workflows/ci-orchestrator.yml) pipeline. |
 
@@ -29,6 +30,7 @@ The full branch name MUST follow one of the patterns below, depending on whether
 | Role feature | `feature/<role>/<topic>` | `feature/web-app-matomo/ldap-integration` |
 | General fix | `fix/<topic>/<ticket-id>` | `fix/dns-resolution/taiga-123` |
 | Role fix | `fix/<role>/<topic>/<ticket-id>` | `fix/web-app-matomo/login-redirect/taiga-789` |
+| Chore | `chore/<topic>` | `chore/update-docker-image-versions` |
 | Alert autofix | `alert-autofix-<alert-id>` | `alert-autofix-261` |
 | Documentation | `documentation/<topic>` | `documentation/contributing-setup` |
 | Agent | `agent/<topic>` | `agent/improve-commit-instructions` |
