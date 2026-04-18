@@ -9,6 +9,7 @@
       "Bash(PYTHONPATH=* python *)",
       "Bash(XDG_CACHE_HOME=* gh api *)",
       "Bash(XDG_CACHE_HOME=* gh issue list *)",
+      "Bash(XDG_CACHE_HOME=* gh run download *)",
       "Bash(XDG_CACHE_HOME=* gh run list *)",
       "Bash(XDG_CACHE_HOME=* gh run view *)",
       "Bash(docker *)",
@@ -119,7 +120,8 @@
       "Bash(gh repo sync*)",
       "Bash(gh workflow run*)",
       "Bash(git commit*)",
-      "Bash(git push*)"
+      "Bash(git push*)",
+      "Skill(update-config*)"
     ],
     "additionalDirectories": [
       "/tmp"
