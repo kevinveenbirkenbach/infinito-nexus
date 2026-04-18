@@ -8,6 +8,7 @@
     "allow": [
       "Bash(* > /tmp/*)",
       "Bash(* > /tmp/* 2>&1)",
+      "Bash(*=* make *)",
       "Bash(PYTHONPATH=* python *)",
       "Bash(docker *)",
       "Bash(echo *)",
@@ -141,6 +142,7 @@
         "*.hcaptcha.com",
         "*.infinito.example",
         "*.infinito.nexus",
+        "*.nektosact.com",
         "*.npmjs.org",
         "*.pythonhosted.org",
         "*.taiga.io",
