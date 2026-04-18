@@ -42,6 +42,7 @@ compose:
 native_metrics:
   enabled:          true
   port:             9000    # Synapse metrics listener port inside the container
+  service_key:      synapse  # compose service key differs from entity name "matrix"
 communication:
   channel:          true
 playbook_tags:        "setup-all,start"                  # For the initial update use: install-all,ensure-matrix-users-created,start

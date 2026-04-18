@@ -67,7 +67,7 @@ compose:
     plugins:                      "mattermost_plugins"
     client-plugins:               "mattermost_client_plugins"
 native_metrics:
-  enabled:          true
+  enabled:          false    # Requires Enterprise Edition — Team Edition compiles out the /metrics endpoint entirely
   port:             8067     # Mattermost metrics listener (MM_METRICSSETTINGS_LISTENADDRESS)
 communication:
   channel:          true

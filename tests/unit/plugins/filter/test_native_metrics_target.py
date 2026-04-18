@@ -8,11 +8,14 @@ from ansible.errors import AnsibleFilterError
 from plugins.filter.native_metrics_target import native_metrics_target
 
 
-def _make_applications(app_id: str, container: str, port: int, entity_name: str) -> dict:
+def _make_applications(app_id: str, container: str, port: int, entity_name: str, service_key: str | None = None) -> dict:
+    native_metrics: dict = {"port": port}
+    if service_key is not None:
+        native_metrics["service_key"] = service_key
     return {
         app_id: {
             "compose": {"services": {entity_name: {"name": container}}},
-            "native_metrics": {"port": port},
+            "native_metrics": native_metrics,
         }
     }
 
@@ -29,6 +32,13 @@ class TestNativeMetricsTargetSuccess(unittest.TestCase):
         with patch("plugins.filter.native_metrics_target.get_entity_name", return_value="mattermost"):
             result = native_metrics_target("web-app-mattermost", apps)
         self.assertEqual(result, "mattermost:8067")
+
+    def test_service_key_override(self):
+        # matrix entity name is "matrix" but compose service key is "synapse"
+        apps = _make_applications("web-app-matrix", "matrix-synapse", 9000, "synapse", service_key="synapse")
+        with patch("plugins.filter.native_metrics_target.get_entity_name", return_value="matrix"):
+            result = native_metrics_target("web-app-matrix", apps)
+        self.assertEqual(result, "matrix-synapse:9000")
 
 
 class TestNativeMetricsTargetErrors(unittest.TestCase):

@@ -25,12 +25,6 @@ ports:
       web-app-prometheus:       16492
     ldap:
       svc-db-openldap: 389
-    metrics:
-      # Internal native-metrics ports — reserved for apps not yet migrated to
-      # container-to-container scraping (matrix, mattermost). New apps use
-      # container-to-container and do not need a host port entry here.
-      web-app-matrix:     9200
-      web-app-mattermost: 9201
     http:
       # Ports which are exposed to the World Wide Web
       web-app-nextcloud: 8001

@@ -6,9 +6,6 @@
     container_name: "{{ MATTERMOST_CONTAINER }}"
     ports:
       - "{{ DOCKER_BIND_HOST }}:{{ ports.localhost.http[application_id] }}:{{ container_port }}"
-{% if lookup('config', application_id, 'native_metrics.enabled', False) | bool %}
-      - "127.0.0.1:{{ ports.localhost.metrics[application_id] }}:{{ lookup('config', application_id, 'native_metrics.port') }}"
-{% endif %}
     volumes:
       - config:/mattermost/config
       - data:/mattermost/data

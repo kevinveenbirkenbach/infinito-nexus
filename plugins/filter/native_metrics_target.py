@@ -15,16 +15,20 @@ def native_metrics_target(app_id: str, applications: dict) -> str:
 
     Usage in a per-app prometheus.yml.j2 fragment:
       targets: ["{{ native_prometheus_application_id | native_metrics_target(applications) }}"]
+
+    When the compose service key differs from the app's entity name (e.g. matrix
+    uses service key "synapse"), set native_metrics.service_key in the app's
+    config/main.yml to override.
     """
-    entity_name = get_entity_name(app_id)
     app_conf = applications.get(app_id, {})
+    service_key = app_conf.get("native_metrics", {}).get("service_key") or get_entity_name(app_id)
 
     container = (
-        app_conf.get("compose", {}).get("services", {}).get(entity_name, {}).get("name")
+        app_conf.get("compose", {}).get("services", {}).get(service_key, {}).get("name")
     )
     if not container:
         raise AnsibleFilterError(
-            f"native_metrics_target: no compose.services.{entity_name}.name for '{app_id}'"
+            f"native_metrics_target: no compose.services.{service_key}.name for '{app_id}'"
         )
 
     port = app_conf.get("native_metrics", {}).get("port")
