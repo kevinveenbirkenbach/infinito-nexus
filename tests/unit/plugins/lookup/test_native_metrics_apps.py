@@ -23,7 +23,9 @@ def _run(applications: dict, roles_dir: Path, group_names: list | None = None) -
         )[0]
 
 
-def _run_explicit(applications: dict, roles_dir: Path, group_names: list | None = None) -> list:
+def _run_explicit(
+    applications: dict, roles_dir: Path, group_names: list | None = None
+) -> list:
     """Invoke with applications passed as explicit positional term — the template usage pattern."""
     if group_names is None:
         group_names = list(applications.keys())
@@ -208,13 +210,19 @@ class TestNativeMetricsAppsExplicitTerm(unittest.TestCase):
 
     def test_returns_app_with_metrics_enabled_explicit(self):
         roles_dir = Path(self._tmpdir.name)
-        apps = _make_roles(roles_dir, {"web-app-gitea": {"native_metrics_enabled": True, "has_fragment": True}})
+        apps = _make_roles(
+            roles_dir,
+            {"web-app-gitea": {"native_metrics_enabled": True, "has_fragment": True}},
+        )
         result = _run_explicit(apps, roles_dir)
         self.assertIn("web-app-gitea", result)
 
     def test_excludes_app_with_metrics_disabled_explicit(self):
         roles_dir = Path(self._tmpdir.name)
-        apps = _make_roles(roles_dir, {"web-app-gitea": {"native_metrics_enabled": False, "has_fragment": True}})
+        apps = _make_roles(
+            roles_dir,
+            {"web-app-gitea": {"native_metrics_enabled": False, "has_fragment": True}},
+        )
         result = _run_explicit(apps, roles_dir)
         self.assertNotIn("web-app-gitea", result)
 

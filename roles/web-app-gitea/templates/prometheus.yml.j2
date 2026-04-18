@@ -9,6 +9,6 @@
     bearer_token: "{{ _token }}"
 {% endif %}
     static_configs:
-      - targets: ["{{ native_prometheus_application_id | native_metrics_target(ports) }}"]
+      - targets: ["{{ native_prometheus_application_id | native_metrics_target(applications) }}"]
         labels:
           app: "{{ native_prometheus_application_id }}"

@@ -59,7 +59,36 @@ test.beforeEach(() => {
   expect(biberPassword,     "BIBER_PASSWORD must be set in the Playwright env file").toBeTruthy();
 });
 
-// Scenario I: dashboard → click Prometheus → SSO login inside iframe (as admin) → verify Prometheus UI → logout
+// Scenario I: /metricz exposes prometheus-format metrics — no auth required.
+//
+// /metricz is the central nginx metrics endpoint scraped by prometheus once for all apps.
+// It must be accessible without authentication (prometheus scrapes it without bearer tokens).
+// If this returns 401/403 the nginx ACL whitelist for /metricz is misconfigured.
+// If it returns HTML the location = /metricz block is missing from the nginx vhost config.
+test("metricz endpoint is accessible and returns prometheus text format", async ({ request }) => {
+  const metriczUrl = `${prometheusBaseUrl.replace(/\/$/, "")}/metricz`;
+  const response = await request.get(metriczUrl);
+
+  expect(
+    response.status(),
+    `/metricz must return 200 without auth — got ${response.status()}. ` +
+    "If 401/403 the nginx ACL whitelist is misconfigured. If 200 with HTML, the location block is missing."
+  ).toBe(200);
+
+  const body = await response.text();
+
+  expect(
+    body,
+    "/metricz response must be prometheus text format (lines starting with #) — got HTML or empty"
+  ).toMatch(/^#/m);
+
+  expect(
+    body,
+    "/metricz must expose nginx_http_requests_total — lua-resty-prometheus metric not found"
+  ).toContain("nginx_http_requests_total");
+});
+
+// Scenario II: dashboard → click Prometheus → SSO login inside iframe (as admin) → verify Prometheus UI → logout
 //
 // Prometheus is admin-only (allowed_groups: web-app-prometheus-administrator).
 // Clicking the Prometheus link on the dashboard opens it inside a fullscreen iframe.

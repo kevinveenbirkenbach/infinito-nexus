@@ -135,18 +135,23 @@ class TestActiveAlertmanagerChannelsExplicitTerm(unittest.TestCase):
     """
 
     def test_includes_channel_when_deployed_explicit(self):
-        apps = _make_applications("web-app-mattermost", channels=("web-app-mattermost",))
+        apps = _make_applications(
+            "web-app-mattermost", channels=("web-app-mattermost",)
+        )
         result = _run_explicit(apps, ["web-app-mattermost"])
         self.assertIn("web-app-mattermost", result)
 
     def test_excludes_channel_when_not_deployed_explicit(self):
-        apps = _make_applications("web-app-mattermost", channels=("web-app-mattermost",))
+        apps = _make_applications(
+            "web-app-mattermost", channels=("web-app-mattermost",)
+        )
         result = _run_explicit(apps, [])
         self.assertEqual(result, [])
 
     def test_multiple_channels_explicit(self):
         apps = _make_applications(
-            "web-app-mattermost", "web-app-matrix",
+            "web-app-mattermost",
+            "web-app-matrix",
             channels=("web-app-mattermost", "web-app-matrix"),
         )
         result = _run_explicit(apps, ["web-app-mattermost", "web-app-matrix"])

@@ -2,26 +2,38 @@ from __future__ import annotations
 
 from ansible.errors import AnsibleFilterError
 
+from utils.entity_name_utils import get_entity_name
 
-_HOST = "host.docker.internal"
 
+def native_metrics_target(app_id: str, applications: dict) -> str:
+    """Return the container-to-container Prometheus scrape target for a native-metrics app.
 
-def native_metrics_target(app_id: str, ports: dict) -> str:
-    """Return the internal Prometheus scrape target for a native-metrics app.
-
-    Encapsulates both the Docker-host gateway hostname and the port lookup so
-    all app scrape fragments use one consistent expression instead of
-    duplicating "host.docker.internal" and the ports dict path.
+    Prometheus connects to the app's Docker network (declared in prometheus's
+    compose.yml.j2 via the native_metrics_apps loop) and scrapes by container
+    name and internal port — no host port binding required, no nginx/OAuth2 in
+    the path.
 
     Usage in a per-app prometheus.yml.j2 fragment:
-      targets: ["{{ native_prometheus_application_id | native_metrics_target(ports) }}"]
+      targets: ["{{ native_prometheus_application_id | native_metrics_target(applications) }}"]
     """
-    port = (ports.get("localhost") or {}).get("metrics", {}).get(app_id)
+    entity_name = get_entity_name(app_id)
+    app_conf = applications.get(app_id, {})
+
+    container = (
+        app_conf.get("compose", {}).get("services", {}).get(entity_name, {}).get("name")
+    )
+    if not container:
+        raise AnsibleFilterError(
+            f"native_metrics_target: no compose.services.{entity_name}.name for '{app_id}'"
+        )
+
+    port = app_conf.get("native_metrics", {}).get("port")
     if port is None:
         raise AnsibleFilterError(
-            f"native_metrics_target: no ports.localhost.metrics entry for '{app_id}'"
+            f"native_metrics_target: no native_metrics.port for '{app_id}'"
         )
-    return f"{_HOST}:{port}"
+
+    return f"{container}:{port}"
 
 
 class FilterModule:

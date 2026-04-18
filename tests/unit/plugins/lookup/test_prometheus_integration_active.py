@@ -36,11 +36,10 @@ def _run(applications: dict, application_id: str, group_names: list) -> bool:
 
 
 def _run_explicit(applications: dict, application_id: str, group_names: list) -> bool:
-    """Invoke with applications passed as an explicit positional term — the template usage pattern."""
+    """Invoke with applications and application_id as explicit positional terms — the template usage pattern."""
     return LookupModule().run(
-        [applications],
+        [applications, application_id],
         variables={
-            "application_id": application_id,
             "group_names": group_names,
         },
     )[0]
@@ -99,21 +98,24 @@ class TestPrometheusIntegrationActiveServiceDep(unittest.TestCase):
 
 
 class TestPrometheusIntegrationActiveExplicitTerm(unittest.TestCase):
-    """applications passed as explicit first term — matches template invocation pattern.
+    """applications and application_id passed as explicit terms — matches template invocation pattern.
 
-    Templates call lookup('prometheus_integration_active', applications) to bypass the
-    Ansible scoping issue where available_variables may contain the pre-merge inventory
-    dict rather than the set_fact-merged result.
+    Templates call lookup('prometheus_integration_active', applications, application_id) to bypass
+    Ansible scoping issues where available_variables may contain stale values.
     """
 
     def test_true_when_app_declares_prometheus_dep_explicit(self):
         apps = _make_applications("web-app-gitea", prometheus_deps=("web-app-gitea",))
-        result = _run_explicit(apps, "web-app-gitea", ["web-app-prometheus", "web-app-gitea"])
+        result = _run_explicit(
+            apps, "web-app-gitea", ["web-app-prometheus", "web-app-gitea"]
+        )
         self.assertTrue(result)
 
     def test_false_when_app_has_no_prometheus_dep_explicit(self):
         apps = _make_applications("web-app-gitea")
-        result = _run_explicit(apps, "web-app-gitea", ["web-app-prometheus", "web-app-gitea"])
+        result = _run_explicit(
+            apps, "web-app-gitea", ["web-app-prometheus", "web-app-gitea"]
+        )
         self.assertFalse(result)
 
     def test_true_for_prometheus_vhost_explicit(self):
