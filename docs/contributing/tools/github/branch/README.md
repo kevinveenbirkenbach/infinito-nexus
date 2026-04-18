@@ -1,3 +1,3 @@
-# Branch Configuration 🌿
+# Branch Governance 🌿
 
-This section documents the GitHub branch settings for this repository: the branch protection rules enforced on `main` and the repository variables that control CI behaviour.
+This section documents the branch protection rules enforced on `main`. For repository variables that control CI behaviour, see [configuration.md](../actions/configuration.md).

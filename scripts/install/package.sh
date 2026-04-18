@@ -21,14 +21,14 @@ build_and_install_arch() {
 	local builder="pkgbuild"
 	local pkg_path=""
 
+	echo "[arch] Initializing pacman keyring..."
+	pacman-key --init
+	pacman-key --populate archlinux
+	# Tolerate missing manjaro keyring on pure Arch images (no manjaro.gpg present).
+	pacman-key --populate manjaro 2>/dev/null || true
+
 	echo "[arch] Installing build toolchain..."
 	pacman -Syu --noconfirm --needed base-devel sudo rsync
-
-	if ! pacman-key --list-sigs >/dev/null 2>&1; then
-		echo "[arch] Initializing pacman keyring..."
-		pacman-key --init
-		pacman-key --populate archlinux
-	fi
 
 	if ! id "${builder}" >/dev/null 2>&1; then
 		echo "[arch] Creating build user '${builder}'..."

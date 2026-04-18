@@ -48,6 +48,13 @@ class TestPullRequestBranchPrefix(unittest.TestCase):
         self.assertEqual(result.returncode, 0)
         self.assertIn("Validated branch prefix 'fix'", result.stdout)
 
+    def test_full_scope_accepts_chore_prefix(self):
+        result = self._run_script(
+            scope="full", head_ref="chore/update-docker-image-versions"
+        )
+        self.assertEqual(result.returncode, 0)
+        self.assertIn("Validated branch prefix 'chore'", result.stdout)
+
     def test_mismatched_prefix_fails(self):
         result = self._run_script(scope="documentation", head_ref="feature/add-docs")
         self.assertNotEqual(result.returncode, 0)
