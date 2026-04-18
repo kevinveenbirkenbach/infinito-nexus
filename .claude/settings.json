@@ -154,7 +154,8 @@
         "infinito.nexus",
         "letsencrypt.org",
         "monogramm.io",
-        "pypi.org"
+        "pypi.org",
+        "raw.githubusercontent.com"
       ],
       "allowAllUnixSockets": true,
       "allowLocalBinding": true
