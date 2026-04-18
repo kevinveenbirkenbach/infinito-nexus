@@ -18,27 +18,25 @@ if ! command -v npx &>/dev/null; then
 fi
 
 cd "${REPO_ROOT}"
-log "skills: restoring from skills-lock.json..."
+log "skills: restoring from skills-lock.json (.agents/skills)..."
 npx --yes skills experimental_install
-log "skills: installation complete."
+log "skills: installation into .agents/skills complete."
 
 # Claude Code discovers project skills in .claude/skills/, but `skills experimental_install`
-# writes to .agents/skills/. Symlink .claude/skills -> .agents/skills so Claude Code picks them up.
+# only writes to .agents/skills/. A symlink between the two collides with the agent sandbox
+# (it treats .claude/skills as a denied path and chokes on a real dir created late).
+# Workaround: mirror the freshly installed .agents/skills/ tree into .claude/skills/ so both
+# locations contain real, independent copies of the skills — no symlink involved.
 skills_src="${REPO_ROOT}/.agents/skills"
-skills_link="${REPO_ROOT}/.claude/skills"
+skills_dst="${REPO_ROOT}/.claude/skills"
 
 if [[ ! -d "${skills_src}" ]]; then
-	warn "skills: ${skills_src} not found — skipping .claude/skills symlink."
+	warn "skills: ${skills_src} not found — skipping .claude/skills mirror."
 	exit 0
 fi
 
-mkdir -p "${REPO_ROOT}/.claude"
-
-if [[ -L "${skills_link}" ]]; then
-	ln -sfn "../.agents/skills" "${skills_link}"
-elif [[ -e "${skills_link}" ]]; then
-	warn "skills: ${skills_link} exists and is not a symlink — skipping."
-else
-	ln -s "../.agents/skills" "${skills_link}"
-fi
-log "skills: linked .claude/skills -> ../.agents/skills. Restart Claude Code to load new skills."
+log "skills: mirroring .agents/skills/ -> .claude/skills/..."
+rm -rf "${skills_dst}"
+mkdir -p "${skills_dst}"
+cp -a "${skills_src}/." "${skills_dst}/"
+log "skills: mirror complete. Restart Claude Code to load new skills."
