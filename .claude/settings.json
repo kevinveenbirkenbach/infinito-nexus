@@ -6,11 +6,10 @@
   },
   "permissions": {
     "allow": [
+      "Bash(* > /tmp/* 2>&1)",
+      "Bash(* > /tmp/*)",
+      "Bash(*=* make *)",
       "Bash(PYTHONPATH=* python *)",
-      "Bash(XDG_CACHE_HOME=* gh api *)",
-      "Bash(XDG_CACHE_HOME=* gh issue list *)",
-      "Bash(XDG_CACHE_HOME=* gh run list *)",
-      "Bash(XDG_CACHE_HOME=* gh run view *)",
       "Bash(docker *)",
       "Bash(echo *)",
       "Bash(gh api *)",
@@ -119,7 +118,8 @@
       "Bash(gh repo sync*)",
       "Bash(gh workflow run*)",
       "Bash(git commit*)",
-      "Bash(git push*)"
+      "Bash(git push*)",
+      "Skill(update-config*)"
     ],
     "additionalDirectories": [
       "/tmp"
@@ -143,6 +143,7 @@
         "*.infinito.example",
         "*.infinito.nexus",
         "*.nextcloud.com",
+        "*.nektosact.com",
         "*.npmjs.org",
         "*.pythonhosted.org",
         "*.taiga.io",
@@ -164,6 +165,7 @@
         ".",
         "/tmp",
         "~/.ansible",
+        "~/.cache/gh",
         "~/.cache/pip",
         "~/.cache/pre-commit",
         "~/.venvs"
