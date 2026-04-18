@@ -6,12 +6,9 @@
   },
   "permissions": {
     "allow": [
+      "Bash(* > /tmp/*)",
+      "Bash(* > /tmp/* 2>&1)",
       "Bash(PYTHONPATH=* python *)",
-      "Bash(XDG_CACHE_HOME=* gh api *)",
-      "Bash(XDG_CACHE_HOME=* gh issue list *)",
-      "Bash(XDG_CACHE_HOME=* gh run download *)",
-      "Bash(XDG_CACHE_HOME=* gh run list *)",
-      "Bash(XDG_CACHE_HOME=* gh run view *)",
       "Bash(docker *)",
       "Bash(echo *)",
       "Bash(gh api *)",
@@ -165,6 +162,7 @@
         ".",
         "/tmp",
         "~/.ansible",
+        "~/.cache/gh",
         "~/.cache/pip",
         "~/.cache/pre-commit",
         "~/.venvs"
