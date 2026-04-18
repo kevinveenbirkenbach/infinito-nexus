@@ -8,7 +8,9 @@
     "allow": [
       "Bash(* > /tmp/* 2>&1)",
       "Bash(* > /tmp/*)",
-      "Bash(*=* make *)",
+      "Bash(* make * > /tmp/* 2>&1)",
+      "Bash(* make * > /tmp/*)",
+      "Bash(* make *)",
       "Bash(PYTHONPATH=* python *)",
       "Bash(docker *)",
       "Bash(echo *)",
@@ -24,7 +26,8 @@
       "Bash(wc *)",
       "Edit",
       "Read",
-      "WebFetch(domain:*)",
+      "WebFetch(domain:github.com)",
+      "WebFetch(domain:raw.githubusercontent.com)",
       "WebSearch",
       "Write"
     ],
@@ -49,6 +52,7 @@
       "Bash(gh variable *)",
       "Bash(gh workflow disable*)",
       "Bash(gh workflow enable*)",
+      "Bash(git -C *)",
       "Bash(git branch -D*)",
       "Bash(git clean*)",
       "Bash(git push --force*)",
