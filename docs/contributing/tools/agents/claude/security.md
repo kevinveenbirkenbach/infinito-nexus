@@ -26,7 +26,7 @@ The Bash auto-allow path trusts the OS sandbox to confine commands. A missing or
 
 Path-scoped write restrictions inside `permissions.allow` entries (for example `Bash(tee /tmp/*)` rather than `Bash(tee *)`) add no security on top of the sandbox. The sandbox enforces write scope at the syscall layer, so any path outside `allowWrite` fails with `EROFS`.
 
-**Enabled by this:** Allow rules MAY use broad wildcards (`tee *`, `XDG_CACHE_HOME=* gh run view *`) without maintaining narrow path lists. The single source of truth for writable paths is `sandbox.filesystem.allowWrite` in [sandbox.md](sandbox.md).
+**Enabled by this:** Allow rules MAY use broad wildcards (`tee *`, `* > /tmp/*`) without maintaining narrow path lists. The single source of truth for writable paths is `sandbox.filesystem.allowWrite` in [sandbox.md](sandbox.md).
 
 **If violated:** If a contributor widens `allowWrite` (for example by adding `~/` or `/`), the broad allow rules become genuinely broad. Changes to `allowWrite` SHOULD be reviewed with the same scrutiny as a `deny` rule.
 
