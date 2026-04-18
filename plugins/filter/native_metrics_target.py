@@ -21,7 +21,9 @@ def native_metrics_target(app_id: str, applications: dict) -> str:
     config/main.yml to override.
     """
     app_conf = applications.get(app_id, {})
-    service_key = app_conf.get("native_metrics", {}).get("service_key") or get_entity_name(app_id)
+    service_key = app_conf.get("native_metrics", {}).get(
+        "service_key"
+    ) or get_entity_name(app_id)
 
     container = (
         app_conf.get("compose", {}).get("services", {}).get(service_key, {}).get("name")
