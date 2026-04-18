@@ -4,6 +4,17 @@ set -euo pipefail
 : "${GITHUB_EVENT_CREATED:?Missing GITHUB_EVENT_CREATED}"
 : "${GITHUB_OUTPUT:?Missing GITHUB_OUTPUT}"
 : "${GITHUB_SHA:?Missing GITHUB_SHA}"
+: "${GITHUB_REF:?Missing GITHUB_REF}"
+
+if [[ "${GITHUB_REF}" == "refs/heads/main" && "${CI_RUN_ON_MAIN:-}" != "true" ]]; then
+	{
+		echo "should_run=false"
+		echo "skip_reason=main-push-gated-by-ci-run-on-main"
+		echo "commit_in_main=true"
+	} >>"${GITHUB_OUTPUT}"
+	echo "Push to main detected and repository variable CI_RUN_ON_MAIN is not 'true' -> CI will be skipped."
+	exit 0
+fi
 
 if [[ "${GITHUB_EVENT_CREATED}" != "true" ]]; then
 	{
