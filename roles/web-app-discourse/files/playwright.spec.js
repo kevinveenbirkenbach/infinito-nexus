@@ -193,6 +193,10 @@ async function discourseLogout(page, discourseBaseUrl) {
   await page
     .goto(`${discourseBaseUrl}/session/destroy`, { waitUntil: "commit" })
     .catch(() => {});
+  await page
+    .goto(`${oidcIssuerUrl}/protocol/openid-connect/logout`, { waitUntil: "commit" })
+    .catch(() => {});
+  await page.context().clearCookies();
 }
 
 const dashboardBaseUrl = normalizeBaseUrl(process.env.APP_BASE_URL || "");
