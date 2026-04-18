@@ -142,6 +142,7 @@
         "*.hcaptcha.com",
         "*.infinito.example",
         "*.infinito.nexus",
+        "*.nextcloud.com",
         "*.npmjs.org",
         "*.pythonhosted.org",
         "*.taiga.io",
