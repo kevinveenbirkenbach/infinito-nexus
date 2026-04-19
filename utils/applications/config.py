@@ -31,7 +31,7 @@ class ConfigEntryNotSetError(AppConfigKeyError):
     pass
 
 
-def get_app_conf(
+def get(
     applications,
     application_id,
     config_path,

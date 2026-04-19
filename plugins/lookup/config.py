@@ -6,7 +6,7 @@ from typing import Any, Dict, Optional
 from ansible.errors import AnsibleError
 from ansible.plugins.lookup import LookupBase
 
-from utils.config_utils import get_app_conf
+from utils.applications.config import get
 
 
 class LookupModule(LookupBase):
@@ -47,7 +47,7 @@ class LookupModule(LookupBase):
                 "lookup('config', ...): Ansible variable 'applications' must be a dict/mapping."
             )
 
-        value = get_app_conf(
+        value = get(
             applications=applications,
             application_id=application_id,
             config_path=config_path,

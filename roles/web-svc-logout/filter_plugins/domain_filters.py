@@ -1,5 +1,5 @@
 from ansible.errors import AnsibleFilterError
-from utils.config_utils import get_app_conf
+from utils.applications.config import get
 
 
 class FilterModule(object):
@@ -24,7 +24,7 @@ class FilterModule(object):
                 if app_id not in group_names:
                     continue
 
-                if not get_app_conf(
+                if not get(
                     applications, app_id, "compose.services.logout.enabled", False
                 ):
                     continue

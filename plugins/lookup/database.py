@@ -6,7 +6,7 @@ from typing import Any, Dict, List, Optional
 from ansible.errors import AnsibleError
 from ansible.plugins.lookup import LookupBase
 
-from utils.config_utils import get_app_conf
+from utils.applications.config import get
 from utils.database_service import (
     get_database_service_config,
     resolve_database_service_key,
@@ -98,7 +98,7 @@ class LookupModule(LookupBase):
         central_enabled = shared
         db_id = f"svc-db-{dbtype}"
 
-        central_name = get_app_conf(
+        central_name = get(
             applications,
             db_id,
             f"compose.services.{dbtype}.name",
@@ -114,7 +114,7 @@ class LookupModule(LookupBase):
         container = dbtype if central_enabled else f"{consumer_entity}-database"
         username = consumer_entity
 
-        password = get_app_conf(
+        password = get(
             applications,
             consumer_id,
             "credentials.database_password",
@@ -128,7 +128,7 @@ class LookupModule(LookupBase):
         except Exception:
             port = ""
 
-        default_version = get_app_conf(
+        default_version = get(
             applications,
             db_id,
             f"compose.services.{dbtype}.version",
@@ -137,7 +137,7 @@ class LookupModule(LookupBase):
             skip_missing_app=True,
         )
 
-        version = get_app_conf(
+        version = get(
             applications,
             consumer_id,
             f"compose.services.{dbtype}.version",

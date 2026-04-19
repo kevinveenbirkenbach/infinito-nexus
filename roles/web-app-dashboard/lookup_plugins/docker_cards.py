@@ -9,7 +9,7 @@ import yaml
 
 from ansible.plugins.lookup import LookupBase
 from ansible.errors import AnsibleError
-from utils.config_utils import get_app_conf
+from utils.applications.config import get
 from ansible.plugins.loader import lookup_loader
 
 
@@ -137,7 +137,7 @@ class LookupModule(LookupBase):
                         f"Error building URL via tls for '{application_id}': {e}"
                     )
 
-            iframe = get_app_conf(
+            iframe = get(
                 applications,
                 application_id,
                 "compose.services.dashboard.enabled",

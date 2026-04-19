@@ -3,8 +3,8 @@ import os
 import sys
 from typing import Iterable, Sequence
 from ansible.errors import AnsibleFilterError
-from utils.config_utils import (
-    get_app_conf,
+from utils.applications.config import (
+    get,
     AppConfigKeyError,
     ConfigEntryNotSetError,
 )
@@ -67,7 +67,7 @@ def redirect_uris(
 ) -> list[str]:
     """
     Build redirect URIs using:
-      - get_app_conf(applications, app_id, dotted_key, default) for feature gating
+      - get(applications, app_id, dotted_key, default) for feature gating
       - get_url(domains_subset, app_id, web_protocol) to form "<proto>://<domain>"
 
     For domain lists, we call get_url() once per domain by passing a minimal
@@ -82,10 +82,10 @@ def redirect_uris(
     uris: list[str] = []
 
     for app_id, domain_value in domains.items():
-        # Feature check via get_app_conf
+        # Feature check via get
         try:
             has_feature = any(
-                bool(get_app_conf(applications, app_id, f, False)) for f in features
+                bool(get(applications, app_id, f, False)) for f in features
             )
         except (AppConfigKeyError, ConfigEntryNotSetError):
             has_feature = False
@@ -111,7 +111,7 @@ def redirect_uris(
 
 
 class FilterModule(object):
-    """Infinito.Nexus redirect URI builder (uses get_app_conf + get_url)"""
+    """Infinito.Nexus redirect URI builder (uses get + get_url)"""
 
     def filters(self):
         return {

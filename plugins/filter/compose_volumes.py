@@ -10,8 +10,8 @@ try:
     from plugins.filter.docker_service_enabled import (
         FilterModule as _DockerServiceEnabledFilter,
     )
-    from plugins.filter.get_app_conf import get_app_conf
     from plugins.filter.get_entity_name import get_entity_name
+    from utils.applications.config import get
     from utils.database_service import (
         get_database_service_config,
         resolve_database_service_key,
@@ -19,8 +19,8 @@ try:
 except ModuleNotFoundError:
     # Fallback when loaded by Ansible plugin loader from filter_plugins path.
     from docker_service_enabled import FilterModule as _DockerServiceEnabledFilter
-    from get_app_conf import get_app_conf
     from get_entity_name import get_entity_name
+    from utils.applications.config import get
     from utils.database_service import (
         get_database_service_config,
         resolve_database_service_key,
@@ -129,7 +129,7 @@ def compose_volumes(
     if _DockerServiceEnabledFilter.is_docker_service_enabled(
         applications, application_id, "redis"
     ) or bool(
-        get_app_conf(
+        get(
             applications=applications,
             application_id=application_id,
             config_path="compose.services.oauth2.enabled",

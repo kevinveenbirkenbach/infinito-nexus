@@ -19,10 +19,10 @@ from ansible.errors import AnsibleFilterError
 
 # Import the shared config resolver from utils
 try:
-    from utils.config_utils import get_app_conf, AppConfigKeyError
+    from utils.applications.config import get, AppConfigKeyError
 except Exception as e:
     raise AnsibleFilterError(
-        f"Failed to import get_app_conf from utils.config_utils: {e}"
+        f"Failed to import get from utils.applications.config: {e}"
     )
 
 _SIZE_RE = re.compile(r"^\s*(\d+(?:\.\d+)?)\s*([kmgtp]?i?b?)?\s*$", re.IGNORECASE)
@@ -110,7 +110,7 @@ def node_max_old_space_size(
         AnsibleFilterError if mem_limit is missing/invalid OR if mem_limit (MB) < min_mb.
     """
     try:
-        mem_limit = get_app_conf(
+        mem_limit = get(
             applications=applications,
             application_id=application_id,
             config_path=f"compose.services.{service_name}.mem_limit",
