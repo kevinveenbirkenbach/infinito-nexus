@@ -21,6 +21,19 @@
   loop_control:
     label: "{{ item.key }}"
 
+- name: Wait for Friendica console binary to exist (entrypoint rsync from /usr/src/friendica into the html volume)
+  command: >
+    {{ BIN_COMPOSE }} exec --user {{ FRIENDICA_USER }}
+    {{ FRIENDICA_SERVICE }}
+    test -f {{ FRIENDICA_APPLICATION_DIR }}/bin/console
+  args:
+    chdir: "{{ lookup('container', application_id, 'directories.instance') }}"
+  register: friendica_console_present
+  changed_when: false
+  retries: 60
+  delay: 2
+  until: friendica_console_present.rc == 0
+
 - name: Ensure Friendica addons are in sync
   command: >
     {{ BIN_COMPOSE }} exec --user {{ FRIENDICA_USER }}
