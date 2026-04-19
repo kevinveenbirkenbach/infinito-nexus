@@ -26,10 +26,10 @@ OMNIAUTH_INJECTION = r"""
         discovery: true,
         issuer: ENV.fetch("OIDC_ISSUER", nil),
         client_options: {
-          host: URI.parse(ENV.fetch("OIDC_ISSUER", "https://auth.infinito.example")).host,
+          host: URI.parse(ENV.fetch("OIDC_ISSUER")).host,
           identifier: ENV.fetch("OIDC_CLIENT_ID", nil),
           secret:     ENV.fetch("OIDC_CLIENT_SECRET", nil),
-          redirect_uri: "#{ENV.fetch('APPLICATION_HOST', 'https://decidim.infinito.example').chomp('/')}/users/auth/openid_connect/callback"
+          redirect_uri: "#{ENV.fetch('APPLICATION_HOST').chomp('/')}/users/auth/openid_connect/callback"
         }
       )
     end
