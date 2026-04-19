@@ -296,7 +296,7 @@
     query: "SELECT id FROM auth_oauth_provider WHERE name = 'Keycloak' LIMIT 1;"
   register: keycloak_provider
 
-- name: "Query Keycloak DB for administrator user ID"
+- name: "Query Keycloak DB for administrator username"
   community.postgresql.postgresql_query:
     db: "{{ lookup('database', 'web-app-keycloak', 'name') }}"
     login_user: "{{ lookup('database', 'web-app-keycloak', 'username') }}"
@@ -304,7 +304,7 @@
     login_host: "{{ lookup('database', 'web-app-keycloak', 'reach_host') }}"
     login_port: "{{ lookup('database', 'web-app-keycloak', 'port') }}"
     query: >
-      SELECT id, username FROM user_entity
+      SELECT username FROM user_entity
       WHERE realm_id = (SELECT id FROM realm WHERE name = %(realm)s)
       AND username = %(admin)s;
     named_args:
@@ -328,7 +328,7 @@
       WHERE login = %(login)s;
     named_args:
       provider_id: "{{ keycloak_provider.query_result[0].id }}"
-      oauth_uid: "{{ (keycloak_users.query_result | selectattr('username', 'equalto', users.administrator.username) | first).id }}"
+      oauth_uid: "{{ (keycloak_users.query_result | selectattr('username', 'equalto', users.administrator.username) | first).username }}"
       login: "{{ users.administrator.username }}"
   when:
     - keycloak_provider.query_result | length > 0
