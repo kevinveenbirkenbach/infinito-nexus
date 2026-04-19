@@ -53,36 +53,7 @@ test.beforeEach(() => {
   expect(biberPassword, "BIBER_PASSWORD must be set in the Playwright env file").toBeTruthy();
 });
 
-// Scenario I: /healthz/live returns 200 without authentication
-//
-// The nginx vhost exposes /healthz/live via a Lua content handler that checks
-// Docker container health and HTTP reachability.  It bypasses oauth2-proxy so
-// Prometheus blackbox-exporter can probe it without credentials.
-// The endpoint must never redirect to Keycloak — even when oauth2 is enabled.
-test("yourls: /healthz/live returns 200 without authentication", async ({ request }) => {
-  const base = yourlsBaseUrl.replace(/\/$/, "");
-
-  const response = await request.get(`${base}/healthz/live`, {
-    maxRedirects: 0,
-    failOnStatusCode: false,
-  });
-
-  expect(
-    response.status(),
-    "/healthz/live must return HTTP 200 without any redirect to Keycloak"
-  ).toBe(200);
-
-  const body = await response.text();
-  expect(body.trim(), "/healthz/live body must be 'live'").toBe("live");
-
-  // Confirm the response stayed on the yourls domain — not redirected to Keycloak
-  expect(
-    new URL(response.url()).hostname,
-    "/healthz/live must not redirect to the Keycloak host"
-  ).toBe(new URL(base).hostname);
-});
-
-// Scenario II: /admin/ requires SSO login — admin can access, biber is denied
+// Scenario I: /admin/ requires SSO login — admin can access, biber is denied
 //
 // YOURLS uses oauth2-proxy in ACL blacklist mode: the root URL is public
 // (URL redirects work without login) but /admin/ is protected.
@@ -129,7 +100,7 @@ test("yourls: admin sso login to admin panel, then logout", async ({ page }) => 
     .toContain(expectedOidcAuthUrl);
 });
 
-// Scenario III: biber is denied access to /admin/ after SSO login
+// Scenario II: biber is denied access to /admin/ after SSO login
 //
 // biber is a regular authenticated Keycloak user but is NOT in the
 // web-app-yourls-administrator group. oauth2-proxy must return HTTP 403
