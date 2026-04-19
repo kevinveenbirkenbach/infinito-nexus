@@ -28,6 +28,8 @@ const oidcIssuerUrl  = decodeDotenvQuotedValue(process.env.OIDC_ISSUER_URL);
 const odooBaseUrl    = decodeDotenvQuotedValue(process.env.ODOO_BASE_URL);
 const adminUsername  = decodeDotenvQuotedValue(process.env.ADMIN_USERNAME);
 const adminPassword  = decodeDotenvQuotedValue(process.env.ADMIN_PASSWORD);
+const biberUsername  = decodeDotenvQuotedValue(process.env.BIBER_USERNAME);
+const biberPassword  = decodeDotenvQuotedValue(process.env.BIBER_PASSWORD);
 
 // Perform SSO login via Keycloak.
 // Accepts a Page or FrameLocator (when Keycloak loads inside the dashboard iframe).
@@ -177,6 +179,8 @@ test.beforeEach(() => {
   expect(odooBaseUrl, "ODOO_BASE_URL must be set in the Playwright env file").toBeTruthy();
   expect(adminUsername, "ADMIN_USERNAME must be set in the Playwright env file").toBeTruthy();
   expect(adminPassword, "ADMIN_PASSWORD must be set in the Playwright env file").toBeTruthy();
+  expect(biberUsername, "BIBER_USERNAME must be set in the Playwright env file").toBeTruthy();
+  expect(biberPassword, "BIBER_PASSWORD must be set in the Playwright env file").toBeTruthy();
 });
 
 // Scenario I: dashboard → Odoo → SSO login as admin → verify authenticated → logout
@@ -257,6 +261,96 @@ test("dashboard to odoo: admin sso login, verify ui, logout", async ({ page }) =
   await performOdooLogout(page, odooBaseUrl);
 
   // 11. Verify we're back on the login page (provider list visible again)
+  const odooFrameAfterLogout = page.frameLocator("#main iframe").first();
+  await expect
+    .poll(
+      async () => await isVisible(odooFrameAfterLogout.locator(".o_auth_oauth_providers")),
+      {
+        timeout: 60_000,
+        message: "Expected Odoo to return to login page after logout"
+      }
+    )
+    .toBe(true);
+
+  // 12. Return to dashboard and verify logged out state
+  await page.goto("/");
+  await logoutFromDashboardIfNeeded(page);
+});
+
+// Scenario II: dashboard → Odoo → SSO login as biber (regular user) → verify authenticated → logout
+//
+// Similar to admin test but verifies regular (non-admin) user SSO flow works.
+// Biber is a standard user without admin privileges - this confirms OIDC works
+// for all Keycloak users, not just the administrator.
+test("dashboard to odoo: biber sso login, verify ui, logout", async ({ page }) => {
+  const expectedOdooBaseUrl = odooBaseUrl.replace(/\/$/, "");
+  const odooLoginUrl = expectedOdooBaseUrl + "/web/login";
+
+  // 1. Navigate to dashboard with the Odoo login URL pre-loaded in the iframe.
+  await page.goto(`/?iframe=${encodeURIComponent(odooLoginUrl)}`);
+
+  // 2. Wait for the iframe to appear and load the Odoo login URL
+  await expect(page.locator("#main iframe")).toBeVisible({ timeout: 30_000 });
+
+  const appFrame = page.frameLocator("#main iframe").first();
+
+  // 3. Wait for the iframe URL to reflect the Odoo login URL
+  await waitForFrameUrl(
+    page.locator("#main iframe"),
+    "/web/login",
+    60_000,
+    `Expected iframe to load Odoo login at ${odooLoginUrl}`
+  );
+
+  // 4. Click the "Login with SSO" button
+  await clickOdooSsoButton(appFrame);
+
+  // 5. Wait for navigation to Keycloak
+  await waitForFrameUrl(
+    page.locator("#main iframe"),
+    oidcIssuerUrl.replace(/\/$/, ""),
+    60_000,
+    "Expected iframe to navigate to Keycloak for authentication"
+  );
+
+  // 6. Perform OIDC login with biber credentials
+  const keycloakFrame = page.frameLocator("#main iframe").first();
+  await performOidcLogin(keycloakFrame, biberUsername, biberPassword);
+
+  // 7. Wait for navigation back to Odoo after authentication.
+  await expect
+    .poll(
+      async () => {
+        const iframeHandle = await page.locator("#main iframe").first().elementHandle();
+        const frame = iframeHandle ? await iframeHandle.contentFrame() : null;
+        const url = frame ? frame.url() : "";
+        return url.includes(expectedOdooBaseUrl) && !url.includes("/web/login");
+      },
+      {
+        timeout: 60_000,
+        message: "Expected iframe to navigate back to Odoo authenticated area (not login page)"
+      }
+    )
+    .toBe(true);
+
+  // 8. Reacquire frame after redirect back to Odoo
+  const odooFrameAuth = page.frameLocator("#main iframe").first();
+
+  // 9. Verify the user is authenticated
+  await expect
+    .poll(
+      async () => await isOdooAuthenticated(odooFrameAuth),
+      {
+        timeout: 60_000,
+        message: "Expected Odoo to show authenticated user interface for biber"
+      }
+    )
+    .toBe(true);
+
+  // 10. Perform logout from Odoo
+  await performOdooLogout(page, odooBaseUrl);
+
+  // 11. Verify we're back on the login page
   const odooFrameAfterLogout = page.frameLocator("#main iframe").first();
   await expect
     .poll(
