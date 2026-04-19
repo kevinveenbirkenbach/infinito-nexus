@@ -11,6 +11,7 @@ on:
       - "feature/**"
       - "hotfix/**"
       - "fix/**"
+      - "chore/**"
       - "alert-autofix-*"
 
 permissions:
@@ -20,8 +21,9 @@ permissions:
   security-events: write
 
 jobs:
-  # Skip a branch-creation push only when the pushed commit is already
-  # contained in origin/main. Fresh commits outside main still run CI.
+  # Skip CI when the push is to main and CI_RUN_ON_MAIN is not 'true', or
+  # when the push is a branch creation whose commit is already in origin/main.
+  # All other pushes run CI.
   run-policy:
     name: 🧭 Decide CI policy
     runs-on: ubuntu-latest
@@ -46,11 +48,12 @@ jobs:
         id: decide
         env:
           GITHUB_EVENT_CREATED: ${{ github.event.created }}
+          CI_RUN_ON_MAIN: ${{ vars.CI_RUN_ON_MAIN }}
         shell: bash
         run: bash scripts/meta/resolve/push_ci_policy.sh
 
-  skip-branch-creation-from-main:
-    name: ⏭️ Skip branch creation from main
+  skip-ci:
+    name: ⏭️ Skip CI
     needs: run-policy
     if: needs.run-policy.outputs.should_run != 'true'
     runs-on: ubuntu-latest
@@ -59,7 +62,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          echo "Skipping CI for branch creation because commit ${GITHUB_SHA} is already contained in origin/main."
+          echo "Skipping CI for commit ${GITHUB_SHA}."
           echo "Reason: ${{ needs.run-policy.outputs.skip_reason }}"
 
   pick-distro:
