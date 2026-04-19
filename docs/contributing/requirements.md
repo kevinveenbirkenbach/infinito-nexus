@@ -2,8 +2,8 @@
 
 Requirements live under `docs/requirements/` and are the SPOT for what the project must do.
 Their primary purpose is to drive AI-agent-assisted development: a contributor creates a requirement
-file and then instructs the agent to iterate — following [requirements.md](../agents/action/requirements.md)
-and [iteration.md](../agents/action/iteration.md) — until every Acceptance Criterion is fulfilled.
+file and then instructs the agent to iterate by following [requirements.md](../agents/action/requirements.md)
+and [Role Loop](../agents/action/iteration/role.md), continuing until every Acceptance Criterion is fulfilled.
 
 Creating a requirement is **not mandatory** to work on a task. For normal work items, bugs, or
 feature requests, use the project tools directly:
@@ -38,7 +38,7 @@ As a <role>, I want <goal> so that <benefit>.
 
 - The **User Story** MUST follow the "As a / I want / so that" format.
 - Each **Acceptance Criterion** MUST be written as a Markdown task list item (`- [ ]`).
-- Criteria MUST be independently verifiable — one observable outcome per item.
+- Criteria MUST be independently verifiable, with one observable outcome per item.
 - Completed criteria MUST be checked off (`- [x]`) once the corresponding work is merged.
 
 ## Cross-linking
