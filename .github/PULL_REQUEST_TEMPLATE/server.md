@@ -87,8 +87,8 @@ Check the relevant rows and explain intentional omissions in `Additional Notes`.
 
 | Check | Item | When to include | Purpose |
 |---|---|---|---|
-| [ ] | Port defined in `group_vars/all/11_ports.yml` | When the app exposes a service | Confirms that the app port is defined consistently in the central port mapping. |
-| [ ] | Network defined in `group_vars/all/10_networks.yml` | When the app communicates over container networks | Confirms that the required network wiring is defined consistently in the central network mapping. |
+| [ ] | Port defined in `group_vars/all/09_ports.yml` | When the app exposes a service | Confirms that the app port is defined consistently in the central port mapping. |
+| [ ] | Network defined in `group_vars/all/08_networks.yml` | When the app communicates over container networks | Confirms that the required network wiring is defined consistently in the central network mapping. |
 
 ---
 
