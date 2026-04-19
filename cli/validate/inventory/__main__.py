@@ -5,10 +5,15 @@ import yaml
 import re
 from pathlib import Path
 
-from utils.runtime_lookup_data import get_application_defaults, get_user_defaults
-
-# Ensure imports work when run directly
+# Ensure imports work when invoked as a script (subprocess without PYTHONPATH).
 repo_root = Path(__file__).resolve().parents[3]
+if str(repo_root) not in sys.path:
+    sys.path.insert(0, str(repo_root))
+
+from utils.runtime_lookup_data import (  # noqa: E402
+    get_application_defaults,
+    get_user_defaults,
+)
 
 
 def load_yaml_file(path):
