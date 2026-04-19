@@ -164,7 +164,7 @@ self-describing.
       clarity, reduce duplication, and remove dead code in the same pass.
 - [x] All existing integration and unit tests pass after the refactoring.
 - [x] Once all other Acceptance Criteria are checked off and the full validation
-      app set deploys successfully, `docs/contributing/code/services.md` MUST be
+      app set deploys successfully, `docs/contributing/design/services.md` MUST be
       updated to reflect the new role-local configuration model. The update MUST
       follow the documentation guidelines in
       [documentation.md](../contributing/documentation.md).

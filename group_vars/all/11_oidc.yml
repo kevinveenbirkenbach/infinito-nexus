@@ -1,6 +1,9 @@
 #############################################
 ### Identity and Access Management (IAM)  ###
 #############################################
+# Developer guide for the OIDC variable tree, claim rules, and the per-app
+# vs. shared client-template policy:
+# @see docs/contributing/design/iam/oidc.md
 
 #############################################
 ### OIDC                                  ###

@@ -2,7 +2,7 @@
 
 ## Description
 
-Jira Software is Atlassian’s issue and project-tracking platform. This role deploys Jira via Docker Compose, connects it to PostgreSQL, and adds proxy awareness, optional OIDC SSO, health checks, and production-oriented defaults for Infinito.Nexus.
+[Jira](https://www.atlassian.com/) is Atlassian’s issue and project-tracking platform. This role deploys Jira via Docker Compose, connects it to PostgreSQL, and adds proxy awareness, optional OIDC SSO, health checks, and production-oriented defaults for Infinito.Nexus.
 
 ## Overview
 
@@ -23,3 +23,10 @@ The role builds a lean custom image on top of the official Jira Software image, 
 
 * Product page: [Atlassian Software](https://www.atlassian.com/)
 * Docker Hub (official image): [atlassian/jira-software](https://hub.docker.com/r/atlassian/jira-software)
+
+## Credits
+
+Developed and maintained by **Kevin Veen-Birkenbach**.
+Learn more at [veen.world](https://www.veen.world).
+Part of the [Infinito.Nexus Project](https://s.infinito.nexus/code).
+Licensed under the [Infinito.Nexus Community License (Non-Commercial)](https://s.infinito.nexus/license).
