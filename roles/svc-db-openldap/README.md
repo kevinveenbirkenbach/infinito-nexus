@@ -1,8 +1,8 @@
-# LDAP
+# OpenLDAP
 
 ## Description
 
-Unleash the potential of centralized identity management with OpenLDAP. This powerful directory service provides a robust platform for managing users, groups, and organizational units while ensuring secure, scalable, and efficient authentication and authorization.
+Unleash the potential of centralized identity management with [OpenLDAP](https://www.openldap.org/). This powerful directory service provides a robust platform for managing users, groups, and organizational units while ensuring secure, scalable, and efficient authentication and authorization.
 
 ## Overview
 
@@ -33,6 +33,10 @@ users:
 
 With `password_update: false`, existing LDAP users keep their current password on later runs.
 
+## Developer Notes
+
+For the LDAP variable tree, DN layout, attribute SPOT, and the rules for pairing LDAP attributes with OIDC claims, see [ldap.md](../../docs/contributing/design/iam/ldap.md).
+
 ## Further Resources
 
 - [Bitnami OpenLDAP](https://hub.docker.com/r/bitnami/openldap)
@@ -42,8 +46,7 @@ With `password_update: false`, existing LDAP users keep their current password o
 
 ## Credits
 
-Developed and maintained by **Kevin Veen-Birkenbach**.  
+Developed and maintained by **Kevin Veen-Birkenbach**.
 Learn more at [veen.world](https://www.veen.world).
-
-Part of the [Infinito.Nexus Project](https://s.infinito.nexus/code)  
+Part of the [Infinito.Nexus Project](https://s.infinito.nexus/code).
 Licensed under the [Infinito.Nexus Community License (Non-Commercial)](https://s.infinito.nexus/license).

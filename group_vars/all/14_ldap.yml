@@ -2,6 +2,9 @@
 #############################################
 ### LDAP                                  ###
 #############################################
+# Developer guide for the LDAP variable tree, DN layout, attribute SPOT, and
+# OIDC pairing rules:
+# @see docs/contributing/design/iam/ldap.md
 
 # Helper Variables:
 # Keep in mind to mapp this variables if there is ever the possibility for the user to define them in the inventory
