@@ -171,6 +171,37 @@ async function expectDashboardCssEffects(page) {
   throw new Error("Expected a dashboard element that demonstrates the role-local CSS to be present");
 }
 
+async function waitForBoundingBoxStable(locator, { samples = 3, interval = 100, timeout = 10_000 } = {}) {
+  const deadline = Date.now() + timeout;
+  let previous = null;
+  let stableCount = 0;
+
+  while (Date.now() < deadline) {
+    const current = await locator.boundingBox();
+
+    if (
+      current &&
+      previous &&
+      current.x === previous.x &&
+      current.y === previous.y &&
+      current.width === previous.width &&
+      current.height === previous.height
+    ) {
+      stableCount += 1;
+      if (stableCount >= samples) {
+        return current;
+      }
+    } else {
+      stableCount = 0;
+    }
+
+    previous = current;
+    await new Promise((resolve) => setTimeout(resolve, interval));
+  }
+
+  return previous;
+}
+
 async function expectStableCardHover(page, cardTitle) {
   const card = page
     .locator(".card")
@@ -188,8 +219,10 @@ async function expectStableCardHover(page, cardTitle) {
     timeout: 60_000
   });
 
-  const cardBox = await card.boundingBox();
-  expect(cardBox, `Expected the ${cardTitle} card to expose a measurable bounding box`).toBeTruthy();
+  await card.scrollIntoViewIfNeeded();
+  await page.waitForLoadState("networkidle").catch(() => undefined);
+  const settledBox = await waitForBoundingBoxStable(card);
+  expect(settledBox, `Expected the ${cardTitle} card to expose a measurable bounding box`).toBeTruthy();
 
   const hoverPoints = [
     { x: 0.5, y: 0.2 },
@@ -198,16 +231,22 @@ async function expectStableCardHover(page, cardTitle) {
   ];
 
   for (const point of hoverPoints) {
-    const x = Math.round(cardBox.x + cardBox.width * point.x);
-    const y = Math.round(cardBox.y + cardBox.height * point.y);
-
-    await page.mouse.move(x, y);
     await expect
       .poll(
-        () => stretchedLink.evaluate((element) => element.matches(":hover")),
+        async () => {
+          const freshBox = await card.boundingBox();
+          if (!freshBox) {
+            return false;
+          }
+          const x = Math.round(freshBox.x + freshBox.width * point.x);
+          const y = Math.round(freshBox.y + freshBox.height * point.y);
+          await page.mouse.move(x, y);
+          return stretchedLink.evaluate((element) => element.matches(":hover"));
+        },
         {
-          timeout: 2_000,
-          message: `Expected the ${cardTitle} stretched-link overlay to stay hovered across the card`
+          timeout: 5_000,
+          intervals: [100, 150, 250, 500],
+          message: `Expected the ${cardTitle} stretched-link overlay to stay hovered at y=${point.y * 100}% of the card`
         }
       )
       .toBe(true);

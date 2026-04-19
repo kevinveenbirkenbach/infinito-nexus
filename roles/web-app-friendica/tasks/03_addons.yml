@@ -21,15 +21,44 @@
   loop_control:
     label: "{{ item.key }}"
 
+- name: Wait until Friendica console + composer vendor tree is fully populated
+  # `bin/console list` boots Friendica's full Composer autoloader, so it only
+  # returns rc=0 once the entrypoint rsync from /usr/src/friendica/ into the
+  # /var/www/html volume has copied every required vendor file. Probing for
+  # bin/console alone is not enough — the binary lands before vendor/ is
+  # complete and PHP then fails mid-loop with "Failed opening required
+  # vendor/.../function.php".
+  command: >
+    {{ BIN_COMPOSE }} exec --user {{ FRIENDICA_USER }}
+    --workdir {{ FRIENDICA_APPLICATION_DIR }}
+    {{ FRIENDICA_SERVICE }}
+    {{ FRIENDICA_APPLICATION_DIR }}/bin/console list
+  args:
+    chdir: "{{ lookup('container', application_id, 'directories.instance') }}"
+  register: friendica_console_ready
+  changed_when: false
+  failed_when: false
+  retries: 90
+  delay: 2
+  until: friendica_console_ready.rc == 0
+
 - name: Ensure Friendica addons are in sync
   command: >
     {{ BIN_COMPOSE }} exec --user {{ FRIENDICA_USER }}
+    --workdir {{ FRIENDICA_APPLICATION_DIR }}
     {{ FRIENDICA_SERVICE }}
-    bin/console addon
+    {{ FRIENDICA_APPLICATION_DIR }}/bin/console addon
     {{ 'enable' if item.enabled else 'disable' }}
     {{ item.name }}
   args:
     chdir: "{{ lookup('container', application_id, 'directories.instance') }}"
+  register: friendica_addon_sync
+  # Defence in depth: even after the readiness probe succeeds, individual
+  # addon commands can still race a slow final piece of the rsync or a
+  # just-reloaded autoloader, so retry a few times on any non-zero exit.
+  retries: 10
+  delay: 3
+  until: friendica_addon_sync.rc == 0
   loop: "{{ friendica_addons }}"
   loop_control:
     label: "{{ item.name }}"

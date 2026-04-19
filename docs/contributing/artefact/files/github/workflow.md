@@ -48,6 +48,23 @@ name: "🚫 Cancel: PR Runs on Close"
 - Short single-command invocations MAY stay inline when they do not contain meaningful control flow.
 - Inline shell in workflow files SHOULD stay limited to small command calls, environment wiring, or direct script invocation.
 
+## Disk space 💾
+
+Deploy test workflows use the `jlumbroso/free-disk-space` action to reclaim runner space before Docker pulls start.
+
+| Option | Value | Reason |
+|---|---|---|
+| `android` | `true` | Android SDK is never needed; safe to remove |
+| `dotnet` | `true` | .NET SDK is never needed; safe to remove |
+| `haskell` | `true` | Haskell toolchain is never needed; safe to remove |
+| `large-packages` | `false` | Can remove build tools (gcc, Python headers) required by pip/Ansible |
+| `docker-images` | `false` | Can remove cached layers reused between deploy steps |
+| `swap-storage` | `false` | Disabling swap can cause OOM for memory-intensive services (e.g. Keycloak) |
+| `tool-cache` | `false` | Runner tool cache may be needed by subsequent steps |
+
+Only options that are **guaranteed unused** MUST be set to `true`.
+When in doubt, keep the option at `false`.
+
 ## Separation of concerns 🧩
 
 - GitHub workflow YAML MUST describe orchestration, permissions, triggers, inputs, and step order.

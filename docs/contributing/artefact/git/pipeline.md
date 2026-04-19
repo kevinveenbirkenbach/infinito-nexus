@@ -4,15 +4,15 @@ This document describes the CI pipeline structure, entry points, and gates used 
 
 ## Overview 🗺️
 
-CI is triggered automatically on pull request events and push to `latest`. The pipeline is composed of reusable workflow files under [.github/workflows/](../../../../.github/workflows/). The central coordinator is [ci-orchestrator.yml](../../../../.github/workflows/ci-orchestrator.yml), which is called by the entry workflows.
+CI is triggered automatically on pull-request events and on pushes to the branches listed in the entry-workflow row in [workflows.md](../../tools/github/actions/workflows.md). The pipeline is composed of reusable workflow files under [.github/workflows/](../../../../.github/workflows/). The central coordinator is [ci-orchestrator.yml](../../../../.github/workflows/ci-orchestrator.yml), which is called by the entry workflows.
 
 ## Entry Points 🚪
 
-| Trigger | Workflow | Description |
-|---|---|---|
-| Pull request (opened, synchronize, reopened, ready\_for\_review) | [entry-pull-request-change.yml](../../../../.github/workflows/entry-pull-request-change.yml) | Detects PR scope and conditionally runs the full orchestrator |
-| Push to `latest` | [entry-push-latest.yml](../../../../.github/workflows/entry-push-latest.yml) | Runs the full orchestrator on the main branch |
-| Manual dispatch | [entry-manual.yml](../../../../.github/workflows/entry-manual.yml) | Allows triggering CI for a specific role or whitelist |
+Every external CI trigger MUST route through one of the entry workflows. Each entry translates its event into a call to the orchestrator; the catalog of triggers and inputs lives in [workflows.md](../../tools/github/actions/workflows.md).
+
+- [entry-pull-request-change.yml](../../../../.github/workflows/entry-pull-request-change.yml): detects PR scope and conditionally calls the orchestrator.
+- [entry-push-latest.yml](../../../../.github/workflows/entry-push-latest.yml): calls the orchestrator for pushes on the supported branch prefixes and additionally invokes the release workflow on version tags.
+- [entry-manual.yml](../../../../.github/workflows/entry-manual.yml): dispatches the orchestrator manually for a chosen distro set and whitelist.
 
 ## PR Scope Detection 🔎
 
@@ -32,32 +32,19 @@ For fork PRs, CI waits for privileged images to be built by the `pull_request_ta
 
 ### 2. Security 🛡️
 
-- [security-codeql.yml](../../../../.github/workflows/security-codeql.yml): Static analysis via GitHub CodeQL.
+The `security-codeql` job runs the CodeQL scan (catalogued in the `Security and linting` table of [workflows.md](../../tools/github/actions/workflows.md)). A failing scan MUST fail `code-quality-gate` and thereby block all downstream deploy, install, and environment tests.
 
 ### 3. Linting 🧹
 
-All linting jobs run in parallel:
-
-- [lint-ansible.yml](../../../../.github/workflows/lint-ansible.yml)
-- [lint-docker.yml](../../../../.github/workflows/lint-docker.yml)
-- [lint-python.yml](../../../../.github/workflows/lint-python.yml)
-- [lint-shell.yml](../../../../.github/workflows/lint-shell.yml)
-
-All four MUST pass the `lint-gate` before the pipeline continues.
+All linting workflows listed in the `Security and linting` table of [workflows.md](../../tools/github/actions/workflows.md) run in parallel. All of them MUST pass `lint-gate` before the pipeline continues.
 
 ### 4. CI Image Build 🐳
 
-[images-build-ci.yml](../../../../.github/workflows/images-build-ci.yml) builds Docker images for the target distributions (`arch`, `debian`, `ubuntu`, `fedora`, `centos`). These images are used by all subsequent test jobs.
+The `build-ci-images` stage uses [images-build-ci.yml](../../../../.github/workflows/images-build-ci.yml) to build Docker images for the target distributions (`arch`, `debian`, `ubuntu`, `fedora`, `centos`). These images are consumed by all subsequent test jobs.
 
 ### 5. Code Tests 🧪
 
-Run in parallel after images are available:
-
-- [test-code-integration.yml](../../../../.github/workflows/test-code-integration.yml)
-- [test-code-lint.yml](../../../../.github/workflows/test-code-lint.yml)
-- [test-code-unit.yml](../../../../.github/workflows/test-code-unit.yml)
-
-All three MUST pass the `test-code-gate`.
+All code-test workflows listed in the `Code tests` table of [workflows.md](../../tools/github/actions/workflows.md) run in parallel once the CI images are available. All of them MUST pass `test-code-gate`.
 
 ### 6. Code Quality Gate 🚦
 
@@ -77,24 +64,15 @@ GHCR publication uses the workflow `GITHUB_TOKEN`; optional Docker Hub secrets a
 
 ### 9. Deploy Tests 🚀
 
-Run in parallel after DNS and mirroring:
-
-- [test-deploy-server.yml](../../../../.github/workflows/test-deploy-server.yml): Server and `web-*` roles.
-- [test-deploy-universal.yml](../../../../.github/workflows/test-deploy-universal.yml): Shared system roles.
-- [test-deploy-workstation.yml](../../../../.github/workflows/test-deploy-workstation.yml): Workstation and `desk-*` roles.
+The three deploy-test workflows listed in the `Infrastructure tests` table of [workflows.md](../../tools/github/actions/workflows.md) (server, universal, workstation scopes) run in parallel once DNS and mirroring have completed.
 
 ### 10. Installation Tests 📦
 
-Run in parallel after the code quality gate:
-
-- [test-install-make.yml](../../../../.github/workflows/test-install-make.yml)
-- [test-install-pkgmgr.yml](../../../../.github/workflows/test-install-pkgmgr.yml)
-
-Both MUST pass the `test-install-gate`.
+The install-test workflows listed in the `Infrastructure tests` table of [workflows.md](../../tools/github/actions/workflows.md) run in parallel once `code-quality-gate` is green. All of them MUST pass `test-install-gate`.
 
 ### 11. Development Environment 🛠️
 
-[test-environment.yml](../../../../.github/workflows/test-environment.yml) validates the development environment setup.
+The `test-development` stage runs the development-environment workflow listed in the `Infrastructure tests` table of [workflows.md](../../tools/github/actions/workflows.md).
 
 ### 12. Done 🏁
 

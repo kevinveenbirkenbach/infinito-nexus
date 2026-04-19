@@ -18,3 +18,9 @@ PEERTUBE_CPUS:                    "{{ lookup('config', application_id, 'compose.
 PEERTUBE_MAX_OLD_SPACE_SIZE:      "{{ lookup('applications') | node_max_old_space_size(application_id, entity_name) }}"
 _peertube_concurrency_candidate:  "{{ ((PEERTUBE_CPUS | float) * 0.5) | round(0, 'floor') | int }}"
 PEERTUBE_TRANSCODING_CONCURRENCY: "{{ [ ( [ (_peertube_concurrency_candidate | int), 1 ] | max ), 8 ] | min }}"
+
+# Heap cap for the one-off `npm run plugin:install` exec. Kept tight so the
+# plugin install does not blow past the host RAM budget on constrained CI
+# runners (where the container-wide NODE_OPTIONS would otherwise grant several
+# GB of V8 heap and trip the host OOM killer).
+PEERTUBE_OIDC_PLUGIN_INSTALL_MAX_OLD_SPACE_MB: 1024

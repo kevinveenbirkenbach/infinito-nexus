@@ -132,6 +132,12 @@ For rules on how to write and structure the `Makefile` itself, see [makefile.md]
 | Fresh kept all | `make deploy-fresh-kept-all` | Builds the broader local deployment flow across apps. | Use this when you explicitly need broad coverage. |
 | Reuse kept all | `make deploy-reuse-kept-all` | Reuses the existing inventory and redeploys the broad app set. | Use this for the faster broad reuse path. |
 
+## Git 🔐
+
+| Category | Command | What it does | When to use it |
+|---|---|---|---|
+| Sign and push | `make sign-push` | GPG-signs every unpushed commit on the current branch via [sign-push.sh](../../../scripts/git/sign-push.sh) and pushes (force-with-lease on rebased history). Refuses to run inside the Claude sandbox and when the working tree is dirty. | Use this instead of `git push`. Direct push is denied in [settings.json](../../../.claude/settings.json) so that only the operator (with access to the GPG key in `~/.gnupg`) ever signs and ships commits. Agents MUST instruct the operator to run this target rather than pushing themselves. |
+
 ## Notes 📝
 
 - The commands use the current `INFINITO_DISTRO` setting from the environment where relevant.
