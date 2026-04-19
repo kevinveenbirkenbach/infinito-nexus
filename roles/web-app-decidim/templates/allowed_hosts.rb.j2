@@ -3,7 +3,3 @@
 # Allows requests from the configured Decidim domain
 
 Rails.application.config.hosts << "{{ domain }}"
-Rails.application.config.hosts << /.*\.{{ DOMAIN_PRIMARY | replace('.', '\\.') }}/
-Rails.application.config.hosts << "localhost"
-Rails.application.config.hosts << "127.0.0.1"
-Rails.application.config.hosts << /\A\d+\.\d+\.\d+\.\d+\z/
