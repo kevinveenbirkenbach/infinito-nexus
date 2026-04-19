@@ -1,11 +1,12 @@
 - name: "Matomo | Set trusted hosts (domain + service + container reach host)"
   vars:
-    # Pin application_id + domain task-locally to shield against nested
-    # include_role chains (sys-stk-front-base → web-opt-rdr-domains /
-    # svc-prx-openresty) that pollute the role-vars layer and make
-    # {{ domain }}/{{ MATOMO_* }} resolve against the wrong application_id.
+    # Pin application_id task-locally to shield against nested include_role chains
+    # (sys-stk-front-base → web-opt-rdr-domains / svc-prx-openresty) that pollute
+    # the role-vars layer and make {{ MATOMO_* }} resolve against the wrong
+    # application_id. The domain lookup is inlined as a literal below because
+    # a task-local `domain:` override does NOT shield against eager evaluation
+    # of the role-layer `domain = lookup('domain', application_id)` template.
     application_id: "web-app-matomo"
-    domain: "{{ lookup('domain', 'web-app-matomo') }}"
   ansible.builtin.command:
     argv:
       - container
@@ -18,7 +19,7 @@
       - |
         set -eu
         CFG="{{ MATOMO_CONFIG }}"
-        DOMAIN="{{ domain }}"
+        DOMAIN="{{ lookup('domain', 'web-app-matomo') }}"
         SERVICE="{{ MATOMO_SERVICE }}"
         LOCAL="{{ DOCKER_REACH_HOST }}:{{ http_port }}"
 
