@@ -41,7 +41,7 @@ Trigger column legend: **auto** = fires automatically (push, pull_request, sched
 
 | Workflow | Description | Trigger | Inputs |
 |---|---|---|---|
-| [security-codeql.yml](../../../../../.github/workflows/security-codeql.yml): `🔒 Scan: CodeQL (Advanced)` | CodeQL static analysis. | reusable, auto (`push` to `main`) | none |
+| [security-codeql.yml](../../../../../.github/workflows/security-codeql.yml): `🔒 Scan: CodeQL (Advanced)` | CodeQL static analysis. Invoked by [ci-orchestrator.yml](../../../../../.github/workflows/ci-orchestrator.yml) so every CI run produces a single scan. See [pipeline.md](../../../artefact/git/pipeline.md) for the gating behaviour. | reusable | none |
 | [lint-ansible.yml](../../../../../.github/workflows/lint-ansible.yml): `🔍 Lint: Ansible` | Runs `make lint-ansible`. | reusable | none |
 | [lint-docker.yml](../../../../../.github/workflows/lint-docker.yml): `🔍 Lint: Dockerfiles` | hadolint on `Dockerfile` with SARIF upload. | reusable | none |
 | [lint-python.yml](../../../../../.github/workflows/lint-python.yml): `🔍 Lint: Python` | `ruff` over the Python sources. | reusable | none |

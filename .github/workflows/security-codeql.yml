@@ -17,9 +17,6 @@ concurrency:
 
 on:
   workflow_call:
-  push:
-    branches:
-      - main
 
 
 jobs:
