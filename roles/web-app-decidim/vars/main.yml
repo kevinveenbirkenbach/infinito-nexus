@@ -1,5 +1,6 @@
 # General
 application_id:                   "web-app-decidim"
+domain:                           "{{ lookup('domain', application_id) }}"
 
 # Docker
 container_port:                   "3000"
@@ -7,6 +8,7 @@ container_port:                   "3000"
 # Decidim
 DECIDIM_VERSION:                  "{{ lookup('config', application_id, 'compose.services.decidim.version') }}"
 DECIDIM_IMAGE:                    "{{ lookup('config', application_id, 'compose.services.decidim.image') }}"
+DECIDIM_CUSTOM_IMAGE:             "{{ DECIDIM_IMAGE }}:{{ DECIDIM_VERSION }}-infinito"
 DECIDIM_CONTAINER:                "{{ lookup('config', application_id, 'compose.services.decidim.name') }}"
 
 ## Volumes

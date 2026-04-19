@@ -4,7 +4,11 @@
 {% set service_name = 'decidim' %}
 {% set container_healthcheck = 'health_check' %}
 {% include 'roles/sys-svc-container/templates/base.yml.j2' %}
-    image: "{{ DECIDIM_IMAGE }}:{{ DECIDIM_VERSION }}"
+    {{ lookup('template', 'roles/sys-svc-container/templates/build.yml.j2') | indent(4) }}
+      args:
+        DECIDIM_IMAGE: "{{ DECIDIM_IMAGE }}"
+        DECIDIM_VERSION: "{{ DECIDIM_VERSION }}"
+    image: "{{ DECIDIM_CUSTOM_IMAGE }}"
     container_name: "{{ DECIDIM_CONTAINER }}"
     command: bundle exec puma -C config/puma.rb
     ports:

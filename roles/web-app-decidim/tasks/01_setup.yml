@@ -39,7 +39,7 @@
       puts "Organization host set to: #{org.host}"
     env:
       RAILS_ENV: "{{ ENVIRONMENT }}"
-      DECIDIM_ORG_HOST: "{{ lookup('tls', application_id, 'url.base') | regex_replace('https?://', '') | regex_replace('/+$', '') }}"
+      DECIDIM_ORG_HOST: "{{ domain }}"
   register: decidim_org_result
   changed_when: "'Organization host set to' in decidim_org_result.stdout"
 
@@ -72,3 +72,20 @@
   register: decidim_admin_result
   changed_when: "'Admin user ready' in decidim_admin_result.stdout"
 
+
+- name: "Decidim | Configure OIDC omniauth settings in organization"
+  community.docker.docker_container_exec:
+    container: "{{ DECIDIM_CONTAINER }}"
+    command: bundle exec rails runner -
+    stdin: |
+      org = Decidim::Organization.first
+      settings = org.omniauth_settings || {}
+      settings["omniauth_settings_openid_connect_enabled"] = true
+      org.omniauth_settings = settings
+      org.save!
+      puts "OIDC settings configured"
+    env:
+      RAILS_ENV: "{{ ENVIRONMENT }}"
+  register: decidim_oidc_result
+  changed_when: "'OIDC settings configured' in decidim_oidc_result.stdout"
+  when: DECIDIM_OIDC_ENABLED | bool
