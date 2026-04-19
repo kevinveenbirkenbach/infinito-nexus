@@ -38,13 +38,19 @@ async function performFriendicaLogin(page, baseUrl, username, password) {
   const usernameField = page.locator("input[name='username']");
   const passwordField = page.locator("input[name='password']");
 
+  // Friendica renders a `btn form-button-search` submit in the topbar before
+  // the main login form, so a generic `button[type='submit']` selector picks
+  // up the search button. Target the login form's own "Sign in" button by
+  // accessible role + exact name instead.
+  const signInButton = page.getByRole("button", { name: "Sign in", exact: true });
+
   await usernameField.waitFor({ state: "visible", timeout: 60_000 });
   await usernameField.fill(username);
   await passwordField.fill(password);
 
   await Promise.all([
     page.waitForLoadState("domcontentloaded"),
-    page.locator("button[type='submit'], input[type='submit']").first().click(),
+    signInButton.click(),
   ]);
 }
 
@@ -130,9 +136,12 @@ test("friendica: biber sends direct message to administrator, administrator rece
     await subjectField.fill(testSubject);
     await bodyField.fill(testBody);
 
+    // Same first-submit-button hazard as the login form: the topbar's search
+    // button would win a generic selector. Scope to the composer's own submit.
+    const sendButton = biberPage.getByRole("button", { name: /^(submit|send)$/i }).last();
     await Promise.all([
       biberPage.waitForLoadState("domcontentloaded"),
-      biberPage.locator("button[type='submit'], input[type='submit']").first().click(),
+      sendButton.click(),
     ]);
 
     await friendicaLogout(biberPage, expectedFriendicaBaseUrl);
