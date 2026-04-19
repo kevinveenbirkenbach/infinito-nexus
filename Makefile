@@ -34,7 +34,8 @@ endif
 	act-all act-app act-workflow \
 	deploy-fresh-kept-apps container-refresh-inventory deploy-reuse-kept-all container-purge-entity container-purge-system \
 	deploy-fresh-purged-apps deploy-reuse-kept-apps deploy-reuse-purged-apps deploy-fresh-kept-all \
-	bootstrap mark-development
+	bootstrap mark-development \
+	sign-push
 
 # Bootstrap the local development environment.
 environment-bootstrap: wsl2-systemd-check install-python-dev install-lint apparmor-teardown dns-setup disable-ipv6
@@ -358,3 +359,8 @@ deploy-reuse-kept-all:
 # Purge one or more app entities, then redeploy them on existing inventory.
 deploy-reuse-purged-apps: container-purge-entity
 	@$(MAKE) deploy-reuse-kept-apps
+
+# GPG-sign every unpushed commit on the current branch and push.
+# Must run outside the Claude sandbox so gpg-agent/pinentry can reach ~/.gnupg.
+sign-push:
+	@bash scripts/git/sign-push.sh

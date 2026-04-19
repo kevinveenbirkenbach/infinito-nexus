@@ -55,8 +55,10 @@
       "Bash(git -C *)",
       "Bash(git branch -D*)",
       "Bash(git clean*)",
-      "Bash(git push --force*)",
+      "Bash(git push*)",
       "Bash(git reset --hard*)",
+      "Bash(git send-pack*)",
+      "Bash(make sign-push*)",
       "Bash(sudo*)",
       "Bash(until *)",
       "Bash(while *)"
@@ -122,7 +124,6 @@
       "Bash(gh repo sync*)",
       "Bash(gh workflow run*)",
       "Bash(git commit*)",
-      "Bash(git push*)",
       "Skill(update-config*)"
     ],
     "additionalDirectories": [
@@ -147,6 +148,7 @@
         "*.infinito.example",
         "*.infinito.nexus",
         "*.nektosact.com",
+        "*.nextcloud.com",
         "*.npmjs.org",
         "*.pythonhosted.org",
         "*.taiga.io",
