@@ -2,7 +2,7 @@
 
 ## Description
 
-Step into a secure future with Keycloak! This open‐source identity and access management solution offers powerful single sign-on (SSO), multi-factor authentication, and user federation capabilities. With support for industry standards such as SAML and OpenID Connect, Keycloak helps you protect and streamline access to your applications.
+Step into a secure future with [Keycloak](https://www.keycloak.org/)! This open‐source identity and access management solution offers powerful single sign-on (SSO), multi-factor authentication, and user federation capabilities. With support for industry standards such as SAML and OpenID Connect, Keycloak helps you protect and streamline access to your applications.
 
 ## Overview
 
@@ -15,6 +15,10 @@ This role deploys Keycloak in a Docker environment, integrating it with a Postgr
 - **Standards Support:** Seamlessly integrate with SAML, OpenID Connect, and OAuth2 to support various authentication flows.
 - **Scalable and Customizable:** Easily tailor settings and scale your Keycloak instance to meet growing demands.
 
+## Developer Notes
+
+For the OIDC variable tree, claim rules, and the policy that app-specific protocol mappers belong in per-client scope files (not in the shared `clients/default.json.j2`), see [oidc.md](../../docs/contributing/design/iam/oidc.md).
+
 ## Further Resources
 
 - [Keycloak Official Website](https://www.keycloak.org/)
@@ -26,8 +30,7 @@ This role deploys Keycloak in a Docker environment, integrating it with a Postgr
 
 ## Credits
 
-Developed and maintained by **Kevin Veen-Birkenbach**.  
+Developed and maintained by **Kevin Veen-Birkenbach**.
 Learn more at [veen.world](https://www.veen.world).
-
-Part of the [Infinito.Nexus Project](https://s.infinito.nexus/code)  
-Licensed under [Infinito.Nexus Community License (Non-Commercial)](https://s.infinito.nexus/license).
+Part of the [Infinito.Nexus Project](https://s.infinito.nexus/code).
+Licensed under the [Infinito.Nexus Community License (Non-Commercial)](https://s.infinito.nexus/license).
