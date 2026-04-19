@@ -7,4 +7,4 @@ Use this page when a local deploy fails. For automated GitHub Actions / CI triag
 
 ## Retry Loop
 
-- For the shared local retry loop, you MUST follow [Iteration](../iteration.md).
+- For the shared local retry loop, you MUST follow [Role Loop](../iteration/role.md).

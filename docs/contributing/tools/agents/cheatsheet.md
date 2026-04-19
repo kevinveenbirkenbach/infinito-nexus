@@ -13,6 +13,7 @@ Every prompt below instructs the agent to first clarify all open requirements th
 | Building a new feature, app, or larger change | [Development](#development-) |
 | Fixing or evolving a single web app role with the deploy/test loop | [Web Development Iteration](#web-development-iteration-) |
 | Running or validating tests for a specific scope | [Testing](#testing-) |
+| Writing or updating a Playwright spec for a `web-*` role | [Playwright Tests](#playwright-tests-) |
 | Cleaning up code, docs, or roles after a change | [Refactor and Optimize](#refactor-and-optimize-) |
 | A GitHub Actions / CI run failed and needs triage | [Pipeline Debugging](#pipeline-debugging-) |
 | A local deploy is failing on the host | [Local Deploy Debugging](#local-deploy-debugging-) |
@@ -38,10 +39,10 @@ SPOT: [develop.md](../../../agents/action/develop.md)
 For any change with a documented acceptance scope, [Requirement Implementation](#requirement-implementation-) is the preferred entry point; use this prompt only when no requirement file exists or applies.
 
 ```
-Follow the instructions from AGENTS.md, iterate on web app role <role> by following the procedure in docs/agents/action/iteration.md. Begin by clarifying every open requirement through active listening, then act autonomously through to completion with as few follow-up questions as possible. Use mode /caveman ultra.
+Follow the instructions from AGENTS.md, iterate on web app role <role> by following the procedure in docs/agents/action/iteration/role.md. Begin by clarifying every open requirement through active listening, then act autonomously through to completion with as few follow-up questions as possible. Use mode /caveman ultra.
 ```
 
-SPOT: [iteration.md](../../../agents/action/iteration.md)
+SPOT: [Role Loop](../../../agents/action/iteration/role.md)
 
 ## Testing ✅
 
@@ -50,6 +51,14 @@ Follow the instructions from AGENTS.md, run and validate tests for <scope> by fo
 ```
 
 SPOT: [testing.md](../../../agents/action/testing.md)
+
+## Playwright Tests 🎭
+
+```
+Follow the instructions from AGENTS.md, write or update the Playwright test for role <role> by following the procedure in docs/agents/action/iteration/playwright.md. Begin by clarifying every open requirement through active listening, then act autonomously through to completion with as few follow-up questions as possible. Ask upfront whether to scope changes to the Playwright files only or also to any other files that cause the tests to fail. Use mode /caveman ultra.
+```
+
+SPOT: [playwright.md](../../actions/testing/playwright.md)
 
 ## Refactor and Optimize ♻️
 

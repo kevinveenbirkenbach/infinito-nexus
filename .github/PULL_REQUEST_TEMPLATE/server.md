@@ -81,7 +81,7 @@ Check the relevant rows and explain intentional omissions in `Additional Notes`.
 | [ ] | `users/main.yml` | When the role bootstraps users or identities | Defines user bootstrap or role-specific user management data. |
 | [ ] | `files/Dockerfile` | When a custom image is required | Provides a custom image build path. Prefer this over `Dockerfile.j2`. |
 | [ ] | `templates/playwright.env.j2` | When Playwright coverage is included | Configures the Playwright test environment. See [Contributing `playwright.env.j2`](../../docs/agents/files/role/playwright.env.j2.md). |
-| [ ] | `files/playwright.spec.js` | When Playwright coverage is included | Defines the Playwright login and logout test flow. See [Contributing `playwright.spec.js`](../../docs/agents/files/role/playwright.spec.js.md). |
+| [ ] | `files/playwright.spec.js` | When Playwright coverage is included | Defines the Playwright login and logout test flow. See [Contributing `playwright.spec.js`](../../docs/contributing/artefact/files/role/playwright.specs.js.md). |
 
 ### Registered
 
