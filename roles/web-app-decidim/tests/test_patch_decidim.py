@@ -1,7 +1,9 @@
 """Unit tests for patch_decidim.py"""
+
 import sys
 import os
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'files'))
+
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "files"))
 
 from patch_decidim import patch_secrets_yml, patch_omniauth_rb, patch_omniauth_helper_rb
 
@@ -47,9 +49,9 @@ def test_patch_secrets_yml_adds_oidc_to_default():
 
 def test_patch_secrets_yml_adds_oidc_to_development():
     result = patch_secrets_yml(SECRETS_YML_FIXTURE)
-    lines = result.split('\n')
-    dev_idx = next(i for i, line in enumerate(lines) if 'developer:' in line)
-    after_dev = '\n'.join(lines[dev_idx:dev_idx + 20])
+    lines = result.split("\n")
+    dev_idx = next(i for i, line in enumerate(lines) if "developer:" in line)
+    after_dev = "\n".join(lines[dev_idx : dev_idx + 20])
     assert "openid_connect:" in after_dev
 
 
@@ -73,7 +75,9 @@ def test_patch_omniauth_rb_closes_correctly():
 
 def test_patch_omniauth_helper_rb_adds_early_return():
     result = patch_omniauth_helper_rb(OMNIAUTH_HELPER_FIXTURE)
-    assert 'return icon("login-box-line") if provider.to_sym == :openid_connect' in result
+    assert (
+        'return icon("login-box-line") if provider.to_sym == :openid_connect' in result
+    )
 
 
 def test_patch_omniauth_helper_rb_preserves_original_method():

@@ -1,4 +1,5 @@
 """Patches Decidim gem files to add OpenID Connect support."""
+
 import re
 
 
@@ -38,23 +39,30 @@ OMNIAUTH_INJECTION = r"""
 def patch_secrets_yml(content: str) -> str:
     """Add openid_connect block to default and development omniauth sections."""
     google_anchor = '      client_secret: <%= ENV["OMNIAUTH_GOOGLE_CLIENT_SECRET"] %>'
-    if google_anchor in content and 'openid_connect:' not in content.split(google_anchor)[1].split('    developer:')[0]:
+    if (
+        google_anchor in content
+        and "openid_connect:"
+        not in content.split(google_anchor)[1].split("    developer:")[0]
+    ):
         content = content.replace(
-            google_anchor,
-            google_anchor + '\n' + OIDC_BLOCK.rstrip()
+            google_anchor, google_anchor + "\n" + OIDC_BLOCK.rstrip()
         )
-    developer_anchor = '    developer:\n      enabled: true\n      icon: phone-line'
-    if developer_anchor in content and 'openid_connect:' not in content.split(developer_anchor)[1].split('\n\n')[0]:
+    developer_anchor = "    developer:\n      enabled: true\n      icon: phone-line"
+    if (
+        developer_anchor in content
+        and "openid_connect:" not in content.split(developer_anchor)[1].split("\n\n")[0]
+    ):
         content = content.replace(
-            developer_anchor,
-            developer_anchor + '\n' + OIDC_BLOCK.rstrip()
+            developer_anchor, developer_anchor + "\n" + OIDC_BLOCK.rstrip()
         )
     return content
 
 
 def patch_omniauth_rb(content: str) -> str:
     """Insert openid_connect provider registration before the closing end."""
-    content = re.sub(r'(  end\nend\s*)$', OMNIAUTH_INJECTION + r'\1', content.rstrip()) + '\n'
+    content = (
+        re.sub(r"(  end\nend\s*)$", OMNIAUTH_INJECTION + r"\1", content.rstrip()) + "\n"
+    )
     return content
 
 
@@ -62,7 +70,7 @@ def patch_omniauth_helper_rb(content: str) -> str:
     """Return login-box-line icon for openid_connect to avoid registry lookup failure."""
     return content.replace(
         "    def oauth_icon(provider)",
-        '    def oauth_icon(provider)\n      return icon("login-box-line") if provider.to_sym == :openid_connect'
+        '    def oauth_icon(provider)\n      return icon("login-box-line") if provider.to_sym == :openid_connect',
     )
 
 
@@ -74,7 +82,9 @@ if __name__ == "__main__":
         f.write(patch_secrets_yml(content))
     print("secrets.yml patched")
 
-    omniauth_path = "/usr/local/bundle/gems/decidim-core-0.28.0/config/initializers/omniauth.rb"
+    omniauth_path = (
+        "/usr/local/bundle/gems/decidim-core-0.28.0/config/initializers/omniauth.rb"
+    )
     with open(omniauth_path) as f:
         content = f.read()
     with open(omniauth_path, "w") as f:
