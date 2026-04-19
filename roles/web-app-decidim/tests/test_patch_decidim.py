@@ -48,7 +48,7 @@ def test_patch_secrets_yml_adds_oidc_to_default():
 def test_patch_secrets_yml_adds_oidc_to_development():
     result = patch_secrets_yml(SECRETS_YML_FIXTURE)
     lines = result.split('\n')
-    dev_idx = next(i for i, l in enumerate(lines) if 'developer:' in l)
+    dev_idx = next(i for i, line in enumerate(lines) if 'developer:' in line)
     after_dev = '\n'.join(lines[dev_idx:dev_idx + 20])
     assert "openid_connect:" in after_dev
 
