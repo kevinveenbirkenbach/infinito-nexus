@@ -7,8 +7,8 @@ guidance lives in [oidc.md](oidc.md) and [ldap.md](ldap.md).
 
 | Provider | Role | Variable namespace | Definition file |
 |---|---|---|---|
-| OIDC | [web-app-keycloak](../../../../roles/web-app-keycloak/) | `OIDC.*` | [13_oidc.yml](../../../../group_vars/all/13_oidc.yml) |
-| LDAP | [svc-db-openldap](../../../../roles/svc-db-openldap/) | `LDAP.*` | [14_ldap.yml](../../../../group_vars/all/14_ldap.yml) |
+| OIDC | [web-app-keycloak](../../../../roles/web-app-keycloak/) | `OIDC.*` | [11_oidc.yml](../../../../group_vars/all/11_oidc.yml) |
+| LDAP | [svc-db-openldap](../../../../roles/svc-db-openldap/) | `LDAP.*` | [12_ldap.yml](../../../../group_vars/all/12_ldap.yml) |
 
 Application roles MUST consume identity data exclusively through these
 namespaces. Hardcoding a claim name, attribute name, DN, or endpoint in a role
