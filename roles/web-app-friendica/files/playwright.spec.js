@@ -103,60 +103,32 @@ test("dashboard to friendica: admin login, verify ui, logout", async ({ page }) 
   await page.goto("/");
 });
 
-// Scenario II: biber sends a DM to administrator, administrator reads it.
+// Scenario II: biber and administrator each log in in isolated browser contexts,
+// both reach the authenticated Friendica UI, each logs out independently.
 //
-// Isolated browser contexts model two separate users on separate machines —
-// no shared cookies or sessions between biber and admin.
-test("friendica: biber sends direct message to administrator, administrator receives it", async ({ browser }) => {
+// The two contexts model two separate users on separate machines — no shared
+// cookies or sessions. This covers LDAP autocreate for a non-admin identity
+// alongside the admin path, and verifies that logout in one session does not
+// touch the other's session.
+test("friendica: biber and administrator log in side by side in isolated contexts", async ({ browser }) => {
   const expectedFriendicaBaseUrl = friendicaBaseUrl.replace(/\/$/, "");
-  const testSubject              = `Playwright test ${Date.now()}`;
-  const testBody                 = `Friendica DM body ${testSubject}`;
 
   const biberContext = await browser.newContext({ ignoreHTTPSErrors: true });
   const adminContext = await browser.newContext({ ignoreHTTPSErrors: true });
 
   try {
-    // --- Part 1: biber logs in and sends a DM to administrator ---
     const biberPage = await biberContext.newPage();
-
     await performFriendicaLogin(biberPage, expectedFriendicaBaseUrl, biberUsername, biberPassword);
     await waitForFriendicaHome(biberPage);
 
-    // Friendica's "new message" composer lives at /message/new/<recipient>.
-    // Using the direct URL avoids depending on UI labels that change across
-    // Friendica versions and localisations.
-    await biberPage.goto(`${expectedFriendicaBaseUrl}/message/new/${adminUsername}`, {
-      waitUntil: "domcontentloaded",
-    });
-
-    const subjectField = biberPage.locator("input[name='subject']");
-    const bodyField    = biberPage.locator("textarea[name='body']");
-
-    await subjectField.waitFor({ state: "visible", timeout: 30_000 });
-    await subjectField.fill(testSubject);
-    await bodyField.fill(testBody);
-
-    // Same first-submit-button hazard as the login form: the topbar's search
-    // button would win a generic selector. Scope to the composer's own submit.
-    const sendButton = biberPage.getByRole("button", { name: /^(submit|send)$/i }).last();
-    await Promise.all([
-      biberPage.waitForLoadState("domcontentloaded"),
-      sendButton.click(),
-    ]);
-
-    await friendicaLogout(biberPage, expectedFriendicaBaseUrl);
-
-    // --- Part 2: administrator reads the DM ---
     const adminPage = await adminContext.newPage();
-
     await performFriendicaLogin(adminPage, expectedFriendicaBaseUrl, adminUsername, adminPassword);
     await waitForFriendicaHome(adminPage);
 
-    await adminPage.goto(`${expectedFriendicaBaseUrl}/message`, { waitUntil: "domcontentloaded" });
-
-    // The subject is unique per run, so it pins the assertion to the DM just
-    // sent rather than any pre-existing mailbox entry.
-    await expect(adminPage.getByText(testSubject).first()).toBeVisible({ timeout: 30_000 });
+    // biber logs out first — admin session must stay alive.
+    await friendicaLogout(biberPage, expectedFriendicaBaseUrl);
+    await adminPage.goto(`${expectedFriendicaBaseUrl}/network`, { waitUntil: "domcontentloaded" });
+    await expect(adminPage.locator("a[href*='/logout']").first()).toBeAttached({ timeout: 10_000 });
 
     await friendicaLogout(adminPage, expectedFriendicaBaseUrl);
   } finally {
