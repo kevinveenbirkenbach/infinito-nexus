@@ -27,11 +27,9 @@ shift
 repo_root="$(cd "$(dirname "$0")/../../.." && pwd)"
 spec_src="$repo_root/roles/$role/files/playwright.spec.js"
 defaults="$repo_root/roles/test-e2e-playwright/defaults/main.yml"
-package_json="$repo_root/roles/test-e2e-playwright/files/package.json"
 
 stage_base="${TEST_E2E_PLAYWRIGHT_STAGE_BASE_DIR:-/tmp/test-e2e-playwright}"
 reports_base="${TEST_E2E_PLAYWRIGHT_REPORTS_BASE_DIR:-/var/lib/infinito/logs/test-e2e-playwright}"
-distro="${TEST_E2E_PLAYWRIGHT_IMAGE_DISTRO:-noble}"
 
 stage_dir="$stage_base/$role"
 reports_dir="$reports_base/$role"
@@ -52,11 +50,10 @@ env_file="$stage_dir/.env"
 
 image="${TEST_E2E_PLAYWRIGHT_IMAGE:-}"
 if [[ -z "$image" ]]; then
-	base_image="$(awk '/^[[:space:]]*image:/{print $2; exit}' "$defaults")"
-	version="$(awk -F'"' '/@playwright\/test/{print $4; exit}' "$package_json")"
-	version="${version#^}"
-	version="${version#~}"
-	image="${base_image}:v${version}-${distro}"
+	base_image="$(awk '/^[[:space:]]*image:[[:space:]]/{print $2; exit}' "$defaults")"
+	# defaults/main.yml is the single source of truth for the image tag.
+	tag="$(awk -F'"' '/^[[:space:]]*version:[[:space:]]/{print $2; exit}' "$defaults")"
+	image="${base_image}:${tag}"
 fi
 
 command -v docker >/dev/null || {
