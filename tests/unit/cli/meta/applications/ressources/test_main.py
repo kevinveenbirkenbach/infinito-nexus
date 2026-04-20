@@ -69,6 +69,16 @@ class TestParsingHelpers(unittest.TestCase):
         self.assertFalse(cli._is_shared({}))
         self.assertFalse(cli._is_shared({"shared": False}))
 
+    def test_looks_like_container(self) -> None:
+        from cli.meta.applications.ressources import __main__ as cli
+
+        self.assertTrue(cli._looks_like_container({"mem_limit": "256m"}))
+        self.assertTrue(cli._looks_like_container({"cpus": 1}))
+        self.assertTrue(cli._looks_like_container({"image": "alpine"}))
+        self.assertTrue(cli._looks_like_container({"name": "foo", "version": "1"}))
+        self.assertFalse(cli._looks_like_container({}))
+        self.assertFalse(cli._looks_like_container({"enabled": True}))
+
 
 class TestAggregate(unittest.TestCase):
     def _row(
@@ -280,6 +290,32 @@ class TestCollectRoleResources(unittest.TestCase):
             warnings=warnings,
         )
         self.assertTrue(any("unknown" in w for w in warnings))
+
+    def test_toggle_only_local_entries_are_skipped(self) -> None:
+        from cli.meta.applications.ressources import __main__ as cli
+
+        apps = {
+            "web-app-x": {
+                "compose": {
+                    "services": {
+                        "x": {"cpus": 1, "mem_limit": "100m"},
+                        "feature_flag": {"enabled": True},
+                    }
+                }
+            }
+        }
+        rows: list = []
+        cli.collect_role_resources(
+            role_name="web-app-x",
+            applications=apps,
+            service_registry={},
+            visited=set(),
+            rows=rows,
+            warnings=[],
+        )
+        services_in_rows = {r["service"] for r in rows}
+        self.assertIn("x", services_in_rows)
+        self.assertNotIn("feature_flag", services_in_rows)
 
     def test_warns_when_role_config_missing(self) -> None:
         from cli.meta.applications.ressources import __main__ as cli

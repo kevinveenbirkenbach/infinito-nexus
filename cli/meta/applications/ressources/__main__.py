@@ -84,6 +84,14 @@ def _is_shared(service_conf: Dict[str, Any]) -> bool:
     return str(raw).strip().lower() in ("true", "1", "yes", "on")
 
 
+_RESOURCE_KEYS = ("mem_reservation", "mem_limit", "pids_limit", "cpus")
+_CONTAINER_KEYS = ("image", "name", "version", "container")
+
+
+def _looks_like_container(service_conf: Dict[str, Any]) -> bool:
+    return any(key in service_conf for key in _RESOURCE_KEYS + _CONTAINER_KEYS)
+
+
 def _row_for_service(
     role_name: str,
     service_key: str,
@@ -152,6 +160,8 @@ def collect_role_resources(
                     f"{role_name}: shared service '{service_key}' has no registered provider"
                 )
         else:
+            if not _looks_like_container(service_conf):
+                continue
             rows.append(_row_for_service(role_name, service_key, service_conf))
 
     for provider_role in shared_dependencies:
