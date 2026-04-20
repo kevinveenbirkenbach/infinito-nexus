@@ -46,6 +46,37 @@ if [ -d /mnt ]; then
 	sudo du -xh --max-depth=2 /mnt 2>/dev/null | sort -h | tail -15 || true
 fi
 
+# Nested view — hlth-disc-space runs INSIDE the infinito container and
+# evaluates df there, so host-side df alone can be misleading. These
+# blocks silently no-op when the container is not (yet) running.
+echo "--- infinito container (nested view) ---"
+INFINITO_CONTAINER="$(docker ps --filter 'name=infinito_nexus' --format '{{.Names}}' 2>/dev/null | head -1 || true)"
+if [ -n "${INFINITO_CONTAINER}" ]; then
+	echo "container: ${INFINITO_CONTAINER}"
+
+	echo "--- df inside container ---"
+	docker exec "${INFINITO_CONTAINER}" df -h 2>&1 || echo "docker exec df failed"
+
+	echo "--- df --output=pcent inside container (what hlth-disc-space sees) ---"
+	docker exec "${INFINITO_CONTAINER}" df --output=pcent 2>&1 || true
+
+	echo "--- failed systemd units inside container ---"
+	docker exec "${INFINITO_CONTAINER}" systemctl --failed --no-pager 2>&1 ||
+		echo "systemctl --failed not reachable"
+
+	echo "--- hlth-disc-space status ---"
+	docker exec "${INFINITO_CONTAINER}" \
+		systemctl status 'hlth-disc-space*' --no-pager -l 2>&1 ||
+		echo "no hlth-disc-space unit (not deployed yet)"
+
+	echo "--- hlth-disc-space journal (last 80 lines) ---"
+	docker exec "${INFINITO_CONTAINER}" \
+		journalctl -u 'hlth-disc-space*' -n 80 --no-pager 2>&1 ||
+		echo "journal for hlth-disc-space not accessible"
+else
+	echo "no infinito container running (expected before 'make up')"
+fi
+
 echo "::endgroup::"
 
 if [ -n "${GITHUB_STEP_SUMMARY:-}" ]; then
