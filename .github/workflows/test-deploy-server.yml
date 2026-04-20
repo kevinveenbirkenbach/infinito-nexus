@@ -115,6 +115,11 @@ jobs:
           APPS: ${{ matrix.apps }}
         run: ./scripts/tests/deploy/ci/all.sh
 
+      - name: Dump runner state (on failure)
+        if: failure()
+        shell: bash
+        run: ./scripts/github/dump_runner_state.sh "post-deploy failure (${{ matrix.apps }})"
+
       - name: Upload Playwright artifacts
         if: always()
         uses: actions/upload-artifact@v7
