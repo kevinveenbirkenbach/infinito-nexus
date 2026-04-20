@@ -77,7 +77,7 @@ APPS=web-app-odoo make deploy-reuse-kept-apps
 ## Access
 
 After deployment, Odoo is accessible at:
-- **URL:** `https://odoo.erp.<your-domain>/`
+- **URL:** `odoo.erp.{DOMAIN}` (HTTPS)
 - **Admin Login:** Uses configured administrator credentials
 - **SSO Login:** "Login with SSO" button (when OIDC is enabled)
 
