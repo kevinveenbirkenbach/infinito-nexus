@@ -1,7 +1,7 @@
 from ansible.errors import AnsibleFilterError
 import hashlib
 import base64
-from utils.config_utils import get_app_conf
+from utils.applications.config import get
 from utils.get_url import get_url
 
 
@@ -70,7 +70,7 @@ class FilterModule(object):
           - compose.services.hcaptcha.enabled
           - compose.services.recaptcha.enabled
         """
-        return get_app_conf(
+        return get(
             applications,
             application_id,
             f"compose.services.{feature}.enabled",
@@ -84,7 +84,7 @@ class FilterModule(object):
         Returns a list of additional whitelist entries for a given directive.
         Accepts both scalar and list in config; always returns a list.
         """
-        wl = get_app_conf(
+        wl = get(
             applications, application_id, "server.csp.whitelist." + directive, False, []
         )
         if isinstance(wl, list):
@@ -108,7 +108,7 @@ class FilterModule(object):
         if directive in ("style-src", "style-src-elem", "style-src-attr"):
             default_flags = {"unsafe-inline": True}
 
-        configured = get_app_conf(
+        configured = get(
             applications, application_id, "server.csp.flags." + directive, False, {}
         )
 
@@ -126,7 +126,7 @@ class FilterModule(object):
         Returns inline script/style snippets to hash for a given directive.
         Accepts both scalar and list in config; always returns a list.
         """
-        snippets = get_app_conf(
+        snippets = get(
             applications, application_id, "server.csp.hashes." + directive, False, []
         )
         if isinstance(snippets, list):
@@ -206,7 +206,7 @@ class FilterModule(object):
 
             for directive in directives:
                 # Collect explicit flags (to later respect explicit "False" on base during merge)
-                explicit_flags = get_app_conf(
+                explicit_flags = get(
                     applications,
                     application_id,
                     "server.csp.flags." + directive,

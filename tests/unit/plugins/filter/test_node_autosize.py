@@ -22,17 +22,17 @@ class TestNodeAutosizeFilter(unittest.TestCase):
         self.application_id = "web-app-nextcloud"
         self.service_name = "whiteboard"
 
-        # Patch get_app_conf (imported from utils.config_utils) inside the filter plugin
-        self.patcher = patch("plugins.filter.node_autosize.get_app_conf")
-        self.mock_get_app_conf = self.patcher.start()
+        # Patch get (imported from utils.applications.config) inside the filter plugin
+        self.patcher = patch("plugins.filter.node_autosize.get")
+        self.mock_get = self.patcher.start()
 
     def tearDown(self):
         self.patcher.stop()
 
     def _set_mem_limit(self, value):
-        """Helper: mock get_app_conf to return a specific mem_limit value."""
+        """Helper: mock get to return a specific mem_limit value."""
 
-        def _fake_get_app_conf(
+        def _fake_get(
             applications,
             application_id,
             config_path,
@@ -44,7 +44,7 @@ class TestNodeAutosizeFilter(unittest.TestCase):
             assert config_path == f"compose.services.{self.service_name}.mem_limit"
             return value
 
-        self.mock_get_app_conf.side_effect = _fake_get_app_conf
+        self.mock_get.side_effect = _fake_get
 
     # --- Tests for node_max_old_space_size (MB) ---
 

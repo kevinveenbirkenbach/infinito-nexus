@@ -5,7 +5,7 @@ from typing import Any, Dict, List, Optional, Set, Tuple
 from ansible.errors import AnsibleError
 from ansible.plugins.lookup import LookupBase
 
-from utils.config_utils import get_app_conf
+from utils.applications.config import get
 from utils.service_registry import (
     build_role_to_primary_service_key,
     build_service_registry_from_applications,
@@ -22,7 +22,7 @@ def _get_service_flag(
 ) -> bool:
     return any(
         bool(
-            get_app_conf(
+            get(
                 applications=applications,
                 application_id=app_id,
                 config_path=f"compose.services.{service_key}.{flag}",
@@ -39,7 +39,7 @@ def _get_enabled_service_keys(
     applications: Dict[str, Any],
     app_id: str,
 ) -> List[str]:
-    services = get_app_conf(
+    services = get(
         applications=applications,
         application_id=app_id,
         config_path="compose.services",

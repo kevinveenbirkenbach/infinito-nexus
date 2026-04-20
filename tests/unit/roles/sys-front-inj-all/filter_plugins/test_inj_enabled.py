@@ -29,7 +29,7 @@ if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
 
 # Import the same module path the plugin uses
-mu_mod = import_module("utils.config_utils")
+mu_mod = import_module("utils.applications.config")
 AppConfigKeyError = mu_mod.AppConfigKeyError
 
 # Load inj_enabled filter plugin from file

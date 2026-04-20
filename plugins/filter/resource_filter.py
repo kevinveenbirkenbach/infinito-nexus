@@ -1,7 +1,7 @@
 from __future__ import annotations
 
-from utils.config_utils import (
-    get_app_conf,
+from utils.applications.config import (
+    get,
     AppConfigKeyError,
     ConfigEntryNotSetError,
 )  # noqa: F401
@@ -30,7 +30,7 @@ def resource_filter(
         primary_service = (
             service_name if service_name != "" else get_entity_name(application_id)
         )
-        return get_app_conf(
+        return get(
             applications,
             application_id,
             f"compose.services.{primary_service}.{key}",

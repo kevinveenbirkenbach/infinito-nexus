@@ -1,9 +1,9 @@
 import os
 import sys
 
-from utils.config_utils import get_app_conf
+from utils.applications.config import get
 
-# Allow imports from utils (same trick as your get_app_conf filter)
+# Allow imports from utils (same trick as your config filter)
 _BASE_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", ".."))
 _MODULE_UTILS_DIR = os.path.join(_BASE_DIR, "utils")
 for _p in (_BASE_DIR, _MODULE_UTILS_DIR):
@@ -31,7 +31,7 @@ def inj_enabled_filter(
         name = str(f)
         path = f"{prefix}.{name}.enabled"
 
-        result[name] = get_app_conf(
+        result[name] = get(
             applications,
             application_id,
             path,

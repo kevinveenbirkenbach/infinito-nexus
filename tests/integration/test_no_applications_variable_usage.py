@@ -8,7 +8,7 @@ import unittest
 class TestNoApplicationsVariableUsage(unittest.TestCase):
     """
     This test ensures that the pattern `applications[some_variable]` is not used anywhere
-    under the roles/ directory. Instead, the usage of get_app_conf should be preferred.
+    under the roles/ directory. Instead, the usage of utils.applications.config.get should be preferred.
     """
 
     APPLICATIONS_VARIABLE_PATTERN = re.compile(
@@ -45,7 +45,7 @@ class TestNoApplicationsVariableUsage(unittest.TestCase):
             self.fail(
                 "Found illegal usages of 'applications[variable]' in the following locations:\n"
                 + "\n".join(found)
-                + "\n\nPlease use get_app_conf instead."
+                + "\n\nPlease use utils.applications.config.get instead."
             )
 
 

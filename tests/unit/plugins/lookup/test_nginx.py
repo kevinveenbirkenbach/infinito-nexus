@@ -35,7 +35,7 @@ class TestNginxPathsLookup(unittest.TestCase):
             "applications": {"svc-prx-openresty": {"docker": {"volumes": {}}}},
         }
 
-    def _fake_get_app_conf(self, applications, app_id, key, strict=True):
+    def _fake_get(self, applications, app_id, key, strict=True):
         if key == "compose.volumes.www":
             return "/opt/mock/www"
         if key == "compose.volumes.nginx":
@@ -44,8 +44,8 @@ class TestNginxPathsLookup(unittest.TestCase):
 
     def _run(self, terms, **kwargs):
         with patch(
-            "plugins.lookup.nginx.get_app_conf",
-            side_effect=self._fake_get_app_conf,
+            "plugins.lookup.nginx.get",
+            side_effect=self._fake_get,
         ):
             return self.plugin.run(terms, variables=self.variables, **kwargs)[0]
 
@@ -102,8 +102,8 @@ class TestNginxPathsLookup(unittest.TestCase):
 
         with (
             patch(
-                "plugins.lookup.nginx.get_app_conf",
-                side_effect=self._fake_get_app_conf,
+                "plugins.lookup.nginx.get",
+                side_effect=self._fake_get,
             ),
             patch(
                 "plugins.lookup.nginx.lookup_loader.get",
@@ -123,8 +123,8 @@ class TestNginxPathsLookup(unittest.TestCase):
         # tls should NOT be consulted when override is present
         with (
             patch(
-                "plugins.lookup.nginx.get_app_conf",
-                side_effect=self._fake_get_app_conf,
+                "plugins.lookup.nginx.get",
+                side_effect=self._fake_get,
             ),
             patch(
                 "plugins.lookup.nginx.lookup_loader.get",
@@ -146,8 +146,8 @@ class TestNginxPathsLookup(unittest.TestCase):
 
     def test_invalid_protocol_override_raises(self):
         with patch(
-            "plugins.lookup.nginx.get_app_conf",
-            side_effect=self._fake_get_app_conf,
+            "plugins.lookup.nginx.get",
+            side_effect=self._fake_get,
         ):
             with self.assertRaises(AnsibleError):
                 self.plugin.run(
@@ -158,8 +158,8 @@ class TestNginxPathsLookup(unittest.TestCase):
 
     def test_invalid_usage_raises(self):
         with patch(
-            "plugins.lookup.nginx.get_app_conf",
-            side_effect=self._fake_get_app_conf,
+            "plugins.lookup.nginx.get",
+            side_effect=self._fake_get,
         ):
             # want-path missing
             with self.assertRaises(AnsibleError):
