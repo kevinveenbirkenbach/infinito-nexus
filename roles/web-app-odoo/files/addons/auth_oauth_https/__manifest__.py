@@ -50,5 +50,5 @@ Features:
     "installable": True,
     "auto_install": False,
     "application": False,
-    "license": "LGPL-3",
+    "license": "Infinito.Nexus Community License (Non-Commercial)",
 }
