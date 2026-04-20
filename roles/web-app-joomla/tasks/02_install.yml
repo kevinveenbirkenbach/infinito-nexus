@@ -24,6 +24,24 @@
   changed_when: false
   failed_when: false
 
+# The joomla docker image (5.4.5-php8.3-apache) populates /var/www/html
+# asynchronously on first container start: index.php appears early, but
+# a stub configuration.php can land a short time later. Between the check
+# above and the install below, the stub has been observed to appear in CI
+# (~0.7s gap), which then makes the CLI installer refuse with
+# "[ERROR] configuration.php already present! Nothing to install, exiting."
+# If the check above confirmed Joomla is NOT installed, any configuration.php
+# appearing in that window is a stub from the image init — delete it so the
+# installer proceeds. Scoped by the same `joomla_installed.rc != 0` guard
+# as the install itself, so a genuine existing install is never touched.
+- name: "Remove stale stub configuration.php before install"
+  command:
+    argv: [ docker, exec, "{{ JOOMLA_CONTAINER }}", rm, -f, "{{ JOOMLA_CONFIG_FILE }}" ]
+  changed_when: false
+  when:
+    - joomla_installed.rc != 0
+    - has_installer.rc == 0
+
 # Install (uses absolute path + argv)
 - name: "Joomla CLI install (first run only)"
   command:
