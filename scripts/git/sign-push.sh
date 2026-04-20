@@ -52,8 +52,7 @@ UNSIGNED="$(git log --format='%G?' "${BASE}..HEAD" | grep -cvE '^G$' || true)"
 
 if [[ "${UNSIGNED}" -gt 0 ]]; then
 	echo "Signing ${UNSIGNED} of ${COUNT} commit(s) in ${BASE}..HEAD"
-	GIT_SEQUENCE_EDITOR=: git rebase --rebase-merges \
-		--exec 'git commit --amend --no-edit -S' "${BASE}"
+	GIT_SEQUENCE_EDITOR=: git rebase --rebase-merges -S "${BASE}"
 else
 	echo "All ${COUNT} commit(s) already GPG-signed; skipping re-sign."
 fi

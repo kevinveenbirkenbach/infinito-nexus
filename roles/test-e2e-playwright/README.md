@@ -24,7 +24,7 @@ This role:
 - Discovers Playwright-enabled roles by scanning `roles/*/templates/playwright.env.j2`
 - Supports allow-/deny-lists via `TEST_E2E_PLAYWRIGHT_ONLY_ROLES` and `TEST_E2E_PLAYWRIGHT_SKIP_ROLES`
 - Stages each Playwright project into `TEST_E2E_PLAYWRIGHT_STAGE_BASE_DIR/<application_id>`
-- Injects central default `package.json` and `playwright.config.js` when an app role omits them
+- Renders the central `package.json` template into each staged project and injects the central `playwright.config.js`
 - Copies role-specific `files/playwright.spec.js` into the staged `tests/playwright.spec.js`
 - Renders `.env` from `templates/playwright.env.j2` using Ansible variables (`application_id`, `domains`, `users`, `applications`)
 - Optionally waits until the application responds with HTTP `200` or `302`
@@ -41,7 +41,7 @@ runner itself.
 Each application role stays responsible for its own Playwright tests and configuration.
 This role only provides the execution framework.
 
-## Role Contract (What application roles must provide)
+## Role contract (what application roles must provide)
 
 A Playwright-enabled role must provide:
 
@@ -51,31 +51,29 @@ roles/<application_id>/
     files/playwright.spec.js
 ```
 
-For the file-level contract, use [Contributing `playwright.env.j2`](../../docs/agents/files/role/playwright.env.j2.md) and [Contributing `playwright.spec.js`](../../docs/agents/files/role/playwright.spec.js.md).
+For the file-level contract, use [Contributing `playwright.env.j2`](../../docs/agents/files/role/playwright.env.j2.md) and [Contributing `playwright.spec.js`](../../docs/contributing/artefact/files/role/playwright.specs.js.md).
 
-`package.json` and `playwright.config.js` are provided centrally by this role from:
-`roles/test-e2e-playwright/files/`.
+`package.json` and `playwright.config.js` are provided centrally by this role:
+- `roles/test-e2e-playwright/templates/package.json.j2` (rendered per-deploy; pins `@playwright/test` from `images.playwright.version`)
+- `roles/test-e2e-playwright/files/playwright.config.js` (copied as-is)
 
-## Included Files
+## Included files
 
-This role ships central Playwright defaults under:
+This role ships central Playwright defaults:
 
-`roles/test-e2e-playwright/files/`
+- `templates/package.json.j2`: `@playwright/test` version derived from `images.playwright.version`
+- `files/playwright.config.js`: shared Playwright configuration
 
-Included files:
-- `package.json`
-- `playwright.config.js`
-
-`package.json` and `playwright.config.js` are used as central defaults for every app role.
+Both are used as central defaults for every app role.
 
 ## Variables
 
-### Staging & Reports
+### Staging & reports
 - `TEST_E2E_PLAYWRIGHT_STAGE_BASE_DIR` (default: `/tmp/test-e2e-playwright`)
 - `TEST_E2E_PLAYWRIGHT_REPORTS_BASE_DIR` (default: `/var/lib/infinito/logs/test-e2e-playwright`)
 
 ### Playwright runtime
-- `TEST_E2E_PLAYWRIGHT_IMAGE` (default: empty; optional full image override)
+- `TEST_E2E_PLAYWRIGHT_IMAGE` (default: empty; optional full image override. When empty, derived from `images.playwright.image` + `images.playwright.version`)
 - `TEST_E2E_PLAYWRIGHT_IMAGE_DISTRO` (default: `noble`)
 - `TEST_E2E_PLAYWRIGHT_COMMAND` (default: `npm install --no-fund --no-audit && npx playwright test`)
 
@@ -88,22 +86,22 @@ Included files:
 - `TEST_E2E_PLAYWRIGHT_ONLY_ROLES` (default: `allowed_applications`)
 - `TEST_E2E_PLAYWRIGHT_SKIP_ROLES` (default: `[]`)
 
-## Design Notes
+## Design notes
 
 - The runner is intentionally test-agnostic at runtime: it executes only tests provided by application roles.
-- The central `files/package.json` is the single source of truth for the default Playwright version.
+- `images.playwright.version` in `defaults/main.yml` is the single source of truth for the default Playwright version; the central `templates/package.json.j2` pins it via the `image_version` filter.
 - `templates/playwright.env.j2` acts as the stable marker for discovery and as the source of environment configuration.
 - Playwright is executed in Docker for reproducibility and consistent browser dependencies.
 - In `TLS_MODE=self_signed`, the role requires `CA_TRUST.cert_host`, `CA_TRUST.wrapper_host`, and `CA_TRUST.trust_name` and fails early if cert/wrapper files are missing.
 
-## How To Use
+## How to use
 
 1. Add the two app-specific files:
    - `roles/<application_id>/templates/playwright.env.j2`
    - `roles/<application_id>/files/playwright.spec.js`
-   Follow [Contributing `playwright.env.j2`](../../docs/agents/files/role/playwright.env.j2.md) and [Contributing `playwright.spec.js`](../../docs/agents/files/role/playwright.spec.js.md) while creating them.
+   Follow [Contributing `playwright.env.j2`](../../docs/agents/files/role/playwright.env.j2.md) and [Contributing `playwright.spec.js`](../../docs/contributing/artefact/files/role/playwright.specs.js.md) while creating them.
 2. Run deployment and include your app in `allowed_applications` (or leave it empty to run all discovered apps).
-3. Keep `package.json` and `playwright.config.js` centralized in `roles/test-e2e-playwright/files/`.
+3. Keep `package.json` and `playwright.config.js` centralized in `roles/test-e2e-playwright/` (`templates/package.json.j2` and `files/playwright.config.js`).
 
 Example override for running only one spec:
 

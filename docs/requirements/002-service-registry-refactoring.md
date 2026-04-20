@@ -16,7 +16,7 @@ self-describing.
       declared via a custom `run_after:` list in the role's `meta/main.yml`. Each
       entry is a role name (e.g. `web-svc-cdn`). `roles/sys-utils-service-loader`
       MUST read this field and load the listed roles before the declaring role within
-      the same deploy-type pass. This is a project-specific convention — Ansible does
+      the same deploy-type pass. This is a project-specific convention; Ansible does
       not process `run_after:` natively.
       Cross-type dependencies are handled implicitly by stage ordering:
       `roles/sys-utils-service-loader` runs in the constructor stage and loads all
@@ -30,7 +30,7 @@ self-describing.
       PostgreSQL and MariaDB are defined as regular services in their own
       `config/main.yml` (same as any other service). Because databases are a different
       deploy type from apps, they are loaded automatically before apps by
-      `roles/sys-utils-service-loader` — no `run_after:` declaration is needed in
+      `roles/sys-utils-service-loader`; no `run_after:` declaration is needed in
       the app.
 
       **Before:**
@@ -52,7 +52,7 @@ self-describing.
 
       **After:**
       ```yaml
-      # svc-db-mariadb/config/main.yml  — self-describing, no central registry entry
+      # svc-db-mariadb/config/main.yml: self-describing, no central registry entry
       compose:
         services:
           mariadb:
@@ -66,7 +66,7 @@ self-describing.
             shared: true
             enabled: true
 
-      # web-app-matomo/config/main.yml  — no database.type needed for service loading
+      # web-app-matomo/config/main.yml: no database.type needed for service loading
       # (svc-db-mariadb is loaded automatically before web-app-* by the service loader)
       ```
 - [x] `frontend` / `backend` type is auto-detected from the role name prefix
@@ -127,7 +127,7 @@ self-describing.
             provides: ldap
       ```
       All consumers (templates, lookups, `run_after:` lists) continue to reference
-      the functional name (e.g. `oidc`, `email`, `ldap`) — no consumer changes are
+      the functional name (e.g. `oidc`, `email`, `ldap`); no consumer changes are
       required for roles that already use these names.
 - [x] `roles/sys-utils-service-loader` is the single place that loads all services.
       It MUST use the existing function that determines which roles are universal,
@@ -136,8 +136,8 @@ self-describing.
 - [x] `roles/sys-utils-service-loader` is invoked from the constructor stage
       (`tasks/stages/01_constructor.yml`) instead of the server block
       (`tasks/stages/02_server.yml`).
-- [x] All service dependencies — including databases (e.g. `svc-db-mariadb`,
-      `svc-db-postgres`) and shared services (e.g. `web-app-keycloak`) — are loaded
+- [x] All service dependencies, including databases (e.g. `svc-db-mariadb`,
+      `svc-db-postgres`) and shared services (e.g. `web-app-keycloak`), are loaded
       automatically by `roles/sys-utils-service-loader` in the constructor stage.
       No service dependency MUST ever require the user to list it explicitly in `APPS`.
 - [x] Every file that currently reads from `SERVICE_REGISTRY` or `20_services.yml`
@@ -160,7 +160,7 @@ self-describing.
 - [x] Every file and role that is modified as part of this refactoring MUST also be
       simplified and refactored where possible, following the principles in
       [principles.md](../contributing/design/principles.md). Do not limit changes to
-      the minimum required — use the mandatory touch as an opportunity to improve
+      the minimum required. Use the mandatory touch as an opportunity to improve
       clarity, reduce duplication, and remove dead code in the same pass.
 - [x] All existing integration and unit tests pass after the refactoring.
 - [x] Once all other Acceptance Criteria are checked off and the full validation
@@ -177,13 +177,13 @@ It covers all relevant service categories and dependency patterns:
 | App | Purpose |
 |---|---|
 | `web-svc-cdn` | Frontend svc with canonical aliases (`css`, `javascript`) |
-| `web-svc-file` | Simplest frontend svc — baseline auto-detection |
+| `web-svc-file` | Simplest frontend svc; baseline auto-detection |
 | `web-app-dashboard` | Frontend web-app consuming multiple services |
-| `svc-db-postgres` | Database as a regular service (replaces `role_template`) — deployed standalone to verify the DB-as-service pattern directly |
-| `svc-db-mariadb` | MariaDB as a regular service — deployed standalone alongside postgres to verify both database types independently |
-| `web-app-matomo` | web-app with MariaDB dependency — tests automatic cross-type service loading |
+| `svc-db-postgres` | Database as a regular service (replaces `role_template`); deployed standalone to verify the DB-as-service pattern directly |
+| `svc-db-mariadb` | MariaDB as a regular service; deployed standalone alongside postgres to verify both database types independently |
+| `web-app-matomo` | web-app with MariaDB dependency; tests automatic cross-type service loading |
 | `web-app-gitea` | web-app with Keycloak (OIDC) dependency |
-| `web-app-nextcloud` | Complex app with both MariaDB and Keycloak — depends on all of the above |
+| `web-app-nextcloud` | Complex app with both MariaDB and Keycloak; depends on all of the above |
 
 ```bash
 APPS="web-svc-cdn web-svc-file web-app-dashboard svc-db-postgres svc-db-mariadb web-app-matomo web-app-gitea web-app-nextcloud" \
@@ -202,28 +202,28 @@ Every app in the Validation Apps table MUST be deployed standalone at least once
 After completing one full iteration cycle over all apps, restart from the top until every app works
 and all Acceptance Criteria are checked off.
 
-**Iteration order (largest → smallest):**
+**Iteration order (largest to smallest):**
 
-1. `web-app-nextcloud` — most complex; MariaDB + Keycloak + many service dependencies
-2. `web-app-gitea` — Keycloak (OIDC) dependency
-3. `web-app-matomo` — MariaDB dependency — tests automatic cross-type service loading
-4. `web-app-dashboard` — frontend web-app consuming multiple services
-5. `svc-db-postgres` — database as a regular service
-6. `svc-db-mariadb` — MariaDB as a regular service, standalone validation
-7. `web-svc-cdn` — canonical aliases (`css`, `javascript`)
-8. `web-svc-file` — simplest frontend service; baseline
+1. `web-app-nextcloud`: most complex; MariaDB + Keycloak + many service dependencies
+2. `web-app-gitea`: Keycloak (OIDC) dependency
+3. `web-app-matomo`: MariaDB dependency; tests automatic cross-type service loading
+4. `web-app-dashboard`: frontend web-app consuming multiple services
+5. `svc-db-postgres`: database as a regular service
+6. `svc-db-mariadb`: MariaDB as a regular service, standalone validation
+7. `web-svc-cdn`: canonical aliases (`css`, `javascript`)
+8. `web-svc-file`: simplest frontend service; baseline
 
 **Per-app cycle:**
 
 For every app in the iteration order, run the full loop described in
-[iteration.md](../agents/action/iteration.md) independently — as if starting fresh for
+[Role Loop](../agents/action/iteration/role.md) independently, as if starting fresh for
 that app. Do not carry over assumptions from the previous app.
 
-1. Read [iteration.md](../agents/action/iteration.md) before starting each app.
+1. Read [Role Loop](../agents/action/iteration/role.md) before starting each app.
 2. Implement the role-local changes for the current app.
 3. Deploy: `make deploy-fresh-purged-apps APPS=<role>`
-4. Follow the inspect-fix-redeploy loop from [iteration.md](../agents/action/iteration.md) until the app works end to end.
-5. Run `make test` — all tests MUST pass before moving to the next app.
+4. Follow the inspect-fix-redeploy loop from [Role Loop](../agents/action/iteration/role.md) until the app works end to end.
+5. Run `make test`. All tests MUST pass before moving to the next app.
 6. Check off the relevant Acceptance Criteria above if fully covered by this app.
 
 Repeat the full cycle from `web-app-nextcloud` down to `web-svc-file` until every criterion is checked.
@@ -232,17 +232,17 @@ Repeat the full cycle from `web-app-nextcloud` down to `web-svc-file` until ever
 
 The following changes in `roles/web-app-nextcloud/` were identified as unrelated to this requirement and were unstaged and stashed for later handling:
 
-- `tasks/_plugin_a_routines.yml` — tarball-based plugin install (DinD IPv6 workaround)
-- `tasks/_plugin_install_from_tarball.yml` *(new)* — tarball install task file
-- `tasks/main.yml` — Nextcloud appstore metadata fetch for plugin compatibility
-- `templates/config/apps_paths.config.php.j2` *(new)* — `custom_apps` path registration
+- `tasks/_plugin_a_routines.yml`: tarball-based plugin install (DinD IPv6 workaround)
+- `tasks/_plugin_install_from_tarball.yml` *(new)*: tarball install task file
+- `tasks/main.yml`: Nextcloud appstore metadata fetch for plugin compatibility
+- `templates/config/apps_paths.config.php.j2` *(new)*: `custom_apps` path registration
 
 **Stash name:** `nextcloud: tarball plugin install (unrelated to req-001)`  
 **Machine:** `msi-stealth-gs66`
 
 ### `roles/web-svc-coturn/`
 
-- `templates/compose.yml.j2` — Coturn 4.9 fix: collapse IPv4/IPv6 `--external-ip` flags into one and replace `turnutils_stunclient` healthcheck with `pgrep`
+- `templates/compose.yml.j2`: Coturn 4.9 fix: collapse IPv4/IPv6 `--external-ip` flags into one and replace `turnutils_stunclient` healthcheck with `pgrep`
 
 **Stash name:** `coturn: fix external-ip IPv4/IPv6 and healthcheck (unrelated to req-001)`  
 **Machine:** `msi-stealth-gs66`
