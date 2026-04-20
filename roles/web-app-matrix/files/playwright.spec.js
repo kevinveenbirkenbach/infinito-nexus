@@ -30,16 +30,22 @@ function attachDiagnostics(page) {
   const consoleErrors = [];
   const pageErrors = [];
   const cspRelated = [];
+  // Match only the full "Content Security Policy" phrase Chromium emits on
+  // real CSP violations. An `|csp` alternative false-positives on random
+  // base64/base58 strings (e.g. Matrix event_ids can contain "csP" as a
+  // substring) that Element logs verbatim from matrix_sdk_crypto decrypt
+  // warnings. The securitypolicyviolation DOM event in
+  // installCspViolationObserver is the canonical source anyway.
   page.on("console", (m) => {
     if (m.type() === "error") consoleErrors.push(m.text());
-    if (/content security policy|csp/i.test(m.text())) {
+    if (/content security policy/i.test(m.text())) {
       cspRelated.push({ source: "console", text: m.text() });
     }
   });
   page.on("pageerror", (e) => {
     const text = String(e);
     pageErrors.push(text);
-    if (/content security policy|csp/i.test(text)) {
+    if (/content security policy/i.test(text)) {
       cspRelated.push({ source: "pageerror", text });
     }
   });
@@ -517,20 +523,29 @@ test.describe("matrix DM", () => {
   await expect(composer, "admin: message composer must appear").toBeVisible({ timeout: 60_000 });
   await composer.click();
 
-  // Biber: accept invite FIRST, before admin sends the marker. With E2EE
-  // enabled (Synapse's default for DMs) and both devices unverified, any
-  // message admin sends before biber joins becomes "historical" from
-  // biber's perspective and renders as "Unable to decrypt message" —
-  // unverified devices can't retrieve pre-join megolm keys. Sending AFTER
-  // biber has joined lets Element share a fresh outbound megolm session
-  // with biber's device as part of normal room key distribution.
+  // Element keeps the DM in a pending "Send your first message to invite …"
+  // state when entered via a profile's "Send message" button: the room
+  // (and therefore the invite to biber) is only created on the server once
+  // admin actually sends. Without this bootstrap send, biber's side never
+  // receives an invite tile and the accept-invite poll below times out.
   //
-  // The flow mirrors Element's invite UX: (1) click the sidebar tile for
-  // admin's invite (the tile renders with admin's display name but no
-  // standalone Accept button), then (2) click the primary accept action
-  // in the invite view (modern Element labels this "Start chatting" for
-  // DMs; older builds / non-DM invites use "Accept" / "Join"). MUST NOT
-  // match "Decline" / "Decline and block".
+  // The bootstrap text is intentionally distinct from `marker`. With E2EE
+  // enabled and biber not yet joined, this first ciphertext will land on
+  // biber's side as "Unable to decrypt message" (no pre-join megolm key
+  // share). That's acceptable — biber's assertion targets `marker`, which
+  // admin sends AFTER biber has joined so Element establishes a fresh
+  // outbound megolm session that includes biber's device.
+  const bootstrap = `bootstrap-${Date.now()}`;
+  await adminPage.keyboard.type(bootstrap);
+  await adminPage.keyboard.press("Enter");
+
+  // Biber: wait for admin's invite to propagate, then accept. The flow
+  // mirrors Element's invite UX: (1) click the sidebar tile for admin's
+  // invite (the tile renders with admin's display name but no standalone
+  // Accept button), then (2) click the primary accept action in the invite
+  // view (modern Element labels this "Start chatting" for DMs; older
+  // builds / non-DM invites use "Accept" / "Join"). MUST NOT match
+  // "Decline" / "Decline and block".
   await expect
     .poll(async () => {
       return await biberPage.evaluate(() => {
