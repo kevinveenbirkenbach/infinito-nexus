@@ -12,7 +12,7 @@
 set -euo pipefail
 
 BUFFER_GB="${1:-25}"
-MIN_SWAP_GB=4   # refuse to create a swapfile smaller than this
+MIN_SWAP_GB=4 # refuse to create a swapfile smaller than this
 
 sudo swapoff -a || true
 sudo rm -f /mnt/swapfile /swapfile
