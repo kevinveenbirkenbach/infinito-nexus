@@ -68,13 +68,13 @@ Set an option back to `false` only when a new host-side step in the same workflo
 
 Deploy test workflows enlarge host swap via [enlarge_swap.sh](../../../../../scripts/github/enlarge_swap.sh) to absorb transient memory spikes (e.g. PeerTube plugin install [#162](https://github.com/infinito-nexus/core/issues/162)) that would otherwise trip the host OOM-killer on the 16 GB GitHub-hosted runner.
 
-The script **prefers `/`** for deterministic placement and falls back to `/mnt` only when `/` does not have enough headroom. Preferring `/` avoids surprises from runners where `/mnt` is unexpectedly pre-populated (larger-runner images, custom Docker-data-root relocations, self-hosted setups).
+The script **prefers `/mnt`** when it is a separate partition (classic `ubuntu-latest` layout with `/dev/sdb` mounted at `/mnt`) and falls back to `/` otherwise. Current public runners no longer expose a separate `/mnt`, so the swapfile lands on `/` and must not starve the root filesystem.
 
-Swap size is computed dynamically: `free(/) - buffer`. The buffer reserves space for nested Docker layers, the checkout, and the runner cache. With the aggressive `free-disk-space` options above, a ~25 GB buffer typically leaves a 25–30 GB swapfile on `ubuntu-latest`, which is far more than any workload the deploy jobs currently trigger.
+Swap size is a **fixed constant**, not a "free space minus buffer" calculation. An earlier version took ~99 GB on a 145 GB root partition, leaving so little headroom that later Docker layer writes (Playwright test image pull) failed with `no space left on device`. A fixed cap is large enough to absorb the peertube spike and small enough that Docker layer writes keep succeeding throughout the 30+ min deploy.
 
 | Argument | Default | Reason |
 |---|---|---|
-| `buffer-gb` (positional) | `25` | Reserves headroom for nested Docker data, checkout and runtime state; pass a smaller value only when you know the job footprint shrinks |
+| `size-gb` (positional) | `16` | Empirically sufficient for the peertube memory spike ([#162](https://github.com/infinito-nexus/core/issues/162)); raise only when a workload is proven to need more |
 
 Workflow step invocation:
 
