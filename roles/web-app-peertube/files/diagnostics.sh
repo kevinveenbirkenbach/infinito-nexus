@@ -1,12 +1,12 @@
 #!/usr/bin/env bash
-# roles/web-app-peertube/files/dump_peertube_diagnostics.sh
+# roles/web-app-peertube/files/diagnostics.sh
 #
 # Best-effort diagnostics for the PeerTube container after a plugin-install
 # failure. Prints container state, health, resource limits, logs, stats,
 # host memory, and OOM-killer evidence. Always exits 0 — the ansible rescue
 # step is responsible for re-raising the failure after the dump.
 #
-# Usage: dump_peertube_diagnostics.sh <container-name>
+# Usage: diagnostics.sh <container-name>
 # Env:   PEERTUBE_OIDC_PLUGIN_INSTALL_MAX_OLD_SPACE_MB, PEERTUBE_MAX_OLD_SPACE_SIZE
 #        (optional — printed into the report for correlation).
 

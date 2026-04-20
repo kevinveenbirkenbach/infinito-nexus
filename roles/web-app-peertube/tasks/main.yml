@@ -16,9 +16,9 @@
     docker_compose_flush_handlers: true
 
 - name: "Install and activate auth-openid-connect plugin if OIDC is enabled"
-  include_tasks: 01_enable-oidc.yml
+  include_tasks: oidc/enable.yml
   when: PEERTUBE_OIDC_ENABLED | bool
 
 - name: "Deinstall and disable auth-openid-connect plugin if OIDC is enabled"
-  include_tasks: 02_disable-oidc.yml
+  include_tasks: oidc/disable.yml
   when: not PEERTUBE_OIDC_ENABLED | bool

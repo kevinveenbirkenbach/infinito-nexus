@@ -10,16 +10,30 @@
   failed_when: false
   changed_when: false
 
-- name: "Install auth-openid-connect plugin for Peertube (with diagnostics on failure)"
+- name: "Install auth-openid-connect plugin for Peertube (with temp mem_limit bump + diagnostics on failure)"
   when: peertube_oidc_plugin_check.rc != 0
   block:
 
+    # Raise the container cgroup ceiling for the duration of the install.
+    # The install node process and the long-running main peertube node
+    # process share this cgroup (install runs via `container exec`), and
+    # their combined RSS plus native allocations (node-gyp, npm postinstall)
+    # was tripping the runtime mem_limit and SIGKILLing peertube, surfacing
+    # as "Container is restarting" on subsequent exec attempts.
+    # --memory-swap -1 allows unlimited swap for the install window (host
+    # has a 16G swapfile from issue #162).
+    - name: "PEERTUBE | Raise mem_limit for plugin install"
+      ansible.builtin.command: >-
+        container update
+        --memory {{ PEERTUBE_OIDC_PLUGIN_INSTALL_MEM_LIMIT }}
+        --memory-swap -1
+        {{ PEERTUBE_CONTAINER }}
+      changed_when: true
+
     - name: "Install auth-openid-connect plugin for Peertube"
-      # The plugin install spawns a fresh node process under the running PeerTube
-      # container. Without an explicit heap cap, V8 inherits the container-wide
-      # NODE_OPTIONS (~35% of mem_limit, multi-GB) and can push a constrained CI
-      # runner over its host RAM, getting SIGKILLed (rc=137) before the install
-      # completes. Force a tight heap and retry to absorb transient host pressure.
+      # V8 heap is still capped tight — the cgroup bump above covers native
+      # memory and spawned workers, while --max-old-space-size keeps the
+      # install's V8 old-generation predictable.
       ansible.builtin.command: >
         container exec
         -e NODE_OPTIONS=--max-old-space-size={{ PEERTUBE_OIDC_PLUGIN_INSTALL_MAX_OLD_SPACE_MB }}
@@ -31,10 +45,25 @@
       until: peertube_oidc_install.rc == 0
       notify: compose up
 
+    # Restore the compose-defined mem_limit on the happy path only.
+    # --memory-swap is pinned to the same value (no extra swap for the
+    # container) — matches the bump contract (extra swap granted solely
+    # during the install window). On failure the rescue block leaves the
+    # bumped limits in place so diagnostics reflect real install-time
+    # state; the next `compose up` recreates the container and reinstates
+    # docker's default memory-swap behavior from compose.yml.
+    - name: "PEERTUBE | Restore compose-defined mem_limit"
+      ansible.builtin.command: >-
+        container update
+        --memory {{ PEERTUBE_MEM_LIMIT }}
+        --memory-swap {{ PEERTUBE_MEM_LIMIT }}
+        {{ PEERTUBE_CONTAINER }}
+      changed_when: true
+
   rescue:
 
     - name: "PEERTUBE | Dump diagnostics after install failure"
-      ansible.builtin.script: "{{ role_path }}/files/dump_peertube_diagnostics.sh {{ PEERTUBE_CONTAINER }}"
+      ansible.builtin.script: "{{ role_path }}/files/diagnostics.sh {{ PEERTUBE_CONTAINER }}"
       environment:
         PEERTUBE_OIDC_PLUGIN_INSTALL_MAX_OLD_SPACE_MB: "{{ PEERTUBE_OIDC_PLUGIN_INSTALL_MAX_OLD_SPACE_MB }}"
         PEERTUBE_MAX_OLD_SPACE_SIZE: "{{ PEERTUBE_MAX_OLD_SPACE_SIZE }}"
@@ -55,17 +84,7 @@
     login_password: "{{ lookup('database', application_id, 'password') }}"
     login_host: "{{ lookup('database', application_id, 'reach_host') }}"
     login_port: "{{ lookup('database', application_id, 'port') }}"
-    query: |
-      UPDATE public.plugin
-      SET settings    = '{{ oidc_settings | to_json }}'::jsonb,
-          enabled     = TRUE,
-          uninstalled = FALSE
-      WHERE name = 'auth-openid-connect'
-        AND (
-          settings IS DISTINCT FROM '{{ oidc_settings | to_json }}'::jsonb
-          OR enabled IS DISTINCT FROM TRUE
-          OR uninstalled IS DISTINCT FROM FALSE
-        );
+    query: "{{ lookup('template', 'upsert-oidc-plugin.sql.j2') }}"
   register: _peertube_oidc_update
   retries: 5
   delay: 3
