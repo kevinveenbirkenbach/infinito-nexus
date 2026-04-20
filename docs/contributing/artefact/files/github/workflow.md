@@ -50,20 +50,47 @@ name: "🚫 Cancel: PR Runs on Close"
 
 ## Disk space 💾
 
-Deploy test workflows use the `jlumbroso/free-disk-space` action to reclaim runner space before Docker pulls start.
+Deploy test workflows use the `jlumbroso/free-disk-space` action to reclaim runner space before Docker pulls start. Because the actual deploy runs **inside** the `infinito` container, the host's language toolchains, build packages, and default Docker layer cache are all dead weight and MUST be reclaimed aggressively.
 
 | Option | Value | Reason |
 |---|---|---|
+| `tool-cache` | `true` | Deploy runs inside the `infinito` container; host Node/Python/Go/Ruby toolchains go unused |
 | `android` | `true` | Android SDK is never needed; safe to remove |
 | `dotnet` | `true` | .NET SDK is never needed; safe to remove |
 | `haskell` | `true` | Haskell toolchain is never needed; safe to remove |
-| `large-packages` | `false` | Can remove build tools (gcc, Python headers) required by pip/Ansible |
-| `docker-images` | `false` | Can remove cached layers reused between deploy steps |
-| `swap-storage` | `false` | Disabling swap can cause OOM for memory-intensive services (e.g. Keycloak) |
-| `tool-cache` | `false` | Runner tool cache may be needed by subsequent steps |
+| `large-packages` | `true` | Ansible, pip and gcc run **inside** the container, not on the host |
+| `docker-images` | `true` | Matrix jobs don't share a Docker layer cache; each runner pulls its own `infinito` image |
+| `swap-storage` | `true` | Default swap file is replaced by `pierotofy/set-swap-space` (see below) |
 
-Only options that are **guaranteed unused** MUST be set to `true`.
-When in doubt, keep the option at `false`.
+Set an option back to `false` only when a new host-side step in the same workflow genuinely needs the removed payload.
+
+## Swap 💾
+
+Deploy test workflows enlarge host swap via [enlarge_swap.sh](../../../../../scripts/github/enlarge_swap.sh) to absorb transient memory spikes (e.g. PeerTube plugin install [#162](https://github.com/infinito-nexus/core/issues/162)) that would otherwise trip the host OOM-killer on the 16 GB GitHub-hosted runner.
+
+The script **prefers `/`** for deterministic placement and falls back to `/mnt` only when `/` does not have enough headroom. Preferring `/` avoids surprises from runners where `/mnt` is unexpectedly pre-populated (larger-runner images, custom Docker-data-root relocations, self-hosted setups).
+
+Swap size is computed dynamically: `free(/) - buffer`. The buffer reserves space for nested Docker layers, the checkout, and the runner cache. With the aggressive `free-disk-space` options above, a ~25 GB buffer typically leaves a 25–30 GB swapfile on `ubuntu-latest`, which is far more than any workload the deploy jobs currently trigger.
+
+| Argument | Default | Reason |
+|---|---|---|
+| `buffer-gb` (positional) | `25` | Reserves headroom for nested Docker data, checkout and runtime state; pass a smaller value only when you know the job footprint shrinks |
+
+Workflow step invocation:
+
+```yaml
+- name: Enlarge swap space
+  shell: bash
+  run: ./scripts/github/enlarge_swap.sh
+```
+
+Ordering:
+
+- Swap step MUST run **after** `actions/checkout` because the script lives inside the repo.
+- Swap step SHOULD run **after** `jlumbroso/free-disk-space` so the reclaimed disk on `/` is also a candidate target when `/mnt` is crowded.
+- Swap step MUST run **before** any `make up` / container build step so the expanded swap is active when heavy-allocation work begins.
+
+Swap is a host-kernel resource; see [svc-opt-swapfile](../../../../../roles/svc-opt-swapfile/) for why the in-stack swap role is intentionally skipped inside containers.
 
 ## Separation of concerns 🧩
 
