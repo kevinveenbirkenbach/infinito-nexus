@@ -18,5 +18,5 @@
     - DOCKER_IN_CONTAINER | bool
     - MODE_DEBUG | bool
   environment:
-    BUSYBOX_IMAGE: "{{ SYS_SVC_DOCKER_DNS_TEST_BUSYBOX_IMAGE }}"
-    NODE_IMAGE: "{{ SYS_SVC_DOCKER_DNS_TEST_NODE_IMAGE }}"
+    BUSYBOX_IMAGE: "{{ lookup('image', 'busybox', 'ref') }}"
+    NODE_IMAGE: "{{ lookup('image', 'node', 'ref') }}"

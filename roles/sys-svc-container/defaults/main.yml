@@ -1,5 +1,12 @@
 # ------------------------------------------------------------
-# Docker-in-Docker DNS test images (override-able)
+# Docker-in-Docker DNS test images
+# Auto-mirrored via images discovery; consumers resolve through
+# lookup('image', <service>, 'ref').
 # ------------------------------------------------------------
-SYS_SVC_DOCKER_DNS_TEST_BUSYBOX_IMAGE: "busybox:1.36"
-SYS_SVC_DOCKER_DNS_TEST_NODE_IMAGE: "node:20-alpine"
+images:
+  busybox:
+    image: busybox
+    version: "1.36"
+  node:
+    image: node
+    version: "20-alpine"
