@@ -84,7 +84,5 @@ compose:
     alertmanager_data:            "prometheus_alertmanager_data"
 alerting:
   telegram:
-    bot_token:                    ""    # Sensitive — set in vault-encrypted inventory vars
     chat_id:                      0     # Telegram chat ID (integer)
-  mattermost:
-    webhook_url:                  ""    # Set in inventory to enable Mattermost alerts
+  mattermost: {}

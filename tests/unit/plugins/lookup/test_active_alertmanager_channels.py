@@ -10,10 +10,19 @@ from plugins.lookup.active_alertmanager_channels import LookupModule
 def _make_applications(*app_ids: str, channels: tuple = ()) -> dict:
     """Build a minimal applications dict.
 
-    apps listed in *channels* get communication.channel: true; others do not.
+    apps listed in *channels* get compose.services.prometheus.communication.channel: true;
+    others do not.
     """
     return {
-        app_id: ({"communication": {"channel": True}} if app_id in channels else {})
+        app_id: (
+            {
+                "compose": {
+                    "services": {"prometheus": {"communication": {"channel": True}}}
+                }
+            }
+            if app_id in channels
+            else {}
+        )
         for app_id in app_ids
     }
 
@@ -22,14 +31,6 @@ def _run(applications: dict, group_names: list) -> list:
     return LookupModule().run(
         [],
         variables={"applications": applications, "group_names": group_names},
-    )[0]
-
-
-def _run_explicit(applications: dict, group_names: list) -> list:
-    """Invoke with applications passed as explicit positional term — the template usage pattern."""
-    return LookupModule().run(
-        [applications],
-        variables={"group_names": group_names},
     )[0]
 
 
@@ -62,7 +63,7 @@ class TestActiveAlertmanagerChannelsDeploymentCheck(unittest.TestCase):
 
 
 class TestActiveAlertmanagerChannelsSelfDeclaration(unittest.TestCase):
-    """communication.channel flag gate — must be true in app config."""
+    """compose.services.prometheus.communication.channel flag gate — must be true in app config."""
 
     def test_excludes_app_without_channel_flag(self):
         apps = _make_applications("web-app-mattermost")  # no channel flag
@@ -124,38 +125,6 @@ class TestActiveAlertmanagerChannelsEmptyInputs(unittest.TestCase):
         apps = _make_applications("web-app-gitea", "web-app-nextcloud")
         result = _run(apps, ["web-app-gitea", "web-app-nextcloud"])
         self.assertEqual(result, [])
-
-
-class TestActiveAlertmanagerChannelsExplicitTerm(unittest.TestCase):
-    """applications passed as explicit first term — matches template invocation pattern.
-
-    Templates call lookup('active_alertmanager_channels', applications) to bypass the
-    Ansible scoping issue where available_variables may contain the pre-merge inventory
-    dict rather than the set_fact-merged result.
-    """
-
-    def test_includes_channel_when_deployed_explicit(self):
-        apps = _make_applications(
-            "web-app-mattermost", channels=("web-app-mattermost",)
-        )
-        result = _run_explicit(apps, ["web-app-mattermost"])
-        self.assertIn("web-app-mattermost", result)
-
-    def test_excludes_channel_when_not_deployed_explicit(self):
-        apps = _make_applications(
-            "web-app-mattermost", channels=("web-app-mattermost",)
-        )
-        result = _run_explicit(apps, [])
-        self.assertEqual(result, [])
-
-    def test_multiple_channels_explicit(self):
-        apps = _make_applications(
-            "web-app-mattermost",
-            "web-app-matrix",
-            channels=("web-app-mattermost", "web-app-matrix"),
-        )
-        result = _run_explicit(apps, ["web-app-mattermost", "web-app-matrix"])
-        self.assertCountEqual(result, ["web-app-mattermost", "web-app-matrix"])
 
 
 class TestActiveAlertmanagerChannelsErrors(unittest.TestCase):

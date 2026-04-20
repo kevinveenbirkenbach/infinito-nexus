@@ -264,10 +264,10 @@ class TestPrometheusNginxEndpoints(unittest.TestCase):
             "locations.conf.j2 must include nginx/location.conf.j2 for prometheus-enabled apps",
         )
         self.assertIn(
-            "lookup('prometheus_integration_active', applications, application_id)",
+            "lookup('prometheus_integration_active', application_id)",
             content,
-            "locations.conf.j2 outer guard must call lookup('prometheus_integration_active', applications, application_id) "
-            "passing both explicitly to bypass Ansible lookup variable scoping",
+            "locations.conf.j2 outer guard must call lookup('prometheus_integration_active', application_id) "
+            "with application_id as term 0; applications is read from available_variables",
         )
 
     def test_prometheus_conf_includes_metricz_only_on_prometheus_domain(self):
@@ -459,13 +459,19 @@ class TestPrometheusNginxEndpoints(unittest.TestCase):
             "CommunicationChannelDown must use the active_alertmanager_channels lookup plugin "
             "for dynamic channel discovery (no hardcoded list)",
         )
-        # Each communication-channel app self-declares communication.channel: true.
-        for app_id in ("web-app-mattermost", "web-app-mailu", "web-app-matrix"):
+        # Each communication-channel app self-declares
+        # compose.services.prometheus.communication.channel: true.
+        # Mailu is excluded — it is an email server, not a webhook channel.
+        for app_id in ("web-app-mattermost", "web-app-matrix"):
             with self.subTest(app_id=app_id):
                 cfg = _load_config(str(roles_dir / app_id / "config" / "main.yml"))
+                prometheus_cfg = (
+                    cfg.get("compose", {}).get("services", {}).get("prometheus", {})
+                )
                 self.assertTrue(
-                    (cfg.get("communication") or {}).get("channel") is True,
-                    f"{app_id}/config/main.yml must declare communication.channel: true "
+                    (prometheus_cfg.get("communication") or {}).get("channel") is True,
+                    f"{app_id}/config/main.yml must declare "
+                    f"compose.services.prometheus.communication.channel: true "
                     f"so the active_alertmanager_channels plugin discovers it",
                 )
 
@@ -743,16 +749,23 @@ class TestNativeAppMetrics(unittest.TestCase):
         for app_id in ("web-app-gitea", "web-app-mattermost", "web-app-matrix"):
             with self.subTest(app_id=app_id):
                 cfg = _load_config(str(roles_dir / app_id / "config" / "main.yml"))
-                self.assertIn(
-                    "native_metrics",
-                    cfg,
-                    f"{app_id}/config/main.yml must have a native_metrics section "
+                native_metrics_cfg = (
+                    cfg.get("compose", {})
+                    .get("services", {})
+                    .get("prometheus", {})
+                    .get("native_metrics", {})
+                )
+                self.assertTrue(
+                    bool(native_metrics_cfg),
+                    f"{app_id}/config/main.yml must have a "
+                    f"compose.services.prometheus.native_metrics section "
                     f"(guards the Prometheus scrape job; set enabled: true in inventory to activate)",
                 )
                 self.assertIn(
                     "enabled",
-                    cfg.get("native_metrics", {}),
-                    f"{app_id}/config/main.yml native_metrics must have an 'enabled' key",
+                    native_metrics_cfg,
+                    f"{app_id}/config/main.yml compose.services.prometheus.native_metrics "
+                    f"must have an 'enabled' key",
                 )
 
     def test_gitea_scrape_fragment_uses_metrics_path(self):

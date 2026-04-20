@@ -36,10 +36,11 @@ def _run(applications: dict, application_id: str, group_names: list) -> bool:
 
 
 def _run_explicit(applications: dict, application_id: str, group_names: list) -> bool:
-    """Invoke with applications and application_id as explicit positional terms — the template usage pattern."""
+    """Invoke with application_id as explicit term 0 — the template usage pattern."""
     return LookupModule().run(
-        [applications, application_id],
+        [application_id],
         variables={
+            "applications": applications,
             "group_names": group_names,
         },
     )[0]
@@ -98,10 +99,10 @@ class TestPrometheusIntegrationActiveServiceDep(unittest.TestCase):
 
 
 class TestPrometheusIntegrationActiveExplicitTerm(unittest.TestCase):
-    """applications and application_id passed as explicit terms — matches template invocation pattern.
+    """application_id passed as explicit term 0 — matches template invocation pattern.
 
-    Templates call lookup('prometheus_integration_active', applications, application_id) to bypass
-    Ansible scoping issues where available_variables may contain stale values.
+    Templates call lookup('prometheus_integration_active', application_id).
+    'applications' is read from available_variables.
     """
 
     def test_true_when_app_declares_prometheus_dep_explicit(self):

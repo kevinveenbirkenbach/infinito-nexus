@@ -17,13 +17,17 @@ def native_metrics_target(app_id: str, applications: dict) -> str:
       targets: ["{{ native_prometheus_application_id | native_metrics_target(applications) }}"]
 
     When the compose service key differs from the app's entity name (e.g. matrix
-    uses service key "synapse"), set native_metrics.service_key in the app's
-    config/main.yml to override.
+    uses service key "synapse"), set compose.services.prometheus.native_metrics.service_key
+    in the app's config/main.yml to override.
     """
     app_conf = applications.get(app_id, {})
-    service_key = app_conf.get("native_metrics", {}).get(
-        "service_key"
-    ) or get_entity_name(app_id)
+    native_metrics_conf = (
+        app_conf.get("compose", {})
+        .get("services", {})
+        .get("prometheus", {})
+        .get("native_metrics", {})
+    )
+    service_key = native_metrics_conf.get("service_key") or get_entity_name(app_id)
 
     container = (
         app_conf.get("compose", {}).get("services", {}).get(service_key, {}).get("name")
@@ -33,10 +37,10 @@ def native_metrics_target(app_id: str, applications: dict) -> str:
             f"native_metrics_target: no compose.services.{service_key}.name for '{app_id}'"
         )
 
-    port = app_conf.get("native_metrics", {}).get("port")
+    port = native_metrics_conf.get("port")
     if port is None:
         raise AnsibleFilterError(
-            f"native_metrics_target: no native_metrics.port for '{app_id}'"
+            f"native_metrics_target: no compose.services.prometheus.native_metrics.port for '{app_id}'"
         )
 
     return f"{container}:{port}"

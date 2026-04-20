@@ -20,8 +20,12 @@ def _make_applications(
         native_metrics["service_key"] = service_key
     return {
         app_id: {
-            "compose": {"services": {entity_name: {"name": container}}},
-            "native_metrics": native_metrics,
+            "compose": {
+                "services": {
+                    entity_name: {"name": container},
+                    "prometheus": {"native_metrics": native_metrics},
+                }
+            }
         }
     }
 
@@ -63,8 +67,11 @@ class TestNativeMetricsTargetErrors(unittest.TestCase):
     def test_raises_when_container_name_missing(self):
         apps = {
             "web-app-gitea": {
-                "compose": {"services": {}},
-                "native_metrics": {"port": 3000},
+                "compose": {
+                    "services": {
+                        "prometheus": {"native_metrics": {"port": 3000}},
+                    }
+                }
             }
         }
         with patch(
@@ -76,8 +83,12 @@ class TestNativeMetricsTargetErrors(unittest.TestCase):
     def test_raises_when_port_missing(self):
         apps = {
             "web-app-gitea": {
-                "compose": {"services": {"gitea": {"name": "gitea"}}},
-                "native_metrics": {},
+                "compose": {
+                    "services": {
+                        "gitea": {"name": "gitea"},
+                        "prometheus": {"native_metrics": {}},
+                    }
+                }
             }
         }
         with patch(

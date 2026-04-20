@@ -143,5 +143,3 @@ compose:
     prometheus:
       enabled: true
       shared: true
-communication:
-  channel:          true

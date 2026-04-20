@@ -80,9 +80,8 @@ compose:
     prometheus:
       enabled: true
       shared: true
+      native_metrics:
+        enabled:    true
+        port:       3000     # Gitea metrics are on the main HTTP server port (same as app)
   volumes:
     data:             "gitea_data"
-native_metrics:
-  enabled:          true
-  port:             3000     # Gitea metrics are on the main HTTP server port (same as app)
-  token:            ""       # Optional bearer token — set in vault if Gitea token auth is enabled
