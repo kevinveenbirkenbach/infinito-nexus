@@ -1,0 +1,91 @@
+---
+- name: "Decidim | Wait for web container to be healthy"
+  community.docker.docker_container_info:
+    name: "{{ DECIDIM_CONTAINER }}"
+  register: decidim_container_info
+  until: >
+    decidim_container_info.container is defined and
+    decidim_container_info.container.State.Health.Status == 'healthy'
+  retries: 20
+  delay: 15
+
+- name: "Decidim | Run database migrations"
+  community.docker.docker_container_exec:
+    container: "{{ DECIDIM_CONTAINER }}"
+    command: bundle exec rails db:migrate
+    env:
+      RAILS_ENV: "{{ ENVIRONMENT }}"
+  register: decidim_migrate_result
+  changed_when: decidim_migrate_result.stdout_lines | default([]) | length > 0
+
+- name: "Decidim | Seed database on first deploy"
+  community.docker.docker_container_exec:
+    container: "{{ DECIDIM_CONTAINER }}"
+    command: bundle exec rails db:seed
+    env:
+      RAILS_ENV: "{{ ENVIRONMENT }}"
+  register: decidim_seed_result
+  changed_when: decidim_seed_result.stdout_lines | default([]) | length > 0
+  failed_when: false
+
+- name: "Decidim | Set organization host"
+  community.docker.docker_container_exec:
+    container: "{{ DECIDIM_CONTAINER }}"
+    command: bundle exec rails runner -
+    stdin: |
+      org = Decidim::Organization.first
+      org.host = ENV.fetch("DECIDIM_ORG_HOST")
+      org.save
+      puts "Organization host set to: #{org.host}"
+    env:
+      RAILS_ENV: "{{ ENVIRONMENT }}"
+      DECIDIM_ORG_HOST: "{{ domain }}"
+  register: decidim_org_result
+  changed_when: "'Organization host set to' in decidim_org_result.stdout"
+
+- name: "Decidim | Ensure administrator user exists with correct credentials"
+  community.docker.docker_container_exec:
+    container: "{{ DECIDIM_CONTAINER }}"
+    command: bundle exec rails runner -
+    stdin: |
+      email    = ENV.fetch("DECIDIM_ADMIN_EMAIL")
+      password = ENV.fetch("DECIDIM_ADMIN_PASSWORD")
+      user = Decidim::User.find_or_initialize_by(email: email)
+      is_new = user.new_record?
+      user.name = 'Administrator'
+      user.nickname = 'administrator'
+      user.admin = true
+      user.confirmed_at = Time.current
+      user.organization = Decidim::Organization.first
+      user.tos_agreement = true
+      user.accepted_tos_version = Decidim::Organization.first.tos_version
+      if is_new || !user.valid_password?(password)
+        user.password = password
+        user.password_confirmation = password
+      end
+      user.save!
+      puts "Admin user ready: #{user.email}"
+    env:
+      RAILS_ENV: "{{ ENVIRONMENT }}"
+      DECIDIM_ADMIN_EMAIL: "{{ users.administrator.email }}"
+      DECIDIM_ADMIN_PASSWORD: "{{ users.administrator.password }}"
+  register: decidim_admin_result
+  changed_when: "'Admin user ready' in decidim_admin_result.stdout"
+
+
+- name: "Decidim | Configure OIDC omniauth settings in organization"
+  community.docker.docker_container_exec:
+    container: "{{ DECIDIM_CONTAINER }}"
+    command: bundle exec rails runner -
+    stdin: |
+      org = Decidim::Organization.first
+      settings = org.omniauth_settings || {}
+      settings["omniauth_settings_openid_connect_enabled"] = true
+      org.omniauth_settings = settings
+      org.save!
+      puts "OIDC settings configured"
+    env:
+      RAILS_ENV: "{{ ENVIRONMENT }}"
+  register: decidim_oidc_result
+  changed_when: "'OIDC settings configured' in decidim_oidc_result.stdout"
+  when: DECIDIM_OIDC_ENABLED | bool

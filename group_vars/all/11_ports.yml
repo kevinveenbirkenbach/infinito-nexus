@@ -95,6 +95,7 @@ ports:
       web-app-prometheus: 8066
       web-app-fider: 8067
       web-app-odoo: 8068
+      web-app-decidim: 8069
       web-app-bigbluebutton: 48087    # This port is predefined by bbb. @todo Try to change this to a 8XXX port
   public:
     # The following ports should be changed to 22 on the subdomain via stream mapping
