@@ -72,7 +72,7 @@ ODOO_LDAP_PORT:                     "{{ LDAP.SERVER.PORT }}"
 ODOO_LDAP_BASE_DN:                  "{{ LDAP.DN.OU.USERS }}"
 ODOO_LDAP_BIND_DN:                  "{{ LDAP.USERS.SERVICE_ACCOUNT.DN }}"
 ODOO_LDAP_BIND_PASSWORD:            "{{ LDAP.USERS.SERVICE_ACCOUNT.PASSWORD }}"
-ODOO_LDAP_FILTER:                   "(uid=%s)"
+ODOO_LDAP_FILTER:                   "({{ ODOO_LDAP_USER_ATTR }}=%s)"
 ODOO_LDAP_USER_ATTR:                "{{ LDAP.ATTRIBUTES.ID }} "
 ODOO_LDAP_CREATE_USER:              true
 ODOO_LDAP_TLS:                      "{{ LDAP.SERVER.SSL }}"
