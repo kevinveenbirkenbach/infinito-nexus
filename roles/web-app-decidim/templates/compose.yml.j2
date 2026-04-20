@@ -8,6 +8,8 @@
       args:
         DECIDIM_IMAGE: "{{ DECIDIM_IMAGE }}"
         DECIDIM_VERSION: "{{ DECIDIM_VERSION }}"
+        DECIDIM_PATCH_SCRIPT_HOST_REL: "{{ DECIDIM_PATCH_SCRIPT_HOST_REL }}"
+        DECIDIM_PATCH_SCRIPT_DOCKER: "{{ DECIDIM_PATCH_SCRIPT_DOCKER }}"
     image: "{{ DECIDIM_CUSTOM_IMAGE }}"
     container_name: "{{ DECIDIM_CONTAINER }}"
     command: bundle exec puma -C config/puma.rb

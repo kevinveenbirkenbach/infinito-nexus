@@ -29,3 +29,8 @@ DECIDIM_OIDC_USER_INFO_URL:       "{{ OIDC.CLIENT.USER_INFO_URL }}"
 
 ## Organisation
 DECIDIM_ORGANIZATION_NAME:        "{{ defaults_service_provider.platform.titel }}"
+## Dockerfile patch script
+DECIDIM_PATCH_SCRIPT_FILE:     "patch_decidim.py"
+DECIDIM_PATCH_SCRIPT_HOST_ABS: "{{ [ lookup('container', application_id, 'directories.volumes'), DECIDIM_PATCH_SCRIPT_FILE ] | path_join }}"
+DECIDIM_PATCH_SCRIPT_HOST_REL: "volumes/{{ DECIDIM_PATCH_SCRIPT_FILE }}"
+DECIDIM_PATCH_SCRIPT_DOCKER:   "/tmp/patch_decidim.py"
