@@ -57,21 +57,37 @@ class FilterModule(object):
         result = {}
         seen_domains = {}
 
+        auto_default_prefixes = ("web-", "svc-db-")
+
         for app_id in sorted(target_apps):
             cfg = apps.get(app_id)
             if cfg is None:
                 continue
-            if not str(app_id).startswith(("web-", "svc-db-")):
+
+            is_auto_default = str(app_id).startswith(auto_default_prefixes)
+            has_canonical = (
+                isinstance(cfg, dict)
+                and isinstance(cfg.get("server"), dict)
+                and isinstance(cfg["server"].get("domains"), dict)
+                and "canonical" in cfg["server"]["domains"]
+            )
+
+            # Roles outside the web-*/svc-db-* families only register when they
+            # declare an explicit canonical domain. Infra roles (sys-*, svc-prx-*,
+            # etc.) otherwise would receive spurious auto-generated subdomains.
+            if not has_canonical and not is_auto_default:
                 continue
+
             if not isinstance(cfg, dict):
                 raise AnsibleFilterError(
                     f"Invalid configuration for application '{app_id}': expected dict, got {cfg!r}"
                 )
 
-            domains_cfg = cfg.get("server", {}).get("domains", {})
-            if not domains_cfg or "canonical" not in domains_cfg:
+            if not has_canonical:
                 self._add_default_domain(app_id, domain_primary, seen_domains, result)
                 continue
+
+            domains_cfg = cfg["server"]["domains"]
 
             canonical_domains = render_domain_value(
                 domains_cfg["canonical"],
