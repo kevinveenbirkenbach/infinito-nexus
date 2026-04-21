@@ -28,13 +28,14 @@ mynetworks = 127.0.0.0/8 [::1]/128
 # (DO NOT disable local_transport for local-only mode)
 # local_transport = error: local delivery disabled
 
+{% set email = lookup('email') %}
 # SMTP timeouts (defensive, avoids hanging clients)
-smtp_connect_timeout = {{ SYSTEM_EMAIL_TIMEOUT }}s
-smtp_helo_timeout = {{ SYSTEM_EMAIL_TIMEOUT }}s
-smtp_mail_timeout = {{ SYSTEM_EMAIL_TIMEOUT }}s
-smtp_rcpt_timeout = {{ SYSTEM_EMAIL_TIMEOUT }}s
-smtp_data_init_timeout = {{ SYSTEM_EMAIL_TIMEOUT }}s
-smtp_data_xfer_timeout = {{ SYSTEM_EMAIL_TIMEOUT }}s
+smtp_connect_timeout = {{ email.timeout }}s
+smtp_helo_timeout = {{ email.timeout }}s
+smtp_mail_timeout = {{ email.timeout }}s
+smtp_rcpt_timeout = {{ email.timeout }}s
+smtp_data_init_timeout = {{ email.timeout }}s
+smtp_data_xfer_timeout = {{ email.timeout }}s
 
 # Mandatory relay restrictions (prevents open relay and startup failures)
 smtpd_relay_restrictions = permit_mynetworks, reject_unauth_destination

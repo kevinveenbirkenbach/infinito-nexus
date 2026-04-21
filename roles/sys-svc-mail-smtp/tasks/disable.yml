@@ -12,4 +12,4 @@
           - postfix
           - postfix-lmdb
         state: absent
-  when: SYSTEM_EMAIL_EXTERNAL | bool
+  when: lookup('email').external | bool

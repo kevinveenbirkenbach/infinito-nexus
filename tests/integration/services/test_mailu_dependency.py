@@ -9,14 +9,14 @@ _EMAIL_SERVICE_KEY = "email"
 
 # Patterns that indicate an email dependency on Mailu
 _MAILU_REF_RE = re.compile(r"web-app-mailu")
-_SYSTEM_EMAIL_RE = re.compile(r"SYSTEM_EMAIL_")
+_EMAIL_LOOKUP_RE = re.compile(r"""lookup\(\s*['"]email['"]""")
 
 # File extensions to scan within a role
 _SCAN_EXTENSIONS = {".yml", ".yaml", ".j2", ".py", ".sh", ".conf", ".env"}
 
 
 def _scan_role(role_path: Path) -> tuple[bool, bool]:
-    """Return (refs_mailu, refs_system_email) for all scannable files in *role_path*."""
+    """Return (refs_mailu, refs_email_lookup) for all scannable files in *role_path*."""
     refs_mailu = False
     refs_email = False
     for path in role_path.rglob("*"):
@@ -28,7 +28,7 @@ def _scan_role(role_path: Path) -> tuple[bool, bool]:
             continue
         if not refs_mailu and _MAILU_REF_RE.search(text):
             refs_mailu = True
-        if not refs_email and _SYSTEM_EMAIL_RE.search(text):
+        if not refs_email and _EMAIL_LOOKUP_RE.search(text):
             refs_email = True
         if refs_mailu and refs_email:
             break
@@ -36,7 +36,7 @@ def _scan_role(role_path: Path) -> tuple[bool, bool]:
 
 
 class TestMailuServiceDependency(unittest.TestCase):
-    """Every role that references 'web-app-mailu' or uses SYSTEM_EMAIL_* variables
+    """Every role that references 'web-app-mailu' or calls lookup('email', ...)
     must declare compose.services.email with enabled: true and shared: true
     in its config/main.yml."""
 
@@ -70,15 +70,15 @@ class TestMailuServiceDependency(unittest.TestCase):
             if not config_path.is_file():
                 continue
 
-            refs_mailu, refs_system_email = _scan_role(role_path)
-            if not refs_mailu and not refs_system_email:
+            refs_mailu, refs_email_lookup = _scan_role(role_path)
+            if not refs_mailu and not refs_email_lookup:
                 continue
 
             reasons = []
             if refs_mailu:
                 reasons.append("references 'web-app-mailu'")
-            if refs_system_email:
-                reasons.append("uses SYSTEM_EMAIL_* variables")
+            if refs_email_lookup:
+                reasons.append("calls lookup('email', ...)")
             reason_str = " and ".join(reasons)
 
             email_svc = self._email_service_conf(config_path)

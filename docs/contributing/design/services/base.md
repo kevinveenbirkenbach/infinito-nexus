@@ -1,9 +1,9 @@
-# Service Management
+# Service Management 🧱
 
 This page is the SPOT for how shared services are declared, discovered, ordered,
 loaded, and injected.
 
-## What Is a Service?
+## What Is a Service? 🧩
 
 A service is a reusable dependency that an application enables via
 `compose.services.<service_key>`.
@@ -14,9 +14,9 @@ Examples:
 - `svc-db-mariadb` provides `mariadb`
 
 Each service entry lives in the provider role's own
-[`config/main.yml`](../../../roles) under `compose.services.<entity_name>`.
+[config/main.yml](../../../../roles) under `compose.services.<entity_name>`.
 
-## Role-Local Service Metadata
+## Role-Local Service Metadata 🏷️
 
 Service providers are self-describing. The provider role owns:
 - `enabled`
@@ -59,27 +59,27 @@ Rules:
 - `canonical:` is only used on alias entries that resolve back to the primary service key.
 - `frontend` vs. `backend` is derived from the role name prefix, not stored in config.
 
-## Service Discovery
+## Service Discovery 🔍
 
 Service discovery is built from role configs, not from a central registry file.
 
 Primary implementation files:
-- [`utils/service_registry.py`](../../../utils/service_registry.py)
-- [`plugins/lookup/service_registry.py`](../../../plugins/lookup/service_registry.py)
+- [service_registry.py](../../../../utils/service_registry.py)
+- [service_registry.py lookup plugin](../../../../plugins/lookup/service_registry.py)
 
 The discovery layer:
-- scans role configs from [`roles`](../../../roles)
+- scans role configs from [roles/](../../../../roles)
 - discovers provider entries from `compose.services`
 - derives deploy type and loader bucket from the role name
 - resolves `provides:` and `canonical:`
 - validates and applies `run_after:` from `meta/main.yml`
 
-## Load Order
+## Load Order 🧮
 
-[`roles/sys-utils-service-loader/tasks/main.yml`](../../../roles/sys-utils-service-loader/tasks/main.yml)
+[main.yml](../../../../roles/sys-utils-service-loader/tasks/main.yml)
 is the single loader SPOT for all shared services.
 
-It runs from [`tasks/stages/01_constructor.yml`](../../../tasks/stages/01_constructor.yml)
+It runs from [01_constructor.yml](../../../../tasks/stages/01_constructor.yml)
 before the normal application stage.
 
 Global bucket order:
@@ -90,7 +90,7 @@ Global bucket order:
 5. `web-app`
 
 Within the same bucket, ordering is refined by `run_after:` in the provider role's
-[`meta/main.yml`](../../../roles).
+[meta/main.yml](../../../../roles).
 
 Rules:
 - `run_after:` entries are role names, not service keys.
@@ -99,41 +99,41 @@ Rules:
 - Cross-type service dependencies do not need `run_after:` because constructor-stage
   loading already brings backend services up before normal app deployment.
 
-## Loading vs Injection
+## Loading vs Injection 🔀
 
 Service loading and frontend injection are separate mechanisms.
 
-### Loading
+### Loading 📥
 
 Loading decides whether the provider role is deployed at all.
 
-[`roles/sys-utils-service-loader/tasks/main.yml`](../../../roles/sys-utils-service-loader/tasks/main.yml):
+[main.yml](../../../../roles/sys-utils-service-loader/tasks/main.yml):
 - queries the ordered discovered service list
 - checks `lookup('service', service_key).needed`
 - skips roles already protected by `run_once_*`
-- loads services through [`tasks/utils/load_app.yml`](../../../tasks/utils/load_app.yml)
+- loads services through [load_app.yml](../../../../tasks/utils/load_app.yml)
 
 Frontend service probe/load helper:
-- [`roles/sys-utils-service-loader/tasks/load_service.yml`](../../../roles/sys-utils-service-loader/tasks/load_service.yml)
+- [load_service.yml](../../../../roles/sys-utils-service-loader/tasks/load_service.yml)
 
-### Injection
+### Injection 🔌
 
 Injection decides whether a deployed app gets extra nginx integration such as
 dashboard, logout, CSS, or JavaScript hooks.
 
 This stays in:
-- [`roles/sys-front-inj-all/tasks/main.yml`](../../../roles/sys-front-inj-all/tasks/main.yml)
-- [`roles/sys-front-inj-all/filter_plugins/inj_enabled.py`](../../../roles/sys-front-inj-all/filter_plugins/inj_enabled.py)
+- [main.yml](../../../../roles/sys-front-inj-all/tasks/main.yml)
+- [inj_enabled.py](../../../../roles/sys-front-inj-all/filter_plugins/inj_enabled.py)
 
 Injection still reads the current app's `compose.services.<feature>.enabled` flags.
 It does not load provider roles.
 
-## Lookup Plugins
+## Lookup Plugins 🔎
 
-### `service`
+### `service` 🧷
 
 File:
-[`plugins/lookup/service.py`](../../../plugins/lookup/service.py)
+[service.py](../../../../plugins/lookup/service.py)
 
 Examples:
 
@@ -156,10 +156,10 @@ Behavior:
 - resolves provider roles through discovered primary service keys
 - computes `needed` transitively from enabled shared services
 
-### `service_registry`
+### `service_registry` 📚
 
 File:
-[`plugins/lookup/service_registry.py`](../../../plugins/lookup/service_registry.py)
+[service_registry.py](../../../../plugins/lookup/service_registry.py)
 
 Examples:
 
@@ -172,17 +172,17 @@ Modes:
 - default: full discovered registry mapping
 - `ordered`: ordered primary service entries for the service loader
 
-### `applications_current_play`
+### `applications_current_play` 🧭
 
 File:
-[`plugins/lookup/applications_current_play.py`](../../../plugins/lookup/applications_current_play.py)
+[applications_current_play.py](../../../../plugins/lookup/applications_current_play.py)
 
 Builds the current-play application set including:
 - group-selected roles
 - transitive shared service dependencies
 - meta dependencies
 
-## Database Services
+## Database Services 🗄️
 
 Relational databases are regular services now:
 - `svc-db-mariadb` provides `mariadb`
@@ -212,20 +212,20 @@ The `lookup('database', ...)` API remains as the convenience accessor for databa
 connection values, but it now resolves the active direct database service from those
 role-local keys instead of `compose.services.database.type`.
 
-## Related Files
+## Related Files 📁
 
 | File | Purpose |
 |---|---|
-| [`utils/service_registry.py`](../../../utils/service_registry.py) | Service discovery, `provides`, `canonical`, bucket detection, `run_after` ordering |
-| [`plugins/lookup/service_registry.py`](../../../plugins/lookup/service_registry.py) | Exposes the discovered registry and ordered provider list to Ansible |
-| [`plugins/lookup/service.py`](../../../plugins/lookup/service.py) | Resolves service flags and transitive need |
-| [`plugins/lookup/applications_current_play.py`](../../../plugins/lookup/applications_current_play.py) | Builds the current play app graph with shared service deps |
-| [`roles/sys-utils-service-loader/tasks/main.yml`](../../../roles/sys-utils-service-loader/tasks/main.yml) | Single shared-service loader SPOT |
-| [`roles/sys-utils-service-loader/tasks/load_service.yml`](../../../roles/sys-utils-service-loader/tasks/load_service.yml) | Per-service load helper used by the central service loader |
-| [`tasks/stages/01_constructor.yml`](../../../tasks/stages/01_constructor.yml) | Calls the service loader during constructor |
-| [`tasks/utils/load_app.yml`](../../../tasks/utils/load_app.yml) | Run-once role loader |
-| [`tests/unit/utils/test_service_registry.py`](../../../tests/unit/utils/test_service_registry.py) | Unit tests for discovery, buckets, and `run_after` ordering |
-| [`tests/unit/plugins/lookup/test_service.py`](../../../tests/unit/plugins/lookup/test_service.py) | Unit tests for `lookup('service', ...)` |
-| [`tests/integration/services/test_resolvable.py`](../../../tests/integration/services/test_resolvable.py) | Integration checks for discovered service resolution |
-| [`tests/integration/services/test_canonical.py`](../../../tests/integration/services/test_canonical.py) | Canonical alias consistency checks |
-| [`tests/integration/services/test_transitive_dependencies.py`](../../../tests/integration/services/test_transitive_dependencies.py) | Integration coverage for transitive dependency resolution |
+| [service_registry.py](../../../../utils/service_registry.py) | Service discovery, `provides`, `canonical`, bucket detection, `run_after` ordering |
+| [service_registry.py lookup](../../../../plugins/lookup/service_registry.py) | Exposes the discovered registry and ordered provider list to Ansible |
+| [service.py](../../../../plugins/lookup/service.py) | Resolves service flags and transitive need |
+| [applications_current_play.py](../../../../plugins/lookup/applications_current_play.py) | Builds the current play app graph with shared service deps |
+| [main.yml](../../../../roles/sys-utils-service-loader/tasks/main.yml) | Single shared-service loader SPOT |
+| [load_service.yml](../../../../roles/sys-utils-service-loader/tasks/load_service.yml) | Per-service load helper used by the central service loader |
+| [01_constructor.yml](../../../../tasks/stages/01_constructor.yml) | Calls the service loader during constructor |
+| [load_app.yml](../../../../tasks/utils/load_app.yml) | Run-once role loader |
+| [test_service_registry.py](../../../../tests/unit/utils/test_service_registry.py) | Unit tests for discovery, buckets, and `run_after` ordering |
+| [test_service.py](../../../../tests/unit/plugins/lookup/test_service.py) | Unit tests for `lookup('service', ...)` |
+| [test_resolvable.py](../../../../tests/integration/services/test_resolvable.py) | Integration checks for discovered service resolution |
+| [test_canonical.py](../../../../tests/integration/services/test_canonical.py) | Canonical alias consistency checks |
+| [test_transitive_dependencies.py](../../../../tests/integration/services/test_transitive_dependencies.py) | Integration coverage for transitive dependency resolution |

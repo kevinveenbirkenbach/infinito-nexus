@@ -20,9 +20,9 @@
 - name: Setup emails via localhost
   include_role:
     name: sys-svc-mail-smtp
-  when: 
+  when:
     - run_once_sys_svc_mail_smtp is not defined
-    - not (SYSTEM_EMAIL_EXTERNAL | bool)
+    - not (lookup('email').external | bool)
 
 - name: Setup msmtp client
   include_role:

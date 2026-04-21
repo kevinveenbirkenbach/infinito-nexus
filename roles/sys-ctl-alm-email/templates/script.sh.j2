@@ -26,9 +26,10 @@ fi
 mail_tmp="$(mktemp)"
 trap 'rm -f "$mail_tmp"' EXIT
 
+{% set email = lookup('email') %}
 cat > "$mail_tmp" <<ERRMAIL
 To: {{ lookup('users', 'administrator').email }}
-From: systemd <{{ lookup('users', 'no-reply').email }}>
+From: systemd <{{ email['from'] }}>
 Subject: ${friendly}
 Content-Transfer-Encoding: 8bit
 Content-Type: text/plain; charset=UTF-8
@@ -39,11 +40,11 @@ $STATUS_OUT
 
 ERRMAIL
 
-timeout "{{ SYSTEM_EMAIL_TIMEOUT }}s" "$sendmail_bin" -t < "$mail_tmp"
+timeout "{{ email.timeout }}s" "$sendmail_bin" -t < "$mail_tmp"
 rc=$?
 
 if [ "$rc" -eq 124 ] || [ "$rc" -eq 137 ]; then
-  echo "ERROR: sendmail timed out after {{ SYSTEM_EMAIL_TIMEOUT }}s" >&2
+  echo "ERROR: sendmail timed out after {{ email.timeout }}s" >&2
   exit 1
 fi
 

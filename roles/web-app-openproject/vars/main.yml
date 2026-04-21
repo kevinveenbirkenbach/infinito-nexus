@@ -33,12 +33,13 @@ OPENPROJECT_CUSTOM_IMAGE:     "{{ entity_name }}_custom:{{ OPENPROJECT_VERSION }
 # The following volume doesn't have a practcical function. It just exist to prevent the creation of unnecessary anonymous volumes
 OPENPROJECT_DUMMY_VOLUME:     "{{ lookup('container', application_id, 'directories.volumes') }}dummy_volume"
 
+OPENPROJECT_EMAIL: "{{ lookup('email', application_id) }}"
 OPENPROJECT_RAILS_SETTINGS:
   email_delivery_method:      "smtp"
-  smtp_address:               "{{ SYSTEM_EMAIL_HOST }}"
-  smtp_domain:                "{{ SYSTEM_EMAIL_DOMAIN }}"
-  smtp_user_name:             "{{ lookup('users', 'no-reply').email }}"
-  smtp_password:              "{{ lookup('users', 'no-reply').tokens['web-app-mailu'] }}"
+  smtp_address:               "{{ OPENPROJECT_EMAIL.host }}"
+  smtp_domain:                "{{ OPENPROJECT_EMAIL.domain }}"
+  smtp_user_name:             "{{ OPENPROJECT_EMAIL.username }}"
+  smtp_password:              "{{ OPENPROJECT_EMAIL.password }}"
   smtp_ssl:                   false
 
 ## LDAP

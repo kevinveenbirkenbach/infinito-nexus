@@ -1,16 +1,17 @@
 "smtpServer": {
-{% if SYSTEM_EMAIL_ENABLED | bool %}
-    "password": "{{ lookup('users', 'no-reply').tokens['web-app-mailu'] }}",
+{% set email = lookup('email', application_id) %}
+{% if email.enabled | bool %}
+    "password": "{{ email.password }}",
     "replyToDisplayName": "",
-    "starttls": "{{ SYSTEM_EMAIL_START_TLS | lower }}",
+    "starttls": "{{ email.start_tls | lower }}",
     "auth": "true",
-    "port": "{{ SYSTEM_EMAIL_PORT }}",
+    "port": "{{ email.port }}",
     "replyTo": "",
-    "host": "{{ SYSTEM_EMAIL_HOST }}",
-    "from": "{{ lookup('users', 'no-reply').email }}",
+    "host": "{{ email.host }}",
+    "from": "{{ email['from'] }}",
     "fromDisplayName": "Authentication System ({{ DOMAIN_PRIMARY | lower }})",
     "envelopeFrom": "",
-    "ssl": "{{ (SYSTEM_EMAIL_TLS and not SYSTEM_EMAIL_START_TLS) | ternary('true','false') }}",
-    "user": "{{ lookup('users', 'no-reply').email }}"
+    "ssl": "{{ (email.tls and not email.start_tls) | ternary('true','false') }}",
+    "user": "{{ email.username }}"
 {% endif %}
 }

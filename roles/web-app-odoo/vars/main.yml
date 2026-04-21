@@ -60,10 +60,11 @@ ODOO_DB_PASSWORD:                   "{{ lookup('database', application_id, 'pass
 ODOO_DB_PORT:                       "{{ lookup('database', application_id, 'port') }}"
 
 ## Email Settings
-ODOO_SMTP_HOST:                     "{{ SYSTEM_EMAIL_HOST }}"
-ODOO_SMTP_PORT:                     "{{ SYSTEM_EMAIL_PORT | default(587) }}"
-ODOO_SMTP_USER:                     "{{ lookup('users', 'no-reply').email }}"
-ODOO_SMTP_PASSWORD:                 "{{ lookup('users', 'no-reply').tokens['web-app-mailu'] }}"
+ODOO_EMAIL:                         "{{ lookup('email', application_id) }}"
+ODOO_SMTP_HOST:                     "{{ ODOO_EMAIL.host }}"
+ODOO_SMTP_PORT:                     "{{ ODOO_EMAIL.port | default(587) }}"
+ODOO_SMTP_USER:                     "{{ ODOO_EMAIL.username }}"
+ODOO_SMTP_PASSWORD:                 "{{ ODOO_EMAIL.password }}"
 ODOO_SMTP_SSL:                      "{{ lookup('tls', application_id, 'enabled') }}"
 
 ## LDAP Settings

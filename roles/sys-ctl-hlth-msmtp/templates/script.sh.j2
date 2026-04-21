@@ -1,7 +1,8 @@
 #!/bin/bash
+{% set email = lookup('email') %}
 {
-  echo "To: {{ lookup('users', 'administrator').email if (SYSTEM_EMAIL_EXTERNAL | bool) else lookup('users', 'administrator').username }}"
+  echo "To: {{ lookup('users', 'administrator').email if (email.external | bool) else lookup('users', 'administrator').username }}"
   echo "Subject: $(hostname) is alive"
   echo
   echo "Host $(hostname) reports at $(date): I'm alive."
-} | timeout {{ SYSTEM_EMAIL_TIMEOUT }}s msmtp -t
+} | timeout {{ email.timeout }}s msmtp -t

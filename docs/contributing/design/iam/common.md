@@ -46,6 +46,6 @@ When you add OIDC or LDAP support to a role, you MUST:
 
 ## Related Areas 📚
 
-For the broader service-loading model see [services.md](../services.md). For
+For the broader service-loading model see [base.md](../services/base.md). For
 the documentation conventions used in this directory see
 [documentation.md](../../documentation.md).
