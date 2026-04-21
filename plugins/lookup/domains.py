@@ -25,9 +25,10 @@ class LookupModule(LookupBase):
 
     Behavior:
         Builds (and caches) the canonical-domains map via
-        utils.runtime_lookup_data.get_merged_domains. Accepts an optional
-        `variables['domains']` override map, which is merged recursively on top
-        of the computed base. No upstream set_fact required.
+        utils.runtime_lookup_data.get_merged_domains. Per-app overrides belong
+        in `applications.<app>.server.domains` (canonical/aliases) and flow
+        through the regular applications-merge pipeline. No upstream set_fact
+        required.
     """
 
     def run(

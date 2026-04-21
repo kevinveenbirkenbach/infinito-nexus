@@ -17,9 +17,9 @@ class LookupModule(LookupBase):
       {{ lookup('domain', application_id) }}
 
     Resolves the canonical primary domain for `application_id` via
-    utils.runtime_lookup_data.get_merged_domains (cached). Accepts an optional
-    `variables['domains']` override map recursively merged on top of the
-    computed canonical-domains map.
+    utils.runtime_lookup_data.get_merged_domains (cached). Per-app overrides
+    belong in `applications.<app>.server.domains` and flow through the
+    regular applications-merge pipeline.
     """
 
     def run(self, terms, variables: Optional[Dict[str, Any]] = None, **kwargs):

@@ -62,13 +62,6 @@
               roles_base_dir=([ playbook_dir, 'roles' ] | path_join),
               seed=(CURRENT_PLAY_APPLICATIONS | dict2items | map(attribute='key') | list)
             )
-          | combine(domains | default({}, true), recursive=True)
-          | combine(
-              {
-                'svc-prx-openresty': ([ DOMAIN_PRIMARY ] | flatten | map('string') | list)
-              },
-              recursive=True
-            )
         }}
 
   - name: Merge CURRENT_PLAY_REDIRECT_DOMAINS

@@ -740,14 +740,14 @@ def get_merged_domains(
     roles_dir: Optional[str | os.PathLike[str]] = None,
     templar: Any = None,
 ) -> dict[str, Any]:
-    """Build the canonical-domain map lazily, mirroring the previous
-    `domains` set_fact at [tasks/stages/01_constructor.yml].
+    """Build the canonical-domain map lazily from the merged applications view.
 
-    The result is:
-        canonical_domains_map(applications, DOMAIN_PRIMARY)
-        | combine(variables['domains'], recursive=True)  # user/play overrides
+    The result is canonical_domains_map(applications, DOMAIN_PRIMARY).
+    Per-app domain overrides belong in `applications.<app>.server.domains`
+    (canonical/aliases) — they flow through the regular applications-merge
+    pipeline rather than a parallel top-level `domains` escape hatch.
 
-    Cached keyed on (roles_dir, variables_signature, domains_override_fingerprint).
+    Cached keyed on (roles_dir, variables_signature).
     """
     from plugins.filter.canonical_domains_map import (
         FilterModule as _CanonicalDomainsFilter,
@@ -756,14 +756,9 @@ def get_merged_domains(
     variables = variables or {}
     resolved_roles_dir = _resolve_roles_dir(roles_dir=roles_dir)
 
-    override = variables.get("domains")
-    if not isinstance(override, Mapping):
-        override = {}
-
     cache_key = (
         _cache_key(resolved_roles_dir),
         _stable_variables_signature(variables),
-        _fingerprint_mapping(override),
     )
     cached = _MERGED_DOMAINS_CACHE.get(cache_key)
     if cached is not None:
@@ -785,15 +780,7 @@ def get_merged_domains(
     )
 
     filter_instance = _CanonicalDomainsFilter()
-    base_map = filter_instance.canonical_domains_map(apps, primary_domain)
-
-    merged: dict[str, Any] = copy.deepcopy(base_map)
-    if override:
-        merged = _deep_merge(merged, dict(override))
-        if not isinstance(merged, dict):
-            raise ValueError(
-                "get_merged_domains: merged domain map must be a mapping after override."
-            )
+    merged = filter_instance.canonical_domains_map(apps, primary_domain)
 
     _MERGED_DOMAINS_CACHE[cache_key] = merged
     return merged
