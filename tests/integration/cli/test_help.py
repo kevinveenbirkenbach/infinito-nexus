@@ -8,7 +8,7 @@ class CLIHelpIntegrationTest(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         cls.project_root = os.path.abspath(
-            os.path.join(os.path.dirname(__file__), "..", "..")
+            os.path.join(os.path.dirname(__file__), "..", "..", "..")
         )
         cls.cli_dir = os.path.join(cls.project_root, "cli")
         cls.main_py = os.path.join(cls.cli_dir, "__main__.py")

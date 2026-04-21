@@ -1,4 +1,3 @@
-# tests/integration/test_csp_configuration_consistency.py
 import unittest
 import yaml
 from pathlib import Path
@@ -60,7 +59,7 @@ class TestCspConfigurationConsistency(unittest.TestCase):
         return parsed.scheme in ("http", "https", "ws", "wss") and bool(parsed.netloc)
 
     def test_csp_configuration_structure(self):
-        roles_dir = Path(__file__).resolve().parent.parent.parent / "roles"
+        roles_dir = Path(__file__).resolve().parents[3] / "roles"
         errors = []
 
         for role_path in sorted(roles_dir.iterdir()):

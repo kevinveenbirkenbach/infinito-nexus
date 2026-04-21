@@ -186,7 +186,7 @@ class TestFactsAreNotOverriddenByVars(unittest.TestCase):
     """
 
     def test_no_fact_is_overridden_via_vars_on_includes(self) -> None:
-        repo_root = Path(__file__).resolve().parents[2]
+        repo_root = Path(__file__).resolve().parents[3]
         task_files = _find_task_files(repo_root)
 
         facts = _collect_defined_facts(task_files)  # fact -> {paths}

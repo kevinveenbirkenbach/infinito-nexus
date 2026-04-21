@@ -1,4 +1,3 @@
-# tests/integration/test_when_condition_duplication.py
 import unittest
 from pathlib import Path
 from typing import Any, Dict, Iterable, List, Tuple
@@ -28,8 +27,8 @@ def _find_repo_root_containing(marker_names: Iterable[str], max_up: int = 8) -> 
         if cur.parent == cur:
             break
         cur = cur.parent
-    # Fallback: repo root assumed 3 levels up from tests/integration
-    return Path(__file__).resolve().parents[3]
+    # Fallback: repo root assumed 4 levels up from tests/integration/roles/when
+    return Path(__file__).resolve().parents[4]
 
 
 def _normalize_when(value: Any) -> str:

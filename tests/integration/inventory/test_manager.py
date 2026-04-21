@@ -1,5 +1,3 @@
-# tests/integration/test_inventory_manager.py
-
 import tempfile
 from pathlib import Path
 from unittest import TestCase, main

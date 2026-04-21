@@ -1,4 +1,3 @@
-# tests/integration/test_block_when_size.py
 import unittest
 from pathlib import Path
 import yaml
@@ -38,8 +37,8 @@ def _repo_root() -> Path:
         if parent == cur:
             break
         cur = parent
-    # Fallback: project/tests/integration/ -> pick parent of 'tests'
-    return here.parents[2] if len(here.parents) >= 3 else here.parent
+    # Fallback: project/tests/integration/roles/when/ -> pick parent of 'tests'
+    return here.parents[4] if len(here.parents) >= 5 else here.parent
 
 
 Yaml = Union[Dict[str, Any], List[Any], Any]

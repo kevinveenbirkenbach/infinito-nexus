@@ -8,8 +8,10 @@ import re
 class TestIncludeImportTasksExistence(unittest.TestCase):
     def setUp(self):
         # Determine project root, roles directory and list of YAML files to scan
-        tests_dir = os.path.dirname(__file__)  # .../tests/integration
-        project_root = os.path.abspath(os.path.join(tests_dir, os.pardir, os.pardir))
+        tests_dir = os.path.dirname(__file__)  # .../tests/integration/roles/includes
+        project_root = os.path.abspath(
+            os.path.join(tests_dir, os.pardir, os.pardir, os.pardir, os.pardir)
+        )
         self.project_root = project_root
         self.roles_dir = os.path.join(project_root, "roles")
 

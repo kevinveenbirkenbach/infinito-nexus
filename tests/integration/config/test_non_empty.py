@@ -38,6 +38,7 @@ class TestConfigurationNoNone(unittest.TestCase):
             os.path.dirname(__file__),
             os.pardir,
             os.pardir,
+            os.pardir,
             "roles",
             "*",
             "config",

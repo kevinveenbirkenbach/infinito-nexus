@@ -10,7 +10,7 @@ class TestIncludeImportRoleExistence(unittest.TestCase):
         # Determine project root and roles directory
         tests_dir = os.path.dirname(__file__)
         project_root = os.path.abspath(
-            os.path.join(tests_dir, os.pardir, os.pardir, os.pardir)
+            os.path.join(tests_dir, os.pardir, os.pardir, os.pardir, os.pardir)
         )
         self.roles_dir = os.path.join(project_root, "roles")
         # Collect all .yml files in project (recursive), excluding .git and tests dirs

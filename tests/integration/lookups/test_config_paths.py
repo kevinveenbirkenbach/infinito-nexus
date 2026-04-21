@@ -1,5 +1,3 @@
-# tests/integration/test_config_lookup_paths.py
-
 import os
 import re
 import unittest
@@ -15,7 +13,7 @@ class TestGetAppConfPaths(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         # Setup paths
-        root = Path(__file__).resolve().parents[2]
+        root = Path(__file__).resolve().parents[3]
         cls.root = root
         cls.application_defaults = get_application_defaults(roles_dir=root / "roles")
         cls.user_defaults = get_user_defaults(roles_dir=root / "roles")
