@@ -36,4 +36,4 @@ All available `make` commands are documented in the [Makefile Commands](../contr
 For a worked example of how these commands interact (including build, bootstrap, test, deploy, and teardown), see the [environment test suite](../../scripts/tests/environment/README.md).
 For further information on setting up a local development environment, see [CONTRIBUTING.md](../../CONTRIBUTING.md).
 
-For inventory creation and deployment, continue with the [Administration Guide](administration.md).
+For inventory creation and deployment, continue with the [Deploy Guide](deploy.md).

@@ -57,8 +57,8 @@ Try [Infinito.Nexus](https://infinito.nexus) – sign up in seconds, explore the
 
 ## Guides 📚
 
-- [Installation Guide](docs/guides/installation.md) for local CLI installation, Docker execution, and source builds.
-- [Administration Guide](docs/guides/administration.md) for inventory creation, full deploys, and redeploy flows.
+- [Installation Guide](docs/administration/installation.md) for local CLI installation, Docker execution, and source builds.
+- [Deploy Guide](docs/administration/deploy.md) for inventory creation, full deploys, and redeploy flows.
 
 ## Contributing 🔨
 
