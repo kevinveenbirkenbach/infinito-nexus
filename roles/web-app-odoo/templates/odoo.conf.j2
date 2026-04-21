@@ -41,7 +41,7 @@ smtp_port = {{ ODOO_SMTP_PORT }}
 smtp_user = {{ ODOO_SMTP_USER }}
 smtp_password = {{ ODOO_SMTP_PASSWORD }}
 smtp_ssl = {{ ODOO_SMTP_SSL | lower }}
-email_from = {{ users['no-reply'].email }}
+email_from = {{ lookup('users', 'no-reply').email }}
 
 {% if ODOO_REDIS_ENABLED | bool %}
 ; Redis session store

@@ -41,9 +41,9 @@ ODOO_LDAP_ENABLED:                  "{{ lookup('config', application_id, 'compos
 ODOO_REDIS_ENABLED:                 "{{ lookup('config', application_id, 'compose.services.redis.enabled') }}"
 
 ## Admin
-ODOO_ADMINISTRATOR_USERNAME:        "{{ users.administrator.username }}"
-ODOO_ADMINISTRATOR_PASSWORD:        "{{ users.administrator.password }}"
-ODOO_ADMINISTRATOR_EMAIL:           "{{ users.administrator.email }}"
+ODOO_ADMINISTRATOR_USERNAME:        "{{ lookup('users', 'administrator').username }}"
+ODOO_ADMINISTRATOR_PASSWORD:        "{{ lookup('users', 'administrator').password }}"
+ODOO_ADMINISTRATOR_EMAIL:           "{{ lookup('users', 'administrator').email }}"
 
 ## Master Password
 ODOO_MASTER_PASSWORD:               "{{ lookup('config', application_id, 'credentials.master_password') }}"
@@ -62,8 +62,8 @@ ODOO_DB_PORT:                       "{{ lookup('database', application_id, 'port
 ## Email Settings
 ODOO_SMTP_HOST:                     "{{ SYSTEM_EMAIL_HOST }}"
 ODOO_SMTP_PORT:                     "{{ SYSTEM_EMAIL_PORT | default(587) }}"
-ODOO_SMTP_USER:                     "{{ users['no-reply'].email }}"
-ODOO_SMTP_PASSWORD:                 "{{ users['no-reply'].tokens['web-app-mailu'] }}"
+ODOO_SMTP_USER:                     "{{ lookup('users', 'no-reply').email }}"
+ODOO_SMTP_PASSWORD:                 "{{ lookup('users', 'no-reply').tokens['web-app-mailu'] }}"
 ODOO_SMTP_SSL:                      "{{ lookup('tls', application_id, 'enabled') }}"
 
 ## LDAP Settings
