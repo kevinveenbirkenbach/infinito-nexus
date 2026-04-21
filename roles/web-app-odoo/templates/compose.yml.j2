@@ -45,7 +45,7 @@
   ODOO_ADDONS_VOLUME: {'name': ODOO_ADDONS_VOLUME},
   ODOO_CONFIG_VOLUME: {'name': ODOO_CONFIG_VOLUME}
 } %}
-{{ applications | compose_volumes(
+{{ lookup('applications') | compose_volumes(
     application_id,
     database_volume=lookup('database', application_id, 'volume'),
     extra_volumes=odoo_extra_volumes

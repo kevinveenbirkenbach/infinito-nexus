@@ -88,7 +88,28 @@ jobs:
         apps: ${{ fromJson(needs.discover.outputs.apps) }}
 
     steps:
+      # Reclaim runner space before Docker pulls start. Deploy jobs otherwise
+      # compete with the default Ubuntu image payload for limited root space.
+      # Option rationale: docs/contributing/artefact/files/github/workflow.md
+      - name: Free disk space
+        uses: jlumbroso/free-disk-space@54081f138730dfa15788a46383842cd2f914a1be # v1.3.1
+        with:
+          tool-cache: true
+          android: true
+          dotnet: true
+          haskell: true
+          large-packages: true
+          docker-images: true
+          swap-storage: true
+
       - uses: actions/checkout@v6
+
+      # Replace the default ~4 GB runner swap with a larger file so transient
+      # memory spikes (e.g. peertube plugin install, issue #162) don't trip
+      # the host OOM-killer. Script picks / or /mnt based on live free space.
+      - name: Enlarge swap space
+        shell: bash
+        run: ./scripts/github/enlarge_swap.sh
 
       - name: Install deps (jq + envsubst)
         shell: bash
@@ -101,3 +122,8 @@ jobs:
           DISTROS: ${{ needs.discover.outputs.distros }}
           APPS: ${{ matrix.apps }}
         run: ./scripts/tests/deploy/ci/all.sh
+
+      - name: Dump runner state (on failure)
+        if: failure()
+        shell: bash
+        run: ./scripts/github/dump_runner_state.sh "post-deploy failure (${{ matrix.apps }})"

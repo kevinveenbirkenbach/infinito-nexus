@@ -10,6 +10,10 @@ compose:
     cdn:
       enabled: false
       shared: true
+      cpus:            "0.2"
+      mem_reservation: "128m"
+      mem_limit:       "256m"
+      pids_limit:      128
     matomo:
       enabled: true
       shared: true

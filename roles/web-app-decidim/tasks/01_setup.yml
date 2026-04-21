@@ -67,8 +67,8 @@
       puts "Admin user ready: #{user.email}"
     env:
       RAILS_ENV: "{{ ENVIRONMENT }}"
-      DECIDIM_ADMIN_EMAIL: "{{ users.administrator.email }}"
-      DECIDIM_ADMIN_PASSWORD: "{{ users.administrator.password }}"
+      DECIDIM_ADMIN_EMAIL: "{{ lookup('users', 'administrator').email }}"
+      DECIDIM_ADMIN_PASSWORD: "{{ lookup('users', 'administrator').password }}"
   register: decidim_admin_result
   changed_when: "'Admin user ready' in decidim_admin_result.stdout"
 
