@@ -1,4 +1,4 @@
-"""Performance smoke tests for runtime_lookup_data caching.
+"""Performance smoke tests for runtime_data caching.
 
 These simulate the Ansible-in-a-play calling pattern that dominates deploy time:
 many tasks each receive a fresh `variables` mapping (per-task get_vars() churn)

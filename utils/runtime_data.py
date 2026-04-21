@@ -623,7 +623,7 @@ def get_user_defaults(
                 definitions[reserved_username] = {"reserved": True}
         built = _build_users(
             definitions,
-            primary_domain="{{ SYSTEM_EMAIL_DOMAIN }}",
+            primary_domain="{{ DOMAIN_PRIMARY }}",
             start_id=1001,
             become_pwd="{{ 42 | strong_password }}",
         )

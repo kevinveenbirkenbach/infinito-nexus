@@ -23,7 +23,7 @@ from utils.tls_common import (
     uniq_preserve,
     want_get,
 )
-from utils.runtime_lookup_data import get_merged_applications, get_merged_domains
+from utils.runtime_data import get_merged_applications, get_merged_domains
 
 
 class LookupModule(LookupBase):

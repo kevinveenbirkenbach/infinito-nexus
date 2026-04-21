@@ -6,7 +6,7 @@ from typing import Any, Dict, Optional
 from ansible.errors import AnsibleError
 from ansible.plugins.lookup import LookupBase
 
-from utils.runtime_lookup_data import (
+from utils.runtime_data import (
     _reset_cache_for_tests as _reset_runtime_lookup_cache,
     get_merged_domains,
 )
@@ -25,7 +25,7 @@ class LookupModule(LookupBase):
 
     Behavior:
         Builds (and caches) the canonical-domains map via
-        utils.runtime_lookup_data.get_merged_domains. Per-app overrides belong
+        utils.runtime_data.get_merged_domains. Per-app overrides belong
         in `applications.<app>.server.domains` (canonical/aliases) and flow
         through the regular applications-merge pipeline. No upstream set_fact
         required.

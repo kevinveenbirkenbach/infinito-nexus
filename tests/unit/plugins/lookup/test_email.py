@@ -9,7 +9,7 @@ import yaml
 from ansible.errors import AnsibleError
 
 from plugins.lookup.email import LookupModule
-from utils import runtime_lookup_data
+from utils import runtime_data
 
 
 def _write_role_config(base_dir: Path, role_name: str, payload: dict) -> None:
@@ -29,10 +29,10 @@ class TestEmailLookup(unittest.TestCase):
         self._tmp.mkdir(parents=True, exist_ok=True)
         (self._tmp / "roles").mkdir(parents=True, exist_ok=True)
         os.chdir(self._tmp)
-        runtime_lookup_data._reset_cache_for_tests()
+        runtime_data._reset_cache_for_tests()
 
     def tearDown(self) -> None:
-        runtime_lookup_data._reset_cache_for_tests()
+        runtime_data._reset_cache_for_tests()
         os.chdir(self._cwd)
         if self._tmp.exists():
             shutil.rmtree(self._tmp)

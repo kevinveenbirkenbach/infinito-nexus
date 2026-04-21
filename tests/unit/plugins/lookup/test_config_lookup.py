@@ -10,7 +10,7 @@ from ansible.errors import AnsibleError
 
 from plugins.lookup.config import LookupModule
 from utils.applications.config import AppConfigKeyError, ConfigEntryNotSetError
-from utils.runtime_lookup_data import _reset_cache_for_tests
+from utils.runtime_data import _reset_cache_for_tests
 
 
 def _write_schema(base_dir: Path, application_id: str, schema: dict) -> None:
@@ -138,10 +138,10 @@ class TestConfigLookup(unittest.TestCase):
     def test_users_path_returns_rendered_user_value(self) -> None:
         _write_config(self._tmp, "web-app-foo", {"enabled": True})
         _write_users(self._tmp, "web-app-foo", {"administrator": {}})
-        self.lm._templar = _DummyTemplar({"SYSTEM_EMAIL_DOMAIN": "mail.example.org"})
+        self.lm._templar = _DummyTemplar({"DOMAIN_PRIMARY": "mail.example.org"})
         out = self.lm.run(
             ["web-app-foo", "users.administrator.email"],
-            variables={"SYSTEM_EMAIL_DOMAIN": "mail.example.org"},
+            variables={"DOMAIN_PRIMARY": "mail.example.org"},
             roles_dir=str(self._tmp / "roles"),
         )
         self.assertEqual(out, ["administrator@mail.example.org"])

@@ -10,7 +10,7 @@ import yaml
 from ansible.errors import AnsibleError
 
 from plugins.lookup.users import LookupModule, _reset_cache_for_tests
-from utils import runtime_lookup_data
+from utils import runtime_data
 
 
 def _write_users(base_dir: Path, role_name: str, users: dict) -> None:
@@ -290,8 +290,8 @@ class TestUsersLookup(unittest.TestCase):
             ),
             encoding="utf-8",
         )
-        previous_default = runtime_lookup_data.DEFAULT_TOKENS_FILE
-        runtime_lookup_data.DEFAULT_TOKENS_FILE = default_tokens
+        previous_default = runtime_data.DEFAULT_TOKENS_FILE
+        runtime_data.DEFAULT_TOKENS_FILE = default_tokens
         try:
             result = self.lookup.run(
                 ["alice"],
@@ -299,7 +299,7 @@ class TestUsersLookup(unittest.TestCase):
                 roles_dir=str(self._tmp / "roles"),
             )[0]
         finally:
-            runtime_lookup_data.DEFAULT_TOKENS_FILE = previous_default
+            runtime_data.DEFAULT_TOKENS_FILE = previous_default
 
         self.assertEqual(result["tokens"]["web-app-mailu"], "token-from-default-path")
 

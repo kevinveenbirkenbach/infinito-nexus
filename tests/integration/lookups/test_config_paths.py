@@ -6,7 +6,7 @@ from pathlib import Path
 import yaml  # requires PyYAML
 from plugins.filter.get_role import get_role
 from utils.applications.config import get, ConfigEntryNotSetError
-from utils.runtime_lookup_data import get_application_defaults, get_user_defaults
+from utils.runtime_data import get_application_defaults, get_user_defaults
 
 
 class TestGetAppConfPaths(unittest.TestCase):

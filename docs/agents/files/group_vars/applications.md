@@ -13,7 +13,7 @@ This page is the SPOT for agent handling of application defaults after the remov
 
 - Defaults source: `roles/*/config/main.yml`
 - Runtime entry point: [`plugins/lookup/applications.py`](../../../../plugins/lookup/applications.py)
-- Shared aggregation helper: [`utils/runtime_lookup_data.py`](../../../../utils/runtime_lookup_data.py)
+- Shared aggregation helper: [`utils/runtime_data.py`](../../../../utils/runtime_data.py)
 
 ## Why
 

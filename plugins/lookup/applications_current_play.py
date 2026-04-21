@@ -8,7 +8,7 @@ from ansible.errors import AnsibleError
 from ansible.plugins.lookup import LookupBase
 
 from utils.applications.in_group_deps import applications_if_group_and_all_deps
-from utils.runtime_lookup_data import (
+from utils.runtime_data import (
     _cache_key,
     _resolve_roles_dir,
     _stable_variables_signature,
