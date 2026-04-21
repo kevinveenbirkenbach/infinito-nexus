@@ -1,5 +1,3 @@
-source_directory: "{{ playbook_dir }}/assets"
-url:              "//{{ lookup('domain', 'web-svc-file') }}/assets"
 server:
   domains:
     canonical:
@@ -14,6 +12,8 @@ compose:
       mem_reservation: "128m"
       mem_limit:       "256m"
       pids_limit:      128
+      source_directory: "{{ playbook_dir }}/assets"
+      url:              "//{{ lookup('domain', 'web-svc-file') }}/assets"
     # Assets are published through the shared file host under /assets.
     # Keep the file dependency here so consumers only depend on web-svc-asset.
     file:
