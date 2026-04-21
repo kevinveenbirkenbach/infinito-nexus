@@ -8,7 +8,7 @@ from ansible.errors import AnsibleError
 
 
 def _repo_root() -> Path:
-    return Path(__file__).resolve().parents[5]
+    return Path(__file__).resolve().parents[4]
 
 
 def _load_module(rel_path: str, name: str):
@@ -56,7 +56,7 @@ class OidcFlavorLookupTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         cls.mod = _load_module(
-            "roles/web-app-nextcloud/lookup_plugins/oidc_flavor.py",
+            "plugins/lookup/oidc_flavor.py",
             "oidc_flavor",
         )
 
