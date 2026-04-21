@@ -226,6 +226,6 @@ role-local keys instead of `compose.services.database.type`.
 | [`tasks/utils/load_app.yml`](../../../tasks/utils/load_app.yml) | Run-once role loader |
 | [`tests/unit/utils/test_service_registry.py`](../../../tests/unit/utils/test_service_registry.py) | Unit tests for discovery, buckets, and `run_after` ordering |
 | [`tests/unit/plugins/lookup/test_service.py`](../../../tests/unit/plugins/lookup/test_service.py) | Unit tests for `lookup('service', ...)` |
-| [`tests/integration/test_services_resolvable.py`](../../../tests/integration/test_services_resolvable.py) | Integration checks for discovered service resolution |
-| [`tests/integration/test_services_canonical.py`](../../../tests/integration/test_services_canonical.py) | Canonical alias consistency checks |
-| [`tests/integration/test_service_transitive_dependencies.py`](../../../tests/integration/test_service_transitive_dependencies.py) | Integration coverage for transitive dependency resolution |
+| [`tests/integration/services/test_resolvable.py`](../../../tests/integration/services/test_resolvable.py) | Integration checks for discovered service resolution |
+| [`tests/integration/services/test_canonical.py`](../../../tests/integration/services/test_canonical.py) | Canonical alias consistency checks |
+| [`tests/integration/services/test_transitive_dependencies.py`](../../../tests/integration/services/test_transitive_dependencies.py) | Integration coverage for transitive dependency resolution |
