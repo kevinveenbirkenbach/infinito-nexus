@@ -10,14 +10,15 @@ applications:
     variable_c: []             # Replaces the default value (use caution with domains)
 ```
 
-## Placeholder Logic with `<< >>`
+## Cross-Role References via Lookup Plugins
 
-You can reference values from the aggregated `applications` dictionary at build time by embedding `<< ... >>` placeholders inside your template. For example:
+You can reference values from another role's aggregated configuration by using the `config` and `domain` lookup plugins directly inside your template. For example:
 
 ```yaml
-url: "{{ lookup('tls', application_id, 'protocols.web') }}://<< applications.web-svc-file.server.domains.canonical[0] >>/assets"
+url: "{{ lookup('tls', application_id, 'protocols.web') }}://{{ lookup('domain', 'web-svc-file') }}/assets"
+port: "{{ lookup('config', 'web-app-gitea', 'compose.services.gitea.port') }}"
 ```
 
-- The `<< ... >>` placeholders are resolved by the [`DictRenderer`](../../../utils/dict_renderer.py) helper class.
-- The applications lookup aggregates role configurations in memory and then calls the renderer to substitute each `<< ... >>` occurrence.
-- Use the `--verbose` flag on the CLI script to log every replacement step, and rely on the built‑in timeout (default: 10 seconds) to prevent infinite loops.
+- `lookup('config', ROLE_ID, DOTTED_PATH, DEFAULT)` resolves any nested value from another role's `config/main.yml` (the `DEFAULT` argument is optional).
+- `lookup('domain', ROLE_ID)` returns the canonical domain of another role.
+- Both lookups operate on the merged `applications` mapping and Jinja expressions in the referenced values are rendered at lookup time.

@@ -2,6 +2,7 @@
 import os
 import sys
 import unittest
+from unittest.mock import patch
 
 from ansible.errors import AnsibleError
 
@@ -20,40 +21,58 @@ from plugins.lookup.domain import LookupModule  # noqa: E402
 
 
 class TestDomainLookup(unittest.TestCase):
+    """Unit tests for the `domain` lookup.
+
+    The plugin delegates the canonical-domains map build to
+    utils.runtime_lookup_data.get_merged_domains. These tests patch that helper
+    so we assert only the plugin's dispatch + primary-domain extraction logic,
+    not the merge pipeline (which has its own integration tests).
+    """
+
     def setUp(self):
         self.lookup = LookupModule()
 
-    def run_lookup(self, application_id, domains):
-        return self.lookup.run(
-            terms=[application_id],
-            variables={"domains": domains},
-        )
+    def run_lookup(self, application_id, domains_map):
+        with patch(
+            "plugins.lookup.domain.get_merged_domains",
+            return_value=domains_map,
+        ):
+            return self.lookup.run(
+                terms=[application_id],
+                variables={},
+            )
 
     def test_string_domain(self):
-        domains = {"app": "example.com"}
-        self.assertEqual(self.run_lookup("app", domains), ["example.com"])
+        self.assertEqual(
+            self.run_lookup("app", {"app": "example.com"}), ["example.com"]
+        )
 
     def test_list_domain(self):
-        domains = {"app": ["example.com", "alt.example.com"]}
-        self.assertEqual(self.run_lookup("app", domains), ["example.com"])
+        self.assertEqual(
+            self.run_lookup("app", {"app": ["example.com", "alt.example.com"]}),
+            ["example.com"],
+        )
 
     def test_dict_domain(self):
-        domains = {"app": {"primary": "example.com", "secondary": "alt.example.com"}}
-        self.assertEqual(self.run_lookup("app", domains), ["example.com"])
-
-    def test_missing_domains_variable(self):
-        with self.assertRaises(AnsibleError) as ctx:
-            self.lookup.run(terms=["app"], variables={})
-        self.assertIn("missing required variable 'domains'", str(ctx.exception))
+        self.assertEqual(
+            self.run_lookup(
+                "app",
+                {"app": {"primary": "example.com", "secondary": "alt.example.com"}},
+            ),
+            ["example.com"],
+        )
 
     def test_missing_application_id(self):
         with self.assertRaises(AnsibleError):
-            self.lookup.run(terms=[], variables={"domains": {"app": "example.com"}})
+            with patch(
+                "plugins.lookup.domain.get_merged_domains",
+                return_value={"app": "example.com"},
+            ):
+                self.lookup.run(terms=[], variables={})
 
     def test_unknown_application_id(self):
-        with self.assertRaises(AnsibleError) as ctx:
+        with self.assertRaises(AnsibleError):
             self.run_lookup("unknown", {"app": "example.com"})
-        self.assertIn("not found in domains mapping", str(ctx.exception))
 
     def test_empty_string_domain(self):
         with self.assertRaises(AnsibleError):
@@ -69,7 +88,11 @@ class TestDomainLookup(unittest.TestCase):
 
     def test_invalid_application_id_type(self):
         with self.assertRaises(AnsibleError):
-            self.lookup.run(terms=[123], variables={"domains": {"app": "example.com"}})
+            with patch(
+                "plugins.lookup.domain.get_merged_domains",
+                return_value={"app": "example.com"},
+            ):
+                self.lookup.run(terms=[123], variables={})
 
 
 if __name__ == "__main__":

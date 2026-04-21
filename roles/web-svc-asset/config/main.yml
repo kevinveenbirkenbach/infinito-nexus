@@ -1,5 +1,5 @@
 source_directory: "{{ playbook_dir }}/assets"
-url:              "//<< applications['web-svc-file'].server.domains.canonical[0] >>/assets"
+url:              "//{{ lookup('domain', 'web-svc-file') }}/assets"
 server:
   domains:
     canonical:

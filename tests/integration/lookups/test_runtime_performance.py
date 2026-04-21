@@ -24,6 +24,10 @@ from plugins.lookup.applications_current_play import (
     LookupModule as ApplicationsCurrentPlayLookup,
     _reset_cache_for_tests as _reset_current_play_cache,
 )
+from plugins.lookup.domains import (
+    LookupModule as DomainsLookup,
+    _reset_cache_for_tests as _reset_domains_cache,
+)
 
 
 REPO_ROOT = Path(__file__).resolve().parents[3]
@@ -56,12 +60,14 @@ class TestRuntimeLookupPerformance(unittest.TestCase):
     def setUp(self) -> None:
         _reset_cache_for_tests()
         _reset_current_play_cache()
+        _reset_domains_cache()
         self.shared_applications: dict = {}
         self.shared_users: dict = {}
 
     def tearDown(self) -> None:
         _reset_cache_for_tests()
         _reset_current_play_cache()
+        _reset_domains_cache()
 
     def _call_applications(self, variables: dict) -> None:
         lookup = ApplicationsLookup()
@@ -70,6 +76,11 @@ class TestRuntimeLookupPerformance(unittest.TestCase):
 
     def _call_applications_current_play(self, variables: dict) -> None:
         lookup = ApplicationsCurrentPlayLookup()
+        lookup._templar = Templar(loader=DataLoader())
+        lookup.run([], variables=variables, roles_dir=str(ROLES_DIR))
+
+    def _call_domains(self, variables: dict) -> None:
+        lookup = DomainsLookup()
         lookup._templar = Templar(loader=DataLoader())
         lookup.run([], variables=variables, roles_dir=str(ROLES_DIR))
 
@@ -173,6 +184,65 @@ class TestRuntimeLookupPerformance(unittest.TestCase):
             f"applications_current_play cache not providing meaningful speed-up: "
             f"warm={warm_elapsed:.2f}s vs avg hot={avg_ms:.2f}ms "
             f"(ratio {warm_over_hot_avg:.1f}x).",
+        )
+
+    def test_domains_lookup_caches_across_fresh_variables_dicts(self) -> None:
+        """Warm call populates the domains cache; subsequent calls with freshly-
+        built `variables` mappings AND freshly-copied applications/users dicts
+        must hit the cache and stay under budget.
+
+        Same guarantees as test_applications_lookup_caches_across_fresh_variables_dicts,
+        but for lookup('domains'). Without caching, each call re-runs
+        canonical_domains_map over the full roles/ tree.
+        """
+        warm = _simulate_ansible_variables(self.shared_applications, self.shared_users)
+        t0 = time.perf_counter()
+        self._call_domains(warm)
+        warm_elapsed = time.perf_counter() - t0
+
+        import copy
+
+        t0 = time.perf_counter()
+        for _ in range(self.ITERATIONS):
+            variables = _simulate_ansible_variables(
+                copy.deepcopy(self.shared_applications),
+                copy.deepcopy(self.shared_users),
+            )
+            self._call_domains(variables)
+        hot_elapsed = time.perf_counter() - t0
+
+        avg_ms = hot_elapsed / self.ITERATIONS * 1000
+        warm_over_hot_avg = (warm_elapsed * 1000) / max(avg_ms, 0.001)
+
+        self.assertLess(
+            hot_elapsed,
+            self.WARM_CALLS_BUDGET_SECONDS,
+            f"{self.ITERATIONS} cached domains lookups took {hot_elapsed:.2f}s "
+            f"(avg {avg_ms:.2f}ms). Budget: {self.WARM_CALLS_BUDGET_SECONDS}s. "
+            f"Warm-up: {warm_elapsed:.2f}s ({warm_over_hot_avg:.0f}x avg hot).",
+        )
+        self.assertGreater(
+            warm_over_hot_avg,
+            50.0,
+            f"Domains cache not providing meaningful speed-up: warm={warm_elapsed:.2f}s "
+            f"vs avg hot={avg_ms:.2f}ms (ratio {warm_over_hot_avg:.1f}x). "
+            "Expected cache hits to be >=50x faster than cold render.",
+        )
+
+    def test_domains_lookup_warmup_budget(self) -> None:
+        """First render of lookup('domains') on full roles/ dir must complete
+        in reasonable time."""
+        variables = _simulate_ansible_variables(
+            self.shared_applications, self.shared_users
+        )
+        t0 = time.perf_counter()
+        self._call_domains(variables)
+        warm_elapsed = time.perf_counter() - t0
+
+        self.assertLess(
+            warm_elapsed,
+            120.0,
+            f"Cold domains render took {warm_elapsed:.2f}s (budget 120s).",
         )
 
 

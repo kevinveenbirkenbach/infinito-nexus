@@ -71,15 +71,6 @@
             )
         }}
 
-  - name: Merge domain definitions for all domains
-    ansible.builtin.set_fact:
-      domains: >-
-        {{
-          lookup('applications')
-          | canonical_domains_map(DOMAIN_PRIMARY)
-          | combine(CURRENT_PLAY_DOMAINS, recursive=True)
-        }}
-
   - name: Merge CURRENT_PLAY_REDIRECT_DOMAINS
     ansible.builtin.set_fact:
       # The following mapping is necessary to define the exceptions for domains which are created, but which aren't used

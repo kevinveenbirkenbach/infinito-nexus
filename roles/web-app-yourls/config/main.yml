@@ -44,7 +44,7 @@ compose:
         - "{{ [RBAC.GROUP.NAME, 'web-app-yourls-administrator'] | path_join }}"
       acl:
         blacklist:
-          - "<< applications[web-app-yourls].server.locations.admin >>" # Protects the admin area
+          - "{{ lookup('config', 'web-app-yourls', 'server.locations.admin') }}" # Protects the admin area
     css:
       enabled: true
       shared: true

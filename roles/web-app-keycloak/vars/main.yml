@@ -58,7 +58,7 @@ KEYCLOAK_SERVER_HOST:               "127.0.0.1:{{ ports.localhost.http[applicati
 KEYCLOAK_REDIRECT_FEATURES:         ["compose.services.oauth2.enabled","compose.services.oidc.enabled"]
 KEYCLOAK_FRONTCHANNEL_LOGOUT_URL:   "{{ lookup('tls', 'web-svc-logout', 'url.base') }}"
 # This will lead to issues later @todo; Optimize:
-KEYCLOAK_REDIRECT_URIS:             "{{ domains | redirect_uris(lookup('applications'), lookup('tls', application_id, 'protocols.web'), '/*', KEYCLOAK_REDIRECT_FEATURES) }}"
+KEYCLOAK_REDIRECT_URIS:             "{{ lookup('domains') | redirect_uris(lookup('applications'), lookup('tls', application_id, 'protocols.web'), '/*', KEYCLOAK_REDIRECT_FEATURES) }}"
 KEYCLOAK_WEB_ORIGINS: >-
   {{ KEYCLOAK_REDIRECT_URIS
       | map('regex_replace','/\\*$','')

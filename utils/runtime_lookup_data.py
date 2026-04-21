@@ -13,7 +13,6 @@ import yaml
 
 from plugins.filter.merge_with_defaults import merge_with_defaults
 from plugins.lookup.application_gid import LookupModule as ApplicationGidLookup
-from utils.dict_renderer import DictRenderer
 from utils.templating import _templar_render_best_effort
 
 try:
@@ -62,6 +61,7 @@ _USERS_DEFAULTS_CACHE: dict[str, dict[str, Any]] = {}
 # input+variables; the templar instance is churned per-task by Ansible.
 _MERGED_APPLICATIONS_CACHE: dict[tuple, dict[str, Any]] = {}
 _MERGED_USERS_CACHE: dict[tuple, dict[str, Any]] = {}
+_MERGED_DOMAINS_CACHE: dict[tuple, dict[str, Any]] = {}
 
 # Re-entry guards. Cross-lookups ({{ lookup('users', ...) }} inside applications
 # and vice versa) can otherwise drive unbounded recursion once strings are
@@ -595,11 +595,7 @@ def _build_application_defaults(roles_dir: Path) -> dict[str, Any]:
 
         applications[application_id] = config_data
 
-    rendered = DictRenderer().render({"applications": applications})
-    apps = rendered.get("applications", {})
-    if not isinstance(apps, dict):
-        raise ValueError("Rendered applications payload must be a mapping")
-    return {key: apps[key] for key in sorted(apps)}
+    return {key: applications[key] for key in sorted(applications)}
 
 
 def get_application_defaults(
@@ -738,9 +734,75 @@ def get_merged_users(
     return rendered
 
 
+def get_merged_domains(
+    *,
+    variables: Optional[dict[str, Any]] = None,
+    roles_dir: Optional[str | os.PathLike[str]] = None,
+    templar: Any = None,
+) -> dict[str, Any]:
+    """Build the canonical-domain map lazily, mirroring the previous
+    `domains` set_fact at [tasks/stages/01_constructor.yml].
+
+    The result is:
+        canonical_domains_map(applications, DOMAIN_PRIMARY)
+        | combine(variables['domains'], recursive=True)  # user/play overrides
+
+    Cached keyed on (roles_dir, variables_signature, domains_override_fingerprint).
+    """
+    from plugins.filter.canonical_domains_map import (
+        FilterModule as _CanonicalDomainsFilter,
+    )
+
+    variables = variables or {}
+    resolved_roles_dir = _resolve_roles_dir(roles_dir=roles_dir)
+
+    override = variables.get("domains")
+    if not isinstance(override, Mapping):
+        override = {}
+
+    cache_key = (
+        _cache_key(resolved_roles_dir),
+        _stable_variables_signature(variables),
+        _fingerprint_mapping(override),
+    )
+    cached = _MERGED_DOMAINS_CACHE.get(cache_key)
+    if cached is not None:
+        return cached
+
+    primary_domain = (
+        variables.get("DOMAIN_PRIMARY") or variables.get("SYSTEM_EMAIL_DOMAIN") or ""
+    )
+    if not primary_domain:
+        raise ValueError(
+            "get_merged_domains: DOMAIN_PRIMARY (or SYSTEM_EMAIL_DOMAIN fallback) "
+            "must be set in variables."
+        )
+
+    apps = get_merged_applications(
+        variables=variables,
+        roles_dir=roles_dir,
+        templar=templar,
+    )
+
+    filter_instance = _CanonicalDomainsFilter()
+    base_map = filter_instance.canonical_domains_map(apps, primary_domain)
+
+    merged: dict[str, Any] = copy.deepcopy(base_map)
+    if override:
+        merged = _deep_merge(merged, dict(override))
+        if not isinstance(merged, dict):
+            raise ValueError(
+                "get_merged_domains: merged domain map must be a mapping after override."
+            )
+
+    _MERGED_DOMAINS_CACHE[cache_key] = merged
+    return merged
+
+
 def _reset_cache_for_tests() -> None:
     _APPLICATIONS_DEFAULTS_CACHE.clear()
     _USERS_DEFAULTS_CACHE.clear()
     _MERGED_APPLICATIONS_CACHE.clear()
     _MERGED_USERS_CACHE.clear()
+    _MERGED_DOMAINS_CACHE.clear()
     _FINGERPRINT_BY_ID.clear()

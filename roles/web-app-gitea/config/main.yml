@@ -69,7 +69,7 @@ compose:
     oauth2:
       origin:
         host:             "application"
-        port:             "<< applications[web-app-gitea].compose.services.gitea.port >>"
+        port:             "{{ lookup('config', 'web-app-gitea', 'compose.services.gitea.port') }}"
       acl:
         blacklist:
           - "/user/login"
