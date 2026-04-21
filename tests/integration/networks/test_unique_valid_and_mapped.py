@@ -11,7 +11,9 @@ class TestNetworksUniqueValidAndMapped(unittest.TestCase):
         # locate group_vars/all/08_networks.yml
         base_dir = os.path.dirname(__file__)
         cls.networks_file = os.path.abspath(
-            os.path.join(base_dir, "..", "..", "group_vars", "all", "08_networks.yml")
+            os.path.join(
+                base_dir, "..", "..", "..", "group_vars", "all", "08_networks.yml"
+            )
         )
         if os.path.isfile(cls.networks_file):
             with open(cls.networks_file, "r", encoding="utf-8") as f:
@@ -83,7 +85,7 @@ class TestNetworksUniqueValidAndMapped(unittest.TestCase):
 
         # gather all application_id values from roles/*/vars/main.yml
         base_dir = os.path.dirname(__file__)
-        roles_dir = os.path.abspath(os.path.join(base_dir, "..", "..", "roles"))
+        roles_dir = os.path.abspath(os.path.join(base_dir, "..", "..", "..", "roles"))
         app_ids = set()
         for role_path in glob.glob(os.path.join(roles_dir, "*")):
             vars_file = os.path.join(role_path, "vars", "main.yml")

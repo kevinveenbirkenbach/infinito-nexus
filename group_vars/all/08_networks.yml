@@ -136,6 +136,20 @@ defaults_networks:
       subnet: 192.168.104.144/28
     web-app-prometheus:
       subnet: 192.168.104.160/28
+    web-app-dashboard:
+      subnet: 192.168.104.192/28
+    web-app-fider:
+      subnet: 192.168.104.208/28
+    web-app-jenkins:
+      subnet: 192.168.104.224/28
+    web-app-mattermost:
+      subnet: 192.168.104.240/28
+    web-app-mediawiki:
+      subnet: 192.168.105.0/28
+    web-app-odoo:
+      subnet: 192.168.105.16/28
+    svc-prx-openresty:
+      subnet: 192.168.105.32/28
 
     # /24 Networks / 254 Usable Clients
     web-app-bigbluebutton:
