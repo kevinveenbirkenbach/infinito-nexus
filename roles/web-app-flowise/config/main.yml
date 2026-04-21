@@ -73,7 +73,10 @@ compose:
     javascript:
       enabled: false
       shared: true
-  volumes: 
+    email:
+      enabled: true
+      shared: true
+  volumes:
     qdrant:     qdrant_data
     flowise:    flowise_data
 credentials: {}

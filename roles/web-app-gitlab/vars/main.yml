@@ -5,6 +5,10 @@ application_id:               "web-app-gitlab"
 GITLAB_URL:                 "{{ lookup('tls', application_id, 'url.base') }}"
 GITLAB_HOSTNAME:            "{{ lookup('domain',application_id) }}"
 
+## Email
+GITLAB_EMAIL:               "{{ lookup('email', application_id) }}"
+GITLAB_EMAIL_ENABLED:       "{{ GITLAB_EMAIL.enabled | bool }}"
+
 ## OIDC
 GITLAB_OIDC_ENABLED:        "{{ lookup('config', application_id, 'compose.services.oidc.enabled') }}"
 GITLAB_OIDC_LABEL:          "{{ OIDC.BUTTON_TEXT }}"
@@ -66,4 +70,18 @@ GITLAB_OMNIBUS_OIDC:
   - "  }"
   - "} }]"
 
-GITLAB_OMNIBUS_ALL: "{{ GITLAB_OMNIBUS_BASE + (GITLAB_OMNIBUS_OIDC if GITLAB_OIDC_ENABLED else []) }}"
+GITLAB_OMNIBUS_SMTP:
+  - ""
+  - "gitlab_rails['smtp_enable']=true"
+  - "gitlab_rails['smtp_address']={{ GITLAB_EMAIL.host | ruby_dq }}"
+  - "gitlab_rails['smtp_port']={{ GITLAB_EMAIL.port }}"
+  - "gitlab_rails['smtp_user_name']={{ GITLAB_EMAIL.username | ruby_dq }}"
+  - "gitlab_rails['smtp_password']={{ GITLAB_EMAIL.password | ruby_dq }}"
+  - "gitlab_rails['smtp_domain']={{ GITLAB_EMAIL.domain | ruby_dq }}"
+  - "gitlab_rails['smtp_authentication']={{ (GITLAB_EMAIL.auth | bool) | ternary(\"'login'\", 'nil') }}"
+  - "gitlab_rails['smtp_enable_starttls_auto']={{ (GITLAB_EMAIL.start_tls | bool) | ternary('true', 'false') }}"
+  - "gitlab_rails['smtp_tls']={{ (GITLAB_EMAIL.tls | bool) | ternary('true', 'false') }}"
+  - "gitlab_rails['gitlab_email_from']={{ GITLAB_EMAIL['from'] | ruby_dq }}"
+  - "gitlab_rails['gitlab_email_reply_to']={{ GITLAB_EMAIL['from'] | ruby_dq }}"
+
+GITLAB_OMNIBUS_ALL: "{{ GITLAB_OMNIBUS_BASE + (GITLAB_OMNIBUS_OIDC if GITLAB_OIDC_ENABLED else []) + (GITLAB_OMNIBUS_SMTP if GITLAB_EMAIL_ENABLED else []) }}"

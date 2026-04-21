@@ -53,6 +53,9 @@ compose:
     ollama:
       enabled: true
       shared: true
-  volumes: 
+    email:
+      enabled: true
+      shared: true
+  volumes:
     openwebui:  ai_openwebui_data
 credentials: {}
