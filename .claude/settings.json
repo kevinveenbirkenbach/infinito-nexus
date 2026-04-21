@@ -26,6 +26,7 @@
       "Bash(wc *)",
       "Edit",
       "Read",
+      "WebFetch(domain:docs.decidim.org)",
       "WebFetch(domain:github.com)",
       "WebFetch(domain:raw.githubusercontent.com)",
       "WebSearch",
