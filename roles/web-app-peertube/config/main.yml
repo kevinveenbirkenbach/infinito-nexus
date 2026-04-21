@@ -48,7 +48,7 @@ compose:
     postgres:
       enabled: true
       shared: true
-    peertube: 
+    peertube:
       name:             "peertube"
       version:          "production-bookworm"
       image:            "chocobozzz/peertube"

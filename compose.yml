@@ -68,6 +68,13 @@ services:
     container_name: infinito_nexus_${INFINITO_DISTRO:-debian}
     restart: "no"
     profiles: ["ci"]
+    # Resource caps for reproducing OOM/OOM-kill scenarios locally (e.g. issue #162
+    # web-app-peertube plugin install rc=137). Defaults of 0 map to "unlimited"
+    # in the Docker engine, so leaving these env vars unset behaves as if the
+    # keys were omitted.
+    mem_limit: ${INFINITO_MEM_LIMIT:-0}
+    memswap_limit: ${INFINITO_MEMSWAP_LIMIT:-0}
+    cpus: ${INFINITO_CPUS:-0}
     <<: *ci_defaults
     volumes:
       - /sys/fs/cgroup:/sys/fs/cgroup:rw
