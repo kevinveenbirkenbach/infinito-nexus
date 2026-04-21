@@ -40,3 +40,7 @@ compose:
     css:
       enabled: false
       shared: true
+    # noqa: email
+    email:
+      enabled: false
+      shared: false

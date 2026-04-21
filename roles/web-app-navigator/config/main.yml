@@ -38,3 +38,7 @@ compose:
     css:
       enabled: true
       shared: true
+    # noqa: email
+    email:
+      enabled: false
+      shared: false

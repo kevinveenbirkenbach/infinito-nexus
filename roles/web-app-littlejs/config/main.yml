@@ -47,3 +47,7 @@ compose:
     littlejs:
       image:   nginx
       version: alpine
+    # noqa: email
+    email:
+      enabled: false
+      shared: false
