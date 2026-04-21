@@ -1,6 +1,7 @@
 # tests/unit/plugins/lookup/test_cert.py
 import sys
 import unittest
+from unittest.mock import patch
 
 from ansible.errors import AnsibleError
 from plugins.lookup.cert import LookupModule
@@ -52,6 +53,28 @@ class TestCertPlanLookup(unittest.TestCase):
                 "api.c.example",
             ],
         }
+
+        # Route get_merged_domains / get_merged_applications through
+        # variables['domains'] / variables['applications'] so tests stay hermetic.
+        def _domains_from_vars(*, variables=None, **_kwargs):
+            return (variables or {}).get("domains", {})
+
+        def _applications_from_vars(*, variables=None, **_kwargs):
+            return (variables or {}).get("applications", {})
+
+        self._patchers = [
+            patch(
+                "plugins.lookup.cert.get_merged_domains",
+                side_effect=_domains_from_vars,
+            ),
+            patch(
+                "plugins.lookup.cert.get_merged_applications",
+                side_effect=_applications_from_vars,
+            ),
+        ]
+        for p in self._patchers:
+            p.start()
+        self.addCleanup(lambda: [p.stop() for p in self._patchers])
 
     def tearDown(self):
         _reset_cache_for_tests()

@@ -10,7 +10,7 @@ import yaml
 from ansible.plugins.lookup import LookupBase
 from ansible.errors import AnsibleError
 from utils.applications.config import get
-from utils.runtime_lookup_data import get_merged_applications
+from utils.runtime_lookup_data import get_merged_applications, get_merged_domains
 from ansible.plugins.loader import lookup_loader
 
 
@@ -116,8 +116,12 @@ class LookupModule(LookupBase):
             except Exception as e:
                 raise AnsibleError(f"Error reading '{meta_path}': {e}")
 
-            # Retrieve domains from variables; applications already merged above.
-            domains = variables.get("domains", {})
+            # Retrieve domains via cached merger; applications already merged above.
+            domains = get_merged_domains(
+                variables=variables,
+                roles_dir=roles_dir,
+                templar=getattr(self, "_templar", None),
+            )
             domain_url = domains.get(application_id, "")
 
             if isinstance(domain_url, list):

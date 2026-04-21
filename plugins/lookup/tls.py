@@ -23,7 +23,7 @@ from utils.tls_common import (
     uniq_preserve,
     want_get,
 )
-from utils.runtime_lookup_data import get_merged_applications
+from utils.runtime_lookup_data import get_merged_applications, get_merged_domains
 
 
 class LookupModule(LookupBase):
@@ -43,7 +43,11 @@ class LookupModule(LookupBase):
 
         want = as_str(terms[1]).strip() if len(terms) == 2 else ""
 
-        domains = require(variables, "domains", dict)
+        domains = get_merged_domains(
+            variables=variables,
+            roles_dir=kwargs.get("roles_dir"),
+            templar=getattr(self, "_templar", None),
+        )
         applications = get_merged_applications(
             variables=variables,
             roles_dir=kwargs.get("roles_dir"),
