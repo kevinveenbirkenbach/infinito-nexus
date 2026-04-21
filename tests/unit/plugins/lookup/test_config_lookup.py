@@ -9,7 +9,7 @@ import yaml
 from ansible.errors import AnsibleError
 
 from plugins.lookup.config import LookupModule
-from utils.config_utils import AppConfigKeyError, ConfigEntryNotSetError
+from utils.applications.config import AppConfigKeyError, ConfigEntryNotSetError
 from utils.runtime_lookup_data import _reset_cache_for_tests
 
 

@@ -34,11 +34,12 @@ return [
 		// DN of the group whose member can auth on Friendica - optional
 		'ldap_group' =>'',
 
-		// ldap_autocreateaccount (Boolean)
-		// To create Friendica account if user exists in ldap
-		// Requires an email and a simple (beautiful) nickname on user ldap object
-		// active account creation - optional - default true
-		'ldap_autocreateaccount' => true,
+		// ldap_autocreateaccount (String "true")
+		// Upstream ldapauth.php checks this with `$val == 'true'`, so the
+		// stored value must be the literal string 'true' — passing a PHP
+		// bool ends up read back as int and the comparison fails in PHP 8+,
+		// which skipped autocreation and rejected every LDAP-only login.
+		'ldap_autocreateaccount' => 'true',
 
 		// ldap_autocreateaccount_emailattribute (String)
 		// attribute to get email - optional - default : 'mail'

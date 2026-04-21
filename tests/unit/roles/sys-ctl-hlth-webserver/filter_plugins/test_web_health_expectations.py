@@ -36,23 +36,23 @@ class TestWebHealthExpectationsFilter(unittest.TestCase):
         cls.mod = load_module_from_path("web_health_expectations", cls.module_path)
 
     def setUp(self):
-        # Fresh mock for get_app_conf per test
-        self.get_app_conf_patch = patch.object(self.mod, "get_app_conf")
-        self.mock_get_app_conf = self.get_app_conf_patch.start()
+        # Fresh mock for get per test
+        self.get_patch = patch.object(self.mod, "get")
+        self.mock_get = self.get_patch.start()
 
     def tearDown(self):
-        self.get_app_conf_patch.stop()
+        self.get_patch.stop()
 
     def _configure_returns(self, mapping):
         """
         Provide a dict keyed by (app_id, key) -> value.
-        get_app_conf(...) will return mapping.get((app_id, key), default)
+        get(...) will return mapping.get((app_id, key), default)
         """
 
         def side_effect(applications, app_id, key, strict=False, default=None):
             return mapping.get((app_id, key), default)
 
-        self.mock_get_app_conf.side_effect = side_effect
+        self.mock_get.side_effect = side_effect
 
     # ------------ Required selection --------------
 

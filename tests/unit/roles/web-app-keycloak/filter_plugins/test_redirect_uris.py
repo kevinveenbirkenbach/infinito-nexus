@@ -35,9 +35,10 @@ def _load_module_from_path(name, file_path):
 class RedirectUrisTest(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        # Create stub package: utils, with config_utils and get_url submodules.
+        # Create stub package: utils, with applications.config and get_url submodules.
         mu = types.ModuleType("utils")
-        mu_config = types.ModuleType("utils.config_utils")
+        mu_apps = types.ModuleType("utils.applications")
+        mu_config = types.ModuleType("utils.applications.config")
         mu_geturl = types.ModuleType("utils.get_url")
 
         # Define stub exceptions
@@ -47,8 +48,8 @@ class RedirectUrisTest(unittest.TestCase):
         class ConfigEntryNotSetError(Exception):
             pass
 
-        # Define a practical get_app_conf that understands dotted keys
-        def get_app_conf(applications, app_id, dotted, default=None):
+        # Define a practical get that understands dotted keys
+        def get(applications, app_id, dotted, default=None):
             data = applications.get(app_id, {})
             cur = data
             for part in dotted.split("."):
@@ -65,7 +66,7 @@ class RedirectUrisTest(unittest.TestCase):
             return f"{protocol}://{domain}"
 
         # Attach to stub modules
-        mu_config.get_app_conf = staticmethod(get_app_conf)
+        mu_config.get = staticmethod(get)
         mu_config.AppConfigKeyError = AppConfigKeyError
         mu_config.ConfigEntryNotSetError = ConfigEntryNotSetError
 
@@ -73,7 +74,8 @@ class RedirectUrisTest(unittest.TestCase):
 
         # Register in sys.modules so plugin imports succeed
         sys.modules["utils"] = mu
-        sys.modules["utils.config_utils"] = mu_config
+        sys.modules["utils.applications"] = mu_apps
+        sys.modules["utils.applications.config"] = mu_config
         sys.modules["utils.get_url"] = mu_geturl
 
         # Load the plugin by path
@@ -82,12 +84,12 @@ class RedirectUrisTest(unittest.TestCase):
         cls.plugin = _load_module_from_path("test_target.redirect_uris", plugin_path)
 
         # Keep originals for per-test monkeypatching
-        cls._orig_get_app_conf = cls.plugin.get_app_conf
+        cls._orig_get = cls.plugin.get
         cls._orig_get_url = cls.plugin.get_url
 
     def tearDown(self):
         # Restore plugin functions if a test monkeypatched them
-        self.plugin.get_app_conf = self._orig_get_app_conf
+        self.plugin.get = self._orig_get
         self.plugin.get_url = self._orig_get_url
 
     def test_single_domain_oauth2_enabled(self):
@@ -154,12 +156,12 @@ class RedirectUrisTest(unittest.TestCase):
             self.plugin.redirect_uris(domains, applications)
         self.assertIn("get_url failed", str(ctx.exception))
 
-    def test_get_app_conf_exception_is_handled_as_no_feature(self):
-        # Make get_app_conf raise AppConfigKeyError; plugin should treat as not enabled and skip
-        def raising_get_app_conf(*args, **kwargs):
+    def test_get_exception_is_handled_as_no_feature(self):
+        # Make get raise AppConfigKeyError; plugin should treat as not enabled and skip
+        def raising_get(*args, **kwargs):
             raise self.plugin.AppConfigKeyError("missing key")
 
-        self.plugin.get_app_conf = raising_get_app_conf
+        self.plugin.get = raising_get
 
         domains = {"app1": "example.org"}
         applications = {

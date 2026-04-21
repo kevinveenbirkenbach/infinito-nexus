@@ -2,9 +2,9 @@ from collections.abc import Mapping
 import os
 import sys
 
-from utils.config_utils import get_app_conf  # reuse existing helper
+from utils.applications.config import get  # reuse existing helper
 
-# Allow imports from utils (same trick as your get_app_conf filter)
+# Allow imports from utils (same trick as your config filter)
 _BASE_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", ".."))
 _MODULE_UTILS_DIR = os.path.join(_BASE_DIR, "utils")
 for _p in (_BASE_DIR, _MODULE_UTILS_DIR):
@@ -144,15 +144,15 @@ def web_health_expectations(
         if app_id not in selection:
             continue
 
-        canonical_raw = get_app_conf(
+        canonical_raw = get(
             applications, app_id, "server.domains.canonical", strict=False, default=[]
         )
-        aliases_raw = get_app_conf(
+        aliases_raw = get(
             applications, app_id, "server.domains.aliases", strict=False, default=[]
         )
         aliases = _to_list(aliases_raw, allow_mapping=True)
 
-        sc_raw = get_app_conf(
+        sc_raw = get(
             applications, app_id, "server.status_codes", strict=False, default={}
         )
         sc_map = {}

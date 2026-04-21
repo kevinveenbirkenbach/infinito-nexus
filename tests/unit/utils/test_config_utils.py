@@ -3,8 +3,8 @@ import shutil
 import tempfile
 import unittest
 
-from utils.config_utils import (
-    get_app_conf,
+from utils.applications.config import (
+    get,
     AppConfigKeyError,
     ConfigEntryNotSetError,
 )
@@ -50,7 +50,7 @@ class TestGetAppConf(unittest.TestCase):
     def test_missing_app_with_skip_missing_app_returns_default_true(self):
         """If app ID is missing and skip_missing_app=True, it should return the default (True)."""
         apps = {"some-other-app": {}}
-        val = get_app_conf(
+        val = get(
             apps,
             "web-app-nextcloud",
             "features.oidc",
@@ -63,7 +63,7 @@ class TestGetAppConf(unittest.TestCase):
     def test_missing_app_with_skip_missing_app_returns_default_false(self):
         """If app ID is missing and skip_missing_app=True, it should return the default (False)."""
         apps = {"svc-bkp-rmt-2-loc": {}}
-        val = get_app_conf(
+        val = get(
             apps,
             "web-app-nextcloud",
             "features.oidc",
@@ -77,7 +77,7 @@ class TestGetAppConf(unittest.TestCase):
         """Missing app ID without skip_missing_app and strict=True should raise."""
         apps = {}
         with self.assertRaises(AppConfigKeyError):
-            get_app_conf(
+            get(
                 apps,
                 "web-app-nextcloud",
                 "features.oidc",
@@ -89,7 +89,7 @@ class TestGetAppConf(unittest.TestCase):
     def test_missing_app_without_skip_missing_app_and_strict_false_raises(self):
         apps = {}
         with self.assertRaises(AppConfigKeyError):
-            get_app_conf(
+            get(
                 apps,
                 "web-app-nextcloud",
                 "features.oidc",
@@ -100,7 +100,7 @@ class TestGetAppConf(unittest.TestCase):
 
     def test_existing_app_returns_expected_value(self):
         """Existing app and key should return the configured value."""
-        val = get_app_conf(
+        val = get(
             self.applications,
             "web-app-demo",
             "features.oidc",
@@ -112,7 +112,7 @@ class TestGetAppConf(unittest.TestCase):
 
     def test_nested_list_index_access(self):
         """Accessing list indices should work correctly."""
-        val0 = get_app_conf(
+        val0 = get(
             self.applications,
             "web-app-demo",
             "features.nested.list[0]",
@@ -120,7 +120,7 @@ class TestGetAppConf(unittest.TestCase):
             default=None,
             skip_missing_app=False,
         )
-        val1 = get_app_conf(
+        val1 = get(
             self.applications,
             "web-app-demo",
             "features.nested.list[1]",
@@ -134,7 +134,7 @@ class TestGetAppConf(unittest.TestCase):
     def test_schema_defined_but_unset_raises_in_strict_mode(self):
         """Schema-defined but unset value should raise in strict mode."""
         with self.assertRaises(ConfigEntryNotSetError):
-            get_app_conf(
+            get(
                 self.applications,
                 "web-app-demo",
                 "features.defined_but_unset",
@@ -145,7 +145,7 @@ class TestGetAppConf(unittest.TestCase):
 
     def test_schema_defined_but_unset_strict_false_returns_default(self):
         """Schema-defined but unset value should return default when strict=False."""
-        val = get_app_conf(
+        val = get(
             self.applications,
             "web-app-demo",
             "features.defined_but_unset",
@@ -158,7 +158,7 @@ class TestGetAppConf(unittest.TestCase):
     def test_invalid_key_format_raises(self):
         """Invalid key format in path should raise AppConfigKeyError."""
         with self.assertRaises(AppConfigKeyError):
-            get_app_conf(
+            get(
                 self.applications,
                 "web-app-demo",
                 "features.nested.list[not-an-int]",
@@ -170,7 +170,7 @@ class TestGetAppConf(unittest.TestCase):
     def test_index_out_of_range_respects_strict(self):
         """Out-of-range index should respect strict parameter."""
         # strict=False returns default
-        val = get_app_conf(
+        val = get(
             self.applications,
             "web-app-demo",
             "features.nested.list[99]",
@@ -181,7 +181,7 @@ class TestGetAppConf(unittest.TestCase):
         self.assertEqual(val, "fallback")
         # strict=True raises
         with self.assertRaises(AppConfigKeyError):
-            get_app_conf(
+            get(
                 self.applications,
                 "web-app-demo",
                 "features.nested.list[99]",

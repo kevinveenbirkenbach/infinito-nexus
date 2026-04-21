@@ -16,10 +16,10 @@ class TestResourceFilter(unittest.TestCase):
         self.application_id = "web-app-foo"
         self.key = "cpus"
 
-        # Patch get_app_conf and get_entity_name inside the plugin module
-        self.patcher_conf = patch.object(plugin_module, "get_app_conf")
+        # Patch get and get_entity_name inside the plugin module
+        self.patcher_conf = patch.object(plugin_module, "get")
         self.patcher_entity = patch.object(plugin_module, "get_entity_name")
-        self.mock_get_app_conf = self.patcher_conf.start()
+        self.mock_get = self.patcher_conf.start()
         self.mock_get_entity_name = self.patcher_entity.start()
         self.mock_get_entity_name.return_value = "foo"  # derived service name
 
@@ -28,8 +28,8 @@ class TestResourceFilter(unittest.TestCase):
         self.patcher_entity.stop()
 
     def test_primary_service_value_found(self):
-        """Returns the value when get_app_conf finds it for an explicit service."""
-        self.mock_get_app_conf.return_value = "0.75"
+        """Returns the value when get finds it for an explicit service."""
+        self.mock_get.return_value = "0.75"
 
         result = plugin_module.resource_filter(
             self.applications,
@@ -40,7 +40,7 @@ class TestResourceFilter(unittest.TestCase):
         )
 
         self.assertEqual(result, "0.75")
-        self.mock_get_app_conf.assert_called_once_with(
+        self.mock_get.assert_called_once_with(
             self.applications,
             self.application_id,
             "compose.services.openresty.cpus",
@@ -50,7 +50,7 @@ class TestResourceFilter(unittest.TestCase):
 
     def test_service_name_empty_uses_get_entity_name(self):
         """When service_name is empty, it resolves via get_entity_name(application_id)."""
-        self.mock_get_app_conf.return_value = "1.0"
+        self.mock_get.return_value = "1.0"
 
         result = plugin_module.resource_filter(
             self.applications,
@@ -62,7 +62,7 @@ class TestResourceFilter(unittest.TestCase):
 
         self.assertEqual(result, "1.0")
         self.mock_get_entity_name.assert_called_once_with(self.application_id)
-        self.mock_get_app_conf.assert_called_once_with(
+        self.mock_get.assert_called_once_with(
             self.applications,
             self.application_id,
             "compose.services.foo.cpus",
@@ -72,10 +72,10 @@ class TestResourceFilter(unittest.TestCase):
 
     def test_returns_hard_default_when_missing(self):
         """
-        If the primary value is missing, get_app_conf (strict=False) should return the provided
+        If the primary value is missing, get (strict=False) should return the provided
         default. We simulate that by returning the default value directly from the mock.
         """
-        self.mock_get_app_conf.return_value = "2g"
+        self.mock_get.return_value = "2g"
 
         result = plugin_module.resource_filter(
             self.applications,
@@ -86,7 +86,7 @@ class TestResourceFilter(unittest.TestCase):
         )
 
         self.assertEqual(result, "2g")
-        self.mock_get_app_conf.assert_called_once_with(
+        self.mock_get.assert_called_once_with(
             self.applications,
             self.application_id,
             "compose.services.openresty.mem_limit",
@@ -96,9 +96,7 @@ class TestResourceFilter(unittest.TestCase):
 
     def test_hard_default_passthrough_type(self):
         """Ensure the hard_default (including non-string types) is passed through correctly."""
-        self.mock_get_app_conf.return_value = (
-            2048  # simulate get_app_conf returning the default
-        )
+        self.mock_get.return_value = 2048  # simulate get returning the default
 
         result = plugin_module.resource_filter(
             self.applications,
@@ -109,7 +107,7 @@ class TestResourceFilter(unittest.TestCase):
         )
 
         self.assertEqual(result, 2048)
-        self.mock_get_app_conf.assert_called_once_with(
+        self.mock_get.assert_called_once_with(
             self.applications,
             self.application_id,
             "compose.services.openresty.pids_limit",
@@ -119,7 +117,7 @@ class TestResourceFilter(unittest.TestCase):
 
     def test_raises_ansible_filter_error_on_config_errors(self):
         """Underlying config errors must be wrapped as AnsibleFilterError."""
-        self.mock_get_app_conf.side_effect = plugin_module.AppConfigKeyError("bad path")
+        self.mock_get.side_effect = plugin_module.AppConfigKeyError("bad path")
 
         with self.assertRaises(plugin_module.AnsibleFilterError):
             plugin_module.resource_filter(

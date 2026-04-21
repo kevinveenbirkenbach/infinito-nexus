@@ -6,7 +6,7 @@ from typing import Any, Dict, Optional
 from ansible.errors import AnsibleError
 from ansible.plugins.lookup import LookupBase
 
-from utils.config_utils import get_app_conf
+from utils.applications.config import get
 from utils.runtime_lookup_data import (
     _render_with_templar,
     get_merged_applications,
@@ -54,7 +54,7 @@ class LookupModule(LookupBase):
                 raise AnsibleError(
                     "lookup('config', ...): users path must include a canonical user key."
                 )
-            app_users = get_app_conf(
+            app_users = get(
                 applications=applications,
                 application_id=application_id,
                 config_path="users",
@@ -102,7 +102,7 @@ class LookupModule(LookupBase):
                 )
             ]
 
-        value = get_app_conf(
+        value = get(
             applications=applications,
             application_id=application_id,
             config_path=config_path,

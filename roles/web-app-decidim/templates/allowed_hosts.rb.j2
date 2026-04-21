@@ -1,0 +1,5 @@
+# frozen_string_literal: true
+# Managed by Ansible - do not edit by hand
+# Allows requests from the configured Decidim domain
+
+Rails.application.config.hosts << "{{ domain }}"

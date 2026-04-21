@@ -1,0 +1,34 @@
+{% include 'roles/sys-svc-compose/templates/base.yml.j2' %}
+
+  application:
+{% set service_name = 'decidim' %}
+{% set container_healthcheck = 'health_check' %}
+{% include 'roles/sys-svc-container/templates/base.yml.j2' %}
+    {{ lookup('template', 'roles/sys-svc-container/templates/build.yml.j2') | indent(4) }}
+      args:
+        DECIDIM_IMAGE: "{{ DECIDIM_IMAGE }}"
+        DECIDIM_VERSION: "{{ DECIDIM_VERSION }}"
+        DECIDIM_PATCH_SCRIPT_HOST_REL: "{{ DECIDIM_PATCH_SCRIPT_HOST_REL }}"
+        DECIDIM_PATCH_SCRIPT_DOCKER: "{{ DECIDIM_PATCH_SCRIPT_DOCKER }}"
+    image: "{{ DECIDIM_CUSTOM_IMAGE }}"
+    container_name: "{{ DECIDIM_CONTAINER }}"
+    command: bundle exec puma -C config/puma.rb
+    ports:
+      - "{{ DOCKER_BIND_HOST }}:{{ ports.localhost.http[application_id] }}:{{ container_port }}"
+    volumes:
+      - uploads:/app/public/uploads
+      - logs:/app/log
+      - "{{ lookup('container', application_id, 'directories.instance') }}allowed_hosts.rb:/code/config/initializers/allowed_hosts.rb:ro"
+{% include 'roles/sys-svc-container/templates/networks.yml.j2' %}
+{% include 'roles/sys-svc-container/templates/depends_on/dmbs_excl.yml.j2' %}
+{% include 'roles/sys-svc-container/templates/healthcheck/curl.yml.j2' %}
+
+{{ applications | compose_volumes(
+    application_id,
+    database_volume=lookup('database', application_id, 'volume'),
+    extra_volumes={
+      'uploads': {'name': DECIDIM_VOLUME_UPLOADS},
+      'logs':    {'name': DECIDIM_VOLUME_LOGS},
+    }
+) }}
+{% include 'roles/sys-svc-compose/templates/networks.yml.j2' %}

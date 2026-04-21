@@ -1,4 +1,4 @@
-# tests/integration/test_get_app_conf_paths.py
+# tests/integration/test_config_lookup_paths.py
 
 import os
 import re
@@ -7,7 +7,7 @@ from pathlib import Path
 
 import yaml  # requires PyYAML
 from plugins.filter.get_role import get_role
-from plugins.filter.get_app_conf import get_app_conf, ConfigEntryNotSetError
+from utils.applications.config import get, ConfigEntryNotSetError
 from utils.runtime_lookup_data import get_application_defaults, get_user_defaults
 
 
@@ -36,20 +36,22 @@ class TestGetAppConfPaths(unittest.TestCase):
                 # skip apps without schema or role
                 continue
 
-        # Regex to find get_app_conf calls
+        # Regex to find lookup('config', app_id, 'path') calls
         cls.pattern = re.compile(
-            r"get_app_conf\(\s*([^\),]+)\s*,\s*['\"]([^'\"]+)['\"]"
+            r"lookup\(\s*['\"]config['\"]\s*,\s*([^,]+?)\s*,\s*['\"]([^'\"]+)['\"]"
         )
 
         # Scan files once
         cls.literal_paths = {}  # app_id -> {path: [(file,line)...]}
         cls.variable_paths = {}  # path -> [(file,line)...]
 
+        skip_dirs = {"tests", "docs"}
         for dirpath, dirs, files in os.walk(root):
-            # skip descending into the tests directory
-            if "tests" in dirs:
-                dirs.remove("tests")
-            if "tests" in Path(dirpath).parts:
+            # skip descending into tests/ and docs/ (docs contain placeholder examples)
+            for sd in list(skip_dirs):
+                if sd in dirs:
+                    dirs.remove(sd)
+            if skip_dirs & set(Path(dirpath).parts):
                 continue
             for fname in files:
                 # ignore .py and .sh files
@@ -71,7 +73,7 @@ class TestGetAppConfPaths(unittest.TestCase):
                         continue
 
                     # 2) Skip calls preceded by an inline comment
-                    idx_call = line.find("get_app_conf")
+                    idx_call = line.find("lookup")
                     idx_hash = line.find("#")
                     if 0 <= idx_hash < idx_call:
                         continue
@@ -114,10 +116,10 @@ class TestGetAppConfPaths(unittest.TestCase):
                     with self.subTest(path=dotted):
                         try:
                             # will raise ConfigEntryNotSetError if defined in schema but not set
-                            get_app_conf(
-                                self.application_defaults,
-                                app_id,
-                                dotted,
+                            get(
+                                applications=self.application_defaults,
+                                application_id=app_id,
+                                config_path=dotted,
                                 strict=True,
                             )
                         except ConfigEntryNotSetError:
@@ -129,7 +131,7 @@ class TestGetAppConfPaths(unittest.TestCase):
     def test_variable_paths(self):
         # dynamic paths: must exist somewhere
         if not self.variable_paths:
-            self.skipTest("No dynamic get_app_conf calls")
+            self.skipTest("No dynamic lookup('config', ...) calls")
         for dotted, occs in self.variable_paths.items():
             with self.subTest(path=dotted):
                 found = False

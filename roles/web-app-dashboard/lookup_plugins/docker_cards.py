@@ -9,7 +9,7 @@ import yaml
 
 from ansible.plugins.lookup import LookupBase
 from ansible.errors import AnsibleError
-from utils.config_utils import get_app_conf
+from utils.applications.config import get
 from utils.runtime_lookup_data import get_merged_applications
 from ansible.plugins.loader import lookup_loader
 
@@ -43,7 +43,7 @@ class LookupModule(LookupBase):
         # Always re-derive applications from inventory + role defaults.
         # The raw `applications` variable may be an unrendered placeholder
         # inside nested template lookups, which silently makes
-        # get_app_conf(..., strict=False, default=False) return False.
+        # get(..., strict=False, default=False) return False.
         applications = get_merged_applications(
             variables=variables,
             roles_dir=roles_dir,
@@ -147,7 +147,7 @@ class LookupModule(LookupBase):
                         f"Error building URL via tls for '{application_id}': {e}"
                     )
 
-            iframe = get_app_conf(
+            iframe = get(
                 applications,
                 application_id,
                 "compose.services.dashboard.enabled",

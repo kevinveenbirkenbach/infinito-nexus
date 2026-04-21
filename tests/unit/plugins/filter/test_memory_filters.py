@@ -8,7 +8,7 @@ memory_filters = importlib.import_module("plugins.filter.memory_filters")
 
 class TestMemoryFilters(unittest.TestCase):
     def setUp(self):
-        # Dummy applications dict – content does not matter because get_app_conf is mocked
+        # Dummy applications dict – content does not matter because get is mocked
         self.apps = {"whatever": True}
         self.app_id = "web-app-confluence"  # entity_name will be mocked
 
@@ -17,7 +17,7 @@ class TestMemoryFilters(unittest.TestCase):
     # -----------------------------
     def _with_conf(self, mem_limit: str, mem_res: str):
         """
-        Patch get_app_conf/get_entity_name so that mem_limit and mem_reservation
+        Patch get/get_entity_name so that mem_limit and mem_reservation
         can be controlled in tests.
         """
         patches = [
@@ -26,7 +26,7 @@ class TestMemoryFilters(unittest.TestCase):
                 return_value="confluence",
             ),
             patch(
-                "plugins.filter.memory_filters.get_app_conf",
+                "plugins.filter.memory_filters.get",
                 side_effect=lambda apps, app_id, key, required=True, **kwargs: (
                     mem_limit
                     if key.endswith(".mem_limit")
@@ -107,7 +107,7 @@ class TestMemoryFilters(unittest.TestCase):
                 return_value="confluence",
             ),
             patch(
-                "plugins.filter.memory_filters.get_app_conf",
+                "plugins.filter.memory_filters.get",
                 side_effect=lambda apps, app_id, key, required=True, **kwargs: (
                     "8Q" if key.endswith(".mem_limit") else "4g"
                 ),
@@ -123,7 +123,7 @@ class TestMemoryFilters(unittest.TestCase):
                 return_value="confluence",
             ),
             patch(
-                "plugins.filter.memory_filters.get_app_conf",
+                "plugins.filter.memory_filters.get",
                 side_effect=lambda apps, app_id, key, required=True, **kwargs: (
                     "0" if key.endswith(".mem_limit") else "4g"
                 ),
@@ -139,7 +139,7 @@ class TestMemoryFilters(unittest.TestCase):
                 return_value="confluence",
             ),
             patch(
-                "plugins.filter.memory_filters.get_app_conf",
+                "plugins.filter.memory_filters.get",
                 side_effect=lambda apps, app_id, key, required=True, **kwargs: (
                     "8g" if key.endswith(".mem_limit") else "0"
                 ),
@@ -159,7 +159,7 @@ class TestMemoryFilters(unittest.TestCase):
                 return_value="confluence",
             ) as mock_entity,
             patch(
-                "plugins.filter.memory_filters.get_app_conf",
+                "plugins.filter.memory_filters.get",
                 side_effect=lambda apps, app_id, key, required=True, **kwargs: (
                     "8g" if key.endswith(".mem_limit") else "6g"
                 ),
@@ -224,7 +224,7 @@ class TestMemoryFilters(unittest.TestCase):
         patches = [
             patch("plugins.filter.memory_filters.get_entity_name"),
             patch(
-                "plugins.filter.memory_filters.get_app_conf",
+                "plugins.filter.memory_filters.get",
                 side_effect=lambda apps, app_id, key, required=True, **kwargs: (
                     "4g" if key.endswith(".mem_limit") else "2g"
                 ),
@@ -246,7 +246,7 @@ class TestMemoryFilters(unittest.TestCase):
         should fall back to its internal default (256m).
         """
 
-        def fake_get_app_conf(apps, app_id, key, required=True, **kwargs):
+        def fake_get(apps, app_id, key, required=True, **kwargs):
             # Simulate missing mem_limit: return the provided default
             if key.endswith(".mem_limit"):
                 return kwargs.get("default")
@@ -254,8 +254,8 @@ class TestMemoryFilters(unittest.TestCase):
 
         with (
             patch(
-                "plugins.filter.memory_filters.get_app_conf",
-                side_effect=fake_get_app_conf,
+                "plugins.filter.memory_filters.get",
+                side_effect=fake_get,
             ),
             patch(
                 "plugins.filter.memory_filters.get_entity_name",
