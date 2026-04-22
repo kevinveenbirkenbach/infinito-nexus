@@ -66,6 +66,8 @@ defaults_networks:
       subnet: 192.168.102.96/28
     web-app-phpmyadmin:
       subnet: 192.168.102.112/28
+    web-app-pihole:
+      subnet: 192.168.102.240/28
     web-app-pixelfed:
       subnet: 192.168.102.128/28
     web-app-pgadmin:
