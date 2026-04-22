@@ -60,12 +60,22 @@ async function performOidcLogin(frame, username, password) {
   await signInButton.click();
 }
 
-// Navigate directly to the Mattermost GitLab OAuth2 login endpoint.
-// This bypasses the login page button rendering (which requires EnableSignInWithGitLab
-// in the client config) and also bypasses the /landing app-selection dialog that
-// Mattermost shows for fresh browser contexts in v11+.
+// Navigate to the Mattermost login page and click the SSO button injected by javascript.js.j2.
+// Mattermost v11 redirects fresh browser contexts (no cookies) from /login to /landing before
+// the login form renders. We detect that redirect and navigate back to /login so the form
+// and the injected button can appear.
 async function startMattermostSsoFlow(page, baseUrl) {
-  await page.goto(`${baseUrl.replace(/\/$/, "")}/oauth/gitlab/login`);
+  const base = baseUrl.replace(/\/$/, "");
+  await page.goto(`${base}/login`);
+
+  // If Mattermost redirected to /landing, navigate back to /login
+  if (page.url().includes("/landing")) {
+    await page.goto(`${base}/login`);
+  }
+
+  const ssoButton = page.locator("a[href='/oauth/gitlab/login']");
+  await ssoButton.waitFor({ state: "visible", timeout: 30_000 });
+  await ssoButton.click();
 }
 
 // Dismiss Mattermost onboarding modals/tips that may appear after first SSO login.
