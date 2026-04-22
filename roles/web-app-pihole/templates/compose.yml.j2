@@ -1,0 +1,36 @@
+{% include 'roles/sys-svc-compose/templates/base.yml.j2' %}
+
+  pihole:
+{% include 'roles/sys-svc-container/templates/base.yml.j2' %}
+    image: "{{ PIHOLE_IMAGE }}:{{ PIHOLE_VERSION }}"
+    container_name: "{{ PIHOLE_CONTAINER }}"
+    environment:
+      TZ:               "{{ PIHOLE_TIMEZONE }}"
+      WEBPASSWORD:      "{{ PIHOLE_PASSWORD }}"
+      PIHOLE_DNS_:      "{{ PIHOLE_UPSTREAM_DNS }}"
+    ports:
+      - "{{ DOCKER_BIND_HOST }}:{{ ports.localhost.http[application_id] }}:80/tcp"
+      - "{{ DOCKER_BIND_HOST }}:53:53/tcp"
+      - "{{ DOCKER_BIND_HOST }}:53:53/udp"
+    cap_add:
+      - NET_ADMIN
+    volumes:
+      - pihole_data:/etc/pihole
+      - pihole_dnsmasq:/etc/dnsmasq.d
+{% include 'roles/sys-svc-container/templates/healthcheck/curl.yml.j2' %}
+{% include 'roles/sys-svc-container/templates/networks.yml.j2' %}
+
+networks:
+  default:
+    name: "{{ PIHOLE_NETWORK }}"
+    external: true
+{% include 'roles/sys-svc-compose/templates/networks.yml.j2' %}
+
+{{ applications | compose_volumes(
+    application_id,
+    database_volume=lookup('database', application_id, 'volume'),
+    extra_volumes={
+      'pihole_data':   {'name': PIHOLE_VOLUME_DATA},
+      'pihole_dnsmasq': {'name': PIHOLE_VOLUME_DNSMASQ}
+    }
+) }}

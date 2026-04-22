@@ -1,0 +1,17 @@
+# General
+application_id:           "web-app-pihole"
+
+# Pi-hole
+# https://pi-hole.net/
+PIHOLE_VERSION:           "{{ lookup('config', application_id, 'compose.services.pihole.version') }}"
+PIHOLE_IMAGE:             "{{ lookup('config', application_id, 'compose.services.pihole.image') }}"
+PIHOLE_CONTAINER:         "{{ lookup('config', application_id, 'compose.services.pihole.name') }}"
+PIHOLE_VOLUME_DATA:       "{{ lookup('config', application_id, 'compose.volumes.data') }}"
+PIHOLE_VOLUME_DNSMASQ:    "{{ lookup('config', application_id, 'compose.volumes.dnsmasq') }}"
+PIHOLE_NETWORK:           "{{ lookup('config', application_id, 'compose.network') }}"
+PIHOLE_UPSTREAM_DNS:      "{{ lookup('config', application_id, 'pihole.upstream_dns') }}"
+PIHOLE_TIMEZONE:          "{{ lookup('config', application_id, 'pihole.timezone') }}"
+
+# OAuth2 enabled — disable Pi-hole native password when OAuth2 is active
+PIHOLE_OAUTH2_ENABLED:    "{{ lookup('config', application_id, 'compose.services.oauth2.enabled') | bool }}"
+PIHOLE_PASSWORD:          "{{ '' if PIHOLE_OAUTH2_ENABLED else lookup('password', application_id, 'admin') }}"
