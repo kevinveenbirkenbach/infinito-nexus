@@ -6,6 +6,7 @@ from ansible.errors import AnsibleError
 from ansible.plugins.lookup import LookupBase
 
 from utils.applications.config import get
+from utils.runtime_data import get_merged_applications
 
 
 _APPLICATION_ID = "web-app-nextcloud"
@@ -32,16 +33,19 @@ class LookupModule(LookupBase):
         if terms:
             raise AnsibleError("lookup('oidc_flavor') takes no positional terms.")
 
-        if variables is None or "applications" not in variables:
-            raise AnsibleError(
-                "lookup('oidc_flavor'): 'applications' variable not defined."
-            )
+        templar = getattr(self, "_templar", None)
+        variables = variables or getattr(self._templar, "available_variables", {}) or {}
 
-        applications = variables["applications"]
-        if not isinstance(applications, dict):
-            raise AnsibleError(
-                "lookup('oidc_flavor'): 'applications' must be a dict/mapping."
-            )
+        # Use the same merged+rendered applications payload that lookup('config')
+        # consumes. The raw `variables["applications"]` that Ansible hands the
+        # lookup is the pre-merge override slice, so nested defaults like
+        # compose.services.ldap.enabled are not yet visible there and the flavor
+        # would silently fall back to 'sociallogin'.
+        applications = get_merged_applications(
+            variables=variables,
+            roles_dir=kwargs.get("roles_dir"),
+            templar=templar,
+        )
 
         explicit = get(
             applications=applications,

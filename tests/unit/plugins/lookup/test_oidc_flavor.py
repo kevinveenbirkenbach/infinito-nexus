@@ -21,9 +21,11 @@ def _load_module(rel_path: str, name: str):
         "utils.applications.config",
         "utils.applications",
         "utils",
+        "utils.runtime_data",
     ):
         sys.modules.pop(key, None)
     importlib.import_module("utils.applications.config")
+    importlib.import_module("utils.runtime_data")
 
     path = _repo_root() / rel_path
     spec = importlib.util.spec_from_file_location(name, str(path))
@@ -34,7 +36,7 @@ def _load_module(rel_path: str, name: str):
 
 
 def _apps(*, ldap_enabled=None, flavor=None, include_app=True):
-    """Build a minimal `applications` dict for the Nextcloud role."""
+    """Build a minimal merged `applications` dict for the Nextcloud role."""
     if not include_app:
         return {}
     oidc_block: dict = {}
@@ -60,7 +62,22 @@ class OidcFlavorLookupTests(unittest.TestCase):
             "oidc_flavor",
         )
 
+    def setUp(self):
+        # Stub get_merged_applications so tests inject the merged view directly
+        # instead of round-tripping through the filesystem role config scan.
+        self._original_merge = self.mod.get_merged_applications
+        self._stub_payload = None
+
+        def _stub(*args, **kwargs):
+            return self._stub_payload
+
+        self.mod.get_merged_applications = _stub
+
+    def tearDown(self):
+        self.mod.get_merged_applications = self._original_merge
+
     def _run(self, applications, *, terms=None):
+        self._stub_payload = applications
         lk = self.mod.LookupModule()
         return lk.run(terms or [], variables={"applications": applications})
 
@@ -130,16 +147,6 @@ class OidcFlavorLookupTests(unittest.TestCase):
         lk = self.mod.LookupModule()
         with self.assertRaises(AnsibleError):
             lk.run(["unexpected"], variables={"applications": _apps()})
-
-    def test_missing_applications_variable_raises(self):
-        lk = self.mod.LookupModule()
-        with self.assertRaises(AnsibleError):
-            lk.run([], variables={})
-
-    def test_applications_not_a_dict_raises(self):
-        lk = self.mod.LookupModule()
-        with self.assertRaises(AnsibleError):
-            lk.run([], variables={"applications": ["not", "a", "dict"]})
 
 
 if __name__ == "__main__":
