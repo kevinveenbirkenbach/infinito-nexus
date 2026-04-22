@@ -66,6 +66,24 @@ const nextcloudTalkUnexpectedTurnServer = decodeDotenvQuotedValue(process.env.NE
 const nextcloudUsernameFieldPattern = /account name or email|username or email/i;
 const nextcloudCredentialSubmitPattern = /sign in|log in/i;
 
+// Condition variables driving the login flavor. Ansible renders these from the
+// role's compose.services.{oidc,ldap}.enabled config so the spec never has to
+// sniff which login UI shape the deployment exposes:
+//   - OIDC + LDAP  -> "oidc_login"  (pulsejet/nextcloud-oidc-login,
+//                                    auto_redirect hands straight to Keycloak)
+//   - OIDC only    -> "sociallogin" (nextcloud/sociallogin shows a
+//                                    "Log in with Keycloak" entry first)
+//   - no OIDC      -> "native"      (no Keycloak handoff; NC credential form)
+const nextcloudOidcEnabled =
+  (process.env.NEXTCLOUD_OIDC_ENABLED || "true").toLowerCase() === "true";
+const nextcloudLdapEnabled =
+  (process.env.NEXTCLOUD_LDAP_ENABLED || "false").toLowerCase() === "true";
+const nextcloudLoginFlavor = !nextcloudOidcEnabled
+  ? "native"
+  : nextcloudLdapEnabled
+    ? "oidc_login"
+    : "sociallogin";
+
 // ---------------------------------------------------------------------------
 // Locator helpers
 //
@@ -349,15 +367,42 @@ async function loginToStandaloneNextcloud(adminPage) {
     timeout: 60_000
   }).catch(() => {});
 
+  const credentialCandidates = [
+    { kind: "credentials", locator: usernameField },
+    { kind: "credentials", locator: signInButton }
+  ];
+  const socialLoginCandidates = getNextcloudSocialLoginCandidates(adminPage);
+
+  let flavorCandidates;
+  let timeoutMessage;
+  switch (nextcloudLoginFlavor) {
+    case "native":
+      flavorCandidates = [...credentialCandidates, ...standaloneShellCandidates];
+      timeoutMessage =
+        "Timed out waiting for the Nextcloud native credential form or an already-authenticated shell";
+      break;
+    case "sociallogin":
+      flavorCandidates = [
+        ...socialLoginCandidates,
+        ...credentialCandidates,
+        ...standaloneShellCandidates
+      ];
+      timeoutMessage =
+        "Timed out waiting for the Nextcloud social-login entry, the Keycloak credential form, or an already-authenticated shell";
+      break;
+    case "oidc_login":
+    default:
+      flavorCandidates = [...credentialCandidates, ...standaloneShellCandidates];
+      timeoutMessage =
+        "Timed out waiting for the Keycloak login form or an already-authenticated Nextcloud shell";
+      break;
+  }
+
   const initialState = await waitForVisibleCandidate(
     adminPage,
-    [
-      { kind: "credentials", locator: usernameField },
-      { kind: "credentials", locator: signInButton },
-      ...standaloneShellCandidates
-    ],
+    flavorCandidates,
     60_000,
-    "Timed out waiting for the Keycloak login form or an already-authenticated Nextcloud shell"
+    timeoutMessage
   );
 
   if (initialState.kind === "shell") {
@@ -365,18 +410,35 @@ async function loginToStandaloneNextcloud(adminPage) {
     return;
   }
 
+  if (initialState.kind === "social-login") {
+    await initialState.locator.click({ timeout: 5_000 });
+    await waitForVisibleCandidate(
+      adminPage,
+      [...credentialCandidates, ...standaloneShellCandidates],
+      60_000,
+      "Timed out waiting for the Keycloak credential form after following the Nextcloud social-login entry"
+    );
+  }
+
+  // Native flavor fills the local Nextcloud credential form (no Keycloak
+  // redirect), so use the direct admin password from the role's credentials
+  // store instead of the Keycloak user password.
+  const effectiveUsername = loginUsername;
+  const effectivePassword =
+    nextcloudLoginFlavor === "native" ? nextcloudDirectLoginPassword : loginPassword;
+
   await expect(usernameField).toBeVisible();
   await usernameField.click();
-  await usernameField.fill(loginUsername);
+  await usernameField.fill(effectiveUsername);
   await usernameField.press("Tab");
-  await passwordField.fill(loginPassword);
+  await passwordField.fill(effectivePassword);
   await signInButton.click();
 
   const postLoginState = await waitForVisibleCandidate(
     adminPage,
     standaloneShellCandidates,
     60_000,
-    "Timed out waiting for a signed-in Nextcloud shell after the Keycloak login redirect"
+    "Timed out waiting for a signed-in Nextcloud shell after the login redirect"
   );
 
   await expect(postLoginState.locator).toBeVisible();
