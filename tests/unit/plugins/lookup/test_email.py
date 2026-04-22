@@ -129,6 +129,30 @@ class TestEmailLookup(unittest.TestCase):
         with self.assertRaises(AnsibleError):
             self.lookup.run(["a", "b"], variables={})
 
+    def test_computed_defaults_are_templated(self) -> None:
+        self.lookup._templar = _DummyTemplar(
+            {"DOMAIN_PRIMARY_RESOLVED": "mail.example.org"}
+        )
+        variables = {
+            "DOMAIN_PRIMARY": "{{ DOMAIN_PRIMARY_RESOLVED }}",
+            "inventory_hostname": "host1",
+        }
+        result = self.lookup.run([], variables=variables)[0]
+        self.assertEqual(result["domain"], "mail.example.org")
+
+
+class _DummyTemplar:
+    def __init__(self, available_variables: dict[str, str]) -> None:
+        self.available_variables = available_variables
+
+    def template(self, value, fail_on_undefined=False):
+        if isinstance(value, str):
+            rendered = value
+            for key, replacement in self.available_variables.items():
+                rendered = rendered.replace(f"{{{{ {key} }}}}", str(replacement))
+            return rendered
+        return value
+
 
 if __name__ == "__main__":
     unittest.main()

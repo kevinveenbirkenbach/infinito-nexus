@@ -80,14 +80,17 @@ class LookupModule(LookupBase):
         variables = variables or getattr(self._templar, "available_variables", {}) or {}
         self._kwargs = kwargs
 
+        templar = getattr(self, "_templar", None)
         resolved: Dict[str, Any] = {}
         for short_key in RESOLUTION_ORDER:
             var_name = _short_to_var(short_key)
             raw = variables.get(var_name)
             if raw is None or raw == "":
-                resolved[short_key] = self._compute(short_key, resolved, variables)
+                resolved[short_key] = _render(
+                    self._compute(short_key, resolved, variables), templar
+                )
             else:
-                resolved[short_key] = _render(raw, getattr(self, "_templar", None))
+                resolved[short_key] = _render(raw, templar)
 
         if len(terms) == 0:
             return [resolved]
@@ -95,7 +98,6 @@ class LookupModule(LookupBase):
         application_id = str(terms[0]).strip()
         overrides = self._app_email_overrides(application_id, variables)
         merged = dict(resolved)
-        templar = getattr(self, "_templar", None)
         for key, value in overrides.items():
             merged[str(key).lower()] = _render(value, templar)
         return [merged]
