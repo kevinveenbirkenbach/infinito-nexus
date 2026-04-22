@@ -145,6 +145,17 @@ test("bigbluebutton enforces Content-Security-Policy and exposes canonical domai
   await expectNoCspViolations(page, diagnostics, "bigbluebutton landing");
 });
 
+// Log out via the universal logout endpoint. Every app's nginx vhost intercepts
+// `location = /logout` and proxies it to web-svc-logout, which terminates both
+// the Greenlight session and the Keycloak SSO. `waitUntil: 'commit'` avoids
+// stalling on any provider-side teardown.
+async function bbbLogout(page, bbbBaseUrl) {
+  await page
+    .goto(`${bbbBaseUrl}/logout`, { waitUntil: "commit" })
+    .catch(() => {});
+  await page.context().clearCookies();
+}
+
 // Greenlight (BBB) auto-submits its SSO form when `?sso=true` is present on the
 // SPA root (see greenlight App.jsx#autoSignIn). This is a deterministic SSO
 // entry that doesn't depend on React button labels or DOM timing.
@@ -179,14 +190,50 @@ async function signInViaBbbOidc(page, username, password, personaLabel) {
     .toMatch(new RegExp(`^${bbbBaseUrl.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}/rooms(/|\\?|$)`));
 }
 
-test("administrator: dashboard to bigbluebutton OIDC login lands on greenlight", async ({ page }) => {
+async function assertLoggedOut(page, bbbBaseUrl, personaLabel) {
+  // After logout, /rooms must no longer render the authenticated shell; the
+  // unauthenticated Greenlight landing exposes "Sign In" / "Sign Up" or
+  // redirects to the sign-in route.
+  await page.goto(`${bbbBaseUrl}/rooms`, { waitUntil: "domcontentloaded" }).catch(() => {});
+  await expect
+    .poll(
+      async () => {
+        const url = page.url();
+        if (/\/(signin|login|ldap_signin)(\/|\?|$)/i.test(url)) return "signin";
+        const signInVisible = await page
+          .getByRole("link", { name: /sign\s*in|log\s*in|anmelden/i })
+          .first()
+          .isVisible()
+          .catch(() => false);
+        if (signInVisible) return "signin";
+        const signInButtonVisible = await page
+          .getByRole("button", { name: /sign\s*in|log\s*in|anmelden/i })
+          .first()
+          .isVisible()
+          .catch(() => false);
+        if (signInButtonVisible) return "signin";
+        return "pending";
+      },
+      {
+        timeout: 60_000,
+        message: `${personaLabel}: expected bigbluebutton to require a new sign-in after logout`
+      }
+    )
+    .toBe("signin");
+}
+
+test("administrator: dashboard to bigbluebutton OIDC login and logout", async ({ page }) => {
   const diagnostics = attachDiagnostics(page);
   await signInViaBbbOidc(page, adminUsername, adminPassword, "administrator");
+  await bbbLogout(page, bbbBaseUrl);
+  await assertLoggedOut(page, bbbBaseUrl, "administrator");
   await expectNoCspViolations(page, diagnostics, "bigbluebutton administrator OIDC");
 });
 
-test("biber: dashboard to bigbluebutton OIDC login lands on greenlight", async ({ page }) => {
+test("biber: dashboard to bigbluebutton OIDC login and logout", async ({ page }) => {
   const diagnostics = attachDiagnostics(page);
   await signInViaBbbOidc(page, biberUsername, biberPassword, "biber");
+  await bbbLogout(page, bbbBaseUrl);
+  await assertLoggedOut(page, bbbBaseUrl, "biber");
   await expectNoCspViolations(page, diagnostics, "bigbluebutton biber OIDC");
 });
