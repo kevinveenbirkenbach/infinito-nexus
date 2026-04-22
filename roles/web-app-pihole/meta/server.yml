@@ -1,0 +1,3 @@
+networks:
+  local:
+    subnet: 192.168.102.240/28
