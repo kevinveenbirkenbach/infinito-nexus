@@ -1,0 +1,6 @@
+- name: "Wait for Pi-hole HTTP endpoint"
+  wait_for:
+    host:     "{{ DOCKER_REACH_HOST }}"
+    port:     "{{ ports.localhost.http[application_id] }}"
+    delay:    5
+    timeout:  120
