@@ -24,6 +24,7 @@ networks:
   default:
     name: "{{ PIHOLE_NETWORK }}"
     external: true
+{% include 'roles/sys-svc-compose/templates/networks.yml.j2' %}
 
 {{ applications | compose_volumes(
     application_id,
