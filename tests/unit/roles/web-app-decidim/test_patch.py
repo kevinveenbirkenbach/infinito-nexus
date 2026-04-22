@@ -1,4 +1,4 @@
-"""Unit tests for roles/web-app-decidim/files/patch_decidim.py."""
+"""Unit tests for roles/web-app-decidim/files/patch.py."""
 
 from __future__ import annotations
 
@@ -16,7 +16,7 @@ def _repo_root() -> Path:
 
 sys.path.insert(0, str(_repo_root() / "roles" / "web-app-decidim" / "files"))
 
-from patch_decidim import patch_omniauth_rb, patch_omniauth_helper_rb  # noqa: E402
+from patch import patch_omniauth_rb, patch_omniauth_helper_rb  # noqa: E402
 
 
 OMNIAUTH_RB_FIXTURE = """\

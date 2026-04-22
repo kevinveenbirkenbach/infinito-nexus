@@ -32,11 +32,7 @@
   community.docker.docker_container_exec:
     container: "{{ DECIDIM_CONTAINER }}"
     command: bundle exec rails runner -
-    stdin: |
-      org = Decidim::Organization.first
-      org.host = ENV.fetch("DECIDIM_ORG_HOST")
-      org.save
-      puts "Organization host set to: #{org.host}"
+    stdin: "{{ lookup('file', 'ruby/set_organization_host.rb') }}"
     env:
       RAILS_ENV: "{{ ENVIRONMENT }}"
       DECIDIM_ORG_HOST: "{{ domain }}"
@@ -47,24 +43,7 @@
   community.docker.docker_container_exec:
     container: "{{ DECIDIM_CONTAINER }}"
     command: bundle exec rails runner -
-    stdin: |
-      email    = ENV.fetch("DECIDIM_ADMIN_EMAIL")
-      password = ENV.fetch("DECIDIM_ADMIN_PASSWORD")
-      user = Decidim::User.find_or_initialize_by(email: email)
-      is_new = user.new_record?
-      user.name = 'Administrator'
-      user.nickname = 'administrator'
-      user.admin = true
-      user.confirmed_at = Time.current
-      user.organization = Decidim::Organization.first
-      user.tos_agreement = true
-      user.accepted_tos_version = Decidim::Organization.first.tos_version
-      if is_new || !user.valid_password?(password)
-        user.password = password
-        user.password_confirmation = password
-      end
-      user.save!
-      puts "Admin user ready: #{user.email}"
+    stdin: "{{ lookup('file', 'ruby/ensure_admin_user.rb') }}"
     env:
       RAILS_ENV: "{{ ENVIRONMENT }}"
       DECIDIM_ADMIN_EMAIL: "{{ lookup('users', 'administrator').email }}"
@@ -77,13 +56,7 @@
   community.docker.docker_container_exec:
     container: "{{ DECIDIM_CONTAINER }}"
     command: bundle exec rails runner -
-    stdin: |
-      org = Decidim::Organization.first
-      settings = org.omniauth_settings || {}
-      settings["omniauth_settings_openid_connect_enabled"] = true
-      org.omniauth_settings = settings
-      org.save!
-      puts "OIDC settings configured"
+    stdin: "{{ lookup('file', 'ruby/configure_oidc.rb') }}"
     env:
       RAILS_ENV: "{{ ENVIRONMENT }}"
   register: decidim_oidc_result
