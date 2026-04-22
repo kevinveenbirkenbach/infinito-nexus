@@ -53,6 +53,8 @@ function decodeDotenvQuotedValue(value) {
 // ---------------------------------------------------------------------------
 const loginUsername = decodeDotenvQuotedValue(process.env.LOGIN_USERNAME);
 const loginPassword = decodeDotenvQuotedValue(process.env.LOGIN_PASSWORD);
+const biberUsername = decodeDotenvQuotedValue(process.env.BIBER_USERNAME);
+const biberPassword = decodeDotenvQuotedValue(process.env.BIBER_PASSWORD);
 const nextcloudDirectLoginPassword = decodeDotenvQuotedValue(process.env.NEXTCLOUD_DIRECT_LOGIN_PASSWORD) || loginPassword;
 const oidcIssuerUrl = decodeDotenvQuotedValue(process.env.OIDC_ISSUER_URL);
 const nextcloudBaseUrl = decodeDotenvQuotedValue(process.env.NEXTCLOUD_BASE_URL);
@@ -355,7 +357,7 @@ async function enterNextcloudLoginThroughVisibleEntryPoint(page, target, usernam
 //   - fills Keycloak creds and waits for the NC shell to reappear.
 // ---------------------------------------------------------------------------
 
-async function loginToStandaloneNextcloud(adminPage) {
+async function loginToStandaloneNextcloud(adminPage, username = loginUsername, password = loginPassword) {
   const loginUrl = new URL("login", nextcloudBaseUrl).toString();
   const usernameField = adminPage.getByRole("textbox", { name: nextcloudUsernameFieldPattern });
   const passwordField = adminPage.locator('input[name="password"], input[type="password"]').first();
@@ -421,11 +423,14 @@ async function loginToStandaloneNextcloud(adminPage) {
   }
 
   // Native flavor fills the local Nextcloud credential form (no Keycloak
-  // redirect), so use the direct admin password from the role's credentials
-  // store instead of the Keycloak user password.
-  const effectiveUsername = loginUsername;
+  // redirect) — but only the administrator persona has a known direct-login
+  // password; every other persona (biber, other LDAP users) authenticates
+  // through Keycloak or LDAP and must use the Keycloak credential.
+  const effectiveUsername = username;
   const effectivePassword =
-    nextcloudLoginFlavor === "native" ? nextcloudDirectLoginPassword : loginPassword;
+    nextcloudLoginFlavor === "native" && username === loginUsername
+      ? nextcloudDirectLoginPassword
+      : password;
 
   await expect(usernameField).toBeVisible();
   await usernameField.click();
@@ -443,6 +448,48 @@ async function loginToStandaloneNextcloud(adminPage) {
 
   await expect(postLoginState.locator).toBeVisible();
   await dismissBlockingNextcloudModals(adminPage, adminPage);
+}
+
+async function logoutStandaloneNextcloud(adminPage) {
+  const userMenuTrigger = adminPage.locator("#user-menu button");
+  const logoutLinkByName = adminPage.getByRole("link", { name: "Log out" });
+  const logoutLinkByHref = adminPage.locator('a[href*="logout"]');
+  const logoutConfirmButton = adminPage.getByRole("button", { name: "Logout" });
+
+  await dismissBlockingNextcloudModals(adminPage, adminPage);
+  await clickUserMenuWithModalRetry(adminPage, adminPage, userMenuTrigger);
+
+  const logoutLink = await waitForFirstVisible(
+    adminPage,
+    [logoutLinkByName, logoutLinkByHref],
+    15_000
+  );
+  await expect(logoutLink).toBeVisible();
+  await logoutLink.click();
+
+  const logoutConfirmationVisible = await logoutConfirmButton
+    .first()
+    .waitFor({ state: "visible", timeout: 10_000 })
+    .then(() => true)
+    .catch(() => false);
+  if (logoutConfirmationVisible) {
+    await logoutConfirmButton.click();
+  }
+}
+
+// LDAP-first-login caveat (see roles/web-app-nextcloud/docs/LDAP.md): a fresh
+// Nextcloud + LDAP deployment only materializes a user's NC account on first
+// successful login, so the very first attempt for a non-administrator persona
+// can fail or stall. Retry the full login flow once after a short delay so
+// the suite stays deterministic without disabling the first-login behavior.
+async function loginToStandaloneNextcloudWithRetry(adminPage, username, password) {
+  try {
+    await loginToStandaloneNextcloud(adminPage, username, password);
+    return;
+  } catch (error) {
+    await adminPage.waitForTimeout(5_000);
+    await loginToStandaloneNextcloud(adminPage, username, password);
+  }
 }
 
 // ---------------------------------------------------------------------------
@@ -592,6 +639,8 @@ test.beforeEach(() => {
   expect(nextcloudBaseUrl, "NEXTCLOUD_BASE_URL must be set in the Playwright env file").toBeTruthy();
   expect(loginUsername, "LOGIN_USERNAME must be set in the Playwright env file").toBeTruthy();
   expect(loginPassword, "LOGIN_PASSWORD must be set in the Playwright env file").toBeTruthy();
+  expect(biberUsername, "BIBER_USERNAME must be set in the Playwright env file").toBeTruthy();
+  expect(biberPassword, "BIBER_PASSWORD must be set in the Playwright env file").toBeTruthy();
 
   if (nextcloudTalkSettingsCheckEnabled) {
     expect(nextcloudTalkSettingsUrl, "NEXTCLOUD_TALK_SETTINGS_URL must be set when Talk admin checks are enabled").toBeTruthy();
@@ -743,4 +792,34 @@ test("dashboard to nextcloud login", async ({ page }) => {
   }
 
   await page.goto("/");
+});
+
+test("biber logs into nextcloud via OIDC and logs out", async ({ browser }) => {
+  const biberContext = await browser.newContext({ ignoreHTTPSErrors: true });
+  const biberPage = await biberContext.newPage();
+
+  try {
+    await loginToStandaloneNextcloudWithRetry(biberPage, biberUsername, biberPassword);
+
+    const shellState = await waitForVisibleCandidate(
+      biberPage,
+      getNextcloudShellCandidates(biberPage),
+      60_000,
+      "Timed out waiting for a signed-in Nextcloud shell for biber"
+    );
+    await expect(shellState.locator).toBeVisible();
+
+    await logoutStandaloneNextcloud(biberPage);
+
+    const loginUrl = new URL("login", nextcloudBaseUrl).toString();
+    await biberPage.goto(loginUrl, { waitUntil: "domcontentloaded", timeout: 60_000 }).catch(() => {});
+    const shellAfterLogout = await findFirstVisibleCandidate(getNextcloudShellCandidates(biberPage));
+    expect(
+      shellAfterLogout,
+      "Expected biber to be logged out after clicking Log out (no authenticated Nextcloud shell on /login)"
+    ).toBeNull();
+  } finally {
+    await biberPage.close().catch(() => {});
+    await biberContext.close().catch(() => {});
+  }
 });
