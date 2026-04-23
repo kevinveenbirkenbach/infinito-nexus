@@ -4,6 +4,7 @@ import os
 import shutil
 import unittest
 from pathlib import Path
+from unittest.mock import patch
 
 import yaml
 from ansible.errors import AnsibleError
@@ -30,8 +31,13 @@ class TestEmailLookup(unittest.TestCase):
         (self._tmp / "roles").mkdir(parents=True, exist_ok=True)
         os.chdir(self._tmp)
         runtime_data._reset_cache_for_tests()
+        self._tokens_store_patcher = patch.object(
+            runtime_data, "_load_store_users", return_value={}
+        )
+        self._tokens_store_patcher.start()
 
     def tearDown(self) -> None:
+        self._tokens_store_patcher.stop()
         runtime_data._reset_cache_for_tests()
         os.chdir(self._cwd)
         if self._tmp.exists():
