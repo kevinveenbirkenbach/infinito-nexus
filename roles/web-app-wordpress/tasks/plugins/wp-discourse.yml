@@ -1,9 +1,4 @@
 ---
-- name: "Include web-app-discourse"
-  include_tasks: "utils/load_app.yml"
-  vars: 
-    load_app_id: web-app-discourse
-
 - name: Wait for Discourse API
   wait_for:
     host: "{{ lookup('domain','web-app-discourse') }}"

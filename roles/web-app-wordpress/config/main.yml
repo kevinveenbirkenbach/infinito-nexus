@@ -43,6 +43,9 @@ compose:
     mariadb:
       enabled: true
       shared: true
+    discourse:
+      enabled: false
+      shared: true
     wordpress:
       version:            latest
       image:              wordpress
@@ -59,7 +62,7 @@ compose:
       max_upload_size:      "256M"
       plugins:
         wp-discourse:
-          enabled:          "{{ 'web-app-discourse' in group_names | lower }}"
+          enabled:          "{{ lookup('service', 'discourse').required | bool }}"
         daggerhart-openid-connect-generic:
           enabled:          true
         activitypub:

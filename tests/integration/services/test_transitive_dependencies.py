@@ -34,7 +34,7 @@ class TestServiceTransitiveDependencies(unittest.TestCase):
             },
         )[0]
 
-        self.assertTrue(result["needed"])
+        self.assertTrue(result["required"])
         self.assertEqual(result["id"], "file")
         self.assertEqual(result["role"], "web-svc-file")
 

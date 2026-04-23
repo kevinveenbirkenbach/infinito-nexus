@@ -109,7 +109,7 @@ Loading decides whether the provider role is deployed at all.
 
 [main.yml](../../../../roles/sys-utils-service-loader/tasks/main.yml):
 - queries the ordered discovered service list
-- checks `lookup('service', service_key).needed`
+- checks `lookup('service', service_key).required`
 - skips roles already protected by `run_once_*`
 - loads services through [load_app.yml](../../../../tasks/utils/load_app.yml)
 
@@ -148,13 +148,19 @@ Returns:
 - `role`
 - `enabled`
 - `shared`
-- `needed`
+- `required` — True when some deployed app has the service with both
+  `enabled: true` AND `shared: true`, directly or transitively through its
+  own enabled service dependencies. This is the flag consumers should gate
+  on when deciding whether to load, integrate with, or configure the
+  service — a plain `enabled` flag is not enough on its own, because a
+  service that is enabled but never shared with another app is not actually
+  contractually required by anyone.
 
 Behavior:
 - accepts either a service key or a provider role name
 - resolves aliases through `canonical`
 - resolves provider roles through discovered primary service keys
-- computes `needed` transitively from enabled shared services
+- computes `required` transitively from enabled shared services
 
 ### `service_registry` 📚
 
