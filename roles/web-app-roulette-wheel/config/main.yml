@@ -25,3 +25,6 @@ compose:
       mem_reservation:    126m
       mem_limit:          265m
       pids_limit:         126
+    prometheus:
+      enabled: true
+      shared: true

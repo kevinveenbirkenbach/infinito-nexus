@@ -65,6 +65,9 @@ compose:
       shared: true
     recaptcha:
       enabled: "{{ RECAPTCHA_ENABLED | bool }}"
+    prometheus:
+      enabled: true
+      shared: true
 credentials:
   recaptcha:
     key:      "{{ CAPTCHA.RECAPTCHA.KEY | default('') }}"

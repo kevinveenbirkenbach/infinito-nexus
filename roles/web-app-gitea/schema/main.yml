@@ -1,1 +1,5 @@
-credentials: {}
+credentials:
+  native_metrics_token:
+    description: "Bearer token for Gitea's /metrics endpoint (set GITEA__metrics__TOKEN in inventory)"
+    algorithm:   token
+    validation:  non_empty_string

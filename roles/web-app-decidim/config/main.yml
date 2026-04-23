@@ -55,6 +55,9 @@ compose:
       shared:                     true
     oauth2:
       enabled:                    false
+    prometheus:
+      enabled:                    true
+      shared:                     true
   volumes:
     uploads:                      "decidim_uploads"
     logs:                         "decidim_logs"

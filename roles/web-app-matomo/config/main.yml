@@ -69,5 +69,8 @@ compose:
     css:
       enabled: false
       shared: true
+    prometheus:
+      enabled: true
+      shared: true
   volumes: 
     data: matomo_data

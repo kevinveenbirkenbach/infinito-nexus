@@ -34,7 +34,16 @@ compose:
     css:
       enabled:        true
       shared: true
-  volumes: 
+    prometheus:
+      enabled: true
+      shared: true
+      native_metrics:
+        enabled:     true
+        port:        9000    # Synapse metrics listener port inside the container
+        service_key: synapse  # compose service key differs from entity name "matrix"
+      communication:
+        channel:     true
+  volumes:
     synapse:          "matrix_synapse_data"
 playbook_tags:        "setup-all,start"                  # For the initial update use: install-all,ensure-matrix-users-created,start
 server_name:          "{{ DOMAIN_PRIMARY }}"             # Adress for the account names etc.

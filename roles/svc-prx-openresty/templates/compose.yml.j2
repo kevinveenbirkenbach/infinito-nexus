@@ -1,8 +1,16 @@
 {% include 'roles/sys-svc-compose/templates/base.yml.j2' %}
   openresty:
     {% include 'roles/sys-svc-container/templates/base.yml.j2' %}
+    {{ lookup('template', 'roles/sys-svc-container/templates/build.yml.j2') | indent(4) }}
+      args:
+        OPENRESTY_IMAGE:              "{{ OPENRESTY_IMAGE }}"
+        OPENRESTY_VERSION:            "{{ OPENRESTY_VERSION }}"
+        PROMETHEUS_ENABLED:           "{{ OPENRESTY_PROMETHEUS_ENABLED }}"
+        LUA_PROMETHEUS_URL_MAIN:      "{{ OPENRESTY_LUA_PROMETHEUS_URL_MAIN }}"
+        LUA_PROMETHEUS_URL_COUNTER:   "{{ OPENRESTY_LUA_PROMETHEUS_URL_COUNTER }}"
+        LUA_PROMETHEUS_URL_KEYS:      "{{ OPENRESTY_LUA_PROMETHEUS_URL_KEYS }}"
     container_name: {{ OPENRESTY_CONTAINER }}
-    image: {{ OPENRESTY_IMAGE }}:{{ OPENRESTY_VERSION }}
+    image: {{ OPENRESTY_CUSTOM_IMAGE }}:{{ OPENRESTY_CUSTOM_VERSION }}
     network_mode: "host"
     volumes:
       - {{ lookup('nginx','files.configuration') }}:/usr/local/openresty/nginx/conf/nginx.conf:ro
@@ -14,6 +22,10 @@
       - {{ LETSENCRYPT_WEBROOT_PATH }}:{{ LETSENCRYPT_WEBROOT_PATH }}:ro
       - {{ LETSENCRYPT_BASE_PATH }}:{{ LETSENCRYPT_BASE_PATH }}:ro
       - {{ TLS_SELFSIGNED_BASE_PATH }}:{{ TLS_SELFSIGNED_BASE_PATH }}:ro
+      # Docker socket (read-only) — lets the Lua health-polling timer query
+      # container state so /healthz/live can reflect Docker health, not just
+      # HTTP reachability.
+      - /var/run/docker.sock:/var/run/docker.sock:ro
     command: ["openresty", "-g", "daemon off;"]
     healthcheck:
       test: ["CMD", "openresty", "-t", "-q"]

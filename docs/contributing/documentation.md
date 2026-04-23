@@ -32,7 +32,7 @@ You MUST use [RFC 2119](https://www.rfc-editor.org/rfc/rfc2119) keywords in all 
 | Web link | `https://docs.infinito.example/` | `docs.infinito.example`, `here`, a descriptive label, or `setup.md` |
 | File link | `docs/contributing/workflow.md` | `workflow.md` or `Contribution Flow` |
 | Email | `mailto:hello@infinito.nexus` | `hello@infinito.nexus` |
-| Matrix | `https://matrix.to/#/@user:infinito.nexus` | `@user:infinito.nexus` |
+| Matrix | `[#room:infinito.nexus](https://some-url.example/)` | `@user:infinito.nexus` |
 | Phone | `tel:+491234567890` | `+49 123 456 7890` |
 
 ## Semantics and Writing ✍️

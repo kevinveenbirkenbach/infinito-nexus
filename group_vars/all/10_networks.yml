@@ -39,7 +39,7 @@ defaults_networks:
     web-app-keycloak:
       subnet: 192.168.101.160/28
     web-app-decidim:
-      subnet: 192.168.104.176/28
+      subnet: 192.168.104.192/28
     web-app-wordpress:
       subnet: 192.168.101.176/28
     web-app-listmonk:
@@ -134,6 +134,8 @@ defaults_networks:
       subnet: 192.168.104.128/28
     web-app-roulette-wheel:
       subnet: 192.168.104.144/28
+    web-app-mattermost:
+      subnet: 192.168.104.176/28
     web-app-prometheus:
       subnet: 192.168.104.160/28
 

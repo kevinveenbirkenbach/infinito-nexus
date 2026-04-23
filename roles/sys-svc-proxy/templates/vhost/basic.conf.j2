@@ -2,13 +2,13 @@ server
 {
   server_name {{ domain }};
   {% include 'roles/sys-svc-proxy/templates/headers/buffers.conf.j2' %}
-  
+
   {% if lookup('config',application_id, 'compose.services.oauth2.enabled', False) %}
     {% include 'roles/web-app-oauth2-proxy/templates/endpoint.conf.j2'%}
   {% endif %}
 
   {% include 'roles/sys-front-inj-all/templates/server.conf.j2'%}
-  
+
   {% if webserver_extra_configuration is defined %}
     {# Additional Domain Specific Configuration #}
     {{ webserver_extra_configuration }}
@@ -56,5 +56,7 @@ server
     {% set location = "/" %}
     {% include 'roles/sys-svc-proxy/templates/location/html.conf.j2' %}
   {% endif %}
+
+  {% include 'roles/web-app-prometheus/templates/nginx/locations.conf.j2' %}
 
 }

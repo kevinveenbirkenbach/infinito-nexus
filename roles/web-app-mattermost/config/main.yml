@@ -57,6 +57,14 @@ compose:
     javascript:
       enabled:                    true
       shared: true
+    prometheus:
+      enabled: true
+      shared: true
+      native_metrics:
+        enabled: false    # Requires Enterprise Edition — Team Edition compiles out the /metrics endpoint entirely
+        port:    8067     # Mattermost metrics listener (MM_METRICSSETTINGS_LISTENADDRESS)
+      communication:
+        channel: true
   volumes:
     config:                       "mattermost_config"
     data:                         "mattermost_data"
