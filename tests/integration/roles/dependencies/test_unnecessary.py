@@ -6,21 +6,21 @@ import yaml
 import unittest
 from typing import Dict, Set, List, Optional
 
+from tests.utils.fs import read_text as _read_text_cached
+
 # ---------------- Utilities ----------------
 
 
 def safe_load_yaml(path: str):
     try:
-        with open(path, "r", encoding="utf-8") as f:
-            return yaml.safe_load(f) or {}
+        return yaml.safe_load(_read_text_cached(path)) or {}
     except Exception:
         return {}
 
 
 def read_text(path: str) -> str:
     try:
-        with open(path, "r", encoding="utf-8") as f:
-            return f.read()
+        return _read_text_cached(path)
     except Exception:
         return ""
 

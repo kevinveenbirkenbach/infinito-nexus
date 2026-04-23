@@ -4,6 +4,8 @@ import glob
 import yaml
 import re
 
+from tests.utils.fs import read_text
+
 
 class TestIncludeImportExistence(unittest.TestCase):
     """
@@ -68,11 +70,14 @@ class TestIncludeImportExistence(unittest.TestCase):
     def _iter_docs(self):
         """Yield (file_path, doc) for every non-empty YAML document across the scan set."""
         for file_path in self.files_to_scan:
-            with open(file_path) as f:
-                try:
-                    documents = list(yaml.safe_load_all(f))
-                except yaml.YAMLError:
-                    self.fail(f"Failed to parse YAML in {file_path}")
+            try:
+                text = read_text(file_path)
+            except (OSError, UnicodeDecodeError):
+                continue
+            try:
+                documents = list(yaml.safe_load_all(text))
+            except yaml.YAMLError:
+                self.fail(f"Failed to parse YAML in {file_path}")
             for doc in documents:
                 if doc is None:
                     continue

@@ -4,13 +4,14 @@ import glob
 import unittest
 import yaml
 
+from tests.utils.fs import read_text
+
 
 def _safe_yaml_load(path):
     try:
-        with open(path, "r", encoding="utf-8") as f:
-            doc = yaml.safe_load(f)
-            # A tasks file can be a list (usual) or a dict (blocks, etc.)
-            return doc
+        doc = yaml.safe_load(read_text(path))
+        # A tasks file can be a list (usual) or a dict (blocks, etc.)
+        return doc
     except Exception as e:
         raise AssertionError(f"Failed to parse YAML: {path}\n{e}") from e
 

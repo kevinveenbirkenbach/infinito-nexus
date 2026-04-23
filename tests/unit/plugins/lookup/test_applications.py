@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import os
-import shutil
+import tempfile
 import unittest
 from pathlib import Path
 
@@ -21,10 +21,8 @@ class TestApplicationsLookup(unittest.TestCase):
     def setUp(self) -> None:
         self.lookup = LookupModule()
         self._cwd = os.getcwd()
-        self._tmp = Path(self._cwd) / ".tmp_test_lookup_applications"
-        if self._tmp.exists():
-            shutil.rmtree(self._tmp)
-        self._tmp.mkdir(parents=True, exist_ok=True)
+        self._tmpdir = tempfile.TemporaryDirectory()
+        self._tmp = Path(self._tmpdir.name)
         os.chdir(self._tmp)
         _reset_cache_for_tests()
 
@@ -38,8 +36,7 @@ class TestApplicationsLookup(unittest.TestCase):
     def tearDown(self) -> None:
         _reset_cache_for_tests()
         os.chdir(self._cwd)
-        if self._tmp.exists():
-            shutil.rmtree(self._tmp)
+        self._tmpdir.cleanup()
 
     def test_returns_full_mapping(self) -> None:
         result = self.lookup.run([], variables={}, roles_dir=str(self._tmp / "roles"))[

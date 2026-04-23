@@ -2,7 +2,6 @@ import ast
 import os
 import re
 import unittest
-import logging
 from typing import Dict, List, Tuple, Optional
 
 from tests.utils.fs import iter_project_files, read_text
@@ -184,77 +183,81 @@ def collect_defined_filters() -> List[Dict[str, str]]:
 # ---------------------------
 
 
-def _compile_jinja_patterns(name: str) -> list[re.Pattern]:
+def _scan_filter_usage(
+    definitions: List[Dict[str, str]],
+) -> Dict[str, Dict[str, bool]]:
+    """Single-pass inverted scan: for every project file, check all filters at once.
+
+    Complexity before (per-filter loop): O(N_filters * M_files * 4_regex). For this
+    repo that is ~50 filters × ~5000 files × 4 patterns ≈ 1M regex calls.
+
+    Complexity now (inverted): O(M_files * 2_master_regex) for Jinja, plus one
+    combined regex per .py file for Python callables. ~10k regex calls total.
+
+    The two master regexes use alternation over all filter names — ``bare_pat``
+    matches ``| name`` anywhere (superset of the ``{{ … | name }}`` and
+    ``{% … | name %}`` patterns the old code carried separately), while
+    ``block_pat`` covers ``{% filter name %}``.
+
+    Returns:
+      ``{filter_name: {"used_any": bool, "used_outside": bool}}``
     """
-    Build robust patterns that match Jinja filter usage without using '%' string formatting.
-    Handles:
-      - {{ ... | name }}
-      - {% ... | name %}
-      - {% filter name %}...{% endfilter %}
-      - bare YAML/Jinja like: when: x | name
-    """
-    escaped = re.escape(name)
-    return [
-        re.compile(r"\{\{[^}]*\|\s*" + escaped + r"\b", re.DOTALL),  # {{ ... | name }}
-        re.compile(
-            r"\{%\s*[^%]*\|\s*" + escaped + r"\b", re.DOTALL
-        ),  # {% ... | name %}
-        re.compile(r"\{%\s*filter\s+" + escaped + r"\b"),  # {% filter name %}
-        re.compile(r"\|\s*" + escaped + r"\b"),  # bare: when: x | name
-    ]
+    # Map filter name → its own definition file (skip self-matches).
+    def_file_by_name: Dict[str, str] = {
+        d["filter"]: os.path.realpath(d["file"]) for d in definitions
+    }
 
+    # Reverse index: callable name → filter name (for the Python-call match group).
+    callable_to_filter: Dict[str, str] = {}
+    for d in definitions:
+        c = d.get("callable")
+        if c:
+            callable_to_filter[c] = d["filter"]
 
-def _python_call_pattern(callable_name: str) -> Optional[re.Pattern]:
-    if not callable_name:
-        return None
-    return re.compile(r"\b%s\s*\(" % re.escape(callable_name))
+    # Build master alternations.
+    escaped_names = [re.escape(d["filter"]) for d in definitions]
+    name_alt = "(" + "|".join(escaped_names) + ")"
+    bare_pat = re.compile(r"\|\s*" + name_alt + r"\b")
+    block_pat = re.compile(r"\{%\s*filter\s+" + name_alt + r"\b")
 
+    if callable_to_filter:
+        escaped_callables = [re.escape(c) for c in callable_to_filter]
+        call_alt = "(" + "|".join(escaped_callables) + ")"
+        call_pat: Optional[re.Pattern] = re.compile(r"\b" + call_alt + r"\s*\(")
+    else:
+        call_pat = None
 
-def search_usage(
-    filter_name: str, callable_name: str, *, skip_file: str
-) -> tuple[bool, bool]:
-    """
-    Search for filter usage.
-
-    Returns tuple:
-      (used_anywhere, used_outside_tests)
-
-    - used_anywhere: True if found in repo at all
-    - used_outside_tests: True if found outside tests/
-    """
-    jinja_pats = _compile_jinja_patterns(filter_name)
-    py_pat = _python_call_pattern(callable_name)
-
-    used_anywhere = False
-    used_outside_tests = False
+    state: Dict[str, Dict[str, bool]] = {
+        d["filter"]: {"used_any": False, "used_outside": False} for d in definitions
+    }
 
     for path in _iter_files(py_only=False):
-        try:
-            if os.path.samefile(path, skip_file):
-                continue
-        except Exception as e:
-            # Exception can occur if files do not exist or are inaccessible.
-            # Skip comparison but log at debug level for diagnosis.
-            logging.debug("Failed to compare files %r and %r: %s", path, skip_file, e)
         content = _read(path)
         if not content:
             continue
 
-        hit = False
-        for pat in jinja_pats:
-            if pat.search(content):
-                hit = True
-                break
+        path_real = os.path.realpath(path)
+        is_test_path = "/tests/" in path or path.endswith("tests")
 
-        if not hit and py_pat and path.endswith(".py") and py_pat.search(content):
-            hit = True
+        def _record(name: str) -> None:
+            # Skip self-matches — a filter's own definition file is not a usage site.
+            if path_real == def_file_by_name.get(name):
+                return
+            s = state[name]
+            s["used_any"] = True
+            if not is_test_path:
+                s["used_outside"] = True
 
-        if hit:
-            used_anywhere = True
-            if "/tests/" not in path and not path.endswith("tests"):
-                used_outside_tests = True
+        for m in bare_pat.finditer(content):
+            _record(m.group(1))
+        for m in block_pat.finditer(content):
+            _record(m.group(1))
 
-    return used_anywhere, used_outside_tests
+        if call_pat is not None and path.endswith(".py"):
+            for m in call_pat.finditer(content):
+                _record(callable_to_filter[m.group(1)])
+
+    return state
 
 
 class TestFilterDefinitionsAreUsed(unittest.TestCase):
@@ -263,14 +266,19 @@ class TestFilterDefinitionsAreUsed(unittest.TestCase):
         if not definitions:
             self.skipTest("No filters found under plugins/filter/.")
 
+        state = _scan_filter_usage(definitions)
+
         unused = []
         for d in definitions:
-            f_name, c_name, f_path = d["filter"], d["callable"], d["file"]
-            used_any, used_outside = search_usage(f_name, c_name, skip_file=f_path)
-            if not used_any:
-                unused.append((f_name, c_name, f_path, "not used anywhere"))
-            elif not used_outside:
-                unused.append((f_name, c_name, f_path, "only used in tests"))
+            s = state[d["filter"]]
+            if not s["used_any"]:
+                unused.append(
+                    (d["filter"], d["callable"], d["file"], "not used anywhere")
+                )
+            elif not s["used_outside"]:
+                unused.append(
+                    (d["filter"], d["callable"], d["file"], "only used in tests")
+                )
 
         if unused:
             msg = ["The following filters are invalidly unused:"]

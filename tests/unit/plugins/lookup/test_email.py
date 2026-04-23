@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import os
-import shutil
+import tempfile
 import unittest
 from pathlib import Path
 from unittest.mock import patch
@@ -24,10 +24,8 @@ class TestEmailLookup(unittest.TestCase):
         self.lookup = LookupModule()
         self.lookup._templar = None
         self._cwd = os.getcwd()
-        self._tmp = Path(self._cwd) / ".tmp_test_lookup_email"
-        if self._tmp.exists():
-            shutil.rmtree(self._tmp)
-        self._tmp.mkdir(parents=True, exist_ok=True)
+        self._tmpdir = tempfile.TemporaryDirectory()
+        self._tmp = Path(self._tmpdir.name)
         (self._tmp / "roles").mkdir(parents=True, exist_ok=True)
         os.chdir(self._tmp)
         runtime_data._reset_cache_for_tests()
@@ -40,8 +38,7 @@ class TestEmailLookup(unittest.TestCase):
         self._tokens_store_patcher.stop()
         runtime_data._reset_cache_for_tests()
         os.chdir(self._cwd)
-        if self._tmp.exists():
-            shutil.rmtree(self._tmp)
+        self._tmpdir.cleanup()
 
     def test_returns_plugin_defaults_when_no_vars(self) -> None:
         result = self.lookup.run([], variables={"inventory_hostname": "host1"})[0]

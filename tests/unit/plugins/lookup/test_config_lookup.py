@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import os
+import tempfile
 import unittest
 from pathlib import Path
 
@@ -59,46 +60,16 @@ class TestConfigLookup(unittest.TestCase):
         self.lm = LookupModule()
         _reset_cache_for_tests()
 
-        # Create a temp working directory and chdir into it
+        # Create a temp working directory in /tmp and chdir into it
         self._cwd = os.getcwd()
-        self._tmp = Path(self._cwd) / ".tmp_test_config_lookup"
-        if self._tmp.exists():
-            # best-effort cleanup
-            for p in sorted(self._tmp.rglob("*"), reverse=True):
-                try:
-                    p.unlink()
-                except IsADirectoryError:
-                    p.rmdir()
-                except FileNotFoundError:
-                    # If the file was already removed, we can safely ignore this.
-                    pass
-            try:
-                self._tmp.rmdir()
-            except OSError:
-                # Best-effort cleanup: it's acceptable if removing the temp directory fails.
-                pass
-
-        self._tmp.mkdir(parents=True, exist_ok=True)
+        self._tmpdir = tempfile.TemporaryDirectory()
+        self._tmp = Path(self._tmpdir.name)
         os.chdir(self._tmp)
 
     def tearDown(self) -> None:
         _reset_cache_for_tests()
         os.chdir(self._cwd)
-        # best-effort cleanup
-        if self._tmp.exists():
-            for p in sorted(self._tmp.rglob("*"), reverse=True):
-                try:
-                    p.unlink()
-                except IsADirectoryError:
-                    p.rmdir()
-                except FileNotFoundError:
-                    # Missing files during teardown are acceptable and can be ignored.
-                    pass
-            try:
-                self._tmp.rmdir()
-            except OSError:
-                # Best-effort cleanup: it's acceptable if removing the temp directory fails.
-                pass
+        self._tmpdir.cleanup()
 
     def test_requires_2_or_3_terms(self) -> None:
         with self.assertRaises(AnsibleError):

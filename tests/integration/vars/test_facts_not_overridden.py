@@ -4,6 +4,8 @@ from typing import Any, Dict, Iterable, List, Optional, Set, Tuple
 
 import yaml
 
+from tests.utils.fs import read_text
+
 
 def _safe_yaml_load_all(path: Path) -> List[Any]:
     """
@@ -11,7 +13,7 @@ def _safe_yaml_load_all(path: Path) -> List[Any]:
     Returns a list of documents (usually 1), each can be list/dict/None.
     """
     try:
-        text = path.read_text(encoding="utf-8")
+        text = read_text(str(path))
     except Exception:
         return []
     # Skip empty / non-yaml-ish files quickly

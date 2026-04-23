@@ -2,6 +2,7 @@ import unittest
 from pathlib import Path
 import yaml
 
+from tests.utils.fs import read_text
 from utils.service_registry import build_service_registry_from_roles_dir
 
 
@@ -91,11 +92,10 @@ class TestServiceCoreFirstTaskRunOnce(unittest.TestCase):
             if not path.is_file():
                 continue  # covered by test_01_core_exists
 
-            with path.open("r", encoding="utf-8") as f:
-                try:
-                    tasks = yaml.safe_load(f)
-                except yaml.YAMLError as e:
-                    self.fail(f"Failed to parse {path}: {e}")
+            try:
+                tasks = yaml.safe_load(read_text(str(path)))
+            except yaml.YAMLError as e:
+                self.fail(f"Failed to parse {path}: {e}")
 
             if not isinstance(tasks, list) or not tasks:
                 violations.append(f"{role}: tasks/01_core.yml is empty or not a list")
@@ -122,11 +122,10 @@ class TestServiceCoreFirstTaskRunOnce(unittest.TestCase):
                 violations.append(f"{role}: tasks/main.yml is missing")
                 continue
 
-            with main_path.open("r", encoding="utf-8") as f:
-                try:
-                    tasks = yaml.safe_load(f)
-                except yaml.YAMLError as e:
-                    self.fail(f"Failed to parse {main_path}: {e}")
+            try:
+                tasks = yaml.safe_load(read_text(str(main_path)))
+            except yaml.YAMLError as e:
+                self.fail(f"Failed to parse {main_path}: {e}")
 
             if not isinstance(tasks, list):
                 violations.append(f"{role}: tasks/main.yml is not a list")

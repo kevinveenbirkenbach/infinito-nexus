@@ -25,6 +25,7 @@ from typing import List
 
 import yaml
 
+from tests.utils.fs import read_text
 from utils.annotations.message import in_github_actions, warning
 from utils.entity_name_utils import get_entity_name
 
@@ -56,7 +57,7 @@ class MissingKeyFinding:
 
 def _load_yaml(path: Path) -> dict:
     try:
-        data = yaml.safe_load(path.read_text(encoding="utf-8"))
+        data = yaml.safe_load(read_text(str(path)))
     except yaml.YAMLError:
         return {}
     return data if isinstance(data, dict) else {}
@@ -68,9 +69,7 @@ def _find_service_line(config_path: Path, service_name: str) -> int:
     """
     pattern = re.compile(rf"^\s{{4}}{re.escape(service_name)}\s*:\s*$")
     try:
-        for i, raw in enumerate(
-            config_path.read_text(encoding="utf-8").splitlines(), start=1
-        ):
+        for i, raw in enumerate(read_text(str(config_path)).splitlines(), start=1):
             if pattern.match(raw):
                 return i
     except OSError:
