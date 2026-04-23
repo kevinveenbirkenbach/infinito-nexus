@@ -5,17 +5,12 @@ import re
 import unittest
 from typing import Dict, List, Set, Tuple
 
+from tests.utils.fs import iter_project_files, read_text
+
 PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "../../../"))
 
-# Where filter definitions may exist
-FILTER_PLUGIN_BASES = [
-    os.path.join(PROJECT_ROOT, "plugins", "filter"),
-    os.path.join(PROJECT_ROOT, "roles"),  # includes roles/*/filter_plugins
-]
-
-# Where to search for usages (EXCLUDES tests/ by default)
-SEARCH_BASES = [PROJECT_ROOT]
-EXCLUDE_TESTS = True  # keep True to require real usage sites
+# EXCLUDES tests/ by default; keeps True to require real usage sites
+EXCLUDE_TESTS = True
 
 # File extensions to scan for template usage
 USAGE_EXTS = (".yml", ".yaml", ".j2", ".jinja2", ".tmpl")
@@ -117,21 +112,12 @@ BUILTIN_FILTERS: Set[str] = {
 }
 
 
-EXCLUDE_DIRS = {".github"}
-if EXCLUDE_TESTS:
-    EXCLUDE_DIRS.add("tests")
-
-
-def _iter_files(base: str, *, exts: Tuple[str, ...]):
-    for root, _, files in os.walk(base):
-        parts = set(os.path.normpath(root).split(os.sep))
-
-        if parts & EXCLUDE_DIRS:
-            continue
-
-        for fn in files:
-            if fn.endswith(exts):
-                yield os.path.join(root, fn)
+def _iter_files(*, exts: Tuple[str, ...]):
+    yield from iter_project_files(
+        extensions=exts,
+        exclude_tests=EXCLUDE_TESTS,
+        exclude_dirs=(".github",),
+    )
 
 
 def _is_filter_plugins_dir(path: str) -> bool:
@@ -141,8 +127,7 @@ def _is_filter_plugins_dir(path: str) -> bool:
 
 def _read(path: str) -> str:
     try:
-        with open(path, "r", encoding="utf-8", errors="ignore") as f:
-            return f.read()
+        return read_text(path)
     except Exception:
         return ""
 
@@ -236,25 +221,22 @@ def _collect_filters_from_filters_method(
 
 def collect_defined_filters() -> Set[str]:
     defined: Set[str] = set()
-    for base in FILTER_PLUGIN_BASES:
-        for path in _iter_files(base, exts=(".py",)):
-            if not _is_filter_plugins_dir(path):
-                continue
-            code = _read(path)
-            if not code:
-                continue
-            try:
-                tree = ast.parse(code, filename=path)
-            except Exception:
-                continue
-            for node in tree.body:
-                if isinstance(node, ast.ClassDef) and node.name == "FilterModule":
-                    for item in node.body:
-                        if isinstance(item, ast.FunctionDef) and item.name == "filters":
-                            for fname, _call in _collect_filters_from_filters_method(
-                                item
-                            ):
-                                defined.add(fname)
+    for path in _iter_files(exts=(".py",)):
+        if not _is_filter_plugins_dir(path):
+            continue
+        code = _read(path)
+        if not code:
+            continue
+        try:
+            tree = ast.parse(code, filename=path)
+        except Exception:
+            continue
+        for node in tree.body:
+            if isinstance(node, ast.ClassDef) and node.name == "FilterModule":
+                for item in node.body:
+                    if isinstance(item, ast.FunctionDef) and item.name == "filters":
+                        for fname, _call in _collect_filters_from_filters_method(item):
+                            defined.add(fname)
     return defined
 
 
@@ -310,23 +292,22 @@ def _extract_filters_from_jinja_body(body: str) -> Set[str]:
 
 def collect_used_filters() -> Set[str]:
     used: Set[str] = set()
-    for base in SEARCH_BASES:
-        for path in _iter_files(base, exts=USAGE_EXTS):
-            text = _read(path)
-            if not text:
-                continue
+    for path in _iter_files(exts=USAGE_EXTS):
+        text = _read(path)
+        if not text:
+            continue
 
-            # 1) Filters used in {{ ... }} blocks
-            for m in RE_JINJA_MUSTACHE.finditer(text):
-                used |= _extract_filters_from_jinja_body(m.group(1))
+        # 1) Filters used in {{ ... }} blocks
+        for m in RE_JINJA_MUSTACHE.finditer(text):
+            used |= _extract_filters_from_jinja_body(m.group(1))
 
-            # 2) Filters used in {% ... %} blocks (e.g., set, if, for)
-            for m in RE_JINJA_TAG.finditer(text):
-                used |= _extract_filters_from_jinja_body(m.group(1))
+        # 2) Filters used in {% ... %} blocks (e.g., set, if, for)
+        for m in RE_JINJA_TAG.finditer(text):
+            used |= _extract_filters_from_jinja_body(m.group(1))
 
-            # 3) Block filter form: {% filter name %} ... {% endfilter %}
-            for m in RE_BLOCK_FILTER.finditer(text):
-                used.add(m.group(1))
+        # 3) Block filter form: {% filter name %} ... {% endfilter %}
+        for m in RE_BLOCK_FILTER.finditer(text):
+            used.add(m.group(1))
 
     return used
 

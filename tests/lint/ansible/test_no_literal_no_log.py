@@ -6,6 +6,8 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Iterable, List
 
+from tests.utils.fs import read_text
+
 
 PROJECT_ROOT = Path(__file__).resolve().parents[3]
 SCAN_DIRS = ("roles", "tasks", "playbooks")
@@ -47,7 +49,7 @@ def _iter_yaml_files(repo_root: Path) -> Iterable[Path]:
 def _scan_file(path: Path) -> List[Finding]:
     findings: List[Finding] = []
     try:
-        text = path.read_text(encoding="utf-8")
+        text = read_text(str(path))
     except (IOError, OSError, UnicodeDecodeError):
         return findings
 

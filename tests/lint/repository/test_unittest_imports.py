@@ -1,6 +1,8 @@
 import os
 import unittest
 
+from tests.utils.fs import iter_project_files_with_content
+
 
 class TestUnittestImports(unittest.TestCase):
     TEST_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
@@ -8,25 +10,22 @@ class TestUnittestImports(unittest.TestCase):
     def test_all_test_files_import_unittest(self):
         missing = []
 
-        for root, dirs, files in os.walk(self.TEST_ROOT):
-            for filename in files:
-                if not filename.endswith(".py"):
-                    continue
-                # only consider test files named like "test_*.py"
-                if not filename.startswith("test_"):
-                    continue
+        tests_prefix = self.TEST_ROOT + os.sep
+        for filepath, content in iter_project_files_with_content(extensions=(".py",)):
+            if not filepath.startswith(tests_prefix):
+                continue
+            filename = os.path.basename(filepath)
+            # only consider test files named like "test_*.py"
+            if not filename.startswith("test_"):
+                continue
 
-                filepath = os.path.join(root, filename)
-                with open(filepath, encoding="utf-8") as f:
-                    content = f.read()
-
-                # check for either import form
-                if (
-                    "import unittest" not in content
-                    and "from unittest import" not in content
-                ):
-                    rel_path = os.path.relpath(filepath, os.getcwd())
-                    missing.append(rel_path)
+            # check for either import form
+            if (
+                "import unittest" not in content
+                and "from unittest import" not in content
+            ):
+                rel_path = os.path.relpath(filepath, os.getcwd())
+                missing.append(rel_path)
 
         if missing:
             self.fail(

@@ -1,6 +1,7 @@
-import os
 import unittest
 import yaml
+
+from tests.utils.fs import iter_project_files, read_text
 
 
 class TestYamlSyntax(unittest.TestCase):
@@ -9,29 +10,15 @@ class TestYamlSyntax(unittest.TestCase):
         Walk the entire repository, find all *.yml files and try to parse them
         with yaml.safe_load(). Fail the test if any file contains invalid YAML.
         """
-        repo_root = os.path.abspath(
-            os.path.join(os.path.dirname(__file__), "..", "..", "..")
-        )
-
         invalid = []
 
-        for dirpath, dirnames, filenames in os.walk(repo_root):
-            # skip hidden directories (like .git, .venv, etc.)
-            dirnames[:] = [d for d in dirnames if not d.startswith(".")]
-            for fname in filenames:
-                if not fname.endswith(".yml"):
-                    continue
-                full = os.path.join(dirpath, fname)
-                # skip any large auto‐generated files if needed:
-                # if 'some/path/to/skip' in full: continue
-
-                try:
-                    with open(full, "r") as f:
-                        yaml.safe_load(f)
-                except yaml.YAMLError as e:
-                    invalid.append((full, str(e)))
-                except Exception as e:
-                    invalid.append((full, f"Unexpected error: {e}"))
+        for full in iter_project_files(extensions=(".yml",)):
+            try:
+                yaml.safe_load(read_text(full))
+            except yaml.YAMLError as e:
+                invalid.append((full, str(e)))
+            except Exception as e:
+                invalid.append((full, f"Unexpected error: {e}"))
 
         if invalid:
             msg_lines = [

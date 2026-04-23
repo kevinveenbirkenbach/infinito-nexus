@@ -4,6 +4,8 @@ import re
 import unittest
 from pathlib import Path
 
+from tests.utils.fs import iter_project_files_with_content
+
 
 def repo_root() -> Path:
     for candidate in Path(__file__).resolve().parents:
@@ -19,21 +21,6 @@ LEGACY_URI_MODULE_PATTERN = re.compile(
 
 class TestNoLegacyUriModuleUsage(unittest.TestCase):
     REPO_ROOT = repo_root()
-    EXCLUDED_DIRS = {
-        ".git",
-        ".venv",
-        ".mypy_cache",
-        ".pytest_cache",
-        "node_modules",
-        "__pycache__",
-    }
-
-    def _iter_yaml_files(self):
-        for path in self.REPO_ROOT.rglob("*.yml"):
-            rel = path.relative_to(self.REPO_ROOT)
-            if any(part in self.EXCLUDED_DIRS for part in rel.parts):
-                continue
-            yield path
 
     def test_no_legacy_uri_module_call_is_used(self):
         """
@@ -41,16 +28,10 @@ class TestNoLegacyUriModuleUsage(unittest.TestCase):
         """
         findings: list[tuple[str, int, str]] = []
 
-        for yml_file in self._iter_yaml_files():
+        for path_str, content in iter_project_files_with_content(extensions=(".yml",)):
+            yml_file = Path(path_str)
             rel = yml_file.relative_to(self.REPO_ROOT).as_posix()
-            try:
-                lines = yml_file.read_text(
-                    encoding="utf-8", errors="replace"
-                ).splitlines()
-            except OSError:
-                continue
-
-            for line_no, line in enumerate(lines, start=1):
+            for line_no, line in enumerate(content.splitlines(), start=1):
                 if LEGACY_URI_MODULE_PATTERN.match(line):
                     findings.append((rel, line_no, line.strip()))
 

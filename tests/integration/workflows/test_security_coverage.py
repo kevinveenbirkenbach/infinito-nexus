@@ -5,22 +5,13 @@ from pathlib import Path
 
 import yaml
 
+from tests.utils.fs import iter_project_files
+
 REPO_ROOT = Path(__file__).resolve().parents[3]
 SECURITY_WORKFLOW_PATH = REPO_ROOT / ".github" / "workflows" / "security-codeql.yml"
 
-# Directories skipped when walking the repository
-SKIP_DIRS = {
-    ".git",
-    ".venv",
-    "venv",
-    "__pycache__",
-    "node_modules",
-    ".tox",
-    "build",
-    "dist",
-}
-
-# Hidden directories that may contain real source files for CodeQL
+# Hidden directories that are the only ones worth scanning (the cached walker
+# already prunes .git/.venv/__pycache__/node_modules etc.).
 SCANNED_HIDDEN_DIRS = {
     ".github",
 }
@@ -82,20 +73,15 @@ class TestSecurityWorkflowCoverage(unittest.TestCase):
 
         detected_languages: set[str] = set()
 
-        for dirpath, dirnames, filenames in os.walk(REPO_ROOT):
-            dirnames[:] = [
-                d
-                for d in dirnames
-                if d not in SKIP_DIRS
-                and (not d.startswith(".") or d in SCANNED_HIDDEN_DIRS)
-            ]
-
-            rel_dir = os.path.relpath(dirpath, REPO_ROOT)
-            rel_dir = "" if rel_dir == "." else rel_dir
-
-            for filename in filenames:
-                rel_file = os.path.join(rel_dir, filename) if rel_dir else filename
-                detected_languages.update(_matching_languages(rel_file, filename))
+        for path in iter_project_files():
+            rel_file = os.path.relpath(path, REPO_ROOT)
+            # Skip top-level hidden directories that are not SCANNED_HIDDEN_DIRS
+            # (the cached walker already prunes the vendor/cache junk).
+            top = rel_file.split(os.sep, 1)[0]
+            if top.startswith(".") and top not in SCANNED_HIDDEN_DIRS:
+                continue
+            filename = os.path.basename(rel_file)
+            detected_languages.update(_matching_languages(rel_file, filename))
 
         active_languages = _load_active_languages()
         missing_languages = sorted(detected_languages - active_languages)

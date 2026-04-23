@@ -1,11 +1,8 @@
-import os
 import re
 import unittest
-from plugins.filter.get_all_application_ids import get_all_application_ids
 
-PROJECT_ROOT = os.path.abspath(
-    os.path.join(os.path.dirname(__file__), "..", "..", "..")
-)
+from plugins.filter.get_all_application_ids import get_all_application_ids
+from tests.utils.fs import iter_project_files_with_content
 
 
 class TestGetDomainApplicationIds(unittest.TestCase):
@@ -20,22 +17,15 @@ class TestGetDomainApplicationIds(unittest.TestCase):
         # Collect all application IDs from roles
         valid_ids = set(get_all_application_ids())
 
-        # Walk through project files
+        # Walk project .py files (skip tests/, served from cache)
         invalid_usages = []
-        for root, dirs, files in os.walk(PROJECT_ROOT):
-            # Skip tests directory to avoid matching in test code
-            if "tests" in root.split(os.sep):
-                continue
-            for fname in files:
-                if not fname.endswith(".py"):
-                    continue
-                path = os.path.join(root, fname)
-                with open(path, "r", encoding="utf-8") as f:
-                    content = f.read()
-                for match in self.GET_DOMAIN_PATTERN.finditer(content):
-                    literal = match.group(1)
-                    if literal not in valid_ids:
-                        invalid_usages.append((path, literal))
+        for path, content in iter_project_files_with_content(
+            extensions=(".py",), exclude_tests=True
+        ):
+            for match in self.GET_DOMAIN_PATTERN.finditer(content):
+                literal = match.group(1)
+                if literal not in valid_ids:
+                    invalid_usages.append((path, literal))
 
         if invalid_usages:
             msgs = [

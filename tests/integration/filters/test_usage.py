@@ -5,26 +5,16 @@ import unittest
 import logging
 from typing import Dict, List, Tuple, Optional
 
+from tests.utils.fs import iter_project_files, read_text
+
 PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "../../../"))
-
-FILTER_PLUGIN_BASES = [
-    os.path.join(PROJECT_ROOT, "plugins", "filter"),
-    os.path.join(PROJECT_ROOT, "roles"),
-]
-
-SEARCH_BASES = [PROJECT_ROOT]
 
 SEARCH_EXTS = (".yml", ".yaml", ".j2", ".jinja2", ".tmpl", ".py")
 
 
-def _iter_files(base: str, *, py_only: bool = False):
-    for root, _, files in os.walk(base):
-        for fn in files:
-            if py_only and not fn.endswith(".py"):
-                continue
-            if not py_only and not fn.endswith(SEARCH_EXTS):
-                continue
-            yield os.path.join(root, fn)
+def _iter_files(*, py_only: bool = False):
+    exts = (".py",) if py_only else SEARCH_EXTS
+    yield from iter_project_files(extensions=exts)
 
 
 def _is_filter_plugins_dir(path: str) -> bool:
@@ -34,8 +24,7 @@ def _is_filter_plugins_dir(path: str) -> bool:
 
 def _read(path: str) -> str:
     try:
-        with open(path, "r", encoding="utf-8", errors="ignore") as f:
-            return f.read()
+        return read_text(path)
     except Exception:
         return ""
 
@@ -180,16 +169,13 @@ def _ast_collect_filters_from_file(path: str) -> List[Tuple[str, str, str]]:
 
 def collect_defined_filters() -> List[Dict[str, str]]:
     found: List[Dict[str, str]] = []
-    for base in FILTER_PLUGIN_BASES:
-        for path in _iter_files(base, py_only=True):
-            if not _is_filter_plugins_dir(path):
-                continue
-            for filter_name, callable_name, fpath in _ast_collect_filters_from_file(
-                path
-            ):
-                found.append(
-                    {"filter": filter_name, "callable": callable_name, "file": fpath}
-                )
+    for path in _iter_files(py_only=True):
+        if not _is_filter_plugins_dir(path):
+            continue
+        for filter_name, callable_name, fpath in _ast_collect_filters_from_file(path):
+            found.append(
+                {"filter": filter_name, "callable": callable_name, "file": fpath}
+            )
     return found
 
 
@@ -242,34 +228,31 @@ def search_usage(
     used_anywhere = False
     used_outside_tests = False
 
-    for base in SEARCH_BASES:
-        for path in _iter_files(base, py_only=False):
-            try:
-                if os.path.samefile(path, skip_file):
-                    continue
-            except Exception as e:
-                # Exception can occur if files do not exist or are inaccessible.
-                # Skip comparison but log at debug level for diagnosis.
-                logging.debug(
-                    "Failed to compare files %r and %r: %s", path, skip_file, e
-                )
-            content = _read(path)
-            if not content:
+    for path in _iter_files(py_only=False):
+        try:
+            if os.path.samefile(path, skip_file):
                 continue
+        except Exception as e:
+            # Exception can occur if files do not exist or are inaccessible.
+            # Skip comparison but log at debug level for diagnosis.
+            logging.debug("Failed to compare files %r and %r: %s", path, skip_file, e)
+        content = _read(path)
+        if not content:
+            continue
 
-            hit = False
-            for pat in jinja_pats:
-                if pat.search(content):
-                    hit = True
-                    break
-
-            if not hit and py_pat and path.endswith(".py") and py_pat.search(content):
+        hit = False
+        for pat in jinja_pats:
+            if pat.search(content):
                 hit = True
+                break
 
-            if hit:
-                used_anywhere = True
-                if "/tests/" not in path and not path.endswith("tests"):
-                    used_outside_tests = True
+        if not hit and py_pat and path.endswith(".py") and py_pat.search(content):
+            hit = True
+
+        if hit:
+            used_anywhere = True
+            if "/tests/" not in path and not path.endswith("tests"):
+                used_outside_tests = True
 
     return used_anywhere, used_outside_tests
 

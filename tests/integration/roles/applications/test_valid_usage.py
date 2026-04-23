@@ -1,6 +1,6 @@
 import os
-import sys
 import re
+import sys
 import unittest
 
 # ensure project root is on PYTHONPATH so we can import the CLI code
@@ -10,6 +10,7 @@ ROOT = os.path.abspath(
 sys.path.insert(0, ROOT)
 
 from cli.meta.applications.all import find_application_ids  # noqa: E402
+from tests.utils.fs import iter_project_files_with_content  # noqa: E402
 
 
 class TestValidApplicationUsage(unittest.TestCase):
@@ -46,61 +47,43 @@ class TestValidApplicationUsage(unittest.TestCase):
     def test_application_references_use_valid_ids(self):
         valid_apps = find_application_ids()
 
-        tests_dir = os.path.join(ROOT, "tests")
-        for dirpath, _, filenames in os.walk(ROOT):
-            # skip the tests/ directory and all its subdirectories
-            if dirpath == tests_dir or dirpath.startswith(tests_dir + os.sep):
-                continue
+        patterns = (
+            self.LOOKUP_APPLICATIONS_RE,
+            self.APPLICATION_DOMAIN_RE,
+        )
 
-            for filename in filenames:
-                if not filename.lower().endswith(
-                    (".yml", ".yaml", ".yml.j2", ".yaml.j2", ".py")
-                ):
-                    continue
+        for filepath, content in iter_project_files_with_content(
+            extensions=(".yml", ".yaml", ".yml.j2", ".yaml.j2", ".py"),
+            exclude_tests=True,
+        ):
+            for pattern in patterns:
+                for match in pattern.finditer(content):
+                    start = match.start()
 
-                filepath = os.path.join(dirpath, filename)
-                try:
-                    with open(filepath, "r", encoding="utf-8") as f:
-                        content = f.read()
-                except Exception:
-                    # skip files that cannot be opened
-                    continue
+                    # Determine the full line containing this match
+                    line_start = content.rfind("\n", 0, start) + 1
+                    line_end = content.find("\n", start)
+                    line = content[line_start : line_end if line_end != -1 else None]
 
-                patterns = (
-                    self.LOOKUP_APPLICATIONS_RE,
-                    self.APPLICATION_DOMAIN_RE,
-                )
+                    # Skip any import or from-import lines
+                    if line.strip().startswith(("import ", "from ")):
+                        continue
 
-                for pattern in patterns:
-                    for match in pattern.finditer(content):
-                        start = match.start()
+                    name = match.group("name")
 
-                        # Determine the full line containing this match
-                        line_start = content.rfind("\n", 0, start) + 1
-                        line_end = content.find("\n", start)
-                        line = content[
-                            line_start : line_end if line_end != -1 else None
-                        ]
+                    line_no, col = self._line_no_and_col(content, start)
 
-                        # Skip any import or from-import lines
-                        if line.strip().startswith(("import ", "from ")):
-                            continue
-
-                        name = match.group("name")
-
-                        line_no, col = self._line_no_and_col(content, start)
-
-                        # each found reference must be in valid_apps
-                        self.assertIn(
-                            name,
-                            valid_apps,
-                            msg=(
-                                f"{filepath}: reference to application '{name}' is invalid.\n"
-                                f"Location: line {line_no}, col {col}\n"
-                                f"Line: {line.rstrip()}\n"
-                                f"Known IDs: {sorted(valid_apps)}"
-                            ),
-                        )
+                    # each found reference must be in valid_apps
+                    self.assertIn(
+                        name,
+                        valid_apps,
+                        msg=(
+                            f"{filepath}: reference to application '{name}' is invalid.\n"
+                            f"Location: line {line_no}, col {col}\n"
+                            f"Line: {line.rstrip()}\n"
+                            f"Known IDs: {sorted(valid_apps)}"
+                        ),
+                    )
 
 
 if __name__ == "__main__":

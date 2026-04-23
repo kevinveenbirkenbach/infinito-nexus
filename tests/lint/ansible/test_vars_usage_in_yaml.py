@@ -4,6 +4,8 @@ import re
 from typing import Any, Iterable, Set, List, Dict, Tuple
 import yaml
 
+from tests.utils.fs import iter_project_files, read_text
+
 
 def repo_root() -> Path:
     for candidate in Path(__file__).resolve().parents:
@@ -44,21 +46,16 @@ class TestVarsPassedAreUsed(unittest.TestCase):
     # ---------- File iteration & YAML loading ----------
 
     def _iter_files(self, extensions: set[str]) -> Iterable[Path]:
-        for p in self.REPO_ROOT.rglob("*"):
-            if p.is_file() and p.suffix in extensions:
-                try:
-                    rel = p.relative_to(self.REPO_ROOT)
-                except Exception:
-                    continue
-                # Skip excluded top-level dirs (e.g. inventories/*)
-                if rel.parts and rel.parts[0] in self.EXCLUDED_TOP_LEVEL_DIRS:
-                    continue
-                yield p
+        exts = tuple(extensions)
+        for path_str in iter_project_files(
+            extensions=exts,
+            exclude_dirs=tuple(self.EXCLUDED_TOP_LEVEL_DIRS),
+        ):
+            yield Path(path_str)
 
     def _load_yaml_documents(self, path: Path) -> List[Any]:
         try:
-            with path.open("r", encoding="utf-8") as f:
-                return list(yaml.safe_load_all(f)) or []
+            return list(yaml.safe_load_all(read_text(str(path)))) or []
         except Exception:
             # File may contain heavy templating or anchors; skip structural parse
             return []
@@ -96,7 +93,7 @@ class TestVarsPassedAreUsed(unittest.TestCase):
 
         for yml in self._iter_files(self.YAML_EXTENSIONS):
             try:
-                lines = yml.read_text(encoding="utf-8").splitlines()
+                lines = read_text(str(yml)).splitlines()
             except Exception:
                 continue
 
@@ -141,7 +138,7 @@ class TestVarsPassedAreUsed(unittest.TestCase):
         parts: List[str] = []
         for f in self._iter_files(self.YAML_EXTENSIONS | self.JINJA_EXTENSIONS):
             try:
-                parts.append(f.read_text(encoding="utf-8"))
+                parts.append(read_text(str(f)))
             except Exception:
                 # Non-UTF8 or unreadable — ignore
                 pass

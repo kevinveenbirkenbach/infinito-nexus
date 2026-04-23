@@ -1,4 +1,3 @@
-import os
 import re
 import unittest
 from pathlib import Path
@@ -7,6 +6,8 @@ import yaml  # requires PyYAML
 from plugins.filter.get_role import get_role
 from utils.applications.config import get, ConfigEntryNotSetError
 from utils.runtime_data import get_application_defaults, get_user_defaults
+
+from tests.utils.fs import iter_project_files_with_content
 
 
 class TestGetAppConfPaths(unittest.TestCase):
@@ -43,55 +44,46 @@ class TestGetAppConfPaths(unittest.TestCase):
         cls.literal_paths = {}  # app_id -> {path: [(file,line)...]}
         cls.variable_paths = {}  # path -> [(file,line)...]
 
-        skip_dirs = {"tests", "docs"}
-        for dirpath, dirs, files in os.walk(root):
-            # skip descending into tests/ and docs/ (docs contain placeholder examples)
-            for sd in list(skip_dirs):
-                if sd in dirs:
-                    dirs.remove(sd)
-            if skip_dirs & set(Path(dirpath).parts):
+        for path_str, text in iter_project_files_with_content(
+            exclude_tests=True,
+            exclude_dirs=("docs",),
+        ):
+            # ignore .py and .sh files (the existing lookup-scan contract)
+            if path_str.endswith((".py", ".sh")):
                 continue
-            for fname in files:
-                # ignore .py and .sh files
-                if fname.endswith((".py", ".sh")):
-                    continue
-                file_path = Path(dirpath) / fname
-                try:
-                    text = file_path.read_text(encoding="utf-8")
-                except Exception:
-                    continue
-                for m in cls.pattern.finditer(text):
-                    # Determine the start and end of the current line
-                    start = text.rfind("\n", 0, m.start()) + 1
-                    end = text.find("\n", start)
-                    line = text[start:end] if end != -1 else text[start:]
+            file_path = Path(path_str)
+            for m in cls.pattern.finditer(text):
+                # Determine the start and end of the current line
+                start = text.rfind("\n", 0, m.start()) + 1
+                end = text.find("\n", start)
+                line = text[start:end] if end != -1 else text[start:]
 
-                    # 1) Skip lines that are entirely commented out
-                    if line.lstrip().startswith("#"):
-                        continue
+                # 1) Skip lines that are entirely commented out
+                if line.lstrip().startswith("#"):
+                    continue
 
-                    # 2) Skip calls preceded by an inline comment
-                    idx_call = line.find("lookup")
-                    idx_hash = line.find("#")
-                    if 0 <= idx_hash < idx_call:
-                        continue
-                    lineno = text.count("\n", 0, m.start()) + 1
-                    app_arg = m.group(1).strip()
-                    path_arg = m.group(2).strip()
-                    # ignore any templated Jinja2 raw-blocks
-                    if "{%" in path_arg:
-                        continue
-                    if (app_arg.startswith("'") and app_arg.endswith("'")) or (
-                        app_arg.startswith('"') and app_arg.endswith('"')
-                    ):
-                        app_id = app_arg.strip("'\"")
-                        cls.literal_paths.setdefault(app_id, {}).setdefault(
-                            path_arg, []
-                        ).append((file_path, lineno))
-                    else:
-                        cls.variable_paths.setdefault(path_arg, []).append(
-                            (file_path, lineno)
-                        )
+                # 2) Skip calls preceded by an inline comment
+                idx_call = line.find("lookup")
+                idx_hash = line.find("#")
+                if 0 <= idx_hash < idx_call:
+                    continue
+                lineno = text.count("\n", 0, m.start()) + 1
+                app_arg = m.group(1).strip()
+                path_arg = m.group(2).strip()
+                # ignore any templated Jinja2 raw-blocks
+                if "{%" in path_arg:
+                    continue
+                if (app_arg.startswith("'") and app_arg.endswith("'")) or (
+                    app_arg.startswith('"') and app_arg.endswith('"')
+                ):
+                    app_id = app_arg.strip("'\"")
+                    cls.literal_paths.setdefault(app_id, {}).setdefault(
+                        path_arg, []
+                    ).append((file_path, lineno))
+                else:
+                    cls.variable_paths.setdefault(path_arg, []).append(
+                        (file_path, lineno)
+                    )
 
     def assertNested(self, mapping, dotted, context):
         keys = dotted.split(".")

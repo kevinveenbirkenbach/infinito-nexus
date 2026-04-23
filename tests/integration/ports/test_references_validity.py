@@ -3,6 +3,8 @@ import unittest
 import yaml
 import re
 
+from tests.utils.fs import read_text
+
 
 class TestPortReferencesValidity(unittest.TestCase):
     @classmethod
@@ -76,20 +78,23 @@ class TestPortReferencesValidity(unittest.TestCase):
                         continue
 
                     path = os.path.join(root, fname)
-                    with open(path, "r", encoding="utf-8", errors="ignore") as fh:
-                        for lineno, line in enumerate(fh, start=1):
-                            for pat in self.patterns:
-                                for m in pat.finditer(line):
-                                    triple = (
-                                        m.group("host"),
-                                        m.group("cat"),
-                                        m.group("svc"),
+                    try:
+                        content = read_text(path)
+                    except (OSError, UnicodeDecodeError):
+                        continue
+                    for lineno, line in enumerate(content.splitlines(), start=1):
+                        for pat in self.patterns:
+                            for m in pat.finditer(line):
+                                triple = (
+                                    m.group("host"),
+                                    m.group("cat"),
+                                    m.group("svc"),
+                                )
+                                if triple not in self.valid:
+                                    errors.append(
+                                        f"{path}:{lineno}: reference `{m.group(0)}` "
+                                        f"not found in {self.ports_file}"
                                     )
-                                    if triple not in self.valid:
-                                        errors.append(
-                                            f"{path}:{lineno}: reference `{m.group(0)}` "
-                                            f"not found in {self.ports_file}"
-                                        )
 
         if errors:
             self.fail("Found invalid port references:\n" + "\n".join(errors))

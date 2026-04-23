@@ -26,30 +26,12 @@ import os
 import re
 import unittest
 
+from tests.utils.fs import iter_project_files, read_text
+
 try:
     import yaml  # PyYAML
 except Exception:
     yaml = None
-
-# ---------- Performance: prune heavy/vendor dirs ----------
-EXCLUDE_DIRS = {
-    ".git",
-    ".hg",
-    ".svn",
-    ".venv",
-    "venv",
-    "env",
-    ".tox",
-    "__pycache__",
-    ".mypy_cache",
-    ".pytest_cache",
-    "node_modules",
-    "dist",
-    "build",
-    "target",
-    ".idea",
-    ".vscode",
-}
 
 # ---------- Regexes (compiled once) ----------
 # Any usage like "run_once_<suffix>"
@@ -70,18 +52,13 @@ def roles_root(root: str) -> str:
 
 
 def walk_yaml_files(root: str):
-    """Yield absolute paths to *.yml files, pruning heavy/vendor directories."""
-    for dirpath, dirnames, filenames in os.walk(root):
-        dirnames[:] = [d for d in dirnames if d not in EXCLUDE_DIRS]
-        for fn in filenames:
-            if fn.endswith(".yml"):
-                yield os.path.join(dirpath, fn)
+    """Yield absolute paths to *.yml files from the cached project walker."""
+    yield from iter_project_files(extensions=(".yml",))
 
 
 def read_text_safe(path: str):
     try:
-        with open(path, "r", encoding="utf-8") as f:
-            return f.read()
+        return read_text(path)
     except (OSError, UnicodeDecodeError):
         return None
 

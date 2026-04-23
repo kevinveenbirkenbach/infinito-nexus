@@ -1,6 +1,8 @@
 import os
 import unittest
 
+from tests.utils.fs import iter_project_files
+
 
 class TestFilenameConventions(unittest.TestCase):
     """
@@ -10,12 +12,12 @@ class TestFilenameConventions(unittest.TestCase):
 
     def test_readme_and_todo_filenames_are_uppercase(self):
         bad_files = []
-        for root, _, files in os.walk("."):
-            for filename in files:
-                lower = filename.lower()
-                if lower in ("readme.md", "todo.md"):
-                    if filename not in ("README.md", "TODO.md"):
-                        bad_files.append(os.path.join(root, filename))
+        for path in iter_project_files():
+            filename = os.path.basename(path)
+            lower = filename.lower()
+            if lower in ("readme.md", "todo.md"):
+                if filename not in ("README.md", "TODO.md"):
+                    bad_files.append(path)
 
         msg = (
             (

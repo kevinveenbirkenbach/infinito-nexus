@@ -1,8 +1,11 @@
 from __future__ import annotations
 
 import fnmatch
+import os
 import unittest
 from pathlib import Path
+
+from tests.utils.fs import iter_project_files
 
 
 def repo_root() -> Path:
@@ -83,9 +86,10 @@ class TestTestFilesLocation(unittest.TestCase):
         patterns = _load_gitignore_patterns(root)
 
         offenders: list[str] = []
-        for path in root.rglob("test_*.py"):
-            if not path.is_file():
+        for path_str in iter_project_files(extensions=(".py",)):
+            if os.path.basename(path_str).startswith("test_") is False:
                 continue
+            path = Path(path_str)
             rel = path.relative_to(root).as_posix()
             if rel == "tests" or rel.startswith("tests/"):
                 continue
