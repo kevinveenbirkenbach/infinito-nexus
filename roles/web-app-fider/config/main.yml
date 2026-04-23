@@ -55,3 +55,6 @@ compose:
       shared:                     true
     javascript:
       enabled:                    false
+    prometheus:
+      enabled: true
+      shared: true

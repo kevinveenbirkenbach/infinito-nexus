@@ -26,6 +26,7 @@ function decodeDotenvQuotedValue(value) {
 // so normalize these values before building URLs or typing credentials.
 const oidcIssuerUrl      = decodeDotenvQuotedValue(process.env.OIDC_ISSUER_URL);
 const mattermostBaseUrl  = decodeDotenvQuotedValue(process.env.MATTERMOST_BASE_URL);
+const prometheusBaseUrl  = decodeDotenvQuotedValue(process.env.PROMETHEUS_BASE_URL);
 const adminUsername      = decodeDotenvQuotedValue(process.env.ADMIN_USERNAME);
 const adminPassword      = decodeDotenvQuotedValue(process.env.ADMIN_PASSWORD);
 const biberUsername      = decodeDotenvQuotedValue(process.env.BIBER_USERNAME);
@@ -60,12 +61,22 @@ async function performOidcLogin(frame, username, password) {
   await signInButton.click();
 }
 
-// Navigate directly to the Mattermost GitLab OAuth2 login endpoint.
-// This bypasses the login page button rendering (which requires EnableSignInWithGitLab
-// in the client config) and also bypasses the /landing app-selection dialog that
-// Mattermost shows for fresh browser contexts in v11+.
+// Navigate to the Mattermost login page and click the SSO button injected by javascript.js.j2.
+// Mattermost v11 redirects fresh browser contexts (no cookies) from /login to /landing before
+// the login form renders. We detect that redirect and navigate back to /login so the form
+// and the injected button can appear.
 async function startMattermostSsoFlow(page, baseUrl) {
-  await page.goto(`${baseUrl.replace(/\/$/, "")}/oauth/gitlab/login`);
+  const base = baseUrl.replace(/\/$/, "");
+  await page.goto(`${base}/login`);
+
+  // If Mattermost redirected to /landing, navigate back to /login
+  if (page.url().includes("/landing")) {
+    await page.goto(`${base}/login`);
+  }
+
+  const ssoButton = page.locator("a[href='/oauth/gitlab/login']");
+  await ssoButton.waitFor({ state: "visible", timeout: 30_000 });
+  await ssoButton.click();
 }
 
 // Dismiss Mattermost onboarding modals/tips that may appear after first SSO login.
@@ -130,7 +141,128 @@ test.beforeEach(() => {
   expect(biberPassword,     "BIBER_PASSWORD must be set in the Playwright env file").toBeTruthy();
 });
 
-// Scenario I: dashboard → click Mattermost → verify iframe → SSO login → verify channel view → logout
+// Scenario 0: /metricz on the prometheus domain exposes metrics for Mattermost.
+//
+// Mattermost declares prometheus as a shared service dependency. When prometheus is
+// deployed alongside Mattermost, lua-resty-prometheus records per-request metrics for
+// the Mattermost vhost and exposes them via the single /metricz scrape endpoint on the
+// prometheus domain. This test verifies the end-to-end contract:
+//   1. /metricz returns HTTP 200 with prometheus text-format content.
+//   2. The response contains at least one metric line labeled app="web-app-mattermost",
+//      confirming that Mattermost's vhost is tracked by the shared metrics dict.
+//
+// /metricz is intentionally unauthenticated — prometheus must scrape it without
+// bearer tokens or OAuth2. If this test returns 401/403, the nginx ACL whitelist
+// for /metricz is misconfigured.
+test("metricz endpoint exposes mattermost metrics when prometheus is loaded as dependency", async ({ request }) => {
+  const metriczUrl = `${prometheusBaseUrl.replace(/\/$/, "")}/metricz`;
+
+  const response = await request.get(metriczUrl);
+
+  if (response.status() === 404) {
+    test.skip(true, "/metricz returned 404 — prometheus nginx vhost not deployed in this CI run (deploy web-app-prometheus explicitly to enable this test)");
+    return;
+  }
+
+  expect(
+    response.status(),
+    `/metricz must return 200 — got ${response.status()}. ` +
+    "If 401/403, the nginx ACL whitelist for /metricz is misconfigured."
+  ).toBe(200);
+
+  const body = await response.text();
+
+  // Prometheus text format always begins comment lines with '#'.
+  expect(body, "/metricz response must be prometheus text format (lines starting with #)").toMatch(/^#/m);
+
+  // At least one metric must carry the Mattermost app label, confirming the vhost
+  // is tracked in the shared lua-resty-prometheus memory dict.
+  expect(
+    body,
+    `/metricz must contain metrics labeled app="web-app-mattermost" — ` +
+    "if missing, the Mattermost vhost is not registered in lua-resty-prometheus."
+  ).toContain('app="web-app-mattermost"');
+});
+
+// Scenario I: Prometheus scrapes Mattermost native metrics — the mattermost job target is up.
+//
+// When native_metrics.enabled=true in the Mattermost inventory, Mattermost exposes /metrics
+// on a dedicated listener port (MM_METRICSSETTINGS_LISTENADDRESS). Prometheus scrapes it
+// via an internal port binding (host.docker.internal:PORT) rather than going through
+// nginx/OAuth2. This test authenticates against Prometheus via SSO and queries the
+// Prometheus HTTP API to confirm the mattermost job has at least one UP target (value=1).
+//
+// The test is skipped when:
+//   - PROMETHEUS_BASE_URL or OIDC_ISSUER_URL are unset (prometheus not deployed)
+//   - The query returns no results (native_metrics.enabled=false in this deployment)
+test("prometheus scrapes mattermost native metrics — job target is up", async ({ browser, request }) => {
+  const metriczPreflight = await request.get(`${prometheusBaseUrl.replace(/\/$/, "")}/metricz`);
+  if (metriczPreflight.status() === 404) {
+    test.skip(true, "Prometheus nginx vhost not deployed in this CI run (deploy web-app-prometheus explicitly to enable this test)");
+    return;
+  }
+
+  const ctx = await browser.newContext({ ignoreHTTPSErrors: true });
+
+  try {
+    const page = await ctx.newPage();
+
+    // Navigate to prometheus — triggers SSO redirect to Keycloak.
+    await page.goto(prometheusBaseUrl);
+
+    await expect
+      .poll(() => page.url(), {
+        timeout: 30_000,
+        message: `Expected redirect to Keycloak OIDC issuer: ${oidcIssuerUrl}`
+      })
+      .toContain(oidcIssuerUrl);
+
+    await performOidcLogin(page, adminUsername, adminPassword);
+
+    await expect
+      .poll(() => page.url(), {
+        timeout: 30_000,
+        message: `Expected redirect back to Prometheus: ${prometheusBaseUrl}`
+      })
+      .toContain(prometheusBaseUrl.replace(/\/$/, ""));
+
+    // Query the Prometheus HTTP API for the mattermost job's up metric.
+    const queryUrl = `${prometheusBaseUrl.replace(/\/$/, "")}/api/v1/query?query=up%7Bjob%3D%22mattermost%22%7D`;
+    const response = await ctx.request.get(queryUrl);
+
+    expect(
+      response.ok(),
+      `Prometheus API returned ${response.status()} — expected 200.`
+    ).toBeTruthy();
+
+    const data = await response.json();
+
+    expect(
+      data.status,
+      `Prometheus API response status must be "success", got: ${data.status}`
+    ).toBe("success");
+
+    const results = data.data.result;
+
+    if (results.length === 0) {
+      test.skip(true, "No mattermost job in Prometheus — native_metrics.enabled=false in this deployment");
+      return;
+    }
+
+    const value = parseFloat(results[0].value[1]);
+
+    expect(
+      value,
+      `Prometheus up{job="mattermost"} must be 1 (target UP) — got ${value}. ` +
+      "If 0, the Mattermost container is down or the internal port binding is broken."
+    ).toBe(1);
+
+  } finally {
+    await ctx.close().catch(() => {});
+  }
+});
+
+// Scenario II: dashboard → click Mattermost → verify iframe → SSO login → verify channel view → logout
 //
 // The SSO flow is triggered by navigating directly to /oauth/gitlab/login rather than
 // clicking the login-page button. In Mattermost v11 Team Edition, the EnableSignInWithGitLab
@@ -194,7 +326,7 @@ test("dashboard to mattermost: sso login, verify channel view, logout", async ({
   await page.goto("/");
 });
 
-// Scenario II: biber logs in → sends direct message to administrator → administrator logs in
+// Scenario III: biber logs in → sends direct message to administrator → administrator logs in
 //              (separate browser) → verifies message → both log out
 //
 // Using isolated browser contexts models two separate users on separate machines:

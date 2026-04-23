@@ -52,7 +52,9 @@ http
   gzip_comp_level 4;
   gzip_min_length 256;
   gzip_types application/atom+xml application/javascript application/xml+rss application/x-javascript application/json application/ld+json application/manifest+json application/rss+xml application/vnd.geo+json application/vnd.ms-fontobject application/x-font-ttf application/x-web-app-app-manifest+json application/xhtml+xml application/xml font/opentype image/bmp image/svg+xml image/x-icon text/cache-manifest text/css text/plain text/vcard text/vnd.rim.location.xloc text/vtt text/x-component text/x-cross-domain-policy text/javascript text/xml;
-  types_hash_max_size 4096;  
+
+  types_hash_max_size 4096;
+
   {% for dir in lookup('nginx','directories.configuration.http_includes') %}
   include {{ dir }}*.conf;
   {% endfor %}

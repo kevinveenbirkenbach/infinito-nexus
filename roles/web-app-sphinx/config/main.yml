@@ -38,3 +38,6 @@ compose:
     email:
       enabled: false
       shared: false
+    prometheus:
+      enabled: true
+      shared: true

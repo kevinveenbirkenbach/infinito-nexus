@@ -33,8 +33,9 @@ compose:
     matomo:
       enabled:                    true
       shared:                     true
-    redis:
-      enabled:                    false
+    email:
+      enabled:                    true
+      shared:                     true
     css:
       enabled:                    true
       shared:                     true
@@ -46,5 +47,41 @@ compose:
       mem_reservation:            "256m"
       mem_limit:                  "512m"
       pids_limit:                 256
+    alertmanager:
+      image:                      "prom/alertmanager"
+      version:                    "v0.32.0"
+      name:                       "prometheus-alertmanager"
+      cpus:                       "0.25"
+      mem_reservation:            "64m"
+      mem_limit:                  "128m"
+      pids_limit:                 64
+    blackbox-exporter:
+      image:                      "prom/blackbox-exporter"
+      version:                    "v0.28.0"
+      name:                       "prometheus-blackbox"
+      cpus:                       "0.1"
+      mem_reservation:            "32m"
+      mem_limit:                  "64m"
+      pids_limit:                 64
+    cadvisor:
+      image:                      "gcr.io/cadvisor/cadvisor"
+      version:                    "v0.52.1"
+      name:                       "prometheus-cadvisor"
+      cpus:                       "0.25"
+      mem_reservation:            "64m"
+      mem_limit:                  "256m"
+      pids_limit:                 64
+    node-exporter:
+      image:                      "prom/node-exporter"
+      version:                    "v1.11.1"
+      name:                       "prometheus-node-exporter"
+      cpus:                       "0.1"
+      mem_reservation:            "32m"
+      mem_limit:                  "128m"
+      pids_limit:                 64
   volumes:
     data:                         "prometheus_data"
+    alertmanager_data:            "prometheus_alertmanager_data"
+alerting:
+  telegram:
+    chat_id:                      0     # Telegram chat ID (integer); bot_token lives under credentials.alerting_telegram_bot_token

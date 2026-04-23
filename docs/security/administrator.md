@@ -12,7 +12,7 @@ In addition to the user security guidelines, administrators have additional resp
   This configuration enables centralized [Single Sign-On (SSO)](https://en.wikipedia.org/wiki/Single_sign-on), simplifying user management and boosting security.
 
 - **Enforce 2FA and Use a Password Manager**
-  Administrators MUST enforce [2FA](https://en.wikipedia.org/wiki/Multi-factor_authentication) and SHOULD use a password manager with auto-generated passwords. We recommend [KeePass](https://keepass.info/). The KeePass database can be stored securely in your Nextcloud instance and synchronized between devices.
+  Administrators MUST enforce [2FA](https://en.wikipedia.org/wiki/Multi-factor_authentication) and SHOULD use a password manager with auto-generated passwords. We recommend [KeePass](https://en.wikipedia.org/wiki/KeePass). The KeePass database can be stored securely in your Nextcloud instance and synchronized between devices.
 
 - **Avoid Root Logins & Plaintext Passwords**
   Infinito.Nexus MUST NOT allow logging in via the root user or using simple passwords. Instead, an SSH key MUST be generated and transferred during system initialization. When executing commands as root, always use `sudo` (or, if necessary, `sudo su`—but only if you understand the risks). (More information on [SSH](https://en.wikipedia.org/wiki/Secure_Shell) and [sudo](https://en.wikipedia.org/wiki/Sudo) is available on Wikipedia.)

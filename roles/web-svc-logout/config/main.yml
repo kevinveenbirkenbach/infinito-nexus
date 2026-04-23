@@ -45,3 +45,6 @@ compose:
     javascript:
       enabled: false
       shared: true
+    prometheus:
+      enabled: true
+      shared: true

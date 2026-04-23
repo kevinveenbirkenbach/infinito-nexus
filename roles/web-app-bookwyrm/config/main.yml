@@ -39,6 +39,9 @@ compose:
     css:
       enabled: true
       shared: true
+    prometheus:
+      enabled: true
+      shared: true
   volumes:
     data:       "bookwyrm_data"
     media:      "bookwyrm_media"

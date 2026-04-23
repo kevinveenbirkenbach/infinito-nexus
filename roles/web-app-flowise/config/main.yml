@@ -76,7 +76,10 @@ compose:
     email:
       enabled: true
       shared: true
-  volumes:
+    prometheus:
+      enabled: true
+      shared: true
+  volumes: 
     qdrant:     qdrant_data
     flowise:    flowise_data
 credentials: {}

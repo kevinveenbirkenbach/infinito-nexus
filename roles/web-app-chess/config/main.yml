@@ -33,6 +33,9 @@ compose:
     email:
       enabled: false
       shared: false
+    prometheus:
+      enabled: true
+      shared: true
   volumes:
     data:                 "chess_data"
 server:

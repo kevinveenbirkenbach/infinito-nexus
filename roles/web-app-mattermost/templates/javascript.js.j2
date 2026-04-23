@@ -1,11 +1,30 @@
 window.addEventListener("DOMContentLoaded", function () {
+    var injected = false;
+
     var observer = new MutationObserver(function () {
-        document.querySelectorAll("a[href*='/oauth/gitlab/'], button").forEach(function (el) {
+        // Rename if Mattermost ever renders the GitLab button natively
+        document.querySelectorAll("a[href*='/oauth/gitlab/']").forEach(function (el) {
             if (el.textContent.trim() === "GitLab") {
                 el.textContent = "SSO with Infinito.Nexus";
-                observer.disconnect();
             }
         });
+
+        // Inject SSO button when login form is present but no native SSO button rendered
+        if (injected) return;
+        if (!document.getElementById("input_loginId")) return;
+        if (document.querySelector("a[href*='/oauth/gitlab/']")) return;
+
+        var btn = document.getElementById("saveSetting");
+        if (!btn) return;
+
+        var a = document.createElement("a");
+        a.href = "/oauth/gitlab/login";
+        a.textContent = "SSO with Infinito.Nexus";
+        a.className = "btn btn-primary login-body-card-form-button-submit large";
+        a.style.cssText = "display:flex;align-items:center;justify-content:center;width:100%;box-sizing:border-box;margin:20px 0 0 0;";
+        btn.parentNode.insertBefore(a, btn.nextSibling);
+        injected = true;
     });
+
     observer.observe(document.body, { childList: true, subtree: true });
 });

@@ -76,6 +76,6 @@ def active_docker_container_count(
 class FilterModule(object):
     def filters(self):
         return {
-            # usage: {{ applications | active_docker_container_count(group_names) }}
+            # usage: {{ lookup('applications') | active_docker_container_count(group_names) }}
             "active_docker_container_count": active_docker_container_count,
         }

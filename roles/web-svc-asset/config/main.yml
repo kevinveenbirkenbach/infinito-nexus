@@ -25,3 +25,6 @@ compose:
     css:
       enabled: false
       shared: false
+    prometheus:
+      enabled: true
+      shared: true

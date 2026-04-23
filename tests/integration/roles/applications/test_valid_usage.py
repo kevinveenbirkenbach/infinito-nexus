@@ -1,7 +1,6 @@
 import os
 import sys
 import re
-from typing import Optional
 import unittest
 
 # ensure project root is on PYTHONPATH so we can import the CLI code
@@ -19,30 +18,20 @@ class TestValidApplicationUsage(unittest.TestCase):
     are used in all .yml, .yaml, .yml.j2, .yaml.j2, and .py files.
 
     It detects:
-    - applications['name']
-    - applications.get('name')
-    - applications.name
-    - get_domain('name')
+    - lookup('applications', 'name')       (canonical applications lookup)
+    - get_domain('name')                    (filter helper for domain resolution)
 
-    For Python, it avoids false positives like applications.setdefault(...),
-    by skipping attribute matches that are immediately used as a call.
+    Dynamic calls such as lookup('applications', application_id) are not
+    validated here, because the app ID is a runtime variable.
     """
 
-    # regex patterns to capture applications['name'], applications.get('name'), applications.name, and get_domain('name')
-    APPLICATION_SUBSCRIPT_RE = re.compile(
-        r"applications\[['\"](?P<name>[^'\"]+)['\"]\]"
+    # Literal app-id captured from lookup('applications', 'name') / lookup("applications", "name")
+    LOOKUP_APPLICATIONS_RE = re.compile(
+        r"lookup\(\s*['\"]applications['\"]\s*,\s*['\"](?P<name>[^'\"]+)['\"]"
     )
-    APPLICATION_GET_RE = re.compile(
-        r"applications\.get\(\s*['\"](?P<name>[^'\"]+)['\"]"
-    )
-    APPLICATION_ATTR_RE = re.compile(r"(?<!\.)applications\.(?P<name>[A-Za-z_]\w*)")
     APPLICATION_DOMAIN_RE = re.compile(
         r"get_domain\(\s*['\"](?P<name>[^'\"]+)['\"]\s*\)"
     )
-
-    # default methods and exceptions that should not be validated as application IDs
-    DEFAULT_WHITELIST = {"items", "yml", "get", "values"}
-    PYTHON_EXTRA_WHITELIST = {"keys"}
 
     @staticmethod
     def _line_no_and_col(content: str, index: int) -> tuple[int, int]:
@@ -53,15 +42,6 @@ class TestValidApplicationUsage(unittest.TestCase):
         line_start = content.rfind("\n", 0, index) + 1
         col = (index - line_start) + 1
         return line_no, col
-
-    @staticmethod
-    def _next_non_ws_char(content: str, index: int) -> Optional[str]:
-        """
-        Return the next non-whitespace character after index, or None if EOF.
-        """
-        while index < len(content) and content[index].isspace():
-            index += 1
-        return content[index] if index < len(content) else None
 
     def test_application_references_use_valid_ids(self):
         valid_apps = find_application_ids()
@@ -86,16 +66,8 @@ class TestValidApplicationUsage(unittest.TestCase):
                     # skip files that cannot be opened
                     continue
 
-                # Extend whitelist depending on file type
-                if filename.endswith(".py"):
-                    whitelist = self.DEFAULT_WHITELIST | self.PYTHON_EXTRA_WHITELIST
-                else:
-                    whitelist = self.DEFAULT_WHITELIST
-
                 patterns = (
-                    self.APPLICATION_SUBSCRIPT_RE,
-                    self.APPLICATION_GET_RE,
-                    self.APPLICATION_ATTR_RE,
+                    self.LOOKUP_APPLICATIONS_RE,
                     self.APPLICATION_DOMAIN_RE,
                 )
 
@@ -115,21 +87,6 @@ class TestValidApplicationUsage(unittest.TestCase):
                             continue
 
                         name = match.group("name")
-
-                        # In Python: avoid false positives like applications.setdefault(...)
-                        # APPLICATION_ATTR_RE matches dict methods too.
-                        # If it is used as a call (applications.<name>(...)), skip it.
-                        if (
-                            filename.endswith(".py")
-                            and pattern is self.APPLICATION_ATTR_RE
-                        ):
-                            nxt = self._next_non_ws_char(content, match.end())
-                            if nxt == "(":
-                                continue
-
-                        # skip whitelisted methods/exceptions
-                        if name in whitelist:
-                            continue
 
                         line_no, col = self._line_no_and_col(content, start)
 
