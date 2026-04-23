@@ -12,9 +12,9 @@ For workflow-level iteration with Act, see [Workflow Loop](workflow.md).
   - ACTION: ask user "disable matomo and email providers? [Y/n]".
   - DEFAULT: yes (disable both).
   - SKIP ASK: only if user already answered explicitly in this iteration.
-  - ON YES: append `matomo,email` to `SERVICES_DISABLED` in every deploy command.
-  - ON NO: omit.
-  - SIDE EFFECT (yes): inventory initializer auto-removes `web-app-matomo` and `web-app-mailu` provider roles. Do NOT list them.
+  - ON YES: pass `SERVICES_DISABLED="matomo,email"` verbatim to every deploy command. The value is a comma-separated list of provider keys — NOT a glob, NOT a `web-app-*.compose.services.*` path.
+  - ON NO: omit the variable entirely.
+  - SIDE EFFECT (yes): inventory initializer auto-removes `web-app-matomo` and `web-app-mailu` provider roles. Do NOT list them in `APPS`.
   - PERSIST: record answer at top of iteration. Reuse for all subsequent deploys without re-asking.
 - You MUST run `make test` before every deploy. Only proceed with the deploy if all tests pass.
 - Unless the user explicitly says to reuse the existing setup, you MUST start once with `make deploy-fresh-purged-apps APPS=<roles> FULL_CYCLE=true` to establish the baseline inventory and clean app state. `FULL_CYCLE=true` adds the async update pass (pass 2) and MUST stay on unless the user explicitly asks to skip it.
