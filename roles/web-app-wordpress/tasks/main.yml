@@ -46,6 +46,9 @@
 - name: "Install wordpress"
   include_tasks: 02_install.yml
 
+- name: "Install mu-plugins (OIDC→RBAC role mapper)"
+  include_tasks: 05_mu_plugins.yml
+
 - name: "Install and activate WordPress plugins"
   block:
     - name: "Iterate through WordPress plugins"

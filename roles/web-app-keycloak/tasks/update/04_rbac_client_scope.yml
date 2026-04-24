@@ -59,20 +59,47 @@
   register: opt_scopes
   changed_when: false
 
-- name: Decide if RBAC scope already assigned
+- name: Get current default client scopes
+  shell: >
+    {{ KEYCLOAK_EXEC_KCADM }} get
+    clients/{{ app_client_id }}/default-client-scopes
+    -r {{ KEYCLOAK_REALM }} --format json
+  register: def_scopes
+  changed_when: false
+
+- name: Decide where RBAC scope is currently assigned
   set_fact:
     has_rbac_optional: >-
       {{ (opt_scopes.stdout | kcadm_json
           | selectattr('id','equalto', scope_id_rbac) | list | length) > 0 }}
+    has_rbac_default: >-
+      {{ (def_scopes.stdout | kcadm_json
+          | selectattr('id','equalto', scope_id_rbac) | list | length) > 0 }}
 
-- name: Ensure RBAC scope assigned as optional (only if missing)
-  when: not has_rbac_optional
+# The RBAC scope MUST be a default client scope so that the OIDC userinfo
+# endpoint runs the group-membership mapper on every session. When it is an
+# optional scope, Keycloak gates the userinfo-level mapper on the scope
+# being explicitly granted — and the `groups` scope is dropped from the
+# granted scope set when `include.in.token.scope=false`, leaving userinfo
+# without the claim. See docs/requirements/004-generic-rbac-ldap-auto-provisioning.md.
+- name: Remove RBAC scope from optional client scopes (if present)
+  when: has_rbac_optional
   shell: >
-    {{ KEYCLOAK_EXEC_KCADM }} update
+    {{ KEYCLOAK_EXEC_KCADM }} delete
     clients/{{ app_client_id }}/optional-client-scopes/{{ scope_id_rbac }}
     -r {{ KEYCLOAK_REALM }}
-  register: add_opt
+  register: remove_opt
   changed_when: true
-  failed_when: add_opt.rc != 0
+  failed_when: remove_opt.rc != 0
+
+- name: Ensure RBAC scope assigned as default (only if missing)
+  when: not has_rbac_default
+  shell: >
+    {{ KEYCLOAK_EXEC_KCADM }} update
+    clients/{{ app_client_id }}/default-client-scopes/{{ scope_id_rbac }}
+    -r {{ KEYCLOAK_REALM }}
+  register: add_default
+  changed_when: true
+  failed_when: add_default.rc != 0
   async: "{{ ASYNC_TIME if ASYNC_ENABLED | bool else omit }}"
   poll:  "{{ ASYNC_POLL if ASYNC_ENABLED | bool else omit }}"
