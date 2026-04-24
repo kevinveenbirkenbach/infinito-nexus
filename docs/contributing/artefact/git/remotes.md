@@ -1,24 +1,34 @@
 # Remotes 🌐
 
-This repository uses a fork-based workflow. Contributors SHOULD NOT configure the remote layout by hand. Remote setup and signed pushes are handled by [git-maintainer-tools](https://github.com/kevinveenbirkenbach/git-maintainer-tools), declared as a dev dependency in [pyproject.toml](../../../../pyproject.toml).
+This repository uses a fork-based workflow. Contributors MUST NOT configure the remote layout by hand. Remote setup and signed pushes are handled by [git-maintainer-tools](https://github.com/kevinveenbirkenbach/git-maintainer-tools), declared as a dev dependency in [pyproject.toml](../../../../pyproject.toml).
 
 ## Layout 🗺️
 
 | Remote | URL | Role |
 |---|---|---|
-| `origin` | `git@github.com:infinito-nexus/core.git` | Canonical / upstream. `main` tracks `origin/main`. Pull target. |
-| `fork` | `git@github.com:<user>/infinito-nexus-core.git` | Personal fork. Push target for every branch. |
+| `origin` | `git@github.com:infinito-nexus/core.git` | Canonical upstream. Pull target for all branches. Push target for `main`. |
+| `fork` | `git@github.com:<user>/infinito-nexus-core.git` | Personal fork. Push target for every branch except `main`. |
 
-The tool enforces `remote.pushDefault = fork` so every push (and every new-branch push via `git-sign-push`) lands on the fork, not on the canonical repo, while `main` keeps pulling from canonical.
+## Push Routing 🛤️
+
+`git-setup-remotes` writes three git-config keys that together route pushes:
+
+| Key | Value | Effect |
+|---|---|---|
+| `remote.pushDefault` | `fork` | Default push target for every branch. |
+| `push.default` | `current` | `git push` targets the same-named branch on the remote. |
+| `branch.main.pushRemote` | `origin` | Overrides the default for `main` so canonical-branch pushes go upstream and never land on the personal fork, whose branch-protection rules can diverge from canonical. |
+
+`main` keeps tracking `origin/main` for `git pull`, independent of the push override.
 
 ## Tools 🧰
 
 | CLI | Purpose |
 |---|---|
-| `git-setup-remotes` | Idempotently configures `origin`, `fork`, main-tracking, and `remote.pushDefault` on a clone. |
-| `git-sign-push` | GPG-signs every unpushed commit on the current branch and pushes to the fork (or the branch's upstream if set). Resolves the target from `remote.pushDefault`, falling back to `origin`. |
+| `git-setup-remotes` | Idempotently configures `origin`, `fork`, `main`-tracking, and the push-routing keys above. |
+| `git-sign-push` | GPG-signs every unpushed commit on the current branch and pushes. The target resolves from the branch's upstream and honours `branch.<name>.pushRemote`. Branches without an upstream fall back to `remote.pushDefault`, then `origin`. |
 
-Both CLIs refuse to run inside the Claude sandbox because `.git/config` writes and `~/.gnupg` access are blocked there per the Git Safety Protocol in [settings.md](../../tools/agents/claude/settings.md).
+Both CLIs MUST run outside the Claude sandbox, because `.git/config` writes and `~/.gnupg` access are blocked there per the Git Safety Protocol in [settings.md](../../tools/agents/claude/settings.md).
 
 ## Install 📦
 
