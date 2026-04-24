@@ -27,6 +27,7 @@ dependencies = [
 dev = [
   "ruff",
   "pre-commit",
+  "git-maintainer-tools",
 ]
 
 [project.scripts]
