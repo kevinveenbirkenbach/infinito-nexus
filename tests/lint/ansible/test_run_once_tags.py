@@ -3,6 +3,8 @@ import re
 import unittest
 from collections import defaultdict
 
+from tests.utils.fs import read_text
+
 PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "../../../"))
 ROLES_DIR = os.path.join(PROJECT_ROOT, "roles")
 ROOT_TASKS_DIR = os.path.join(PROJECT_ROOT, "tasks")
@@ -32,9 +34,8 @@ def find_role_includes(roles_dir):
                 continue
 
             try:
-                with open(fpath, "r", encoding="utf-8") as f:
-                    lines = f.readlines()
-            except (IOError, OSError):
+                lines = read_text(fpath).splitlines(keepends=True)
+            except (IOError, OSError, UnicodeDecodeError):
                 continue
 
             for idx, line in enumerate(lines):
@@ -92,13 +93,11 @@ class TestRunOnceTag(unittest.TestCase):
             _, line, role_name = usages[0]
             role_tasks = os.path.join(ROLES_DIR, role_name, "tasks", "main.yml")
             try:
-                with open(role_tasks, "r", encoding="utf-8") as f:
-                    content = f.read()
-            except FileNotFoundError:
+                content = read_text(role_tasks)
+            except (FileNotFoundError, OSError):
                 # Fallback to the includer file if tasks/main.yml doesn't exist
                 includer_file = usages[0][0]
-                with open(includer_file, "r", encoding="utf-8") as f:
-                    content = f.read()
+                content = read_text(includer_file)
 
             if not check_run_once_tag(content, role_name):
                 error_msg = (

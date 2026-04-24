@@ -18,9 +18,7 @@ from typing import List
 from utils.annotations.message import in_github_actions, warning
 
 
-OPEN_PROJECT_URL_RE = re.compile(
-    r"https://open\.project\.infinito\.nexus/projects/[^/\s]+/work_packages/\d+/"
-)
+OPEN_PROJECT_URL_RE = re.compile(r"https://open\.project\.infinito\.nexus/\S*")
 TODO_LIST_ITEM_RE = re.compile(r"^\s*(?:[-*+]|\d+\.)\s+(?P<body>\S.*)$")
 WHITESPACE_RE = re.compile(r"\s+")
 
@@ -150,15 +148,19 @@ def scan_inline_markers(path: Path) -> List[TodoFinding]:
         return findings
 
     for line_no, line in enumerate(lines, start=1):
-        if INLINE_TODO_RE.search(line):
-            findings.append(
-                TodoFinding(
-                    kind="inline-marker",
-                    path=path,
-                    line=line_no,
-                    text=line.strip(),
-                )
+        if not INLINE_TODO_RE.search(line):
+            continue
+
+        link_match = OPEN_PROJECT_URL_RE.search(line)
+        findings.append(
+            TodoFinding(
+                kind="inline-marker",
+                path=path,
+                line=line_no,
+                text=line.strip(),
+                link=link_match.group(0) if link_match else None,
             )
+        )
 
     return findings
 
@@ -204,22 +206,23 @@ class TestTodoTransparency(unittest.TestCase):
         todo_findings.sort(key=finding_sort_key)
         inline_findings.sort(key=finding_sort_key)
         unlinked_todos = [item for item in todo_findings if not item.link]
+        unlinked_inline = [item for item in inline_findings if not item.link]
 
-        if not unlinked_todos and not inline_findings:
+        if not unlinked_todos and not unlinked_inline:
             print("No TODO markers were found.")
             return
 
         for item in unlinked_todos:
             emit_github_warning(item, root)
 
-        for item in inline_findings:
+        for item in unlinked_inline:
             emit_github_warning(item, root)
 
         if in_github_actions():
             return
 
         print_summary("Unlinked TODO.md items", unlinked_todos, root)
-        print_summary("Inline TODO markers in code", inline_findings, root)
+        print_summary("Inline TODO markers in code", unlinked_inline, root)
 
 
 if __name__ == "__main__":

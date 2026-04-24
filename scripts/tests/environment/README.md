@@ -30,4 +30,4 @@ Run the full suite via the entry point:
 bash scripts/tests/environment/00_orchestrator.sh
 ```
 
-For documentation on the overall development workflow, see the [Administration Guide](../../../docs/guides/administration.md).
+For documentation on the overall development workflow, see the [Deploy Guide](../../../docs/administration/deploy.md).

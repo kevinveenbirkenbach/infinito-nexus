@@ -2,7 +2,7 @@
 # Reuse app config to derive sensible Node.js heap sizes for containers.
 #
 # Usage example (Jinja):
-#   {{ applications | node_max_old_space_size('web-app-nextcloud', 'whiteboard') }}
+#   {{ lookup('applications') | node_max_old_space_size('web-app-nextcloud', 'whiteboard') }}
 #
 # Heuristics (defaults):
 #   - candidate = 35% of mem_limit

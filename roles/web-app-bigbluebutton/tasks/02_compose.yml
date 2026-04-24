@@ -16,8 +16,12 @@
   notify:
     - compose up
 - name: Prebuild etherpad image
-  # On local testing environment errors exist if you don't prebuild
+  # On local testing environment errors exist if you don't prebuild.
+  # --network=host: buildkit's private network fails to reach
+  # registry.npmjs.org / raw.githubusercontent.com from inside the
+  # nested infinito container; host-net inherits the outer container's
+  # working network.
   command:
-    cmd: compose build etherpad
+    cmd: compose build --network=host etherpad
     chdir: "{{ lookup('container', application_id, 'directories.instance') }}"
   when: RUNTIME == 'dev'

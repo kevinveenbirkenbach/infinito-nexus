@@ -2,7 +2,7 @@
 
 ## Description
 
-`sys-token-store` is a lightweight Ansible helper role for **resolving, persisting, and injecting per-user application tokens** in a unified and idempotent way.
+`sys-token-store` is a lightweight Ansible helper role for **resolving and persisting per-user application tokens** in a unified and idempotent way.
 
 It provides a **single source of truth** for application tokens while keeping runtime usage simple and consistent across roles.
 
@@ -19,8 +19,8 @@ It only **stores and propagates tokens that already exist** (e.g. created by boo
   - Empty tokens are rejected
 - **Idempotent persistence**
   - Store file is only rewritten when content actually changes
-- **Runtime injection**
-  - Tokens are always injected into the `users` fact for immediate use
+- **Lookup-based runtime resolution**
+  - Tokens are resolved through `lookup('users')`, which hydrates from the store on each lookup call
 - **Case-sensitive keys**
   - User keys and application IDs must match exactly
 
@@ -30,7 +30,7 @@ It only **stores and propagates tokens that already exist** (e.g. created by boo
 
 When resolving a token, the following order is used:
 
-1. `users.<user>.tokens.<application_id>`
+1. `lookup('users', '<user>').tokens.<application_id>`
 2. Token store file (`tokens.yml`)
 3. Empty string (`''`)
 
@@ -47,7 +47,7 @@ users:
   administrator:
     tokens:
       web-app-matomo: "46e50b0eb52d0d141a7d6cf9b3d0b3e2"
-````
+```
 
 Default location:
 
@@ -63,7 +63,7 @@ Permissions are restricted to root by default.
 
 ### `write.yml`
 
-Persists a token **and injects it into the runtime `users` variable**.
+Persists a token so it is available through the `users` lookup on subsequent reads.
 
 This is the **canonical way** to store tokens.
 
@@ -76,7 +76,7 @@ This is the **canonical way** to store tokens.
 **Effects**
 
 * Updates the token store file (idempotent)
-* Injects the token into `users.<user>.tokens.<app>`
+* Makes the token available via `lookup('users', '<user>').tokens['<app>']`
 * Exports `sys_token_store_token`
 
 Empty tokens are rejected explicitly.
@@ -87,7 +87,7 @@ Empty tokens are rejected explicitly.
 
 ---
 
-### Persist and inject a token
+### Persist a token
 
 ```yaml
 - include_role:
@@ -99,10 +99,10 @@ Empty tokens are rejected explicitly.
     sys_token_store_token: "{{ matomo_token_value }}"
 ```
 
-After this, the token is immediately available as:
+After this, the token is available as:
 
 ```yaml
-users.administrator.tokens['web-app-matomo']
+lookup('users', 'administrator').tokens['web-app-matomo']
 ```
 
 ---
@@ -123,11 +123,13 @@ It is a **generic infrastructure helper**.
 * Keep all user and application keys lowercase
 * Use stable `application_id` values
 * Let application roles create tokens
-* Let `sys-token-store` handle persistence and propagation
+* Let `sys-token-store` handle persistence
 
 ---
 
-## License
+## Credits
 
-Part of the **Infinito.Nexus Project**
-Licensed under the *Infinito.Nexus Community License (Non-Commercial)*.
+Developed and maintained by **Kevin Veen-Birkenbach**.
+Learn more at [veen.world](https://www.veen.world).
+Part of the [Infinito.Nexus Project](https://s.infinito.nexus/code).
+Licensed under the [Infinito.Nexus Community License (Non-Commercial)](https://s.infinito.nexus/license).

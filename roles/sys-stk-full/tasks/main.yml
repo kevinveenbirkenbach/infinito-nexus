@@ -1,12 +1,21 @@
 # run_once_sys_stk_full: deactivated
+- name: "For '{{ application_id }}': freeze full-stack context"
+  ansible.builtin.set_fact:
+    sys_stk_full_application_id: "{{ application_id }}"
+    sys_stk_full_domain: "{{ lookup('domain', application_id) }}"
+    sys_stk_full_http_port: "{{ ports.localhost.http[application_id] }}"
+  changed_when: false
+
 - name: "For '{{ application_id }}': include role sys-stk-front-proxy"
   include_role:
     name: sys-stk-front-proxy
   vars:
-    domain:     "{{ lookup('domain',application_id) }}"
-    http_port:  "{{ ports.localhost.http[application_id] }}"
+    application_id: "{{ sys_stk_full_application_id }}"
+    domain: "{{ sys_stk_full_domain }}"
+    http_port: "{{ sys_stk_full_http_port }}"
 
 - name: "For '{{ application_id }}': load docker and db"
   include_role:
     name: sys-stk-backend
-
+  vars:
+    application_id: "{{ sys_stk_full_application_id }}"

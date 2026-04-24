@@ -48,41 +48,55 @@ class TestFindProviderRoles(unittest.TestCase):
 
     def _make_role(self, role_name: str, services: dict) -> None:
         role_dir = self.roles_dir / role_name
-        config_dir = role_dir / "config"
-        config_dir.mkdir(parents=True)
-        with (config_dir / "main.yml").open("w") as f:
+        (role_dir / "config").mkdir(parents=True)
+        (role_dir / "vars").mkdir(parents=True)
+        with (role_dir / "config" / "main.yml").open("w") as f:
             import yaml
 
             yaml.dump({"compose": {"services": services}}, f)
+        with (role_dir / "vars" / "main.yml").open("w") as f:
+            import yaml
 
-    def test_finds_role_by_image(self):
+            yaml.dump({"application_id": role_name}, f)
+
+    def test_finds_shared_provider_role(self):
         self._make_role(
             "web-app-matomo",
-            {
-                "matomo": {"image": "matomo", "version": "latest"},
-            },
+            {"matomo": {"image": "matomo", "shared": True}},
         )
         result = find_provider_roles(["matomo"], self.roles_dir)
         self.assertEqual(result, {"matomo": "web-app-matomo"})
 
-    def test_ignores_service_without_image(self):
+    def test_resolves_provider_via_provides_alias(self):
+        self._make_role(
+            "web-app-mailu",
+            {"mailu": {"image": "mailu", "shared": True, "provides": "email"}},
+        )
+        result = find_provider_roles(["email"], self.roles_dir)
+        self.assertEqual(result, {"email": "web-app-mailu"})
+
+    def test_ignores_service_that_is_not_shared_or_provides(self):
         self._make_role(
             "svc-db-openldap",
-            {
-                "ldap": {"enabled": True, "shared": True},
-            },
+            {"ldap": {"enabled": True}},
         )
         result = find_provider_roles(["ldap"], self.roles_dir)
         self.assertEqual(result, {})
 
     def test_no_match(self):
-        self._make_role("web-app-foo", {"foo": {"image": "foo"}})
+        self._make_role("web-app-foo", {"foo": {"image": "foo", "shared": True}})
         result = find_provider_roles(["oidc"], self.roles_dir)
         self.assertEqual(result, {})
 
     def test_multiple_services(self):
-        self._make_role("web-app-matomo", {"matomo": {"image": "matomo"}})
-        self._make_role("web-app-dashboard", {"dashboard": {"image": "port-ui"}})
+        self._make_role(
+            "web-app-matomo",
+            {"matomo": {"image": "matomo", "shared": True}},
+        )
+        self._make_role(
+            "web-app-dashboard",
+            {"dashboard": {"image": "port-ui", "shared": True}},
+        )
         result = find_provider_roles(["matomo", "dashboard"], self.roles_dir)
         self.assertEqual(
             result,
@@ -209,7 +223,9 @@ class TestApplyServicesDisabled(unittest.TestCase):
                 }
             }
         )
-        self._make_role("web-app-matomo", {"matomo": {"image": "matomo"}})
+        self._make_role(
+            "web-app-matomo", {"matomo": {"image": "matomo", "shared": True}}
+        )
         self._make_role(
             "web-app-nextcloud", {"matomo": {"enabled": True, "shared": True}}
         )

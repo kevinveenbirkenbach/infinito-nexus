@@ -1,19 +1,20 @@
+{% set email = lookup('email') %}
 # Set default values for all following accounts.
 defaults
 logfile             ~/.msmtp.log
-timeout             {{ SYSTEM_EMAIL_TIMEOUT }}
+timeout             {{ email.timeout }}
 syslog              {{ (MODE_DEBUG | bool) | ternary('on','off') }}
-auth                {{ SYSTEM_EMAIL_AUTH | ternary('on','off')}}
-tls_starttls        {{ (SYSTEM_EMAIL_START_TLS | bool) | ternary('on','off') }}
-tls                 {{ (SYSTEM_EMAIL_TLS | bool ) | ternary('on','off') }}
+auth                {{ email.auth | ternary('on','off')}}
+tls_starttls        {{ (email.start_tls | bool) | ternary('on','off') }}
+tls                 {{ (email.tls | bool ) | ternary('on','off') }}
 tls_trust_file      {{ '/etc/pki/tls/certs/ca-bundle.crt' if (ansible_facts['os_family'] | lower == 'redhat') else '/etc/ssl/certs/ca-certificates.crt' }}
-tls_host_override   {{ SYSTEM_EMAIL_HOST }}
+tls_host_override   {{ email.host }}
 account             system_email_no_reply
-host                {{ '127.0.0.1' if (DOCKER_IN_CONTAINER | bool) else SYSTEM_EMAIL_HOST }}
-port                {{ SYSTEM_EMAIL_PORT }}
-from                {{ SYSTEM_EMAIL_FROM }}
-{% if (SYSTEM_EMAIL_AUTH | bool) %}
-user                {{ SYSTEM_EMAIL_USERNAME }}
-password            {{ SYSTEM_EMAIL_PASSWORD }}
+host                {{ '127.0.0.1' if (DOCKER_IN_CONTAINER | bool) else email.host }}
+port                {{ email.port }}
+from                {{ email['from'] }}
+{% if (email.auth | bool) %}
+user                {{ email.username }}
+password            {{ email.password }}
 {% endif %}
 account default : system_email_no_reply

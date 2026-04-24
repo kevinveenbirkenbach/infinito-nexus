@@ -2,10 +2,10 @@ from __future__ import annotations
 
 from typing import Any, Dict, List, Optional
 
-from ansible.errors import AnsibleError
 from ansible.plugins.lookup import LookupBase
 
 from utils.applications.config import get as get_app_conf
+from utils.runtime_data import get_merged_applications
 
 
 class LookupModule(LookupBase):
@@ -21,8 +21,8 @@ class LookupModule(LookupBase):
     Usage in a template:
       {% set _comm_channels = lookup('active_alertmanager_channels') %}
 
-    'applications' is read from available_variables — the same source used by
-    lookup('config') and lookup('database'). No explicit passing required.
+    'applications' is obtained via get_merged_applications — the same merged view
+    that backs lookup('applications').
     """
 
     def run(
@@ -33,11 +33,11 @@ class LookupModule(LookupBase):
     ) -> List[List[str]]:
         vars_ = variables or getattr(self._templar, "available_variables", {}) or {}
 
-        applications = vars_.get("applications")
-        if not isinstance(applications, dict):
-            raise AnsibleError(
-                "active_alertmanager_channels: required variable 'applications' must be a mapping"
-            )
+        applications = get_merged_applications(
+            variables=vars_,
+            roles_dir=kwargs.get("roles_dir"),
+            templar=getattr(self, "_templar", None),
+        )
 
         group_names: List[str] = vars_.get("group_names", [])
 

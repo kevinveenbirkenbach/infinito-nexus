@@ -27,7 +27,7 @@
       timeout: 5s
       retries: 18
 
-{{ applications | compose_volumes(
+{{ lookup('applications') | compose_volumes(
     application_id,
     extra_volumes={'data': {'name': MARIADB_VOLUME}}
 ) }}

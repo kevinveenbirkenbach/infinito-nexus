@@ -1,10 +1,11 @@
 from __future__ import annotations
 
+import tempfile
 import unittest
-
-from ansible.errors import AnsibleError
+from pathlib import Path
 
 from plugins.lookup.prometheus_integration_active import LookupModule
+from utils.runtime_data import _reset_cache_for_tests
 
 
 def _make_applications(
@@ -24,7 +25,22 @@ def _make_applications(
     return apps
 
 
+# Empty tmp roles dir → get_merged_applications returns the inventory
+# `applications` override dict verbatim, without leaking real repo role defaults.
+_TMP_ROLES_DIR_HOLDER: dict = {}
+
+
+def setUpModule() -> None:
+    _TMP_ROLES_DIR_HOLDER["tmpdir"] = tempfile.TemporaryDirectory()
+    _TMP_ROLES_DIR_HOLDER["path"] = Path(_TMP_ROLES_DIR_HOLDER["tmpdir"].name)
+
+
+def tearDownModule() -> None:
+    _TMP_ROLES_DIR_HOLDER["tmpdir"].cleanup()
+
+
 def _run(applications: dict, application_id: str, group_names: list) -> bool:
+    _reset_cache_for_tests()
     return LookupModule().run(
         [],
         variables={
@@ -32,17 +48,20 @@ def _run(applications: dict, application_id: str, group_names: list) -> bool:
             "application_id": application_id,
             "group_names": group_names,
         },
+        roles_dir=str(_TMP_ROLES_DIR_HOLDER["path"]),
     )[0]
 
 
 def _run_explicit(applications: dict, application_id: str, group_names: list) -> bool:
     """Invoke with application_id as explicit term 0 — the template usage pattern."""
+    _reset_cache_for_tests()
     return LookupModule().run(
         [application_id],
         variables={
             "applications": applications,
             "group_names": group_names,
         },
+        roles_dir=str(_TMP_ROLES_DIR_HOLDER["path"]),
     )[0]
 
 
@@ -123,18 +142,6 @@ class TestPrometheusIntegrationActiveExplicitTerm(unittest.TestCase):
         apps = _make_applications("web-app-prometheus")
         result = _run_explicit(apps, "web-app-prometheus", ["web-app-prometheus"])
         self.assertTrue(result)
-
-
-class TestPrometheusIntegrationActiveErrors(unittest.TestCase):
-    """Invalid inputs must raise AnsibleError."""
-
-    def test_raises_when_applications_missing(self):
-        with self.assertRaises(AnsibleError):
-            LookupModule().run([], variables={})
-
-    def test_raises_when_applications_not_a_dict(self):
-        with self.assertRaises(AnsibleError):
-            LookupModule().run([], variables={"applications": ["not", "a", "dict"]})
 
 
 if __name__ == "__main__":

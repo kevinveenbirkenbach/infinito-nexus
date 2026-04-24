@@ -39,3 +39,14 @@ docker exec -u www-data nextcloud php occ user:sync-account-data
 ```
 
 This step is especially useful after modifying LDAP attributes or group memberships, ensuring up-to-date data in the Nextcloud UI and permission system.
+
+## Playwright / E2E: biber First-Login Caveat
+
+When a Playwright scenario exercises the OIDC/LDAP path as `biber` (or any non-administrator persona) against a freshly provisioned Nextcloud stack, the very first login can fail or stall because the Nextcloud internal account has not yet been materialized from LDAP — exactly the situation described above. On subsequent logins the account exists and the flow behaves normally.
+
+If a brand-new deployment must pass the `biber` end-to-end scenario on its first run, either:
+
+- Pre-provision `biber` via `php occ ldap:check-user --update biber` (and any other personas used by the test suite) as part of the role's post-deploy tasks, or
+- Extend `roles/web-app-nextcloud/files/javascript.js` (exposed to the login page through the injected `javascript.js.j2` template) with a small guard that detects the "user does not exist" Nextcloud error message and retries the OIDC handshake once after a short delay, giving the LDAP plugin time to provision the account.
+
+Either approach keeps the Playwright suite deterministic without disabling the LDAP first-login-provisioning behavior that real users rely on.

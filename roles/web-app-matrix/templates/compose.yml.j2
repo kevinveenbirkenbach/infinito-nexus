@@ -100,7 +100,7 @@
 {% if lookup('config',application_id, 'plugins.chatgpt') | bool %}
 {%   set _ = _extra_volumes.update({'chatgpt_data': {}}) %}
 {% endif %}
-{{ applications | compose_volumes(
+{{ lookup('applications') | compose_volumes(
     application_id,
     database_volume=lookup('database', application_id, 'volume'),
     extra_volumes=_extra_volumes

@@ -53,34 +53,28 @@ def find_roles_with_service(service_name: str, roles_dir: Path) -> set[str]:
 
 def find_provider_roles(services: list[str], roles_dir: Path) -> dict[str, str]:
     """
-    Scan all role configs and return a mapping of service_name -> application_id
-    for roles that directly provide the service (i.e., have an image defined for it).
-    The application_id equals the role folder name.
+    Return mapping of service_name -> application_id for the provider role of each
+    requested service. Resolution goes through the canonical service registry, so
+    ``provides:`` aliases (e.g. ``mailu.provides: email``) and shared entity-name
+    services are both recognized.
     """
     mapping: dict[str, str] = {}
     if not roles_dir.exists():
         return mapping
 
-    for role_dir in sorted(roles_dir.iterdir()):
-        if not role_dir.is_dir():
-            continue
-        config_file = role_dir / "config" / "main.yml"
-        if not config_file.exists():
-            continue
-        try:
-            with config_file.open("r", encoding="utf-8") as f:
-                config = yaml.safe_load(f) or {}
-        except Exception:
-            continue
+    try:
+        registry = build_service_registry_from_roles_dir(roles_dir)
+    except Exception:
+        return mapping
 
-        compose_services = (config.get("compose") or {}).get("services") or {}
-        for svc_name, svc_config in compose_services.items():
-            if (
-                svc_name in services
-                and isinstance(svc_config, dict)
-                and "image" in svc_config
-            ):
-                mapping[svc_name] = role_dir.name
+    for svc in services:
+        if svc not in registry:
+            continue
+        primary = canonical_service_key(registry, svc)
+        entry = registry.get(primary) or {}
+        role_name = entry.get("role")
+        if isinstance(role_name, str) and role_name:
+            mapping[svc] = role_name
 
     return mapping
 

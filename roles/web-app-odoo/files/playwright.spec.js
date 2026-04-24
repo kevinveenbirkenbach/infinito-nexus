@@ -46,18 +46,29 @@ async function performOidcLogin(locator, username, password) {
 }
 
 // Click the "Login with SSO" button on Odoo's login page.
-// When auth_oauth is installed Odoo renders OAuth provider links in .o_auth_oauth_providers.
-// The oe_login_form has class 'd-none' (hidden) when OAuth providers are present,
-// so we must NOT wait for the form - we wait for the provider links directly.
+// Odoo renders OAuth provider links inside a ".o_login_auth" container (modern
+// layout; older variants used ".o_auth_oauth_providers"). The oe_login_form has
+// class "d-none" when OAuth is enabled, so we wait for either container OR the
+// SSO link itself directly.
 async function clickOdooSsoButton(locator) {
-  // Wait for the OAuth provider list to appear
-  const providerList = locator.locator(".o_auth_oauth_providers");
-  await providerList.first().waitFor({ state: "visible", timeout: 60_000 });
+  const providerList = locator.locator(".o_login_auth, .o_auth_oauth_providers");
+  const ssoButton = locator
+    .locator('a[href*="/auth_oauth/signin"], a[href*="auth_oauth/signin"]')
+    .filter({ hasText: /login with sso|sign in with|continue with/i })
+    .first();
+  const ssoButtonByText = locator.getByRole("link", { name: /login with sso/i }).first();
 
-  // Click the SSO provider link by its text
-  const ssoButton = locator.getByRole("link", { name: /login with sso/i });
-  await ssoButton.first().waitFor({ state: "visible", timeout: 15_000 });
-  await ssoButton.first().click();
+  await Promise.any([
+    providerList.first().waitFor({ state: "visible", timeout: 60_000 }),
+    ssoButton.waitFor({ state: "visible", timeout: 60_000 }),
+    ssoButtonByText.waitFor({ state: "visible", timeout: 60_000 })
+  ]);
+
+  if (await ssoButtonByText.isVisible().catch(() => false)) {
+    await ssoButtonByText.click();
+  } else {
+    await ssoButton.click();
+  }
 }
 
 // Check if user is authenticated in Odoo
@@ -264,7 +275,7 @@ test("dashboard to odoo: admin sso login, verify ui, logout", async ({ page }) =
   const odooFrameAfterLogout = page.frameLocator("#main iframe").first();
   await expect
     .poll(
-      async () => await isVisible(odooFrameAfterLogout.locator(".o_auth_oauth_providers")),
+      async () => await isVisible(odooFrameAfterLogout.locator(".o_login_auth, .o_auth_oauth_providers")),
       {
         timeout: 60_000,
         message: "Expected Odoo to return to login page after logout"
@@ -354,7 +365,7 @@ test("dashboard to odoo: biber sso login, verify ui, logout", async ({ page }) =
   const odooFrameAfterLogout = page.frameLocator("#main iframe").first();
   await expect
     .poll(
-      async () => await isVisible(odooFrameAfterLogout.locator(".o_auth_oauth_providers")),
+      async () => await isVisible(odooFrameAfterLogout.locator(".o_login_auth, .o_auth_oauth_providers")),
       {
         timeout: 60_000,
         message: "Expected Odoo to return to login page after logout"

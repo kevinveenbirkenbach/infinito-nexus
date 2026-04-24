@@ -14,7 +14,7 @@ def native_metrics_target(app_id: str, applications: dict) -> str:
     the path.
 
     Usage in a per-app prometheus.yml.j2 fragment:
-      targets: ["{{ native_prometheus_application_id | native_metrics_target(applications) }}"]
+      targets: ["{{ native_prometheus_application_id | native_metrics_target(lookup('applications')) }}"]
 
     When the compose service key differs from the app's entity name (e.g. matrix
     uses service key "synapse"), set compose.services.prometheus.native_metrics.service_key

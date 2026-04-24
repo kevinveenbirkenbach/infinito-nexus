@@ -1,6 +1,7 @@
 # tests/unit/plugins/lookup/test_tls.py
 import sys
 import unittest
+from unittest.mock import patch
 from ansible.errors import AnsibleError
 from plugins.lookup.tls import LookupModule
 
@@ -32,6 +33,28 @@ class TestTlsResolveLookup(unittest.TestCase):
             "TLS_ENABLED": True,
             "TLS_MODE": "letsencrypt",
         }
+
+        # Route get_merged_domains / get_merged_applications through
+        # variables['domains'] / variables['applications'] so tests stay hermetic.
+        def _domains_from_vars(*, variables=None, **_kwargs):
+            return (variables or {}).get("domains", {})
+
+        def _applications_from_vars(*, variables=None, **_kwargs):
+            return (variables or {}).get("applications", {})
+
+        self._patchers = [
+            patch(
+                "plugins.lookup.tls.get_merged_domains",
+                side_effect=_domains_from_vars,
+            ),
+            patch(
+                "plugins.lookup.tls.get_merged_applications",
+                side_effect=_applications_from_vars,
+            ),
+        ]
+        for p in self._patchers:
+            p.start()
+        self.addCleanup(lambda: [p.stop() for p in self._patchers])
 
     def test_domain_term_auto_mode(self):
         out = self.lookup.run(["a.example"], variables=self.base_vars)[0]

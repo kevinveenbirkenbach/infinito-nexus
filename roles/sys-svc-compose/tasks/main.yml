@@ -21,7 +21,7 @@
   ansible.builtin.include_role:
     name: sys-svc-compose-ca
   when:
-    - domains | has_domain(application_id)
+    - lookup('domains') | has_domain(application_id)
     - lookup('tls', application_id, 'enabled') | bool
     - lookup('tls', application_id, 'mode') == 'self_signed'
 

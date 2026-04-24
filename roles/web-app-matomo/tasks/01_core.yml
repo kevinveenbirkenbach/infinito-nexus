@@ -49,7 +49,7 @@
   include_tasks: 03a_bootstrap.yml
   when: >
     (matomo_config_exists.rc != 0) or
-    ((users.administrator.tokens['web-app-matomo'] | default('') | string | trim) == "")
+    ((lookup('users', 'administrator').tokens['web-app-matomo'] | default('') | string | trim) == "")
 
 - name: "Patch database credentials for {{ application_id }}"
   include_tasks: 04_patch_database.yml

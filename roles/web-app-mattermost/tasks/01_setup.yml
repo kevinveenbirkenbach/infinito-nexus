@@ -16,9 +16,9 @@
   shell: |
     container exec -i {{ MATTERMOST_CONTAINER }} \
       /mattermost/bin/mmctl --local user create \
-        --email    "{{ users.administrator.email }}" \
-        --username "{{ users.administrator.username }}" \
-        --password {{ users.administrator.password | quote }} \
+        --email    "{{ lookup('users', 'administrator').email }}" \
+        --username "{{ lookup('users', 'administrator').username }}" \
+        --password {{ lookup('users', 'administrator').password | quote }} \
         --system-admin
   args:
     chdir: "{{ lookup('container', application_id, 'directories.instance') }}"
@@ -62,17 +62,17 @@
     container exec -i {{ MATTERMOST_CONTAINER }} \
       /mattermost/bin/mmctl --local team users add \
         main \
-        "{{ users.administrator.email }}"
+        "{{ lookup('users', 'administrator').email }}"
   args:
     chdir: "{{ lookup('container', application_id, 'directories.instance') }}"
-  when: users.administrator.email not in mm_team_members.stdout
+  when: lookup('users', 'administrator').email not in mm_team_members.stdout
 
 - name: "Mattermost | Check administrator auth service"
   shell: |
     container exec -i {{ lookup('database', application_id, 'container') }} \
       psql -U {{ lookup('database', application_id, 'username') }} \
            -d {{ lookup('database', application_id, 'name') }} \
-           -t -c "SELECT authservice FROM users WHERE email='{{ users.administrator.email }}';"
+           -t -c "SELECT authservice FROM users WHERE email='{{ lookup('users', 'administrator').email }}';"
   args:
     chdir: "{{ lookup('container', application_id, 'directories.instance') }}"
   register: mm_admin_authservice
@@ -86,7 +86,7 @@
         -D {{ LDAP.DN.ADMINISTRATOR.DATA | quote }} \
         -w {{ LDAP.BIND_CREDENTIAL | quote }} \
         -b {{ LDAP.DN.OU.USERS | quote }} \
-        "(uid={{ users.administrator.username }})" uidNumber \
+        "(uid={{ lookup('users', 'administrator').username }})" uidNumber \
     | grep '^uidNumber:' | awk '{print $2}'
   args:
     chdir: "{{ lookup('container', application_id, 'directories.instance') }}"
@@ -102,7 +102,7 @@
     container exec -i {{ lookup('database', application_id, 'container') }} \
       psql -U {{ lookup('database', application_id, 'username') }} \
            -d {{ lookup('database', application_id, 'name') }} \
-           -c "UPDATE users SET authservice='gitlab', authdata='{{ mm_admin_uidnumber.stdout | trim }}', password='' WHERE email='{{ users.administrator.email }}';"
+           -c "UPDATE users SET authservice='gitlab', authdata='{{ mm_admin_uidnumber.stdout | trim }}', password='' WHERE email='{{ lookup('users', 'administrator').email }}';"
   args:
     chdir: "{{ lookup('container', application_id, 'directories.instance') }}"
   when:

@@ -60,7 +60,7 @@ scrape_configs:
 
   # Blackbox readiness probes — one target per canonical domain per application.
   # Proxied to the app backend: returns 502/503 when the app is down.
-{% set canonical_map = applications | canonical_domains_map(DOMAIN_PRIMARY) %}
+{% set canonical_map = lookup('applications') | canonical_domains_map(DOMAIN_PRIMARY) %}
   - job_name: "blackbox-healthz"
     metrics_path: /probe
     params:

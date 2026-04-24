@@ -30,7 +30,13 @@ DECIDIM_OIDC_USER_INFO_URL:       "{{ OIDC.CLIENT.USER_INFO_URL }}"
 ## Organisation
 DECIDIM_ORGANIZATION_NAME:        "{{ defaults_service_provider.platform.titel }}"
 ## Dockerfile patch script
-DECIDIM_PATCH_SCRIPT_FILE:     "patch_decidim.py"
+DECIDIM_PATCH_SCRIPT_FILE:     "patch.py"
 DECIDIM_PATCH_SCRIPT_HOST_ABS: "{{ [ lookup('container', application_id, 'directories.volumes'), DECIDIM_PATCH_SCRIPT_FILE ] | path_join }}"
 DECIDIM_PATCH_SCRIPT_HOST_REL: "volumes/{{ DECIDIM_PATCH_SCRIPT_FILE }}"
-DECIDIM_PATCH_SCRIPT_DOCKER:   "/tmp/patch_decidim.py"
+DECIDIM_PATCH_SCRIPT_DOCKER:   "/tmp/patch.py"
+
+## Ruby snippets sourced by patch.py at build time
+DECIDIM_PATCH_RUBY_DIR:         "ruby"
+DECIDIM_PATCH_RUBY_HOST_ABS:    "{{ [ lookup('container', application_id, 'directories.volumes'), DECIDIM_PATCH_RUBY_DIR ] | path_join }}"
+DECIDIM_PATCH_RUBY_HOST_REL:    "volumes/{{ DECIDIM_PATCH_RUBY_DIR }}"
+DECIDIM_PATCH_RUBY_DOCKER:      "/tmp/{{ DECIDIM_PATCH_RUBY_DIR }}"

@@ -35,8 +35,8 @@ CONFLUENCE_DATA_VOLUME:           "{{ lookup('config', application_id, 'compose.
 CONFLUENCE_CUSTOM_IMAGE:          "{{ entity_name }}_custom:{{ CONFLUENCE_VERSION }}"
 
 ## Performance (derive from container limits in config/main.yml)
-CONFLUENCE_JVM_MAX:               "{{ applications | jvm_max_mb(application_id) }}m"
-CONFLUENCE_JVM_MIN:               "{{ applications | jvm_min_mb(application_id) }}m"
+CONFLUENCE_JVM_MAX:               "{{ lookup('applications') | jvm_max_mb(application_id) }}m"
+CONFLUENCE_JVM_MIN:               "{{ lookup('applications') | jvm_min_mb(application_id) }}m"
 
 ## Options 
 CONFLUENCE_TRUST_STORE_ENABLED:   "{{ lookup('config', application_id, 'truststore_enabled') }}"

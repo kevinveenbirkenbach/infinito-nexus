@@ -53,6 +53,8 @@ function decodeDotenvQuotedValue(value) {
 // ---------------------------------------------------------------------------
 const loginUsername = decodeDotenvQuotedValue(process.env.LOGIN_USERNAME);
 const loginPassword = decodeDotenvQuotedValue(process.env.LOGIN_PASSWORD);
+const biberUsername = decodeDotenvQuotedValue(process.env.BIBER_USERNAME);
+const biberPassword = decodeDotenvQuotedValue(process.env.BIBER_PASSWORD);
 const nextcloudDirectLoginPassword = decodeDotenvQuotedValue(process.env.NEXTCLOUD_DIRECT_LOGIN_PASSWORD) || loginPassword;
 const oidcIssuerUrl = decodeDotenvQuotedValue(process.env.OIDC_ISSUER_URL);
 const nextcloudBaseUrl = decodeDotenvQuotedValue(process.env.NEXTCLOUD_BASE_URL);
@@ -65,6 +67,24 @@ const nextcloudTalkUnexpectedStunServer = decodeDotenvQuotedValue(process.env.NE
 const nextcloudTalkUnexpectedTurnServer = decodeDotenvQuotedValue(process.env.NEXTCLOUD_TALK_UNEXPECTED_TURN_SERVER);
 const nextcloudUsernameFieldPattern = /account name or email|username or email/i;
 const nextcloudCredentialSubmitPattern = /sign in|log in/i;
+
+// Condition variables driving the login flavor. Ansible renders these from the
+// role's compose.services.{oidc,ldap}.enabled config so the spec never has to
+// sniff which login UI shape the deployment exposes:
+//   - OIDC + LDAP  -> "oidc_login"  (pulsejet/nextcloud-oidc-login,
+//                                    auto_redirect hands straight to Keycloak)
+//   - OIDC only    -> "sociallogin" (nextcloud/sociallogin shows a
+//                                    "Log in with Keycloak" entry first)
+//   - no OIDC      -> "native"      (no Keycloak handoff; NC credential form)
+const nextcloudOidcEnabled =
+  (process.env.NEXTCLOUD_OIDC_ENABLED || "true").toLowerCase() === "true";
+const nextcloudLdapEnabled =
+  (process.env.NEXTCLOUD_LDAP_ENABLED || "false").toLowerCase() === "true";
+const nextcloudLoginFlavor = !nextcloudOidcEnabled
+  ? "native"
+  : nextcloudLdapEnabled
+    ? "oidc_login"
+    : "sociallogin";
 
 // ---------------------------------------------------------------------------
 // Locator helpers
@@ -337,7 +357,7 @@ async function enterNextcloudLoginThroughVisibleEntryPoint(page, target, usernam
 //   - fills Keycloak creds and waits for the NC shell to reappear.
 // ---------------------------------------------------------------------------
 
-async function loginToStandaloneNextcloud(adminPage) {
+async function loginToStandaloneNextcloud(adminPage, username = loginUsername, password = loginPassword) {
   const loginUrl = new URL("login", nextcloudBaseUrl).toString();
   const usernameField = adminPage.getByRole("textbox", { name: nextcloudUsernameFieldPattern });
   const passwordField = adminPage.locator('input[name="password"], input[type="password"]').first();
@@ -349,15 +369,42 @@ async function loginToStandaloneNextcloud(adminPage) {
     timeout: 60_000
   }).catch(() => {});
 
+  const credentialCandidates = [
+    { kind: "credentials", locator: usernameField },
+    { kind: "credentials", locator: signInButton }
+  ];
+  const socialLoginCandidates = getNextcloudSocialLoginCandidates(adminPage);
+
+  let flavorCandidates;
+  let timeoutMessage;
+  switch (nextcloudLoginFlavor) {
+    case "native":
+      flavorCandidates = [...credentialCandidates, ...standaloneShellCandidates];
+      timeoutMessage =
+        "Timed out waiting for the Nextcloud native credential form or an already-authenticated shell";
+      break;
+    case "sociallogin":
+      flavorCandidates = [
+        ...socialLoginCandidates,
+        ...credentialCandidates,
+        ...standaloneShellCandidates
+      ];
+      timeoutMessage =
+        "Timed out waiting for the Nextcloud social-login entry, the Keycloak credential form, or an already-authenticated shell";
+      break;
+    case "oidc_login":
+    default:
+      flavorCandidates = [...credentialCandidates, ...standaloneShellCandidates];
+      timeoutMessage =
+        "Timed out waiting for the Keycloak login form or an already-authenticated Nextcloud shell";
+      break;
+  }
+
   const initialState = await waitForVisibleCandidate(
     adminPage,
-    [
-      { kind: "credentials", locator: usernameField },
-      { kind: "credentials", locator: signInButton },
-      ...standaloneShellCandidates
-    ],
+    flavorCandidates,
     60_000,
-    "Timed out waiting for the Keycloak login form or an already-authenticated Nextcloud shell"
+    timeoutMessage
   );
 
   if (initialState.kind === "shell") {
@@ -365,22 +412,84 @@ async function loginToStandaloneNextcloud(adminPage) {
     return;
   }
 
+  if (initialState.kind === "social-login") {
+    await initialState.locator.click({ timeout: 5_000 });
+    await waitForVisibleCandidate(
+      adminPage,
+      [...credentialCandidates, ...standaloneShellCandidates],
+      60_000,
+      "Timed out waiting for the Keycloak credential form after following the Nextcloud social-login entry"
+    );
+  }
+
+  // Native flavor fills the local Nextcloud credential form (no Keycloak
+  // redirect) — but only the administrator persona has a known direct-login
+  // password; every other persona (biber, other LDAP users) authenticates
+  // through Keycloak or LDAP and must use the Keycloak credential.
+  const effectiveUsername = username;
+  const effectivePassword =
+    nextcloudLoginFlavor === "native" && username === loginUsername
+      ? nextcloudDirectLoginPassword
+      : password;
+
   await expect(usernameField).toBeVisible();
   await usernameField.click();
-  await usernameField.fill(loginUsername);
+  await usernameField.fill(effectiveUsername);
   await usernameField.press("Tab");
-  await passwordField.fill(loginPassword);
+  await passwordField.fill(effectivePassword);
   await signInButton.click();
 
   const postLoginState = await waitForVisibleCandidate(
     adminPage,
     standaloneShellCandidates,
     60_000,
-    "Timed out waiting for a signed-in Nextcloud shell after the Keycloak login redirect"
+    "Timed out waiting for a signed-in Nextcloud shell after the login redirect"
   );
 
   await expect(postLoginState.locator).toBeVisible();
   await dismissBlockingNextcloudModals(adminPage, adminPage);
+}
+
+async function logoutStandaloneNextcloud(adminPage) {
+  const userMenuTrigger = adminPage.locator("#user-menu button");
+  const logoutLinkByName = adminPage.getByRole("link", { name: "Log out" });
+  const logoutLinkByHref = adminPage.locator('a[href*="logout"]');
+  const logoutConfirmButton = adminPage.getByRole("button", { name: "Logout" });
+
+  await dismissBlockingNextcloudModals(adminPage, adminPage);
+  await clickUserMenuWithModalRetry(adminPage, adminPage, userMenuTrigger);
+
+  const logoutLink = await waitForFirstVisible(
+    adminPage,
+    [logoutLinkByName, logoutLinkByHref],
+    15_000
+  );
+  await expect(logoutLink).toBeVisible();
+  await logoutLink.click();
+
+  const logoutConfirmationVisible = await logoutConfirmButton
+    .first()
+    .waitFor({ state: "visible", timeout: 10_000 })
+    .then(() => true)
+    .catch(() => false);
+  if (logoutConfirmationVisible) {
+    await logoutConfirmButton.click();
+  }
+}
+
+// LDAP-first-login caveat (see roles/web-app-nextcloud/docs/LDAP.md): a fresh
+// Nextcloud + LDAP deployment only materializes a user's NC account on first
+// successful login, so the very first attempt for a non-administrator persona
+// can fail or stall. Retry the full login flow once after a short delay so
+// the suite stays deterministic without disabling the first-login behavior.
+async function loginToStandaloneNextcloudWithRetry(adminPage, username, password) {
+  try {
+    await loginToStandaloneNextcloud(adminPage, username, password);
+    return;
+  } catch (error) {
+    await adminPage.waitForTimeout(5_000);
+    await loginToStandaloneNextcloud(adminPage, username, password);
+  }
 }
 
 // ---------------------------------------------------------------------------
@@ -530,6 +639,8 @@ test.beforeEach(() => {
   expect(nextcloudBaseUrl, "NEXTCLOUD_BASE_URL must be set in the Playwright env file").toBeTruthy();
   expect(loginUsername, "LOGIN_USERNAME must be set in the Playwright env file").toBeTruthy();
   expect(loginPassword, "LOGIN_PASSWORD must be set in the Playwright env file").toBeTruthy();
+  expect(biberUsername, "BIBER_USERNAME must be set in the Playwright env file").toBeTruthy();
+  expect(biberPassword, "BIBER_PASSWORD must be set in the Playwright env file").toBeTruthy();
 
   if (nextcloudTalkSettingsCheckEnabled) {
     expect(nextcloudTalkSettingsUrl, "NEXTCLOUD_TALK_SETTINGS_URL must be set when Talk admin checks are enabled").toBeTruthy();
@@ -681,4 +792,34 @@ test("dashboard to nextcloud login", async ({ page }) => {
   }
 
   await page.goto("/");
+});
+
+test("biber logs into nextcloud via OIDC and logs out", async ({ browser }) => {
+  const biberContext = await browser.newContext({ ignoreHTTPSErrors: true });
+  const biberPage = await biberContext.newPage();
+
+  try {
+    await loginToStandaloneNextcloudWithRetry(biberPage, biberUsername, biberPassword);
+
+    const shellState = await waitForVisibleCandidate(
+      biberPage,
+      getNextcloudShellCandidates(biberPage),
+      60_000,
+      "Timed out waiting for a signed-in Nextcloud shell for biber"
+    );
+    await expect(shellState.locator).toBeVisible();
+
+    await logoutStandaloneNextcloud(biberPage);
+
+    const loginUrl = new URL("login", nextcloudBaseUrl).toString();
+    await biberPage.goto(loginUrl, { waitUntil: "domcontentloaded", timeout: 60_000 }).catch(() => {});
+    const shellAfterLogout = await findFirstVisibleCandidate(getNextcloudShellCandidates(biberPage));
+    expect(
+      shellAfterLogout,
+      "Expected biber to be logged out after clicking Log out (no authenticated Nextcloud shell on /login)"
+    ).toBeNull();
+  } finally {
+    await biberPage.close().catch(() => {});
+    await biberContext.close().catch(() => {});
+  }
 });

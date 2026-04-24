@@ -33,7 +33,7 @@ MEDIAWIKI_USER_GID:               "33"
 MEDIAWIKI_NETWORK_DATABASE:       "{{ lookup('config','svc-db-mariadb', 'compose.network') }}"
 
 # User and Credentials
-MEDIAWIKI_ADMINISTRATOR_NAME:     "{{ users.administrator.username }}"
+MEDIAWIKI_ADMINISTRATOR_NAME:     "{{ lookup('users', 'administrator').username }}"
 MEDIAWIKI_ADMINISTRATOR_PASSWORD: "{{ lookup('config', application_id, 'credentials.administrator_password') }}"
 MEDIAWIKI_SECRET_KEY:             "{{ lookup('config', application_id, 'credentials.secret_key') }}"
 

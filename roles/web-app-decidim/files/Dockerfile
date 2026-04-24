@@ -4,11 +4,14 @@ FROM ${DECIDIM_IMAGE}:${DECIDIM_VERSION}
 
 ARG DECIDIM_PATCH_SCRIPT_HOST_REL
 ARG DECIDIM_PATCH_SCRIPT_DOCKER
+ARG DECIDIM_PATCH_RUBY_HOST_REL
+ARG DECIDIM_PATCH_RUBY_DOCKER
 
 # Add omniauth_openid_connect to Gemfile and install
 RUN echo "gem 'omniauth_openid_connect'" >> /code/Gemfile && \
     cd /code && bundle install --quiet
 
-# Copy and run the patch script
+# Copy patch script + ruby snippets it sources, then run
 COPY ${DECIDIM_PATCH_SCRIPT_HOST_REL} ${DECIDIM_PATCH_SCRIPT_DOCKER}
+COPY ${DECIDIM_PATCH_RUBY_HOST_REL}/ ${DECIDIM_PATCH_RUBY_DOCKER}/
 RUN python3 ${DECIDIM_PATCH_SCRIPT_DOCKER}

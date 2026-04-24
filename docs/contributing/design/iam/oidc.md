@@ -2,7 +2,7 @@
 
 This page is the SPOT for how application roles consume the platform's OIDC
 provider, [Keycloak](../../../../roles/web-app-keycloak/). The variable tree
-lives in [13_oidc.yml](../../../../group_vars/all/13_oidc.yml) under
+lives in [11_oidc.yml](../../../../group_vars/all/11_oidc.yml) under
 `defaults_oidc`. For the cross-cutting IAM principles, including the paired
 identifier rule shared with LDAP, see [common.md](common.md). For LDAP-side
 details see [ldap.md](ldap.md).
@@ -33,7 +33,7 @@ The keys consumers care about:
 
 When a role needs an OIDC endpoint, it MUST template the corresponding
 `OIDC.CLIENT.*` value rather than build the URL from `OIDC.URL` itself. The
-URL builders in [13_oidc.yml](../../../../group_vars/all/13_oidc.yml) already
+URL builders in [11_oidc.yml](../../../../group_vars/all/11_oidc.yml) already
 handle realm and protocol concerns.
 
 ## Claim Attributes 🏷️
@@ -108,7 +108,7 @@ consumes.
 
 | File | Purpose |
 |---|---|
-| [13_oidc.yml](../../../../group_vars/all/13_oidc.yml) | OIDC SPOT, defines `OIDC.*` |
+| [11_oidc.yml](../../../../group_vars/all/11_oidc.yml) | OIDC SPOT, defines `OIDC.*` |
 | [web-app-keycloak](../../../../roles/web-app-keycloak/) | OIDC provider role |
 | [default.json.j2](../../../../roles/web-app-keycloak/templates/import/clients/default.json.j2) | Shared client template, MUST stay app-agnostic |
 | [scopes](../../../../roles/web-app-keycloak/templates/import/scopes/) | Per-app client scopes for extra mappers |

@@ -31,22 +31,23 @@ enable_metrics:                 {{ lookup('config', application_id, 'compose.ser
 macaroon_secret_key:            "{{ lookup('config', application_id, 'credentials.macaroon_secret_key') }}"
 form_secret:                    "{{ lookup('config', application_id, 'credentials.form_secret') }}"
 signing_key_path:               "/data/{{ MATRIX_SYNAPSE_DOMAIN }}.signing.key"
-web_client_location:            "{{ lookup('tls', application_id, 'protocols.web') }}://{{ domains[application_id].element}}"
+web_client_location:            "{{ lookup('tls', application_id, 'protocols.web') }}://{{ lookup('domains', application_id).element }}"
 public_baseurl:                 "{{ MATRIX_SYNAPSE_URL }}"
 trusted_key_servers:
   - server_name: "matrix.org"
-admin_contact: 'mailto:{{ users.administrator.email }}'
+admin_contact: 'mailto:{{ lookup('users', 'administrator').email }}'
 
-{% if SYSTEM_EMAIL_ENABLED | bool %}
+{% set email = lookup('email', application_id) %}
+{% if email.enabled | bool %}
 email:
-  smtp_host:                    "{{ SYSTEM_EMAIL_HOST }}"
-  smtp_port:                    "{{ SYSTEM_EMAIL_PORT }}"
-  smtp_user:                    "{{ users['no-reply'].email }}"
-  smtp_pass:                    "{{ users['no-reply'].tokens['web-app-mailu'] }}"
+  smtp_host:                    "{{ email.host }}"
+  smtp_port:                    "{{ email.port }}"
+  smtp_user:                    "{{ email.username }}"
+  smtp_pass:                    "{{ email.password }}"
   #force_tls:                    true
   #require_transport_security:   true
-  enable_tls:                   "{{ SYSTEM_EMAIL_TLS | upper }}"
-  notif_from:                   "Your Friendly %(app)s homeserver <{{ users['no-reply'].email }}>"
+  enable_tls:                   "{{ email.tls | upper }}"
+  notif_from:                   "Your Friendly %(app)s homeserver <{{ email['from'] }}>"
   app_name:                     "Matrix on {{ MATRIX_SYNAPSE_DOMAIN }}"
   enable_notifs:                true
   notif_for_new_users:          false

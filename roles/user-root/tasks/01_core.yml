@@ -1,22 +1,3 @@
-- name: Ensure users.root.authorized_keys exists (empty by default)
-  ansible.builtin.set_fact:
-    users: >-
-      {{
-        (users | default({}))
-        | combine(
-            {
-              'root': (
-                (users.root | default({}))
-                | combine(
-                    { 'authorized_keys': (users.root.authorized_keys | default([])) },
-                    recursive=True
-                  )
-              )
-            },
-            recursive=True
-          )
-      }}
-
 - name: Check if the SSH key for root already exists
   ansible.builtin.stat:
     path: "{{ USER_ROOT_SSH_KEY_PUBLIC }}"
@@ -31,6 +12,18 @@
     name: user
   vars:
     user_key: "root"
+    user_config: >-
+      {{
+        lookup('users', 'root', {})
+        | combine(
+            {
+              'authorized_keys': (
+                lookup('users', 'root', {}).authorized_keys | default([])
+              )
+            },
+            recursive=True
+          )
+      }}
 
 - name: "create {{ DIR_SCRIPTS_ROOT }}"
   file:

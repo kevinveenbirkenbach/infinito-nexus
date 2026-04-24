@@ -24,30 +24,49 @@
   changed_when: false
   failed_when: false
 
-# Install (uses absolute path + argv)
-- name: "Joomla CLI install (first run only)"
-  command:
+# The joomla docker image (5.4.5-php8.3-apache) populates /var/www/html
+# asynchronously on first container start: index.php appears early, but
+# a stub configuration.php can land a short time later. Between the check
+# above and the install below, the stub has been observed to appear in CI
+# (~0.7s gap), which then makes the CLI installer refuse with
+# "[ERROR] configuration.php already present! Nothing to install, exiting."
+#
+# An earlier fix added a single "rm -f configuration.php" task between the
+# check and the install, but CI still caught the stub re-appearing between
+# rm and install when image init was slow enough. The retry-safe fix below
+# bundles the stub removal and the CLI install into a single shell step so
+# every retry re-runs BOTH: the install can lose the race at most for its
+# own attempt; the retry window covers the image-init settling period.
+#
+# Scoped by the same `joomla_installed.rc != 0` guard as before so a
+# genuine existing install is never touched.
+- name: "Joomla CLI install (rm stub + install in one retry loop for image-init race)"
+  ansible.builtin.command:
     argv:
-      - docker
-      - exec
-      - --user
-      - "{{ JOOMLA_WEB_USER }}"
-      - "{{ JOOMLA_CONTAINER }}"
-      - php
-      - "{{ JOOMLA_INSTALLER_CLI_FILE }}"
-      - install
-      - "--db-type={{ JOOMLA_DB_CONNECTOR }}"
-      - "--db-host={{ lookup('database', application_id, 'host') }}"
-      - "--db-user={{ lookup('database', application_id, 'username') }}"
-      - "--db-pass={{ lookup('database', application_id, 'password') }}"
-      - "--db-name={{ lookup('database', application_id, 'name') }}"
-      - "--admin-user={{ JOOMLA_USER }}"
-      - "--admin-username={{ JOOMLA_USER_NAME }}"
-      - "--admin-password={{ JOOMLA_USER_PASSWORD }}"
-      - "--admin-email={{ JOOMLA_USER_EMAIL }}"
-      - "--no-interaction"
-      - "--site-name={{ JOOMLA_SITE_NAME }}"
+      - sh
+      - -lc
+      - |
+        set -o pipefail
+        container exec "{{ JOOMLA_CONTAINER }}" rm -f "{{ JOOMLA_CONFIG_FILE }}"
+        exec container exec --user "{{ JOOMLA_WEB_USER }}" "{{ JOOMLA_CONTAINER }}" \
+          php "{{ JOOMLA_INSTALLER_CLI_FILE }}" install \
+          "--db-type={{ JOOMLA_DB_CONNECTOR }}" \
+          "--db-host={{ lookup('database', application_id, 'host') }}" \
+          "--db-user={{ lookup('database', application_id, 'username') }}" \
+          "--db-pass={{ lookup('database', application_id, 'password') }}" \
+          "--db-name={{ lookup('database', application_id, 'name') }}" \
+          "--admin-user={{ JOOMLA_USER }}" \
+          "--admin-username={{ JOOMLA_USER_NAME }}" \
+          "--admin-password={{ JOOMLA_USER_PASSWORD }}" \
+          "--admin-email={{ JOOMLA_USER_EMAIL }}" \
+          --no-interaction \
+          "--site-name={{ JOOMLA_SITE_NAME }}"
   register: j_install
+  retries: 5
+  delay: 5
+  until: >-
+    j_install.rc == 0 or
+    (j_install.stdout | default('') is search('Unable to delete installation folder'))
   changed_when: j_install.rc == 0 or (j_install.stdout | default('') is search('Unable to delete installation folder'))
   # The CLI installer exits rc=0 when refusing to run on a raw git source tree,
   # which silently masks the failure and the next task then trips on a missing
@@ -60,6 +79,7 @@
       not (j_install.stdout | default('') is search('Unable to delete installation folder'))
     )
     or (j_install.stdout | default('') is search('trying to run Joomla! from our git repository'))
+  no_log: "{{ MASK_CREDENTIALS_IN_LOGS | bool }}"
   when:
     - joomla_installed.rc != 0
     - has_installer.rc == 0

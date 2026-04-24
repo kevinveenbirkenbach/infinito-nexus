@@ -24,7 +24,7 @@ MATRIX_SYNAPSE_VERSION:               "{{ lookup('config', application_id, 'comp
 MATRIX_SYNAPSE_IMAGE:                 "{{ lookup('config', application_id, 'compose.services.synapse.image') }}"
 MATRIX_SYNAPSE_NAME:                  "{{ lookup('config', application_id, 'compose.services.synapse.name') }}"
 MATRIX_SYNAPSE_VOLUME:                "{{ lookup('config', application_id, 'compose.volumes.synapse') }}"
-MATRIX_SYNAPSE_DOMAIN:                "{{ domains[application_id].synapse }}"
+MATRIX_SYNAPSE_DOMAIN:                "{{ lookup('domains', application_id).synapse }}"
 MATRIX_SYNAPSE_PORT:                  "{{ ports.localhost.http['web-app-matrix_synapse'] }}"
 MATRIX_SYNAPSE_CONFIG_PATH_HOST:      "{{ [ lookup('container', application_id, 'directories.config'), 'homeserver.yaml' ] | path_join }}"
 MATRIX_SYNAPSE_CONFIG_PATH_CONTAINER: "/data/homeserver.yaml"
@@ -37,7 +37,7 @@ MATRIX_SYNAPSE_LISTEN_FLAGS:          "{{ MATRIX_FEDERATION_PORT }} {{ 'ssl ' if
 MATRIX_ELEMENT_VERSION:               "{{ lookup('config', application_id, 'compose.services.element.version') }}"
 MATRIX_ELEMENT_IMAGE:                 "{{ lookup('config', application_id, 'compose.services.element.image') }}"
 MATRIX_ELEMENT_NAME:                  "{{ lookup('config', application_id, 'compose.services.element.name') }}"
-MATRIX_ELEMENT_DOMAIN:                "{{ domains[application_id].element }}"
+MATRIX_ELEMENT_DOMAIN:                "{{ lookup('domains', application_id).element }}"
 MATRIX_ELEMENT_PORT:                  "{{ ports.localhost.http['web-app-matrix_element'] }}"
 MATRIX_ELEMENT_CONFIG_PATH_HOST:      "{{ [ lookup('container', application_id, 'directories.config'), 'element-config.json' ] | path_join }}"
 

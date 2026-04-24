@@ -89,5 +89,89 @@ class TestBuildLdapRoleEntries(unittest.TestCase):
                 self.assertNotIn("carol", entry.get("memberUid", []))
 
 
+class TestBuildLdapRoleEntriesGroupNamesGate(unittest.TestCase):
+    """Gate: only applications whose application_id appears in group_names
+    contribute LDAP groups. When group_names is None, the gate is bypassed
+    (backwards-compatible). See requirement 004 for rationale."""
+
+    def setUp(self):
+        self.applications = {
+            "web-app-wordpress": {
+                "group_id": 10001,
+                "rbac": {
+                    "roles": {
+                        "editor": {"description": "Editor"},
+                    }
+                },
+            },
+            "web-app-pretix": {
+                "group_id": 10002,
+                "rbac": {
+                    "roles": {
+                        "organizer": {"description": "Organizer"},
+                    }
+                },
+            },
+        }
+        self.users = {"alice": {"roles": ["editor"]}}
+        self.ldap = {
+            "DN": {
+                "OU": {
+                    "USERS": "ou=users,dc=example,dc=org",
+                    "ROLES": "ou=roles,dc=example,dc=org",
+                }
+            },
+            "USER": {"ATTRIBUTES": {"ID": "uid"}},
+            "RBAC": {"FLAVORS": ["posixGroup"]},
+        }
+
+    def test_only_deployed_apps_contribute_when_group_names_given(self):
+        entries = build_ldap_role_entries(
+            self.applications,
+            self.users,
+            self.ldap,
+            group_names=["web-app-wordpress"],
+        )
+        cns = {entry["cn"] for entry in entries.values()}
+        # WordPress is in group_names → editor + administrator provisioned
+        self.assertIn("web-app-wordpress-editor", cns)
+        self.assertIn("web-app-wordpress-administrator", cns)
+        # pretix is NOT in group_names → no groups for it
+        self.assertNotIn("web-app-pretix-organizer", cns)
+        self.assertNotIn("web-app-pretix-administrator", cns)
+
+    def test_empty_group_names_emits_no_entries(self):
+        entries = build_ldap_role_entries(
+            self.applications,
+            self.users,
+            self.ldap,
+            group_names=[],
+        )
+        self.assertEqual(entries, {})
+
+    def test_group_names_none_preserves_legacy_behavior(self):
+        entries = build_ldap_role_entries(
+            self.applications,
+            self.users,
+            self.ldap,
+            group_names=None,
+        )
+        cns = {entry["cn"] for entry in entries.values()}
+        # Every app contributes when gate is off — matches pre-004 behavior.
+        self.assertIn("web-app-wordpress-editor", cns)
+        self.assertIn("web-app-pretix-organizer", cns)
+        self.assertIn("web-app-wordpress-administrator", cns)
+        self.assertIn("web-app-pretix-administrator", cns)
+
+    def test_group_names_with_unknown_id_emits_no_entries(self):
+        entries = build_ldap_role_entries(
+            self.applications,
+            self.users,
+            self.ldap,
+            group_names=["web-app-not-in-applications"],
+        )
+        self.assertEqual(entries, {})
+
+
 if __name__ == "__main__":
     unittest.main()

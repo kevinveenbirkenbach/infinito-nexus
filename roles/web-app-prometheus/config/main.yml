@@ -84,5 +84,4 @@ compose:
     alertmanager_data:            "prometheus_alertmanager_data"
 alerting:
   telegram:
-    chat_id:                      0     # Telegram chat ID (integer)
-  mattermost: {}
+    chat_id:                      0     # Telegram chat ID (integer); bot_token lives under credentials.alerting_telegram_bot_token

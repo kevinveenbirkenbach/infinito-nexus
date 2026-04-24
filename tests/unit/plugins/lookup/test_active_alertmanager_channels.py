@@ -1,10 +1,11 @@
 from __future__ import annotations
 
+import tempfile
 import unittest
-
-from ansible.errors import AnsibleError
+from pathlib import Path
 
 from plugins.lookup.active_alertmanager_channels import LookupModule
+from utils.runtime_data import _reset_cache_for_tests
 
 
 def _make_applications(*app_ids: str, channels: tuple = ()) -> dict:
@@ -27,10 +28,26 @@ def _make_applications(*app_ids: str, channels: tuple = ()) -> dict:
     }
 
 
+# Empty tmp roles dir → get_merged_applications returns the inventory
+# `applications` override dict verbatim, without leaking real repo role defaults.
+_TMP_ROLES_DIR_HOLDER: dict = {}
+
+
+def setUpModule() -> None:
+    _TMP_ROLES_DIR_HOLDER["tmpdir"] = tempfile.TemporaryDirectory()
+    _TMP_ROLES_DIR_HOLDER["path"] = Path(_TMP_ROLES_DIR_HOLDER["tmpdir"].name)
+
+
+def tearDownModule() -> None:
+    _TMP_ROLES_DIR_HOLDER["tmpdir"].cleanup()
+
+
 def _run(applications: dict, group_names: list) -> list:
+    _reset_cache_for_tests()
     return LookupModule().run(
         [],
         variables={"applications": applications, "group_names": group_names},
+        roles_dir=str(_TMP_ROLES_DIR_HOLDER["path"]),
     )[0]
 
 
@@ -125,18 +142,6 @@ class TestActiveAlertmanagerChannelsEmptyInputs(unittest.TestCase):
         apps = _make_applications("web-app-gitea", "web-app-nextcloud")
         result = _run(apps, ["web-app-gitea", "web-app-nextcloud"])
         self.assertEqual(result, [])
-
-
-class TestActiveAlertmanagerChannelsErrors(unittest.TestCase):
-    """Invalid inputs must raise AnsibleError."""
-
-    def test_raises_when_applications_missing(self):
-        with self.assertRaises(AnsibleError):
-            LookupModule().run([], variables={})
-
-    def test_raises_when_applications_not_a_dict(self):
-        with self.assertRaises(AnsibleError):
-            LookupModule().run([], variables={"applications": ["not", "a", "dict"]})
 
 
 if __name__ == "__main__":

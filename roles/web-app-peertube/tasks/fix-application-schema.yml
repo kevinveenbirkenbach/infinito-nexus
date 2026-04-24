@@ -1,0 +1,68 @@
+---
+# PeerTube v8.x (and intermittently under the rolling `production-bookworm`
+# tag) ships a migration that declares `application.nodeVersion` and
+# `application.nodeABIVersion` as NOT NULL without a column default, while
+# the bootstrap `Application.loadApplication()` only INSERTs `migrationVersion`
+# into the single-row `application` table. On a fresh database that INSERT
+# fails with
+#
+#   null value in column "nodeVersion" of relation "application" violates
+#   not-null constraint
+#
+# and peertube crash-loops on startup before it can add the plugin or serve
+# traffic. Related upstream reports (all closed as user error / stale data):
+# https://github.com/Chocobozzz/PeerTube/issues/5588 ,
+# https://github.com/Chocobozzz/PeerTube/issues/6137 .
+#
+# The bug is timing-independent inside the container (the INSERT is racing the
+# runtime code that would later set `nodeVersion`, not a schema migration), so
+# we patch it at the database level: once peertube has created the `application`
+# table during its first startup attempt, back-fill column defaults so the
+# next restart's INSERT succeeds. Peertube itself overwrites the values with
+# real node/ABI version strings on every boot, so the defaults only cover the
+# bootstrap INSERT.
+
+- name: "PEERTUBE | Wait for peertube to create the `application` table"
+  community.postgresql.postgresql_query:
+    db: "{{ lookup('database', application_id, 'name') }}"
+    login_user: "{{ lookup('database', application_id, 'username') }}"
+    login_password: "{{ lookup('database', application_id, 'password') }}"
+    login_host: "{{ lookup('database', application_id, 'reach_host') }}"
+    login_port: "{{ lookup('database', application_id, 'port') }}"
+    query: "SELECT to_regclass('public.application') AS reg"
+  register: _peertube_app_table_check
+  retries: 60
+  delay: 5
+  until: >-
+    _peertube_app_table_check is succeeded and
+    (_peertube_app_table_check.query_result | default([{}]))[0].reg is not none
+  changed_when: false
+
+- name: "PEERTUBE | Back-fill column defaults so the bootstrap INSERT does not violate NOT NULL"
+  community.postgresql.postgresql_query:
+    db: "{{ lookup('database', application_id, 'name') }}"
+    login_user: "{{ lookup('database', application_id, 'username') }}"
+    login_password: "{{ lookup('database', application_id, 'password') }}"
+    login_host: "{{ lookup('database', application_id, 'reach_host') }}"
+    login_port: "{{ lookup('database', application_id, 'port') }}"
+    query: |
+      ALTER TABLE application
+        ALTER COLUMN "nodeVersion"    SET DEFAULT '',
+        ALTER COLUMN "nodeABIVersion" SET DEFAULT 0;
+  register: _peertube_app_defaults
+  changed_when: _peertube_app_defaults is succeeded
+  notify: compose up
+
+- name: "PEERTUBE | Wait for peertube container to become healthy after schema back-fill"
+  ansible.builtin.command:
+    argv:
+      - container
+      - inspect
+      - -f
+      - "{{ '{{.State.Health.Status}}' }}"
+      - "{{ PEERTUBE_CONTAINER }}"
+  register: _peertube_health
+  retries: 60
+  delay: 5
+  until: _peertube_health.rc == 0 and _peertube_health.stdout == "healthy"
+  changed_when: false

@@ -2,7 +2,7 @@
 
 This page is the SPOT for how application roles consume the platform's LDAP
 provider, [OpenLDAP](../../../../roles/svc-db-openldap/). The variable tree
-lives in [14_ldap.yml](../../../../group_vars/all/14_ldap.yml) under `LDAP`.
+lives in [12_ldap.yml](../../../../group_vars/all/12_ldap.yml) under `LDAP`.
 For the cross-cutting IAM principles, including the paired identifier rule
 shared with OIDC, see [common.md](common.md). For OIDC-side details see
 [oidc.md](oidc.md).
@@ -30,7 +30,7 @@ Rules:
 
 - Roles MUST connect via `LDAP.SERVER.URI`. Building the URI from the
   individual `DOMAIN`, `PORT`, and protocol parts is forbidden because the
-  helper variables in [14_ldap.yml](../../../../group_vars/all/14_ldap.yml)
+  helper variables in [12_ldap.yml](../../../../group_vars/all/12_ldap.yml)
   already pick the correct scheme based on Docker-network availability.
 - The data administrator DN MUST be used for adding, modifying, and removing
   users, groups, and roles. The configuration administrator DN MUST be used
@@ -106,7 +106,7 @@ member is added.
 
 | File | Purpose |
 |---|---|
-| [14_ldap.yml](../../../../group_vars/all/14_ldap.yml) | LDAP SPOT, defines `LDAP.*` |
+| [12_ldap.yml](../../../../group_vars/all/12_ldap.yml) | LDAP SPOT, defines `LDAP.*` |
 | [svc-db-openldap](../../../../roles/svc-db-openldap/) | LDAP provider role |
 | [oidc.md](oidc.md) | OIDC-side counterpart, paired user identifier |
 | [common.md](common.md) | Cross-cutting IAM principles and integration checklist |

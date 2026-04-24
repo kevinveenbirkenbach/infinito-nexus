@@ -59,9 +59,9 @@ class TestHelp(unittest.TestCase):
                     main_path=cli_dir / "deploy" / "__main__.py",
                 ),
                 Command(
-                    parts=("setup", "users"),
-                    module="cli.setup.users",
-                    main_path=cli_dir / "setup" / "users" / "__main__.py",
+                    parts=("meta", "applications", "all"),
+                    module="cli.meta.applications.all",
+                    main_path=cli_dir / "meta" / "applications" / "all" / "__main__.py",
                 ),
             ]
             mock_discover.return_value = cmds
@@ -69,7 +69,9 @@ class TestHelp(unittest.TestCase):
             show_full_help_for_all(cli_dir)
 
             invoked_modules = {call.args[0][2] for call in mock_run.call_args_list}
-            self.assertEqual({"cli.deploy", "cli.setup.users"}, invoked_modules)
+            self.assertEqual(
+                {"cli.deploy", "cli.meta.applications.all"}, invoked_modules
+            )
 
             for call in mock_run.call_args_list:
                 args, kwargs = call

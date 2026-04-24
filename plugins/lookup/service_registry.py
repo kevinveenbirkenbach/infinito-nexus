@@ -6,6 +6,7 @@ from typing import Any, Dict, List, Optional
 from ansible.errors import AnsibleError
 from ansible.plugins.lookup import LookupBase
 
+from utils.runtime_data import get_merged_applications
 from utils.service_registry import (
     build_service_registry_from_applications,
     ordered_primary_service_entries,
@@ -28,11 +29,11 @@ class LookupModule(LookupBase):
         **kwargs: Any,
     ) -> List[Any]:
         vars_ = variables or getattr(self._templar, "available_variables", {}) or {}
-        applications = kwargs.get("applications", vars_.get("applications"))
-        if not isinstance(applications, dict):
-            raise AnsibleError(
-                "service_registry: required variable 'applications' must be a mapping"
-            )
+        applications = get_merged_applications(
+            variables=vars_,
+            roles_dir=kwargs.get("roles_dir"),
+            templar=getattr(self, "_templar", None),
+        )
 
         roles_dir = Path(kwargs.get("roles_dir") or Path.cwd() / "roles")
         registry = build_service_registry_from_applications(applications)

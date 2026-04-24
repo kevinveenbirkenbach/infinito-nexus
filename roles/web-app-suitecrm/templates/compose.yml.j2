@@ -30,7 +30,7 @@
       - "{{ SUITECRM_LDAP_CONFIG_HOST }}:{{ SUITECRM_LDAP_EXTENSION_DIR }}/ldap.yaml"
 {% endif %}
 
-{{ applications | compose_volumes(
+{{ lookup('applications') | compose_volumes(
     application_id,
     database_volume=lookup('database', application_id, 'volume'),
     extra_volumes={'data': {'name': SUITECRM_DATA_VOLUME}}

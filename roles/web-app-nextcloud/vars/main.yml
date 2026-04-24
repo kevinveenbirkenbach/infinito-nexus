@@ -155,7 +155,7 @@ NEXTCLOUD_WHITEBOARD_TMP_VOLUME:          "{{ lookup('config', application_id, '
 NEXTCLOUD_WHITEBOARD_FRONTCACHE_VOLUME:   "{{ lookup('config', application_id, 'compose.volumes.whiteboard_fontcache') }}"
 NEXTCLOUD_WHITEBOARD_SERVICE_DIRECTORY:   "{{ [ lookup('container', application_id, 'directories.services'), 'whiteboard' ] | path_join }}"
 NEXTCLOUD_WHITEBOARD_SERVICE_DOCKERFILE:  "{{ [ NEXTCLOUD_WHITEBOARD_SERVICE_DIRECTORY, 'Dockerfile' ] | path_join }}"
-NEXTCLOUD_WHITEBOARD_MAX_OLD_SPACE_SIZE:  "{{ applications | node_max_old_space_size(application_id, NEXTCLOUD_WHITEBOARD_SERVICE) }}"
+NEXTCLOUD_WHITEBOARD_MAX_OLD_SPACE_SIZE:  "{{ lookup('applications') | node_max_old_space_size(application_id, NEXTCLOUD_WHITEBOARD_SERVICE) }}"
 
 ### Talk Recording backend
 NEXTCLOUD_RECORDING_SERVICE:              "talk_recording"

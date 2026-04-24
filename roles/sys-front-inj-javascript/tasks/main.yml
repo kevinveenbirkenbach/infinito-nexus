@@ -21,6 +21,8 @@
 
 - name: "Append Javascript CSP hash for '{{ application_id }}'"
   set_fact:
-    applications: "{{ applications | append_csp_hash(application_id, javascript_code_one_liner) }}"
+    webserver_csp_hashes_extra_by_app: >-
+      {{ webserver_csp_hashes_extra_by_app | default({})
+         | add_csp_hash(application_id, 'script-src-elem', javascript_code_one_liner) }}
   changed_when: false
   no_log: "{{ MASK_CREDENTIALS_IN_LOGS | bool }}"

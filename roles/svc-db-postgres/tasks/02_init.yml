@@ -5,6 +5,13 @@
       - application_id == 'svc-db-postgres'
       - database_consumer_id != 'svc-db-postgres'
 
+- name: Normalize postgres credential strings for module args
+  ansible.builtin.set_fact:
+    postgres_login_password_string: "{{ POSTGRES_PASSWORD | string }}"
+    postgres_database_password_string: "{{ database_password | string }}"
+  changed_when: false
+  no_log: "{{ MASK_CREDENTIALS_IN_LOGS | bool }}"
+
 - name: Wait until postgres TCP auth works
   block:
 
@@ -47,7 +54,7 @@
     name: "{{ database_name }}"
     state: present
     login_user: postgres
-    login_password: "{{ POSTGRES_PASSWORD }}"
+    login_password: "{{ postgres_login_password_string }}"
     login_host: "{{ POSTGRES_LOCAL_HOST }}"
     login_port: "{{ POSTGRES_PORT }}"
   register: postgresql_result
@@ -59,11 +66,11 @@
 - name: "Create database user: {{ database_username }}"
   community.postgresql.postgresql_user:
     name:           "{{ database_username }}"
-    password:       "{{ database_password }}"
+    password:       "{{ postgres_database_password_string }}"
     db:             "{{ database_name }}"
     state:          present
     login_user:     postgres
-    login_password: "{{ POSTGRES_PASSWORD }}"
+    login_password: "{{ postgres_login_password_string }}"
     login_host:     "{{ POSTGRES_LOCAL_HOST }}"
     login_port:     "{{ POSTGRES_PORT }}"
   register: postgresql_result
@@ -79,7 +86,7 @@
       community.postgresql.postgresql_query:
         db: postgres
         login_user: postgres
-        login_password: "{{ POSTGRES_PASSWORD }}"
+        login_password: "{{ postgres_login_password_string }}"
         login_host: "{{ POSTGRES_LOCAL_HOST }}"
         login_port: "{{ POSTGRES_PORT }}"
         query: |
@@ -253,7 +260,7 @@
     schema: public
     state:  present
     login_user:     postgres
-    login_password: "{{ POSTGRES_PASSWORD }}"
+    login_password: "{{ postgres_login_password_string }}"
     login_host:     "{{ POSTGRES_LOCAL_HOST }}"
     login_port:     "{{ POSTGRES_PORT }}"
   register: postgresql_result
@@ -270,7 +277,7 @@
     privs: ALL
     state: present
     login_user:     postgres
-    login_password: "{{ POSTGRES_PASSWORD }}"
+    login_password: "{{ postgres_login_password_string }}"
     login_host:     "{{ POSTGRES_LOCAL_HOST }}"
     login_port:     "{{ POSTGRES_PORT }}"
   register: postgresql_result
@@ -283,7 +290,7 @@
   community.postgresql.postgresql_query:
     db: "{{ database_name }}"
     login_user: postgres
-    login_password: "{{ POSTGRES_PASSWORD }}"
+    login_password: "{{ postgres_login_password_string }}"
     login_host: "{{ POSTGRES_LOCAL_HOST }}"
     login_port: "{{ POSTGRES_PORT }}"
     query: |
@@ -303,7 +310,7 @@
     ext:        "{{ item }}"
     state:      present
     login_user:     postgres
-    login_password: "{{ POSTGRES_PASSWORD }}"
+    login_password: "{{ postgres_login_password_string }}"
     login_host:     "{{ POSTGRES_LOCAL_HOST }}"
     login_port:     "{{ POSTGRES_PORT }}"
   loop:
@@ -323,7 +330,7 @@
     ext:          vector
     state:        present
     login_user:   postgres
-    login_password: "{{ POSTGRES_PASSWORD }}"
+    login_password: "{{ postgres_login_password_string }}"
     login_host:   "{{ POSTGRES_LOCAL_HOST }}"
     login_port:   "{{ POSTGRES_PORT }}"
   register: postgresql_result

@@ -10,7 +10,7 @@ oidc_settings:
   endpoint_jwks:            "{{ OIDC.CLIENT.CERTS }}"                                             # URL of the JWKS endpoint used to verify ID token signatures.
   endpoint_end_session:     "{{ OIDC.CLIENT.LOGOUT_URL }}"                                        # URL of the end-session endpoint to log users out of the IDP.
   login_type:               "auto"                                                                # Determines how the login interface is rendered (e.g., button or form).
-  scope:                    "openid profile email"                                                # Scopes requested from the OIDC provider during authentication.
+  scope:                    "openid profile email {{ RBAC.GROUP.CLAIM }}"                         # Scopes requested from the OIDC provider during authentication. Includes the RBAC group-membership scope so Keycloak emits the `groups` claim consumed by the mu-plugin infinito-oidc-rbac-mapper.php for role mapping (see docs/requirements/004-generic-rbac-ldap-auto-provisioning.md).
   create_if_does_not_exist: true                                                                  # Auto-create a new WP user if one doesn’t exist.
   enforce_privacy:          false                                                                 # Require authentication for all site pages if set to true.
   link_existing_users:      true                                                                  # Link OIDC login to existing WP users by matching email.

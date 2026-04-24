@@ -1,6 +1,6 @@
 - name: "Check if site {{ domain }} is already registered at Matomo"
   uri_retry:
-    url: "{{ matomo_index_php_url }}?module=API&method=SitesManager.getSitesIdFromSiteUrl&url={{ lookup('tls', application_id, 'protocols.web') }}://{{ base_domain }}&format=json&token_auth={{ users.administrator.tokens['web-app-matomo'] }}"
+    url: "{{ matomo_index_php_url }}?module=API&method=SitesManager.getSitesIdFromSiteUrl&url={{ lookup('tls', application_id, 'protocols.web') }}://{{ base_domain }}&format=json&token_auth={{ lookup('users', 'administrator').tokens['web-app-matomo'] }}"
     method: GET
     return_content: yes
     status_code: 200
@@ -33,7 +33,7 @@
   uri_retry:
     url: "{{ matomo_index_php_url }}"
     method: POST
-    body: "module=API&method=SitesManager.addSite&siteName={{ base_domain }}&urls={{ lookup('tls', application_id, 'protocols.web') }}://{{ base_domain }}&format=json&token_auth={{ users.administrator.tokens['web-app-matomo'] }}"
+    body: "module=API&method=SitesManager.addSite&siteName={{ base_domain }}&urls={{ lookup('tls', application_id, 'protocols.web') }}://{{ base_domain }}&format=json&token_auth={{ lookup('users', 'administrator').tokens['web-app-matomo'] }}"
     body_format: form-urlencoded
     status_code: 200
     return_content: yes
@@ -58,6 +58,8 @@
 
 - name: Append Matomo CSP hash
   set_fact:
-    applications: "{{ applications | append_csp_hash(application_id, matomo_tracking_code_one_liner) }}"
+    webserver_csp_hashes_extra_by_app: >-
+      {{ webserver_csp_hashes_extra_by_app | default({})
+         | add_csp_hash(application_id, 'script-src-elem', matomo_tracking_code_one_liner) }}
   no_log: "{{ MASK_CREDENTIALS_IN_LOGS | bool }}"
   changed_when: false

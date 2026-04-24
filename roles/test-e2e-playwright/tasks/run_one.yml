@@ -161,9 +161,7 @@
     content: "{{ lookup('template', _playwright_env_template) }}"
   vars:
     application_id: "{{ application_id }}"
-    domains: "{{ domains }}"
-    users: "{{ users }}"
-    applications: "{{ applications }}"
+    domains: "{{ lookup('domains') }}"
 
 # Optional wait until app is ready (uses domain resolution).
 # Accept any 1xx/2xx/3xx response — anything below 400 means the service is up.

@@ -1,14 +1,47 @@
-def build_ldap_role_entries(applications, users, ldap):
-    """
-    Builds structured LDAP role entries using the global `ldap` configuration.
-    Supports objectClasses: posixGroup (adds gidNumber, memberUid), groupOfNames (adds member).
+def build_ldap_role_entries(applications, users, ldap, group_names=None):
+    """Build structured LDAP role entries for the RBAC groups container.
+
+    For every application in ``applications`` that is deployed on the
+    current host (its ``application_id`` appears in ``group_names``), emit
+    one LDAP group per role declared under ``rbac.roles`` plus an implicit
+    ``administrator`` group. The gate exists so the provisioning only
+    touches groups for applications that are actually present on the
+    host, not every application in the merged config.
+
+    Supports objectClasses: posixGroup (adds gidNumber, memberUid) and
+    groupOfNames (adds member).
+
+    Args:
+        applications: The merged applications mapping (from
+            ``lookup('applications')``).
+        users: The merged users mapping (from ``lookup('users')``).
+        ldap: The global LDAP configuration (from ``group_vars``).
+        group_names: Ansible's ``group_names`` fact for the current host.
+            When a list (including an empty list), only applications
+            whose ``application_id`` appears in it contribute groups.
+            When ``None``, no gating is applied and every application
+            contributes — this preserves backwards-compatible behavior
+            for unit tests and for any caller that hasn't been migrated
+            yet. Production templates MUST pass the live fact.
+
+    Returns:
+        dict: ``{dn: entry}`` mapping for every resolved group.
     """
 
     result = {}
 
     placeholder_dn = ldap.get("RBAC", {}).get("EMPTY_MEMBER_DN")
 
-    for application_id, application_config in applications.items():
+    # When group_names is supplied (even as an empty list), filter strictly;
+    # when it is None, fall through and include every application.
+    if group_names is not None:
+        deployed_apps = {
+            app_id: cfg for app_id, cfg in applications.items() if app_id in group_names
+        }
+    else:
+        deployed_apps = applications
+
+    for application_id, application_config in deployed_apps.items():
         base_roles = application_config.get("rbac", {}).get("roles", {})
         roles = {
             **base_roles,

@@ -5,6 +5,8 @@ import unittest
 from pathlib import Path
 from typing import List
 
+from tests.utils.fs import read_text
+
 
 def repo_root() -> Path:
     for candidate in Path(__file__).resolve().parents:
@@ -36,8 +38,7 @@ class TestTestFilesContainUnittestTests(unittest.TestCase):
         - a function named test_* at module level (rare), OR
         - a class inheriting from unittest.TestCase (directly or via alias) with at least one method test_*.
         """
-        with open(path, "r", encoding="utf-8") as f:
-            src = f.read()
+        src = read_text(path)
 
         try:
             tree = ast.parse(src, filename=path)

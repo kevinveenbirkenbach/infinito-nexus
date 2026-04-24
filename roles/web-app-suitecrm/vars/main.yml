@@ -44,4 +44,4 @@ SUITECRM_ENTRYPOINT_SCRIPT_HOST_REL:  "volumes/{{ SUITECRM_ENTRYPOINT_SCRIPT_FIL
 SUITECRM_ENTRYPOINT_SCRIPT_DOCKER:    "{{ [ '/usr/local/bin/', SUITECRM_ENTRYPOINT_SCRIPT_FILE ] | path_join }}"
 
 # Node
-SUITECRM_MAX_OLD_SPACE_SIZE:          "{{ applications | node_max_old_space_size(application_id, entity_name) }}"
+SUITECRM_MAX_OLD_SPACE_SIZE:          "{{ lookup('applications') | node_max_old_space_size(application_id, entity_name) }}"

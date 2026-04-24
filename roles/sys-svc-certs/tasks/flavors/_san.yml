@@ -9,7 +9,7 @@
   command: >-
     certbundle
     --domains "{{ CURRENT_PLAY_DOMAINS_ALL | join(',') }}"
-    --certbot-email "{{ users.administrator.email }}"
+    --certbot-email "{{ lookup('users', 'administrator').email }}"
     --certbot-acme-challenge-method "{{ CERTBOT_ACME_CHALLENGE_METHOD }}"
     --chunk-size 100
     {% if CERTBOT_ACME_CHALLENGE_METHOD != 'webroot' %}

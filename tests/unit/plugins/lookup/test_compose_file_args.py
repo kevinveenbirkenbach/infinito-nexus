@@ -52,6 +52,18 @@ class TestComposeFArgs(unittest.TestCase):
             },
         }
 
+        # Route get_merged_domains through variables['domains'] to keep tests hermetic.
+        def _domains_from_vars(*, variables=None, **_kwargs):
+            return (variables or {}).get("domains", {})
+
+        self._domains_patcher = patch.object(
+            self.m,
+            "get_merged_domains",
+            side_effect=_domains_from_vars,
+        )
+        self._domains_patcher.start()
+        self.addCleanup(self._domains_patcher.stop)
+
     def _stub_get_docker_paths(self, application_id: str, base_dir: str) -> dict:
         # Keep structure identical to utils.docker.paths_utils.get_docker_paths()
         # but stable for unit tests.

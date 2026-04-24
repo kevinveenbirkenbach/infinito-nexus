@@ -10,7 +10,7 @@ webserver_extra_configuration:    "{{ lookup('template', 'nginx/helper_iframes.c
 KEYCLOAK_CONTAINER_HOSTNAME:        "{{ entity_name }}"
 KEYCLOAK_DOMAIN:                    "{{ domain }}"
 KEYCLOAK_REALM:                     "{{ OIDC.CLIENT.REALM }}" # This is the name of the default realm which is used by the applications
-KEYCLOAK_URL:                       "{{ lookup('tls', application_id, 'url.base') }}"
+KEYCLOAK_URL:                       "{{ lookup('tls', application_id, 'url.base') | regex_replace('/+$', '') }}"
 KEYCLOAK_REALM_URL:                 "{{ KEYCLOAK_URL }}/realms/{{ KEYCLOAK_REALM }}"
 KEYCLOAK_DEBUG_ENABLED:             "{{ MODE_DEBUG }}"
 KEYCLOAK_CLIENT_ID:                 "{{ OIDC.CLIENT.ID }}"
@@ -20,10 +20,6 @@ KEYCLOAK_SERVER_INTERNAL_URL:       "http://127.0.0.1:8080"
 KEYCLOAK_RBAC_GROUP_CLAIM:          "{{ RBAC.GROUP.CLAIM }}"
 KEYCLOAK_RBAC_GROUP_NAME:           "{{ RBAC.GROUP.NAME }}"
 
-# Users
-KEYCLOAK_RESERVED_USERNAMES_LIST:   "{{ users | reserved_usernames }}"
-KEYCLOAK_RESERVED_USERNAMES_REGEX:  "{{ KEYCLOAK_RESERVED_USERNAMES_LIST | join('|') }}"
-
 ## Health
 KEYCLOAK_HEALTH_ENABLED:            true
 
@@ -32,7 +28,9 @@ KEYCLOAK_REALM_IMPORT_ENABLED:      "{{ lookup('config', application_id, 'compos
 KEYCLOAK_REALM_IMPORT_DIR_HOST:     "{{ [lookup('container', application_id, 'directories.volumes'),'import'] | path_join }}"
 KEYCLOAK_REALM_IMPORT_DIR_DOCKER:   "/opt/keycloak/data/import/"
 KEYCLOAK_REALM_IMPORT_FILE_SRC:     "import/realm.json.j2"
-KEYCLOAK_REALM_IMPORT_FILE_DST:     "{{ [KEYCLOAK_REALM_IMPORT_DIR_HOST,'realm.json'] | path_join }}"
+KEYCLOAK_REALM_IMPORT_FILENAME:     "realm.json"
+KEYCLOAK_REALM_IMPORT_FILE_DST:     "{{ [KEYCLOAK_REALM_IMPORT_DIR_HOST,KEYCLOAK_REALM_IMPORT_FILENAME] | path_join }}"
+KEYCLOAK_REALM_IMPORT_FILE_DOCKER:  "{{ [KEYCLOAK_REALM_IMPORT_DIR_DOCKER,KEYCLOAK_REALM_IMPORT_FILENAME] | path_join }}"
 KEYCLOAK_REALM_TOTP_ENABLED:        "{{ lookup('config', application_id, 'compose.services.keycloak.realm.totp_enabled') }}"
 
 ## Credentials
@@ -60,7 +58,7 @@ KEYCLOAK_SERVER_HOST:               "127.0.0.1:{{ ports.localhost.http[applicati
 KEYCLOAK_REDIRECT_FEATURES:         ["compose.services.oauth2.enabled","compose.services.oidc.enabled"]
 KEYCLOAK_FRONTCHANNEL_LOGOUT_URL:   "{{ lookup('tls', 'web-svc-logout', 'url.base') }}"
 # This will lead to issues later @todo; Optimize:
-KEYCLOAK_REDIRECT_URIS:             "{{ domains | redirect_uris(applications, lookup('tls', application_id, 'protocols.web'), '/*', KEYCLOAK_REDIRECT_FEATURES) }}"
+KEYCLOAK_REDIRECT_URIS:             "{{ lookup('domains') | redirect_uris(lookup('applications'), lookup('tls', application_id, 'protocols.web'), '/*', KEYCLOAK_REDIRECT_FEATURES) }}"
 KEYCLOAK_WEB_ORIGINS: >-
   {{ KEYCLOAK_REDIRECT_URIS
       | map('regex_replace','/\\*$','')
@@ -95,38 +93,6 @@ KEYCLOAK_USER_EMAILS_VERIFIED:      "{{ lookup('config', application_id, 'compos
 KEYCLOAK_RECAPTCHA_ENABLED: "{{ lookup('config', application_id, 'compose.services.recaptcha.enabled') }}"
 KEYCLOAK_RECAPTCHA_KEY:     "{{ lookup('config', application_id, 'credentials.recaptcha.key') }}"
 KEYCLOAK_RECAPTCHA_SECRET:  "{{ lookup('config', application_id, 'credentials.recaptcha.secret') }}"
-
-# Dictionaries
-KEYCLOAK_DICTIONARY_REALM_RAW: "{{ lookup('template', 'import/realm.json.j2') }}"
-KEYCLOAK_DICTIONARY_REALM: >-
-  {{
-    KEYCLOAK_DICTIONARY_REALM_RAW
-      if (KEYCLOAK_DICTIONARY_REALM_RAW is mapping)
-      else (KEYCLOAK_DICTIONARY_REALM_RAW | from_json)
-  }}
-
-# Parsed user profile object from the realm template
-KEYCLOAK_USER_PROFILE_OBJECT: >-
-  {{
-    (
-      KEYCLOAK_DICTIONARY_REALM.components['org.keycloak.userprofile.UserProfileProvider']
-      | first
-    )['config']['kc.user.profile.config'][0]
-    | from_json
-  }}
-
-# Payload we actually want to merge into the component's config
-KEYCLOAK_USER_PROFILE_CONFIG_PAYLOAD: >-
-  {{
-    {
-      'config': {
-        'kc.user.profile.config': [
-          KEYCLOAK_USER_PROFILE_OBJECT | to_json
-        ]
-      }
-    }
-  }}
-
 
 KEYCLOAK_COMMAND_PERMANENT_ADMIN_LOGIN: |-
   {{ KEYCLOAK_EXEC_CONTAINER }} sh -lc '

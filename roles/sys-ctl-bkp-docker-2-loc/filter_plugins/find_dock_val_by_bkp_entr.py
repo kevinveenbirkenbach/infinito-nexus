@@ -10,7 +10,7 @@ def find_dock_val_by_bkp_entr(applications, search_string, mapped_entry):
     :param applications: dict of applications
     :param search_string: string, the backup subkey to search for (e.g., "enabled")
     :param mapped_entry: string, the key to return from the service (e.g., "name")
-    :return: list of mapped_entry values
+    :return: sorted list of mapped_entry values
     """
     if not isinstance(applications, dict):
         raise AnsibleFilterError("applications must be a dict")
@@ -29,7 +29,7 @@ def find_dock_val_by_bkp_entr(applications, search_string, mapped_entry):
                 mapped_value = svc.get(mapped_entry)
                 if mapped_value is not None:
                     results.append(mapped_value)
-    return results
+    return sorted(results)
 
 
 class FilterModule(object):

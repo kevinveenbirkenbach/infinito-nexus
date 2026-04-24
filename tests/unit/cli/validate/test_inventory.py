@@ -17,28 +17,21 @@ SCRIPT_PATH = os.path.abspath(
 class TestValidateInventory(unittest.TestCase):
     def setUp(self):
         self.temp_dir = tempfile.mkdtemp()
-        self.group_vars_all = Path(self.temp_dir) / "group_vars" / "all"
-        self.group_vars_all.mkdir(parents=True)
-
+        self.roles_dir = Path(self.temp_dir) / "roles"
+        (self.roles_dir / "app1" / "config").mkdir(parents=True)
+        (self.roles_dir / "identity" / "users").mkdir(parents=True)
         self.inventory_dir = Path(self.temp_dir) / "inventory"
         self.inventory_dir.mkdir()
 
-        # Create default applications file
-        self.default_applications = {
-            "defaults_applications": {
-                "app1": {"port": 8080, "enabled": True, "settings": {"theme": "dark"}}
-            }
-        }
-        (self.group_vars_all / "01_applications.yml").write_text(
-            yaml.dump(self.default_applications), encoding="utf-8"
+        (self.roles_dir / "app1" / "config" / "main.yml").write_text(
+            yaml.safe_dump(
+                {"port": 8080, "enabled": True, "settings": {"theme": "dark"}}
+            ),
+            encoding="utf-8",
         )
-
-        # Create default users file
-        self.default_users = {
-            "default_users": {"alice": {"email": "alice@example.com", "role": "admin"}}
-        }
-        (self.group_vars_all / "01_users.yml").write_text(
-            yaml.dump(self.default_users), encoding="utf-8"
+        (self.roles_dir / "identity" / "users" / "main.yml").write_text(
+            yaml.safe_dump({"users": {"alice": {"email": "alice@example.com"}}}),
+            encoding="utf-8",
         )
 
     def tearDown(self):
@@ -46,7 +39,13 @@ class TestValidateInventory(unittest.TestCase):
 
     def run_script(self, expected_code=0):
         result = subprocess.run(
-            [sys.executable, SCRIPT_PATH, str(self.inventory_dir)],
+            [
+                sys.executable,
+                SCRIPT_PATH,
+                str(self.inventory_dir),
+                "--roles-dir",
+                str(self.roles_dir),
+            ],
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
             encoding="utf-8",
@@ -71,7 +70,6 @@ class TestValidateInventory(unittest.TestCase):
                     "users": {
                         "alice": {
                             "email": "alice@example.com",
-                            "role": "admin",
                             "password": "secret",
                         }
                     },
@@ -85,7 +83,7 @@ class TestValidateInventory(unittest.TestCase):
 
     def test_unknown_user_warning(self):
         (self.inventory_dir / "invalid_users.yml").write_text(
-            yaml.dump({"users": {"bob": {"email": "bob@example.com", "role": "user"}}}),
+            yaml.dump({"users": {"bob": {"email": "bob@example.com"}}}),
             encoding="utf-8",
         )
 
@@ -99,7 +97,6 @@ class TestValidateInventory(unittest.TestCase):
                     "users": {
                         "alice": {
                             "email": "alice@example.com",
-                            "role": "admin",
                             "extra": "unexpected",
                         }
                     }

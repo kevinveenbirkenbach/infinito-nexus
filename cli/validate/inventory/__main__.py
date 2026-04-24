@@ -4,11 +4,16 @@ import sys
 import yaml
 import re
 from pathlib import Path
-from cli.meta.applications.all import find_application_ids
 
-# Ensure imports work when run directly
-script_dir = Path(__file__).resolve().parent
-repo_root = script_dir.parent.parent
+# Ensure imports work when invoked as a script (subprocess without PYTHONPATH).
+repo_root = Path(__file__).resolve().parents[3]
+if str(repo_root) not in sys.path:
+    sys.path.insert(0, str(repo_root))
+
+from utils.runtime_data import (  # noqa: E402
+    get_application_defaults,
+    get_user_defaults,
+)
 
 
 def load_yaml_file(path):
@@ -36,15 +41,13 @@ def recursive_keys(d, prefix=""):
     return keys
 
 
-def compare_application_keys(applications, defaults, source):
+def compare_application_keys(applications, application_defaults, source):
     errs = []
     for app_id, conf in applications.items():
-        if app_id not in defaults:
-            errs.append(
-                f"{source}: Unknown application '{app_id}' (not in defaults_applications)"
-            )
+        if app_id not in application_defaults:
+            errs.append(f"{source}: Unknown application '{app_id}'")
             continue
-        default = defaults[app_id]
+        default = application_defaults[app_id]
         app_keys = recursive_keys(conf)
         def_keys = recursive_keys(default)
         for key in app_keys:
@@ -55,16 +58,16 @@ def compare_application_keys(applications, defaults, source):
     return errs
 
 
-def compare_user_keys(users, default_users, source):
+def compare_user_keys(users, user_defaults, source):
     errs = []
     for user, conf in users.items():
-        if user not in default_users:
+        if user not in user_defaults:
             print(
-                f"Warning: {source}: Unknown user '{user}' (not in default_users)",
+                f"Warning: {source}: Unknown user '{user}'",
                 file=sys.stderr,
             )
             continue
-        def_conf = default_users[user]
+        def_conf = user_defaults[user]
         for key in conf:
             if key in ("password", "credentials"):
                 continue
@@ -79,7 +82,7 @@ def load_inventory_files(inv_dir):
     for f in p.glob("*.yml"):
         data = load_yaml_file(f)
         if isinstance(data, dict):
-            apps = data.get("applications") or data.get("defaults_applications")
+            apps = data.get("applications")
             if apps:
                 all_data[str(f)] = apps
     for d in p.glob("*_vars"):
@@ -87,7 +90,7 @@ def load_inventory_files(inv_dir):
             for f in d.rglob("*.yml"):
                 data = load_yaml_file(f)
                 if isinstance(data, dict):
-                    apps = data.get("applications") or data.get("defaults_applications")
+                    apps = data.get("applications")
                     if apps:
                         all_data[str(f)] = apps
     return all_data
@@ -111,45 +114,39 @@ def validate_host_keys(app_ids, inv_dir):
     return errs
 
 
-def find_single_file(pattern):
-    c = list(Path("group_vars/all").glob(pattern))
-    if len(c) != 1:
-        raise RuntimeError(
-            f"Expected exactly one {pattern} in group_vars/all, found {len(c)}"
-        )
-    return c[0]
-
-
 def main():
     p = argparse.ArgumentParser()
     p.add_argument("inventory_dir")
+    p.add_argument(
+        "--roles-dir",
+        default=str(repo_root / "roles"),
+        help="Path to the repository roles directory.",
+    )
     args = p.parse_args()
-    # defaults
-    dfile = find_single_file("*_applications.yml")
-    ufile = find_single_file("*users.yml")
-    ddata = load_yaml_file(dfile) or {}
-    udata = load_yaml_file(ufile) or {}
-    defaults = ddata.get("defaults_applications", {})
-    default_users = udata.get("default_users", {})
-    if not defaults:
-        print(f"Error: No 'defaults_applications' found in {dfile}", file=sys.stderr)
+    application_defaults = get_application_defaults(roles_dir=args.roles_dir)
+    user_defaults = get_user_defaults(roles_dir=args.roles_dir)
+    if not application_defaults:
+        print(
+            "Error: No application defaults discovered in roles directory",
+            file=sys.stderr,
+        )
         sys.exit(1)
-    if not default_users:
-        print(f"Error: No 'default_users' found in {ufile}", file=sys.stderr)
+    if not user_defaults:
+        print("Error: No user defaults discovered in roles directory", file=sys.stderr)
         sys.exit(1)
     app_errs = []
     inv_files = load_inventory_files(args.inventory_dir)
     for src, apps in inv_files.items():
-        app_errs.extend(compare_application_keys(apps, defaults, src))
+        app_errs.extend(compare_application_keys(apps, application_defaults, src))
     user_errs = []
     for fpath in Path(args.inventory_dir).rglob("*.yml"):
         data = load_yaml_file(fpath)
         if isinstance(data, dict) and "users" in data:
-            errs = compare_user_keys(data["users"], default_users, str(fpath))
+            errs = compare_user_keys(data["users"], user_defaults, str(fpath))
             for e in errs:
                 print(e, file=sys.stderr)
             user_errs.extend(errs)
-    host_errs = validate_host_keys(find_application_ids(), args.inventory_dir)
+    host_errs = validate_host_keys(set(application_defaults), args.inventory_dir)
     app_errs.extend(host_errs)
     if app_errs or user_errs:
         if app_errs:

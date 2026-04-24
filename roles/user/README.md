@@ -7,12 +7,13 @@ for a user selected via `user_key`.
 
 ## Single Point of Truth (SPOT)
 
-User data is defined under `users.<key>` and referenced exclusively via `user_key`.
+User data is resolved via `lookup('users', user_key)` and referenced via `user_key`.
+Callers may pass `user_config` to override the resolved lookup result for one invocation.
 
 Resolution rules:
-- `user_username` is resolved from `users[user_key].username` (fallback: `user_key`)
+- `user_username` is resolved from `lookup('users', user_key).username` (fallback: `user_key`)
 - Home path and ownership are based on `user_username`
-- SSH keys are read from `users[user_key].authorized_keys`
+- SSH keys are read from `lookup('users', user_key).authorized_keys`
 
 ## Required input
 
@@ -20,5 +21,13 @@ Resolution rules:
 
 ## Optional user fields
 
-- `users.<user_key>.username` (defaults to `<user_key>`)
-- `users.<user_key>.authorized_keys` (list; may be empty)
+- `lookup('users', user_key).username` (defaults to `user_key`)
+- `lookup('users', user_key).authorized_keys` (list; may be empty)
+- optional include-role var `user_config` to override the lookup result for the current call
+
+## Credits
+
+Developed and maintained by **Kevin Veen-Birkenbach**.
+Learn more at [veen.world](https://www.veen.world).
+Part of the [Infinito.Nexus Project](https://s.infinito.nexus/code).
+Licensed under the [Infinito.Nexus Community License (Non-Commercial)](https://s.infinito.nexus/license).
