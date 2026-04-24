@@ -9,7 +9,6 @@
         query(
           'service_registry',
           'ordered',
-          applications=applications,
           roles_dir=([ playbook_dir, 'roles' ] | path_join)
         ) | first
       }}
@@ -22,7 +21,7 @@
     service_run_once_var: "{{ 'run_once_' ~ (service_item.role | replace('-', '_')) }}"
   when:
     - lookup('vars', service_run_once_var, default='__missing__') == '__missing__'
-    - lookup('service', service_item.id).needed | bool
+    - lookup('service', service_item.id).required | bool
   loop: "{{ _ordered_services }}"
   loop_control:
     loop_var: service_item

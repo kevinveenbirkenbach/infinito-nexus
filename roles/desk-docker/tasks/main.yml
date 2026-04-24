@@ -5,8 +5,8 @@
       - docker-compose
     state: present
 
-- name: "Adding user {{ users[WORKSTATION_USER].username }} to relevant docker usergroup"
+- name: "Adding user {{ lookup('users', WORKSTATION_USER).username }} to relevant docker usergroup"
   user: 
-    name: "{{ users[WORKSTATION_USER].username }}"
+    name: "{{ lookup('users', WORKSTATION_USER).username }}"
     groups: docker
     append: yes

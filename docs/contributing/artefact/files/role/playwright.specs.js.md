@@ -23,6 +23,7 @@ For the matching rendered environment contract, see [Agent `playwright.env.j2`](
 - When the role enables OIDC or LDAP, at least one scenario MUST exercise the integrated login path so the auth-flow wiring is covered end to end (not only the local-form login).
 - A scenario MUST be added or updated whenever role-local `style.css` or `javascript.js` changes user-visible behavior, asserting on the visible effect.
 - When the application supports peer-to-peer messaging, the spec MUST cover a bi-directional exchange between `biber` and `administrator`: `biber` sends a direct message to `administrator` AND `administrator` sends one back, each delivery asserted in the recipient's inbox from an isolated browser context.
+- Existing scenarios MUST NOT be deleted when optimizing a spec. Rewrite them to satisfy the MUSTs above or strengthen their assertions, but do not shrink coverage by removing a scenario — deletions are only acceptable when the underlying behavior has been removed from the role itself.
 
 ## Selectors and Waits ⏳
 

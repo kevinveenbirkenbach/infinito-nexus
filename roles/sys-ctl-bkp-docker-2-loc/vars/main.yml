@@ -18,13 +18,13 @@ BKP_DOCKER_2_LOC_DB_ENABLED: >-
 
 # Gather mapped values as lists
 BKP_DOCKER_2_LOC_DB_ROUTINE: >-
-  {{ applications | find_dock_val_by_bkp_entr('database_routine', 'name') | list | sort }}
+  {{ lookup('applications') | find_dock_val_by_bkp_entr('database_routine', 'name') }}
 
 BKP_DOCKER_2_LOC_NO_STOP_REQUIRED: >-
-  {{ applications | find_dock_val_by_bkp_entr('no_stop_required', 'image') | list | sort }}
+  {{ lookup('applications') | find_dock_val_by_bkp_entr('no_stop_required', 'image') }}
 
 BKP_DOCKER_2_LOC_DISABLED: >-
-  {{ applications | find_dock_val_by_bkp_entr('disabled', 'image') | list | sort }}
+  {{ lookup('applications') | find_dock_val_by_bkp_entr('disabled', 'image') }}
 
 # CLI argument strings (only set if list not empty)
 BKP_DOCKER_2_LOC_DB_ROUTINE_CLI: >-

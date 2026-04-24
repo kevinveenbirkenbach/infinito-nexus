@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import unittest
+from unittest.mock import patch
 
 from ansible.errors import AnsibleError
 
@@ -17,17 +18,29 @@ _SERVICE_REGISTRY = {
 
 
 def _run(terms, applications, group_names, service_registry=None):
-    kwargs = {}
+    patches = [
+        patch(
+            "plugins.lookup.service.get_merged_applications",
+            return_value=applications,
+        )
+    ]
     if service_registry is not None:
-        kwargs["service_registry"] = service_registry
-    return LookupModule().run(
-        terms,
-        variables={
-            "applications": applications,
-            "group_names": group_names,
-        },
-        **kwargs,
-    )
+        patches.append(
+            patch(
+                "plugins.lookup.service.build_service_registry_from_applications",
+                return_value=service_registry,
+            )
+        )
+    for p in patches:
+        p.start()
+    try:
+        return LookupModule().run(
+            terms,
+            variables={"group_names": group_names},
+        )
+    finally:
+        for p in reversed(patches):
+            p.stop()
 
 
 class TestServiceDirect(unittest.TestCase):
@@ -53,23 +66,23 @@ class TestServiceDirect(unittest.TestCase):
             service_registry=_SERVICE_REGISTRY,
         )[0]
 
-    def test_needed_true_when_enabled_and_shared(self):
-        self.assertTrue(self._get("matomo")["needed"])
+    def test_required_true_when_enabled_and_shared(self):
+        self.assertTrue(self._get("matomo")["required"])
 
-    def test_needed_false_when_enabled_only(self):
-        self.assertFalse(self._get("cdn")["needed"])
+    def test_required_false_when_enabled_only(self):
+        self.assertFalse(self._get("cdn")["required"])
 
-    def test_needed_false_when_shared_only(self):
-        self.assertFalse(self._get("logout")["needed"])
+    def test_required_false_when_shared_only(self):
+        self.assertFalse(self._get("logout")["required"])
 
-    def test_needed_false_when_service_absent(self):
-        self.assertFalse(self._get("collab")["needed"])
+    def test_required_false_when_service_absent(self):
+        self.assertFalse(self._get("collab")["required"])
 
-    def test_needed_false_when_group_names_do_not_match(self):
-        self.assertFalse(self._get("matomo", ["web-app-unknown"])["needed"])
+    def test_required_false_when_group_names_do_not_match(self):
+        self.assertFalse(self._get("matomo", ["web-app-unknown"])["required"])
 
-    def test_needed_true_when_any_app_qualifies(self):
-        self.assertTrue(self._get("matomo", ["web-app-bar", "web-app-foo"])["needed"])
+    def test_required_true_when_any_app_qualifies(self):
+        self.assertTrue(self._get("matomo", ["web-app-bar", "web-app-foo"])["required"])
 
     def test_enabled_shared_flags_are_aggregated_via_canonical_alias(self):
         result = self._get("cdn")
@@ -89,9 +102,9 @@ class TestServiceDirect(unittest.TestCase):
             service_registry=_SERVICE_REGISTRY,
         )
         self.assertEqual(len(results), 3)
-        self.assertTrue(results[0]["needed"])
-        self.assertFalse(results[1]["needed"])
-        self.assertFalse(results[2]["needed"])
+        self.assertTrue(results[0]["required"])
+        self.assertFalse(results[1]["required"])
+        self.assertFalse(results[2]["required"])
 
     def test_empty_terms_returns_empty(self):
         self.assertEqual(
@@ -120,14 +133,14 @@ class TestServiceTransitive(unittest.TestCase):
             },
         }
 
-    def test_transitive_needed_resolved(self):
+    def test_transitive_required_resolved(self):
         result = _run(
             ["matomo"],
             self.applications,
             ["web-app-nextcloud"],
             service_registry=_SERVICE_REGISTRY,
         )[0]
-        self.assertTrue(result["needed"])
+        self.assertTrue(result["required"])
 
     def test_transitive_requires_shared_at_target(self):
         applications = {
@@ -142,16 +155,16 @@ class TestServiceTransitive(unittest.TestCase):
             ["web-app-nextcloud"],
             service_registry=_SERVICE_REGISTRY,
         )[0]
-        self.assertFalse(result["needed"])
+        self.assertFalse(result["required"])
 
-    def test_direct_provider_is_not_needed_without_shared_flag(self):
+    def test_direct_provider_is_not_required_without_shared_flag(self):
         result = _run(
             ["collab"],
             self.applications,
             ["web-app-nextcloud"],
             service_registry=_SERVICE_REGISTRY,
         )[0]
-        self.assertFalse(result["needed"])
+        self.assertFalse(result["required"])
 
 
 class TestServiceDiscoveryWithoutExplicitRegistry(unittest.TestCase):
@@ -175,7 +188,7 @@ class TestServiceDiscoveryWithoutExplicitRegistry(unittest.TestCase):
 
         result = _run(["dashboard"], applications, ["web-app-foo"])[0]
         self.assertEqual(result["role"], "web-app-dashboard")
-        self.assertTrue(result["needed"])
+        self.assertTrue(result["required"])
 
     def test_provides_and_canonical_are_discovered_from_provider_configs(self):
         applications = {
@@ -212,10 +225,10 @@ class TestServiceDiscoveryWithoutExplicitRegistry(unittest.TestCase):
         cdn = _run(["cdn"], applications, ["web-app-foo"])[0]
 
         self.assertEqual(oidc["role"], "web-app-keycloak")
-        self.assertTrue(oidc["needed"])
+        self.assertTrue(oidc["required"])
         self.assertEqual(cdn["role"], "web-svc-cdn")
         self.assertTrue(cdn["enabled"])
-        self.assertFalse(cdn["needed"])
+        self.assertFalse(cdn["required"])
 
 
 class TestServiceCycleGuard(unittest.TestCase):
@@ -235,7 +248,7 @@ class TestServiceCycleGuard(unittest.TestCase):
             ["svc-a"],
             service_registry=service_registry,
         )[0]
-        self.assertFalse(result["needed"])
+        self.assertFalse(result["required"])
 
     def test_cycle_found_if_service_present(self):
         applications = {
@@ -260,35 +273,17 @@ class TestServiceCycleGuard(unittest.TestCase):
             ["svc-b"],
             service_registry=service_registry,
         )[0]
-        self.assertTrue(result["needed"])
+        self.assertTrue(result["required"])
 
 
 class TestServiceErrors(unittest.TestCase):
-    def test_raises_when_applications_missing(self):
-        with self.assertRaises(AnsibleError):
-            LookupModule().run(["matomo"], variables={"group_names": ["web-app-foo"]})
-
-    def test_raises_when_applications_not_mapping(self):
-        with self.assertRaises(AnsibleError):
-            LookupModule().run(
-                ["matomo"],
-                variables={"applications": ["not", "a", "dict"], "group_names": []},
-            )
-
     def test_raises_when_group_names_not_list(self):
-        with self.assertRaises(AnsibleError):
-            LookupModule().run(
-                ["matomo"],
-                variables={"applications": {}, "group_names": "not-a-list"},
-            )
-
-    def test_raises_when_service_registry_not_mapping(self):
-        with self.assertRaises(AnsibleError):
-            LookupModule().run(
-                ["matomo"],
-                variables={"applications": {}, "group_names": []},
-                service_registry="not-a-dict",
-            )
+        with patch("plugins.lookup.service.get_merged_applications", return_value={}):
+            with self.assertRaises(AnsibleError):
+                LookupModule().run(
+                    ["matomo"],
+                    variables={"group_names": "not-a-list"},
+                )
 
     def test_raises_when_term_empty(self):
         with self.assertRaises(AnsibleError):

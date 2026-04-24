@@ -16,6 +16,7 @@
       - data:/prometheus
       - {{ PROMETHEUS_CONFIG_HOST }}:{{ PROMETHEUS_CONFIG_DOCKER }}:ro
       - {{ ALERT_RULES_CONFIG_HOST }}:{{ ALERT_RULES_CONFIG_DOCKER }}:ro
+
 {% include 'roles/sys-svc-container/templates/networks.yml.j2' %}
 {% for metrics_app_id in lookup('native_metrics_apps') %}
       {{ metrics_app_id | get_entity_name }}:
@@ -78,7 +79,7 @@
       - "--path.sysfs=/host/sys"
       - "--collector.filesystem.mount-points-exclude=^/(sys|proc|dev|host|etc)($$|/)"
 
-{{ applications | compose_volumes(application_id, extra_volumes={'data': {'name': PROMETHEUS_VOLUME_DATA}, 'alertmanager_data': {'name': ALERTMANAGER_VOLUME_DATA}}) }}
+{{ lookup('applications') | compose_volumes(application_id, extra_volumes={'data': {'name': PROMETHEUS_VOLUME_DATA}, 'alertmanager_data': {'name': ALERTMANAGER_VOLUME_DATA}}) }}
 {% include 'roles/sys-svc-compose/templates/networks.yml.j2' %}
 {% for metrics_app_id in lookup('native_metrics_apps') %}
   {{ metrics_app_id | get_entity_name }}:

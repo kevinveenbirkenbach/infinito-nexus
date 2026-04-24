@@ -24,4 +24,8 @@
     executable: /bin/bash
     chdir: "{{ DISCOURSE_REPOSITORY_DIR }}"
   listen: recreate discourse
+  register: discourse_rebuild
+  retries: 3
+  delay: 60
+  until: discourse_rebuild.rc == 0
   no_log: "{{ MASK_CREDENTIALS_IN_LOGS | bool }}"

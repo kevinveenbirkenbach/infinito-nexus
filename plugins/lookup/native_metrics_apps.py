@@ -8,6 +8,7 @@ from ansible.errors import AnsibleError
 from ansible.plugins.lookup import LookupBase
 
 from utils.applications.config import get as get_app_conf
+from utils.runtime_data import get_merged_applications
 
 
 class LookupModule(LookupBase):
@@ -24,8 +25,8 @@ class LookupModule(LookupBase):
       {% include 'roles/' + app_id + '/templates/prometheus.yml.j2' %}
       {% endfor %}
 
-    'applications' is read from available_variables — the same source used by
-    lookup('config') and lookup('database'). No explicit passing required.
+    'applications' is obtained via get_merged_applications — the same merged view
+    that backs lookup('applications').
     """
 
     def run(
@@ -36,14 +37,14 @@ class LookupModule(LookupBase):
     ) -> List[List[str]]:
         vars_ = variables or getattr(self._templar, "available_variables", {}) or {}
 
-        applications = vars_.get("applications")
-        if not isinstance(applications, dict):
-            raise AnsibleError(
-                "native_metrics_apps: required variable 'applications' must be a mapping"
-            )
+        roles_dir = self._find_roles_dir()
+        applications = get_merged_applications(
+            variables=vars_,
+            roles_dir=kwargs.get("roles_dir") or str(roles_dir),
+            templar=getattr(self, "_templar", None),
+        )
 
         group_names: List[str] = vars_.get("group_names", [])
-        roles_dir = self._find_roles_dir()
 
         result: List[str] = []
         for app_id in sorted(applications.keys()):

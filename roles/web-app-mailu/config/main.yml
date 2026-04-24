@@ -1,4 +1,4 @@
-domain:                   "{{ SYSTEM_EMAIL_DOMAIN }}" # The main domain from which mails will be send \ email suffix behind @                              
+domain:                   "{{ lookup('email').domain }}" # The main domain from which mails will be send \ email suffix behind @
 server:
   status_codes:
     default:

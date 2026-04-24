@@ -8,16 +8,18 @@ from typing import Any, Dict, Optional
 from ansible.errors import AnsibleError
 from ansible.plugins.lookup import LookupBase
 
+from utils.runtime_data import get_merged_domains
+
 
 class LookupModule(LookupBase):
     """
     Usage:
       {{ lookup('domain', application_id) }}
 
-    Reads:
-      - variables['domains'] (required)
-    Returns:
-      - domain as string (resolved via utils.domains.primary_domain.get_domain)
+    Resolves the canonical primary domain for `application_id` via
+    utils.runtime_data.get_merged_domains (cached). Per-app overrides
+    belong in `applications.<app>.server.domains` and flow through the
+    regular applications-merge pipeline.
     """
 
     def run(self, terms, variables: Optional[Dict[str, Any]] = None, **kwargs):
@@ -32,11 +34,14 @@ class LookupModule(LookupBase):
                 f"lookup('domain'): application_id must be a non-empty string, got {application_id!r}"
             )
 
-        variables = variables or {}
-        if "domains" not in variables:
-            raise AnsibleError("lookup('domain'): missing required variable 'domains'")
+        variables = variables or getattr(self._templar, "available_variables", {}) or {}
 
-        # Make utils importable (project_root/utils)
+        domains = get_merged_domains(
+            variables=variables,
+            roles_dir=kwargs.get("roles_dir"),
+            templar=getattr(self, "_templar", None),
+        )
+
         plugin_dir = os.path.dirname(os.path.abspath(__file__))
         project_root = os.path.abspath(os.path.join(plugin_dir, "..", ".."))
         if project_root not in sys.path:
@@ -50,7 +55,7 @@ class LookupModule(LookupBase):
             )
 
         try:
-            domain = get_domain(variables["domains"], application_id.strip())
+            domain = get_domain(domains, application_id.strip())
         except Exception as e:
             raise AnsibleError(
                 f"lookup('domain'): failed to resolve domain for '{application_id}': {e}"

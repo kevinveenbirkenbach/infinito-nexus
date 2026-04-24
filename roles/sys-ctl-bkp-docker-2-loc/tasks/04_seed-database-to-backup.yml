@@ -58,12 +58,12 @@
 - name: Seed database definition via baudolo-seed (system binary)
   ansible.builtin.command:
     argv:
-      - "{{ lookup('command_path', 'baudolo-seed') }}"
-      - "{{ FILE_DATABASE_SECRETS }}"
-      - "{{ database_instance }}"
+      - "{{ lookup('command_path', 'baudolo-seed') | string }}"
+      - "{{ FILE_DATABASE_SECRETS | string }}"
+      - "{{ database_instance | string }}"
       - "{{ '*' if (database_name | string | length) == 0 else (database_name | string) }}"
-      - "{{ database_username }}"
-      - "{{ database_password }}"
+      - "{{ database_username | string }}"
+      - "{{ database_password | string }}"
   no_log: "{{ MASK_CREDENTIALS_IN_LOGS | bool }}"
   async: "{{ ASYNC_TIME if ASYNC_ENABLED | bool else omit }}"
   poll: "{{ ASYNC_POLL if ASYNC_ENABLED | bool else omit }}"

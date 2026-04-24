@@ -49,6 +49,14 @@ Changes to the policy MUST edit [`.claude/settings.json`](.claude/settings.json)
 
 Agents MUST write all transient files (downloaded logs, intermediate output, scratch artefacts) to `/tmp`. The set of writable paths is defined by `sandbox.filesystem.allowWrite` in [`.claude/settings.json`](.claude/settings.json); of those entries, `/tmp` is the designated path for agent scratch data. Other entries are reserved for their respective tooling and MUST NOT be repurposed for agent temp data. The repository working tree MUST NOT hold transient files.
 
+## Container-Owned Filesystem Entries 🐳
+
+Files produced by the containerized runner (e.g. `__pycache__/*.pyc` under `tests/`, build artefacts) are often owned by `nobody` or another in-container UID and cannot be removed from the host. When a host-level `rm`/`chmod`/edit fails with `Permission denied` on such paths, agents MUST run the cleanup via `make exec` (see [compose.yml](compose.yml) — the repo is mounted at `/opt/src/infinito`) and MUST NOT ask the operator which path to take.
+
+## Commit-Time Context Compaction 📦
+
+Whenever the agent runs `git commit` (the pre-commit hook executes `make test`, which takes several minutes), the agent MUST trigger context compaction in parallel so the wait time is spent productively. Preferred flow: launch the commit as a background task, then immediately invoke `/compact` (or equivalent context-compaction mechanism) while the hook runs. The agent MUST NOT idle-wait for `make test` to finish before compacting.
+
 ## Skills 🎓
 
 At the start of every conversation, the agent MUST check whether agent skills are installed by verifying that `.agents/skills/` exists and is non-empty. If skills are missing, the agent MUST notify the user once with:

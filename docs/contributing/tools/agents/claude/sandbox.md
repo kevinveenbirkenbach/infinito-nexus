@@ -1,6 +1,6 @@
 # Claude Code Sandbox 🏖️
 
-This page documents the OS-level sandbox configuration for Claude Code. The relevant keys live under `sandbox` in [`.claude/settings.json`](../../../../../.claude/settings.json). The sandbox is the **primary** containment layer in this project: with `autoAllowBashIfSandboxed` enabled, sandbox confinement (not the per-command allowlist) is what bounds the blast radius of Bash. The `allow`/`ask`/`deny` lists described in [settings.md](settings.md) remain in force on top of it as the policy gate.
+This page documents the OS-level sandbox configuration for Claude Code. The relevant keys live under `sandbox` in [`.claude/settings.json`](../../../../../.claude/settings.json). The sandbox is the **primary** containment layer in this project: because the allowlist uses the wildcard `Bash(*)` (with `autoAllowBashIfSandboxed` as defence-in-depth), sandbox confinement, not the per-command allowlist, is what bounds the blast radius of Bash. The `allow`/`ask`/`deny` lists described in [settings.md](settings.md) remain in force on top of it as the policy gate.
 
 ## Activation 🟢
 
@@ -16,7 +16,7 @@ The settings file additionally sets `"sandbox": { "failIfUnavailable": true }`. 
 
 ## Bash Auto-Allow ⚡
 
-`"sandbox": { "autoAllowBashIfSandboxed": true }` treats sandbox confinement as sufficient policy for Bash. While the sandbox is active, Bash commands run automatically without an explicit `Bash(...)` entry in `permissions.allow`, as long as no `deny` or `ask` rule matches. This keeps the allowlist small (see [settings.md](settings.md)) and removes the friction of extending it for every new make target or script. The trade-off is that the sandbox MUST be correct: `allowWrite`, `denyRead`, and the network rules below are now the operative policy for what Bash can touch.
+`"sandbox": { "autoAllowBashIfSandboxed": true }` treats sandbox confinement as sufficient policy for Bash. It exists as defence-in-depth alongside the explicit `Bash(*)` allow entry in `permissions.allow`: with either in place, Bash commands run automatically as long as no `deny` or `ask` rule matches. The wildcard `Bash(*)` is the primary gate today; the flag guarantees the agent stays functional if that entry is ever narrowed or removed. This keeps the allowlist small (see [settings.md](settings.md)) and removes the friction of extending it for every new make target or script. The trade-off is that the sandbox MUST be correct: `allowWrite`, `denyRead`, and the network rules below are now the operative policy for what Bash can touch.
 
 ## Installing the Sandbox Backend 📥
 
@@ -65,7 +65,7 @@ The following directories are never readable, even if a task explicitly requests
 
 | Path | What it protects |
 |---|---|
-| `~/.gnupg` | GPG keys and keyrings. The agent therefore cannot create signed commits — see the GPG signing override in [settings.md](settings.md#environment-overrides-) for how this is reconciled with `commit.gpgsign=true` on the host. |
+| `~/.gnupg` | GPG keys and keyrings. The agent therefore cannot create signed commits. See the GPG signing override in [settings.md](settings.md#environment-overrides-) for how this is reconciled with `commit.gpgsign=true` on the host. |
 | `~/.kube` | Kubernetes cluster credentials. |
 | `~/.aws` | AWS access keys and configuration. |
 | `~/.config/gcloud` | Google Cloud service account credentials. |
@@ -78,7 +78,7 @@ The `sandbox.network` block governs outbound and local connectivity from inside 
 
 | Field | Current value | Effect |
 |---|---|---|
-| `allowedDomains` | List of domain patterns the agent or its tooling needs to reach. Apex domains are listed bare (`pypi.org`, `github.com`, `ghcr.io`, `letsencrypt.org`, `monogramm.io`, `cybermaster.space`, `infinito.nexus`, `infinito.example`); subdomain families use the `*.parent.tld` form (`*.pythonhosted.org`, `*.ansible.com`, `*.amazonaws.com`, `*.github.com`, `*.githubusercontent.com`, `*.npmjs.org`, `*.docker.com`, `*.gitea.com`, `*.hcaptcha.com`, `*.gstatic.com`, `*.taiga.io`, `*.infinito.nexus`). | Subdomain wildcards (`*.example.com`) are honored, but a bare `*` is not — sandboxed network access is enforced per pattern, and any unmatched host triggers an interactive `SandboxNetworkAccess` prompt. Add a new pattern here when introducing tooling that fetches from a new origin; egress is still bounded by any host-level firewall on top. |
+| `allowedDomains` | List of domain patterns the agent or its tooling needs to reach. Apex domains are listed bare (`pypi.org`, `github.com`, `ghcr.io`, `letsencrypt.org`, `monogramm.io`, `cybermaster.space`, `infinito.nexus`, `infinito.example`); subdomain families use the `*.parent.tld` form (`*.pythonhosted.org`, `*.ansible.com`, `*.amazonaws.com`, `*.github.com`, `*.githubusercontent.com`, `*.npmjs.org`, `*.docker.com`, `*.gitea.com`, `*.hcaptcha.com`, `*.gstatic.com`, `*.taiga.io`, `*.infinito.nexus`). | Subdomain wildcards (`*.example.com`) are honored, but a bare `*` is not; sandboxed network access is enforced per pattern, and any unmatched host triggers an interactive `SandboxNetworkAccess` prompt. Add a new pattern here when introducing tooling that fetches from a new origin; egress is still bounded by any host-level firewall on top. |
 | `allowAllUnixSockets` | `true` | The sandbox can connect to any Unix-domain socket on the host. Required so commands like `docker`, `systemctl`, and language servers continue to work; these all communicate over Unix sockets (e.g. `/var/run/docker.sock`). |
 | `allowLocalBinding` | `true` | The agent MAY bind listening sockets on `localhost` (e.g. `make up`, `python -m http.server`, dev servers). Required for any local end-to-end testing. |
 

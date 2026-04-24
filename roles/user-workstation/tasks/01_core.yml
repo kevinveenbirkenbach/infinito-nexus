@@ -3,10 +3,10 @@
     msg: "WORKSTATION_USER must be defined (e.g. WORKSTATION_USER: biber)."
   when: WORKSTATION_USER is not defined or (WORKSTATION_USER | string | length) == 0
 
-- name: Validate users.<WORKSTATION_USER> exists
+- name: Validate lookup('users', WORKSTATION_USER) exists
   ansible.builtin.fail:
-    msg: "users.{{ WORKSTATION_USER }} must be defined."
-  when: users is not defined or users[WORKSTATION_USER] is not defined
+    msg: "lookup('users', '{{ WORKSTATION_USER }}') must resolve to a user entry."
+  when: lookup('users', WORKSTATION_USER, none) is none
 
 - name: Ensure primary group exists
   ansible.builtin.group:
@@ -26,7 +26,7 @@
     password: >-
       {{
         (USER_WORKSTATION_SET_PASSWORD | bool)
-        | ternary((users[USER_WORKSTATION_KEY].password | password_hash('sha512')), omit)
+        | ternary((USER_WORKSTATION_CONFIG.password | password_hash('sha512')), omit)
       }}
   no_log: "{{ MASK_CREDENTIALS_IN_LOGS | default(true) | bool }}"
 

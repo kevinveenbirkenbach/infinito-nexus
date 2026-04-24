@@ -35,13 +35,16 @@ limit_time_cpu = 600
 limit_time_real = 1200
 limit_time_real_cron = 600
 
+{% set email = lookup('email', application_id) %}
+{% if email.enabled | bool %}
 ; SMTP settings
 smtp_server = {{ ODOO_SMTP_HOST }}
 smtp_port = {{ ODOO_SMTP_PORT }}
 smtp_user = {{ ODOO_SMTP_USER }}
 smtp_password = {{ ODOO_SMTP_PASSWORD }}
 smtp_ssl = {{ ODOO_SMTP_SSL | lower }}
-email_from = {{ users['no-reply'].email }}
+email_from = {{ email['from'] }}
+{% endif %}
 
 {% if ODOO_REDIS_ENABLED | bool %}
 ; Redis session store

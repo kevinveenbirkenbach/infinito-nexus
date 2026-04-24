@@ -4,8 +4,21 @@
 - name: Freeze front proxy context before nested role loads
   ansible.builtin.set_fact:
     front_proxy_application_id: "{{ application_id }}"
-    front_proxy_domain: "{{ domain }}"
-    front_proxy_domain_conf_dst_resolved: "{{ lookup('nginx', 'files.domain', domain) }}"
+    front_proxy_domain: "{{ domain | default(lookup('domain', application_id)) }}"
+    front_proxy_http_port: >-
+      {{
+        http_port
+        | default((ports.localhost.http | default({})).get(application_id))
+      }}
+    front_proxy_domain_conf_dst_resolved: >-
+      {{
+        lookup(
+          'nginx',
+          'files.domain',
+          (domain | default(lookup('domain', application_id)))
+        )
+      }}
+  changed_when: false
 
 - name: Bootstrap Frontend Base
   ansible.builtin.include_role:
@@ -48,6 +61,7 @@
   vars:
     application_id: "{{ front_proxy_application_id }}"
     domain: "{{ front_proxy_domain }}"
+    http_port: "{{ front_proxy_http_port }}"
   register: nginx_conf
   notify: restart openresty
 

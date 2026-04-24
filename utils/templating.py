@@ -7,6 +7,28 @@ import re
 from typing import Any, Optional
 
 from ansible.errors import AnsibleError
+from utils.manager.value_generator import ValueGenerator
+
+try:
+    from ansible._internal._datatag._tags import TrustedAsTemplate
+except Exception:
+    TrustedAsTemplate = None
+
+
+def _trust_as_template(s: str) -> Any:
+    """Tag a string as trusted for Jinja templating in Ansible 2.19+.
+
+    Ansible's templar refuses to render strings that aren't tagged via
+    TrustedAsTemplate. YAML loaded directly with yaml.safe_load lacks this
+    tag, so embedded {{ ... }} returns unchanged. Tagging restores rendering.
+    """
+    if TrustedAsTemplate is None or not isinstance(s, str):
+        return s
+    try:
+        return TrustedAsTemplate().tag(s)
+    except Exception:
+        return s
+
 
 # Match the "lookup('env','NAME')" head (without caring about trailing filters)
 _RE_LOOKUP_ENV_HEAD = re.compile(
@@ -17,6 +39,8 @@ _RE_LOOKUP_ENV_HEAD = re.compile(
 _RE_ANY_LOOKUP = re.compile(r"""\blookup\s*\(""", re.IGNORECASE)
 
 _RE_VARPATH = re.compile(r"^[A-Za-z_][A-Za-z0-9_]*(\.[A-Za-z0-9_]+)*$")
+_RE_INT_LITERAL = re.compile(r"^-?\d+$")
+_RE_FLOAT_LITERAL = re.compile(r"^-?\d+\.\d+$")
 _RE_JINJA_BLOCK = re.compile(r"\{\{\s*(.*?)\s*\}\}", re.DOTALL)
 
 
@@ -132,6 +156,13 @@ def _apply_filter(value: Any, filt: str) -> Any:
         parts = [str(x) for x in value if str(x) != ""]
         return posixpath.join(*parts) if parts else ""
 
+    if f == "strong_password":
+        try:
+            length = int(value)
+        except (TypeError, ValueError):
+            length = 32
+        return ValueGenerator().generate_strong_password(length)
+
     # default('x', true) -> treat None/"" as default
     if f.startswith("default(") and f.endswith(")"):
         inner = f[len("default(") : -1].strip()
@@ -180,6 +211,10 @@ def _fallback_eval_expr(expr: str, variables: dict) -> str:
         # Allow minimal list literals (needed for patterns like: [ DIR_BIN, 'x' ] | path_join)
         if head.startswith("[") and head.endswith("]"):
             val = _eval_list_literal(head, variables)
+        elif _RE_INT_LITERAL.match(head):
+            val = int(head)
+        elif _RE_FLOAT_LITERAL.match(head):
+            val = float(head)
         else:
             if not _RE_VARPATH.match(head):
                 raise ValueError(f"unsupported expression: {head}")
@@ -261,16 +296,25 @@ def _templar_render_best_effort(templar: Any, s: str, variables: dict) -> str:
     if hasattr(templar, "available_variables"):
         try:
             prev_avail = templar.available_variables
-            templar.available_variables = variables
+            # Merge additively so templar keeps access to ansible_facts /
+            # hostvars etc. from prev_avail while our caller-supplied keys
+            # (e.g. _INFINITO_APPLICATIONS_RAW) are layered on top. Replacing
+            # wholesale drops fact keys that aren't rematerialized by
+            # dict(variables) in the caller.
+            merged_avail: dict = dict(prev_avail) if prev_avail else {}
+            if variables:
+                merged_avail.update(variables)
+            templar.available_variables = merged_avail
         except Exception:
             prev_avail = None
 
     rendered: Any = s
+    trusted_input = _trust_as_template(s)
     try:
         try:
-            rendered = templar.template(s, fail_on_undefined=True)
+            rendered = templar.template(trusted_input, fail_on_undefined=True)
         except TypeError:
-            rendered = templar.template(s)
+            rendered = templar.template(trusted_input)
         except Exception:
             # If templar is present but fails unexpectedly, fall back to safe subset below.
             rendered = s

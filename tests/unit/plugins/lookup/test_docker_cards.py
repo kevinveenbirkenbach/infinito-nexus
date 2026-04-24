@@ -3,6 +3,7 @@ import sys
 import tempfile
 import shutil
 import unittest
+from unittest.mock import patch
 
 from ansible.errors import AnsibleError
 from jinja2 import Environment, StrictUndefined, select_autoescape
@@ -164,9 +165,21 @@ galaxy_info:
 
         docker_cards_module.lookup_loader.get = _patched_get
 
+        # Route get_merged_domains through variables['domains'] so tests stay hermetic.
+        def _domains_from_vars(*, variables=None, **_kwargs):
+            return (variables or {}).get("domains", {})
+
+        self._domains_patcher = patch.object(
+            docker_cards_module,
+            "get_merged_domains",
+            side_effect=_domains_from_vars,
+        )
+        self._domains_patcher.start()
+
     def tearDown(self):
         # Restore patched lookup_loader
         docker_cards_module.lookup_loader.get = self._orig_lookup_get
+        self._domains_patcher.stop()
 
         # Remove the temporary roles directory after the test.
         shutil.rmtree(self.test_roles_dir)

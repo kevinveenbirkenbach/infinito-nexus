@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 {
     "name": "OAuth HTTPS & Configurable UID",
-    "version": "18.0.1.2.0",
+    "version": "19.0.1.8.0",
     "category": "Authentication",
     "summary": "Force HTTPS redirect URIs and configurable OIDC UID field for OAuth",
     "description": """
@@ -50,5 +50,5 @@ Features:
     "installable": True,
     "auto_install": False,
     "application": False,
-    "license": "MIT",
+    "license": "LGPL-3",
 }

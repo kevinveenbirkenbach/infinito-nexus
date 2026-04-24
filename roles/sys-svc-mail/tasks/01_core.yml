@@ -9,7 +9,7 @@
   ansible.builtin.assert:
     that:
       - run_once_web_app_mailu is defined
-      - (users['no-reply'].tokens | default({})).get('web-app-mailu', '') | length > 0
+      - (lookup('users', 'no-reply').tokens | default({})).get('web-app-mailu', '') | length > 0
     fail_msg: >-
       Mailu must be preloaded by sys-utils-service-loader before sys-svc-mail runs.
       Missing run_once_web_app_mailu or missing users['no-reply'].tokens['web-app-mailu']
@@ -20,9 +20,9 @@
 - name: Setup emails via localhost
   include_role:
     name: sys-svc-mail-smtp
-  when: 
+  when:
     - run_once_sys_svc_mail_smtp is not defined
-    - not (SYSTEM_EMAIL_EXTERNAL | bool)
+    - not (lookup('email').external | bool)
 
 - name: Setup msmtp client
   include_role:

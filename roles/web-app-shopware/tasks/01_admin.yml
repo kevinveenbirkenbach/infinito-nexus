@@ -1,10 +1,10 @@
-- name: "Rename default Shopware admin user to {{ users.administrator.username }}"
+- name: "Rename default Shopware admin user to {{ lookup('users', 'administrator').username }}"
   shell: |
     container exec -i --user {{ SHOPWARE_USER }} {{ SHOPWARE_WEB_CONTAINER }} sh -lc '
       set -e
       cd {{ SHOPWARE_ROOT }}
       old_user="admin"
-      new_user="{{ users.administrator.username }}"
+      new_user="{{ lookup('users', 'administrator').username }}"
       if php bin/console user:list | grep -q "^$old_user "; then
         echo "[INFO] Renaming Shopware user: $old_user -> $new_user"
         php bin/console user:update "$old_user" --username="$new_user" || true
@@ -22,16 +22,16 @@
     container exec -i --user {{ SHOPWARE_USER }} {{ SHOPWARE_WEB_CONTAINER }} sh -lc '
       set -e
       cd {{ SHOPWARE_ROOT }}
-      php bin/console user:create "{{ users.administrator.username }}" \
+      php bin/console user:create "{{ lookup('users', 'administrator').username }}" \
         --admin \
-        --password={{ users.administrator.password | quote }} \
-        --firstName="{{ users.administrator.username }}" \
+        --password={{ lookup('users', 'administrator').password | quote }} \
+        --firstName="{{ lookup('users', 'administrator').username }}" \
         --lastName="{{ DOMAIN_PRIMARY | lower }}" \
-        --email="{{ users.administrator.email }}" || true
-      php bin/console user:change-password "{{ users.administrator.username }}" \
-        --password={{ users.administrator.password | quote }} || true
-      php bin/console user:update "{{ users.administrator.username }}" \
-        --email="{{ users.administrator.email }}" 2>/dev/null || true
+        --email="{{ lookup('users', 'administrator').email }}" || true
+      php bin/console user:change-password "{{ lookup('users', 'administrator').username }}" \
+        --password={{ lookup('users', 'administrator').password | quote }} || true
+      php bin/console user:update "{{ lookup('users', 'administrator').username }}" \
+        --email="{{ lookup('users', 'administrator').email }}" 2>/dev/null || true
     '
   args:
     chdir: "{{ lookup('container', application_id, 'directories.instance') }}"

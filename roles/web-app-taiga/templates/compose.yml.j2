@@ -194,7 +194,7 @@ pull_policy: never
       - {{ TAIGA_FRONT_SERVICE }}
       - {{ TAIGA_SERVICE }}
       - {{ TAIGA_EVENTS_SERVICE }}
-{{ applications | compose_volumes(
+{{ lookup('applications') | compose_volumes(
     application_id,
     database_volume=TAIGA_DATABASE_VOLUME,
     extra_volumes={'async-rabbitmq-data': {}, 'events-rabbitmq-data': {}, 'media-data': {}, 'static-data': {}}

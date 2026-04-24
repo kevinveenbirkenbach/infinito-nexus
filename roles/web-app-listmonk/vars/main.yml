@@ -17,13 +17,14 @@ LISTMONK_USER_BOUNCE:         "bounce"
 
 LISTMONK_EXEC_DATABASE:       "container exec -i {{ lookup('database', application_id, 'container') }} psql -U {{ lookup('database', application_id, 'username') }} -d {{ lookup('database', application_id, 'name') }}"
 LISTMONK_RUN:                 "{{ BIN_COMPOSE }} run -T --rm application"
+LISTMONK_EMAIL:               "{{ lookup('email', application_id) }}"
 
 LISTMONK_SETTINGS:
   - key: "app.root_url"
     value: "\"{{ lookup('tls', application_id, 'url.base') }}\""
 
   - key: "app.notify_emails"
-    value: "{{ [ users.administrator.email ] | to_json }}"
+    value: "{{ [ lookup('users', 'administrator').email ] | to_json }}"
 
   # OIDC integration (conditional)
   - key: "security.oidc"
@@ -51,15 +52,15 @@ LISTMONK_SETTINGS:
     value: >-
       {{ [
         {
-          "host":            SYSTEM_EMAIL_HOST,
-          "port":            SYSTEM_EMAIL_PORT,
-          "enabled":         SYSTEM_EMAIL_SMTP,
-          "username":        users[LISTMONK_USER_SEND].email,
-          "password":        users[LISTMONK_USER_SEND].password,
+          "host":            LISTMONK_EMAIL.host,
+          "port":            LISTMONK_EMAIL.port,
+          "enabled":         LISTMONK_EMAIL.smtp,
+          "username":        lookup('users', LISTMONK_USER_SEND).email,
+          "password":        lookup('users', LISTMONK_USER_SEND).password,
           "tls_type":        (
-                                SYSTEM_EMAIL_TLS
+                                LISTMONK_EMAIL.tls
                                 | ternary("TLS",
-                                    SYSTEM_EMAIL_START_TLS
+                                    LISTMONK_EMAIL.start_tls
                                       | ternary("STARTTLS","NONE")
                                   )
                               ),
@@ -73,7 +74,7 @@ LISTMONK_SETTINGS:
           "tls_skip_verify": false
         }
       ] | to_json }}
-    when: SYSTEM_EMAIL_SMTP | bool
+    when: LISTMONK_EMAIL.smtp | bool
 
 
   - key: "app.lang"
@@ -98,15 +99,15 @@ LISTMONK_SETTINGS:
     value: >-
       {{ [
         {
-          "host":            SYSTEM_EMAIL_HOST,
+          "host":            LISTMONK_EMAIL.host,
           "port":            995,
           "type":            "pop",
           "uuid":            "471fd0e9-8c33-4e4a-9183-c4679699faca",
           "enabled":         true,
-          "username":        users[LISTMONK_USER_BOUNCE].email,
-          "password":        users[LISTMONK_USER_BOUNCE].tokens['web-app-mailu'],
-          "return_path":     users[LISTMONK_USER_BOUNCE].email,
-          "tls_enabled":     SYSTEM_EMAIL_TLS,
+          "username":        lookup('users', LISTMONK_USER_BOUNCE).email,
+          "password":        lookup('users', LISTMONK_USER_BOUNCE).get('tokens', {}).get('web-app-mailu', ''),
+          "return_path":     lookup('users', LISTMONK_USER_BOUNCE).email,
+          "tls_enabled":     LISTMONK_EMAIL.tls,
           "auth_protocol":   "userpass",
           "scan_interval":   "15m",
           "tls_skip_verify": false
@@ -124,7 +125,7 @@ LISTMONK_SETTINGS:
 #    value: '1000'
 
   - key: "app.from_email"
-    value: '"{{ service_provider.company.titel }} Newsletter <{{ users[LISTMONK_USER_SEND].email }}>"'
+    value: '"{{ service_provider.company.titel }} Newsletter <{{ lookup(''users'', LISTMONK_USER_SEND).email }}>"'
 
 #  - key: "bounce.actions"
 #    value: >-
@@ -234,4 +235,3 @@ LISTMONK_SETTINGS:
 
   - key: "app.enable_public_archive_rss_content"
     value: 'true'
-

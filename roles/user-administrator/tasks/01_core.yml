@@ -1,8 +1,8 @@
 - name: Fail if administrator authorized_keys is empty
   ansible.builtin.fail:
     msg: >-
-      users.administrator.authorized_keys must contain at least one SSH public key.
-  when: users.administrator.authorized_keys | length == 0
+      lookup('users', 'administrator').authorized_keys must contain at least one SSH public key.
+  when: lookup('users', 'administrator').authorized_keys | length == 0
 
 - name: Include dependency 'sys-sudo'
   include_role:
@@ -13,7 +13,7 @@
   user:
     name: administrator
     update_password: on_create
-    password: "{{ users.administrator.password | password_hash('sha512') }}"
+    password: "{{ lookup('users', 'administrator').password | password_hash('sha512') }}"
     create_home: yes
     generate_ssh_key: yes
     ssh_key_type: rsa

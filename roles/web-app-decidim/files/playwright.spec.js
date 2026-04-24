@@ -54,10 +54,22 @@ async function login(page, email, password) {
   await page.waitForLoadState("networkidle");
 }
 
+// Helper: dismiss the cookie consent banner if present. Decidim renders a
+// modal overlay that steals pointer events from form buttons — without this
+// the "Create an account" submit on the OIDC registration form is not hittable.
+async function dismissCookieBanner(page) {
+  const acceptBtn = page.getByRole("button", { name: /accept all|accept only essential|accept/i }).first();
+  if (await acceptBtn.isVisible().catch(() => false)) {
+    await acceptBtn.click().catch(() => {});
+    await page.waitForLoadState("networkidle", { timeout: 5000 }).catch(() => {});
+  }
+}
+
 // Helper: OIDC login via Keycloak
 async function oidcLogin(page, username, password) {
   await page.goto(`${baseUrl}/users/sign_in`);
   await page.waitForLoadState("networkidle");
+  await dismissCookieBanner(page);
   const ssoButton = page.locator("a[href*='openid_connect']").first();
   const ssoVisible = await ssoButton.isVisible().catch(() => false);
   if (!ssoVisible) {
@@ -91,6 +103,29 @@ async function oidcLogin(page, username, password) {
   console.log("Login clicked, waiting for redirect back...");
   await page.waitForLoadState("networkidle", { timeout: 30000 }).catch(e => console.log("networkidle error:", e.message));
   console.log("After login URL:", page.url());
+  await dismissCookieBanner(page);
+
+  // First-time OIDC users land on Decidim's registration form (TOS + nickname
+  // confirmation). Returning users skip this and sign in directly — detection
+  // is by form presence, not URL, so the flow is idempotent across runs.
+  const tosCheckbox = page.locator("input[type='checkbox'][name='user[tos_agreement]']").first();
+  const onRegistrationForm = await tosCheckbox.isVisible().catch(() => false);
+  if (onRegistrationForm) {
+    console.log("First-time OIDC registration form detected, accepting TOS...");
+    await tosCheckbox.check({ force: true });
+    // Decidim's `user-registration-form` Stimulus controller cancels submit and
+    // opens a newsletter modal when `user[newsletter]` is unchecked. Click the
+    // decline button on that modal to proceed without subscribing — that path
+    // sets the continue flag and re-submits the form.
+    await page.evaluate(() => document.getElementById("omniauth-register-form").requestSubmit());
+    const declineBtn = page.locator("#sign-up-newsletter-modal [data-check='false']").first();
+    await declineBtn.waitFor({ state: "visible", timeout: 10000 });
+    await Promise.all([
+      page.waitForURL((url) => !/auth\/openid_connect\/callback/.test(url.toString()), { timeout: 30000 }).catch(e => console.log("post-submit nav error:", e.message)),
+      declineBtn.click({ force: true }),
+    ]);
+    console.log("After registration URL:", page.url());
+  }
 }
 
 // Scenario I: Homepage loads

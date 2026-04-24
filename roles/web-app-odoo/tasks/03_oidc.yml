@@ -309,7 +309,7 @@
       AND username = %(admin)s;
     named_args:
       realm: "{{ OIDC.CLIENT.REALM }}"
-      admin: "{{ users.administrator.username }}"
+      admin: "{{ lookup('users', 'administrator').username }}"
   register: keycloak_users
   when: keycloak_provider.query_result | length > 0
 
@@ -328,11 +328,11 @@
       WHERE login = %(login)s;
     named_args:
       provider_id: "{{ keycloak_provider.query_result[0].id }}"
-      oauth_uid: "{{ (keycloak_users.query_result | selectattr('username', 'equalto', users.administrator.username) | first).username }}"
-      login: "{{ users.administrator.username }}"
+      oauth_uid: "{{ (keycloak_users.query_result | selectattr('username', 'equalto', lookup('users', 'administrator').username) | first).username }}"
+      login: "{{ lookup('users', 'administrator').username }}"
   when:
     - keycloak_provider.query_result | length > 0
-    - keycloak_users.query_result | selectattr('username', 'equalto', users.administrator.username) | list | length > 0
+    - keycloak_users.query_result | selectattr('username', 'equalto', lookup('users', 'administrator').username) | list | length > 0
 
 # Auto-created OAuth users get portal access by default. Grant internal user access
 # to all OAuth-linked users so they can access the main Odoo interface.

@@ -26,7 +26,7 @@
 - name: "Start Mailu token procedures if token missing"
   when: >-
     (
-      users.get(mailu_user_key, {}).get('tokens', {}).get(application_id, '')
+      lookup('users').get(mailu_user_key, {}).get('tokens', {}).get(application_id, '')
       | string | trim
     ) == ''
   include_tasks: 03b_create_user_token.yml

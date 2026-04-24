@@ -34,6 +34,7 @@ from ansible.plugins.loader import lookup_loader
 
 from utils.docker.paths_utils import get_docker_paths
 from utils.jinja_strict import render_strict
+from utils.runtime_data import get_merged_domains
 
 
 def _as_str(v: Any) -> str:
@@ -176,12 +177,11 @@ class LookupModule(LookupBase):
 
         # 2) CA override: only when include_ca=True and domain exists AND TLS is enabled AND self_signed.
         if include_ca:
-            if "domains" not in variables:
-                raise AnsibleError(
-                    "compose_file_args: missing required variable 'domains'"
-                )
-
-            domains = _maybe_template(templar, variables["domains"])
+            domains = get_merged_domains(
+                variables=variables,
+                roles_dir=kwargs.get("roles_dir"),
+                templar=templar,
+            )
             if _has_domain(domains, application_id):
                 tlsr = lookup_loader.get("tls", self._loader, self._templar)
                 tls = tlsr.run([application_id], variables=variables)[0]

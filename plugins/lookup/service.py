@@ -6,6 +6,7 @@ from ansible.errors import AnsibleError
 from ansible.plugins.lookup import LookupBase
 
 from utils.applications.config import get
+from utils.runtime_data import get_merged_applications
 from utils.service_registry import (
     build_role_to_primary_service_key,
     build_service_registry_from_applications,
@@ -71,7 +72,7 @@ def _resolve_service_provider_app_id(
     return None
 
 
-def _is_service_needed(
+def _is_service_required(
     applications: Dict[str, Any],
     service_registry: Dict[str, Any],
     app_id: str,
@@ -82,6 +83,8 @@ def _is_service_needed(
     Return True if app_id directly or transitively (via its enabled services)
     has service_key with both enabled: true AND shared: true.
     Uses visited to prevent infinite loops.
+
+    Exposed via the ``required`` flag on the ``service`` lookup result.
     """
     if app_id in visited:
         return False
@@ -100,7 +103,7 @@ def _is_service_needed(
             applications, service_registry, svc
         )
         if dep_app_id and dep_app_id in applications:
-            if _is_service_needed(
+            if _is_service_required(
                 applications, service_registry, dep_app_id, service_key, visited
             ):
                 return True
@@ -154,11 +157,11 @@ def _compute_flags(
         for app_id in deployed
     )
     primary_key = canonical_service_key(service_registry, service_key)
-    any_needed = any(
-        _is_service_needed(applications, service_registry, app_id, primary_key, set())
+    any_required = any(
+        _is_service_required(applications, service_registry, app_id, primary_key, set())
         for app_id in deployed
     )
-    return {"enabled": any_enabled, "shared": any_shared, "needed": any_needed}
+    return {"enabled": any_enabled, "shared": any_shared, "required": any_required}
 
 
 class LookupModule(LookupBase):
@@ -177,8 +180,11 @@ class LookupModule(LookupBase):
       role    — provider role name     (e.g. 'web-app-matomo')
       enabled — True if any deployed app has compose.services.<key>.enabled: true
       shared  — True if any deployed app has compose.services.<key>.shared: true
-      needed  — True if any deployed app has both enabled AND shared (direct or
-                transitively via its own enabled service dependencies)
+      required — True if any deployed app has both enabled AND shared (direct
+                 or transitively via its own enabled service dependencies).
+                 "Required" was chosen over "needed" to express that the
+                 service is contractually required by a real consumer, not
+                 merely convenient.
     """
 
     def run(
@@ -192,23 +198,19 @@ class LookupModule(LookupBase):
 
         vars_ = variables or getattr(self._templar, "available_variables", {}) or {}
 
-        applications = kwargs.get("applications", vars_.get("applications"))
-        if not isinstance(applications, dict):
-            raise AnsibleError(
-                "service: required variable 'applications' must be a mapping"
-            )
+        applications = get_merged_applications(
+            variables=vars_,
+            roles_dir=kwargs.get("roles_dir"),
+            templar=getattr(self, "_templar", None),
+        )
 
-        group_names = kwargs.get("group_names", vars_.get("group_names", []))
+        group_names = vars_.get("group_names", [])
         if not isinstance(group_names, list):
             raise AnsibleError(
                 "service: required variable 'group_names' must be a list"
             )
 
-        service_registry = kwargs.get("service_registry")
-        if service_registry is None:
-            service_registry = build_service_registry_from_applications(applications)
-        if not isinstance(service_registry, dict):
-            raise AnsibleError("service: 'service_registry' must be a mapping")
+        service_registry = build_service_registry_from_applications(applications)
 
         role_to_key = _build_role_to_key(service_registry)
 

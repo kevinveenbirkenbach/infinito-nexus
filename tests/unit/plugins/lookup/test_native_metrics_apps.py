@@ -174,20 +174,6 @@ class TestNativeMetricsApps(unittest.TestCase):
         )
         self.assertEqual(_run(apps, self.roles_dir, group_names=[]), [])
 
-    # ── error handling ─────────────────────────────────────────────────────
-
-    def test_raises_when_applications_missing(self):
-        from ansible.errors import AnsibleError
-
-        with self.assertRaises(AnsibleError):
-            LookupModule().run([], variables={})
-
-    def test_raises_when_applications_not_a_dict(self):
-        from ansible.errors import AnsibleError
-
-        with self.assertRaises(AnsibleError):
-            LookupModule().run([], variables={"applications": ["not", "a", "dict"]})
-
 
 if __name__ == "__main__":
     unittest.main()

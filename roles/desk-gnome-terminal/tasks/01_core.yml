@@ -5,9 +5,9 @@
       - gnome-terminal
     state: present
 
-- name: "Set zsh as default shell for {{ users[WORKSTATION_USER].username }}"
+- name: "Set zsh as default shell for {{ lookup('users', WORKSTATION_USER).username }}"
   user:
-    name: "{{ users[WORKSTATION_USER].username }}"
+    name: "{{ lookup('users', WORKSTATION_USER).username }}"
     shell: /usr/bin/zsh
   become: true
 

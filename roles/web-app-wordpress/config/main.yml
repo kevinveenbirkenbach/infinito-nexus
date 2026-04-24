@@ -1,12 +1,3 @@
-title:                "Blog"   # WordPress titel
-max_upload_size:      "256M"   # Low default upload size, because you should use Peertube for Videos and Funkwhale for Audio files
-plugins:
-  wp-discourse:
-    enabled:          "{{ 'web-app-discourse' in group_names | lower }}"
-  daggerhart-openid-connect-generic:
-    enabled:          true
-  activitypub:
-    enabled:          true
 server:
   csp:
     flags:
@@ -52,17 +43,30 @@ compose:
     mariadb:
       enabled: true
       shared: true
+    discourse:
+      enabled: false
+      shared: true
     wordpress:
-      version:            latest 
+      version:            latest
       image:              wordpress
-      name:               wordpress 
+      name:               wordpress
       min_storage:        "8GB"
       backup:
-        no_stop_required: true
-      cpus:               1
-      mem_reservation:    0.5g
-      mem_limit:          1.5g
-      pids_limit:         512
+        no_stop_required:   true
+      cpus:                 1
+      mem_reservation:      0.5g
+      mem_limit:            1.5g
+      pids_limit:           512
+      title:                "Blog by {{ service_provider.platform.titel }}"
+      # Low default upload size, because you should use Peertube for Videos and Funkwhale for Audio files
+      max_upload_size:      "256M"
+      plugins:
+        wp-discourse:
+          enabled:          "{{ lookup('service', 'discourse').required | bool }}"
+        daggerhart-openid-connect-generic:
+          enabled:          true
+        activitypub:
+          enabled:          true
     css:
       enabled: false
       shared: true

@@ -46,7 +46,8 @@
     "roles",
     "profile",
     "basic",
-    "email"
+    "email",
+    "{{ KEYCLOAK_RBAC_GROUP_CLAIM }}"
   ],
   "optionalClientScopes": [
     "address",
@@ -54,7 +55,6 @@
     "organization",
     "offline_access",
     "microprofile-jwt",
-    "{{ KEYCLOAK_RBAC_GROUP_CLAIM }}",
     "{{ lookup('config', application_id, 'scopes.nextcloud') }}"
   ]
 }

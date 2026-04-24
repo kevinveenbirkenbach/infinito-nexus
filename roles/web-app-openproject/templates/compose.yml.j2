@@ -96,7 +96,7 @@ x-op-app: &app
       - "data:/var/openproject/assets"
       - "{{ OPENPROJECT_DUMMY_VOLUME }}:/var/openproject/pgdata" # This mount is unnecessary and just done to prevent anonymous volumes
 
-{{ applications | compose_volumes(
+{{ lookup('applications') | compose_volumes(
     application_id,
     database_volume=lookup('database', application_id, 'volume'),
     extra_volumes={'data': {'name': OPENPROJECT_VOLUME}}

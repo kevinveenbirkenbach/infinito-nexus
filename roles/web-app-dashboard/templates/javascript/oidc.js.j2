@@ -12,8 +12,8 @@ const KC_CONFIG = {
   url: "{{ OIDC.URL }}",                 // e.g. https://auth.infinito.nexus
   realm: "{{ OIDC.CLIENT.REALM }}",      // e.g. cymais.cloud
   clientId: "{{ OIDC.CLIENT.ID }}",      // e.g. cymais.cloud
-  redirectUri: window.location.origin,   // where to return after login/logout
-  silentCheckSsoRedirectUri: window.location.origin + "{{ DASHBOARD_LOCATION_SILENT_CHECK }}"
+  redirectUri: "{{ DASHBOARD_APP_BASE_URL }}",   // canonical app URL for login/logout round-trips
+  silentCheckSsoRedirectUri: "{{ (DASHBOARD_APP_BASE_URL | regex_replace('/+$', '')) ~ DASHBOARD_LOCATION_SILENT_CHECK }}"
 };
 
 const DEBUG = {{ 'true' if MODE_DEBUG else 'false' }};

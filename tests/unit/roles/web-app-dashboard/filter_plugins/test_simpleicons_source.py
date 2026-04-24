@@ -3,7 +3,6 @@ import os
 import pathlib
 import tempfile
 import unittest
-from ansible.errors import AnsibleFilterError
 from unittest.mock import patch
 
 import certifi
@@ -68,7 +67,7 @@ class TestGetRequestsVerify(unittest.TestCase):
 
 
 class TestAddSimpleiconSource(unittest.TestCase):
-    def test_uses_dashboard_local_static_svg_path_when_icon_exists(self):
+    def test_uses_absolute_simpleicons_url_when_icon_exists(self):
         cards = [{"title": "Keycloak", "icon": {"class": "fa-solid fa-lock"}}]
 
         with (
@@ -81,7 +80,9 @@ class TestAddSimpleiconSource(unittest.TestCase):
 
             result = add_simpleicon_source(cards, "https://icons.example")
 
-        self.assertEqual(result[0]["icon"]["source"], "simpleicons/keycloak.svg")
+        self.assertEqual(
+            result[0]["icon"]["source"], "https://icons.example/keycloak.svg"
+        )
         self.assertEqual(result[0]["icon"]["class"], "fa-solid fa-lock")
         mock_head.assert_called_once_with(
             "https://icons.example/keycloak.svg",
@@ -101,13 +102,17 @@ class TestAddSimpleiconSource(unittest.TestCase):
         self.assertNotIn("source", result[0]["icon"])
         mock_head.assert_called_once()
 
-    def test_rejects_empty_dashboard_local_static_directory(self):
-        with self.assertRaises(AnsibleFilterError):
-            add_simpleicon_source(
+    def test_accepts_legacy_local_static_dir_parameter(self):
+        with patch.object(_simpleicons.requests, "head") as mock_head:
+            mock_head.return_value.status_code = 404
+
+            result = add_simpleicon_source(
                 [{"title": "Keycloak", "icon": {}}],
                 "https://icons.example",
                 local_static_dir="/",
             )
+
+        self.assertEqual(result[0]["title"], "Keycloak")
 
 
 if __name__ == "__main__":

@@ -2,11 +2,11 @@
   package:
     name:
       - ttf-liberation
-      - "libreoffice-{{ applications['desk-libreoffice'].flavor }}"
+      - "libreoffice-{{ lookup('applications', 'desk-libreoffice').flavor }}"
     state: present
 
 - name: install libreoffice language packages
   package:
-    name: "libreoffice-{{ applications['desk-libreoffice'].flavor }}-{{ item }}"
+    name: "libreoffice-{{ lookup('applications', 'desk-libreoffice').flavor }}-{{ item }}"
     state: present
   loop: "{{ libreoffice_languages }}"

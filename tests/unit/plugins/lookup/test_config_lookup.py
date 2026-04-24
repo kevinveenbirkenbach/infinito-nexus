@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import os
+import tempfile
 import unittest
 from pathlib import Path
 
@@ -10,6 +11,7 @@ from ansible.errors import AnsibleError
 
 from plugins.lookup.config import LookupModule
 from utils.applications.config import AppConfigKeyError, ConfigEntryNotSetError
+from utils.runtime_data import _reset_cache_for_tests
 
 
 def _write_schema(base_dir: Path, application_id: str, schema: dict) -> None:
@@ -18,49 +20,56 @@ def _write_schema(base_dir: Path, application_id: str, schema: dict) -> None:
     schema_path.write_text(yaml.safe_dump(schema), encoding="utf-8")
 
 
+def _write_config(base_dir: Path, application_id: str, config: dict) -> None:
+    config_path = base_dir / "roles" / application_id / "config" / "main.yml"
+    config_path.parent.mkdir(parents=True, exist_ok=True)
+    config_path.write_text(yaml.safe_dump(config), encoding="utf-8")
+
+
+def _write_users(base_dir: Path, application_id: str, users: dict) -> None:
+    users_path = base_dir / "roles" / application_id / "users" / "main.yml"
+    users_path.parent.mkdir(parents=True, exist_ok=True)
+    users_path.write_text(yaml.safe_dump({"users": users}), encoding="utf-8")
+
+
+class _DummyTemplar:
+    def __init__(self, available_variables: dict[str, str]) -> None:
+        self.available_variables = available_variables
+
+    def template(self, value, fail_on_undefined=False):
+        if isinstance(value, str):
+            rendered = value
+            for key, replacement in self.available_variables.items():
+                rendered = rendered.replace(f"{{{{ {key} }}}}", str(replacement))
+            return rendered
+        if isinstance(value, dict):
+            return {
+                key: self.template(item, fail_on_undefined=fail_on_undefined)
+                for key, item in value.items()
+            }
+        if isinstance(value, list):
+            return [
+                self.template(item, fail_on_undefined=fail_on_undefined)
+                for item in value
+            ]
+        return value
+
+
 class TestConfigLookup(unittest.TestCase):
     def setUp(self) -> None:
         self.lm = LookupModule()
+        _reset_cache_for_tests()
 
-        # Create a temp working directory and chdir into it
+        # Create a temp working directory in /tmp and chdir into it
         self._cwd = os.getcwd()
-        self._tmp = Path(self._cwd) / ".tmp_test_config_lookup"
-        if self._tmp.exists():
-            # best-effort cleanup
-            for p in sorted(self._tmp.rglob("*"), reverse=True):
-                try:
-                    p.unlink()
-                except IsADirectoryError:
-                    p.rmdir()
-                except FileNotFoundError:
-                    # If the file was already removed, we can safely ignore this.
-                    pass
-            try:
-                self._tmp.rmdir()
-            except OSError:
-                # Best-effort cleanup: it's acceptable if removing the temp directory fails.
-                pass
-
-        self._tmp.mkdir(parents=True, exist_ok=True)
+        self._tmpdir = tempfile.TemporaryDirectory()
+        self._tmp = Path(self._tmpdir.name)
         os.chdir(self._tmp)
 
     def tearDown(self) -> None:
+        _reset_cache_for_tests()
         os.chdir(self._cwd)
-        # best-effort cleanup
-        if self._tmp.exists():
-            for p in sorted(self._tmp.rglob("*"), reverse=True):
-                try:
-                    p.unlink()
-                except IsADirectoryError:
-                    p.rmdir()
-                except FileNotFoundError:
-                    # Missing files during teardown are acceptable and can be ignored.
-                    pass
-            try:
-                self._tmp.rmdir()
-            except OSError:
-                # Best-effort cleanup: it's acceptable if removing the temp directory fails.
-                pass
+        self._tmpdir.cleanup()
 
     def test_requires_2_or_3_terms(self) -> None:
         with self.assertRaises(AnsibleError):
@@ -70,11 +79,43 @@ class TestConfigLookup(unittest.TestCase):
         with self.assertRaises(AnsibleError):
             self.lm.run(["a", "b", "c", "d"], variables={"applications": {}})
 
-    def test_requires_applications_var_present(self) -> None:
-        with self.assertRaises(AnsibleError):
-            self.lm.run(["app", "x.y"], variables={})
-        with self.assertRaises(AnsibleError):
-            self.lm.run(["app", "x.y"], variables=None)
+    def test_resolves_from_roles_without_applications_var(self) -> None:
+        _write_config(
+            self._tmp,
+            "web-app-foo",
+            {"smtp": {"host": "mail.example.org"}},
+        )
+        out = self.lm.run(
+            ["web-app-foo", "smtp.host"],
+            variables={},
+            roles_dir=str(self._tmp / "roles"),
+        )
+        self.assertEqual(out, ["mail.example.org"])
+
+    def test_renders_selected_value_with_templar_variables(self) -> None:
+        _write_config(
+            self._tmp,
+            "web-app-foo",
+            {"domain": "{{ SYSTEM_EMAIL_DOMAIN }}"},
+        )
+        self.lm._templar = _DummyTemplar({"SYSTEM_EMAIL_DOMAIN": "mail.example.org"})
+        out = self.lm.run(
+            ["web-app-foo", "domain"],
+            variables={"SYSTEM_EMAIL_DOMAIN": "mail.example.org"},
+            roles_dir=str(self._tmp / "roles"),
+        )
+        self.assertEqual(out, ["mail.example.org"])
+
+    def test_users_path_returns_rendered_user_value(self) -> None:
+        _write_config(self._tmp, "web-app-foo", {"enabled": True})
+        _write_users(self._tmp, "web-app-foo", {"administrator": {}})
+        self.lm._templar = _DummyTemplar({"DOMAIN_PRIMARY": "mail.example.org"})
+        out = self.lm.run(
+            ["web-app-foo", "users.administrator.email"],
+            variables={"DOMAIN_PRIMARY": "mail.example.org"},
+            roles_dir=str(self._tmp / "roles"),
+        )
+        self.assertEqual(out, ["administrator@mail.example.org"])
 
     def test_requires_applications_var_is_dict(self) -> None:
         with self.assertRaises(AnsibleError):

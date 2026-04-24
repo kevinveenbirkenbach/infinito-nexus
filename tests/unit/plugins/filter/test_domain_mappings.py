@@ -60,6 +60,21 @@ class TestDomainMappings(unittest.TestCase):
         result = self.filter.domain_mappings(apps, self.primary, True)
         self.assertEqual(result, expected)
 
+    def test_rendered_template_domains(self):
+        apps = {
+            "web-app-dashboard": {
+                "server": {
+                    "domains": {
+                        "aliases": ["www.{{ DOMAIN_PRIMARY }}"],
+                        "canonical": ["dash.{{ DOMAIN_PRIMARY }}"],
+                    }
+                }
+            }
+        }
+        expected = [{"source": "www.example.com", "target": "dash.example.com"}]
+        result = self.filter.domain_mappings(apps, self.primary, False)
+        self.assertEqual(result, expected)
+
     def test_multiple_apps(self):
         apps = {
             "web-app-dashboard": {"server": {"domains": {"aliases": ["a1.com"]}}},

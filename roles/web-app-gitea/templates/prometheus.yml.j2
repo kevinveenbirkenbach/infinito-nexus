@@ -4,11 +4,11 @@
   - job_name: "gitea"
     scheme: http
     metrics_path: /metrics
-{% set _token = lookup('config', native_prometheus_application_id, 'compose.services.prometheus.native_metrics.token', '') %}
+{% set _token = lookup('config', native_prometheus_application_id, 'credentials.native_metrics_token', '') %}
 {% if _token %}
     bearer_token: "{{ _token }}"
 {% endif %}
     static_configs:
-      - targets: ["{{ native_prometheus_application_id | native_metrics_target(applications) }}"]
+      - targets: ["{{ native_prometheus_application_id | native_metrics_target(lookup('applications')) }}"]
         labels:
           app: "{{ native_prometheus_application_id }}"

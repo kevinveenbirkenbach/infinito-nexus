@@ -2,8 +2,9 @@ from __future__ import annotations
 
 from typing import Any, Dict, List, Optional
 
-from ansible.errors import AnsibleError
 from ansible.plugins.lookup import LookupBase
+
+from utils.runtime_data import get_merged_applications
 
 
 class LookupModule(LookupBase):
@@ -21,8 +22,8 @@ class LookupModule(LookupBase):
       ...prometheus monitoring block...
       {% endif %}
 
-    Pass 'application_id' as term 0 (string). 'applications' is read from
-    available_variables — the same source used by lookup('config') and lookup('database').
+    Pass 'application_id' as term 0 (string). 'applications' is obtained via
+    get_merged_applications — the same merged view that backs lookup('applications').
     """
 
     def run(
@@ -33,11 +34,11 @@ class LookupModule(LookupBase):
     ) -> List[bool]:
         vars_ = variables or getattr(self._templar, "available_variables", {}) or {}
 
-        applications = vars_.get("applications")
-        if not isinstance(applications, dict):
-            raise AnsibleError(
-                "prometheus_integration_active: required variable 'applications' must be a mapping"
-            )
+        applications = get_merged_applications(
+            variables=vars_,
+            roles_dir=kwargs.get("roles_dir"),
+            templar=getattr(self, "_templar", None),
+        )
 
         # application_id may be passed explicitly (term 0) or read from available_variables.
         if terms and isinstance(terms[0], str):

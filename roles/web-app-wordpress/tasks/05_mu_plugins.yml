@@ -1,0 +1,27 @@
+---
+# Install mu-plugins into the running WordPress container so they are
+# always active (mu-plugins cannot be deactivated from the admin UI).
+# Currently installs the OIDC→RBAC role mapper required by
+# docs/requirements/004-generic-rbac-ldap-auto-provisioning.md.
+
+- name: "Ensure mu-plugins directory exists inside the container"
+  command: >
+    container exec -u {{ WORDPRESS_USER }} {{ WORDPRESS_CONTAINER }}
+    mkdir -p {{ WORDPRESS_DOCKER_HTML_PATH }}/wp-content/mu-plugins
+  changed_when: false
+
+- name: "Copy infinito-oidc-rbac-mapper.php into the container"
+  command: >
+    container cp
+    {{ [role_path, 'files/mu-plugins/infinito-oidc-rbac-mapper.php'] | path_join }}
+    {{ WORDPRESS_CONTAINER }}:{{ WORDPRESS_DOCKER_HTML_PATH }}/wp-content/mu-plugins/infinito-oidc-rbac-mapper.php
+  register: cp_mu_plugin
+  changed_when: cp_mu_plugin.rc == 0
+  failed_when: cp_mu_plugin.rc != 0
+
+- name: "Ensure WordPress user owns the mu-plugin file"
+  command: >
+    container exec {{ WORDPRESS_CONTAINER }}
+    chown {{ WORDPRESS_USER }}:{{ WORDPRESS_USER }}
+    {{ WORDPRESS_DOCKER_HTML_PATH }}/wp-content/mu-plugins/infinito-oidc-rbac-mapper.php
+  changed_when: false

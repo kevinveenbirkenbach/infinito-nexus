@@ -1,5 +1,8 @@
 from pathlib import Path
+import os
 import unittest
+
+from tests.utils.fs import iter_project_files
 
 
 def repo_root() -> Path:
@@ -16,18 +19,30 @@ class TestTestFileNaming(unittest.TestCase):
 
     This guarantees consistent test naming and reliable
     test discovery.
+
+    Files under ``tests/utils/`` are exempt because they hold shared
+    test infrastructure (cached filesystem helpers, fixtures) rather
+    than tests.
     """
 
     def test_all_python_files_use_test_prefix(self):
-        tests_root = repo_root() / "tests"
+        root = repo_root()
+        tests_root = root / "tests"
+        tests_prefix = str(tests_root) + os.sep
+        utils_prefix = str(tests_root / "utils") + os.sep
 
         invalid_files = []
 
-        for path in tests_root.rglob("*.py"):
+        for path_str in iter_project_files(extensions=(".py",)):
+            if not path_str.startswith(tests_prefix):
+                continue
+            path = Path(path_str)
             # Explicitly allow package initializers
             if path.name == "__init__.py":
                 continue
-
+            # Exempt shared test infrastructure under tests/utils/
+            if path_str.startswith(utils_prefix):
+                continue
             if not path.name.startswith("test_"):
                 invalid_files.append(path.relative_to(tests_root))
 

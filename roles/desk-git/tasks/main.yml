@@ -20,17 +20,17 @@
           - --merge-option
           - rebase
           - --name
-          - "{{ users[WORKSTATION_USER].firstname }} {{ users[WORKSTATION_USER].lastname }}"
+          - "{{ lookup('users', WORKSTATION_USER).firstname }} {{ lookup('users', WORKSTATION_USER).lastname }}"
           - --email
-          - "{{ users[WORKSTATION_USER].email }}"
+          - "{{ lookup('users', WORKSTATION_USER).email }}"
           - --website
-          - "{{ users[WORKSTATION_USER].website }}"
+          - "{{ lookup('users', WORKSTATION_USER).website }}"
           - --signing
           - gpg
           - --gpg-key
-          - "{{ users[WORKSTATION_USER].gpg }}"
+          - "{{ lookup('users', WORKSTATION_USER).gpg }}"
       become: true
-      become_user: "{{ users[WORKSTATION_USER].username }}"
+      become_user: "{{ lookup('users', WORKSTATION_USER).username }}"
       environment:
         PATH: "/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
 

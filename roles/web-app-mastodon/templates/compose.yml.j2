@@ -52,7 +52,7 @@
       retries: 3
 {% include 'roles/sys-svc-container/templates/networks.yml.j2' %}
 
-{{ applications | compose_volumes(
+{{ lookup('applications') | compose_volumes(
     application_id,
     database_volume=lookup('database', application_id, 'volume'),
     extra_volumes={'data': {'name': MASTODON_VOLUME}}

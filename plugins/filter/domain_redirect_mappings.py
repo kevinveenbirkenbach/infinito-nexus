@@ -1,4 +1,6 @@
 from ansible.errors import AnsibleFilterError
+
+from utils.domains.list import render_domain_value
 from utils.entity_name_utils import get_entity_name
 
 
@@ -21,7 +23,11 @@ class FilterModule(object):
         def parse_entry(domains_cfg, key, app_id):
             if key not in domains_cfg:
                 return None
-            entry = domains_cfg[key]
+            entry = render_domain_value(
+                domains_cfg[key],
+                {"DOMAIN_PRIMARY": primary_domain},
+                f"{app_id}.server.domains.{key}",
+            )
             if isinstance(entry, dict):
                 values = list(entry.values())
             elif isinstance(entry, list):
@@ -45,7 +51,15 @@ class FilterModule(object):
         canonical_map = {}
         for app_id, cfg in apps.items():
             domains_cfg = cfg.get("server", {}).get("domains", {})
-            entry = domains_cfg.get("canonical")
+            entry = (
+                render_domain_value(
+                    domains_cfg.get("canonical"),
+                    {"DOMAIN_PRIMARY": primary_domain},
+                    f"{app_id}.server.domains.canonical",
+                )
+                if "canonical" in domains_cfg
+                else None
+            )
             if entry is None:
                 canonical_map[app_id] = [default_domain(app_id, primary_domain)]
             elif isinstance(entry, dict):

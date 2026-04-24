@@ -1,7 +1,7 @@
 ---
 - name: "include _create-domains.yml for peertube"
   include_tasks: _create-domains.yml
-  loop: "{{ domains[application_id] }}"
+  loop: "{{ lookup('domains', application_id) }}"
   loop_control:
     loop_var: domain
   vars:
@@ -14,6 +14,9 @@
     name: sys-stk-backend
   vars:
     docker_compose_flush_handlers: true
+
+- name: "PEERTUBE | Patch the `application` table so the bootstrap INSERT survives fresh installs"
+  include_tasks: fix-application-schema.yml
 
 - name: "Install and activate auth-openid-connect plugin if OIDC is enabled"
   include_tasks: oidc/enable.yml

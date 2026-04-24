@@ -12,6 +12,7 @@ from utils.database_service import (
     resolve_database_service_key,
 )
 from utils.entity_name_utils import get_entity_name
+from utils.runtime_data import get_merged_applications
 
 
 class LookupModule(LookupBase):
@@ -54,7 +55,11 @@ class LookupModule(LookupBase):
             want = "all"
 
         vars_ = variables or self._templar.available_variables
-        applications = self._require_var(vars_, "applications")
+        applications = get_merged_applications(
+            variables=vars_,
+            roles_dir=kwargs.get("roles_dir"),
+            templar=getattr(self, "_templar", None),
+        )
         ports = self._require_var(vars_, "ports")
         path_instances = self._require_var(vars_, "DIR_COMPOSITIONS")
 

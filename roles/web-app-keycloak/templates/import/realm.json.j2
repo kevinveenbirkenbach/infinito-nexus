@@ -1568,7 +1568,9 @@
       }
     ],
     {%- include "components/org.keycloak.userprofile.UserProfileProvider.json.j2" -%},
+    {%- if KEYCLOAK_LDAP_ENABLED | bool -%}
     {%- include "components/org.keycloak.storage.UserStorageProvider.json.j2" -%},
+    {%- endif -%}
     "org.keycloak.keys.KeyProvider": [
       {
         "name": "rsa-enc-generated",

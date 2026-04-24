@@ -6,12 +6,12 @@ entity_name:                      "{{ application_id | get_entity_name }}"
 # Taiga
 
 ## General
-TAIGA_EMAIL_BACKEND:              "{{ 'smtp' if SYSTEM_EMAIL_SMTP else 'console' }}"  ## use an SMTP server or display the emails in the console (either "smtp" or "console")
+TAIGA_EMAIL_BACKEND:              "{{ 'smtp' if lookup('email', application_id).smtp else 'console' }}"  ## use an SMTP server or display the emails in the console (either "smtp" or "console")
 
 ## User
-TAIGA_SUPERUSER_NAME:             "{{ users.administrator.username }}"
-TAIGA_SUPERUSER_PASSWORD:         "{{ users.administrator.password }}"
-TAIGA_SUPERUSER_EMAIL:            "{{ users.administrator.email }}"
+TAIGA_SUPERUSER_NAME:             "{{ lookup('users', 'administrator').username }}"
+TAIGA_SUPERUSER_PASSWORD:         "{{ lookup('users', 'administrator').password }}"
+TAIGA_SUPERUSER_EMAIL:            "{{ lookup('users', 'administrator').email }}"
 
 ## Authentication
 TAIGA_OIDC_ENABLED:               "{{ lookup('config', application_id, 'compose.services.oidc.enabled') }}"
