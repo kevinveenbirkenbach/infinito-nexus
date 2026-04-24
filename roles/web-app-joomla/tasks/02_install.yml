@@ -42,8 +42,11 @@
 # genuine existing install is never touched.
 - name: "Joomla CLI install (rm stub + install in one retry loop for image-init race)"
   ansible.builtin.command:
+    # NOTE: argv[0] must be `bash`, not `sh`. On Debian/Ubuntu CI runners
+    # `/bin/sh` is dash, which does not support `set -o pipefail` and aborts
+    # with "sh: 1: set: Illegal option -o pipefail". See infinito-nexus/core#194.
     argv:
-      - sh
+      - bash
       - -lc
       - |
         set -o pipefail
