@@ -1,4 +1,3 @@
-autocreate_users:     true # Autocreate LDAP users on Login
 server:
   domains:
     canonical:
