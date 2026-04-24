@@ -24,6 +24,7 @@ class TestFrontendServiceSpot(unittest.TestCase):
             if entry["role"] == role_name:
                 return index
         self.fail(f"Role {role_name} not found in ordered service registry")
+        return -1
 
     def test_bucket_order_is_monotonic(self):
         bucket_order = {
