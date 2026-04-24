@@ -28,7 +28,7 @@ At the start of every new conversation (after reading `AGENTS.md`), you MUST rea
 ## Pushing 🚢
 
 - You MUST NOT push, directly or through wrappers that push implicitly.
-- When commits are ready to ship, you MUST instruct the operator to run `make sign-push` outside the sandbox. See [sign-push.sh](scripts/git/sign-push.sh).
+- When commits are ready to ship, you MUST instruct the operator to run `git-sign-push` outside the sandbox. The CLI is provided by [git-maintainer-tools](https://github.com/kevinveenbirkenbach/git-maintainer-tools), declared as a dev dependency in [pyproject.toml](pyproject.toml); install it via `make install-python-dev`.
 
 ## Configuration 🛠️
 
