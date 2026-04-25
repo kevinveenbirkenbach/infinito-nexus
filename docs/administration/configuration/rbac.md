@@ -1,6 +1,6 @@
 # RBAC 🛂
 
-This page is the administration SPOT for granting and revoking application role memberships via Keycloak. It covers the **how**; for the **why** (design, schema, LDAP layout, client-scope contract) see [rbac.md](../../contributing/design/iam/rbac.md).
+This page is the administration SPOT for granting and revoking application role memberships via Keycloak. It covers the **how**; for the **why** (design, schema, LDAP layout, client-scope contract) see [RBAC design](../../contributing/design/iam/rbac.md).
 
 ## Granting a role 🎟️
 
@@ -32,7 +32,7 @@ To revoke a role, remove the user from the same group. Changes take effect the n
 When a user unexpectedly ends up in the fallback `subscriber` role, check the following in order:
 
 1. The user is a direct member of the expected group (not only a parent OU).
-2. The OIDC client used by the application has the `groups` client scope attached as a **default** scope (not optional). The design note in [rbac.md](../../contributing/design/iam/rbac.md) explains why.
+2. The OIDC client used by the application has the `groups` client scope attached as a **default** scope (not optional). The design note in [RBAC design](../../contributing/design/iam/rbac.md) explains why.
 3. The Keycloak **Userinfo** preview for the user contains a `groups` array with the full path. If it does not, the scope is not reaching the userinfo endpoint and the mapping will not fire.
 
 ## Migration from the pre-005 flat layout 🔁

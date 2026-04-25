@@ -2,7 +2,7 @@
 
 ## Description
 
-[WordPress](https://en.wordpress.org/) is a versatile and widely used [content management system (CMS)](https://en.wikipedia.org/wiki/Content_management_system) that powers millions of websites — from blogs and portfolios to e-commerce and corporate sites. This deployment provides a containerized WordPress instance optimized for multisite operation, advanced media management, and extensive plugin support, allowing you to fully leverage the rich features of the WordPress software.
+[WordPress](https://en.wordpress.org/) is a versatile and widely used [content management system (CMS)](https://en.wikipedia.org/wiki/Content_management_system) that powers millions of websites, from blogs and portfolios to e-commerce and corporate sites. This deployment provides a containerized WordPress instance optimized for multisite operation, advanced media management, and extensive plugin support, allowing you to fully leverage the rich features of the WordPress software.
 
 ## Overview
 
@@ -29,7 +29,7 @@ WordPress offers an extensive array of features that make it a robust platform f
 - **Extensive Community and Ecosystem:**
   Benefit from a massive community with frequent updates, security patches, and a wide range of third-party tools that continuously enhance the platform.
 
-This automated Docker Compose deployment streamlines the process by building a custom WordPress image — which includes tools like msmtp for email delivery — and configuring the necessary PHP settings, ensuring that your WordPress site is secure, scalable, and always up to date.
+This automated Docker Compose deployment streamlines the process by building a custom WordPress image (which includes tools like msmtp for email delivery) and configuring the necessary PHP settings, ensuring that your WordPress site is secure, scalable, and always up to date.
 
 ## Purpose
 
@@ -43,7 +43,7 @@ RBAC under Multisite uses the hierarchical Keycloak group path:
 - Per-site role: `/roles/web-app-wordpress/<canonical-domain>/<role>`
 - Network-wide super-admin: `/roles/web-app-wordpress/network-administrator`
 
-Operator-facing instructions for assigning these groups live in [rbac.md](../../docs/administration/configuration/rbac.md); the design contract is in [rbac.md](../../docs/contributing/design/iam/rbac.md).
+Operator-facing instructions for assigning these groups live in [Administration RBAC](../../docs/administration/configuration/rbac.md). The design contract is in [RBAC design](../../docs/contributing/design/iam/rbac.md).
 
 ## Playwright service dependencies
 

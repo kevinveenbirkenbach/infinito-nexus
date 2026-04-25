@@ -1,24 +1,18 @@
 # RBAC 🛂
 
-This page is the design SPOT for the Infinito.Nexus RBAC layer that provisions LDAP groups, synchronises them to Keycloak, and emits them as the OIDC `groups` claim. For IAM fundamentals that span both providers, see [common.md](common.md). For the LDAP server layer, see [ldap.md](ldap.md). For the OIDC client layer, see [oidc.md](oidc.md). Operator-facing steps live in [rbac.md](../../../administration/configuration/rbac.md).
+This page is the design SPOT for the Infinito.Nexus RBAC layer that provisions LDAP groups, synchronises them to Keycloak, and emits them as the OIDC `groups` claim. For IAM fundamentals that span both providers, see [common.md](common.md). For the LDAP server layer, see [ldap.md](ldap.md). For the OIDC client layer, see [oidc.md](oidc.md). Operator-facing steps live in [Administration RBAC](../../../administration/configuration/rbac.md).
 
 ## LDAP layout contract 🌳
 
-Every role that declares an `rbac:` block in its `config/main.yml` is provisioned under a per-application OU under the container named by `RBAC.GROUP.NAME` (default `roles`):
+Every role that declares an `rbac:` block in its `config/main.yml` MUST be provisioned with a per-application namespace under the container named by `RBAC.GROUP.NAME` (default `roles`). Each LDAP group entry is a direct child of that container; the application identifier (and the tenant identifier, if any) is encoded into the CN with hyphen separators:
 
 ```
-ou=<application_id>,ou=roles,<LDAP_DN_BASE>
+cn=<application_id>-<role_name>,ou=roles,<LDAP_DN_BASE>                       # non-tenant / global role
+cn=<application_id>-<tenant_id>-<role_name>,ou=roles,<LDAP_DN_BASE>           # tenant-aware per-tenant
+cn=<application_id>-<role_name>,ou=roles,<LDAP_DN_BASE>                       # tenant-aware scope=global
 ```
 
-Role groups hang off that OU as `cn=<role_name>` entries. Tenant-aware applications (`rbac.tenancy.axis == "domain"`) add a tenant layer between the application OU and the role entries:
-
-```
-cn=<role_name>,ou=<application_id>,ou=roles,...                   # non-tenant role
-cn=<role_name>,ou=<tenant_id>,ou=<application_id>,ou=roles,...    # tenant-aware per-tenant
-cn=<role_name>,ou=<application_id>,ou=roles,...                   # tenant-aware scope=global
-```
-
-The pre-005 flat pattern `cn=<application_id>-<role_name>,ou=roles,...` MUST NOT appear in the tree after the 005 migration has run. [build_ldap_role_entries](../../../../roles/svc-db-openldap/filter_plugins/build_ldap_role_entries.py) is the authoritative producer; it also emits the intermediate OUs so the subtree is self-contained.
+The producer [build_ldap_role_entries](../../../../roles/svc-db-openldap/filter_plugins/build_ldap_role_entries.py) also emits a per-application `groupOfNames` container `cn=<application_id>,ou=roles,...` whose `member` attribute references every role group of that application, so an LDAP-only consumer can still navigate the hierarchy. Keycloak does not rely on those containers; it reconstructs `/roles/<application_id>/<role_name>` via per-application mappers (see below).
 
 ## `rbac.tenancy` schema 📐
 
@@ -55,11 +49,13 @@ An application SHOULD opt in to `axis: domain` only when its authorisation model
 # -> "roles/web-app-wordpress/network-administrator"
 ```
 
-Inline `[RBAC.GROUP.NAME, ...] | path_join` is forbidden because it scatters the path shape across dozens of files and makes future layout changes partial. Centralising the path in the plugin guarantees that a layout evolution stays a one-file change.
+Inline `[RBAC.GROUP.NAME, ...] | path_join` MUST NOT be used: it scatters the path shape across dozens of files and makes future layout changes partial. Centralising the path in the plugin guarantees that a layout evolution stays a one-file change.
 
 ## Keycloak group tree and the `groups` client scope 🎫
 
-Keycloak imports the LDAP tree with `Preserve Group Inheritance = true`, so every `ou=<application_id>` appears as a Keycloak group with its role children as sub-groups and (for tenant-aware apps) tenant OUs as another sub-group layer.
+The Keycloak group tree is built by **per-application** `group-ldap-mapper`s. Each deployed application gets one mapper anchored at `/roles/<application_id>` whose LDAP filter `(&(objectClass=groupOfNames)(cn=<application_id>-*))` surfaces only that application's role groups. The mapper uses the LDAP `description` attribute as the visible Keycloak group name, so the resulting group paths carry no redundant prefix.
+
+A shared mapper that imports every LDAP group with `preserve.group.inheritance=true` MUST NOT be used. Role names recur across applications (`administrator`, `editor`, ...) and Keycloak's `GroupTreeResolver` keys its lookup map on the group name, so the second `administrator` silently overwrites the first.
 
 The `groups` client scope emits the OIDC `groups` claim with `full.path=true`, so consumers receive entries shaped like:
 

@@ -458,7 +458,7 @@ prose).
   - The `rbac_group_path` lookup plugin as the **only** sanctioned
     way to compute an OIDC group path for a role: contract, examples,
     failure modes. The page MUST state that inline
-    `[RBAC.GROUP.NAME, ...] | path_join` is forbidden and explain why
+    `[RBAC.GROUP.NAME, ...] | path_join` MUST NOT be used and explain why
     centralising the path computation protects against partial
     migrations when the layout evolves again.
   - The Keycloak group tree that mirrors the LDAP OUs, the default

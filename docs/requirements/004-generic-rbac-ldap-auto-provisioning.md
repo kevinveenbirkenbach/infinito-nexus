@@ -4,8 +4,8 @@
 
 As an infrastructure maintainer, I want the OpenLDAP role to automatically
 provision the RBAC groups for every role that declares an `rbac:` block in its
-`config/main.yml` — gated on whether the role is deployed on this host
-(present in `group_names`) — so that operators declare roles once in role
+`config/main.yml`, gated on whether the role is deployed on this host
+(present in `group_names`), so that operators declare roles once in role
 config and the LDAP directory, Keycloak groups, and downstream OIDC claims
 stay in lockstep without a per-role manual provisioning step.
 
@@ -54,7 +54,7 @@ stay in lockstep without a per-role manual provisioning step.
   The already-provisioned `cn=<application_id>-administrator,ou=roles,…`
   groups MUST keep their exact current DNs so existing bind/search filters
   in consumer apps continue to match. New auto-provisioned roles share
-  the same `ou=roles` container — no new OU is introduced.
+  the same `ou=roles` container, with no new OU introduced.
 
 ### Keycloak synchronization
 
@@ -87,7 +87,7 @@ stay in lockstep without a per-role manual provisioning step.
 ### Idempotency
 
 - [x] Re-running the provisioning on an already-provisioned LDAP directory
-  MUST be a no-op with respect to group existence and role membership — no
+  MUST be a no-op with respect to group existence and role membership: no
   duplicate group, no removed membership, no spurious "changed" task
   result. Existing manual membership edits made outside the provisioning
   pipeline MUST NOT be overwritten unless the role config explicitly lists

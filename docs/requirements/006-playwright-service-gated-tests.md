@@ -132,30 +132,30 @@ authoritative final list. The audit MUST be driven by reading each
 scenario end to end. Baseline scenarios MUST stay ungated in every
 case.
 
-- [x] [web-app-bigbluebutton](../../roles/web-app-bigbluebutton/) — audit spec; baseline gates: `oidc`, `ldap`, `dashboard`.
-- [x] [web-app-dashboard](../../roles/web-app-dashboard/) — audit spec; baseline gates: `oidc`, `matomo`, `simpleicons`. MUST NOT self-gate on `dashboard` because the role IS the dashboard.
-- [x] [web-app-decidim](../../roles/web-app-decidim/) — audit spec; baseline gates: `oidc`, `email`.
-- [x] [web-app-discourse](../../roles/web-app-discourse/) — audit spec; baseline gates: `oidc`, `dashboard`.
-- [x] [web-app-fider](../../roles/web-app-fider/) — audit spec; baseline gates: `oidc`, `email`, `dashboard`.
-- [x] [web-app-friendica](../../roles/web-app-friendica/) — audit spec; baseline gates: `oidc`, `ldap`, `dashboard`.
-- [x] [web-app-gitea](../../roles/web-app-gitea/) — audit spec; baseline gates: `oidc`, `email`.
-- [x] [web-app-joomla](../../roles/web-app-joomla/) — audit spec; baseline gates: `oidc`, `dashboard`.
-- [x] [web-app-keycloak](../../roles/web-app-keycloak/) — audit spec; baseline gates: `ldap` for federation scenarios. MUST NOT self-gate on `oidc` because Keycloak IS the OIDC provider; if the spec runs at all, OIDC is available by definition.
-- [x] [web-app-mailu](../../roles/web-app-mailu/) — audit spec; baseline gates: `oidc`, `dashboard`. MUST NOT self-gate on `email` because Mailu IS the email provider.
-- [x] [web-app-matomo](../../roles/web-app-matomo/) — audit spec; baseline gates: `dashboard`. MUST NOT self-gate on `matomo` because Matomo IS the matomo provider.
-- [x] [web-app-matrix](../../roles/web-app-matrix/) — audit spec; baseline gates: `oidc`, `email`, `matomo`, `dashboard`.
-- [x] [web-app-mattermost](../../roles/web-app-mattermost/) — audit spec; baseline gates: `oidc`, `email`, `dashboard`.
-- [x] [web-app-nextcloud](../../roles/web-app-nextcloud/) — audit spec; baseline gates: `oidc`, `ldap`, `email`, `dashboard`, `onlyoffice`, `collabora`, `talk`. Each integration scenario MUST gate on its own flag; a single omnibus gate across the set is forbidden.
-- [x] [web-app-odoo](../../roles/web-app-odoo/) — audit spec; baseline gates: `oidc`, `email`, `dashboard`.
-- [x] [web-app-openwebui](../../roles/web-app-openwebui/) — audit spec; baseline gates: `oidc`, `dashboard`.
-- [x] [web-app-peertube](../../roles/web-app-peertube/) — audit spec; baseline gates: `oidc`, `dashboard`.
-- [x] [web-app-pixelfed](../../roles/web-app-pixelfed/) — audit spec; baseline gates: `oidc`, `email`, `dashboard`.
-- [x] [web-app-prometheus](../../roles/web-app-prometheus/) — audit spec; baseline gates: `oidc`, `email`, `dashboard`.
-- [x] [web-app-taiga](../../roles/web-app-taiga/) — audit spec; baseline gates: `oidc`, `dashboard`.
-- [x] [web-app-wordpress](../../roles/web-app-wordpress/) — audit spec; baseline gates: `oidc`, `ldap` (from [004](004-generic-rbac-ldap-auto-provisioning.md)); `discourse` (from [007](007-wordpress-discourse-post-round-trip.md)).
-- [x] [web-app-yourls](../../roles/web-app-yourls/) — audit spec; baseline gates: `oidc`, `email`, `dashboard`.
-- [x] [web-svc-cdn](../../roles/web-svc-cdn/) — audit spec before adding any gate; CDN is a static-origin service and its spec is likely all-baseline. The audit outcome MUST be documented in the commit that closes this checkbox.
-- [x] [web-svc-simpleicons](../../roles/web-svc-simpleicons/) — audit spec; baseline gate: `oidc` if the admin-facing scenario uses it; otherwise close this item with "all-baseline" and no gate added.
+- [x] [web-app-bigbluebutton](../../roles/web-app-bigbluebutton/): audit spec; baseline gates: `oidc`, `ldap`, `dashboard`.
+- [x] [web-app-dashboard](../../roles/web-app-dashboard/): audit spec; baseline gates: `oidc`, `matomo`, `simpleicons`. MUST NOT self-gate on `dashboard` because the role IS the dashboard.
+- [x] [web-app-decidim](../../roles/web-app-decidim/): audit spec; baseline gates: `oidc`, `email`.
+- [x] [web-app-discourse](../../roles/web-app-discourse/): audit spec; baseline gates: `oidc`, `dashboard`.
+- [x] [web-app-fider](../../roles/web-app-fider/): audit spec; baseline gates: `oidc`, `email`, `dashboard`.
+- [x] [web-app-friendica](../../roles/web-app-friendica/): audit spec; baseline gates: `oidc`, `ldap`, `dashboard`.
+- [x] [web-app-gitea](../../roles/web-app-gitea/): audit spec; baseline gates: `oidc`, `email`.
+- [x] [web-app-joomla](../../roles/web-app-joomla/): audit spec; baseline gates: `oidc`, `dashboard`.
+- [x] [web-app-keycloak](../../roles/web-app-keycloak/): audit spec; baseline gates: `ldap` for federation scenarios. MUST NOT self-gate on `oidc` because Keycloak IS the OIDC provider; if the spec runs at all, OIDC is available by definition.
+- [x] [web-app-mailu](../../roles/web-app-mailu/): audit spec; baseline gates: `oidc`, `dashboard`. MUST NOT self-gate on `email` because Mailu IS the email provider.
+- [x] [web-app-matomo](../../roles/web-app-matomo/): audit spec; baseline gates: `dashboard`. MUST NOT self-gate on `matomo` because Matomo IS the matomo provider.
+- [x] [web-app-matrix](../../roles/web-app-matrix/): audit spec; baseline gates: `oidc`, `email`, `matomo`, `dashboard`.
+- [x] [web-app-mattermost](../../roles/web-app-mattermost/): audit spec; baseline gates: `oidc`, `email`, `dashboard`.
+- [x] [web-app-nextcloud](../../roles/web-app-nextcloud/): audit spec; baseline gates: `oidc`, `ldap`, `email`, `dashboard`, `onlyoffice`, `collabora`, `talk`. Each integration scenario MUST gate on its own flag; a single omnibus gate across the set MUST NOT be used.
+- [x] [web-app-odoo](../../roles/web-app-odoo/): audit spec; baseline gates: `oidc`, `email`, `dashboard`.
+- [x] [web-app-openwebui](../../roles/web-app-openwebui/): audit spec; baseline gates: `oidc`, `dashboard`.
+- [x] [web-app-peertube](../../roles/web-app-peertube/): audit spec; baseline gates: `oidc`, `dashboard`.
+- [x] [web-app-pixelfed](../../roles/web-app-pixelfed/): audit spec; baseline gates: `oidc`, `email`, `dashboard`.
+- [x] [web-app-prometheus](../../roles/web-app-prometheus/): audit spec; baseline gates: `oidc`, `email`, `dashboard`.
+- [x] [web-app-taiga](../../roles/web-app-taiga/): audit spec; baseline gates: `oidc`, `dashboard`.
+- [x] [web-app-wordpress](../../roles/web-app-wordpress/): audit spec; baseline gates: `oidc`, `ldap` (from [004](004-generic-rbac-ldap-auto-provisioning.md)); `discourse` (from [007](007-wordpress-discourse-post-round-trip.md)).
+- [x] [web-app-yourls](../../roles/web-app-yourls/): audit spec; baseline gates: `oidc`, `email`, `dashboard`.
+- [x] [web-svc-cdn](../../roles/web-svc-cdn/): audit spec before adding any gate; CDN is a static-origin service and its spec is likely all-baseline. The audit outcome MUST be documented in the commit that closes this checkbox.
+- [x] [web-svc-simpleicons](../../roles/web-svc-simpleicons/): audit spec; baseline gate: `oidc` if the admin-facing scenario uses it; otherwise close this item with "all-baseline" and no gate added.
 - [x] After the refactor the following post-conditions MUST all hold:
   - Baseline scenarios of every spec keep passing when `SERVICES_DISABLED`
     is empty.
