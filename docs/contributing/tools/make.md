@@ -134,9 +134,7 @@ For rules on how to write and structure the `Makefile` itself, see [makefile.md]
 
 ## Git 🔐
 
-| Category | Command | What it does | When to use it |
-|---|---|---|---|
-| Sign and push | `make sign-push` | GPG-signs every unpushed commit on the current branch via [sign-push.sh](../../../scripts/git/sign-push.sh) and pushes (force-with-lease on rebased history). Refuses to run inside the Claude sandbox and when the working tree is dirty. | Use this instead of `git push`. Direct push is denied in [settings.json](../../../.claude/settings.json) so that only the operator (with access to the GPG key in `~/.gnupg`) ever signs and ships commits. Agents MUST instruct the operator to run this target rather than pushing themselves. |
+Remote setup and signed pushes are handled by [git-maintainer-tools](https://github.com/kevinveenbirkenbach/git-maintainer-tools), installed through `make install-python-dev` (see [remotes.md](../artefact/git/remotes.md)). The tool's `git-setup-remotes` and `git-sign-push` CLIs MUST be invoked directly; there are no `make` wrappers in this repo. Direct `git push` is denied in [settings.json](../../../.claude/settings.json), and agents MUST instruct the operator to run `git-sign-push` outside the Claude sandbox.
 
 ## Notes 📝
 

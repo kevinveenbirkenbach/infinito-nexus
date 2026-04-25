@@ -34,7 +34,7 @@ compose:
       enabled:                    true
     decidim:
       image:                      "ghcr.io/decidim/decidim"
-      version:                    "0.31.3"
+      version:                    "0.31.4"
       min_storage:                "10GB"
       name:                       "decidim"
       cpus:                       "1.0"
