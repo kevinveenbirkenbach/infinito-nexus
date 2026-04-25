@@ -20,6 +20,37 @@ KEYCLOAK_SERVER_INTERNAL_URL:       "http://127.0.0.1:8080"
 KEYCLOAK_RBAC_GROUP_CLAIM:          "{{ RBAC.GROUP.CLAIM }}"
 KEYCLOAK_RBAC_GROUP_NAME:           "{{ RBAC.GROUP.NAME }}"
 
+# RBAC | Per-application group-ldap-mapper payload (requirement 005).
+# Single SPOT for the per-app mapper definition: takes the canonical
+# 'ldap-roles' mapper from the realm-import dictionary
+# (templates/import/components/org.keycloak.storage.UserStorageProvider.json.j2)
+# and overrides only the fields that genuinely vary per application.
+# Lazy-evaluated, so the consuming task MUST set `kc_app_id`,
+# `kc_app_group_id`, and have `ldap_cmp_id` resolved before rendering.
+KEYCLOAK_PER_APP_LDAP_ROLES_MAPPER: >-
+  {{
+    (KEYCLOAK_DICTIONARY_REALM.components['org.keycloak.storage.UserStorageProvider']
+     | selectattr('name','equalto', KEYCLOAK_LDAP_CMP_NAME)
+     | list | first
+    ).subComponents['org.keycloak.storage.ldap.mappers.LDAPStorageMapper']
+    | selectattr('name','equalto','ldap-roles')
+    | list | first
+    | combine({
+        'name':         kc_app_id | kc_per_app_mapper_name,
+        'parentId':     ldap_cmp_id | trim,
+        'providerId':   'group-ldap-mapper',
+        'providerType': 'org.keycloak.storage.ldap.mappers.LDAPStorageMapper',
+        'config': {
+          'preserve.group.inheritance':            ['false'],
+          'group.name.ldap.attribute':             ['description'],
+          'groups.ldap.filter':                    [kc_app_id | kc_per_app_ldap_filter],
+          'groups.path':                           ['/' ~ (KEYCLOAK_RBAC_GROUP_NAME | trim('/')) ~ '/' ~ kc_app_id],
+          'groups.path.group':                     [kc_app_group_id],
+          'drop.non.existing.groups.during.sync':  ['true'],
+        }
+      }, recursive=True)
+  }}
+
 ## Health
 KEYCLOAK_HEALTH_ENABLED:            true
 

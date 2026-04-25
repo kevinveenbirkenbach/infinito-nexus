@@ -57,6 +57,16 @@
   failed_when: false
   no_log: "{{ MASK_CREDENTIALS_IN_LOGS | bool }}"
 
+- name: "per-app mapper [{{ kc_app_id }}]: render ldap-roles-{{ kc_app_id }} mapper payload"
+  # `KEYCLOAK_PER_APP_LDAP_ROLES_MAPPER` (vars/main.yml) is the single
+  # SPOT for the per-application mapper definition.
+  ansible.builtin.copy:
+    dest: "/tmp/kc_mapper_payload_{{ kc_app_id }}.json"
+    mode: "0600"
+    content: "{{ KEYCLOAK_PER_APP_LDAP_ROLES_MAPPER | to_nice_json }}"
+  changed_when: false
+  no_log: "{{ MASK_CREDENTIALS_IN_LOGS | bool }}"
+
 - name: "per-app mapper [{{ kc_app_id }}]: upsert ldap-roles-{{ kc_app_id }} mapper"
   ansible.builtin.script:
     cmd: "files/scripts/per_app_mapper/upsert_app_mapper.sh"
@@ -65,10 +75,8 @@
     KC_CONTAINER: "{{ KEYCLOAK_CONTAINER }}"
     KC_REALM: "{{ KEYCLOAK_REALM }}"
     LDAP_COMPONENT_ID: "{{ ldap_cmp_id | trim }}"
-    APP_ID: "{{ kc_app_id }}"
-    APP_GROUP_ID: "{{ kc_app_group_id }}"
-    APP_GROUP_PATH: "/{{ KEYCLOAK_RBAC_GROUP_NAME | trim('/') }}/{{ kc_app_id }}"
-    LDAP_ROLES_DN: "{{ LDAP.DN.OU.ROLES }}"
+    MAPPER_NAME: "{{ kc_app_id | kc_per_app_mapper_name }}"
+    PAYLOAD_FILE: "/tmp/kc_mapper_payload_{{ kc_app_id }}.json"
   register: per_app_mapper_id_out
   changed_when: true
   failed_when: (per_app_mapper_id_out.stdout | default('') | trim | length) == 0
