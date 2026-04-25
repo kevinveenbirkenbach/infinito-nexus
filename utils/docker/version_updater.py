@@ -18,7 +18,13 @@ from utils.docker.image.ref import (
     split_registry_and_name,
 )
 
-_SEMVER_RE = re.compile(r"^v?\d+(\.\d+){0,3}$")
+_SEMVER_CORE = r"v?\d+(?:\.\d+){0,3}"
+_SEMVER_RE = re.compile(rf"^{_SEMVER_CORE}$")
+# Tags that extend a semver with a `-<flavor>` suffix, e.g. the Docker
+# Official image tag `5.4.5-php8.3-apache`. The flavor is treated as an
+# opaque discriminator: tags are only considered upgrade candidates for
+# each other when their flavor strings match.
+_VERSIONED_TAG_RE = re.compile(rf"^(?P<semver>{_SEMVER_CORE})(?P<flavor>-\S+)?$")
 _NOCHECK_TAG = "# nocheck: docker-version"
 _KEY_RE = re.compile(r"^(?P<indent>\s*)(?P<key>[A-Za-z0-9_-]+):(?P<rest>.*)$")
 _VERSION_VALUE_RE = re.compile(
@@ -41,22 +47,54 @@ class DockerImageVersionUpdate:
     latest: str
 
 
+def _parse_versioned_tag(tag: str) -> tuple[str, str] | None:
+    match = _VERSIONED_TAG_RE.match(str(tag).strip())
+    if match is None:
+        return None
+    return match.group("semver"), match.group("flavor") or ""
+
+
 def is_semver(value: str) -> bool:
-    return bool(_SEMVER_RE.match(str(value).strip()))
+    return _parse_versioned_tag(value) is not None
 
 
 def version_key(tag: str) -> tuple[int, ...]:
-    value = str(tag).strip().lstrip("v")
-    parts = tuple(int(part) for part in value.split("."))
+    parsed = _parse_versioned_tag(tag)
+    if parsed is None:
+        return (0,) * 4
+    semver, _flavor = parsed
+    parts = tuple(int(part) for part in semver.lstrip("v").split("."))
     return parts + (0,) * (4 - len(parts))
 
 
 def version_depth(tag: str) -> int:
-    return len(str(tag).strip().lstrip("v").split("."))
+    parsed = _parse_versioned_tag(tag)
+    if parsed is None:
+        return 0
+    semver, _flavor = parsed
+    return len(semver.lstrip("v").split("."))
 
 
-def latest_semver(tags: list[str], depth: int) -> str | None:
-    candidates = [tag for tag in tags if is_semver(tag) and version_depth(tag) == depth]
+def version_flavor(tag: str) -> str:
+    """Return the `-<flavor>` suffix of a versioned tag, or "" when none.
+
+    Only tags that share the same flavor are considered upgrade candidates
+    for one another, so that e.g. `5.4.5-php8.3-apache` is never
+    auto-bumped to `5.4.6-php8.4-apache` (different runtime flavor) or to
+    `5.4.6-php8.3-fpm` (different webserver flavor).
+    """
+    parsed = _parse_versioned_tag(tag)
+    return parsed[1] if parsed else ""
+
+
+def latest_semver(tags: list[str], depth: int, flavor: str = "") -> str | None:
+    candidates = [
+        tag
+        for tag in tags
+        if is_semver(tag)
+        and version_depth(tag) == depth
+        and version_flavor(tag) == flavor
+    ]
     return max(candidates, key=version_key, default=None)
 
 
@@ -246,7 +284,11 @@ def find_outdated_updates(repo_root: Path) -> list[DockerImageVersionUpdate]:
         tags = image_tags.get(entry.image, [])
         if not tags:
             continue
-        latest = latest_semver(tags, version_depth(entry.version))
+        latest = latest_semver(
+            tags,
+            version_depth(entry.version),
+            version_flavor(entry.version),
+        )
         if latest and version_key(entry.version) < version_key(latest):
             updates.append(DockerImageVersionUpdate(entry=entry, latest=latest))
 
