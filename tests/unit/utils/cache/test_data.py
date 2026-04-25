@@ -5,21 +5,23 @@ import textwrap
 import unittest
 from pathlib import Path
 
-from utils.cache.data import (
+from utils.cache import _reset_cache_for_tests
+from utils.cache.applications import get_application_defaults
+from utils.cache.base import (
     PROJECT_ROOT,
     ROLES_DIR,
-    _build_users,
-    _compute_reserved_usernames,
     _deep_merge,
     _fingerprint_mapping,
+    _load_yaml_mapping,
+    _stable_variables_signature,
+)
+from utils.cache.users import (
+    _build_users,
+    _compute_reserved_usernames,
     _hydrate_users_tokens,
     _load_user_defs,
-    _load_yaml_mapping,
     _materialize_builtin_user_aliases,
     _merge_users,
-    _reset_cache_for_tests,
-    _stable_variables_signature,
-    get_application_defaults,
     get_user_defaults,
 )
 
@@ -476,8 +478,9 @@ class TestImplicitRolesDir(unittest.TestCase):
 
     Why pin: when this module was at `utils/runtime_data.py`,
     `parents[1]` resolved to the repo root. After the move to
-    `utils/cache/data.py`, `parents[1]` silently became `utils/`, which
-    is itself a python package. Glob walks like
+    `utils/cache/base.py` (and previously `utils/cache/data.py`),
+    `parents[1]` silently became `utils/`, which is itself a python
+    package. Glob walks like
     `<utils>/roles/*/users/main.yml` then yielded zero matches and
     `lookup('users', 'contact')` started failing during deploy as if
     `contact` were undefined. Encode the invariant explicitly so any
@@ -507,84 +510,133 @@ class TestImplicitRolesDir(unittest.TestCase):
         self.assertIn("contact", defaults)
 
 
+def _run_in_ansible_blocked_subprocess(snippet: str):
+    """Spawn a fresh `python3` subprocess that installs a meta-path
+    finder denying every `ansible*` import, then runs the given
+    snippet against the real repo. Returns ``(returncode, stdout,
+    stderr)``.
+
+    Subprocess isolation avoids the in-process module-state hazards
+    (namespace packages, cross-test sys.modules churn, identity
+    fragmentation of cache dicts) that plagued earlier in-process
+    `_AnsibleBlock` shims and broke under Python 3.13 inside the
+    infinito container. Each subprocess starts with a clean import
+    state and a clean `sys.meta_path`.
+    """
+    import subprocess
+    import sys
+    from pathlib import Path
+
+    repo_root = Path(__file__).resolve().parents[4]
+    preamble = (
+        "import sys\n"
+        "sys.path.insert(0, %r)\n"
+        "class _Block:\n"
+        "    def find_spec(self, name, path=None, target=None):\n"
+        "        if name == 'ansible' or name.startswith('ansible.'):\n"
+        "            raise ImportError(f'blocked: {name}')\n"
+        "        return None\n"
+        "sys.meta_path.insert(0, _Block())\n"
+    ) % str(repo_root)
+    code = preamble + snippet
+    result = subprocess.run(
+        [sys.executable, "-c", code],
+        capture_output=True,
+        text=True,
+        cwd=str(repo_root),
+        timeout=60,
+    )
+    return result.returncode, result.stdout, result.stderr
+
+
 class TestImportableWithoutAnsible(unittest.TestCase):
-    """Pin: `utils.cache.data` MUST be importable without `ansible` on
-    sys.path.
+    """Pin: `utils.cache.applications` MUST be importable AND its
+    hot-path callables MUST run without `ansible` on sys.path.
 
     Why pin: the `cli.deploy.development` CLI runs on the GitHub Actions
     runner host (see scripts/tests/deploy/ci/dedicated.sh) where the
-    runner Python has no `ansible` package. CI run 24934007615 broke
-    every per-app deploy job because `from utils.cache.data import
-    get_variants` transitively pulled `from
-    plugins.lookup.application_gid import LookupModule` and that pulled
-    `from ansible.plugins.lookup import LookupBase`, raising
-    `ModuleNotFoundError: No module named 'ansible'` before the actual
-    deploy could even start. The fix moved the two ansible-coupled
-    imports (`ApplicationGidLookup`, `_templar_render_best_effort`) out
-    of the module-level import block into lazy imports at the call sites
-    that genuinely need them. This test simulates the CI runner by
-    blocking `ansible` via a `MetaPathFinder` and asserts that the cheap
-    entry point still imports.
+    runner Python has no `ansible` package. The original CI failure
+    (run 24934007615) was at *import* time. The follow-up CI failure
+    (run 24935979190) showed that import-only guards are not enough:
+    `_build_variants` still instantiated `ApplicationGidLookup` at
+    *call* time, which transitively imported
+    `ansible.plugins.lookup.LookupBase` the moment the function was
+    invoked. The fix split `compute_application_gid` (pure-Python) from
+    the ansible-facing `LookupModule` wrapper. These tests pin BOTH
+    layers — import-time AND call-time — by spawning a fresh subprocess
+    so the regression is caught at unit-test time, not by a multi-hour
+    CI matrix.
     """
 
-    def _import_under_ansible_block(self, module_name: str, attr: str):
-        """Re-import `module_name` with `ansible` artificially blocked."""
-        import importlib
-        import sys
-
-        class _Block:
-            def find_spec(self, name, path=None, target=None):
-                if name == "ansible" or name.startswith("ansible."):
-                    raise ImportError(f"simulated: ansible blocked for {name}")
-                return None
-
-        original_meta_path = list(sys.meta_path)
-        snapshot = {
-            k: sys.modules[k]
-            for k in list(sys.modules)
-            if k == "ansible"
-            or k.startswith("ansible.")
-            or k == module_name
-            or k.startswith(module_name + ".")
-            or k.startswith("plugins.lookup.application_gid")
-            or k.startswith("utils.templating")
-        }
-        # Drop the cached modules so the next import goes through the block.
-        for k in snapshot:
-            sys.modules.pop(k, None)
-
-        sys.meta_path.insert(0, _Block())
-        try:
-            mod = importlib.import_module(module_name)
-            return getattr(mod, attr)
-        finally:
-            sys.meta_path[:] = original_meta_path
-            # Restore originals so the rest of the test session keeps working
-            # against the real (ansible-aware) implementations.
-            for k in list(sys.modules):
-                if (
-                    k == module_name
-                    or k.startswith(module_name + ".")
-                    or k.startswith("plugins.lookup.application_gid")
-                    or k.startswith("utils.templating")
-                ):
-                    sys.modules.pop(k, None)
-            for k, m in snapshot.items():
-                sys.modules[k] = m
-
     def test_get_variants_importable_without_ansible(self):
-        get_variants_fn = self._import_under_ansible_block(
-            "utils.cache.data", "get_variants"
+        rc, out, err = _run_in_ansible_blocked_subprocess(
+            "from utils.cache.applications import get_variants\n"
+            "assert callable(get_variants)\n"
+            "print('OK')\n"
         )
-        self.assertTrue(callable(get_variants_fn))
+        self.assertEqual(rc, 0, msg=f"stderr=\n{err}\nstdout=\n{out}")
+        self.assertIn("OK", out)
 
     def test_inventory_module_importable_without_ansible(self):
         # The actual call chain that broke in CI run 24934007615:
-        #   cli.deploy.development.init -> .inventory -> utils.cache.data
-        plan_fn = self._import_under_ansible_block(
-            "cli.deploy.development.inventory", "plan_dev_inventory_matrix"
+        #   cli.deploy.development.init -> .inventory ->
+        #   utils.cache.applications
+        rc, out, err = _run_in_ansible_blocked_subprocess(
+            "from cli.deploy.development.inventory import "
+            "plan_dev_inventory_matrix\n"
+            "assert callable(plan_dev_inventory_matrix)\n"
+            "print('OK')\n"
         )
-        self.assertTrue(callable(plan_fn))
+        self.assertEqual(rc, 0, msg=f"stderr=\n{err}\nstdout=\n{out}")
+        self.assertIn("OK", out)
+
+    def test_get_variants_callable_without_ansible(self):
+        # Pins CI run 24935979190 specifically: the import-time guards
+        # added in 8e4886d70 passed this very file's import-only tests
+        # but `get_variants(roles_dir=...)` still triggered the lazy
+        # import of `ApplicationGidLookup` and died at call time. This
+        # test invokes the function AGAINST the real repo roles dir
+        # while ansible is blocked.
+        rc, out, err = _run_in_ansible_blocked_subprocess(
+            "from utils.cache.applications import get_variants\n"
+            "from utils.cache.base import ROLES_DIR\n"
+            "v = get_variants(roles_dir=ROLES_DIR)\n"
+            "assert isinstance(v, dict)\n"
+            "assert len(v) > 0, 'expected at least one role'\n"
+            "sample_app, sample_variants = next(iter(v.items()))\n"
+            "assert isinstance(sample_variants, list)\n"
+            "assert len(sample_variants) > 0\n"
+            "print('OK', len(v))\n"
+        )
+        self.assertEqual(rc, 0, msg=f"stderr=\n{err}\nstdout=\n{out}")
+        self.assertIn("OK", out)
+
+    def test_plan_dev_inventory_matrix_callable_without_ansible(self):
+        # Same exhaustive shape as above, one level higher: the actual
+        # CLI path is `cli.deploy.development.init.handler` ->
+        # `plan_dev_inventory_matrix(...)` -> `get_variants(...)`. We
+        # invoke the planner so a future regression at any layer of
+        # this chain trips here.
+        rc, out, err = _run_in_ansible_blocked_subprocess(
+            "from cli.deploy.development.inventory import "
+            "plan_dev_inventory_matrix\n"
+            "from utils.cache.applications import get_variants\n"
+            "from utils.cache.base import ROLES_DIR\n"
+            "apps = list(get_variants(roles_dir=ROLES_DIR).keys())\n"
+            "sample = [apps[0]]\n"
+            "plan = plan_dev_inventory_matrix(\n"
+            "    roles_dir=str(ROLES_DIR),\n"
+            "    include=sample,\n"
+            "    base_inventory_dir='/tmp/_inv_unused',\n"
+            ")\n"
+            "assert len(plan) > 0\n"
+            "round_index, inv_dir, round_variants = plan[0]\n"
+            "assert round_index == 0\n"
+            "assert sample[0] in round_variants\n"
+            "print('OK')\n"
+        )
+        self.assertEqual(rc, 0, msg=f"stderr=\n{err}\nstdout=\n{out}")
+        self.assertIn("OK", out)
 
 
 if __name__ == "__main__":

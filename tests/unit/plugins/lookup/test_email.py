@@ -10,7 +10,8 @@ import yaml
 from ansible.errors import AnsibleError
 
 from plugins.lookup.email import LookupModule
-from utils.cache import data as runtime_data
+from utils.cache import _reset_cache_for_tests
+from utils.cache import users as cache_users
 
 
 def _write_role_config(base_dir: Path, role_name: str, payload: dict) -> None:
@@ -28,15 +29,15 @@ class TestEmailLookup(unittest.TestCase):
         self._tmp = Path(self._tmpdir.name)
         (self._tmp / "roles").mkdir(parents=True, exist_ok=True)
         os.chdir(self._tmp)
-        runtime_data._reset_cache_for_tests()
+        _reset_cache_for_tests()
         self._tokens_store_patcher = patch.object(
-            runtime_data, "_load_store_users", return_value={}
+            cache_users, "_load_store_users", return_value={}
         )
         self._tokens_store_patcher.start()
 
     def tearDown(self) -> None:
         self._tokens_store_patcher.stop()
-        runtime_data._reset_cache_for_tests()
+        _reset_cache_for_tests()
         os.chdir(self._cwd)
         self._tmpdir.cleanup()
 

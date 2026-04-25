@@ -1,6 +1,6 @@
 # `users` lookup 👥
 
-This page is the SPOT for the contributor-facing rules of the [users.py](../../../../../../plugins/lookup/users.py) lookup plugin.
+Contributor-facing rules for the [users.py](../../../../../../plugins/lookup/users.py) lookup plugin.
 For general documentation rules such as links, writing style, RFC 2119 keywords, and Sphinx behavior, see [documentation.md](../../../../documentation.md).
 
 ## Access Pattern 🎯
@@ -82,7 +82,7 @@ users:
 | File | Purpose |
 |---|---|
 | [users.py](../../../../../../plugins/lookup/users.py) | Runtime entry point for the `users` lookup. |
-| [runtime_data.py](../../../../../../utils/cache/data.py) | Shared aggregation helper that builds and caches defaults, handles reserved users, UID/GID allocation, and uniqueness validation. |
+| [users.py (cache)](../../../../../../utils/cache/users.py) | Shared aggregation helper that builds and caches defaults, handles reserved users, UID/GID allocation, and uniqueness validation. |
 | [test_users.py](../../../../../../tests/unit/plugins/lookup/test_users.py) | Unit tests covering the full-dict, single-entry, override, strict missing, and non-strict missing cases. |
 
 For the related applications pattern see [applications.md](applications.md).

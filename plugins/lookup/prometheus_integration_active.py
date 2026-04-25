@@ -4,7 +4,7 @@ from typing import Any, Dict, List, Optional
 
 from ansible.plugins.lookup import LookupBase
 
-from utils.cache.data import get_merged_applications
+from utils.cache.applications import get_merged_applications
 
 
 class LookupModule(LookupBase):

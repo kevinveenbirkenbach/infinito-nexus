@@ -5,7 +5,7 @@ import unittest
 from pathlib import Path
 
 from plugins.lookup.prometheus_integration_active import LookupModule
-from utils.cache.data import _reset_cache_for_tests
+from utils.cache import _reset_cache_for_tests
 
 
 def _make_applications(

@@ -17,11 +17,11 @@ The development deploy CLI uses a **folder-per-round model** that splits cleanly
 6. **`--full-cycle` (async update pass).** When set (or `FULL_CYCLE=true` in the environment), the wrapper runs each round's deploy TWICE: first the regular sync pass, then immediately a second pass with `-e ASYNC_ENABLED=true` overriding the host_var, against the SAME variant's folder, BEFORE moving to the next round. The two passes are therefore always co-located on the same host state; the async pass never accidentally targets a host that a previous round's variant left behind.
 7. **Pinning to a single round.** Both init and deploy accept `--variant <idx>` (or read the `VARIANT` environment variable) to pin operations to a single round's folder. In single-round mode no inter-round cleanup runs, since there is no previous round to diff against. The `make deploy-reuse-*` targets honour the same `VARIANT` env-var by suffixing `INVENTORY_DIR` / `INVENTORY_FILE` to `<base>-<idx>`, so a redeploy can target one specific variant without iterating the full matrix.
 
-The in-play loader (`utils.runtime_data.get_merged_applications`) always uses variant 0 as the default and lets the inventory's `applications.<app>` overrides win via deep merge: the inventory itself is the source of truth for what variant a round runs against.
+The in-play loader (`utils.cache.applications.get_merged_applications`) always uses variant 0 as the default and lets the inventory's `applications.<app>` overrides win via deep merge: the inventory itself is the source of truth for what variant a round runs against.
 
 ## What Not To Do 🚫
 
-- You MUST NOT introduce a parallel cache. The variants are cached per `roles_dir` inside `utils/cache/data.py` and returned as deep copies; mutating the result MUST NOT corrupt subsequent lookups.
+- You MUST NOT introduce a parallel cache. The variants are cached per `roles_dir` inside `utils/cache/applications.py` and returned as deep copies; mutating the result MUST NOT corrupt subsequent lookups.
 - You MUST NOT skip the inter-round purge.
 - You MUST NOT introduce a runtime variant-selector extra-var. Variant data lives in the inventory after init; the deploy stage reads it as plain `applications.<app>` overrides.
 
@@ -30,7 +30,7 @@ The in-play loader (`utils.runtime_data.get_merged_applications`) always uses va
 | File | Purpose |
 |---|---|
 | [variants.md](../artefact/files/role/variants.md) | File-structure rules for `roles/<role>/meta/variants.yml`. |
-| [runtime_data.py](../../../utils/cache/data.py) | Loader and cache for `_build_variants` (`get_variants` is the public Python entry point). The merged-applications path stays variant-agnostic; variant payloads reach it as inventory-level `applications.<app>` overrides. |
+| [applications.py (cache)](../../../utils/cache/applications.py) | Loader and cache for `_build_variants` (`get_variants` is the public Python entry point). The merged-applications path stays variant-agnostic; variant payloads reach it as inventory-level `applications.<app>` overrides. |
 | [inventory.py](../../../cli/deploy/development/inventory.py) | Dev inventory build: `DevInventorySpec`, `build_dev_inventory` (variant baking), `plan_dev_inventory_matrix` (pure planner shared with the deploy wrapper), `build_dev_inventory_matrix` (creates one folder per round). |
 | [init.py](../../../cli/deploy/development/init.py) | Dev CLI entry that drives `build_dev_inventory_matrix` to materialise `<inventory-dir>-<round>` folders. |
 | [deploy.py](../../../cli/deploy/development/deploy.py) | Dev CLI entry that re-derives the matrix plan and iterates one deploy per folder, with per-app cleanup between rounds. |

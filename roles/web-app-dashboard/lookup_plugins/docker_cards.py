@@ -10,7 +10,8 @@ import yaml
 from ansible.plugins.lookup import LookupBase
 from ansible.errors import AnsibleError
 from utils.applications.config import get
-from utils.cache.data import get_merged_applications, get_merged_domains
+from utils.cache.applications import get_merged_applications
+from utils.cache.domains import get_merged_domains
 from ansible.plugins.loader import lookup_loader
 
 

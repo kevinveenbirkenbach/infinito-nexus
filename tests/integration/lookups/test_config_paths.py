@@ -5,7 +5,8 @@ from pathlib import Path
 import yaml  # requires PyYAML
 from plugins.filter.get_role import get_role
 from utils.applications.config import get, ConfigEntryNotSetError
-from utils.cache.data import get_application_defaults, get_user_defaults
+from utils.cache.applications import get_application_defaults
+from utils.cache.users import get_user_defaults
 
 from tests.utils.fs import iter_project_files_with_content
 

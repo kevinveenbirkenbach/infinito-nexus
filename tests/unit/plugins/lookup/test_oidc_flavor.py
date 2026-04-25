@@ -21,12 +21,12 @@ def _load_module(rel_path: str, name: str):
         "utils.applications.config",
         "utils.applications",
         "utils",
-        "utils.cache.data",
+        "utils.cache.applications",
         "utils.cache",
     ):
         sys.modules.pop(key, None)
     importlib.import_module("utils.applications.config")
-    importlib.import_module("utils.cache.data")
+    importlib.import_module("utils.cache.applications")
 
     path = _repo_root() / rel_path
     spec = importlib.util.spec_from_file_location(name, str(path))

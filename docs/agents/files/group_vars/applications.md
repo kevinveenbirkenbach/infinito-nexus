@@ -1,6 +1,6 @@
 # applications lookup
 
-This page is the SPOT for agent handling of application defaults after the removal of `group_vars/all/05_applications.yml`.
+This page describes how agents handle application defaults after the removal of `group_vars/all/05_applications.yml`.
 
 ## Rules
 
@@ -13,7 +13,7 @@ This page is the SPOT for agent handling of application defaults after the remov
 
 - Defaults source: `roles/*/config/main.yml`
 - Runtime entry point: [`plugins/lookup/applications.py`](../../../../plugins/lookup/applications.py)
-- Shared aggregation helper: [`utils/cache/data.py`](../../../../utils/cache/data.py)
+- Shared aggregation helper: [`utils/cache/applications.py`](../../../../utils/cache/applications.py)
 
 ## Why
 

@@ -10,10 +10,8 @@ repo_root = Path(__file__).resolve().parents[3]
 if str(repo_root) not in sys.path:
     sys.path.insert(0, str(repo_root))
 
-from utils.cache.data import (  # noqa: E402
-    get_application_defaults,
-    get_user_defaults,
-)
+from utils.cache.applications import get_application_defaults  # noqa: E402
+from utils.cache.users import get_user_defaults  # noqa: E402
 
 
 def load_yaml_file(path):

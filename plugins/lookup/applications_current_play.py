@@ -8,11 +8,11 @@ from ansible.errors import AnsibleError
 from ansible.plugins.lookup import LookupBase
 
 from utils.applications.in_group_deps import applications_if_group_and_all_deps
-from utils.cache.data import (
+from utils.cache.applications import get_merged_applications
+from utils.cache.base import (
     _cache_key,
     _resolve_roles_dir,
     _stable_variables_signature,
-    get_merged_applications,
 )
 from utils.service_registry import build_service_registry_from_applications
 

@@ -1,6 +1,6 @@
 """Unit tests for the per-role `meta/variants.yml` matrix-deploy
-loader (`utils.cache.data.get_variants` and the variant-zero default
-in `get_merged_applications`)."""
+loader (`utils.cache.applications.get_variants` and the variant-zero
+default in `get_merged_applications`)."""
 
 import os
 import sys
@@ -12,14 +12,14 @@ REPO_ROOT = Path(__file__).resolve().parents[4]
 if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
 
-from utils.cache.data import (  # noqa: E402
+from utils.cache import _reset_cache_for_tests  # noqa: E402
+from utils.cache.applications import (  # noqa: E402
     _build_variants,
-    _load_yaml_variant_list,
-    _reset_cache_for_tests,
     get_application_defaults,
-    get_variants,
     get_merged_applications,
+    get_variants,
 )
+from utils.cache.base import _load_yaml_variant_list  # noqa: E402
 
 
 def _write_role(

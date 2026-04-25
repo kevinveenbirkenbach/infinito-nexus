@@ -11,7 +11,7 @@ from ansible.errors import AnsibleError
 
 from plugins.lookup.config import LookupModule
 from utils.applications.config import AppConfigKeyError, ConfigEntryNotSetError
-from utils.cache.data import _reset_cache_for_tests
+from utils.cache import _reset_cache_for_tests
 
 
 def _write_schema(base_dir: Path, application_id: str, schema: dict) -> None:

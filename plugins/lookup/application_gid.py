@@ -11,7 +11,7 @@ def compute_application_gid(application_id, roles_dir="roles", base_gid=10000):
     Sorts every `<roles_dir>/<role>/config/main.yml`-bearing role
     alphabetically by `<role>` and returns ``base_gid + index`` for the
     requested ``application_id``. Extracted so callers that only need
-    the GID computation (e.g. ``utils.cache.data._build_variants`` on
+    the GID computation (e.g. ``utils.cache.applications._build_variants`` on
     the GitHub Actions runner host, where the runner Python ships
     without ``ansible``) can import THIS function instead of the
     ``LookupModule`` class — that one transitively pulls
@@ -36,9 +36,7 @@ def compute_application_gid(application_id, roles_dir="roles", base_gid=10000):
     try:
         index = sorted_ids.index(application_id)
     except ValueError:
-        raise ValueError(
-            f"Application ID '{application_id}' not found in any role"
-        )
+        raise ValueError(f"Application ID '{application_id}' not found in any role")
 
     return base_gid + index
 
@@ -48,7 +46,7 @@ def compute_application_gid(application_id, roles_dir="roles", base_gid=10000):
 # when an Ansible process actually loads this module via the lookup
 # loader, and that always happens inside a process that has ansible
 # installed (the playbook runner). Pure-Python importers (e.g.
-# `utils.cache.data._build_variants` running inside `cli.deploy.
+# `utils.cache.applications._build_variants` running inside `cli.deploy.
 # development init` on the GitHub Actions runner host) want
 # `compute_application_gid` only and MUST NOT pay the ansible-import
 # cost — see CI run 24935979190 for the regression that motivated this
