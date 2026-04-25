@@ -29,12 +29,15 @@ KEYCLOAK_RBAC_GROUP_NAME:           "{{ RBAC.GROUP.NAME }}"
 # `kc_app_group_id`, and have `ldap_cmp_id` resolved before rendering.
 KEYCLOAK_PER_APP_LDAP_ROLES_MAPPER: >-
   {{
-    (KEYCLOAK_DICTIONARY_REALM.components['org.keycloak.storage.UserStorageProvider']
-     | selectattr('name','equalto', KEYCLOAK_LDAP_CMP_NAME)
+    ((KEYCLOAK_DICTIONARY_REALM.components['org.keycloak.storage.UserStorageProvider']
+      | selectattr('name','equalto', KEYCLOAK_LDAP_CMP_NAME)
+      | list | first
+     ).subComponents['org.keycloak.storage.ldap.mappers.LDAPStorageMapper']
+     | selectattr('name','equalto','ldap-roles')
      | list | first
-    ).subComponents['org.keycloak.storage.ldap.mappers.LDAPStorageMapper']
-    | selectattr('name','equalto','ldap-roles')
-    | list | first
+     | dict2items
+     | rejectattr('key','in',['subComponents','id'])
+     | list | items2dict)
     | combine({
         'name':         kc_app_id | kc_per_app_mapper_name,
         'parentId':     ldap_cmp_id | trim,

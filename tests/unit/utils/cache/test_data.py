@@ -6,6 +6,8 @@ import unittest
 from pathlib import Path
 
 from utils.cache.data import (
+    PROJECT_ROOT,
+    ROLES_DIR,
     _build_users,
     _compute_reserved_usernames,
     _deep_merge,
@@ -467,6 +469,42 @@ class TestGetUserDefaults(unittest.TestCase):
             first["administrator"]["mutated"] = True
             second = get_user_defaults(roles_dir=roles)
             self.assertNotIn("mutated", second["administrator"])
+
+
+class TestImplicitRolesDir(unittest.TestCase):
+    """Pin the implicit ROLES_DIR to the actual repo `roles/` directory.
+
+    Why pin: when this module was at `utils/runtime_data.py`,
+    `parents[1]` resolved to the repo root. After the move to
+    `utils/cache/data.py`, `parents[1]` silently became `utils/`, which
+    is itself a python package. Glob walks like
+    `<utils>/roles/*/users/main.yml` then yielded zero matches and
+    `lookup('users', 'contact')` started failing during deploy as if
+    `contact` were undefined. Encode the invariant explicitly so any
+    future move that changes the depth is caught here, not by a
+    multi-hour deploy that fails inside Ansible.
+    """
+
+    def test_project_root_is_repo_root(self):
+        # The repo root has both `roles/` and `cli/` at the top level;
+        # `utils/` does not. Asserting both keeps the test robust against
+        # accidental drift to either direction.
+        self.assertTrue(
+            (PROJECT_ROOT / "roles").is_dir(),
+            f"expected <repo>/roles under PROJECT_ROOT={PROJECT_ROOT}",
+        )
+        self.assertTrue(
+            (PROJECT_ROOT / "cli").is_dir(),
+            f"expected <repo>/cli under PROJECT_ROOT={PROJECT_ROOT}",
+        )
+        self.assertEqual(ROLES_DIR, PROJECT_ROOT / "roles")
+
+    def test_implicit_user_defaults_include_role_defined_users(self):
+        # `contact` is contributed by web-app-odoo and web-app-espocrm
+        # role users files. If ROLES_DIR is wrong, the implicit lookup
+        # silently returns an empty defaults map and this regresses.
+        defaults = get_user_defaults()
+        self.assertIn("contact", defaults)
 
 
 if __name__ == "__main__":

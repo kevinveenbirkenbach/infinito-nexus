@@ -43,7 +43,13 @@ def _decrypt_ansible_encrypted_strings(value: Any) -> Any:
     return value
 
 
-PROJECT_ROOT = Path(__file__).resolve().parents[1]
+# utils/cache/data.py is two levels deep: utils/cache/data.py -> repo root.
+# parents[1] would point at utils/ (i.e. the python module), so callers
+# that fall back to the implicit ROLES_DIR would walk a non-existent
+# `<repo>/utils/roles/*/users/main.yml` glob and silently yield no role
+# defaults — making `lookup('users', '<role-defined-key>')` raise as if
+# the user didn't exist.
+PROJECT_ROOT = Path(__file__).resolve().parents[2]
 ROLES_DIR = PROJECT_ROOT / "roles"
 DEFAULT_TOKENS_FILE = Path("/var/lib/infinito/secrets/tokens.yml")
 

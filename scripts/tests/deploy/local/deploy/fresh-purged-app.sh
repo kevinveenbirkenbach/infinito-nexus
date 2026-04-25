@@ -71,12 +71,17 @@ deploy_args=(
 # Pass 1 and Pass 2 always stay co-located on the SAME variant. The dev
 # deploy wrapper handles that interleaving when `--full-cycle` is set
 # (or `FULL_CYCLE=true` is exported, which we already inherit here).
-echo ">>> init inventory (ASYNC_ENABLED=false baked)"
+echo ">>> init inventory (ASYNC_ENABLED=false, RUNTIME=dev baked)"
+# RUNTIME MUST be `dev` here: the host process running this script lives
+# OUTSIDE the development compose stack, so `detect_runtime()` falls back
+# to "host". Without an explicit override the matrix-init step would bake
+# `RUNTIME=host` into host_vars and the Playwright E2E gate
+# (RUNTIME in [dev, act, github]) would never fire.
 "${PYTHON}" -m cli.deploy.development init \
 	--distro "${INFINITO_DISTRO}" \
 	--apps "${APPS}" \
 	--inventory-dir "${INVENTORY_DIR}" \
-	--vars '{"ASYNC_ENABLED": false}'
+	--vars '{"ASYNC_ENABLED": false, "RUNTIME": "dev"}'
 
 if [[ "${FULL_CYCLE}" == "true" ]]; then
 	echo ">>> deploy (PASS 1 sync + PASS 2 async per variant, FULL_CYCLE=true)"
