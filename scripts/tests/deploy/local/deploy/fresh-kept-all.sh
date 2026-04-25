@@ -7,6 +7,11 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "${SCRIPT_DIR}/../../../../.." && pwd)"
 cd "${REPO_ROOT}"
 
+# Mark this shell as a make-driven deploy run so MODE_CI flips to true
+# inside Ansible (requirement 006).
+# shellcheck source=scripts/meta/env/ci.sh
+source "scripts/meta/env/ci.sh"
+
 # ---------------------------------------------------------------------------
 # Required environment
 # ---------------------------------------------------------------------------

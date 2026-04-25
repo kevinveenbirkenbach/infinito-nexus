@@ -191,10 +191,14 @@ accidental proxy with an explicit intent variable.
     Actions runner's canonical marker).
   - The env var `ACT` is set to a truthy value (nektos/act's
     canonical marker for local GitHub Actions emulation).
-  - The env var `INFINITO_MAKE_DEPLOY` is set to a truthy value and
-    MUST be exported by every `make deploy-*` target in
-    [Makefile](../../Makefile) so `make`-driven local deploys count
-    as the "intentionally CI-like" case.
+  - The env var `INFINITO_MAKE_DEPLOY` is set to a truthy value. Each
+    deploy entry-point script under
+    [scripts/tests/deploy/local/deploy/](../../scripts/tests/deploy/local/deploy/)
+    sources [scripts/meta/env/ci.sh](../../scripts/meta/env/ci.sh)
+    at startup, which exports the marker. This makes `make`-driven
+    local deploys (which call those entry-point scripts) count as
+    the "intentionally CI-like" case without the Makefile having to
+    inline the export.
 - [x] `MODE_CI` MUST be strictly orthogonal to
   `DOCKER_IN_CONTAINER`. The existing `DOCKER_IN_CONTAINER` variable
   MUST keep its current container-detection semantics and its current
@@ -208,35 +212,39 @@ accidental proxy with an explicit intent variable.
   test execution specifically (rather than containerization) MUST be
   audited in the same requirement iteration and migrated if the
   semantic intent was CI.
-- [x] [Makefile](../../Makefile) MUST declare a single top-level
-  variable that holds the export needed to flip `MODE_CI` to `true`,
-  for example:
+- [x] The export needed to flip `MODE_CI` to `true` MUST live in a
+  single SPOT under
+  [scripts/meta/env/ci.sh](../../scripts/meta/env/ci.sh):
 
-  ```make
-  DEPLOY_CI_EXPORTS := INFINITO_MAKE_DEPLOY=1
+  ```bash
+  : "${INFINITO_MAKE_DEPLOY:=1}"
+  export INFINITO_MAKE_DEPLOY
   ```
 
-  Every `deploy-*` recipe MUST prefix its playbook invocation with
-  that variable, e.g.:
+  Every deploy entry-point script under
+  [scripts/tests/deploy/local/deploy/](../../scripts/tests/deploy/local/deploy/)
+  MUST source `scripts/meta/env/ci.sh` at startup, e.g.:
 
-  ```make
-  deploy-fresh-purged-apps: down up
-      @$(DEPLOY_CI_EXPORTS) $(ANSIBLE_PLAYBOOK) ...
+  ```bash
+  # shellcheck source=scripts/meta/env/ci.sh
+  source "scripts/meta/env/ci.sh"
   ```
 
-  No recipe MAY hard-code the literal `INFINITO_MAKE_DEPLOY=1`. The
-  single-variable indirection is load-bearing: when `MODE_CI` later
-  gains additional contributing markers, or when the marker name
-  changes, exactly one line in the Makefile has to move.
-- [x] The set of recipes that MUST use `DEPLOY_CI_EXPORTS` is every
-  `deploy-*` target in the file, without exception: today that is
-  `deploy-fresh-kept-all`, `deploy-fresh-kept-apps`,
-  `deploy-fresh-purged-apps`, `deploy-reuse-kept-apps`,
-  `deploy-reuse-kept-all`, `deploy-reuse-purged-apps`, and any
-  wrapper reached through `FULL_CYCLE=true`. Every future
-  `deploy-<variant>` target added to the Makefile MUST use the same
-  indirection. Raw `ansible-playbook` invocations from a developer
-  shell MUST NOT set the flag, so the default is "E2E tests stay
+  No Makefile recipe MAY hard-code the literal
+  `INFINITO_MAKE_DEPLOY=1`, and `scripts/meta/env/all.sh` MUST NOT
+  source `ci.sh` (the marker MUST surface only when a deploy actually
+  runs, never for unrelated `make test*` / `make build*` recipes that
+  share the same `BASH_ENV`). When `MODE_CI` later gains additional
+  contributing markers, or when the marker name changes, exactly one
+  line in `ci.sh` has to move.
+- [x] The set of scripts that MUST source `ci.sh` is every deploy
+  entry-point under
+  [scripts/tests/deploy/local/deploy/](../../scripts/tests/deploy/local/deploy/),
+  without exception: today that is `fresh-kept-all.sh`,
+  `fresh-kept-app.sh`, `fresh-purged-app.sh`, `reuse-kept-all.sh`,
+  and `reuse-kept-app.sh`. Every future deploy entry-point MUST
+  source it the same way. Raw `ansible-playbook` invocations from a
+  developer shell MUST NOT set the flag, so the default is "E2E tests stay
   out of the way unless explicitly requested".
 - [x] A `make deploy-*` target MAY additionally allow an explicit
   opt-out via `INFINITO_SKIP_E2E=1`. When set, `MODE_CI` MUST

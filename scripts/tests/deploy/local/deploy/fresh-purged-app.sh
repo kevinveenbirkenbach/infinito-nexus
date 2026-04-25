@@ -1,6 +1,11 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+# Mark this shell as a make-driven deploy run so MODE_CI flips to true
+# inside Ansible (requirement 006).
+# shellcheck source=scripts/meta/env/ci.sh
+source "scripts/meta/env/ci.sh"
+
 # Fresh-purged deploy: run exactly ONE app on ONE distro against the same stack.
 # Same logic as CI version, but WITHOUT destructive cleanup.
 #
