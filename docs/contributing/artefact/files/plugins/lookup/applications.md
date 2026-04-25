@@ -68,7 +68,7 @@ applications:
 | File | Purpose |
 |---|---|
 | [applications.py](../../../../../../plugins/lookup/applications.py) | Runtime entry point for the `applications` lookup. |
-| [runtime_data.py](../../../../../../utils/runtime_data.py) | Shared aggregation helper that builds and caches defaults. |
+| [runtime_data.py](../../../../../../utils/cache/data.py) | Shared aggregation helper that builds and caches defaults. |
 | [test_applications.py](../../../../../../tests/unit/plugins/lookup/test_applications.py) | Unit tests covering the full-dict, single-entry, override, strict missing, and non-strict missing cases. |
 
 For the related users pattern see [users.md](users.md).

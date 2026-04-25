@@ -17,7 +17,7 @@ import argparse
 from pathlib import Path
 from typing import Dict, List, Set
 
-from utils.yaml_cache import load_yaml
+from utils.cache.yaml import load_yaml
 
 
 class DependenciesResolutionError(RuntimeError):

@@ -7,7 +7,7 @@ from ansible.errors import AnsibleError
 from ansible.plugins.lookup import LookupBase
 
 from utils.applications.config import get
-from utils.runtime_data import (
+from utils.cache.data import (
     _render_with_templar,
     get_merged_applications,
     get_merged_users,

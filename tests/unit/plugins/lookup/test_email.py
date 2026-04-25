@@ -10,7 +10,7 @@ import yaml
 from ansible.errors import AnsibleError
 
 from plugins.lookup.email import LookupModule
-from utils import runtime_data
+from utils.cache import data as runtime_data
 
 
 def _write_role_config(base_dir: Path, role_name: str, payload: dict) -> None:

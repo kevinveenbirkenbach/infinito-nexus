@@ -8,7 +8,7 @@ from ansible.errors import AnsibleError
 from ansible.plugins.lookup import LookupBase
 
 from utils.applications.config import get as get_app_conf
-from utils.runtime_data import get_merged_applications
+from utils.cache.data import get_merged_applications
 
 
 class LookupModule(LookupBase):

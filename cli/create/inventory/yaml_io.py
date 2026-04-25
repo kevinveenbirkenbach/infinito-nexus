@@ -3,8 +3,8 @@ from __future__ import annotations
 from pathlib import Path
 from typing import Any, Dict
 
-from utils.yaml_cache import dump_yaml as _cached_dump_yaml
-from utils.yaml_cache import load_yaml as _cached_load_yaml
+from utils.cache.yaml import dump_yaml as _cached_dump_yaml
+from utils.cache.yaml import load_yaml as _cached_load_yaml
 
 
 def load_yaml(path: Path) -> Dict[str, Any]:
@@ -18,7 +18,7 @@ def load_yaml(path: Path) -> Dict[str, Any]:
 
 
 def dump_yaml(path: Path, data: Dict[str, Any]) -> None:
-    """Write-through wrapper around `utils.yaml_cache.dump_yaml`; evicts
+    """Write-through wrapper around `utils.cache.yaml.dump_yaml`; evicts
     the cached entry so subsequent `load_yaml(path)` calls see the new
     content."""
     _cached_dump_yaml(path, data)

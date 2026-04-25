@@ -5,7 +5,7 @@ import sys
 import argparse
 from collections import defaultdict, deque
 
-from utils.yaml_cache import load_yaml
+from utils.cache.yaml import load_yaml
 
 def find_roles(roles_dir, prefixes=None):
     """

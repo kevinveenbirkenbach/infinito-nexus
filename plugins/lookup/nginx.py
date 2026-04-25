@@ -28,7 +28,7 @@ from ansible.plugins.lookup import LookupBase
 from ansible.plugins.loader import lookup_loader
 
 from utils.applications.config import get
-from utils.runtime_data import get_merged_applications
+from utils.cache.data import get_merged_applications
 from utils.tls_common import as_str, want_get
 
 

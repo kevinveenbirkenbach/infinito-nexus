@@ -1,5 +1,5 @@
 """Unit tests for the per-role `meta/variants.yml` matrix-deploy
-loader (`utils.runtime_data.get_variants` and the variant-zero default
+loader (`utils.cache.data.get_variants` and the variant-zero default
 in `get_merged_applications`)."""
 
 import os
@@ -8,11 +8,11 @@ import textwrap
 import unittest
 from pathlib import Path
 
-REPO_ROOT = Path(__file__).resolve().parents[3]
+REPO_ROOT = Path(__file__).resolve().parents[4]
 if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
 
-from utils.runtime_data import (  # noqa: E402
+from utils.cache.data import (  # noqa: E402
     _build_variants,
     _load_yaml_variant_list,
     _reset_cache_for_tests,

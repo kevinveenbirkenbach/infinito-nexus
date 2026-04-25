@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from utils.yaml_cache import load_yaml as _cached_load_yaml
+from utils.cache.yaml import load_yaml as _cached_load_yaml
 
 from .errors import ServicesResolutionError
 

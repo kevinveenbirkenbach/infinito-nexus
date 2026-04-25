@@ -12,7 +12,7 @@ from utils.database_service import (
     resolve_database_service_key,
 )
 from utils.entity_name_utils import get_entity_name
-from utils.runtime_data import get_merged_applications
+from utils.cache.data import get_merged_applications
 
 
 class LookupModule(LookupBase):

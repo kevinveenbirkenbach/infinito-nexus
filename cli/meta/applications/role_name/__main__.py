@@ -12,7 +12,7 @@ import os
 import sys
 import argparse
 
-from utils.yaml_cache import load_yaml
+from utils.cache.yaml import load_yaml
 
 
 def get_role(application_id, roles_path):

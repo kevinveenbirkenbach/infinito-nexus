@@ -21,7 +21,7 @@ The in-play loader (`utils.runtime_data.get_merged_applications`) always uses va
 
 ## What Not To Do 🚫
 
-- You MUST NOT introduce a parallel cache. The variants are cached per `roles_dir` inside `utils/runtime_data.py` and returned as deep copies; mutating the result MUST NOT corrupt subsequent lookups.
+- You MUST NOT introduce a parallel cache. The variants are cached per `roles_dir` inside `utils/cache/data.py` and returned as deep copies; mutating the result MUST NOT corrupt subsequent lookups.
 - You MUST NOT skip the inter-round purge.
 - You MUST NOT introduce a runtime variant-selector extra-var. Variant data lives in the inventory after init; the deploy stage reads it as plain `applications.<app>` overrides.
 
@@ -30,11 +30,11 @@ The in-play loader (`utils.runtime_data.get_merged_applications`) always uses va
 | File | Purpose |
 |---|---|
 | [variants.md](../artefact/files/role/variants.md) | File-structure rules for `roles/<role>/meta/variants.yml`. |
-| [runtime_data.py](../../../utils/runtime_data.py) | Loader and cache for `_build_variants` (`get_variants` is the public Python entry point). The merged-applications path stays variant-agnostic; variant payloads reach it as inventory-level `applications.<app>` overrides. |
+| [runtime_data.py](../../../utils/cache/data.py) | Loader and cache for `_build_variants` (`get_variants` is the public Python entry point). The merged-applications path stays variant-agnostic; variant payloads reach it as inventory-level `applications.<app>` overrides. |
 | [inventory.py](../../../cli/deploy/development/inventory.py) | Dev inventory build: `DevInventorySpec`, `build_dev_inventory` (variant baking), `plan_dev_inventory_matrix` (pure planner shared with the deploy wrapper), `build_dev_inventory_matrix` (creates one folder per round). |
 | [init.py](../../../cli/deploy/development/init.py) | Dev CLI entry that drives `build_dev_inventory_matrix` to materialise `<inventory-dir>-<round>` folders. |
 | [deploy.py](../../../cli/deploy/development/deploy.py) | Dev CLI entry that re-derives the matrix plan and iterates one deploy per folder, with per-app cleanup between rounds. |
 | [entity.sh](../../../scripts/tests/deploy/local/purge/entity.sh) | Cleanup script invoked between rounds for every app whose variant changed. |
-| [test_variants.py](../../../tests/unit/utils/test_variants.py) | Unit tests covering parser edge cases, deep-merge semantics, caching, and the variant-zero default path. |
+| [test_variants.py](../../../tests/unit/utils/cache/test_variants.py) | Unit tests covering parser edge cases, deep-merge semantics, caching, and the variant-zero default path. |
 | [test_inventory.py](../../../tests/unit/cli/deploy/development/test_inventory.py) | Unit tests covering the planner, variant baking, and the per-folder build flow. |
 | [test_matrix_deploy.py](../../../tests/unit/cli/deploy/development/test_matrix_deploy.py) | Wrapper-level tests covering the per-round folder iteration and cleanup logic. |

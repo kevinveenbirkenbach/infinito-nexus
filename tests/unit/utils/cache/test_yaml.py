@@ -1,4 +1,4 @@
-"""Unit tests for `utils.yaml_cache` (in-process cached YAML loader)."""
+"""Unit tests for `utils.cache.yaml` (in-process cached YAML loader)."""
 
 from __future__ import annotations
 
@@ -6,7 +6,7 @@ import unittest
 from pathlib import Path
 from tempfile import TemporaryDirectory
 
-from utils.yaml_cache import (
+from utils.cache.yaml import (
     _reset_cache_for_tests,
     dump_yaml,
     invalidate,

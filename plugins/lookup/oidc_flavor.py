@@ -6,7 +6,7 @@ from ansible.errors import AnsibleError
 from ansible.plugins.lookup import LookupBase
 
 from utils.applications.config import get
-from utils.runtime_data import get_merged_applications
+from utils.cache.data import get_merged_applications
 
 
 _APPLICATION_ID = "web-app-nextcloud"

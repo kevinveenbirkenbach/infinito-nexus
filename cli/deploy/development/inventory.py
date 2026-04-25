@@ -23,7 +23,7 @@ import json
 from dataclasses import dataclass
 from typing import TYPE_CHECKING, Any, Mapping, Sequence
 
-from utils.runtime_data import get_variants
+from utils.cache.data import get_variants
 
 from .common import DEV_INVENTORY_VARS_FILE
 from .mirrors import generate_ci_mirrors_file, should_use_mirrors_on_ci

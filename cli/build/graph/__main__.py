@@ -5,10 +5,10 @@ import json
 import re
 from typing import List, Dict, Any, Set
 
-import yaml  # for safe_dump only; reads go through utils.yaml_cache
+import yaml  # for safe_dump only; reads go through utils.cache.yaml
 
 from utils.roles.dependency_resolver import RoleDependencyResolver
-from utils.yaml_cache import load_yaml, load_yaml_any
+from utils.cache.yaml import load_yaml, load_yaml_any
 
 # Regex used to ignore Jinja expressions inside include/import statements
 JINJA_PATTERN = re.compile(r'{{.*}}')

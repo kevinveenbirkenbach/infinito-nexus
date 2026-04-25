@@ -57,7 +57,7 @@ This declares two variants. Variant 0 is the baseline; variant 1 flips Multisite
 1. Edit `roles/<application_id>/meta/variants.yml` (create the file if absent).
 2. Append a list entry containing only the keys that differ from variant 0.
 3. If the new variant relies on cleanup steps that the standard inter-round entity purge does not cover, extend the role's purge handling. The matrix wrapper invokes the standard purge between rounds for every app whose variant changed.
-4. Add or extend the deep-merge edge-case tests in [test_variants.py](../../../../../tests/unit/utils/test_variants.py) when the new variant exercises behaviour beyond the existing fixtures (for example list replacement vs. nested scalar override).
+4. Add or extend the deep-merge edge-case tests in [test_variants.py](../../../../../tests/unit/utils/cache/test_variants.py) when the new variant exercises behaviour beyond the existing fixtures (for example list replacement vs. nested scalar override).
 
 ## What Not To Do 🚫
 
