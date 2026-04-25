@@ -507,5 +507,85 @@ class TestImplicitRolesDir(unittest.TestCase):
         self.assertIn("contact", defaults)
 
 
+class TestImportableWithoutAnsible(unittest.TestCase):
+    """Pin: `utils.cache.data` MUST be importable without `ansible` on
+    sys.path.
+
+    Why pin: the `cli.deploy.development` CLI runs on the GitHub Actions
+    runner host (see scripts/tests/deploy/ci/dedicated.sh) where the
+    runner Python has no `ansible` package. CI run 24934007615 broke
+    every per-app deploy job because `from utils.cache.data import
+    get_variants` transitively pulled `from
+    plugins.lookup.application_gid import LookupModule` and that pulled
+    `from ansible.plugins.lookup import LookupBase`, raising
+    `ModuleNotFoundError: No module named 'ansible'` before the actual
+    deploy could even start. The fix moved the two ansible-coupled
+    imports (`ApplicationGidLookup`, `_templar_render_best_effort`) out
+    of the module-level import block into lazy imports at the call sites
+    that genuinely need them. This test simulates the CI runner by
+    blocking `ansible` via a `MetaPathFinder` and asserts that the cheap
+    entry point still imports.
+    """
+
+    def _import_under_ansible_block(self, module_name: str, attr: str):
+        """Re-import `module_name` with `ansible` artificially blocked."""
+        import importlib
+        import sys
+
+        class _Block:
+            def find_spec(self, name, path=None, target=None):
+                if name == "ansible" or name.startswith("ansible."):
+                    raise ImportError(f"simulated: ansible blocked for {name}")
+                return None
+
+        original_meta_path = list(sys.meta_path)
+        snapshot = {
+            k: sys.modules[k]
+            for k in list(sys.modules)
+            if k == "ansible"
+            or k.startswith("ansible.")
+            or k == module_name
+            or k.startswith(module_name + ".")
+            or k.startswith("plugins.lookup.application_gid")
+            or k.startswith("utils.templating")
+        }
+        # Drop the cached modules so the next import goes through the block.
+        for k in snapshot:
+            sys.modules.pop(k, None)
+
+        sys.meta_path.insert(0, _Block())
+        try:
+            mod = importlib.import_module(module_name)
+            return getattr(mod, attr)
+        finally:
+            sys.meta_path[:] = original_meta_path
+            # Restore originals so the rest of the test session keeps working
+            # against the real (ansible-aware) implementations.
+            for k in list(sys.modules):
+                if (
+                    k == module_name
+                    or k.startswith(module_name + ".")
+                    or k.startswith("plugins.lookup.application_gid")
+                    or k.startswith("utils.templating")
+                ):
+                    sys.modules.pop(k, None)
+            for k, m in snapshot.items():
+                sys.modules[k] = m
+
+    def test_get_variants_importable_without_ansible(self):
+        get_variants_fn = self._import_under_ansible_block(
+            "utils.cache.data", "get_variants"
+        )
+        self.assertTrue(callable(get_variants_fn))
+
+    def test_inventory_module_importable_without_ansible(self):
+        # The actual call chain that broke in CI run 24934007615:
+        #   cli.deploy.development.init -> .inventory -> utils.cache.data
+        plan_fn = self._import_under_ansible_block(
+            "cli.deploy.development.inventory", "plan_dev_inventory_matrix"
+        )
+        self.assertTrue(callable(plan_fn))
+
+
 if __name__ == "__main__":
     unittest.main()

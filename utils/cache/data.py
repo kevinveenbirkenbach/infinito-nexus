@@ -6,14 +6,25 @@ import os
 import threading
 from collections import OrderedDict
 from pathlib import Path
-from typing import Any, Mapping, Optional
+from typing import TYPE_CHECKING, Any, Mapping, Optional
 from urllib.parse import urlparse
 
 import yaml
 
+# `merge_with_defaults` is a pure-Python helper with no `ansible` dependency,
+# so it stays at module scope.
 from plugins.filter.merge_with_defaults import merge_with_defaults
-from plugins.lookup.application_gid import LookupModule as ApplicationGidLookup
-from utils.templating import _templar_render_best_effort
+
+# `ApplicationGidLookup` and `_templar_render_best_effort` transitively pull
+# in `ansible`, but several callers of this module (notably the
+# `cli.deploy.development` CLI on the GitHub Actions runner host) only need
+# the cheap, ansible-free entry points such as `get_variants`. Importing
+# either of those at module scope would make `import utils.cache.data` raise
+# `ModuleNotFoundError: No module named 'ansible'` on hosts that ship the
+# CLI but no ansible interpreter (see CI run 24934007615 for the full
+# trace). Defer the imports to the call sites that actually need them.
+if TYPE_CHECKING:
+    from plugins.lookup.application_gid import LookupModule as ApplicationGidLookup
 
 try:
     from ansible.parsing.vault import EncryptedString as _AnsibleEncryptedString
@@ -434,6 +445,10 @@ def _materialize_builtin_user_aliases(
     variables: Optional[Mapping[str, Any]],
     templar: Any = None,
 ) -> dict[str, Any]:
+    # Lazy import: pulls `ansible.errors.AnsibleError` transitively, see the
+    # module-level note on why this stays out of the import block.
+    from utils.templating import _templar_render_best_effort
+
     def _normalize_domain_candidate(value: Any) -> str:
         text = str(value or "").strip()
         if not text:
@@ -550,6 +565,10 @@ def _render_with_templar(
     if templar is None:
         return value
 
+    # Lazy import: pulls `ansible.errors.AnsibleError` transitively, see the
+    # module-level note on why this stays out of the import block.
+    from utils.templating import _templar_render_best_effort
+
     # Start from whatever the templar already had available so that
     # ansible_facts/hostvars stay accessible during nested renders. Overlay the
     # caller-supplied variables on top, then inject our raw.*_RAW helpers.
@@ -650,6 +669,11 @@ def _build_variants(roles_dir: Path) -> dict[str, list[Any]]:
     role keeps its pre-variant behaviour. The single-variant case is
     equivalent to the legacy `_build_application_defaults` output.
     """
+    # Lazy import: `ApplicationGidLookup` extends `ansible.plugins.lookup.
+    # LookupBase`. See the module-level note on why this stays out of the
+    # top-of-file import block.
+    from plugins.lookup.application_gid import LookupModule as ApplicationGidLookup
+
     gid_lookup = ApplicationGidLookup()
     variants: dict[str, list[Any]] = {}
 
