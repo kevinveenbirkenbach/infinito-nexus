@@ -107,8 +107,8 @@ echo ">>> Ensuring development stack is up (when-down)"
 
 echo ">>> Running entry.sh bootstrap inside container"
 "${PYTHON}" -m cli.deploy.development exec \
-	--distro "${INFINITO_DISTRO}" -- \
-	bash -lc "set -euo pipefail; cd /opt/src/infinito; ./scripts/docker/entry.sh true"
+	--distro "${INFINITO_DISTRO}" \
+	-- bash /opt/src/infinito/scripts/tests/deploy/local/utils/entry-bootstrap.sh
 
 echo ">>> Creating inventory for app '${APPS}'"
 "${PYTHON}" -m cli.deploy.development init \

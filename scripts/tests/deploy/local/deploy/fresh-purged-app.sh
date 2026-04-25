@@ -60,14 +60,8 @@ APPS='matomo' \
 
 echo ">>> Running entry.sh inside container"
 "${PYTHON}" -m cli.deploy.development exec \
-	--distro "${INFINITO_DISTRO}" -- \
-	bash -lc "
-    set -euo pipefail
-    cd /opt/src/infinito
-
-    echo '>>> Running entry.sh'
-    ./scripts/docker/entry.sh true
-  "
+	--distro "${INFINITO_DISTRO}" \
+	-- bash /opt/src/infinito/scripts/tests/deploy/local/utils/entry-bootstrap.sh
 
 deploy_args=(
 	--distro "${INFINITO_DISTRO}"
@@ -76,27 +70,25 @@ deploy_args=(
 	--debug
 )
 
-run_pass() {
-	local label="$1"
-	local async_enabled="$2"
-
-	echo ">>> ${label}: init inventory (ASYNC_ENABLED=${async_enabled})"
-	"${PYTHON}" -m cli.deploy.development init \
-		--distro "${INFINITO_DISTRO}" \
-		--apps "${APPS}" \
-		--inventory-dir "${INVENTORY_DIR}" \
-		--vars "{\"ASYNC_ENABLED\": ${async_enabled}}"
-
-	echo ">>> ${label}: deploy"
-	"${PYTHON}" -m cli.deploy.development deploy "${deploy_args[@]}"
-}
-
-run_pass "PASS 1" "false"
+# Single init bakes the matrix folders with the inventory's default
+# ASYNC_ENABLED (false). The async update pass runs as a per-round
+# re-deploy with `-e ASYNC_ENABLED=true` overriding the host_var, so
+# Pass 1 and Pass 2 always stay co-located on the SAME variant. The dev
+# deploy wrapper handles that interleaving when `--full-cycle` is set
+# (or `FULL_CYCLE=true` is exported, which we already inherit here).
+echo ">>> init inventory (ASYNC_ENABLED=false baked)"
+"${PYTHON}" -m cli.deploy.development init \
+	--distro "${INFINITO_DISTRO}" \
+	--apps "${APPS}" \
+	--inventory-dir "${INVENTORY_DIR}" \
+	--vars '{"ASYNC_ENABLED": false}'
 
 if [[ "${FULL_CYCLE}" == "true" ]]; then
-	run_pass "PASS 2" "true"
+	echo ">>> deploy (PASS 1 sync + PASS 2 async per variant, FULL_CYCLE=true)"
+	"${PYTHON}" -m cli.deploy.development deploy "${deploy_args[@]}" --full-cycle
 else
-	echo ">>> PASS 2 skipped (FULL_CYCLE=false)"
+	echo ">>> deploy (PASS 1 sync only, FULL_CYCLE=false)"
+	"${PYTHON}" -m cli.deploy.development deploy "${deploy_args[@]}"
 fi
 
 echo

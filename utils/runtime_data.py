@@ -48,6 +48,7 @@ ROLES_DIR = PROJECT_ROOT / "roles"
 DEFAULT_TOKENS_FILE = Path("/var/lib/infinito/secrets/tokens.yml")
 
 _APPLICATIONS_DEFAULTS_CACHE: dict[str, dict[str, Any]] = {}
+_VARIANTS_CACHE: dict[str, dict[str, list[Any]]] = {}
 _USERS_DEFAULTS_CACHE: dict[str, dict[str, Any]] = {}
 
 # Single-slot rendered caches. lookup('config'), lookup('applications') and
@@ -147,6 +148,40 @@ def _load_yaml_mapping(path: Path) -> dict[str, Any]:
     if not isinstance(data, dict):
         raise ValueError(f"{path} must contain a YAML mapping")
     return data
+
+
+def _load_yaml_variant_list(path: Path) -> list[dict[str, Any]]:
+    """Load a `roles/<role>/meta/variants.yml` variant list.
+
+    Each entry is a deep-merge override for the role's
+    `config/main.yml`; `null` and `{}` are valid no-op entries. Missing
+    file or empty list collapses to a single empty variant so the
+    role behaves exactly like before this layer was introduced.
+    """
+    if not path.exists():
+        return [{}]
+
+    raw = yaml.safe_load(path.read_text(encoding="utf-8"))
+    if raw is None:
+        return [{}]
+    if not isinstance(raw, list):
+        raise ValueError(
+            f"{path} must contain a YAML list of override mappings (or be empty)."
+        )
+    if not raw:
+        return [{}]
+
+    normalised: list[dict[str, Any]] = []
+    for index, entry in enumerate(raw):
+        if entry is None:
+            normalised.append({})
+        elif isinstance(entry, Mapping):
+            normalised.append(dict(entry))
+        else:
+            raise ValueError(
+                f"{path}[{index}] must be a mapping (or null); got {type(entry).__name__}"
+            )
+    return normalised
 
 
 def _deep_merge(base: Any, override: Any) -> Any:
@@ -572,30 +607,76 @@ def _render_with_templar(
     return _decrypt_ansible_encrypted_strings(data)
 
 
-def _build_application_defaults(roles_dir: Path) -> dict[str, Any]:
+def _build_role_base_config(
+    role_dir: Path,
+    roles_dir: Path,
+    gid_lookup: ApplicationGidLookup,
+) -> dict[str, Any]:
+    """Return the post-augmentation `config/main.yml` payload for a
+    role: `group_id` resolved, `users` references rewritten to
+    `lookup('users', ...)`. Empty config collapses to `{}` (no
+    overrides applied)."""
+    application_id = role_dir.name
+    config_data = _load_yaml_mapping(role_dir / "config" / "main.yml")
+    if not config_data:
+        return {}
+
+    group_id = gid_lookup.run([application_id], roles_dir=str(roles_dir))[0]
+    config_data["group_id"] = group_id
+
+    users_meta = _load_yaml_mapping(role_dir / "users" / "main.yml")
+    users_data = users_meta.get("users", {})
+    if isinstance(users_data, dict) and users_data:
+        config_data["users"] = {
+            user_key: "{{ lookup('users', " + repr(user_key) + ") }}"
+            for user_key in users_data
+        }
+    return config_data
+
+
+def _build_variants(roles_dir: Path) -> dict[str, list[Any]]:
+    """Return ``{application_id: [variant_0, variant_1, ...]}``.
+
+    Each variant is the role's `config/main.yml` payload deep-merged
+    with the corresponding entry from
+    `roles/<role>/meta/variants.yml`. A missing/empty
+    `meta/variants.yml` collapses to a single empty variant so the
+    role keeps its pre-variant behaviour. The single-variant case is
+    equivalent to the legacy `_build_application_defaults` output.
+    """
     gid_lookup = ApplicationGidLookup()
-    applications: dict[str, Any] = {}
+    variants: dict[str, list[Any]] = {}
 
     for config_file in sorted(roles_dir.glob("*/config/main.yml")):
         role_dir = config_file.parents[1]
         application_id = role_dir.name
-        config_data = _load_yaml_mapping(config_file)
+        base_config = _build_role_base_config(role_dir, roles_dir, gid_lookup)
+        meta_path = role_dir / "meta" / "variants.yml"
+        override_list = _load_yaml_variant_list(meta_path)
+        role_variants: list[Any] = []
+        for override in override_list:
+            if base_config:
+                role_variants.append(_deep_merge(base_config, override))
+            else:
+                # Role has no config/main.yml payload, but a variant list
+                # MAY still legitimately produce an override-only result
+                # (e.g. when a role declares its inventory entirely from
+                # meta/variants.yml). Fall back to a deep copy of the
+                # override so callers never observe shared mutable state.
+                role_variants.append(copy.deepcopy(override))
+        variants[application_id] = role_variants
 
-        if config_data:
-            group_id = gid_lookup.run([application_id], roles_dir=str(roles_dir))[0]
-            config_data["group_id"] = group_id
+    return {key: variants[key] for key in sorted(variants)}
 
-            users_meta = _load_yaml_mapping(role_dir / "users" / "main.yml")
-            users_data = users_meta.get("users", {})
-            if isinstance(users_data, dict) and users_data:
-                config_data["users"] = {
-                    user_key: "{{ lookup('users', " + repr(user_key) + ") }}"
-                    for user_key in users_data
-                }
 
-        applications[application_id] = config_data
-
-    return {key: applications[key] for key in sorted(applications)}
+def _build_application_defaults(roles_dir: Path) -> dict[str, Any]:
+    """Backward-compatible shim: every consumer that historically saw
+    one mapping per application now sees the FIRST variant (index 0).
+    The full list is exposed via :func:`get_variants`."""
+    return {
+        application_id: copy.deepcopy(variant_list[0])
+        for application_id, variant_list in _build_variants(roles_dir).items()
+    }
 
 
 def get_application_defaults(
@@ -607,6 +688,22 @@ def get_application_defaults(
     if cached is None:
         cached = _build_application_defaults(resolved_roles_dir)
         _APPLICATIONS_DEFAULTS_CACHE[key] = cached
+    return copy.deepcopy(cached)
+
+
+def get_variants(
+    *, roles_dir: Optional[str | os.PathLike[str]] = None
+) -> dict[str, list[Any]]:
+    """Return ``{application_id: [variant_0, ...]}`` cached per
+    ``roles_dir``. Each variant is the role's effective configuration
+    after the corresponding `meta/variants.yml` override has been
+    deep-merged on top of `config/main.yml`."""
+    resolved_roles_dir = _resolve_roles_dir(roles_dir=roles_dir)
+    key = _cache_key(resolved_roles_dir)
+    cached = _VARIANTS_CACHE.get(key)
+    if cached is None:
+        cached = _build_variants(resolved_roles_dir)
+        _VARIANTS_CACHE[key] = cached
     return copy.deepcopy(cached)
 
 
@@ -648,7 +745,15 @@ def get_merged_applications(
     if cached is not None:
         return cached
 
-    defaults = get_application_defaults(roles_dir=roles_dir)
+    # Defaults always come from variant 0 (= the legacy `config/main.yml`
+    # payload, deep-merged with the empty `{}` entry). Per-round variant
+    # overrides are baked into the inventory's `applications.<app>` block at
+    # init time (see `cli.deploy.development.inventory.build_dev_inventory`)
+    # and applied below as overrides on top of these defaults, so the deploy
+    # stage needs no runtime variant selector: the inventory itself is
+    # variant-resolved.
+    defaults = get_application_defaults(roles_dir=resolved_roles_dir)
+
     overrides = _resolve_override_mapping(variables, "applications", templar=templar)
 
     merged = merge_with_defaults(defaults, overrides)
@@ -788,6 +893,7 @@ def get_merged_domains(
 
 def _reset_cache_for_tests() -> None:
     _APPLICATIONS_DEFAULTS_CACHE.clear()
+    _VARIANTS_CACHE.clear()
     _USERS_DEFAULTS_CACHE.clear()
     _MERGED_APPLICATIONS_CACHE.clear()
     _MERGED_USERS_CACHE.clear()

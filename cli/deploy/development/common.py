@@ -11,6 +11,18 @@ if TYPE_CHECKING:
     from .compose import Compose
 
 
+# SPOT: canonical repo-relative path to the development vars file that
+# `infinito create inventory --vars-file <...>` consumes. Mirrors
+# `INVENTORY_VARS_FILE` from scripts/meta/env/inventory.sh; the bash file
+# is the SPOT-of-record for callers that go through the deploy chain
+# (env is set before Python runs), and the literal here is the fallback
+# for direct/test invocations that bypass that chain. A unit test locks
+# both literals together so they cannot silently drift.
+DEV_INVENTORY_VARS_FILE: str = os.environ.get(
+    "INVENTORY_VARS_FILE", "inventories/development/default.yml"
+)
+
+
 def repo_root_from_here() -> Path:
     # <repo>/cli/deploy/development/common.py -> parents[3] == <repo>
     return Path(__file__).resolve().parents[3]

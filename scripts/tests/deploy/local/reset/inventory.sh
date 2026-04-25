@@ -12,6 +12,7 @@ set -euo pipefail
 : "${TEST_DEPLOY_TYPE:?TEST_DEPLOY_TYPE must be set (server|workstation|universal)}"
 : "${INVENTORY_DIR:?INVENTORY_DIR must be set (e.g. /etc/inventories/local-full-server)}"
 : "${INVENTORY_FILE:?INVENTORY_FILE is not set — source scripts/meta/env/inventory.sh first}"
+: "${INVENTORY_VARS_FILE:?INVENTORY_VARS_FILE is not set — source scripts/meta/env/inventory.sh first}"
 
 # This script always generates inventories for the development compose stack.
 RUNTIME_VARS_JSON='{"RUNTIME":"dev","SYS_SERVICE_RUNNER_RETRIES":1}'
@@ -99,7 +100,7 @@ echo ">>> Initializing inventory inside container"
       --vars '${RUNTIME_VARS_JSON}' \
       --host 'localhost' \
       --ssl-disabled \
-      --vars-file inventories/dev.yml \
+      --vars-file '${INVENTORY_VARS_FILE}' \
       --include '${apps_csv}'
 
     echo '✅ Inventory initialized.'

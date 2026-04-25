@@ -41,6 +41,7 @@ You MUST use [RFC 2119](https://www.rfc-editor.org/rfc/rfc2119) keywords in all 
 - You MUST fix nearby wording and semantic issues when you touch a file, and correct obvious nearby issues proactively in the same pass.
 - You SHOULD use emojis when they make the text more visually appealing, improve the mood, and increase readability.
 - You MUST NOT use em dashes (—) as thought breaks or clause separators. You SHOULD prefer complete sentences. Hyphens (-) MAY be used for compound words and list items.
+- You MUST NOT explicitly declare a documentation page as "the SPOT", "Single Point of Truth", or any equivalent self-label. SPOT status is conferred by readers cross-linking to the page from elsewhere, not by the page asserting it about itself. Describe the subject directly instead.
 
 ## Headlines 🏷️
 

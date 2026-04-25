@@ -1,6 +1,6 @@
 # `applications` lookup 📦
 
-This page is the SPOT for the contributor-facing rules of the [applications.py](../../../../../../plugins/lookup/applications.py) lookup plugin.
+Contributor-facing rules for the [applications.py](../../../../../../plugins/lookup/applications.py) lookup plugin.
 For general documentation rules such as links, writing style, RFC 2119 keywords, and Sphinx behavior, see [documentation.md](../../../../documentation.md).
 
 ## Access Pattern 🎯
@@ -63,7 +63,7 @@ applications:
 - You MUST NOT introduce an alternative key source. The `application_id` is always the role directory name.
 - You MUST NOT filter applications inside the lookup. The lookup returns the full set; filtering by enabled or allowed apps stays a caller concern (for example [applications_current_play.py](../../../../../../plugins/lookup/applications_current_play.py)).
 
-## Source Of Truth 📌
+## Reference Files 📌
 
 | File | Purpose |
 |---|---|
@@ -72,3 +72,4 @@ applications:
 | [test_applications.py](../../../../../../tests/unit/plugins/lookup/test_applications.py) | Unit tests covering the full-dict, single-entry, override, strict missing, and non-strict missing cases. |
 
 For the related users pattern see [users.md](users.md).
+For the per-role matrix-deploy variant list that backs `applications` when more than one shape exists, see [matrix-deploy.md](../../../../design/matrix-deploy.md) (deploy-time mechanism) and [variants.md](../../role/variants.md) (file format).

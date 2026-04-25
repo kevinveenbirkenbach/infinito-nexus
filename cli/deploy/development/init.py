@@ -7,79 +7,14 @@ import os
 from typing import Any, Dict
 
 from .common import make_compose, resolve_deploy_ids_for_apps
-from .mirrors import generate_ci_mirrors_file, should_use_mirrors_on_ci
+from .inventory import (
+    DevInventorySpec,
+    build_dev_inventory,
+    filter_plan_to_variant,
+    plan_dev_inventory_matrix,
+)
 from .storage import detect_storage_constrained
 from ...meta.runtime import detect_runtime
-
-
-def _ensure_vault_password_file(compose, *, inventory_dir: str) -> None:
-    inv_root = str(inventory_dir).rstrip("/")
-    pw_file = f"{inv_root}/.password"
-
-    compose.exec(
-        [
-            "sh",
-            "-lc",
-            f"mkdir -p {inv_root} && "
-            f"[ -f {pw_file} ] || "
-            f"printf '%s\n' 'ci-vault-password' > {pw_file}",
-        ],
-        check=True,
-    )
-
-
-def _create_inventory(
-    compose,
-    *,
-    include: list[str],
-    storage_constrained: bool,
-    inventory_dir: str,
-    extra_vars: Dict[str, Any] | None,
-) -> None:
-    if not include:
-        raise ValueError("include must not be empty")
-
-    inv_root = str(inventory_dir).rstrip("/")
-    runtime = os.environ.get("RUNTIME") or detect_runtime()
-
-    overrides: Dict[str, Any] = {
-        "STORAGE_CONSTRAINED": bool(storage_constrained),
-        "RUNTIME": runtime,
-    }
-
-    # User-provided vars always win
-    if extra_vars:
-        overrides.update(extra_vars)
-
-    cmd = [
-        "infinito",
-        "create",
-        "inventory",
-        inv_root,
-        "--host",
-        "localhost",
-        "--ssl-disabled",
-        "--vars-file",
-        "inventories/dev.yml",
-        "--vars",
-        json.dumps(overrides),
-        "--include",
-        ",".join(include),
-    ]
-
-    if should_use_mirrors_on_ci():
-        mirrors_file = generate_ci_mirrors_file(compose, inventory_dir=inv_root)
-        cmd += ["--mirror", mirrors_file]
-
-    extra_env: dict[str, str] = {}
-    services_disabled = os.environ.get("SERVICES_DISABLED", "")
-    if services_disabled:
-        extra_env["SERVICES_DISABLED"] = services_disabled
-
-    compose.exec(
-        cmd, check=True, workdir="/opt/src/infinito", extra_env=extra_env or None
-    )
-    _ensure_vault_password_file(compose, inventory_dir=inv_root)
 
 
 def add_parser(sub: argparse._SubParsersAction) -> None:
@@ -98,7 +33,12 @@ def add_parser(sub: argparse._SubParsersAction) -> None:
         "--inventory-dir",
         default=os.environ.get("INVENTORY_DIR"),
         required=os.environ.get("INVENTORY_DIR") is None,
-        help="Inventory directory to use (default: $INVENTORY_DIR).",
+        help=(
+            "Inventory directory base (default: $INVENTORY_DIR). "
+            "When the included apps declare more than one matrix-deploy "
+            "variant, sibling folders `<dir>-0`, `<dir>-1`, ... are "
+            "created; otherwise the directory is used as-is."
+        ),
     )
 
     g = p.add_mutually_exclusive_group(required=True)
@@ -128,7 +68,30 @@ def add_parser(sub: argparse._SubParsersAction) -> None:
         default=None,
         help="JSON object merged into inventory variables (overrides win).",
     )
+    p.add_argument(
+        "--variant",
+        type=int,
+        default=_env_variant(),
+        help=(
+            "Pin the matrix init to a single round (zero-based index). "
+            "Useful when only one variant of a multi-variant app needs to "
+            "be (re-)materialised. Defaults to the VARIANT environment "
+            "variable when set, otherwise full-matrix mode."
+        ),
+    )
     p.set_defaults(_handler=handler)
+
+
+def _env_variant() -> int | None:
+    raw = os.environ.get("VARIANT", "").strip()
+    if not raw:
+        return None
+    try:
+        return int(raw)
+    except ValueError:
+        raise SystemExit(
+            f"VARIANT environment variable must be an integer, got {raw!r}"
+        )
 
 
 def handler(args: argparse.Namespace) -> int:
@@ -159,16 +122,47 @@ def handler(args: argparse.Namespace) -> int:
             compose, threshold_gib=int(args.threshold_gib)
         )
 
-    _create_inventory(
-        compose,
+    plan = plan_dev_inventory_matrix(
+        roles_dir=str(compose.repo_root / "roles"),
         include=include,
-        storage_constrained=storage_constrained,
-        inventory_dir=str(args.inventory_dir),
-        extra_vars=extra_vars,
+        base_inventory_dir=str(args.inventory_dir),
     )
+    try:
+        plan = filter_plan_to_variant(plan, args.variant)
+    except ValueError as exc:
+        raise SystemExit(f"--variant: {exc}")
 
-    print(
-        f">>> Inventory initialized (include={','.join(include)} "
-        f"storage_constrained={storage_constrained})"
-    )
+    runtime = os.environ.get("RUNTIME") or detect_runtime()
+    services_disabled = os.environ.get("SERVICES_DISABLED", "")
+    for _round_index, inv_dir, round_variants in plan:
+        spec = DevInventorySpec(
+            inventory_dir=inv_dir,
+            include=tuple(include),
+            storage_constrained=storage_constrained,
+            runtime=runtime,
+            extra_vars=extra_vars,
+            services_disabled=services_disabled,
+            active_variants=round_variants,
+        )
+        build_dev_inventory(compose, spec)
+
+    if len(plan) == 1:
+        _, inv_dir, round_variants = plan[0]
+        non_zero = {a: i for a, i in round_variants.items() if i}
+        suffix = f" variants={non_zero}" if non_zero else ""
+        print(
+            f">>> Inventory initialized at {inv_dir} "
+            f"(include={','.join(include)} storage_constrained={storage_constrained}){suffix}"
+        )
+    else:
+        print(
+            f">>> Matrix inventory initialized in {len(plan)} folders "
+            f"(include={','.join(include)} storage_constrained={storage_constrained}):"
+        )
+        for round_index, inv_dir, round_variants in plan:
+            non_zero = {a: i for a, i in round_variants.items() if i}
+            print(
+                f"    [round {round_index}] {inv_dir}"
+                + (f"  variants={non_zero}" if non_zero else "")
+            )
     return 0

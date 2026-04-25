@@ -383,6 +383,6 @@
 
 # Note: Non-admin users (like biber) are auto-created via OAuth signup when they first
 # SSO login. The auth_signup.invitation_scope = 'b2c' setting enables this.
-# Users are defined in inventories/dev.yml and created in LDAP by svc-db-openldap,
+# Users are defined in inventories/development/default.yml and created in LDAP by svc-db-openldap,
 # then federated to Keycloak for SSO authentication.
 # The tasks above ensure OAuth-created users get internal access and company membership.
