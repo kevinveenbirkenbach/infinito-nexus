@@ -60,9 +60,18 @@ compose:
       title:                "Blog by {{ service_provider.platform.titel }}"
       # Low default upload size, because you should use Peertube for Videos and Funkwhale for Audio files
       max_upload_size:      "256M"
+      # Requirement 005: opt-in WordPress Multisite. When true the mu-plugin
+      # parses per-site role groups `/roles/web-app-wordpress/<tenant>/<role>`
+      # and `server.domains.canonical` is expected to enumerate the
+      # participating sites. Default is single-site; enable by setting
+      # `multisite.enabled: true` in the inventory.
+      multisite:
+        enabled:            false
       plugins:
         wp-discourse:
-          enabled:          "{{ lookup('service', 'discourse').required | bool }}"
+          # `discourse` is a web-app, not a shared-service key, so gate
+          # on whether web-app-discourse is in the host's group_names.
+          enabled:          "{{ ('web-app-discourse' in (group_names | default([]))) | bool }}"
         daggerhart-openid-connect-generic:
           enabled:          true
         activitypub:

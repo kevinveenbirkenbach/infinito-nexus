@@ -36,7 +36,7 @@ compose:
         port:   "80"
         host:   "application"
       allowed_groups:
-        - "{{ [RBAC.GROUP.NAME, 'web-app-phpmyadmin-administrator'] | path_join }}"
+        - "{{ lookup('rbac_group_path', application_id='web-app-phpmyadmin', role='administrator') }}"
     css:
       enabled: false
       shared: true

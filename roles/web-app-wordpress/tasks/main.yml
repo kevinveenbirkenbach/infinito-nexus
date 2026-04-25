@@ -46,6 +46,12 @@
 - name: "Install wordpress"
   include_tasks: 02_install.yml
 
+- name: "Convert to Multisite when opted in (requirement 005)"
+  include_tasks: 06_multisite.yml
+  when: >-
+    (lookup('config', application_id, 'compose.services.wordpress.multisite.enabled')
+      | default(false) | bool)
+
 - name: "Install mu-plugins (OIDC→RBAC role mapper)"
   include_tasks: 05_mu_plugins.yml
 

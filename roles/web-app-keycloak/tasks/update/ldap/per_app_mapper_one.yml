@@ -1,0 +1,130 @@
+---
+# Ensure the /<KEYCLOAK_RBAC_GROUP_NAME>/<kc_app_id> Keycloak group
+# exists and a per-app group-ldap-mapper points at it.
+
+- name: "per-app mapper [{{ kc_app_id }}]: resolve groups.path root group id"
+  ansible.builtin.shell: |
+    {{ KEYCLOAK_EXEC_KCADM }} get groups -r {{ KEYCLOAK_REALM }} \
+      -q max=500 --fields id,path --format csv --noquotes 2>/dev/null \
+      > /tmp/kc_groups_top.txt
+    awk -F',' -v p="/{{ KEYCLOAK_RBAC_GROUP_NAME | trim('/') }}" '!/^\[/ && !/Cgroup/ && $2==p {print $1; exit}' /tmp/kc_groups_top.txt | tr -d '\r'
+  args:
+    executable: /bin/bash
+  register: per_app_root_id
+  changed_when: false
+  no_log: "{{ MASK_CREDENTIALS_IN_LOGS | bool }}"
+
+- name: "per-app mapper [{{ kc_app_id }}]: assert root group was resolved"
+  ansible.builtin.assert:
+    that: (per_app_root_id.stdout | default('') | trim) | length > 0
+    fail_msg: "could not resolve /{{ KEYCLOAK_RBAC_GROUP_NAME | trim('/') }} group id"
+
+- name: "per-app mapper [{{ kc_app_id }}]: set root group id fact"
+  ansible.builtin.set_fact:
+    kc_root_group_id: "{{ (per_app_root_id.stdout | default('')) | trim }}"
+  changed_when: false
+
+- name: "per-app mapper [{{ kc_app_id }}]: ensure /{{ KEYCLOAK_RBAC_GROUP_NAME | trim('/') }}/{{ kc_app_id }} Keycloak group exists"
+  ansible.builtin.shell: |
+    {{ KEYCLOAK_EXEC_KCADM }} get "groups/{{ kc_root_group_id }}/children" -r {{ KEYCLOAK_REALM }} \
+      -q max=500 --fields id,name --format csv --noquotes 2>/dev/null \
+      > /tmp/kc_children_listing.txt
+    EXISTING=$(awk -F',' -v n="{{ kc_app_id }}" '!/^\[/ && !/Cgroup/ && $2==n {print $1; exit}' /tmp/kc_children_listing.txt | tr -d '\r')
+    if [ -n "$EXISTING" ]; then
+      printf '%s\n' "$EXISTING"
+      exit 0
+    fi
+    {{ KEYCLOAK_EXEC_KCADM }} create "groups/{{ kc_root_group_id }}/children" \
+      -r {{ KEYCLOAK_REALM }} -s name={{ kc_app_id }} -i 2>/dev/null \
+      > /tmp/kc_create_output.txt
+    grep -vE '(^\[|Cgroup)' /tmp/kc_create_output.txt | grep -E '^[0-9a-fA-F-]{8,}$' | head -1 | tr -d '\r'
+  args:
+    executable: /bin/bash
+  register: per_app_group_id_out
+  changed_when: true
+  failed_when: (per_app_group_id_out.stdout | default('') | trim) | length == 0
+  no_log: "{{ MASK_CREDENTIALS_IN_LOGS | bool }}"
+
+- name: "per-app mapper [{{ kc_app_id }}]: set per-app Keycloak group id fact"
+  ansible.builtin.set_fact:
+    kc_app_group_id: "{{ (per_app_group_id_out.stdout | default('')) | trim }}"
+  changed_when: false
+
+- name: "per-app mapper [{{ kc_app_id }}]: purge ALL subgroups under /{{ KEYCLOAK_RBAC_GROUP_NAME | trim('/') }}/{{ kc_app_id }} so the next mapper sync rebuilds them cleanly"
+  ansible.builtin.shell: |
+    {{ KEYCLOAK_EXEC_KCADM }} get "groups/{{ kc_app_group_id }}/children" -r {{ KEYCLOAK_REALM }} \
+      -q max=500 --fields id,name --format csv --noquotes 2>/dev/null \
+      > /tmp/kc_app_children.txt
+    awk -F',' '!/^\[/ && !/Cgroup/ && $1 != "" { print $1 }' \
+      /tmp/kc_app_children.txt | tr -d '\r' > /tmp/kc_app_orphans.txt
+    while IFS= read -r stale_id; do
+      [ -z "$stale_id" ] && continue
+      {{ KEYCLOAK_EXEC_KCADM }} delete "groups/$stale_id" -r {{ KEYCLOAK_REALM }} </dev/null 2>/dev/null || true
+    done < /tmp/kc_app_orphans.txt
+  args:
+    executable: /bin/bash
+  changed_when: true
+  failed_when: false
+  no_log: "{{ MASK_CREDENTIALS_IN_LOGS | bool }}"
+
+- name: "per-app mapper [{{ kc_app_id }}]: upsert ldap-roles-{{ kc_app_id }} mapper"
+  ansible.builtin.shell: |
+    MAPPER_NAME="ldap-roles-{{ kc_app_id }}"
+    {{ KEYCLOAK_EXEC_KCADM }} get components -r {{ KEYCLOAK_REALM }} \
+      -q parentId={{ ldap_cmp_id | trim }} \
+      -q providerId=group-ldap-mapper \
+      -q max=500 --fields id,name --format csv --noquotes 2>/dev/null \
+      > /tmp/kc_mappers_listing.txt
+    EXISTING_ID=$(awk -F',' -v n="$MAPPER_NAME" '!/^\[/ && !/Cgroup/ && $2==n {print $1; exit}' /tmp/kc_mappers_listing.txt | tr -d '\r')
+    cat >/tmp/kc_mapper_payload.json <<PAYLOAD
+    {
+      "name": "$MAPPER_NAME",
+      "providerId": "group-ldap-mapper",
+      "providerType": "org.keycloak.storage.ldap.mappers.LDAPStorageMapper",
+      "parentId": "{{ ldap_cmp_id | trim }}",
+      "config": {
+        "membership.attribute.type": ["DN"],
+        "group.name.ldap.attribute": ["description"],
+        "membership.user.ldap.attribute": ["dn"],
+        "preserve.group.inheritance": ["false"],
+        "groups.dn": ["{{ LDAP.DN.OU.ROLES }}"],
+        "mode": ["LDAP_ONLY"],
+        "user.roles.retrieve.strategy": ["LOAD_GROUPS_BY_MEMBER_ATTRIBUTE"],
+        "groups.ldap.filter": ["(&(objectClass=groupOfNames)(cn={{ kc_app_id }}-*))"],
+        "membership.ldap.attribute": ["member"],
+        "ignore.missing.groups": ["true"],
+        "group.object.classes": ["groupOfNames"],
+        "memberof.ldap.attribute": ["memberOf"],
+        "drop.non.existing.groups.during.sync": ["true"],
+        "groups.path.group": ["{{ kc_app_group_id }}"],
+        "groups.path": ["/{{ KEYCLOAK_RBAC_GROUP_NAME | trim('/') }}/{{ kc_app_id }}"]
+      }
+    }
+    PAYLOAD
+    if [ -n "$EXISTING_ID" ]; then
+      sed -i "s|\"name\":|\"id\": \"$EXISTING_ID\",\n    \"name\":|" /tmp/kc_mapper_payload.json
+      # The keycloak container does not see the host path; stream the
+      # payload via stdin instead of `-f /tmp/...`.
+      cat /tmp/kc_mapper_payload.json | {{ KEYCLOAK_EXEC_KCADM }} update "components/$EXISTING_ID" -r {{ KEYCLOAK_REALM }} -f - >/dev/null 2>&1 || true
+      printf '%s\n' "$EXISTING_ID"
+    else
+      cat /tmp/kc_mapper_payload.json | {{ KEYCLOAK_EXEC_KCADM }} create components -r {{ KEYCLOAK_REALM }} -f - -i 2>/dev/null > /tmp/kc_create_mapper.txt
+      grep -vE '(^\[|Cgroup)' /tmp/kc_create_mapper.txt | grep -E '^[0-9a-fA-F-]{8,}$' | head -1 | tr -d '\r'
+    fi
+  args:
+    executable: /bin/bash
+  register: per_app_mapper_id_out
+  changed_when: true
+  failed_when: (per_app_mapper_id_out.stdout | default('') | trim | length) == 0
+  no_log: "{{ MASK_CREDENTIALS_IN_LOGS | bool }}"
+
+- name: "per-app mapper [{{ kc_app_id }}]: sync mapper"
+  ansible.builtin.shell: |
+    M_ID="{{ (per_app_mapper_id_out.stdout | default('')) | trim }}"
+    [ -z "$M_ID" ] && exit 0
+    {{ KEYCLOAK_EXEC_KCADM }} create "user-storage/{{ ldap_cmp_id | trim }}/mappers/$M_ID/sync?direction=fedToKeycloak" -r {{ KEYCLOAK_REALM }} 2>&1 || true
+  args:
+    executable: /bin/bash
+  changed_when: true
+  failed_when: false
+  no_log: "{{ MASK_CREDENTIALS_IN_LOGS | bool }}"

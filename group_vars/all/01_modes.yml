@@ -7,3 +7,21 @@ MODE_RESET:   false                       # Cleans up all Infinito.Nexus files. 
 MODE_CLEANUP: true                        # Cleanup unused files and configurations
 MODE_ASSERT:  "{{ MODE_DEBUG  | bool }}"  # Executes validation tasks during the run.
 MODE_BACKUP:  true                        # Executes the Backup before the deployment
+
+# MODE_CI: the playbook runs in an automated test context and the E2E
+# Playwright stage MAY execute. Sources (OR): GitHub Actions
+# (GITHUB_ACTIONS), nektos/act (ACT), and the make deploy-* family
+# (INFINITO_MAKE_DEPLOY, set via Makefile's DEPLOY_CI_EXPORTS). A raw
+# ansible-playbook invocation from a developer shell evaluates to
+# false, so E2E stays out of the way unless explicitly requested.
+# INFINITO_SKIP_E2E overrides the other markers and forces false.
+# See docs/requirements/006-playwright-service-gated-tests.md.
+MODE_CI: >-
+  {{
+    (ansible_facts['env']['INFINITO_SKIP_E2E'] | default('') | string | lower) not in ['1','true','yes']
+    and (
+      (ansible_facts['env']['GITHUB_ACTIONS']     | default('') | string | lower) in ['1','true','yes']
+      or (ansible_facts['env']['ACT']             | default('') | string | lower) in ['1','true','yes']
+      or (ansible_facts['env']['INFINITO_MAKE_DEPLOY'] | default('') | string | lower) in ['1','true','yes']
+    )
+  }}

@@ -41,7 +41,7 @@ compose:
         host: "application"
         port: "80"
       allowed_groups:
-        - "{{ [RBAC.GROUP.NAME, 'web-app-yourls-administrator'] | path_join }}"
+        - "{{ lookup('rbac_group_path', application_id='web-app-yourls', role='administrator') }}"
       acl:
         blacklist:
           - "{{ lookup('config', 'web-app-yourls', 'server.locations.admin') }}" # Protects the admin area

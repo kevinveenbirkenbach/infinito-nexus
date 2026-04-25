@@ -10,6 +10,7 @@
       "Bash(docker exec *)",
       "Edit",
       "Read",
+      "WebFetch(domain:auth.docker.io)",
       "WebFetch(domain:docs.decidim.org)",
       "WebFetch(domain:github.com)",
       "WebFetch(domain:raw.githubusercontent.com)",

@@ -27,4 +27,4 @@
 - name: Run E2E Playwright tests
   include_role:
     name: "test-e2e-playwright"
-  when: DOCKER_IN_CONTAINER | bool
+  when: MODE_CI | bool

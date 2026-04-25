@@ -53,6 +53,20 @@ def _run_deploy(
     if services_disabled:
         extra_env["SERVICES_DISABLED"] = services_disabled
 
+    # Propagate the markers that feed MODE_CI (requirement 006) into the
+    # container so `ansible_facts['env']` sees them. Without this, the
+    # Playwright stage never runs because MODE_CI collapses to false.
+    # See docs/requirements/006-playwright-service-gated-tests.md.
+    for marker in (
+        "INFINITO_MAKE_DEPLOY",
+        "GITHUB_ACTIONS",
+        "ACT",
+        "INFINITO_SKIP_E2E",
+    ):
+        value = os.environ.get(marker, "")
+        if value:
+            extra_env[marker] = value
+
     # Live stream output for immediate visibility.
     r = compose.exec(
         cmd,

@@ -1,0 +1,115 @@
+---
+# Requirement 005: produce OIDC `groups` claims of shape
+#   /roles/<application_id>/<role_name>                       (non-tenant / global)
+#   /roles/<application_id>/<tenant_id>/<role_name>           (per-tenant)
+# with no redundant segments.
+#
+# Why per-app mappers instead of the shared default one:
+# Keycloak's shared `group-ldap-mapper` with
+# `preserve.group.inheritance=true` keys its parent-child resolution on
+# the LDAP group's name (the attribute selected by
+# `group.name.ldap.attribute`). Role names repeat across applications
+# (administrator, editor, ...) so a single mapper with description-
+# based naming hits the Keycloak GroupTreeResolver collision: the map
+# is keyed by name and the second "administrator" silently overwrites
+# the first. The filter solution is to run **one mapper per deployed
+# application**: each mapper's LDAP filter
+#   (&(objectClass=groupOfNames)(cn=<application_id>-*))
+# sees only that app's role groups, anchors them under
+# `/roles/<application_id>`, and names each by the `description`
+# attribute (set by build_ldap_role_entries to the final path segment).
+# `preserve.group.inheritance=false` suffices per mapper because the
+# anchor is per-app — no collisions between apps exist within a mapper.
+#
+# The shared default `ldap-roles` mapper (created by update/05_ldap.yml)
+# is removed here so it does not shadow the per-app mappers, and any
+# Keycloak groups it had imported flat under /roles are pruned.
+#
+# Limitation (documented): tenant-aware apps produce role groups whose
+# CN is `<application_id>-<tenant>-<role>`. The simple substring filter
+# `(cn=<application_id>-*)` catches them too, so for the multisite
+# WordPress case Keycloak would import the per-tenant groups as siblings
+# of the global role groups under /roles/<application_id>, losing the
+# tenant layer in the Keycloak tree. Tenant-aware expansion in the
+# Keycloak group tree is left for a follow-up iteration; the LDAP
+# layout already encodes the tenant via CN so consumers that query
+# LDAP directly can still distinguish them.
+
+- name: "per-app mappers: flush pending handlers before mutating the shared mapper"
+  ansible.builtin.meta: flush_handlers
+
+- name: "per-app mappers: list deployed app ids that build_ldap_role_entries emits LDAP groups for"
+  # build_ldap_role_entries always adds the implicit `administrator`
+  # role for every deployed application, so a per-app Keycloak mapper
+  # is needed for every deployed app — not only those with an explicit
+  # `rbac:` block in `config/main.yml`.
+  ansible.builtin.set_fact:
+    kc_rbac_deployed_app_ids: >-
+      {{
+        (group_names | default([]))
+        | select('match', '^(web-app|web-svc|svc-db|svc-opt|svc-prx|svc-net|svc-ai|svc-bkp)-')
+        | select('in', (lookup('applications') | default({})).keys() | list)
+        | list
+      }}
+  changed_when: false
+
+- name: "per-app mappers: show deployed apps with rbac"
+  ansible.builtin.debug:
+    msg: "apps with rbac: {{ kc_rbac_deployed_app_ids | default([]) }}"
+
+- name: "per-app mappers: delete shared 'ldap-roles' mapper if present"
+  ansible.builtin.shell: |
+    set -o pipefail
+    {{ KEYCLOAK_EXEC_KCADM }} get components -r {{ KEYCLOAK_REALM }} \
+      -q parentId={{ ldap_cmp_id | trim }} \
+      -q providerId=group-ldap-mapper \
+      --fields id,name --format csv --noquotes 2>/dev/null \
+      | tr -d '\r' | awk -F',' '$2=="ldap-roles"{print $1}' > /tmp/kc_ldap_roles_ids.txt
+    while IFS= read -r m_id; do
+      [ -z "$m_id" ] && continue
+      {{ KEYCLOAK_EXEC_KCADM }} delete "components/$m_id" -r {{ KEYCLOAK_REALM }} </dev/null || true
+    done < /tmp/kc_ldap_roles_ids.txt
+  args:
+    executable: /bin/bash
+  changed_when: true
+  failed_when: false
+  no_log: "{{ MASK_CREDENTIALS_IN_LOGS | bool }}"
+
+- name: "per-app mappers: purge stale flat / orphan Keycloak groups under /<KEYCLOAK_RBAC_GROUP_NAME>"
+  ansible.builtin.shell: |
+    DEPLOYED_APPS="{{ kc_rbac_deployed_app_ids | default([]) | join(' ') }}"
+    [ -z "$DEPLOYED_APPS" ] && exit 0
+    {{ KEYCLOAK_EXEC_KCADM }} get groups -r {{ KEYCLOAK_REALM }} \
+      -q max=500 --fields id,path --format csv --noquotes 2>/dev/null \
+      > /tmp/kc_top_groups.txt
+    ROOT_ID=$(awk -F',' -v p='/{{ KEYCLOAK_RBAC_GROUP_NAME | trim("/") }}' \
+      '!/^\[/ && !/Cgroup/ && $2==p {print $1; exit}' /tmp/kc_top_groups.txt | tr -d '\r')
+    [ -z "$ROOT_ID" ] && exit 0
+    APP_REGEX=$(echo "$DEPLOYED_APPS" | tr ' ' '|')
+    {{ KEYCLOAK_EXEC_KCADM }} get "groups/$ROOT_ID/children" -r {{ KEYCLOAK_REALM }} \
+      -q max=500 --fields id,name --format csv --noquotes 2>/dev/null \
+      > /tmp/kc_root_children.txt
+    # Delete any direct child of /<root> whose name is NOT a deployed app id.
+    # This sweeps orphan flat groups (e.g. /roles/<app>-<role>) and
+    # description-collision orphans (/roles/administrator, /roles/editor, ...).
+    awk -F',' -v keep="$DEPLOYED_APPS" '
+      BEGIN { n=split(keep,a," "); for(i=1;i<=n;i++) ok[a[i]]=1 }
+      !/^\[/ && !/Cgroup/ && $2 != "" && !ok[$2] { print $1 }
+    ' /tmp/kc_root_children.txt | tr -d '\r' > /tmp/kc_root_to_delete.txt
+    while IFS= read -r stale_id; do
+      [ -z "$stale_id" ] && continue
+      {{ KEYCLOAK_EXEC_KCADM }} delete "groups/$stale_id" -r {{ KEYCLOAK_REALM }} </dev/null 2>/dev/null || true
+    done < /tmp/kc_root_to_delete.txt
+  args:
+    executable: /bin/bash
+  changed_when: true
+  failed_when: false
+  no_log: "{{ MASK_CREDENTIALS_IN_LOGS | bool }}"
+
+- name: "per-app mappers: ensure Keycloak group and mapper per deployed rbac app"
+  include_tasks: ldap/per_app_mapper_one.yml
+  vars:
+    kc_app_id: "{{ rbac_app }}"
+  loop: "{{ kc_rbac_deployed_app_ids | default([]) }}"
+  loop_control:
+    loop_var: rbac_app

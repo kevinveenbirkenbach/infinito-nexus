@@ -40,25 +40,25 @@ and retroactively migrates the existing specs onto it.
 
 ### Source of truth: per-service boolean env flags
 
-- [ ] The test-e2e-playwright role MUST render one boolean env
+- [x] The test-e2e-playwright role MUST render one boolean env
   variable per gateable shared service into the role's staged
   Playwright `.env`, named `<SERVICE>_SERVICE_ENABLED` in
   UPPER_SNAKE_CASE (for example `OIDC_SERVICE_ENABLED=true`,
   `EMAIL_SERVICE_ENABLED=false`, `MATOMO_SERVICE_ENABLED=false`).
   Values MUST be the literal strings `"true"` or `"false"`. No other
   string (e.g. `1`, `0`, `yes`, empty) is permitted.
-- [ ] The rendered value MUST be derived deterministically from
+- [x] The rendered value MUST be derived deterministically from
   `applications[<role>].compose.services.<name>.enabled` minus every
   identifier in `SERVICES_DISABLED`. Two runs with the same role
   config and the same `SERVICES_DISABLED` MUST produce the same set
   of flag values.
-- [ ] The env template of the role under test
+- [x] The env template of the role under test
   (`roles/<role>/templates/playwright.env.j2`) IS the registry of
   gateable services for that role. A service MUST appear as a
   `<SERVICE>_SERVICE_ENABLED=...` line in that template for the spec
   to be allowed to gate on it. Adding a new gate therefore requires
   updating the env template AND the spec together.
-- [ ] Structurally always-present core services (the webserver-core,
+- [x] Structurally always-present core services (the webserver-core,
   container runtime, DNS stack) MUST NOT be rendered as gate flags.
   The registry is reserved for shared-service integrations whose
   presence is meaningfully optional (OIDC, LDAP, email, matomo, CDN,
@@ -67,7 +67,7 @@ and retroactively migrates the existing specs onto it.
 
 ### Gate API in the Playwright specs
 
-- [ ] A small shared helper MUST be added at
+- [x] A small shared helper MUST be added at
   `roles/test-e2e-playwright/files/service-gating.js` and staged
   alongside every role spec by the same mechanism that stages the
   spec itself, so every `roles/<role>/files/playwright.spec.js`
@@ -82,33 +82,33 @@ and retroactively migrates the existing specs onto it.
   isServiceDisabledReason("email")  // e.g. "EMAIL_SERVICE_ENABLED=false"
   ```
 
-- [ ] The helper MUST hard-fail with `Unknown service: <name>` when
+- [x] The helper MUST hard-fail with `Unknown service: <name>` when
   called with an identifier that is not declared in the spec's env
   registry (i.e. no `<SERVICE>_SERVICE_ENABLED` line exists for it).
   A typo in `isServiceEnabled("oicd")` MUST surface as a test error,
   not as a silent disable.
-- [ ] The helper MUST use Playwright's native `test.skip()` mechanism
+- [x] The helper MUST use Playwright's native `test.skip()` mechanism
   (conditional skip with a reason string) rather than
   `test.describe.skip()` or runtime `return` statements, so skipped
   tests show up in the reporter as `- skipped: <reason>`.
-- [ ] The skip reason MUST name the disabling flag verbatim: for
+- [x] The skip reason MUST name the disabling flag verbatim: for
   example `skipped: EMAIL_SERVICE_ENABLED=false`. This is the single
   diagnostic every contributor will consult when a test is missing
   from a run, so it MUST point at the exact env variable.
-- [ ] Specs MUST NOT read `<SERVICE>_SERVICE_ENABLED` variables
+- [x] Specs MUST NOT read `<SERVICE>_SERVICE_ENABLED` variables
   directly via `process.env`. All reads go through the helper so the
   "unknown service hard-fails" guarantee is not bypassed.
 
 ### Backwards-compatible defaults
 
-- [ ] When a `<SERVICE>_SERVICE_ENABLED` variable is absent from the
+- [x] When a `<SERVICE>_SERVICE_ENABLED` variable is absent from the
   env (for example during local iteration via
   [rerun-spec.sh](../../scripts/tests/e2e/rerun-spec.sh) against an
   older staged `.env` that predates this requirement), the helper
   MUST treat that service as **enabled**. This preserves the current
   behaviour for iterative spec development against a fully-featured
   deploy.
-- [ ] An explicit `<SERVICE>_SERVICE_ENABLED=false` MUST be the only
+- [x] An explicit `<SERVICE>_SERVICE_ENABLED=false` MUST be the only
   way to trigger a skip. There is no global "disable everything"
   toggle; operators who want only baseline tests set each relevant
   flag to `false` in their staged env, or deploy with
@@ -132,31 +132,31 @@ authoritative final list. The audit MUST be driven by reading each
 scenario end to end. Baseline scenarios MUST stay ungated in every
 case.
 
-- [ ] [web-app-bigbluebutton](../../roles/web-app-bigbluebutton/) — audit spec; baseline gates: `oidc`, `ldap`, `dashboard`.
-- [ ] [web-app-dashboard](../../roles/web-app-dashboard/) — audit spec; baseline gates: `oidc`, `matomo`, `simpleicons`. MUST NOT self-gate on `dashboard` because the role IS the dashboard.
-- [ ] [web-app-decidim](../../roles/web-app-decidim/) — audit spec; baseline gates: `oidc`, `email`.
-- [ ] [web-app-discourse](../../roles/web-app-discourse/) — audit spec; baseline gates: `oidc`, `dashboard`.
-- [ ] [web-app-fider](../../roles/web-app-fider/) — audit spec; baseline gates: `oidc`, `email`, `dashboard`.
-- [ ] [web-app-friendica](../../roles/web-app-friendica/) — audit spec; baseline gates: `oidc`, `ldap`, `dashboard`.
-- [ ] [web-app-gitea](../../roles/web-app-gitea/) — audit spec; baseline gates: `oidc`, `email`.
-- [ ] [web-app-joomla](../../roles/web-app-joomla/) — audit spec; baseline gates: `oidc`, `dashboard`.
-- [ ] [web-app-keycloak](../../roles/web-app-keycloak/) — audit spec; baseline gates: `ldap` for federation scenarios. MUST NOT self-gate on `oidc` because Keycloak IS the OIDC provider; if the spec runs at all, OIDC is available by definition.
-- [ ] [web-app-mailu](../../roles/web-app-mailu/) — audit spec; baseline gates: `oidc`, `dashboard`. MUST NOT self-gate on `email` because Mailu IS the email provider.
-- [ ] [web-app-matomo](../../roles/web-app-matomo/) — audit spec; baseline gates: `dashboard`. MUST NOT self-gate on `matomo` because Matomo IS the matomo provider.
-- [ ] [web-app-matrix](../../roles/web-app-matrix/) — audit spec; baseline gates: `oidc`, `email`, `matomo`, `dashboard`.
-- [ ] [web-app-mattermost](../../roles/web-app-mattermost/) — audit spec; baseline gates: `oidc`, `email`, `dashboard`.
-- [ ] [web-app-nextcloud](../../roles/web-app-nextcloud/) — audit spec; baseline gates: `oidc`, `ldap`, `email`, `dashboard`, `onlyoffice`, `collabora`, `talk`. Each integration scenario MUST gate on its own flag; a single omnibus gate across the set is forbidden.
-- [ ] [web-app-odoo](../../roles/web-app-odoo/) — audit spec; baseline gates: `oidc`, `email`, `dashboard`.
-- [ ] [web-app-openwebui](../../roles/web-app-openwebui/) — audit spec; baseline gates: `oidc`, `dashboard`.
-- [ ] [web-app-peertube](../../roles/web-app-peertube/) — audit spec; baseline gates: `oidc`, `dashboard`.
-- [ ] [web-app-pixelfed](../../roles/web-app-pixelfed/) — audit spec; baseline gates: `oidc`, `email`, `dashboard`.
-- [ ] [web-app-prometheus](../../roles/web-app-prometheus/) — audit spec; baseline gates: `oidc`, `email`, `dashboard`.
-- [ ] [web-app-taiga](../../roles/web-app-taiga/) — audit spec; baseline gates: `oidc`, `dashboard`.
-- [ ] [web-app-wordpress](../../roles/web-app-wordpress/) — audit spec; baseline gates: `oidc`, `ldap` (from [004](004-generic-rbac-ldap-auto-provisioning.md)); `discourse` (from [007](007-wordpress-discourse-post-round-trip.md)).
-- [ ] [web-app-yourls](../../roles/web-app-yourls/) — audit spec; baseline gates: `oidc`, `email`, `dashboard`.
-- [ ] [web-svc-cdn](../../roles/web-svc-cdn/) — audit spec before adding any gate; CDN is a static-origin service and its spec is likely all-baseline. The audit outcome MUST be documented in the commit that closes this checkbox.
-- [ ] [web-svc-simpleicons](../../roles/web-svc-simpleicons/) — audit spec; baseline gate: `oidc` if the admin-facing scenario uses it; otherwise close this item with "all-baseline" and no gate added.
-- [ ] After the refactor the following post-conditions MUST all hold:
+- [x] [web-app-bigbluebutton](../../roles/web-app-bigbluebutton/) — audit spec; baseline gates: `oidc`, `ldap`, `dashboard`.
+- [x] [web-app-dashboard](../../roles/web-app-dashboard/) — audit spec; baseline gates: `oidc`, `matomo`, `simpleicons`. MUST NOT self-gate on `dashboard` because the role IS the dashboard.
+- [x] [web-app-decidim](../../roles/web-app-decidim/) — audit spec; baseline gates: `oidc`, `email`.
+- [x] [web-app-discourse](../../roles/web-app-discourse/) — audit spec; baseline gates: `oidc`, `dashboard`.
+- [x] [web-app-fider](../../roles/web-app-fider/) — audit spec; baseline gates: `oidc`, `email`, `dashboard`.
+- [x] [web-app-friendica](../../roles/web-app-friendica/) — audit spec; baseline gates: `oidc`, `ldap`, `dashboard`.
+- [x] [web-app-gitea](../../roles/web-app-gitea/) — audit spec; baseline gates: `oidc`, `email`.
+- [x] [web-app-joomla](../../roles/web-app-joomla/) — audit spec; baseline gates: `oidc`, `dashboard`.
+- [x] [web-app-keycloak](../../roles/web-app-keycloak/) — audit spec; baseline gates: `ldap` for federation scenarios. MUST NOT self-gate on `oidc` because Keycloak IS the OIDC provider; if the spec runs at all, OIDC is available by definition.
+- [x] [web-app-mailu](../../roles/web-app-mailu/) — audit spec; baseline gates: `oidc`, `dashboard`. MUST NOT self-gate on `email` because Mailu IS the email provider.
+- [x] [web-app-matomo](../../roles/web-app-matomo/) — audit spec; baseline gates: `dashboard`. MUST NOT self-gate on `matomo` because Matomo IS the matomo provider.
+- [x] [web-app-matrix](../../roles/web-app-matrix/) — audit spec; baseline gates: `oidc`, `email`, `matomo`, `dashboard`.
+- [x] [web-app-mattermost](../../roles/web-app-mattermost/) — audit spec; baseline gates: `oidc`, `email`, `dashboard`.
+- [x] [web-app-nextcloud](../../roles/web-app-nextcloud/) — audit spec; baseline gates: `oidc`, `ldap`, `email`, `dashboard`, `onlyoffice`, `collabora`, `talk`. Each integration scenario MUST gate on its own flag; a single omnibus gate across the set is forbidden.
+- [x] [web-app-odoo](../../roles/web-app-odoo/) — audit spec; baseline gates: `oidc`, `email`, `dashboard`.
+- [x] [web-app-openwebui](../../roles/web-app-openwebui/) — audit spec; baseline gates: `oidc`, `dashboard`.
+- [x] [web-app-peertube](../../roles/web-app-peertube/) — audit spec; baseline gates: `oidc`, `dashboard`.
+- [x] [web-app-pixelfed](../../roles/web-app-pixelfed/) — audit spec; baseline gates: `oidc`, `email`, `dashboard`.
+- [x] [web-app-prometheus](../../roles/web-app-prometheus/) — audit spec; baseline gates: `oidc`, `email`, `dashboard`.
+- [x] [web-app-taiga](../../roles/web-app-taiga/) — audit spec; baseline gates: `oidc`, `dashboard`.
+- [x] [web-app-wordpress](../../roles/web-app-wordpress/) — audit spec; baseline gates: `oidc`, `ldap` (from [004](004-generic-rbac-ldap-auto-provisioning.md)); `discourse` (from [007](007-wordpress-discourse-post-round-trip.md)).
+- [x] [web-app-yourls](../../roles/web-app-yourls/) — audit spec; baseline gates: `oidc`, `email`, `dashboard`.
+- [x] [web-svc-cdn](../../roles/web-svc-cdn/) — audit spec before adding any gate; CDN is a static-origin service and its spec is likely all-baseline. The audit outcome MUST be documented in the commit that closes this checkbox.
+- [x] [web-svc-simpleicons](../../roles/web-svc-simpleicons/) — audit spec; baseline gate: `oidc` if the admin-facing scenario uses it; otherwise close this item with "all-baseline" and no gate added.
+- [x] After the refactor the following post-conditions MUST all hold:
   - Baseline scenarios of every spec keep passing when `SERVICES_DISABLED`
     is empty.
   - With `SERVICES_DISABLED=matomo,email,discourse` and a role under test
@@ -182,7 +182,7 @@ E2E tests enabled; a CI job whose container probe does not surface
 the env marker silently skips them. This requirement replaces the
 accidental proxy with an explicit intent variable.
 
-- [ ] A new top-level variable `MODE_CI` MUST be defined in
+- [x] A new top-level variable `MODE_CI` MUST be defined in
   [group_vars/all/01_modes.yml](../../group_vars/all/01_modes.yml)
   alongside the existing `MODE_DUMMY`, `MODE_DEBUG`, `MODE_ASSERT`
   etc. family, as a boolean fact. Its value MUST be `true` when ANY of the
@@ -195,20 +195,20 @@ accidental proxy with an explicit intent variable.
     MUST be exported by every `make deploy-*` target in
     [Makefile](../../Makefile) so `make`-driven local deploys count
     as the "intentionally CI-like" case.
-- [ ] `MODE_CI` MUST be strictly orthogonal to
+- [x] `MODE_CI` MUST be strictly orthogonal to
   `DOCKER_IN_CONTAINER`. The existing `DOCKER_IN_CONTAINER` variable
   MUST keep its current container-detection semantics and its current
   consumers (MariaDB port exposure, hostname task, WireGuard gating,
   etc.) MUST NOT be migrated to `MODE_CI`. The two flags answer
   two different questions and MUST continue to do so.
-- [ ] The include of `test-e2e-playwright` in
+- [x] The include of `test-e2e-playwright` in
   [tasks/stages/02_server.yml](../../tasks/stages/02_server.yml)
   MUST switch its `when:` from `DOCKER_IN_CONTAINER | bool` to
   `MODE_CI | bool`. Any other callsite in the tree that gates
   test execution specifically (rather than containerization) MUST be
   audited in the same requirement iteration and migrated if the
   semantic intent was CI.
-- [ ] [Makefile](../../Makefile) MUST declare a single top-level
+- [x] [Makefile](../../Makefile) MUST declare a single top-level
   variable that holds the export needed to flip `MODE_CI` to `true`,
   for example:
 
@@ -228,7 +228,7 @@ accidental proxy with an explicit intent variable.
   single-variable indirection is load-bearing: when `MODE_CI` later
   gains additional contributing markers, or when the marker name
   changes, exactly one line in the Makefile has to move.
-- [ ] The set of recipes that MUST use `DEPLOY_CI_EXPORTS` is every
+- [x] The set of recipes that MUST use `DEPLOY_CI_EXPORTS` is every
   `deploy-*` target in the file, without exception: today that is
   `deploy-fresh-kept-all`, `deploy-fresh-kept-apps`,
   `deploy-fresh-purged-apps`, `deploy-reuse-kept-apps`,
@@ -238,12 +238,12 @@ accidental proxy with an explicit intent variable.
   indirection. Raw `ansible-playbook` invocations from a developer
   shell MUST NOT set the flag, so the default is "E2E tests stay
   out of the way unless explicitly requested".
-- [ ] A `make deploy-*` target MAY additionally allow an explicit
+- [x] A `make deploy-*` target MAY additionally allow an explicit
   opt-out via `INFINITO_SKIP_E2E=1`. When set, `MODE_CI` MUST
   evaluate to `false` regardless of the other markers. This gives a
   contributor a fast iteration loop that deploys without paying the
   Playwright cost.
-- [ ] The new flag and its truthiness sources MUST be documented in
+- [x] The new flag and its truthiness sources MUST be documented in
   [documentation.md](../contributing/documentation.md)'s environment
   conventions (or the closest existing SPOT if a more appropriate
   page exists) so a contributor does not have to grep the Makefile to
@@ -251,27 +251,27 @@ accidental proxy with an explicit intent variable.
 
 ### Verification
 
-- [ ] A unit-level test on the test-e2e-playwright role MUST assert
+- [x] A unit-level test on the test-e2e-playwright role MUST assert
   the env-rendering logic: given a synthetic
   `applications[<role>].compose.services` fact and a synthetic
   `SERVICES_DISABLED` list, the rendered set of
   `<SERVICE>_SERVICE_ENABLED` lines MUST match an explicit expected
   set. At least three fixtures MUST be covered: nothing disabled,
   one service disabled, all service-gated flags disabled.
-- [ ] A unit-level test on the helper MUST cover all observable
+- [x] A unit-level test on the helper MUST cover all observable
   behaviours: the `true` path, the `false` path, the absent-variable
   (default-enabled) path, and the hard-fail path for an unknown
   service name.
-- [ ] At least one role spec MUST include an integration-level test
+- [x] At least one role spec MUST include an integration-level test
   that drives the helper both ways in the same run: one scenario
   gated on a service known to be enabled (MUST execute) and one
   scenario gated on a service forced off via a locally-scoped env
   override (MUST report `skipped` with the expected reason).
-- [ ] A CI smoke run with `SERVICES_DISABLED=matomo,email` MUST be
+- [x] A CI smoke run with `SERVICES_DISABLED=matomo,email` MUST be
   added (or extended from the existing deploy cycle) that deploys at
   least one matomo-using and one email-using role and asserts that
   the related Playwright tests report as `skipped`, not as `failed`.
-- [ ] An end-to-end smoke MUST cover the `MODE_CI` gate matrix:
+- [x] An end-to-end smoke MUST cover the `MODE_CI` gate matrix:
   - A GitHub Actions run MUST produce `MODE_CI=true` and
     therefore include the `test-e2e-playwright` stage.
   - A [nektos/act](https://nektos.com/) local run MUST produce the
@@ -293,19 +293,19 @@ accidental proxy with an explicit intent variable.
 
 ### Documentation
 
-- [ ] The Playwright contributor guide
+- [x] The Playwright contributor guide
   [playwright.specs.js.md](../contributing/artefact/files/role/playwright.specs.js.md)
   already carries the normative rules for service gating under the
   Option B shape. It MUST stay in sync with this requirement. Any
   clarification added to this requirement that tightens the contract
   MUST be mirrored there, and vice versa.
-- [ ] The Playwright framework SPOT
+- [x] The Playwright framework SPOT
   [Playwright Tests](../contributing/actions/testing/playwright.md)
   MUST gain a short section that documents the
   `<SERVICE>_SERVICE_ENABLED` contract, the helper API, and the
   backwards-compatible default. The page MUST follow
   [documentation.md](../contributing/documentation.md) (RFC 2119,
   link-text style, emojis after headings, no em dashes).
-- [ ] Each role README that documents its Playwright spec MUST state
+- [x] Each role README that documents its Playwright spec MUST state
   which shared services its gated scenarios depend on, so an operator
   planning a reduced deploy can predict which scenarios will skip.

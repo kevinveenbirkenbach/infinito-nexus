@@ -40,6 +40,10 @@ echo "inventory_dir=${INVENTORY_DIR}"
 
 docker exec \
 	-e SERVICES_DISABLED="${SERVICES_DISABLED:-}" \
+	-e INFINITO_MAKE_DEPLOY="${INFINITO_MAKE_DEPLOY:-}" \
+	-e INFINITO_SKIP_E2E="${INFINITO_SKIP_E2E:-}" \
+	-e GITHUB_ACTIONS="${GITHUB_ACTIONS:-}" \
+	-e ACT="${ACT:-}" \
 	"${INFINITO_CONTAINER}" bash -c "
   set -euo pipefail
   cd /opt/src/infinito

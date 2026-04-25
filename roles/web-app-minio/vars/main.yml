@@ -32,7 +32,7 @@ MINIO_MC_HOST_ENV:              "{{ MINIO_MC_SCHEME }}://{{ MINIO_MC_USER }}:{{ 
 
 ## OIDC
 MINIO_OIDC_ENABLED:             "{{ lookup('config', application_id, 'compose.services.oidc.enabled') }}"
-MINIO_OIDC_POLICY_NAME:         "{{ [ RBAC.GROUP.NAME, application_id ~ '-administrator' ] | path_join }}"
+MINIO_OIDC_POLICY_NAME:         "{{ lookup('rbac_group_path', application_id=application_id, role='administrator') }}"
 MINIO_OIDC_POLICY_CONTENT:      "{{ lookup('template', 'policy.json.j2') }}"
 
 MINIO_FRONT_PROXY_MATRIX: >-

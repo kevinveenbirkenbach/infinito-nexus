@@ -8,6 +8,16 @@ SHELL := /bin/bash
 ENV_SH ?= $(CURDIR)/scripts/meta/env/all.sh
 export ENV_SH
 
+# ------------------------------------------------------------
+# Marker that flips MODE_CI=true for every `deploy-*` target.
+# MODE_CI is defined in group_vars/all/01_modes.yml and also reacts
+# to GITHUB_ACTIONS and ACT; INFINITO_MAKE_DEPLOY is the make-driven
+# equivalent. Keep the export in exactly one place so future marker
+# name or value changes stay a single-line edit.
+# See docs/requirements/006-playwright-service-gated-tests.md.
+# ------------------------------------------------------------
+DEPLOY_CI_EXPORTS := INFINITO_MAKE_DEPLOY=1
+
 # For non-interactive bash, BASH_ENV is sourced before executing the command.
 # This makes the env layer apply automatically to *all* Make recipes.
 ifneq ("$(wildcard $(ENV_SH))","")
@@ -336,25 +346,25 @@ container-purge-system: container-purge-entity
 # Create a fresh inventory and deploy all apps.
 deploy-fresh-kept-all:
 	@echo "=== local full deploy (type=$${TEST_DEPLOY_TYPE}, distro=$${INFINITO_DISTRO}) ==="
-	@bash scripts/tests/deploy/local/deploy/fresh-kept-all.sh
+	@$(DEPLOY_CI_EXPORTS) bash scripts/tests/deploy/local/deploy/fresh-kept-all.sh
 
 # Create a fresh inventory and deploy one or more apps.
 deploy-fresh-kept-apps:
 	@: "$${APPS:?APPS must be set (e.g. APPS=web-app-nextcloud)}"
-	@bash scripts/tests/deploy/local/deploy/fresh-kept-app.sh "$${APPS}"
+	@$(DEPLOY_CI_EXPORTS) bash scripts/tests/deploy/local/deploy/fresh-kept-app.sh "$${APPS}"
 
 # Deploy one or more apps with purged entities. Set FULL_CYCLE=true to also run the update pass.
 deploy-fresh-purged-apps: down up
-	@bash scripts/tests/deploy/local/deploy/fresh-purged-app.sh
+	@$(DEPLOY_CI_EXPORTS) bash scripts/tests/deploy/local/deploy/fresh-purged-app.sh
 
 # Redeploy one or more apps on an existing inventory.
 deploy-reuse-kept-apps:
-	@DEBUG=true \
+	@$(DEPLOY_CI_EXPORTS) DEBUG=true \
 	bash scripts/tests/deploy/local/deploy/reuse-kept-app.sh
 
 # Redeploy all apps on an existing inventory.
 deploy-reuse-kept-all:
-	@bash scripts/tests/deploy/local/deploy/reuse-kept-all.sh
+	@$(DEPLOY_CI_EXPORTS) bash scripts/tests/deploy/local/deploy/reuse-kept-all.sh
 
 # Purge one or more app entities, then redeploy them on existing inventory.
 deploy-reuse-purged-apps: container-purge-entity

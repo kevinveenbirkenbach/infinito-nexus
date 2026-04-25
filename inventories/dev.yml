@@ -70,6 +70,24 @@ applications:
           # Allows faster debugging
           autologin: true
 
+  # Requirement 005 Multisite verification block. Enable for a targeted
+  # CI run that exercises the Multisite code path; leave commented for
+  # the default dev inventory so the single-site scenarios remain the
+  # canonical path. When uncommented, server.domains.canonical and
+  # compose.services.wordpress.multisite.enabled flip together.
+  #web-app-wordpress:
+  #  server:
+  #    domains:
+  #      canonical:
+  #        - "blog.{{ DOMAIN_PRIMARY }}"
+  #        - "shop.{{ DOMAIN_PRIMARY }}"
+  #        - "news.{{ DOMAIN_PRIMARY }}"
+  #  compose:
+  #    services:
+  #      wordpress:
+  #        multisite:
+  #          enabled: true
+
 SIZE_PERCENT_CLEANUP_DISC_SPACE: 99 # Set high because in DiD Ci Environment in github workflow it can be verry high e.g. ~92%
 
 WORKSTATION_USER: biber

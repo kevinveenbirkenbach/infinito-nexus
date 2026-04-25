@@ -8,7 +8,8 @@ Plugin used: [daggerhart-openid-connect-generic](https://wordpress.org/plugins/d
 
 ## 💬 WP Discourse  
 Seamlessly connects WordPress with a Discourse forum for comments, discussions, and single sign-on (SSO).  
-Plugin used: [wp-discourse](https://wordpress.org/plugins/wp-discourse/)
+Plugin used: [wp-discourse](https://wordpress.org/plugins/wp-discourse/).
+Runtime contract for the WordPress → Discourse post round-trip (published post MUST appear as a Discourse topic) is defined in [007-wordpress-discourse-post-round-trip.md](../../../../docs/requirements/007-wordpress-discourse-post-round-trip.md).
 
 ## 🌍 ActivityPub  
 Federates your blog with the Fediverse, making it accessible on platforms like Mastodon and Friendica.  

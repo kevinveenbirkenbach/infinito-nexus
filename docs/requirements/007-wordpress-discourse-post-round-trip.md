@@ -33,18 +33,18 @@ re-provisioning, or the category-mapping defaults can ship silently.
 
 ### Scope
 
-- [ ] A new scenario MUST be added to
+- [x] A new scenario MUST be added to
   [roles/web-app-wordpress/files/playwright.spec.js](../../roles/web-app-wordpress/files/playwright.spec.js)
   that publishes a WordPress post via the WP admin UI and asserts
   that the corresponding Discourse topic exists.
-- [ ] The scenario MUST be gated on the `discourse` shared service
+- [x] The scenario MUST be gated on the `discourse` shared service
   being enabled-and-shared, using the `isServiceEnabled("discourse")`
   / `requireService("discourse", ...)` helper contract from
   [006-playwright-service-gated-tests.md](006-playwright-service-gated-tests.md).
   When Discourse is not enabled on the current deploy, the scenario
   MUST report as `skipped: DISCOURSE_SERVICE_ENABLED=false`, not as
   failed.
-- [ ] The scenario MUST follow the idempotency contract from
+- [x] The scenario MUST follow the idempotency contract from
   [004-generic-rbac-ldap-auto-provisioning.md](004-generic-rbac-ldap-auto-provisioning.md):
   whatever the test creates in WordPress and Discourse, the test MUST
   remove again before it finishes. A completed run against a
@@ -53,11 +53,11 @@ re-provisioning, or the category-mapping defaults can ship silently.
 
 ### Test body
 
-- [ ] The scenario MUST generate a unique post title per run (e.g.
+- [x] The scenario MUST generate a unique post title per run (e.g.
   `infinito-playwright-discourse-roundtrip-<ISO-8601-timestamp>-<short-uuid>`)
   so that concurrent or repeated runs cannot collide and so the
   assertion locators remain unambiguous across Discourse categories.
-- [ ] Authoring the post MUST use an OIDC-authenticated session of a
+- [x] Authoring the post MUST use an OIDC-authenticated session of a
   user who holds a WordPress role with `publish_posts` capability
   (typically the administrator persona the existing spec already uses
   for baseline tests). The scenario MUST exercise the WP admin
@@ -65,7 +65,7 @@ re-provisioning, or the category-mapping defaults can ship silently.
   wp-discourse sidebar toggle to publish to Discourse, then publish.
   It MUST NOT short-circuit via the WP REST API, because the goal is
   to catch regressions that affect editors in their real workflow.
-- [ ] The wp-discourse plugin persists the publish-intent as a
+- [x] The wp-discourse plugin persists the publish-intent as a
   WordPress post-meta field named `publish_to_discourse` (managed by
   the plugin's `Discourse_Publish` class). The scenario MUST drive
   the sidebar UI that sets this meta, not write the meta directly,
@@ -73,13 +73,13 @@ re-provisioning, or the category-mapping defaults can ship silently.
   path the test is meant to exercise. If a future wp-discourse
   release renames this meta key, the scenario MUST be updated in
   lockstep, but it MUST continue to go through the UI toggle.
-- [ ] Assertion in Discourse MUST use the Discourse HTTP API (the same
+- [x] Assertion in Discourse MUST use the Discourse HTTP API (the same
   API key channel the wp-discourse plugin uses), not UI scraping of
   the Discourse front end. The scenario MUST poll the Discourse
   search endpoint for the generated title with an explicit timeout
   (at least 60 seconds, configurable via env), because wp-discourse's
   publish path is asynchronous.
-- [ ] The assertion MUST verify at minimum:
+- [x] The assertion MUST verify at minimum:
   - A topic with the generated title exists in Discourse.
   - The topic's first post body contains a substring of the WP post
     content that the test wrote, proving the content round-tripped
@@ -90,7 +90,7 @@ re-provisioning, or the category-mapping defaults can ship silently.
 
 ### Configuration prerequisites
 
-- [ ] If `auto-publish` on the wp-discourse side is not currently
+- [x] If `auto-publish` on the wp-discourse side is not currently
   enabled by default (it is commented out in
   [vars/discourse.yml](../../roles/web-app-wordpress/vars/discourse.yml)),
   the requirement MUST decide and document one of the two paths:
@@ -106,7 +106,7 @@ re-provisioning, or the category-mapping defaults can ship silently.
   [vars/discourse.yml](../../roles/web-app-wordpress/vars/discourse.yml)
   pointing future maintainers at this decision so the behaviour is
   not silently flipped.
-- [ ] The Playwright env template
+- [x] The Playwright env template
   [roles/web-app-wordpress/templates/playwright.env.j2](../../roles/web-app-wordpress/templates/playwright.env.j2)
   MUST render the Discourse base URL and an API key that the scenario
   can use to query Discourse AND to delete the Discourse topic
@@ -118,7 +118,7 @@ re-provisioning, or the category-mapping defaults can ship silently.
   test-scoped API key MUST be provisioned with the minimum
   privileges required by the scenario (topic read AND topic delete)
   and its value injected through the standard dotenv pipeline.
-- [ ] `DISCOURSE_SERVICE_ENABLED` MUST be emitted into the env by the
+- [x] `DISCOURSE_SERVICE_ENABLED` MUST be emitted into the env by the
   same mechanism as every other gate from
   [006-playwright-service-gated-tests.md](006-playwright-service-gated-tests.md)
   (derived from `applications[web-app-wordpress].compose.services.discourse.enabled`
@@ -126,12 +126,12 @@ re-provisioning, or the category-mapping defaults can ship silently.
 
 ### Teardown
 
-- [ ] Teardown MUST run in a `finally` block so it fires even when the
+- [x] Teardown MUST run in a `finally` block so it fires even when the
   body assertion throws, matching the pattern the RBAC scenarios
   from
   [004-generic-rbac-ldap-auto-provisioning.md](004-generic-rbac-ldap-auto-provisioning.md)
   already establish for Playwright teardown.
-- [ ] Teardown MUST cover **every** state the scenario can leave the
+- [x] Teardown MUST cover **every** state the scenario can leave the
   system in, including partial states caused by a crash between
   steps. Specifically it MUST:
   - Search WordPress for any post whose title exactly matches the
@@ -147,7 +147,7 @@ re-provisioning, or the category-mapping defaults can ship silently.
     outcome (e.g. the scenario crashed before the post was created
     at all). A teardown MUST NOT fail the test on "nothing to
     clean up".
-- [ ] Teardown failures MUST be logged to the Playwright reporter
+- [x] Teardown failures MUST be logged to the Playwright reporter
   (via `console.warn` in the `finally` block, the same pattern the
   RBAC scenarios use for their Keycloak cleanup) but MUST NOT mask
   the original body failure. The test result MUST reflect the body
@@ -155,16 +155,16 @@ re-provisioning, or the category-mapping defaults can ship silently.
 
 ### Verification
 
-- [ ] A fresh `make deploy-fresh-purged-apps APPS=web-app-wordpress
+- [x] A fresh `make deploy-fresh-purged-apps APPS=web-app-wordpress
   FULL_CYCLE=true` with Discourse enabled MUST produce a green
   run including this scenario.
-- [ ] A `make deploy-fresh-purged-apps APPS=web-app-wordpress
+- [x] A `make deploy-fresh-purged-apps APPS=web-app-wordpress
   FULL_CYCLE=true SERVICES_DISABLED=discourse` MUST produce a
   green run with the scenario reported as `skipped` rather than
   failing, proving the gate from
   [006-playwright-service-gated-tests.md](006-playwright-service-gated-tests.md)
   works as declared in practice.
-- [ ] The scenario MUST pass the same idempotency check as the rest
+- [x] The scenario MUST pass the same idempotency check as the rest
   of the suite: running the Playwright spec twice in a row (via
   [rerun-spec.sh](../../scripts/tests/e2e/rerun-spec.sh)) MUST both
   times return green and MUST leave zero persisted test posts in
@@ -172,12 +172,12 @@ re-provisioning, or the category-mapping defaults can ship silently.
 
 ### Documentation
 
-- [ ] [roles/web-app-wordpress/README.md](../../roles/web-app-wordpress/README.md)
+- [x] [roles/web-app-wordpress/README.md](../../roles/web-app-wordpress/README.md)
   MUST gain an entry under its Playwright section that names
   `discourse` as a gated shared-service dependency, in line with the
   enumeration rule from
   [006-playwright-service-gated-tests.md](006-playwright-service-gated-tests.md).
-- [ ] The plugin-specific doc
+- [x] The plugin-specific doc
   [roles/web-app-wordpress/tasks/plugins/README.md](../../roles/web-app-wordpress/tasks/plugins/README.md)
   MUST link to this requirement so a future maintainer touching
   wp-discourse sees the round-trip contract that the Playwright

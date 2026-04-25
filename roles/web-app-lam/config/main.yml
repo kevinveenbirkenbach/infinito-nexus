@@ -23,7 +23,7 @@ compose:
         host:       application
         port:       80
       allowed_groups:
-        - "{{ [RBAC.GROUP.NAME, 'web-app-lam-administrator'] | path_join }}"
+        - "{{ lookup('rbac_group_path', application_id='web-app-lam', role='administrator') }}"
     css:
       enabled: true
       shared: true
