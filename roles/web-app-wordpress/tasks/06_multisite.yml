@@ -28,7 +28,11 @@
     and ('already' not in (wp_ms_convert.stderr | lower))
     and ('multisite' not in (wp_ms_convert.stderr | lower))
 
-- name: "Multisite: patch wp-config.php with the constants WP multisite requires"
+- name: "Multisite: patch wp-config.php with PHP-literal constants (booleans, ints) — requires --raw"
+  # `--raw` writes the value verbatim into the file, so MULTISITE/
+  # SUBDOMAIN_INSTALL must arrive at wp-cli as bareword PHP literals
+  # (true, false, 123, ...). For these the value contains no characters
+  # that shlex would chew on.
   command: >
     container exec -u {{ WORDPRESS_USER }} {{ WORDPRESS_CONTAINER }}
     wp config set {{ item.key }} {{ item.value }}
@@ -38,10 +42,31 @@
   loop:
     - { key: "MULTISITE", value: "true" }
     - { key: "SUBDOMAIN_INSTALL", value: "true" }
-    - { key: "DOMAIN_CURRENT_SITE", value: "'{{ WORDPRESS_DOMAINS | first }}'" }
-    - { key: "PATH_CURRENT_SITE", value: "'/'" }
     - { key: "SITE_ID_CURRENT_SITE", value: "1" }
     - { key: "BLOG_ID_CURRENT_SITE", value: "1" }
+  args:
+    chdir: "{{ lookup('container', application_id, 'directories.instance') }}"
+  changed_when: true
+
+- name: "Multisite: patch wp-config.php with PHP-string constants (domain, path) — without --raw"
+  # WHY split this loop: when `--raw` is set, wp-cli writes the value
+  # verbatim. We previously tried to inject `'blog.infinito.example'`
+  # WITH literal single-quotes so the verbatim write would land as a
+  # quoted PHP string. But the Ansible `command:` module pipes through
+  # shlex, which strips the outer single-quotes before exec, so wp-cli
+  # received `blog.infinito.example` and wrote
+  # `define('DOMAIN_CURRENT_SITE', blog.infinito.example);` — a
+  # bareword that PHP can't parse. Dropping `--raw` lets wp-cli detect
+  # the type as string and quote it for us, which is the SPOT for that
+  # decision.
+  command: >
+    container exec -u {{ WORDPRESS_USER }} {{ WORDPRESS_CONTAINER }}
+    wp config set {{ item.key }} {{ item.value }}
+    --type=constant
+    --path={{ WORDPRESS_DOCKER_HTML_PATH }}
+  loop:
+    - { key: "DOMAIN_CURRENT_SITE", value: "{{ WORDPRESS_DOMAINS | first }}" }
+    - { key: "PATH_CURRENT_SITE", value: "/" }
   args:
     chdir: "{{ lookup('container', application_id, 'directories.instance') }}"
   changed_when: true
