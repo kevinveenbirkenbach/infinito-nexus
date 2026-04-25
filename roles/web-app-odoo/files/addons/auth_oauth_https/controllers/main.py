@@ -2,10 +2,13 @@
 # Part of Infinito.Nexus. See LICENSE file for full copyright and licensing details.
 
 import json
+import logging
 import werkzeug.urls
 
 from odoo.http import request
 from odoo.addons.auth_oauth.controllers.main import OAuthLogin
+
+_logger = logging.getLogger(__name__)
 
 
 class OAuthLoginHTTPS(OAuthLogin):
@@ -37,7 +40,9 @@ class OAuthLoginHTTPS(OAuthLogin):
                     base_url += "/"
                 return base_url
         except Exception:
-            pass
+            _logger.exception(
+                "Failed to read 'web.base.url' from ir.config_parameter; falling back to request URL root."
+            )
         # Fallback to standard behavior
         return request.httprequest.url_root
 
