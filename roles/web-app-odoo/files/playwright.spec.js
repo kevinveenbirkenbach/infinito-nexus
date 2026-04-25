@@ -115,16 +115,6 @@ async function performOdooLogout(page, odooBaseUrl) {
   await page.waitForTimeout(2_000);
 }
 
-// Check if we're on the login page (logged out state)
-async function isOnOdooLoginPage(locator) {
-  try {
-    const loginForm = locator.locator(".oe_login_form, form[action='/web/login']");
-    return await loginForm.first().isVisible().catch(() => false);
-  } catch {
-    return false;
-  }
-}
-
 // Wait for frame URL to contain a specific string
 async function waitForFrameUrl(iframeLocator, matcher, timeout, errorMessage) {
   await expect

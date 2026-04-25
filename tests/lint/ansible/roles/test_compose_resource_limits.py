@@ -73,7 +73,9 @@ def _find_service_line(config_path: Path, service_name: str) -> int:
             if pattern.match(raw):
                 return i
     except OSError:
-        pass
+        # Best-effort lookup only: if the file can't be read, keep linting and
+        # point the annotation at line 1 as a safe fallback.
+        return 1
     return 1
 
 
