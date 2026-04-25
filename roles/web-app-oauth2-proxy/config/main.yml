@@ -1,5 +1,3 @@
-configuration_file: "oauth2-proxy-keycloak.cfg" # Needs to be set true in the roles which use it
-allowed_roles:      "admin"                     # Restrict it default to admin role. Use the vars/main.yml to open the specific role for other groups  
 server:
   domains:
     canonical:
@@ -22,6 +20,15 @@ compose:
       image:    "quay.io/oauth2-proxy/oauth2-proxy"
       version:  "latest"
       min_storage: "1GB"
+      # Internal listen port inside the oauth2-proxy container.
+      # Single SPOT consumed by container.yml.j2 (right side of the port
+      # mapping) AND oauth2-proxy-keycloak.cfg.j2 (`http_address`); both
+      # MUST stay in sync, so they read this value via lookup('config').
+      port:     4180
+      # Filename of the rendered oauth2-proxy config inside the role's
+      # docker volume directory. Consumed by tasks/main.yml (template
+      # destination) and container.yml.j2 (volume mount source).
+      configuration_file: "oauth2-proxy-keycloak.cfg"
     # noqa: email
     email:
       enabled: false
