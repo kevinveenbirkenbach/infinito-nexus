@@ -1,11 +1,6 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# Mark this shell as a make-driven deploy run so MODE_CI flips to true
-# inside Ansible (requirement 006).
-# shellcheck source=scripts/meta/env/ci.sh
-source "scripts/meta/env/ci.sh"
-
 # Reuse-kept deploy for a single app inside the running infinito container.
 # Expects (ALL required):
 #   APPS               e.g. web-app-nextcloud
@@ -55,10 +50,6 @@ echo "inventory_dir=${INVENTORY_DIR}"
 
 docker exec \
 	-e SERVICES_DISABLED="${SERVICES_DISABLED:-}" \
-	-e INFINITO_MAKE_DEPLOY="${INFINITO_MAKE_DEPLOY:-}" \
-	-e INFINITO_SKIP_E2E="${INFINITO_SKIP_E2E:-}" \
-	-e GITHUB_ACTIONS="${GITHUB_ACTIONS:-}" \
-	-e ACT="${ACT:-}" \
 	-e INVENTORY_FILE="${INVENTORY_FILE}" \
 	-e APPS="${APPS}" \
 	-e DEBUG="${DEBUG}" \

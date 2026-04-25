@@ -1,5 +1,22 @@
 # 006 - Service-gated Playwright tests
 
+## Update — MODE_CI retired
+
+The `MODE_CI` flag introduced by this requirement was later retired in
+favour of a direct `RUNTIME` check. The Playwright include in
+[tasks/stages/02_server.yml](../../tasks/stages/02_server.yml) now
+gates on `RUNTIME in ['dev', 'act', 'github']` (see
+[cli/meta/runtime/__init__.py](../../cli/meta/runtime/__init__.py) for
+how `RUNTIME` is detected and where it is baked into the inventory).
+With that change the helper file `scripts/meta/env/ci.sh` and the
+`INFINITO_MAKE_DEPLOY` / `INFINITO_SKIP_E2E` env-var plumbing were
+removed: `make deploy-*` already bakes `RUNTIME=dev` into the
+inventory at init time, CI runners detect `RUNTIME=act|github` from
+their canonical env markers, and bare `ansible-playbook` from a
+production shell stays at the default `RUNTIME=host` (no E2E). The
+remainder of this document describes the historical MODE_CI design
+for reference.
+
 ## User Story
 
 As a contributor who runs `make deploy-*` with a subset of shared
@@ -194,7 +211,7 @@ accidental proxy with an explicit intent variable.
   - The env var `INFINITO_MAKE_DEPLOY` is set to a truthy value. Each
     deploy entry-point script under
     [scripts/tests/deploy/local/deploy/](../../scripts/tests/deploy/local/deploy/)
-    sources [scripts/meta/env/ci.sh](../../scripts/meta/env/ci.sh)
+    sources `scripts/meta/env/ci.sh` (since deleted)
     at startup, which exports the marker. This makes `make`-driven
     local deploys (which call those entry-point scripts) count as
     the "intentionally CI-like" case without the Makefile having to
@@ -214,7 +231,7 @@ accidental proxy with an explicit intent variable.
   semantic intent was CI.
 - [x] The export needed to flip `MODE_CI` to `true` MUST live in a
   single SPOT under
-  [scripts/meta/env/ci.sh](../../scripts/meta/env/ci.sh):
+  `scripts/meta/env/ci.sh` (since deleted):
 
   ```bash
   : "${INFINITO_MAKE_DEPLOY:=1}"
