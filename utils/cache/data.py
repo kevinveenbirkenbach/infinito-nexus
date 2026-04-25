@@ -635,18 +635,27 @@ def _render_with_templar(
 def _build_role_base_config(
     role_dir: Path,
     roles_dir: Path,
-    gid_lookup: ApplicationGidLookup,
 ) -> dict[str, Any]:
     """Return the post-augmentation `config/main.yml` payload for a
     role: `group_id` resolved, `users` references rewritten to
     `lookup('users', ...)`. Empty config collapses to `{}` (no
     overrides applied)."""
+    # Pure-Python GID resolver — does NOT pull ansible. The previous
+    # `ApplicationGidLookup().run([...])` call dragged
+    # `ansible.plugins.lookup.LookupBase` into this code path and broke
+    # `cli.deploy.development init` on the GitHub Actions runner host
+    # (CI run 24935979190) where the runner Python ships without
+    # ansible. The split lives in plugins/lookup/application_gid.py:
+    # `compute_application_gid` is the pure helper, `LookupModule` is
+    # the ansible-facing wrapper.
+    from plugins.lookup.application_gid import compute_application_gid
+
     application_id = role_dir.name
     config_data = _load_yaml_mapping(role_dir / "config" / "main.yml")
     if not config_data:
         return {}
 
-    group_id = gid_lookup.run([application_id], roles_dir=str(roles_dir))[0]
+    group_id = compute_application_gid(application_id, str(roles_dir))
     config_data["group_id"] = group_id
 
     users_meta = _load_yaml_mapping(role_dir / "users" / "main.yml")
@@ -669,18 +678,12 @@ def _build_variants(roles_dir: Path) -> dict[str, list[Any]]:
     role keeps its pre-variant behaviour. The single-variant case is
     equivalent to the legacy `_build_application_defaults` output.
     """
-    # Lazy import: `ApplicationGidLookup` extends `ansible.plugins.lookup.
-    # LookupBase`. See the module-level note on why this stays out of the
-    # top-of-file import block.
-    from plugins.lookup.application_gid import LookupModule as ApplicationGidLookup
-
-    gid_lookup = ApplicationGidLookup()
     variants: dict[str, list[Any]] = {}
 
     for config_file in sorted(roles_dir.glob("*/config/main.yml")):
         role_dir = config_file.parents[1]
         application_id = role_dir.name
-        base_config = _build_role_base_config(role_dir, roles_dir, gid_lookup)
+        base_config = _build_role_base_config(role_dir, roles_dir)
         meta_path = role_dir / "meta" / "variants.yml"
         override_list = _load_yaml_variant_list(meta_path)
         role_variants: list[Any] = []
