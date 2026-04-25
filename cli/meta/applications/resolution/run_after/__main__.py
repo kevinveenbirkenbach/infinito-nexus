@@ -15,7 +15,7 @@ import argparse
 from pathlib import Path
 from typing import Dict, List, Set
 
-import yaml
+from utils.yaml_cache import load_yaml
 
 
 class RunAfterResolutionError(RuntimeError):
@@ -44,7 +44,7 @@ def load_run_after(role_name: str) -> List[str]:
         return []
 
     try:
-        data = yaml.safe_load(meta.read_text(encoding="utf-8")) or {}
+        data = load_yaml(meta)
     except Exception as exc:
         raise RunAfterResolutionError(f"Failed to parse {meta}: {exc}") from exc
 

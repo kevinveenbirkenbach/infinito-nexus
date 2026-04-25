@@ -31,11 +31,39 @@ import yaml
 
 
 _MISSING = object()
-_CACHE: Dict[str, Dict[str, Any]] = {}
+_CACHE: Dict[str, Any] = {}
 
 
 def _key(path) -> str:
     return str(Path(path).resolve())
+
+
+def _load_raw(path, *, default_if_missing: Any) -> Any:
+    """Cached parse without root-shape validation.
+
+    Returns whatever `yaml.safe_load` produces (dict, list, scalar,
+    None coerced to `{}` for empty files). Callers wrap this with
+    their own validation.
+    """
+    key = _key(path)
+    if key in _CACHE:
+        return _CACHE[key]
+
+    p = Path(path)
+    if not p.exists():
+        if default_if_missing is _MISSING:
+            raise FileNotFoundError(p)
+        # Do NOT cache the synthetic default: a later `dump_yaml` may
+        # create the file, and we want the next read to pick the real
+        # content up. Caching the empty default here would mask that.
+        return default_if_missing
+
+    with p.open("r", encoding="utf-8") as f:
+        data = yaml.safe_load(f)
+    if data is None:
+        data = {}
+    _CACHE[key] = data
+    return data
 
 
 def load_yaml(path, *, default_if_missing: Any = _MISSING) -> Dict[str, Any]:
@@ -48,31 +76,26 @@ def load_yaml(path, *, default_if_missing: Any = _MISSING) -> Dict[str, Any]:
       does not exist, mirroring the historical
       `cli.create.inventory.yaml_io.load_yaml` behaviour.
 
-    Raises `ValueError` when the YAML root is not a mapping; callers
-    that need a domain-specific error wrap this lookup.
+    Raises `ValueError` when the YAML root is not a mapping; use
+    `load_yaml_any` for files whose root is a list or scalar.
     """
-    key = _key(path)
-    cached = _CACHE.get(key)
-    if cached is not None:
-        return cached
-
-    p = Path(path)
-    if not p.exists():
-        if default_if_missing is _MISSING:
-            raise FileNotFoundError(p)
-        # Do NOT cache the synthetic default: a later `dump_yaml` may
-        # create the file, and we want the next read to pick the real
-        # content up. Caching the empty default here would mask that.
-        return default_if_missing
-
-    with p.open("r", encoding="utf-8") as f:
-        data = yaml.safe_load(f) or {}
+    data = _load_raw(path, default_if_missing=default_if_missing)
     if not isinstance(data, dict):
         raise ValueError(
-            f"Expected a YAML mapping at top-level in {p}, got {type(data).__name__}"
+            f"Expected a YAML mapping at top-level in {path}, got {type(data).__name__}"
         )
-    _CACHE[key] = data
     return data
+
+
+def load_yaml_any(path, *, default_if_missing: Any = _MISSING) -> Any:
+    """Memoised YAML load that accepts any root shape (dict, list,
+    scalar). Use this for files where the root is not a mapping (e.g.
+    Ansible task lists, the root list in `meta/variants.yml`).
+
+    Empty files surface as `{}` (matching `yaml.safe_load(...) or {}`
+    semantics that most call sites already rely on).
+    """
+    return _load_raw(path, default_if_missing=default_if_missing)
 
 
 def dump_yaml(path, data: Mapping[str, Any]) -> None:

@@ -3,7 +3,7 @@ from __future__ import annotations
 from pathlib import Path
 from typing import Any, Dict, Iterable, List, Optional, Set
 
-import yaml
+from utils.yaml_cache import load_yaml
 
 from .errors import ServicesResolutionError
 from utils.service_registry import (
@@ -92,7 +92,7 @@ class ServicesResolver:
         if not cfg_path.exists():
             return {}
         try:
-            return yaml.safe_load(cfg_path.read_text(encoding="utf-8")) or {}
+            return load_yaml(cfg_path)
         except Exception as exc:
             raise ServicesResolutionError(f"Failed to parse {cfg_path}: {exc}") from exc
 

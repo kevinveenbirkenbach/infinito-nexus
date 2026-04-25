@@ -1,12 +1,14 @@
 #!/usr/bin/env python3
 import os
 import argparse
-import yaml
 import json
 import re
 from typing import List, Dict, Any, Set
 
+import yaml  # for safe_dump only; reads go through utils.yaml_cache
+
 from utils.roles.dependency_resolver import RoleDependencyResolver
+from utils.yaml_cache import load_yaml, load_yaml_any
 
 # Regex used to ignore Jinja expressions inside include/import statements
 JINJA_PATTERN = re.compile(r'{{.*}}')
@@ -60,8 +62,7 @@ def load_meta(path: str) -> Dict[str, Any]:
         - run_after
         - dependencies
     """
-    with open(path, "r") as f:
-        data = yaml.safe_load(f) or {}
+    data = load_yaml(path)
 
     galaxy_info = data.get("galaxy_info", {}) or {}
     return {
@@ -76,8 +77,10 @@ def load_tasks(path: str, dep_type: str) -> List[str]:
     Parse include_tasks/import_tasks from tasks/main.yml.
     Only accepts simple, non-Jinja names.
     """
-    with open(path, "r") as f:
-        data = yaml.safe_load(f) or []
+    # `tasks/main.yml` root is a list, not a mapping.
+    data = load_yaml_any(path)
+    if not isinstance(data, list):
+        data = []
 
     roles: List[str] = []
 

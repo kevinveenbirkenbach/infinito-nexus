@@ -11,6 +11,7 @@ from utils.yaml_cache import (
     dump_yaml,
     invalidate,
     load_yaml,
+    load_yaml_any,
 )
 
 
@@ -75,6 +76,45 @@ class TestLoadYaml(unittest.TestCase):
         path.write_text("real: yes\n", encoding="utf-8")
         second = load_yaml(path)
         self.assertEqual(second, {"real": True})
+
+
+class TestLoadYamlAny(unittest.TestCase):
+    def setUp(self) -> None:
+        _reset_cache_for_tests()
+        self._tmp = TemporaryDirectory()
+        self.addCleanup(self._tmp.cleanup)
+        self.tmp = Path(self._tmp.name)
+
+    def _write(self, name: str, content: str) -> Path:
+        path = self.tmp / name
+        path.write_text(content, encoding="utf-8")
+        return path
+
+    def test_list_root_returned_unchanged(self):
+        path = self._write("tasks.yml", "- name: a\n  debug:\n    msg: hi\n")
+        result = load_yaml_any(path)
+        self.assertEqual(result, [{"name": "a", "debug": {"msg": "hi"}}])
+
+    def test_dict_root_returned_unchanged(self):
+        path = self._write("config.yml", "foo: 1\n")
+        self.assertEqual(load_yaml_any(path), {"foo": 1})
+
+    def test_empty_file_returns_empty_dict(self):
+        path = self._write("empty.yml", "")
+        self.assertEqual(load_yaml_any(path), {})
+
+    def test_load_yaml_any_and_load_yaml_share_cache(self):
+        # The two entry points MUST hit the same cache so a hot path
+        # that mixes them does not pay the parse cost twice.
+        path = self._write("config.yml", "foo: 1\n")
+        first = load_yaml_any(path)
+        second = load_yaml(path)
+        self.assertIs(first, second)
+
+    def test_load_yaml_strict_rejects_list_root(self):
+        path = self._write("tasks.yml", "- a\n- b\n")
+        with self.assertRaisesRegex(ValueError, "mapping at top-level"):
+            load_yaml(path)
 
 
 class TestDumpYaml(unittest.TestCase):
