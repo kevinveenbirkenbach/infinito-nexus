@@ -36,7 +36,6 @@ echo
 # ---------------------------------------------------------------------------
 echo ">>> Starting development compose stack (no build)"
 "${PYTHON}" -m cli.deploy.development up \
-	--distro "${INFINITO_DISTRO}" \
 	--skip-entry-init
 
 # ---------------------------------------------------------------------------
@@ -104,7 +103,6 @@ echo
 echo ">>> Running entry/init + inventory + deploy inside infinito container via development exec"
 
 "${PYTHON}" -m cli.deploy.development exec \
-	--distro "${INFINITO_DISTRO}" \
 	--env "INVENTORY_DIR=${INVENTORY_DIR}" \
 	--env "INVENTORY_FILE=${INVENTORY_FILE}" \
 	--env "INVENTORY_VARS_FILE=${INVENTORY_VARS_FILE}" \

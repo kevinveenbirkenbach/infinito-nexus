@@ -23,13 +23,6 @@ def add_parser(sub: argparse._SubParsersAction) -> None:
         help="Create development inventory inside the infinito container.",
     )
     p.add_argument(
-        "--distro",
-        default=os.environ.get("INFINITO_DISTRO", "arch"),
-        choices=["arch", "debian", "ubuntu", "fedora", "centos"],
-        help="Target distro (compose env INFINITO_DISTRO).",
-    )
-
-    p.add_argument(
         "--inventory-dir",
         default=os.environ.get("INVENTORY_DIR"),
         required=os.environ.get("INVENTORY_DIR") is None,
@@ -95,7 +88,7 @@ def _env_variant() -> int | None:
 
 
 def handler(args: argparse.Namespace) -> int:
-    compose = make_compose(distro=args.distro)
+    compose = make_compose()
 
     if args.apps:
         include = resolve_deploy_ids_for_apps(compose, args.apps)

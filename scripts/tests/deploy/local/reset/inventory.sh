@@ -26,7 +26,6 @@ echo
 # 1) Bring up development stack (no build)
 echo ">>> Starting development compose stack (no build)"
 "${PYTHON}" -m cli.deploy.development up \
-	--distro "${INFINITO_DISTRO}" \
 	--skip-entry-init
 
 # 2) Discover apps on HOST (same as local/deploy/fresh-kept-all.sh)
@@ -74,7 +73,7 @@ echo
 echo ">>> Initializing inventory inside container"
 
 "${PYTHON}" -m cli.deploy.development exec \
-	--distro "${INFINITO_DISTRO}" -- \
+	-- \
 	bash -c "
     set -euo pipefail
     cd /opt/src/infinito

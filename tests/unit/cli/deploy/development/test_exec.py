@@ -131,12 +131,22 @@ class TestDevelopmentExec(unittest.TestCase):
         )
 
     def test_env_pair_without_equals_is_rejected(self):
-        with self.assertRaisesRegex(SystemExit, "expects KEY=VALUE"):
-            exec_cmd.handler(_args(cmd=["true"], env=["BARE"]))
+        compose = unittest.mock.Mock()
+        with unittest.mock.patch(
+            "cli.deploy.development.exec.make_compose",
+            return_value=compose,
+        ):
+            with self.assertRaisesRegex(SystemExit, "expects KEY=VALUE"):
+                exec_cmd.handler(_args(cmd=["true"], env=["BARE"]))
 
     def test_env_pair_with_empty_key_is_rejected(self):
-        with self.assertRaisesRegex(SystemExit, "KEY is empty"):
-            exec_cmd.handler(_args(cmd=["true"], env=["=value"]))
+        compose = unittest.mock.Mock()
+        with unittest.mock.patch(
+            "cli.deploy.development.exec.make_compose",
+            return_value=compose,
+        ):
+            with self.assertRaisesRegex(SystemExit, "KEY is empty"):
+                exec_cmd.handler(_args(cmd=["true"], env=["=value"]))
 
 
 if __name__ == "__main__":

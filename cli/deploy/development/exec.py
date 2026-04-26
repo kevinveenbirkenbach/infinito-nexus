@@ -9,12 +9,6 @@ from .common import make_compose
 def add_parser(sub: argparse._SubParsersAction) -> None:
     p = sub.add_parser("exec", help="Execute a command inside the infinito container.")
     p.add_argument(
-        "--distro",
-        default=os.environ.get("INFINITO_DISTRO", "arch"),
-        choices=["arch", "debian", "ubuntu", "fedora", "centos"],
-        help="Target distro (compose env INFINITO_DISTRO).",
-    )
-    p.add_argument(
         "--env",
         action="append",
         default=[],
@@ -48,7 +42,7 @@ def _parse_env_pairs(pairs: list[str]) -> dict[str, str]:
 
 
 def handler(args: argparse.Namespace) -> int:
-    compose = make_compose(distro=args.distro)
+    compose = make_compose()
 
     cmd = list(args.cmd or [])
     if cmd and cmd[0] == "--":

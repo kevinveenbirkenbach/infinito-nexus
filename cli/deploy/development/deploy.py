@@ -135,13 +135,6 @@ def add_parser(sub: argparse._SubParsersAction) -> None:
         "deploy", help="Run deploy inside the infinito container (requires inventory)."
     )
     p.add_argument(
-        "--distro",
-        default=os.environ.get("INFINITO_DISTRO", "arch"),
-        choices=["arch", "debian", "ubuntu", "fedora", "centos"],
-        help="Target distro (compose env INFINITO_DISTRO).",
-    )
-
-    p.add_argument(
         "--inventory-dir",
         default=os.environ.get("INVENTORY_DIR"),
         required=os.environ.get("INVENTORY_DIR") is None,
@@ -205,7 +198,7 @@ def add_parser(sub: argparse._SubParsersAction) -> None:
 
 
 def handler(args: argparse.Namespace) -> int:
-    compose = make_compose(distro=args.distro)
+    compose = make_compose()
 
     if args.apps:
         deploy_ids = resolve_deploy_ids_for_apps(compose, args.apps)
@@ -252,9 +245,7 @@ def handler(args: argparse.Namespace) -> int:
     except ValueError as exc:
         raise SystemExit(f"--variant: {exc}")
 
-    container_name = os.environ.get(
-        "INFINITO_CONTAINER", f"infinito_nexus_{args.distro}"
-    )
+    container_name = f"infinito_nexus_{compose.distro}"
 
     rc = 0
     previous_round_variants: dict[str, int] = {}

@@ -120,7 +120,7 @@ system-purge:
 
 # Restart the development stack.
 restart:
-	@"$${PYTHON}" -m cli.deploy.development restart --distro "$${INFINITO_DISTRO}"
+	@"$${PYTHON}" -m cli.deploy.development restart
 
 # Refresh the running development stack only when it already exists.
 refresh:

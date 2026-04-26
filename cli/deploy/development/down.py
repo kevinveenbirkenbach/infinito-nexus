@@ -6,6 +6,8 @@ import shutil
 import subprocess
 from pathlib import Path
 
+from .common import resolve_distro
+
 
 def _repo_root_from_here() -> Path:
     # Derive the repository root relative to this file.
@@ -74,15 +76,9 @@ def down_stack(*, repo_root: Path, distro: str) -> None:
 
 def add_parser(sub: argparse._SubParsersAction) -> None:
     p = sub.add_parser("down", help="Stop compose stack and remove volumes.")
-    p.add_argument(
-        "--distro",
-        default=os.environ.get("INFINITO_DISTRO", "arch"),
-        choices=["arch", "debian", "ubuntu", "fedora", "centos"],
-        help="Target distro (compose env INFINITO_DISTRO).",
-    )
     p.set_defaults(_handler=handler)
 
 
 def handler(args: argparse.Namespace) -> int:
-    down_stack(repo_root=_repo_root_from_here(), distro=args.distro)
+    down_stack(repo_root=_repo_root_from_here(), distro=resolve_distro())
     return 0

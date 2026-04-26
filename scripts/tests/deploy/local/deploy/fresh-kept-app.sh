@@ -97,24 +97,20 @@ echo
 
 echo ">>> Ensuring development stack is up (when-down)"
 "${PYTHON}" -m cli.deploy.development up \
-	--distro "${INFINITO_DISTRO}" \
 	--when-down
 
 echo ">>> Running entry.sh bootstrap inside container"
 "${PYTHON}" -m cli.deploy.development exec \
-	--distro "${INFINITO_DISTRO}" \
 	-- bash /opt/src/infinito/scripts/tests/deploy/local/utils/entry-bootstrap.sh
 
 echo ">>> Creating inventory for app '${APPS}'"
 "${PYTHON}" -m cli.deploy.development init \
-	--distro "${INFINITO_DISTRO}" \
 	--apps "${APPS}" \
 	--inventory-dir "${INVENTORY_DIR}" \
 	--vars '{"ASYNC_ENABLED": false}'
 
 deploy_cmd=(
 	"${PYTHON}" -m cli.deploy.development deploy
-	--distro "${INFINITO_DISTRO}"
 	--apps "${APPS}"
 	--inventory-dir "${INVENTORY_DIR}"
 )

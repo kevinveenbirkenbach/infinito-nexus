@@ -44,7 +44,6 @@ echo
 
 echo ">>> Ensuring stack is up for distro ${INFINITO_DISTRO}"
 "${PYTHON}" -m cli.deploy.development up \
-	--distro "${INFINITO_DISTRO}" \
 	--when-down
 
 echo ">>> Pre-cleanup shared entities (host docker context)"
@@ -55,11 +54,9 @@ APPS='matomo' \
 
 echo ">>> Running entry.sh inside container"
 "${PYTHON}" -m cli.deploy.development exec \
-	--distro "${INFINITO_DISTRO}" \
 	-- bash /opt/src/infinito/scripts/tests/deploy/local/utils/entry-bootstrap.sh
 
 deploy_args=(
-	--distro "${INFINITO_DISTRO}"
 	--apps "${APPS}"
 	--inventory-dir "${INVENTORY_DIR}"
 	--debug
@@ -78,7 +75,6 @@ echo ">>> init inventory (ASYNC_ENABLED=false, RUNTIME=dev baked)"
 # `RUNTIME=host` into host_vars and the Playwright E2E gate
 # (RUNTIME in [dev, act, github]) would never fire.
 "${PYTHON}" -m cli.deploy.development init \
-	--distro "${INFINITO_DISTRO}" \
 	--apps "${APPS}" \
 	--inventory-dir "${INVENTORY_DIR}" \
 	--vars '{"ASYNC_ENABLED": false, "RUNTIME": "dev"}'

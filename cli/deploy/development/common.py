@@ -23,21 +23,41 @@ DEV_INVENTORY_VARS_FILE: str = os.environ.get(
 )
 
 
+VALID_DISTROS: tuple[str, ...] = ("arch", "debian", "ubuntu", "fedora", "centos")
+
+
 def repo_root_from_here() -> Path:
     # <repo>/cli/deploy/development/common.py -> parents[3] == <repo>
     return Path(__file__).resolve().parents[3]
 
 
-def ensure_distro_env(distro: str) -> None:
-    # Keep env consistent with compose wrapper and other scripts
-    os.environ["INFINITO_DISTRO"] = distro
+def resolve_distro() -> str:
+    """Return the current INFINITO_DISTRO. Single SPOT for the value.
+
+    The env var is the only input — all CLI subcommands rely on it
+    (callers source `scripts/meta/env/defaults.sh` before invocation).
+    Raises SystemExit when unset or invalid so a missing setup never
+    silently picks the wrong distro.
+    """
+    distro = os.environ.get("INFINITO_DISTRO", "").strip()
+    if not distro:
+        raise SystemExit(
+            "INFINITO_DISTRO is not set. Source scripts/meta/env/defaults.sh "
+            "or export INFINITO_DISTRO=<arch|debian|ubuntu|fedora|centos> "
+            "before invoking cli.deploy.development."
+        )
+    if distro not in VALID_DISTROS:
+        raise SystemExit(
+            f"INFINITO_DISTRO={distro!r} is not a valid distro. "
+            f"Valid: {', '.join(VALID_DISTROS)}."
+        )
+    return distro
 
 
-def make_compose(*, distro: str) -> Compose:
+def make_compose() -> Compose:
     from .compose import Compose
 
-    ensure_distro_env(distro)
-    return Compose(repo_root=repo_root_from_here(), distro=distro)
+    return Compose(repo_root=repo_root_from_here(), distro=resolve_distro())
 
 
 def resolve_deploy_ids_for_app(compose: Compose, app_id: str) -> list[str]:

@@ -83,7 +83,7 @@ cleanup() {
 		"${_playwright_host_dir}" 2>/dev/null || true
 
 	echo ">>> Removing stack for distro ${INFINITO_DISTRO} (fresh start for next distro)"
-	"${PYTHON}" -m cli.deploy.development down --distro "${INFINITO_DISTRO}" || true
+	"${PYTHON}" -m cli.deploy.development down || true
 
 	echo ">>> HARD cleanup (containers/volumes/networks/images/build-cache)"
 	echo ">>> Docker disk usage before HARD cleanup"
@@ -148,11 +148,9 @@ trap cleanup EXIT
 echo ">>> Ensuring stack is up for distro ${INFINITO_DISTRO}"
 # Always reconcile the stack to the requested distro.
 # This avoids reusing a pre-started stack with a different INFINITO_DISTRO.
-"${PYTHON}" -m cli.deploy.development up \
-	--distro "${INFINITO_DISTRO}"
+"${PYTHON}" -m cli.deploy.development up
 
 deploy_args=(
-	--distro "${INFINITO_DISTRO}"
 	--apps "${APPS}"
 	--inventory-dir "${INVENTORY_DIR}"
 	--debug
@@ -165,7 +163,6 @@ echo ">>> END STATE BEFORE DEPLOY"
 
 echo ">>> init inventory (ASYNC_ENABLED=false baked into host_vars)"
 "${PYTHON}" -m cli.deploy.development init \
-	--distro "${INFINITO_DISTRO}" \
 	--apps "${APPS}" \
 	--inventory-dir "${INVENTORY_DIR}" \
 	--vars '{"ASYNC_ENABLED": false}'
