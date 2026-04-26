@@ -37,7 +37,7 @@ compose:
       shared: true
     suitecrm:
       image:            "php"
-      version:          "8.2-apache"
+      version:          "8.5-apache"
       # Git tag from https://github.com/SuiteCRM/SuiteCRM-Core/releases
       app_version:      "8.9.1"
       name:             "suitecrm"
