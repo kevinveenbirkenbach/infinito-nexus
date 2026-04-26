@@ -23,7 +23,7 @@ compose:
       shared: true
     application:
       image:      "python"
-      version:    "3.12-bookworm"
+      version:    "3.14-bookworm"
       name:       "web-app-bridgy-fed"
       repository: "https://github.com/snarfed/bridgy-fed.git"
       branch:     "main"
