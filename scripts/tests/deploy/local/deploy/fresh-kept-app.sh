@@ -68,7 +68,8 @@ if [[ $# -gt 0 ]]; then
 	exit 2
 fi
 
-INFINITO_DISTRO="${INFINITO_DISTRO:-debian}"
+# INFINITO_DISTRO is set by scripts/meta/env/defaults.sh (single SPOT,
+# defaults to debian) — no local fallback here.
 INVENTORY_DIR="${INVENTORY_DIR:-}"
 LIMIT_HOST="${LIMIT_HOST:-localhost}"
 

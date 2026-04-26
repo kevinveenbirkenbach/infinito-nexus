@@ -54,10 +54,34 @@ def resolve_distro() -> str:
     return distro
 
 
+def resolve_container() -> str:
+    """Return the current INFINITO_CONTAINER. Single SPOT for the value.
+
+    The env var is kept in lock-step with INFINITO_DISTRO by
+    `scripts/meta/env/defaults.sh` (always-derived block outside its
+    load-once guard); callers that change INFINITO_DISTRO MUST re-source
+    defaults.sh so this stays consistent. Raises SystemExit when unset
+    so a missing setup never silently exec's the wrong container.
+    """
+    container = os.environ.get("INFINITO_CONTAINER", "").strip()
+    if not container:
+        raise SystemExit(
+            "INFINITO_CONTAINER is not set. Source scripts/meta/env/defaults.sh "
+            "before invoking cli.deploy.development."
+        )
+    return container
+
+
 def make_compose() -> Compose:
     from .compose import Compose
 
-    return Compose(repo_root=repo_root_from_here(), distro=resolve_distro())
+    distro = resolve_distro()
+    # Early-fail guard so a missing scripts/meta/env/defaults.sh source
+    # surfaces here instead of as a confusing
+    # `compose.yml: required variable INFINITO_CONTAINER missing` later.
+    # The two env vars must travel together; defaults.sh keeps them in sync.
+    resolve_container()
+    return Compose(repo_root=repo_root_from_here(), distro=distro)
 
 
 def resolve_deploy_ids_for_app(compose: Compose, app_id: str) -> list[str]:

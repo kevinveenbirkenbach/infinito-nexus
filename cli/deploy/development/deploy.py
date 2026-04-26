@@ -11,7 +11,12 @@ from cli.create.inventory.services_disabler import (
     parse_services_disabled,
 )
 
-from .common import make_compose, repo_root_from_here, resolve_deploy_ids_for_apps
+from .common import (
+    make_compose,
+    repo_root_from_here,
+    resolve_container,
+    resolve_deploy_ids_for_apps,
+)
 from .inventory import filter_plan_to_variant, plan_dev_inventory_matrix
 
 
@@ -245,7 +250,10 @@ def handler(args: argparse.Namespace) -> int:
     except ValueError as exc:
         raise SystemExit(f"--variant: {exc}")
 
-    container_name = f"infinito_nexus_{compose.distro}"
+    # INFINITO_CONTAINER is the single SPOT — defaults.sh keeps it in
+    # lock-step with INFINITO_DISTRO across matrix iterations. Read it
+    # strictly here; no fallback derivation, no env-vs-arg ambiguity.
+    container_name = resolve_container()
 
     rc = 0
     previous_round_variants: dict[str, int] = {}

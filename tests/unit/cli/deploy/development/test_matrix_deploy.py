@@ -14,7 +14,20 @@ import unittest
 from pathlib import Path
 from unittest.mock import MagicMock, patch
 
-from cli.deploy.development.deploy import handler
+# deploy.handler reads the running container name strictly via
+# cli.deploy.development.common.resolve_container (which is sourced from
+# scripts/meta/env/defaults.sh — the single SPOT for the formula). Patch
+# that resolver for the whole test module instead of duplicating the
+# formula or hard-coding INFINITO_CONTAINER in os.environ. The tests
+# below do not assert on the returned value; the sentinel is purely an
+# opaque fixture string.
+_RESOLVE_CONTAINER_PATCHER = patch(
+    "cli.deploy.development.deploy.resolve_container",
+    return_value="<unit-test fixture>",
+)
+_RESOLVE_CONTAINER_PATCHER.start()
+
+from cli.deploy.development.deploy import handler  # noqa: E402
 
 
 def _args(
@@ -23,8 +36,10 @@ def _args(
     variant: int | None = None,
     full_cycle: bool = False,
 ) -> argparse.Namespace:
+    # `distro` is intentionally absent: deploy.handler no longer consumes
+    # it (the --distro arg was retired in favour of resolve_distro() reading
+    # INFINITO_DISTRO env strictly).
     return argparse.Namespace(
-        distro="arch",
         inventory_dir="/srv/inv",
         apps=None,
         id=apps,

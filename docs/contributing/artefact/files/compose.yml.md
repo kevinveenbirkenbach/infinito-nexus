@@ -31,7 +31,7 @@ All variables consumed by [compose.yml](../../../../compose.yml). Variables with
 |--------------------------|-----------------|-------------------------------------------------------------------------|
 | `INFINITO_IMAGE`         | none (required) | Image reference used by the `infinito` service.                         |
 | `INFINITO_PULL_POLICY`   | `never`         | Compose `pull_policy`. Keep `never` for local builds, `always` for CI.  |
-| `INFINITO_DISTRO`        | `debian`        | Distro suffix appended to the `container_name`.                         |
+| `INFINITO_CONTAINER`     | none (required) | Used directly as `container_name`. SPOT-derived from `INFINITO_DISTRO` by [defaults.sh](../../../../scripts/meta/env/defaults.sh); compose.yml reads it strictly via `${INFINITO_CONTAINER:?...}`. |
 | `INFINITO_COMPILE`       | `1`             | Passed into the container; toggles in-container compilation steps.      |
 | `NIX_CONFIG`             | none            | Build-arg forwarded to the Dockerfile for Nix configuration.            |
 

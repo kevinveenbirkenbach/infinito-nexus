@@ -65,7 +65,12 @@ services:
     tty: true
     stdin_open: true
 
-    container_name: infinito_nexus_${INFINITO_DISTRO:-debian}
+    # INFINITO_CONTAINER is the single SPOT for the container name; it is
+    # exported by scripts/meta/env/defaults.sh (always-derived from
+    # INFINITO_DISTRO outside its load-once guard). Any caller that runs
+    # `docker compose ...` against this file MUST source defaults.sh
+    # beforehand — no local fallback derivation here.
+    container_name: ${INFINITO_CONTAINER:?Source scripts/meta/env/defaults.sh before running docker compose}
     restart: "no"
     profiles: ["ci"]
     # Resource caps for reproducing OOM/OOM-kill scenarios locally (e.g. issue #162

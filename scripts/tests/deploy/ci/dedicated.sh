@@ -75,11 +75,10 @@ cleanup() {
 
 	# Copy Playwright reports from the infinito container to the runner filesystem
 	# BEFORE containers/volumes are destroyed, so GitHub Actions can upload them as artifacts.
-	local _container="infinito_nexus_${INFINITO_DISTRO}"
 	local _playwright_host_dir="/tmp/playwright-artifacts/${INFINITO_DISTRO}/${APPS}"
 	mkdir -p "${_playwright_host_dir}"
-	echo ">>> Copying Playwright artifacts from ${_container} to ${_playwright_host_dir}"
-	docker cp "${_container}:/var/lib/infinito/logs/test-e2e-playwright/." \
+	echo ">>> Copying Playwright artifacts from ${INFINITO_CONTAINER} to ${_playwright_host_dir}"
+	docker cp "${INFINITO_CONTAINER}:/var/lib/infinito/logs/test-e2e-playwright/." \
 		"${_playwright_host_dir}" 2>/dev/null || true
 
 	echo ">>> Removing stack for distro ${INFINITO_DISTRO} (fresh start for next distro)"

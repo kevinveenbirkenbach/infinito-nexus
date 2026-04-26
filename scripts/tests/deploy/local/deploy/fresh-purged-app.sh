@@ -47,10 +47,7 @@ echo ">>> Ensuring stack is up for distro ${INFINITO_DISTRO}"
 	--when-down
 
 echo ">>> Pre-cleanup shared entities (host docker context)"
-target_container="infinito_nexus_${INFINITO_DISTRO}"
-APPS='matomo' \
-	INFINITO_CONTAINER="${INFINITO_CONTAINER:-${target_container}}" \
-	scripts/tests/deploy/local/purge/entity.sh
+APPS='matomo' scripts/tests/deploy/local/purge/entity.sh
 
 echo ">>> Running entry.sh inside container"
 "${PYTHON}" -m cli.deploy.development exec \
