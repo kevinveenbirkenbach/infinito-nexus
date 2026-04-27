@@ -24,21 +24,23 @@ Galaxy schema does not define.
 Caching
 =======
 
-YAML parsing is the bottleneck on a 250+ role tree, so the parser is wrapped in
-``functools.lru_cache`` keyed by path; file contents come through
-``tests.utils.fs.read_text`` which is itself cached process-wide.
+YAML parsing is the bottleneck on a 250+ role tree. Parses go through
+the shared process-wide ``utils.cache.yaml.load_yaml_any`` cache so
+multiple lint tests that touch the same ``meta/main.yml`` file pay one
+parse.
 """
 
 from __future__ import annotations
 
 import unittest
-from functools import lru_cache
 from pathlib import Path
 from typing import Any
 
-import yaml
+import yaml as _yaml
 
-from tests.utils.fs import PROJECT_ROOT, read_text
+from utils.annotations.message import warning
+from utils.cache.files import PROJECT_ROOT
+from utils.cache.yaml import load_yaml_any
 
 
 ROLES_DIR = PROJECT_ROOT / "roles"
@@ -74,33 +76,29 @@ _ALLOWED_GALAXY_INFO: frozenset[str] = frozenset(
     }
 )
 
-# Galaxy minimum-required galaxy_info fields. A role missing any of these is
-# not Galaxy-publishable.
+# Hard-required galaxy_info fields. Missing any of these fails the lint.
+# Kept tight on purpose: these three carry documentation value for every
+# internal role.
 _REQUIRED_GALAXY_INFO: frozenset[str] = frozenset(
     {
         "author",
         "description",
         "license",
+    }
+)
+
+# Soft-recommended galaxy_info fields. Required by Ansible Galaxy when
+# *publishing* a role, but Infinito.Nexus does not publish to Galaxy, so
+# missing these is reported as a GitHub Actions ::warning:: annotation
+# (via utils.annotations.message) instead of a hard test failure. Roles
+# that DO carry the field are still validated for shape via
+# `_validate_platforms` / the type checks below.
+_RECOMMENDED_GALAXY_INFO: frozenset[str] = frozenset(
+    {
         "min_ansible_version",
         "platforms",
     }
 )
-
-
-@lru_cache(maxsize=2048)
-def _load_meta_main(path: str) -> Any:
-    """Parse a meta/main.yml file once per process."""
-    try:
-        return yaml.safe_load(read_text(path))
-    except yaml.YAMLError as exc:
-        return _ParseError(str(exc))
-
-
-class _ParseError:
-    __slots__ = ("message",)
-
-    def __init__(self, message: str):
-        self.message = message
 
 
 def _meta_main_paths() -> list[Path]:
@@ -160,10 +158,11 @@ def _validate_dependencies(deps: Any) -> list[str]:
 
 def _validate_meta_main(path: Path) -> list[str]:
     """Return a list of human-readable problems for one meta/main.yml file."""
-    parsed = _load_meta_main(str(path))
-    if isinstance(parsed, _ParseError):
-        return [f"YAML parse error: {parsed.message}"]
-    if parsed is None:
+    try:
+        parsed = load_yaml_any(str(path), default_if_missing={})
+    except _yaml.YAMLError as exc:
+        return [f"YAML parse error: {exc}"]
+    if parsed in (None, {}):
         return ["file is empty (no galaxy_info block)"]
     if not isinstance(parsed, dict):
         return [f"top-level must be a mapping; got {type(parsed).__name__}"]
@@ -187,6 +186,16 @@ def _validate_meta_main(path: Path) -> list[str]:
     if missing_required:
         problems.append(
             "missing required galaxy_info field(s): " + ", ".join(missing_required)
+        )
+
+    missing_recommended = sorted(_RECOMMENDED_GALAXY_INFO - set(galaxy_info.keys()))
+    if missing_recommended:
+        rel_path = path.relative_to(PROJECT_ROOT)
+        warning(
+            "missing Galaxy-publishing recommended field(s): "
+            + ", ".join(missing_recommended),
+            title="meta/main.yml galaxy_info",
+            file=str(rel_path),
         )
 
     if "platforms" in galaxy_info:

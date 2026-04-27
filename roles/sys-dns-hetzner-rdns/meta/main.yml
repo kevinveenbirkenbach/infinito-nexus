@@ -16,6 +16,4 @@ galaxy_info:
     - ptr
     - mail
   issue_tracker_url: https://s.infinito.nexus/issues
-  logo:
-    class: fa-solid fa-server
 dependencies: []

@@ -32,5 +32,3 @@ galaxy_info:
     - infinito
     - logout
   issue_tracker_url: https://github.com/kevinveenbirkenbach/universal-logout/issues
-  logo:
-    class: fa fa-sign-out-alt

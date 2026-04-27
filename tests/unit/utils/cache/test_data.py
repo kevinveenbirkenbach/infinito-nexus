@@ -12,7 +12,6 @@ from utils.cache.base import (
     ROLES_DIR,
     _deep_merge,
     _fingerprint_mapping,
-    _load_yaml_mapping,
     _stable_variables_signature,
 )
 from utils.cache.users import (
@@ -29,31 +28,6 @@ from utils.cache.users import (
 def _write(path: Path, content: str) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(textwrap.dedent(content), encoding="utf-8")
-
-
-class TestLoadYamlMapping(unittest.TestCase):
-    def test_missing_file_returns_empty(self):
-        with tempfile.TemporaryDirectory() as tmp:
-            self.assertEqual(_load_yaml_mapping(Path(tmp) / "missing.yml"), {})
-
-    def test_empty_file_returns_empty(self):
-        with tempfile.TemporaryDirectory() as tmp:
-            path = Path(tmp) / "empty.yml"
-            path.write_text("", encoding="utf-8")
-            self.assertEqual(_load_yaml_mapping(path), {})
-
-    def test_non_mapping_raises(self):
-        with tempfile.TemporaryDirectory() as tmp:
-            path = Path(tmp) / "list.yml"
-            path.write_text("- a\n- b\n", encoding="utf-8")
-            with self.assertRaises(ValueError):
-                _load_yaml_mapping(path)
-
-    def test_mapping_returns_dict(self):
-        with tempfile.TemporaryDirectory() as tmp:
-            path = Path(tmp) / "ok.yml"
-            path.write_text("foo: 1\nbar: [1, 2]\n", encoding="utf-8")
-            self.assertEqual(_load_yaml_mapping(path), {"foo": 1, "bar": [1, 2]})
 
 
 class TestDeepMerge(unittest.TestCase):

@@ -14,8 +14,6 @@ galaxy_info:
     - editor
     - cli
   issue_tracker_url: https://s.infinito.nexus/issues
-  logo:
-    class: fab fa-vim
   min_ansible_version: '2.9'
   platforms:
     - name: Archlinux

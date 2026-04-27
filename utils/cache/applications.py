@@ -21,13 +21,13 @@ from .base import (
     _RENDER_GUARD,
     _cache_key,
     _deep_merge,
-    _load_yaml_mapping,
-    _load_yaml_variant_list,
     _render_with_templar,
     _resolve_override_mapping,
     _resolve_roles_dir,
     _stable_variables_signature,
 )
+from .yaml import load_yaml as _load_yaml_cached
+from .yaml import load_yaml_any as _load_yaml_any_cached
 
 
 _APPLICATIONS_DEFAULTS_CACHE: dict[str, dict[str, Any]] = {}
@@ -38,6 +38,12 @@ _MERGED_APPLICATIONS_CACHE: dict[tuple, dict[str, Any]] = {}
 # files. The file root IS the value of `applications.<app>.<topic>` — there
 # is NO wrapping key matching the filename.
 _META_TOPICS: tuple[str, ...] = ("server", "rbac", "services", "volumes")
+
+# `meta/info.yml` is descriptive role-level metadata (req-011). Loaded into
+# `applications.<role>.info` like the other meta files, but does NOT mark a
+# role as an application by itself — a metadata-only `info.yml` next to a
+# bare `meta/main.yml` is just documentation, not config.
+_META_INFO_TOPIC: str = "info"
 
 
 def _extract_default_credentials(creds_node: Any) -> dict[str, Any]:
@@ -109,6 +115,7 @@ def _build_role_base_config(
     `meta/rbac.yml`     → `rbac`
     `meta/services.yml` → `services`
     `meta/volumes.yml`  → `volumes`
+    `meta/info.yml`     → `info`     (descriptive role-level metadata per req-011)
     `meta/schema.yml`   → `credentials` (only the literal `default:` values;
                          non-default credentials are filled by the
                          inventory's apply_schema step and merged in by the
@@ -132,11 +139,17 @@ def _build_role_base_config(
     meta_dir = role_dir / "meta"
 
     for topic in _META_TOPICS:
-        topic_data = _load_yaml_mapping(meta_dir / f"{topic}.yml")
+        topic_data = _load_yaml_cached(meta_dir / f"{topic}.yml", default_if_missing={})
         if topic_data:
             config_data[topic] = topic_data
 
-    schema_data = _load_yaml_mapping(meta_dir / "schema.yml")
+    info_data = _load_yaml_cached(
+        meta_dir / f"{_META_INFO_TOPIC}.yml", default_if_missing={}
+    )
+    if info_data:
+        config_data[_META_INFO_TOPIC] = info_data
+
+    schema_data = _load_yaml_cached(meta_dir / "schema.yml", default_if_missing={})
     if schema_data:
         creds_defaults = _extract_default_credentials(
             schema_data.get("credentials") or {}
@@ -144,7 +157,7 @@ def _build_role_base_config(
         if creds_defaults:
             config_data["credentials"] = creds_defaults
 
-    users_meta = _load_yaml_mapping(meta_dir / "users.yml")
+    users_meta = _load_yaml_cached(meta_dir / "users.yml", default_if_missing={})
     if isinstance(users_meta, dict) and users_meta:
         config_data["users"] = {
             user_key: "{{ lookup('users', " + repr(user_key) + ") }}"
@@ -165,6 +178,41 @@ def _iter_application_role_dirs(roles_dir: Path):
             yield child
 
 
+def _load_variants_overrides(path: Path) -> list[dict[str, Any]]:
+    """Load a `roles/<role>/meta/variants.yml` variant list through the
+    shared YAML cache.
+
+    Each entry is a deep-merge override for the role's
+    `meta/services.yml`; ``null`` and ``{}`` are valid no-op entries.
+    Missing file or empty list collapses to a single empty variant so
+    the role keeps its pre-variant behaviour.
+    """
+    if not path.exists():
+        return [{}]
+
+    raw = _load_yaml_any_cached(path)
+    if raw in (None, {}):
+        return [{}]
+    if not isinstance(raw, list):
+        raise ValueError(
+            f"{path} must contain a YAML list of override mappings (or be empty)."
+        )
+    if not raw:
+        return [{}]
+
+    normalised: list[dict[str, Any]] = []
+    for index, entry in enumerate(raw):
+        if entry is None:
+            normalised.append({})
+        elif isinstance(entry, Mapping):
+            normalised.append(dict(entry))
+        else:
+            raise ValueError(
+                f"{path}[{index}] must be a mapping (or null); got {type(entry).__name__}"
+            )
+    return normalised
+
+
 def _build_variants(roles_dir: Path) -> dict[str, list[Any]]:
     """Return ``{application_id: [variant_0, variant_1, ...]}``.
 
@@ -180,7 +228,7 @@ def _build_variants(roles_dir: Path) -> dict[str, list[Any]]:
         application_id = role_dir.name
         base_config = _build_role_base_config(role_dir, roles_dir)
         meta_path = role_dir / "meta" / "variants.yml"
-        override_list = _load_yaml_variant_list(meta_path)
+        override_list = _load_variants_overrides(meta_path)
         role_variants: list[Any] = []
         for override in override_list:
             if base_config:

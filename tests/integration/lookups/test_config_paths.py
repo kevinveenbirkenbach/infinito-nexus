@@ -8,7 +8,7 @@ from utils.applications.config import get, ConfigEntryNotSetError
 from utils.cache.applications import get_application_defaults
 from utils.cache.users import get_user_defaults
 
-from tests.utils.fs import iter_project_files_with_content
+from utils.cache.files import iter_project_files_with_content
 
 
 class TestGetAppConfPaths(unittest.TestCase):

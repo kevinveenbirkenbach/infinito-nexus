@@ -16,6 +16,4 @@ galaxy_info:
     - mail
     - automation
   issue_tracker_url: https://s.infinito.nexus/issues
-  logo:
-    class: fa-solid fa-cloud
 dependencies: []

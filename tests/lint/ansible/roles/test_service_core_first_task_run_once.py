@@ -2,7 +2,7 @@ import unittest
 from pathlib import Path
 import yaml
 
-from tests.utils.fs import read_text
+from utils.cache.files import read_text
 from utils.service_registry import build_service_registry_from_roles_dir
 
 

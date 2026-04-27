@@ -16,20 +16,19 @@ from pathlib import Path
 from typing import Any, Mapping, Optional
 from urllib.parse import urlparse
 
-import yaml
 
 from . import base as _base
 from .base import (
     _RENDER_GUARD,
     _cache_key,
     _deep_merge,
-    _load_yaml_mapping,
     _render_with_templar,
     _resolve_override_mapping,
     _resolve_roles_dir,
     _stable_variables_signature,
     _tokens_file_signature,
 )
+from .yaml import load_yaml as _load_yaml_cached
 
 
 _USERS_DEFAULTS_CACHE: dict[str, dict[str, Any]] = {}
@@ -63,7 +62,7 @@ def _load_user_defs(roles_dir: Path) -> OrderedDict[str, dict[str, Any]]:
     merged: OrderedDict[str, dict[str, Any]] = OrderedDict()
 
     for filepath in files:
-        users = _load_yaml_mapping(Path(filepath))
+        users = _load_yaml_cached(Path(filepath), default_if_missing={})
         if not isinstance(users, dict):
             continue
 
@@ -169,11 +168,8 @@ def _load_store_users(file_tokens: Optional[str | os.PathLike[str]]) -> dict[str
     if not path.exists():
         return {}
 
-    data = yaml.safe_load(path.read_text(encoding="utf-8")) or {}
-    if not isinstance(data, dict):
-        return {}
-
-    users = data.get("users", {})
+    data = _load_yaml_cached(path, default_if_missing={})
+    users = data.get("users", {}) if isinstance(data, dict) else {}
     return users if isinstance(users, dict) else {}
 
 

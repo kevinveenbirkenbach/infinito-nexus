@@ -21,8 +21,6 @@ import threading
 from pathlib import Path
 from typing import Any, Mapping, Optional
 
-import yaml
-
 # `merge_with_defaults` is a pure-Python helper with no `ansible` dependency,
 # so it stays at module scope.
 from plugins.filter.merge_with_defaults import merge_with_defaults  # noqa: F401  re-exported
@@ -142,50 +140,6 @@ def _tokens_file_signature(path: Path) -> tuple:
     except (FileNotFoundError, OSError):
         return (str(path), 0, 0)
     return (str(path), st.st_mtime_ns, st.st_size)
-
-
-def _load_yaml_mapping(path: Path) -> dict[str, Any]:
-    if not path.exists():
-        return {}
-
-    data = yaml.safe_load(path.read_text(encoding="utf-8")) or {}
-    if not isinstance(data, dict):
-        raise ValueError(f"{path} must contain a YAML mapping")
-    return data
-
-
-def _load_yaml_variant_list(path: Path) -> list[dict[str, Any]]:
-    """Load a `roles/<role>/meta/variants.yml` variant list.
-
-    Each entry is a deep-merge override for the role's
-    `meta/services.yml`; `null` and `{}` are valid no-op entries. Missing
-    file or empty list collapses to a single empty variant so the
-    role behaves exactly like before this layer was introduced.
-    """
-    if not path.exists():
-        return [{}]
-
-    raw = yaml.safe_load(path.read_text(encoding="utf-8"))
-    if raw is None:
-        return [{}]
-    if not isinstance(raw, list):
-        raise ValueError(
-            f"{path} must contain a YAML list of override mappings (or be empty)."
-        )
-    if not raw:
-        return [{}]
-
-    normalised: list[dict[str, Any]] = []
-    for index, entry in enumerate(raw):
-        if entry is None:
-            normalised.append({})
-        elif isinstance(entry, Mapping):
-            normalised.append(dict(entry))
-        else:
-            raise ValueError(
-                f"{path}[{index}] must be a mapping (or null); got {type(entry).__name__}"
-            )
-    return normalised
 
 
 def _deep_merge(base: Any, override: Any) -> Any:

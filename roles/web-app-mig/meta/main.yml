@@ -19,5 +19,3 @@ galaxy_info:
     - graph
     - mig
   issue_tracker_url: https://github.com/kevinveenbirkenbach/meta-infinite-graph/issues
-  logo:
-    class: fa-solid fa-brain

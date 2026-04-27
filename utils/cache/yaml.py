@@ -122,6 +122,17 @@ def invalidate(path) -> None:
     _CACHE.pop(_key(path), None)
 
 
-def _reset_cache_for_tests() -> None:
-    """Test-only helper: clear the entire cache."""
+def _reset() -> None:
+    """Test-only helper: clear the entire cache.
+
+    Named ``_reset`` for parity with the per-domain reset helpers in
+    sibling modules (``applications._reset``, ``users._reset``,
+    ``domains._reset``, ``base._reset``); ``utils.cache._reset_cache_for_tests``
+    orchestrates calls to all of them.
+    """
     _CACHE.clear()
+
+
+# Backwards-compatible alias for in-tree callers that may still reference
+# the old name.
+_reset_cache_for_tests = _reset

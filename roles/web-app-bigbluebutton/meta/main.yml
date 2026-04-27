@@ -19,5 +19,3 @@ galaxy_info:
     - video
     - conference
   issue_tracker_url: https://s.infinito.nexus/issues
-  logo:
-    class: fa-solid fa-chalkboard-teacher

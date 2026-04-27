@@ -18,5 +18,3 @@ galaxy_info:
     - community
     - self-hosted
   issue_tracker_url: https://s.infinito.nexus/issues
-  logo:
-    class: fa-solid fa-landmark

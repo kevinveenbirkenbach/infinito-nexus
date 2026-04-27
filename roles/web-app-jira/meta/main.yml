@@ -13,6 +13,4 @@ galaxy_info:
     - jira
     - project management
   issue_tracker_url: https://s.infinito.nexus/issues
-  logo:
-    class: fas fa-diagram-project
 dependencies: []

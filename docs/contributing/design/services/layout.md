@@ -2,8 +2,9 @@
 
 This page is the SPOT for the on-disk shape of every role's metadata after
 [req-008](../../../requirements/008-role-meta-layout.md),
-[req-009](../../../requirements/009-per-role-networks-and-ports.md), and
-[req-010](../../../requirements/010-role-meta-runafter-lifecycle-migration.md).
+[req-009](../../../requirements/009-per-role-networks-and-ports.md),
+[req-010](../../../requirements/010-role-meta-runafter-lifecycle-migration.md), and
+[req-011](../../../requirements/011-role-meta-info-migration.md).
 
 The legacy entry files `roles/<role>/config/main.yml`,
 `roles/<role>/users/main.yml`, and `roles/<role>/schema/main.yml` are gone.
@@ -13,13 +14,14 @@ All role-owned metadata lives under `roles/<role>/meta/<topic>.yml`.
 
 | File                     | Contents                                                                                                                                          |
 |--------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------|
-| `meta/main.yml`          | Ansible Galaxy metadata + Ansible `dependencies:`. **No** project-internal `run_after:` / `lifecycle:` keys (those moved per req-010).            |
+| `meta/main.yml`          | Ansible Galaxy metadata + Ansible `dependencies:`. **No** project-internal `run_after:` / `lifecycle:` keys (req-010), **no** `logo:` / `homepage:` / `video:` / `display:` (req-011). |
 | `meta/services.yml`      | Per-entity service config. **File root IS the services map** keyed by `<entity_name>`. No `compose:` and no `services:` wrapper.                  |
 | `meta/server.yml`        | CSP, `domains`, `status_codes`, plus per-role `networks.local.{subnet,dns_resolver}` (req-009). File root IS `applications.<app>.server`.        |
 | `meta/rbac.yml`          | RBAC declarations. File root IS `applications.<app>.rbac`.                                                                                         |
 | `meta/volumes.yml`       | Compose volumes. File root IS the volumes map keyed by volume name. No `compose:` and no `volumes:` wrapper.                                      |
 | `meta/users.yml`         | Role-local user definitions. File root IS the users map (no `users:` wrapper).                                                                     |
 | `meta/schema.yml`        | Credential schema (merged from the old `schema/main.yml` and the `credentials:` block of the old `config/main.yml`).                              |
+| `meta/info.yml`          | Optional. Descriptive role-level metadata (`logo`, `homepage`, `video`, `display`) per req-011. File root IS `applications.<app>.info` (no `info:` wrapper). |
 | `meta/variants.yml`      | Optional. Variant overrides deep-merged over the assembled application payload (used by `svc-ai-ollama`, `web-app-phpmyadmin`).                   |
 
 Ansible only auto-loads `meta/main.yml`. Every other `meta/<topic>.yml` is
@@ -37,9 +39,10 @@ rule:
 
 So `meta/services.yml` MUST NOT have a top-level `services:` key wrapping its
 content; `meta/volumes.yml` MUST NOT have a top-level `volumes:` key; same for
-`meta/server.yml`, `meta/rbac.yml`, `meta/users.yml`. The filename alone fixes
-the path prefix in the materialised application tree, which keeps consumer
-paths short and predictable (no redundant `compose.…` prefixes).
+`meta/server.yml`, `meta/rbac.yml`, `meta/users.yml`, `meta/info.yml`. The
+filename alone fixes the path prefix in the materialised application tree,
+which keeps consumer paths short and predictable (no redundant `compose.…`
+prefixes).
 
 ## Materialised Paths 🔗
 
@@ -331,6 +334,51 @@ the helper instead of hand-rolled derivations. The helper returns `[]` /
 `None` gracefully when `meta/services.yml` is absent or when the field is
 not set.
 
+## Descriptive Role-Level Metadata — `meta/info.yml` 📝
+
+Project-internal descriptive metadata (icon, upstream homepage, demo
+video, dashboard display flag) lives in an OPTIONAL `meta/info.yml`,
+not nested inside `galaxy_info:`. The file-root convention applies (no
+wrapping `info:` key — file content IS `applications.<role>.info`). See
+[req-011](../../../requirements/011-role-meta-info-migration.md).
+
+```yaml
+# roles/web-app-nextcloud/meta/info.yml
+logo:
+  class: fa-solid fa-cloud
+homepage: https://nextcloud.com/
+video: https://youtu.be/3jcYJGQgenI?si=FDmoMSrAb9_WvviC
+```
+
+### Allowed Fields
+
+| Field      | Type   | Semantics                                                                                                                |
+|------------|--------|--------------------------------------------------------------------------------------------------------------------------|
+| `logo`     | map    | UI icon descriptor. Today only `class:` (FontAwesome). Future fields (`source:`, `svg:`) require an explicit allowlist update in the lint. |
+| `homepage` | string | Upstream project URL — the canonical landing page of the software the role deploys.                                      |
+| `video`    | string | Upstream demo / overview video URL.                                                                                      |
+| `display`  | bool   | Default `true`. `false` opts the role out of dashboards / cards / apps grids.                                            |
+
+The lint (`tests/lint/repository/test_role_meta_info.py`) rejects any
+other top-level key so the file does not become a dumping ground.
+
+### Optionality
+
+`meta/info.yml` is OPTIONAL. A role with none of the four fields does
+not grow the file. Consumers MUST treat missing file or missing field
+as absent / default — matching the historical
+`galaxy_info.get('display', True)` semantics.
+
+### Materialised Path
+
+```
+applications.<role>.info.{logo,homepage,video,display}
+```
+
+The dashboard's `web-app-dashboard/lookup_plugins/docker_cards.py` reads
+`logo.class` and `display` from this location; `description` and
+`galaxy_tags` continue to come from `galaxy_info` (Galaxy-spec fields).
+
 ## Related Pages 📚
 
 - [base.md](base.md) — service registration, loading, and injection model.
@@ -340,3 +388,4 @@ not set.
 - [req-008](../../../requirements/008-role-meta-layout.md) — meta layout spec.
 - [req-009](../../../requirements/009-per-role-networks-and-ports.md) — per-role networks and ports spec.
 - [req-010](../../../requirements/010-role-meta-runafter-lifecycle-migration.md) — `run_after` / `lifecycle` migration spec.
+- [req-011](../../../requirements/011-role-meta-info-migration.md) — `meta/info.yml` migration spec.

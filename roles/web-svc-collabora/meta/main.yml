@@ -22,5 +22,3 @@ galaxy_info:
     - wopi
     - code
   issue_tracker_url: https://s.infinito.nexus/issues
-  logo:
-    class: fa-solid fa-file-code

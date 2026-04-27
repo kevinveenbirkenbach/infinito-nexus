@@ -16,6 +16,4 @@ galaxy_info:
     - fediverse
     - bridge
   issue_tracker_url: https://s.infinito.nexus/issues
-  logo:
-    class: fa-solid fa-bridge
 dependencies: []

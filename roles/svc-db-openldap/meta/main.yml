@@ -17,5 +17,3 @@ galaxy_info:
     - tls
     - identity management
   issue_tracker_url: https://s.infinito.nexus/issues
-  logo:
-    class: fa-solid fa-users

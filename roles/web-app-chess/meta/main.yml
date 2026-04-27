@@ -9,8 +9,6 @@ galaxy_info:
     - activitypub
     - social
   issue_tracker_url: https://s.infinito.nexus/issues
-  logo:
-    class: fas fa-chess-king
   min_ansible_version: '2.9'
   platforms:
     - name: Any

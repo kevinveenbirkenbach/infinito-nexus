@@ -21,6 +21,4 @@ galaxy_info:
     - ollama
     - flowise
   issue_tracker_url: https://s.infinito.nexus/issues
-  logo:
-    class: fa-solid fa-diagram-project
 dependencies: []

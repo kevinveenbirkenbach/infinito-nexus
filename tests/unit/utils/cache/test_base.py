@@ -70,66 +70,6 @@ class TestDeepMerge(unittest.TestCase):
         self.assertEqual(override["x"], [1, 2, 3])
 
 
-class TestLoadYamlMapping(unittest.TestCase):
-    def test_missing_file_returns_empty_dict(self):
-        with tempfile.TemporaryDirectory() as tmp:
-            self.assertEqual(base._load_yaml_mapping(Path(tmp) / "missing.yml"), {})
-
-    def test_empty_file_returns_empty_dict(self):
-        with tempfile.TemporaryDirectory() as tmp:
-            path = Path(tmp) / "empty.yml"
-            path.write_text("", encoding="utf-8")
-            self.assertEqual(base._load_yaml_mapping(path), {})
-
-    def test_mapping_round_trip(self):
-        with tempfile.TemporaryDirectory() as tmp:
-            path = Path(tmp) / "x.yml"
-            _write(path, "a: 1\nb: [1, 2]\n")
-            self.assertEqual(base._load_yaml_mapping(path), {"a": 1, "b": [1, 2]})
-
-    def test_non_mapping_root_raises(self):
-        with tempfile.TemporaryDirectory() as tmp:
-            path = Path(tmp) / "list.yml"
-            _write(path, "- 1\n- 2\n")
-            with self.assertRaisesRegex(ValueError, "must contain a YAML mapping"):
-                base._load_yaml_mapping(path)
-
-
-class TestLoadYamlVariantList(unittest.TestCase):
-    def test_missing_file_collapses_to_single_empty_variant(self):
-        with tempfile.TemporaryDirectory() as tmp:
-            self.assertEqual(
-                base._load_yaml_variant_list(Path(tmp) / "missing.yml"),
-                [{}],
-            )
-
-    def test_empty_file_collapses_to_single_empty_variant(self):
-        with tempfile.TemporaryDirectory() as tmp:
-            path = Path(tmp) / "v.yml"
-            path.write_text("", encoding="utf-8")
-            self.assertEqual(base._load_yaml_variant_list(path), [{}])
-
-    def test_null_entries_become_empty_dicts(self):
-        with tempfile.TemporaryDirectory() as tmp:
-            path = Path(tmp) / "v.yml"
-            _write(path, "- null\n- {a: 1}\n")
-            self.assertEqual(base._load_yaml_variant_list(path), [{}, {"a": 1}])
-
-    def test_non_list_root_raises(self):
-        with tempfile.TemporaryDirectory() as tmp:
-            path = Path(tmp) / "v.yml"
-            _write(path, "a: 1\n")
-            with self.assertRaisesRegex(ValueError, "YAML list of override"):
-                base._load_yaml_variant_list(path)
-
-    def test_non_mapping_entry_raises(self):
-        with tempfile.TemporaryDirectory() as tmp:
-            path = Path(tmp) / "v.yml"
-            _write(path, "- a-string\n")
-            with self.assertRaisesRegex(ValueError, "must be a mapping"):
-                base._load_yaml_variant_list(path)
-
-
 class TestResolveRolesDir(unittest.TestCase):
     def test_explicit_arg_wins(self):
         with tempfile.TemporaryDirectory() as tmp:

@@ -17,6 +17,4 @@ galaxy_info:
     - real-time
     - encrypted
   issue_tracker_url: https://s.infinito.nexus/issues
-  logo:
-    class: fa-solid fa-satellite-dish
 dependencies: []

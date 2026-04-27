@@ -6,12 +6,13 @@ This package contains the in-process cache layers Infinito.Nexus uses to keep CL
 
 | Module | Caches |
 |---|---|
-| [yaml.py](yaml.py) | A single YAML file's parsed root, keyed by absolute path. |
-| [base.py](base.py) | Cross-cutting helpers: filesystem constants (`PROJECT_ROOT`, `ROLES_DIR`, `DEFAULT_TOKENS_FILE`), YAML loaders, `_deep_merge`, cache-key + content-fingerprint signatures, the cross-domain re-entry guard, and the templar-render machinery. The only ansible-coupled symbol is `_render_with_templar`, which lazy-imports its dependency. |
+| [yaml.py](yaml.py) | A single YAML file's parsed root, keyed by absolute path. Every other module routes its YAML reads through here so each file is parsed at most once per process. |
+| [files.py](files.py) | The project tree's full path list (one walk per process) and per-file UTF-8 contents (`read_text`). Used by lint/integration tests and CLI tools that scan the repo. |
+| [base.py](base.py) | Cross-cutting helpers: filesystem constants (`PROJECT_ROOT`, `ROLES_DIR`, `DEFAULT_TOKENS_FILE`), `_deep_merge`, cache-key + content-fingerprint signatures, the cross-domain re-entry guard, and the templar-render machinery. The only ansible-coupled symbol is `_render_with_templar`, which lazy-imports its dependency. |
 | [applications.py](applications.py) | Per-app variants + defaults + `get_merged_applications`. **Strictly ansible-free at import time** so the GitHub Actions runner-host CLI path (`cli.deploy.development.init` → `plan_dev_inventory_matrix` → `get_variants`) keeps working without ansible installed. |
 | [users.py](users.py) | User definitions, token store hydration, alias materialization, `get_user_defaults`, `get_merged_users`. |
 | [domains.py](domains.py) | Canonical-domains map derived from the merged applications view: `get_merged_domains`. |
-| [`__init__.py`](__init__.py) | Owns the package-level `_reset_cache_for_tests()` orchestrator that clears every domain's cache plus the shared fingerprint memo in one call. |
+| [`__init__.py`](__init__.py) | Owns the package-level `_reset_cache_for_tests()` orchestrator that clears every cache plus the shared fingerprint memo in one call. |
 
 ## When To Use Which 🎯
 
@@ -26,7 +27,7 @@ Both layers are process-wide in-process caches. They intentionally do NOT track 
 
 ## Test-Only Helpers 🧪
 
-Each domain module owns a private `_reset()` that clears its own cache dicts. The package-level `utils.cache._reset_cache_for_tests()` orchestrates all four (`base`, `applications`, `users`, `domains`) plus the shared fingerprint memo. Unit tests that exercise the cached paths MUST call it in `setUp` to guarantee clean state across test cases.
+Each module owns a private `_reset()` that clears its own cache dicts. The package-level `utils.cache._reset_cache_for_tests()` orchestrates all six (`base`, `applications`, `users`, `domains`, `yaml`, `files`) plus the shared fingerprint memo. Unit tests that exercise the cached paths MUST call it in `setUp` to guarantee clean state across test cases.
 
 ## Design Guidelines 📐
 

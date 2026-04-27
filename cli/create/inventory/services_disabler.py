@@ -4,15 +4,31 @@ import os
 from pathlib import Path
 from typing import Optional
 
-import yaml
 from ruamel.yaml import YAML
 from ruamel.yaml.comments import CommentedMap
 
+from utils.cache.yaml import load_yaml_any
 from utils.service_registry import (
     build_service_registry_from_roles_dir,
     canonical_service_key,
     equivalent_service_keys,
 )
+
+
+def _load_yaml_mapping_tolerant(path: Path) -> dict:
+    """Read a YAML file as a mapping; non-mapping or unparseable content
+    silently collapses to ``{}``. Backed by the shared YAML cache.
+
+    Used for inventory-style files (devices.yml, host_vars/*.yml) where
+    the caller wants tolerance, not strictness.
+    """
+    if not path.exists():
+        return {}
+    try:
+        data = load_yaml_any(path)
+    except Exception:
+        return {}
+    return data if isinstance(data, dict) else {}
 
 
 class ServicesDisabledConflictError(RuntimeError):
@@ -47,12 +63,8 @@ def find_roles_with_service(service_name: str, roles_dir: Path) -> set[str]:
         services_file = role_dir / "meta" / "services.yml"
         if not services_file.exists():
             continue
-        try:
-            with services_file.open("r", encoding="utf-8") as f:
-                services = yaml.safe_load(f) or {}
-        except Exception:
-            continue
-        if not isinstance(services, dict):
+        services = _load_yaml_mapping_tolerant(services_file)
+        if not services:
             continue
         entry = services.get(service_name)
         if not isinstance(entry, dict):
@@ -226,16 +238,8 @@ def apply_services_disabled_from_env(
     )
 
 
-def _load_yaml_mapping(path: Path) -> dict:
-    if not path.exists():
-        return {}
-    with path.open("r", encoding="utf-8") as f:
-        data = yaml.safe_load(f) or {}
-    return data if isinstance(data, dict) else {}
-
-
 def _inventory_application_ids(inventory_file: Path) -> set[str]:
-    doc = _load_yaml_mapping(inventory_file)
+    doc = _load_yaml_mapping_tolerant(inventory_file)
     all_section = doc.get("all") or {}
     children = all_section.get("children") or {}
     if not isinstance(children, dict):
@@ -283,7 +287,7 @@ def find_services_disabled_conflicts(
             )
 
         for host_vars_file in host_vars_files:
-            doc = _load_yaml_mapping(host_vars_file)
+            doc = _load_yaml_mapping_tolerant(host_vars_file)
             applications = doc.get("applications") or {}
             if not isinstance(applications, dict):
                 continue

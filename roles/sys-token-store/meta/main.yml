@@ -16,6 +16,4 @@ galaxy_info:
     - security
     - ansible
   issue_tracker_url: https://s.infinito.nexus/issues
-  logo:
-    class: fa-solid fa-key
 dependencies: []

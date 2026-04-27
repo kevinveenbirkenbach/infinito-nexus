@@ -1,13 +1,14 @@
-"""Process-level cached helpers for tests that scan the project tree.
+"""Process-level cached filesystem helpers for project-tree scans.
 
-Many integration/lint tests walk the whole repo and read every matching file.
-Doing that N times per pytest run is wasteful — the tree doesn't change during
-a run. These helpers walk the tree once per process and memoise both the path
-list and file contents, so every test after the first one pays near-zero cost.
+Many integration/lint tests and CLI tools walk the whole repo and read every
+matching file. Doing that N times per process is wasteful — the tree doesn't
+change during a run. These helpers walk the tree once per process and memoise
+both the path list and file contents, so every caller after the first one pays
+near-zero cost.
 
 Usage:
 
-    from tests.utils.fs import iter_project_files, read_text
+    from utils.cache.files import iter_project_files, read_text
 
     for path in iter_project_files(extensions=(".yml", ".yml.j2"), exclude_tests=True):
         content = read_text(path)
@@ -20,11 +21,9 @@ from __future__ import annotations
 
 import os
 from functools import lru_cache
-from pathlib import Path
 from typing import Iterable, Iterator, Tuple
 
-# tests/utils/fs.py → up two levels to repo root
-PROJECT_ROOT: Path = Path(__file__).resolve().parents[2]
+from .base import PROJECT_ROOT
 
 # Directories never worth descending into during project-tree scans.
 _DEFAULT_SKIP_DIRS: frozenset[str] = frozenset(
@@ -99,7 +98,7 @@ def iter_project_files(
 
 @lru_cache(maxsize=8192)
 def read_text(path: str) -> str:
-    """Return the UTF-8 text content of a file; cached across tests.
+    """Return the UTF-8 text content of a file; cached process-wide.
 
     Raises OSError / UnicodeDecodeError unchanged — callers that scan arbitrary
     files can wrap this in try/except if non-UTF-8 blobs may appear.
@@ -117,7 +116,7 @@ def iter_project_files_with_content(
     """Yield ``(path, content)`` for matching files; content is cached.
 
     Files that fail to read (permission errors, non-UTF-8) are silently
-    skipped — that matches the prior test-local behaviour of wrapping
+    skipped — that matches the prior caller behaviour of wrapping
     ``open().read()`` in a bare ``try/except Exception: continue``.
     """
     for path in iter_project_files(
@@ -130,3 +129,14 @@ def iter_project_files_with_content(
         except (OSError, UnicodeDecodeError):
             continue
         yield path, content
+
+
+def _reset() -> None:
+    """Test-only helper: clear the project-walk and file-content caches.
+
+    Named ``_reset`` for parity with the per-domain reset helpers in
+    sibling modules; ``utils.cache._reset_cache_for_tests`` orchestrates
+    calls to all of them.
+    """
+    _all_project_files.cache_clear()
+    read_text.cache_clear()

@@ -23,6 +23,4 @@ galaxy_info:
     - automation
     - archlinux
   issue_tracker_url: https://s.infinito.nexus/issues
-  logo:
-    class: ''
 dependencies: []

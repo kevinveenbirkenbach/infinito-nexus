@@ -15,6 +15,4 @@ galaxy_info:
     - social network
     - decentralized
   issue_tracker_url: https://s.infinito.nexus/issues
-  logo:
-    class: fa-solid fa-sun
 dependencies: []

@@ -24,5 +24,3 @@ galaxy_info:
     - automation
     - deployment
   issue_tracker_url: https://s.infinito.nexus/issues
-  logo:
-    class: fa-solid fa-book

@@ -5,7 +5,7 @@ import os
 import unittest
 from pathlib import Path
 
-from tests.utils.fs import iter_project_files
+from utils.cache.files import iter_project_files
 
 
 def repo_root() -> Path:
