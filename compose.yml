@@ -7,6 +7,54 @@ x-ci-defaults: &ci_defaults
 
 services:
   # ------------------------------------------------------------
+  # Registry-cache (pull-through MITM proxy, CI-profile only)
+  # ------------------------------------------------------------
+  # rpardini/docker-registry-proxy intercepts every outbound docker
+  # registry pull from `infinito`'s inner dockerd and caches blobs/
+  # manifests on disk. Catch-all by design — first request to any
+  # registry (docker.io, ghcr.io, quay.io, registry.k8s.io, …) is
+  # fetched and persisted; re-requests are served from cache. Drastic
+  # speedup for re-deploys, parallel CI shards, and local fresh-purges.
+  #
+  # Lifecycle is tied to the `ci` profile so the cache starts whenever
+  # the dev/CI stack starts (alongside coredns and infinito), and stays
+  # off for out-of-stack `docker compose up` invocations.
+  #
+  # Storage location is overridable via the two
+  # INFINITO_REGISTRY_CACHE_*_HOST_PATH env vars (defaults: /tmp).
+  # The CA cert volume is also bind-mounted into the `infinito`
+  # container so its dockerd can install the proxy CA via
+  # /usr/local/bin/registry-cache-ca.sh on every restart.
+  registry-cache:
+    profiles: ["ci"]
+    image: rpardini/docker-registry-proxy:0.6.5
+    container_name: infinito-registry-cache
+    environment:
+      ENABLE_MANIFEST_CACHE: "true"
+      AUTH_REGISTRIES: ""
+      CACHE_MAX_SIZE: "${INFINITO_REGISTRY_CACHE_MAX_SIZE:-32g}"
+    volumes:
+      - type: bind
+        source: ${INFINITO_REGISTRY_CACHE_HOST_PATH:-/tmp/infinito/core/registry-cache/mirror}
+        target: /docker_mirror_cache
+        bind:
+          create_host_path: true
+      - type: bind
+        source: ${INFINITO_REGISTRY_CACHE_CA_HOST_PATH:-/tmp/infinito/core/registry-cache/ca}
+        target: /ca
+        bind:
+          create_host_path: true
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - "wget -qO- http://127.0.0.1:3128/ca.crt >/dev/null 2>&1"
+      interval: 5s
+      timeout: 3s
+      retries: 30
+      start_period: 30s
+    restart: unless-stopped
+
+  # ------------------------------------------------------------
   # CoreDNS (CI only)
   # ------------------------------------------------------------
   coredns:
@@ -15,7 +63,7 @@ services:
     profiles: ["ci"]
     command: ["-conf", "/Corefile"]
     volumes:
-      - ./compose/Corefile:/Corefile:ro
+      - ./compose/coredns/Corefile:/Corefile:ro
     networks:
       default:
         ipv4_address: ${DNS_IP}
@@ -35,8 +83,17 @@ services:
         NIX_CONFIG: ${NIX_CONFIG}
     image: "${INFINITO_IMAGE}"
     pull_policy: "${INFINITO_PULL_POLICY:-never}"
+    # Gate `infinito` on `registry-cache` being healthy (not just started),
+    # otherwise dockerd's ExecStartPre runs registry-cache-ca.sh
+    # before rpardini has written /ca/ca.crt → script silently skips, dockerd
+    # boots with HTTP_PROXY pointing at the proxy but no MITM CA in trust →
+    # every pull fails with x509 unknown-authority. The healthcheck at
+    # `wget http://127.0.0.1:3128/ca.crt` only succeeds once the CA is on disk.
     depends_on:
-      - coredns
+      coredns:
+        condition: service_started
+      registry-cache:
+        condition: service_healthy
 
     # Run systemd as PID 1
     command:
@@ -87,6 +144,23 @@ services:
       - ${INFINITO_DOCKER_VOLUME:-docker}:${INFINITO_DOCKER_MOUNT:-/var/lib/docker}
       - infinito:/var/lib/infinito/
       - letsencrypt:/etc/letsencrypt/
+      # Read-only bind of the registry-cache CA bundle so this container's
+      # /usr/local/bin/registry-cache-ca.sh can drop the cert into
+      # the system trust store before dockerd starts.
+      - type: bind
+        source: ${INFINITO_REGISTRY_CACHE_CA_HOST_PATH:-/tmp/infinito/core/registry-cache/ca}
+        target: /opt/registry-cache-ca
+        read_only: true
+        bind:
+          create_host_path: true
+      # systemd drop-in: routes inner dockerd through the registry-cache
+      # MITM proxy and runs registry-cache-ca.sh as ExecStartPre.
+      # Bind-mounted from the repo so edits take effect on the next
+      # `make up` without an image rebuild.
+      - ./compose/registry-cache/proxy.conf:/etc/systemd/system/docker.service.d/registry-cache-proxy.conf:ro
+      # Companion install script invoked by the drop-in above. Must be
+      # executable in the repo (git +x bit); bind-mount preserves perms.
+      - ./scripts/docker/registry-cache-ca.sh:/usr/local/bin/registry-cache-ca.sh:ro
 
     environment:
       DNS_IP: ${DNS_IP}

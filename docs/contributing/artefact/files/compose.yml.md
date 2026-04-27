@@ -57,6 +57,40 @@ Allowing swap masks OOM conditions that the real runner would hit.
 | `INFINITO_DOCKER_VOLUME`  | `docker`           | Named volume (or host path) backing the nested Docker directory. |
 | `INFINITO_DOCKER_MOUNT`   | `/var/lib/docker`  | Mount point inside the container for the nested Docker data.     |
 
+### Registry Cache
+
+The `registry-cache` service runs `rpardini/docker-registry-proxy` as a
+pull-through MITM proxy in front of every outbound docker registry pull
+made by `infinito`'s inner dockerd. Catch-all caching: first request to
+any registry (`docker.io`, `ghcr.io`, `quay.io`, `registry.k8s.io`, …)
+is fetched and persisted; re-requests are served from cache. The
+service sits in the `ci` profile alongside `coredns` and `infinito`, so
+it starts and stops with the dev/CI stack.
+
+Wiring inside `infinito` (all bind-mounted directly via `compose.yml`,
+no Dockerfile or entry.sh staging, so edits take effect on the next
+container start without an image rebuild):
+
+- the registry-cache CA bundle at `/opt/registry-cache-ca` (read-only),
+- the systemd drop-in
+  [proxy.conf](../../../../compose/registry-cache/proxy.conf) at
+  `/etc/systemd/system/docker.service.d/registry-cache-proxy.conf`,
+- the install script
+  [registry-cache-ca.sh](../../../../scripts/docker/registry-cache-ca.sh)
+  at `/usr/local/bin/registry-cache-ca.sh` (must keep its git
+  +x bit; bind-mounts preserve host permissions).
+
+The drop-in registers the install script as `ExecStartPre`. dockerd is
+gated on `registry-cache` health (`condition: service_healthy`) so the
+CA is on disk before `ExecStartPre` runs. Pulls only. Pushes are not
+intercepted.
+
+| Variable                                | Default                                | Purpose                                                                                                              |
+|-----------------------------------------|----------------------------------------|----------------------------------------------------------------------------------------------------------------------|
+| `INFINITO_REGISTRY_CACHE_HOST_PATH`     | `/tmp/infinito/core/registry-cache/mirror`  | Host path bind-mounted into `registry-cache` for blob/manifest persistence.                                          |
+| `INFINITO_REGISTRY_CACHE_CA_HOST_PATH`  | `/tmp/infinito/core/registry-cache/ca`      | Host path holding the proxy MITM CA bundle. Mounted writable into `registry-cache`, read-only into `infinito`.       |
+| `INFINITO_REGISTRY_CACHE_MAX_SIZE`      | `32g`                                  | Maximum on-disk size of the cache. Older entries are evicted when this is reached.                                   |
+
 ### Networking
 
 | Variable                      | Default          | Purpose                                                                |
