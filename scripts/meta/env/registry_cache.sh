@@ -10,11 +10,6 @@
 
 set -euo pipefail
 
-if [[ "${INFINITO_ENV_REGISTRY_CACHE_LOADED:-}" == "1" ]]; then
-	return 0
-fi
-export INFINITO_ENV_REGISTRY_CACHE_LOADED="1"
-
 : "${INFINITO_REGISTRY_CACHE_HOST_PATH:=/tmp/infinito/core/registry-cache/mirror}"
 : "${INFINITO_REGISTRY_CACHE_CA_HOST_PATH:=/tmp/infinito/core/registry-cache/ca}"
 export INFINITO_REGISTRY_CACHE_HOST_PATH
