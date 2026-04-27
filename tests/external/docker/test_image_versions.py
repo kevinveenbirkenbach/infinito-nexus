@@ -12,6 +12,11 @@ available updates via the warning output.
 Semver-compatible version formats checked:
   x  /  x.x  /  x.x.x  /  x.x.x.x  (with optional leading ``v``)
 
+Flavored Docker Official Image tags of the form
+``<semver>-<flavor>`` (e.g. ``5.4.5-php8.3-apache``) are also recognised;
+upgrade candidates must share the same ``-<flavor>`` suffix so the check
+never silently proposes a different runtime/webserver variant.
+
 Suppress a check by placing ``# nocheck: docker-version`` on the line
 directly above the ``version:`` key (blank lines between are ignored,
 but any non-comment line resets the search):
@@ -22,203 +27,27 @@ but any non-comment line resets the search):
 
 from __future__ import annotations
 
-import json
-import re
-import time
 import unittest
-import urllib.error
-import urllib.request
 from pathlib import Path
 
 from utils.annotations.message import warning
-from urllib.parse import quote, urlencode
-
-import yaml
+from utils.docker.version_updater import (
+    fetch_dockerhub_tags,
+    fetch_ghcr_tags,
+    is_dockerhub,
+    is_ghcr,
+    is_semver,
+    latest_semver,
+    suppressed_services,
+    version_depth,
+    version_flavor,
+    version_key,
+)
 
 from utils.docker.image.discovery import iter_role_images
-from utils.docker.image.ref import (
-    DOCKER_HUB_REGISTRIES,
-    GHCR_REGISTRY,
-    split_registry_and_name,
-)
 
 _REPO_ROOT = Path(__file__).resolve().parents[3]
 _ROLES_ROOT = _REPO_ROOT / "roles"
-
-# Matches: 1 / 1.2 / 1.2.3 / 1.2.3.4 with optional leading "v"
-_SEMVER_RE = re.compile(r"^v?\d+(\.\d+){0,3}$")
-
-_NOCHECK_TAG = "# nocheck: docker-version"
-
-
-def _is_semver(value: str) -> bool:
-    return bool(_SEMVER_RE.match(str(value).strip()))
-
-
-def _version_key(tag: str) -> tuple[int, ...]:
-    """Normalised 4-tuple for version comparison."""
-    v = str(tag).strip().lstrip("v")
-    tup = tuple(int(x) for x in v.split("."))
-    return tup + (0,) * (4 - len(tup))
-
-
-def _is_dockerhub(image: str) -> bool:
-    """Return True when *image* refers to a Docker Hub repository.
-
-    Handles both plain names (``nginx``, ``gitea/gitea``) and the explicit
-    ``docker.io/`` registry prefix.
-    """
-    parsed = split_registry_and_name(image)
-    if parsed is None:
-        return False
-    registry, _name = parsed
-    return registry is None or registry in DOCKER_HUB_REGISTRIES
-
-
-def _dockerhub_repo(image: str) -> str:
-    """Normalise a Docker Hub image reference to ``namespace/name``."""
-    parsed = split_registry_and_name(image)
-    if parsed is None:
-        raise ValueError(f"Invalid Docker image reference: {image!r}")
-    registry, name = parsed
-    if registry is not None and registry not in DOCKER_HUB_REGISTRIES:
-        raise ValueError(f"Image is not a Docker Hub reference: {image!r}")
-    return name if "/" in name else f"library/{name}"
-
-
-def _fetch_dockerhub_tags(image: str, max_pages: int = 5) -> list[str]:
-    """Return tag names for a Docker Hub image (up to *max_pages* x 100)."""
-    repo = _dockerhub_repo(image)
-    tags: list[str] = []
-    for page in range(1, max_pages + 1):
-        url = (
-            f"https://hub.docker.com/v2/repositories/{repo}/tags/"
-            f"?page_size=100&page={page}"
-        )
-        req = urllib.request.Request(
-            url, headers={"User-Agent": "infinito-nexus-version-check"}
-        )
-        try:
-            with urllib.request.urlopen(req, timeout=15) as resp:
-                if resp.status == 429:
-                    time.sleep(2)
-                    continue
-                body = json.loads(resp.read().decode())
-        except (urllib.error.URLError, OSError, json.JSONDecodeError):
-            break
-        tags.extend(r["name"] for r in body.get("results", []))
-        if not body.get("next"):
-            break
-    return tags
-
-
-def _is_ghcr(image: str) -> bool:
-    """Return True when *image* refers to a GitHub Container Registry repository."""
-    parsed = split_registry_and_name(image)
-    return parsed is not None and parsed[0] == GHCR_REGISTRY
-
-
-def _ghcr_repo(image: str) -> str:
-    """Return the validated repository path of a ghcr.io image."""
-    parsed = split_registry_and_name(image)
-    if parsed is None or parsed[0] != GHCR_REGISTRY:
-        raise ValueError(f"Image is not a GHCR reference: {image!r}")
-    return parsed[1]
-
-
-def _fetch_ghcr_tags(image: str) -> list[str]:
-    """Return tag names for a ghcr.io image using anonymous token flow."""
-    name = _ghcr_repo(image)
-    token_query = urlencode(
-        {"scope": f"repository:{name}:pull", "service": GHCR_REGISTRY}
-    )
-    token_url = f"https://{GHCR_REGISTRY}/token?{token_query}"
-    try:
-        req = urllib.request.Request(
-            token_url, headers={"User-Agent": "infinito-nexus-version-check"}
-        )
-        with urllib.request.urlopen(req, timeout=15) as resp:
-            token_body = json.loads(resp.read().decode())
-        token = token_body.get("token") or token_body.get("access_token")
-    except (urllib.error.URLError, OSError, json.JSONDecodeError):
-        return []
-
-    if not token:
-        return []
-
-    tags_url = f"https://{GHCR_REGISTRY}/v2/{quote(name, safe='/')}/tags/list"
-    req = urllib.request.Request(
-        tags_url,
-        headers={
-            "Authorization": f"Bearer {token}",
-            "User-Agent": "infinito-nexus-version-check",
-        },
-    )
-    try:
-        with urllib.request.urlopen(req, timeout=15) as resp:
-            body = json.loads(resp.read().decode())
-    except (urllib.error.URLError, OSError, json.JSONDecodeError):
-        return []
-
-    return body.get("tags") or []
-
-
-def _version_depth(tag: str) -> int:
-    """Return the number of dot-separated segments in a version string."""
-    return len(str(tag).strip().lstrip("v").split("."))
-
-
-def _latest_semver(tags: list[str], depth: int) -> str | None:
-    """Return the highest semver tag from *tags* that has exactly *depth* segments.
-
-    This ensures that a configured ``version: "15"`` (depth 1) is only compared
-    against other single-segment tags, ``version: "8.3"`` (depth 2) only against
-    ``x.x`` tags, and so on.
-    """
-    candidates = [t for t in tags if _is_semver(t) and _version_depth(t) == depth]
-    return max(candidates, key=_version_key, default=None)
-
-
-def _suppressed_services(config_path: Path) -> set[str]:
-    """Return service names whose ``version:`` line is preceded by the nocheck tag."""
-    raw = config_path.read_text(encoding="utf-8")
-    lines = raw.splitlines()
-
-    # Collect 0-based line numbers of suppressed version: keys
-    suppressed_lines: set[int] = set()
-    for i, line in enumerate(lines):
-        if not re.search(r"^\s+version\s*:", line):
-            continue
-        for j in range(i - 1, -1, -1):
-            prev = lines[j].strip()
-            if prev == _NOCHECK_TAG:
-                suppressed_lines.add(i)
-                break
-            if prev and not prev.startswith("#"):
-                break  # non-comment line resets the nocheck window
-
-    if not suppressed_lines:
-        return set()
-
-    # Map suppressed line numbers to service names via YAML node tree
-    root = yaml.compose(raw)
-    if not isinstance(root, yaml.MappingNode):
-        return set()
-
-    names: set[str] = set()
-    for key, val in root.value:
-        if key.value != "compose" or not isinstance(val, yaml.MappingNode):
-            continue
-        for k2, v2 in val.value:
-            if k2.value != "services" or not isinstance(v2, yaml.MappingNode):
-                continue
-            for svc_key, svc_val in v2.value:
-                if not isinstance(svc_val, yaml.MappingNode):
-                    continue
-                for fk, _ in svc_val.value:
-                    if fk.value == "version" and fk.start_mark.line in suppressed_lines:
-                        names.add(svc_key.value)
-    return names
 
 
 def _collect_entries() -> list[dict]:
@@ -231,12 +60,12 @@ def _collect_entries() -> list[dict]:
         # Only compose services from config/main.yml, not vars
         if ref.source_file != "config/main.yml":
             continue
-        # Only semver versions
-        if not _is_semver(ref.version):
+        # Only semver versions (pure or `<semver>-<flavor>`)
+        if not is_semver(ref.version):
             continue
         cfg_path = _ROLES_ROOT / ref.role / "meta" / "services.yml"
         # Check nocheck suppression
-        if ref.service in _suppressed_services(cfg_path):
+        if ref.service in suppressed_services(cfg_path):
             continue
         # Reconstruct full image reference for registry API calls
         if ref.registry == "docker.io":
@@ -293,24 +122,28 @@ class TestDockerImageVersions(unittest.TestCase):
             img = e["image"]
             if img in image_tags:
                 continue
-            if _is_dockerhub(img):
-                image_tags[img] = _fetch_dockerhub_tags(img)
-            elif _is_ghcr(img):
-                image_tags[img] = _fetch_ghcr_tags(img)
+            if is_dockerhub(img):
+                image_tags[img] = fetch_dockerhub_tags(img)
+            elif is_ghcr(img):
+                image_tags[img] = fetch_ghcr_tags(img)
 
         outdated: list[dict] = []
         unchecked: list[dict] = []
         for e in entries:
             img = e["image"]
-            if not _is_dockerhub(img) and not _is_ghcr(img):
+            if not is_dockerhub(img) and not is_ghcr(img):
                 unchecked.append(e)
                 continue
             tags = image_tags.get(img, [])
             if not tags:
                 unchecked.append(e)
                 continue
-            latest = _latest_semver(tags, _version_depth(e["version"]))
-            if latest and _version_key(e["version"]) < _version_key(latest):
+            latest = latest_semver(
+                tags,
+                version_depth(e["version"]),
+                version_flavor(e["version"]),
+            )
+            if latest and version_key(e["version"]) < version_key(latest):
                 outdated.append({**e, "latest": latest})
 
         if outdated:

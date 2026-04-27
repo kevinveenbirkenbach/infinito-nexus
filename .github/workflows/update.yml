@@ -15,6 +15,7 @@ permissions:
 jobs:
   update-docker-image-versions:
     name: 🐳 Update Docker image versions
+    if: vars.CI_ENABLE_AUTO_UPDATES == 'true'
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -48,6 +49,7 @@ jobs:
 
   update-skills:
     name: 🧠 Update skills-lock.json
+    if: vars.CI_ENABLE_AUTO_UPDATES == 'true'
     runs-on: ubuntu-latest
     steps:
       - name: Checkout

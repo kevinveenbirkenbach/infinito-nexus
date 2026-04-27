@@ -74,7 +74,7 @@ redis:
     disabled: true
   enabled: true
   image: redis
-  version: 7-alpine
+  version: 8-alpine
   cpus: 0.25
   mem_reservation: 256m
   mem_limit: 512m

@@ -21,6 +21,8 @@ mariadb:
   shared: true
 suitecrm:
   image: php
+  # TODO: Make SuiteCRM compatible with PHP 8.5; update currently not possible. noqa: intentional legacy pin
+  # nocheck: docker-version
   version: 8.2-apache
   app_version: 8.9.1
   name: suitecrm

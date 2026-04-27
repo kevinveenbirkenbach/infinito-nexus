@@ -1,0 +1,28 @@
+name: "🚫 Dependabot: Close while auto-updates disabled"
+
+# Closes Dependabot PRs while update PRs are gated off via the
+# CI_ENABLE_AUTO_UPDATES repository variable. Dependabot itself cannot read
+# repository variables, so the gate is enforced here.
+#
+# pull_request_target runs in base-branch context and therefore has
+# access to repository vars/secrets and a write-scoped GITHUB_TOKEN
+# even for Dependabot's PRs. This workflow does NOT check out PR code.
+
+on:
+  pull_request_target:
+    types: [opened, reopened]
+
+permissions:
+  pull-requests: write
+
+jobs:
+  close-when-disabled:
+    name: 🚫 Close Dependabot PR while gated
+    if: github.event.pull_request.user.login == 'dependabot[bot]' && vars.CI_ENABLE_AUTO_UPDATES != 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Close PR
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PR_URL: ${{ github.event.pull_request.html_url }}
+        run: gh pr close "$PR_URL" --comment "Auto-closed by \`dependabot-close.yml\`. The repository variable \`CI_ENABLE_AUTO_UPDATES\` is not set to \`true\`, so update PRs are disabled. Set it to \`true\` under **Settings → Secrets and variables → Actions → Variables** to allow Dependabot PRs."

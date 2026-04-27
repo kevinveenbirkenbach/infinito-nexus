@@ -10,6 +10,7 @@ Repository variables are set under **Settings → Secrets and variables → Acti
 |---|---|---|---|
 | `CI_CANCEL_IN_PROGRESS` | [entry-push-latest.yml](../../../../../.github/workflows/entry-push-latest.yml) | Cancels in-progress runs on new push | `false` to keep in-progress runs alive |
 | `CI_RUN_ON_MAIN` | [entry-push-latest.yml](../../../../../.github/workflows/entry-push-latest.yml) | Pushes to `main` skip CI | `true` to run CI on `main` pushes too |
+| `CI_ENABLE_AUTO_UPDATES` | [update.yml](../../../../../.github/workflows/update.yml), [dependabot-close.yml](../../../../../.github/workflows/dependabot-close.yml) | Update jobs skipped; Dependabot PRs auto-closed | `true` to allow update PRs (workflow-driven and Dependabot) |
 
 ## `CI_CANCEL_IN_PROGRESS` 🛑
 
@@ -73,3 +74,39 @@ The gate is applied inside [push_ci_policy.sh](../../../../../scripts/meta/resol
 | `true` | yes | CI runs ✓ |
 | any other value | yes | CI skipped ✓ |
 | *(any)* | no | Unaffected (CI runs per branch rules) ✓ |
+
+## `CI_ENABLE_AUTO_UPDATES` 🔄
+
+Controls whether automated update PRs are created. Covers both the workflow-driven jobs in [update.yml](../../../../../.github/workflows/update.yml) (Docker image versions, agent skills) and PRs opened by Dependabot (gated via [dependabot-close.yml](../../../../../.github/workflows/dependabot-close.yml), which auto-closes them).
+
+**Default behaviour (variable not set or set to any value other than `true`):**
+The `update-docker-image-versions` and `update-skills` jobs are skipped. Dependabot PRs are auto-closed on open with a comment pointing to this variable.
+
+**To enable update PRs:**
+
+1. Open the repository on GitHub.
+2. Go to **Settings → Secrets and variables → Actions**.
+3. Switch to the **Variables** tab.
+4. Click **New repository variable**.
+5. Set **Name** to `CI_ENABLE_AUTO_UPDATES` and **Value** to `true`.
+6. Save.
+
+**To disable again:**
+
+Delete the variable or change its value to anything other than `true`.
+
+**How it works:**
+
+In [update.yml](../../../../../.github/workflows/update.yml) each job carries a job-level guard:
+
+```yaml
+if: vars.CI_ENABLE_AUTO_UPDATES == 'true'
+```
+
+Dependabot cannot read repository variables itself, so [dependabot-close.yml](../../../../../.github/workflows/dependabot-close.yml) listens on `pull_request_target` (`opened`, `reopened`) and closes any PR authored by `dependabot[bot]` while `CI_ENABLE_AUTO_UPDATES != 'true'`. The workflow does not check out PR code, which keeps the elevated `pull_request_target` context safe.
+
+| Variable value | Workflow update jobs | Dependabot PRs |
+|---|---|---|
+| *(not set / empty)* | Skipped ✓ | Auto-closed on open ✓ |
+| `true` | Run ✓ | Stay open ✓ |
+| any other value | Skipped ✓ | Auto-closed on open ✓ |
