@@ -14,7 +14,7 @@ import ipaddress
 from pathlib import Path
 from typing import Dict, Iterable, List, Tuple
 
-import yaml
+from utils.cache.yaml import load_yaml_any
 
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
@@ -24,10 +24,10 @@ ROLES_DIR = REPO_ROOT / "roles"
 def _load_yaml(path: Path):
     if not path.is_file():
         return None
-    text = path.read_text(encoding="utf-8")
-    if not text.strip():
+    data = load_yaml_any(str(path), default_if_missing=None)
+    if data in (None, {}):
         return None
-    return yaml.safe_load(text)
+    return data
 
 
 def iter_role_dirs() -> Iterable[Path]:

@@ -4,7 +4,7 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Iterable, Tuple
 
-import yaml
+from utils.cache.yaml import load_yaml_any as _load_yaml_cached
 
 
 DOCKER_HUB_PREFIXES = (
@@ -47,8 +47,7 @@ class ImageRef:
 
 
 def load_yaml(path: Path) -> dict:
-    with path.open("r", encoding="utf-8") as f:
-        obj = yaml.safe_load(f) or {}
+    obj = _load_yaml_cached(str(path), default_if_missing={}) or {}
     return obj if isinstance(obj, dict) else {}
 
 

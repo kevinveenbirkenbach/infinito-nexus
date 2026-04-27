@@ -4,8 +4,7 @@ from collections import deque
 from pathlib import Path
 from typing import Any, Dict, List
 
-import yaml
-
+from utils.cache.yaml import load_yaml_any
 from utils.entity_name_utils import get_entity_name
 from utils.invokable import types_from_group_names
 from utils.roles.meta_lookup import get_role_run_after
@@ -56,7 +55,7 @@ def detect_service_bucket(role_name: str) -> str:
 def read_yaml_file(path: Path) -> Dict[str, Any]:
     if not path.is_file():
         return {}
-    return _as_mapping(yaml.safe_load(path.read_text(encoding="utf-8")) or {})
+    return _as_mapping(load_yaml_any(str(path), default_if_missing={}) or {})
 
 
 def load_applications_from_roles_dir(roles_dir: Path) -> Dict[str, Dict[str, Any]]:

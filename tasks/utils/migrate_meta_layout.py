@@ -42,14 +42,14 @@ def _load_yaml(path: Path) -> Any:
     text = path.read_text(encoding="utf-8")
     if not text.strip():
         return None
-    return yaml.safe_load(text)
+    return yaml.safe_load(text)  # noqa: direct-yaml — once-off migration script
 
 
 def _dump_yaml(path: Path, data: Any) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     if data is None:
         data = {}
-    text = yaml.safe_dump(
+    text = yaml.safe_dump(  # noqa: direct-yaml — once-off migration script
         data,
         sort_keys=False,
         default_flow_style=False,
@@ -60,7 +60,7 @@ def _dump_yaml(path: Path, data: Any) -> None:
 
 
 def _ordered_dump(data: Any) -> str:
-    return yaml.safe_dump(
+    return yaml.safe_dump(  # noqa: direct-yaml — once-off migration script
         data,
         sort_keys=False,
         default_flow_style=False,

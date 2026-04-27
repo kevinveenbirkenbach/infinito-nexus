@@ -5,7 +5,6 @@ import json
 import re
 from typing import List, Dict, Any, Set
 
-import yaml  # for safe_dump only; reads go through utils.cache.yaml
 
 from utils.roles.dependency_resolver import RoleDependencyResolver
 from utils.cache.yaml import load_yaml, load_yaml_any
@@ -321,17 +320,20 @@ def build_mappings(
 # ------------------------------------------------------------
 
 def output_graph(graph_data: Any, fmt: str, start: str, key: str):
+    from pathlib import Path
+
+    from utils.cache.yaml import dump_yaml, dump_yaml_str
+
     base = f"{start}_{key}"
     if fmt == "console":
         print(f"--- {base} ---")
-        print(yaml.safe_dump(graph_data, sort_keys=False))
-
+        print(dump_yaml_str(graph_data))
     else:
         path = f"{base}.{fmt}"
-        with open(path, "w") as f:
-            if fmt == "yaml":
-                yaml.safe_dump(graph_data, f, sort_keys=False)
-            else:
+        if fmt == "yaml":
+            dump_yaml(Path(path), graph_data)
+        else:
+            with open(path, "w") as f:
                 json.dump(graph_data, f, indent=2)
         print(f"Wrote {path}")
 

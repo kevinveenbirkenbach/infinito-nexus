@@ -59,7 +59,8 @@ def _load_raw(path, *, default_if_missing: Any) -> Any:
         return default_if_missing
 
     with p.open("r", encoding="utf-8") as f:
-        data = yaml.safe_load(f)
+        # This module IS the cache; calling itself would recurse.
+        data = yaml.safe_load(f)  # noqa: direct-yaml
     if data is None:
         data = {}
     _CACHE[key] = data
@@ -108,8 +109,42 @@ def dump_yaml(path, data: Mapping[str, Any]) -> None:
     p = Path(path)
     p.parent.mkdir(parents=True, exist_ok=True)
     with p.open("w", encoding="utf-8") as f:
-        yaml.safe_dump(dict(data), f, sort_keys=False, default_flow_style=False)
+        yaml.safe_dump(  # noqa: direct-yaml — this module IS the cache.
+            dict(data), f, sort_keys=False, default_flow_style=False
+        )
     _CACHE.pop(_key(p), None)
+
+
+def dump_yaml_str(
+    data: Any,
+    *,
+    sort_keys: bool = False,
+    default_flow_style: bool = False,
+) -> str:
+    """Serialise *data* to a YAML string.
+
+    Use this for stdout output, log messages, or any place a YAML
+    representation is needed without an on-disk file. There is no
+    cache involved (the destination is a string, not a path), but the
+    helper exists so callers don't have to ``import yaml`` just to call
+    ``yaml.safe_dump`` — keeping every YAML touchpoint in
+    ``utils.cache.yaml``.
+    """
+    return yaml.safe_dump(  # noqa: direct-yaml — this module IS the cache.
+        data, sort_keys=sort_keys, default_flow_style=default_flow_style
+    )
+
+
+def load_yaml_str(text: str) -> Any:
+    """Parse a YAML string.
+
+    Use this when the YAML payload comes from somewhere other than a
+    file (HTTP response body, stdin, an intermediate buffer). The
+    path-keyed cache cannot help here — every call parses afresh — but
+    the helper exists for symmetry with :func:`dump_yaml_str` so
+    callers never have to ``import yaml`` directly.
+    """
+    return yaml.safe_load(text)  # noqa: direct-yaml — this module IS the cache.
 
 
 def invalidate(path) -> None:

@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from pathlib import Path
 
-import yaml
+from utils.cache.yaml import load_yaml_any
 from ruamel.yaml import YAML
 from ruamel.yaml.comments import CommentedMap
 
@@ -49,7 +49,7 @@ def apply_mirror_overrides(host_vars_file: Path, mirrors_file: Path) -> None:
         raise SystemExit(f"Mirrors file not found: {mirrors_file}")
 
     try:
-        mirrors_raw = yaml.safe_load(mirrors_file.read_text(encoding="utf-8")) or {}
+        mirrors_raw = load_yaml_any(str(mirrors_file), default_if_missing={}) or {}
     except Exception as exc:
         raise SystemExit(f"Failed to load mirrors file {mirrors_file}: {exc}") from exc
 

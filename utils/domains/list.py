@@ -3,7 +3,7 @@ from __future__ import annotations
 from pathlib import Path
 from typing import Any
 
-import yaml
+from utils.cache.yaml import load_yaml as _load_yaml_cached
 
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
 ROLES_DIR = PROJECT_ROOT / "roles"
@@ -34,11 +34,7 @@ def _build_domain_index(
 def load_yaml_mapping(path: Path) -> dict[str, Any]:
     if not path.exists():
         return {}
-
-    data = yaml.safe_load(path.read_text(encoding="utf-8")) or {}
-    if not isinstance(data, dict):
-        raise ValueError(f"{path} must contain a YAML mapping")
-    return data
+    return _load_yaml_cached(str(path), default_if_missing={})
 
 
 def render_domain_value(value: Any, variables: dict[str, Any], field_name: str) -> Any:

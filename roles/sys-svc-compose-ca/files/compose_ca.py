@@ -11,6 +11,12 @@ import sys
 from pathlib import Path
 from typing import Any, Dict, List, Tuple
 
+# This script is deployed to the target host via `ansible.builtin.copy`
+# (see roles/sys-svc-compose-ca/tasks/01_core.yml). The deploy target
+# does NOT have the project's `utils/` package on PYTHONPATH, so direct
+# yaml.safe_load / yaml.safe_dump are the only option here. Each call
+# below carries an explicit `# noqa: direct-yaml` marker that the lint
+# `tests/lint/repository/test_no_direct_yaml_calls.py` honours.
 import yaml
 
 
@@ -40,7 +46,7 @@ def run_checked(cmd: List[str], *, cwd: Path, env: Dict[str, str], label: str) -
 
 def parse_yaml(text: str, label: str) -> Dict[str, Any]:
     try:
-        doc = yaml.safe_load(text)
+        doc = yaml.safe_load(text)  # noqa: direct-yaml
     except Exception as e:
         die(f"Failed to parse YAML for {label}: {e}")
     if not isinstance(doc, dict):
@@ -365,7 +371,7 @@ def _discover_profiles_from_files(compose_files: List[Path]) -> List[str]:
         if not f.exists():
             die(f"Compose file does not exist: {f}")
         try:
-            doc = yaml.safe_load(f.read_text(encoding="utf-8")) or {}
+            doc = yaml.safe_load(f.read_text(encoding="utf-8")) or {}  # noqa: direct-yaml
         except Exception as e:
             die(f"Failed to parse compose file '{f}': {e}")
 
@@ -657,7 +663,9 @@ def main() -> int:
 
     try:
         out_path.parent.mkdir(parents=True, exist_ok=True)
-        text = yaml.safe_dump(override_doc, sort_keys=True, default_flow_style=False)
+        text = yaml.safe_dump(  # noqa: direct-yaml
+            override_doc, sort_keys=True, default_flow_style=False
+        )
         out_path.write_text(text, encoding="utf-8")
     except Exception as e:
         die(f"Failed to write output file {out_path}: {e}")

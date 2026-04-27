@@ -7,7 +7,7 @@ import argparse
 import os
 import sys
 
-import yaml  # for safe_dump only; reads go through utils.cache.yaml
+from utils.cache.yaml import dump_yaml_str
 
 from utils.applications.in_group_deps import applications_if_group_and_all_deps
 from utils.cache.yaml import load_yaml
@@ -122,7 +122,7 @@ def main() -> int:
         print(f"Error running resolver: {exc}", file=sys.stderr)
         return 1
 
-    print(yaml.safe_dump(filtered, default_flow_style=False))
+    print(dump_yaml_str(filtered))
     return 0
 
 

@@ -6,7 +6,7 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Iterable, Set
 
-import yaml
+from utils.cache.yaml import load_yaml_any
 
 
 @dataclass(frozen=True)
@@ -52,8 +52,8 @@ def _categories_file() -> Path:
 def _read_yaml(path: Path) -> dict:
     if not path.is_file():
         return {}
-    with path.open("r", encoding="utf-8") as f:
-        return yaml.safe_load(f) or {}
+    data = load_yaml_any(str(path), default_if_missing={})
+    return data if isinstance(data, dict) else {}
 
 
 def _role_lifecycle(role_dir: Path) -> str:

@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from typing import Any, Dict, Mapping, Optional, Sequence
 
-import yaml
+from utils.cache.yaml import dump_yaml_str
 from ansible.errors import AnsibleFilterError
 
 try:
@@ -148,11 +148,7 @@ def compose_volumes(
 
     payload = {"volumes": _to_plain(volumes)}
 
-    return yaml.safe_dump(
-        payload,
-        sort_keys=False,
-        default_flow_style=False,
-    ).rstrip()
+    return dump_yaml_str(payload).rstrip()
 
 
 class FilterModule(object):

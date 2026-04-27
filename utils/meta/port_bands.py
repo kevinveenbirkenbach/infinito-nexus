@@ -9,7 +9,7 @@ from __future__ import annotations
 from pathlib import Path
 from typing import Dict, Optional, Tuple
 
-import yaml
+from utils.cache.yaml import load_yaml_any
 
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
@@ -23,8 +23,7 @@ class PortBandsError(ValueError):
 def _load_root() -> Dict:
     if not NETWORKS_FILE.is_file():
         raise PortBandsError(f"missing networks file: {NETWORKS_FILE}")
-    text = NETWORKS_FILE.read_text(encoding="utf-8")
-    data = yaml.safe_load(text) or {}
+    data = load_yaml_any(str(NETWORKS_FILE), default_if_missing={}) or {}
     if not isinstance(data, dict):
         raise PortBandsError(f"{NETWORKS_FILE} must be a YAML mapping")
     return data

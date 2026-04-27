@@ -2,11 +2,11 @@ from __future__ import annotations
 
 from pathlib import Path
 from typing import Iterable, List, Any
-import yaml
 
 from humanfriendly import parse_size
-from utils.entity_name_utils import get_entity_name
 from utils.annotations.message import warning
+from utils.cache.yaml import load_yaml_any
+from utils.entity_name_utils import get_entity_name
 
 
 def _repo_root() -> Path:
@@ -28,7 +28,7 @@ def _deep_get(dct: dict, path: list[str]) -> Any:
 
 
 def _load_yaml_file(path: Path) -> dict:
-    data = yaml.safe_load(path.read_text(encoding="utf-8"))
+    data = load_yaml_any(str(path), default_if_missing={})
     return data if isinstance(data, dict) else {}
 
 

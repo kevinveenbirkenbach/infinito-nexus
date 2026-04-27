@@ -3,7 +3,7 @@ from __future__ import annotations
 import os
 from typing import Any, Dict, List, Optional
 
-import yaml
+from utils.cache.yaml import load_yaml_any
 from ansible.errors import AnsibleError
 from ansible.plugins.lookup import LookupBase
 
@@ -88,9 +88,10 @@ class LookupModule(LookupBase):
         if not os.path.isfile(meta_file):
             return []
         try:
-            with open(meta_file, encoding="utf-8") as f:
-                meta = yaml.safe_load(f) or {}
+            meta = load_yaml_any(meta_file, default_if_missing={}) or {}
         except Exception:
+            return []
+        if not isinstance(meta, dict):
             return []
         deps = []
         for dep in meta.get("dependencies", []):

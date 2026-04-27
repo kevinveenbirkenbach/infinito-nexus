@@ -1,6 +1,6 @@
 import os
 import re
-import yaml
+from utils.cache.yaml import load_yaml_any
 from ansible.errors import AnsibleFilterError
 from collections.abc import Mapping
 
@@ -45,8 +45,7 @@ def get(
     def schema_defines(path):
         if not os.path.isfile(schema_path):
             return False
-        with open(schema_path) as f:
-            schema = yaml.safe_load(f) or {}
+        schema = load_yaml_any(schema_path, default_if_missing={}) or {}
         node = schema
         for part in path.split("."):
             key_match = re.match(r"^([a-zA-Z0-9_-]+)", part)

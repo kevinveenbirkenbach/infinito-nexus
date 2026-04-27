@@ -27,6 +27,7 @@ from typing import List, Optional, Union
 
 import yaml
 
+from utils.cache.yaml import load_yaml_any
 from utils.entity_name_utils import get_entity_name
 
 
@@ -41,16 +42,13 @@ def _read_meta_services(role_dir: Path) -> Optional[dict]:
     services_path = role_dir / "meta" / "services.yml"
     if not services_path.is_file():
         return None
-    text = services_path.read_text(encoding="utf-8")
-    if not text.strip():
-        return None
     try:
-        loaded = yaml.safe_load(text)
+        loaded = load_yaml_any(str(services_path))
     except yaml.YAMLError as exc:
         raise MetaServicesShapeError(
             f"{services_path} is not valid YAML: {exc}"
         ) from exc
-    if loaded is None:
+    if loaded in (None, {}):
         return None
     if not isinstance(loaded, dict):
         raise MetaServicesShapeError(
