@@ -25,8 +25,9 @@ services:
   # The CA cert volume is also bind-mounted into the `infinito`
   # container so its dockerd can install the proxy CA via
   # /usr/local/bin/registry-cache-ca.sh on every restart.
+  # `cache` profile gated; see compose/registry-cache/README.md.
   registry-cache:
-    profiles: ["ci"]
+    profiles: ["cache"]
     image: rpardini/docker-registry-proxy:0.6.5
     container_name: infinito-registry-cache
     environment:
@@ -90,17 +91,13 @@ services:
         NIX_CONFIG: ${NIX_CONFIG}
     image: "${INFINITO_IMAGE}"
     pull_policy: "${INFINITO_PULL_POLICY:-never}"
-    # Gate `infinito` on `registry-cache` being healthy (not just started),
-    # otherwise dockerd's ExecStartPre runs registry-cache-ca.sh
-    # before rpardini has written /ca/ca.crt → script silently skips, dockerd
-    # boots with HTTP_PROXY pointing at the proxy but no MITM CA in trust →
-    # every pull fails with x509 unknown-authority. The healthcheck at
-    # `wget http://127.0.0.1:3128/ca.crt` only succeeds once the CA is on disk.
+    # service_healthy + required:false: see compose/registry-cache/README.md.
     depends_on:
       coredns:
         condition: service_started
       registry-cache:
         condition: service_healthy
+        required: false
 
     # Run systemd as PID 1
     command:
@@ -160,13 +157,9 @@ services:
         read_only: true
         bind:
           create_host_path: true
-      # systemd drop-in: routes inner dockerd through the registry-cache
-      # MITM proxy and runs registry-cache-ca.sh as ExecStartPre.
-      # Bind-mounted from the repo so edits take effect on the next
-      # `make up` without an image rebuild.
-      - ./compose/registry-cache/proxy.conf:/etc/systemd/system/docker.service.d/registry-cache-proxy.conf:ro
-      # Companion install script invoked by the drop-in above. Must be
-      # executable in the repo (git +x bit); bind-mount preserves perms.
+      # /dev/null when cache profile inactive; INFINITO_REGISTRY_CACHE_PROXY_CONF
+      # is set by Profile in cli/deploy/development/profile.py.
+      - ${INFINITO_REGISTRY_CACHE_PROXY_CONF:-/dev/null}:/etc/systemd/system/docker.service.d/registry-cache-proxy.conf:ro
       - ./scripts/docker/registry-cache-ca.sh:/usr/local/bin/registry-cache-ca.sh:ro
 
     environment:

@@ -88,9 +88,18 @@ class TestComposeUpRetries(unittest.TestCase):
         self.assertEqual(compose.run.call_count, 1)
         sleep_mock.assert_not_called()
 
-    @patch.dict(os.environ, {"INFINITO_IMAGE": "test-image/arch"}, clear=False)
+    @patch.dict(
+        os.environ,
+        {
+            "INFINITO_IMAGE": "test-image/arch",
+            "GITHUB_ACTIONS": "true",
+            "RUNNING_ON_GITHUB": "true",
+            "CI": "true",
+        },
+        clear=False,
+    )
     @patch("subprocess.run", autospec=True)
-    def test_run_passes_ci_profile_flag_to_docker_compose(
+    def test_run_uses_only_ci_profile_on_github_runner(
         self, run_mock: MagicMock
     ) -> None:
         compose = self._compose()
@@ -110,12 +119,66 @@ class TestComposeUpRetries(unittest.TestCase):
         cmd = run_mock.call_args.args[0]
         env = run_mock.call_args.kwargs["env"]
 
+        # On GitHub-hosted runners the registry-cache stays inactive:
+        # fresh disk per job means no cross-run amortization, so the
+        # proxy adds startup latency without a payoff. Only the `ci`
+        # profile fires.
         self.assertEqual(
             cmd,
             ["docker", "compose", "--profile", "ci", "ps", "-q", "infinito"],
         )
         self.assertEqual(env["INFINITO_DISTRO"], "arch")
         self.assertNotIn("COMPOSE_PROFILES", env)
+        # And the proxy.conf bind-mount stays at /dev/null (the default
+        # baked into compose.yml), so dockerd does direct pulls.
+        self.assertNotIn("INFINITO_REGISTRY_CACHE_PROXY_CONF", env)
+
+    @patch.dict(
+        os.environ,
+        {
+            "INFINITO_IMAGE": "test-image/arch",
+            "GITHUB_ACTIONS": "",
+            "RUNNING_ON_GITHUB": "",
+            "CI": "",
+        },
+        clear=False,
+    )
+    @patch("subprocess.run", autospec=True)
+    def test_run_activates_cache_profile_locally(self, run_mock: MagicMock) -> None:
+        compose = self._compose()
+
+        run_mock.return_value = subprocess.CompletedProcess(
+            ["docker", "compose"], 0, stdout="", stderr=""
+        )
+
+        compose.run(["ps", "-q", "infinito"], check=False, capture=True)
+
+        cmd = run_mock.call_args.args[0]
+        env = run_mock.call_args.kwargs["env"]
+
+        # On a developer machine the cache profile activates so the
+        # registry-cache joins the stack and infinito's depends_on
+        # gates it via service_healthy.
+        self.assertEqual(
+            cmd,
+            [
+                "docker",
+                "compose",
+                "--profile",
+                "ci",
+                "--profile",
+                "cache",
+                "ps",
+                "-q",
+                "infinito",
+            ],
+        )
+        # And the proxy.conf bind-mount points at the real file so
+        # dockerd loads the systemd drop-in and routes pulls.
+        self.assertEqual(
+            env["INFINITO_REGISTRY_CACHE_PROXY_CONF"],
+            "./compose/registry-cache/proxy.conf",
+        )
 
     @patch.dict(
         os.environ,

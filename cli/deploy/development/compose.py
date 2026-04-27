@@ -8,17 +8,19 @@ from pathlib import Path
 from .coredns import CoreDNSCorefileRenderer
 from .network import detect_outer_network_mtu
 from .proc import run_streaming
+from .profile import Profile
 
 
 class Compose:
     """
     Small wrapper around:
-      INFINITO_DISTRO=<distro> docker compose --profile ci ...
+      INFINITO_DISTRO=<distro> docker compose --profile ci [--profile cache] ...
     """
 
     def __init__(self, repo_root: Path, distro: str) -> None:
         self.repo_root = repo_root
         self.distro = distro
+        self.profile = Profile()
 
     def _base_env(self) -> dict[str, str]:
         env = dict(os.environ)
@@ -39,15 +41,11 @@ class Compose:
                 check=True,
             )
             env["INFINITO_IMAGE"] = result.stdout.strip()
+        if self.profile.registry_cache_active():
+            env["INFINITO_REGISTRY_CACHE_PROXY_CONF"] = (
+                "./compose/registry-cache/proxy.conf"
+            )
         return env
-
-    def _is_ci(self) -> bool:
-        # keep this conservative (CI -> no TTY by default)
-        return (
-            os.environ.get("GITHUB_ACTIONS") == "true"
-            or os.environ.get("RUNNING_ON_GITHUB") == "true"
-            or os.environ.get("CI") == "true"
-        )
 
     def run(
         self,
@@ -59,7 +57,7 @@ class Compose:
         text: bool = True,
         extra_env: dict[str, str] | None = None,
     ) -> subprocess.CompletedProcess:
-        cmd = ["docker", "compose", "--profile", "ci", *args]
+        cmd = ["docker", "compose", *self.profile.args(), *args]
         env = self._base_env()
         if extra_env:
             env.update({k: str(v) for k, v in extra_env.items()})
@@ -217,7 +215,7 @@ class Compose:
           - live=True streams stdout/stderr to terminal.
         """
         if tty is None:
-            tty = not self._is_ci()
+            tty = not self.profile.is_ci()
 
         args = ["exec"]
         if not tty:

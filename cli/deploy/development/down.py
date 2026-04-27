@@ -7,6 +7,7 @@ import subprocess
 from pathlib import Path
 
 from .common import resolve_distro
+from .profile import Profile
 
 
 def _repo_root_from_here() -> Path:
@@ -31,7 +32,11 @@ def _compose_run(*, repo_root: Path, distro: str, args: list[str]) -> None:
     if env_development.exists():
         cmd += ["--env-file", "env.development"]
 
-    cmd += ["--profile", "ci", *args]
+    # Tear the registry-cache down too if it was activated for the
+    # corresponding `up`. Reuse the Profile decision so up/down cannot
+    # disagree about which services are part of the stack.
+    cmd += Profile().args()
+    cmd += list(args)
     env = _base_env(distro=distro)
     env.setdefault("NIX_CONFIG", "")
     subprocess.run(cmd, cwd=repo_root, env=env, check=True, text=True)

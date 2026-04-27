@@ -1,6 +1,6 @@
 # `compose.yml` 🐳
 
-This page is the SPOT for rules that govern the top-level [compose.yml](../../../../compose.yml) and for the environment variables it consumes.
+This page documents the rules that govern the top-level [compose.yml](../../../../compose.yml) and the environment variables it consumes.
 For general documentation rules (links, writing, RFC 2119 keywords), see [documentation.md](../../documentation.md).
 For CI debugging workflows that use these variables, see [ci.md](../../actions/debugging/ci.md).
 
@@ -31,7 +31,7 @@ All variables consumed by [compose.yml](../../../../compose.yml). Variables with
 |--------------------------|-----------------|-------------------------------------------------------------------------|
 | `INFINITO_IMAGE`         | none (required) | Image reference used by the `infinito` service.                         |
 | `INFINITO_PULL_POLICY`   | `never`         | Compose `pull_policy`. Keep `never` for local builds, `always` for CI.  |
-| `INFINITO_CONTAINER`     | none (required) | Used directly as `container_name`. SPOT-derived from `INFINITO_DISTRO` by [defaults.sh](../../../../scripts/meta/env/defaults.sh); compose.yml reads it strictly via `${INFINITO_CONTAINER:?...}`. |
+| `INFINITO_CONTAINER`     | none (required) | Used directly as `container_name`. Derived from `INFINITO_DISTRO` by [defaults.sh](../../../../scripts/meta/env/defaults.sh); compose.yml reads it strictly via `${INFINITO_CONTAINER:?...}`. |
 | `INFINITO_COMPILE`       | `1`             | Passed into the container; toggles in-container compilation steps.      |
 | `NIX_CONFIG`             | none            | Build-arg forwarded to the Dockerfile for Nix configuration.            |
 
@@ -63,33 +63,48 @@ The `registry-cache` service runs `rpardini/docker-registry-proxy` as a
 pull-through MITM proxy in front of every outbound docker registry pull
 made by `infinito`'s inner dockerd. Catch-all caching: first request to
 any registry (`docker.io`, `ghcr.io`, `quay.io`, `registry.k8s.io`, …)
-is fetched and persisted; re-requests are served from cache. The
-service sits in the `ci` profile alongside `coredns` and `infinito`, so
-it starts and stops with the dev/CI stack.
+is fetched and persisted; re-requests are served from cache.
+
+The service sits in its own `cache` profile, separate from the always-on
+`ci` profile that carries `coredns` and `infinito`. Profile activation
+is decided by [Profile](../../../../cli/deploy/development/profile.py):
+
+- **Local dev**: `cache` profile active, `registry-cache` runs, `infinito`
+  routes pulls through the proxy. Cross-run image dedup pays off here
+  because the host disk persists between deploys.
+- **CI runs** (`GITHUB_ACTIONS=true`, `RUNNING_ON_GITHUB=true`, or
+  `CI=true`): `cache` profile inactive, `registry-cache` does not start,
+  `infinito.depends_on.registry-cache` is `required: false` so Compose
+  does not pull it in via the dependency. Fresh runner disks would not
+  benefit from cross-run dedup; the proxy startup overhead is net loss.
 
 Wiring inside `infinito` (all bind-mounted directly via `compose.yml`,
 no Dockerfile or entry.sh staging, so edits take effect on the next
 container start without an image rebuild):
 
 - the registry-cache CA bundle at `/opt/registry-cache-ca` (read-only),
-- the systemd drop-in
-  [proxy.conf](../../../../compose/registry-cache/proxy.conf) at
-  `/etc/systemd/system/docker.service.d/registry-cache-proxy.conf`,
+- the systemd drop-in source path is gated by
+  `INFINITO_REGISTRY_CACHE_PROXY_CONF`. The dev tooling sets it to
+  [proxy.conf](../../../../compose/registry-cache/proxy.conf) when the
+  `cache` profile is active and leaves it at `/dev/null` otherwise, so
+  systemd reads an empty drop-in when the proxy is not running and
+  dockerd boots without `HTTP_PROXY`,
 - the install script
   [registry-cache-ca.sh](../../../../scripts/docker/registry-cache-ca.sh)
   at `/usr/local/bin/registry-cache-ca.sh` (must keep its git
   +x bit; bind-mounts preserve host permissions).
 
-The drop-in registers the install script as `ExecStartPre`. dockerd is
-gated on `registry-cache` health (`condition: service_healthy`) so the
-CA is on disk before `ExecStartPre` runs. Pulls only. Pushes are not
-intercepted.
+When the proxy is active, the drop-in registers the install script as
+`ExecStartPre`. dockerd is gated on `registry-cache` health
+(`condition: service_healthy`) so the CA is on disk before
+`ExecStartPre` runs. Pulls only. Pushes are not intercepted.
 
 | Variable                                | Default                                | Purpose                                                                                                              |
 |-----------------------------------------|----------------------------------------|----------------------------------------------------------------------------------------------------------------------|
 | `INFINITO_REGISTRY_CACHE_HOST_PATH`     | `/tmp/infinito/core/registry-cache/mirror`  | Host path bind-mounted into `registry-cache` for blob/manifest persistence.                                          |
 | `INFINITO_REGISTRY_CACHE_CA_HOST_PATH`  | `/tmp/infinito/core/registry-cache/ca`      | Host path holding the proxy MITM CA bundle. Mounted writable into `registry-cache`, read-only into `infinito`.       |
 | `INFINITO_REGISTRY_CACHE_MAX_SIZE`      | `32g`                                  | Maximum on-disk size of the cache. Older entries are evicted when this is reached.                                   |
+| `INFINITO_REGISTRY_CACHE_PROXY_CONF`    | `/dev/null`                            | Bind-mount source for the systemd drop-in inside `infinito`. Set by the dev tooling to the real `proxy.conf` only when the `cache` profile is active; the `/dev/null` default makes systemd load an empty drop-in so dockerd boots without `HTTP_PROXY`. |
 
 ### Networking
 
