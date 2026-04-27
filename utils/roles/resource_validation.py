@@ -74,7 +74,7 @@ def filter_roles_by_min_storage(
                 )
             continue
 
-        cfg_path = role_dir / "config" / "main.yml"
+        cfg_path = role_dir / "meta" / "services.yml"
         if not cfg_path.is_file():
             continue
 
@@ -88,8 +88,7 @@ def filter_roles_by_min_storage(
                 )
             continue
 
-        service_path = ["compose", "services", entity_name]
-        service_cfg = _deep_get(cfg, service_path)
+        service_cfg = _deep_get(cfg, [entity_name])
         if service_cfg is None or not isinstance(service_cfg, dict):
             out.append(role_name)
             continue
@@ -99,7 +98,7 @@ def filter_roles_by_min_storage(
         if min_storage_val is None:
             if emit_warnings:
                 warning(
-                    f"Missing key compose.services.{entity_name}.min_storage in {cfg_path} (treating as 0GB)",
+                    f"Missing key services.{entity_name}.min_storage in {cfg_path} (treating as 0GB)",
                     title="min_storage validation",
                 )
             out.append(role_name)

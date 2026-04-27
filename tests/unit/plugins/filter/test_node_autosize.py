@@ -41,7 +41,7 @@ class TestNodeAutosizeFilter(unittest.TestCase):
             **_kwargs,
         ):
             assert application_id == self.application_id
-            assert config_path == f"compose.services.{self.service_name}.mem_limit"
+            assert config_path == f"services.{self.service_name}.mem_limit"
             return value
 
         self.mock_get.side_effect = _fake_get

@@ -88,7 +88,7 @@ def _resolve_variant_payloads(
     """Return ``{app_id: variant_payload}`` for the requested round.
 
     Apps without `meta/variants.yml` collapse to a single empty variant
-    in the loader, so this just picks variant 0 (= `config/main.yml`
+    in the loader, so this just picks variant 0 (= `meta/services.yml`
     unchanged) for them. Out-of-range indices clamp to 0.
     """
     variants_per_app = get_variants(roles_dir=roles_dir)
@@ -217,7 +217,7 @@ def plan_dev_inventory_matrix(
 
     `total_rounds = max(variant_count)` across the included apps. In each
     round R, every app uses variant index R when its variant list is long
-    enough, otherwise variant 0 (the legacy `config/main.yml` payload).
+    enough, otherwise variant 0 (the legacy `meta/services.yml` payload).
     Inventory paths are suffixed with `-<round>` only when `total_rounds
     > 1`, so single-variant deploys keep the historical unsuffixed path.
 

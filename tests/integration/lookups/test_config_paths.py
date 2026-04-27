@@ -28,7 +28,7 @@ class TestGetAppConfPaths(unittest.TestCase):
             try:
                 role = get_role(app_id, roles_path)
                 cls.role_for_app[app_id] = role
-                schema_file = root / "roles" / role / "schema" / "main.yml"
+                schema_file = root / "roles" / role / "meta" / "schema.yml"
                 with schema_file.open(encoding="utf-8") as sf:
                     schema = yaml.safe_load(sf) or {}
                 cls.role_schemas[app_id] = schema
@@ -78,9 +78,19 @@ class TestGetAppConfPaths(unittest.TestCase):
                     app_arg.startswith('"') and app_arg.endswith('"')
                 ):
                     app_id = app_arg.strip("'\"")
-                    cls.literal_paths.setdefault(app_id, {}).setdefault(
-                        path_arg, []
-                    ).append((file_path, lineno))
+                    # Path strings ending with `.` are partial — they get
+                    # concatenated with a Jinja variable via `~` (e.g.
+                    # `'services.openldap.ports.local.' ~ _ldap_protocol`).
+                    # Validate them via the variable_paths wildcard‐prefix
+                    # path instead of attempting an exact lookup.
+                    if path_arg.endswith("."):
+                        cls.variable_paths.setdefault(path_arg, []).append(
+                            (file_path, lineno)
+                        )
+                    else:
+                        cls.literal_paths.setdefault(app_id, {}).setdefault(
+                            path_arg, []
+                        ).append((file_path, lineno))
                 else:
                     cls.variable_paths.setdefault(path_arg, []).append(
                         (file_path, lineno)

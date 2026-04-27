@@ -27,7 +27,7 @@ port assignments:
   `defaults_networks.local.<role>.subnet` per role plus `dns_resolver` (mailu),
   and global host-level keys (`NETWORK_IPV6_ENABLED`,
   `defaults_networks.internet.{ip4,ip6,dns}`).
-- [`group_vars/all/09_ports.yml`](../../group_vars/all/09_ports.yml) —
+- `group_vars/all/09_ports.yml` (since deleted by this requirement) —
   `ports.{localhost,public}.<category>.<role>` per role, with multi-entity
   roles flattened via `_<entity>` suffixes (`web-app-bluesky_api`,
   `web-app-matrix_synapse`, …).

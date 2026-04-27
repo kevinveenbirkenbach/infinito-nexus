@@ -189,7 +189,8 @@ galaxy_info:
         return {
             "domains": {"portfolio": "myportfolio.com"},
             "applications": {
-                "portfolio": {"compose": {"services": {"dashboard": {"enabled": True}}}}
+                # Per req-008 the materialised payload moved to services.<X>.
+                "portfolio": {"services": {"dashboard": {"enabled": True}}}
             },
             "group_names": ["portfolio"],
             "TLS_ENABLED": True,

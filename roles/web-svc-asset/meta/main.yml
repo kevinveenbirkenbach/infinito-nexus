@@ -3,9 +3,7 @@ galaxy_info:
   description: Serves static assets via Nginx by copying from a source directory to the Nginx data path.
   license: Infinito.Nexus Community License (Non-Commercial)
   license_url: https://s.infinito.nexus/license
-  company: 'Kevin Veen-Birchenbach
-    Consulting & Coaching Solutions
-    https://www.veen.world'
+  company: Kevin Veen-Birchenbach Consulting & Coaching Solutions https://www.veen.world
   galaxy_tags:
   - assets
   - nginx
@@ -18,6 +16,3 @@ galaxy_info:
   - name: Any
     versions:
     - all
-  lifecycle: beta
-  run_after:
-  - web-svc-file

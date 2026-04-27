@@ -12,6 +12,3 @@ galaxy_info:
   - caffeine
   - autostart
   - archlinux
-  run_after:
-  - desk-gnome
-  lifecycle: pre-alpha

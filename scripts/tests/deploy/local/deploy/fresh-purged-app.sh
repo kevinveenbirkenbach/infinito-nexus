@@ -71,10 +71,20 @@ echo ">>> init inventory (ASYNC_ENABLED=false, RUNTIME=dev baked)"
 # to "host". Without an explicit override the matrix-init step would bake
 # `RUNTIME=host` into host_vars and the Playwright E2E gate
 # (RUNTIME in [dev, act, github]) would never fire.
+#
+# Allow ad-hoc inventory overrides for dev iteration via `INIT_VARS_EXTRA`,
+# e.g. `INIT_VARS_EXTRA='"SYSTEM_EMAIL_EXTERNAL": true'` to skip the local
+# postfix relay in dev containers where systemd-postfix won't start.
+INIT_VARS_BASE='"ASYNC_ENABLED": false, "RUNTIME": "dev"'
+if [[ -n "${INIT_VARS_EXTRA:-}" ]]; then
+	INIT_VARS="{${INIT_VARS_BASE}, ${INIT_VARS_EXTRA}}"
+else
+	INIT_VARS="{${INIT_VARS_BASE}}"
+fi
 "${PYTHON}" -m cli.deploy.development init \
 	--apps "${APPS}" \
 	--inventory-dir "${INVENTORY_DIR}" \
-	--vars '{"ASYNC_ENABLED": false, "RUNTIME": "dev"}'
+	--vars "${INIT_VARS}"
 
 if [[ "${FULL_CYCLE}" == "true" ]]; then
 	echo ">>> deploy (PASS 1 sync + PASS 2 async per variant, FULL_CYCLE=true)"

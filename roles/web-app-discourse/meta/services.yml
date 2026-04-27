@@ -1,0 +1,52 @@
+asset:
+  enabled: true
+  shared: true
+oidc:
+  enabled: true
+  shared: true
+logout:
+  enabled: true
+  shared: true
+ldap:
+  enabled: false
+  shared: false
+dashboard:
+  enabled: true
+  shared: true
+matomo:
+  enabled: true
+  shared: true
+email:
+  enabled: true
+  shared: true
+postgres:
+  enabled: true
+  shared: true
+redis:
+  backup:
+    disabled: true
+  enabled: true
+discourse:
+  name: discourse
+  version: main
+  min_storage: 15GB
+  repository: https://github.com/discourse/discourse_docker.git
+  plugins:
+    docker_manager:
+      enabled: true
+    discourse-activity-pub:
+      enabled: true
+    discourse-akismet:
+      enabled: true
+  ports:
+    local:
+      http: 8020
+  run_after:
+  - web-app-wordpress
+  lifecycle: beta
+css:
+  enabled: true
+  shared: true
+prometheus:
+  enabled: true
+  shared: true

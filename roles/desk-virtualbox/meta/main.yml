@@ -1,13 +1,15 @@
 galaxy_info:
   author: Kevin Veen-Birchenbach
-  description: Installs and configures VirtualBox and its kernel modules on Pacman-based systems, including extension packs
-    and user group setup.
+  description: Installs and configures VirtualBox and its kernel modules on Pacman-based systems, including extension packs and user group setup.
   license: Infinito.Nexus Community License (Non-Commercial)
   license_url: https://s.infinito.nexus/license
-  company: |
-    Kevin Veen-Birkenbach
+  company: 'Kevin Veen-Birkenbach
+
     Consulting & Coaching Solutions
+
     https://www.veen.world
+
+    '
   galaxy_tags:
   - virtualbox
   - virtualization
@@ -20,5 +22,4 @@ galaxy_info:
   - name: Archlinux
     versions:
     - all
-  lifecycle: pre-alpha
 dependencies: []

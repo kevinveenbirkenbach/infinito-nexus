@@ -1,12 +1,9 @@
-# roles/sys-front-tls/meta/main.yml
 galaxy_info:
   author: Kevin Veen-Birchenbach
   description: Generic TLS orchestrator that resolves TLS mode and delegates certificate handling to provider roles (LetsEncrypt/self-signed/off) for Nginx reverse proxies.
   license: Infinito.Nexus Community License (Non-Commercial)
   license_url: https://s.infinito.nexus/license
-  company: 'Kevin Veen-Birchenbach
-    Consulting & Coaching Solutions
-    https://www.veen.world'
+  company: Kevin Veen-Birchenbach Consulting & Coaching Solutions https://www.veen.world
   galaxy_tags:
   - nginx
   - tls
@@ -22,4 +19,3 @@ galaxy_info:
   - name: Any
     versions:
     - all
-  lifecycle: beta

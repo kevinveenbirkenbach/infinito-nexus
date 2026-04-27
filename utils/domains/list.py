@@ -72,8 +72,8 @@ def build_applications_from_roles(
 
     for role_dir in sorted(roles_dir.iterdir()):
         vars_main = role_dir / "vars" / "main.yml"
-        config_main = role_dir / "config" / "main.yml"
-        if not vars_main.exists() or not config_main.exists():
+        server_meta = role_dir / "meta" / "server.yml"
+        if not vars_main.exists() or not server_meta.exists():
             continue
 
         vars_data = load_yaml_mapping(vars_main)
@@ -81,8 +81,9 @@ def build_applications_from_roles(
         if not isinstance(application_id, str) or not application_id.strip():
             continue
 
-        config_data = load_yaml_mapping(config_main)
-        server = config_data.get("server")
+        # Per req-008 the file-root of meta/server.yml IS the value of
+        # applications.<app>.server.
+        server = load_yaml_mapping(server_meta)
         if not isinstance(server, dict):
             continue
 

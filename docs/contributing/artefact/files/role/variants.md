@@ -8,23 +8,23 @@ For how the file is consumed at runtime (folder-per-round model, `--variant` / `
 
 - The file MUST live at `roles/<application_id>/meta/variants.yml`.
 - It MUST NOT be named `meta/inventory.yml`. The Ansible language server auto-applies the inventory schema to that filename, and the variant list does not satisfy it.
-- A role MAY omit the file entirely. The loader then exposes exactly one variant equal to `config/main.yml` unchanged.
+- A role MAY omit the file entirely. The loader then exposes exactly one variant equal to the assembled per-role meta payload (`meta/services.yml` + `meta/server.yml` + `meta/rbac.yml` + `meta/volumes.yml` + `apply_schema()`'d `meta/schema.yml`) unchanged.
 
 ## File Format 📋
 
 - The top-level node MUST be a YAML list. A non-list root is a hard error.
 - Each list entry MUST be either:
   - the empty mapping `{}` (the canonical no-override entry), or
-  - a YAML mapping that mirrors the keys you want to override in `config/main.yml`.
+  - a YAML mapping that mirrors the assembled application payload — i.e. it can override anything reachable under `applications.<app>.{server,rbac,services,volumes,credentials}` (see [layout.md](../../../design/services/layout.md)).
 - The literal `null` is normalised to `{}` so a bare `- ` list item stays valid.
 - Scalars at entry level (numbers, strings, lists) are rejected.
 - Variants are addressed by their **zero-based index** in the list.
 
 ## Entry Semantics 🧩
 
-A **variant** is the role's `config/main.yml` payload deep-merged with the matching list entry. The deep-merge follows the same rules as the [`applications`](../plugins/lookup/applications.md) lookup: dictionaries merge recursively, scalars and lists are replaced, and the entry has precedence.
+A **variant** is the role's assembled per-role meta payload (the same payload `applications.<app>` exposes — see [layout.md](../../../design/services/layout.md)) deep-merged with the matching list entry. The deep-merge follows the same rules as the [`applications`](../plugins/lookup/applications.md) lookup: dictionaries merge recursively, scalars and lists are replaced, and the entry has precedence.
 
-- Entry `{}` produces the unchanged `config/main.yml` payload, which becomes variant 0.
+- Entry `{}` produces the unchanged assembled payload, which becomes variant 0.
 - An entry with overrides produces a derived shape (for example WordPress Multisite domains).
 - Variant 0 is the canonical baseline. The first entry SHOULD therefore be `{}` whenever the role has a meaningful "default deploy" shape, so consumers reading variant 0 keep getting the historical payload unchanged.
 
@@ -43,11 +43,10 @@ A **variant** is the role's `config/main.yml` payload deep-merged with the match
         - "blog.{{ DOMAIN_PRIMARY }}"
         - "shop.{{ DOMAIN_PRIMARY }}"
         - "news.{{ DOMAIN_PRIMARY }}"
-  compose:
-    services:
-      wordpress:
-        multisite:
-          enabled: true
+  services:
+    wordpress:
+      multisite:
+        enabled: true
 ```
 
 This declares two variants. Variant 0 is the baseline; variant 1 flips Multisite on against three canonical domains.

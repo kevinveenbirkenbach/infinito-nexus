@@ -64,7 +64,7 @@ def resolve_direct_service_roles_from_config(
 
 class ServicesResolver:
     """
-    Resolve shared-provider roles transitively from role config/main.yml.
+    Resolve shared-provider roles transitively from role meta/services.yml.
 
     Note:
     - Transitively follows provider roles by reading THEIR configs and applying the same
@@ -84,17 +84,22 @@ class ServicesResolver:
     def _role_dir(self, role_name: str) -> Path:
         return self.roles_root / role_name
 
-    def _role_config_path(self, role_name: str) -> Path:
-        return self._role_dir(role_name) / "config" / "main.yml"
+    def _role_services_path(self, role_name: str) -> Path:
+        # Per req-008 the services manifest moved to meta/services.yml. The
+        # file root IS the services map (no `compose.services` wrapper).
+        return self._role_dir(role_name) / "meta" / "services.yml"
 
     def _load_role_config(self, role_name: str) -> dict:
-        cfg_path = self._role_config_path(role_name)
-        if not cfg_path.exists():
+        services_path = self._role_services_path(role_name)
+        if not services_path.exists():
             return {}
         try:
-            return load_yaml(cfg_path)
+            services = load_yaml(services_path) or {}
         except Exception as exc:
-            raise ServicesResolutionError(f"Failed to parse {cfg_path}: {exc}") from exc
+            raise ServicesResolutionError(
+                f"Failed to parse {services_path}: {exc}"
+            ) from exc
+        return {"services": services} if isinstance(services, dict) else {}
 
     def _validate_role_exists(self, role_name: str) -> None:
         role_dir = self._role_dir(role_name)

@@ -17,8 +17,7 @@
         - "blog.{{ DOMAIN_PRIMARY }}"
         - "biberblog.{{ DOMAIN_PRIMARY }}"
         - "biber.blog.{{ DOMAIN_PRIMARY }}"
-  compose:
-    services:
-      wordpress:
-        multisite:
-          enabled: true
+  services:
+    wordpress:
+      multisite:
+        enabled: true

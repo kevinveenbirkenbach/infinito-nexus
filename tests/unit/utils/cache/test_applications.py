@@ -27,26 +27,23 @@ def _write(path: Path, content: str) -> None:
 
 
 def _seed_minimal_roles(tmp: Path) -> Path:
-    """Create a minimal `<tmp>/roles/web-app-foo/{config,users}` tree
+    """Create a minimal `<tmp>/roles/web-app-foo/meta/...` tree (post req-008)
     so applications/variants can resolve a real role.
     """
     roles = tmp / "roles"
     role = roles / "web-app-foo"
     _write(
-        role / "config" / "main.yml",
+        role / "meta" / "services.yml",
         """
-        compose:
-          services:
-            foo:
-              image: foo
-              version: latest
+        foo:
+          image: foo
+          version: latest
         """,
     )
     _write(
-        role / "users" / "main.yml",
+        role / "meta" / "users.yml",
         """
-        users:
-          administrator: {}
+        administrator: {}
         """,
     )
     return roles
@@ -61,7 +58,7 @@ class TestGetApplicationDefaults(unittest.TestCase):
             roles = _seed_minimal_roles(Path(tmp))
             defaults = cache_apps.get_application_defaults(roles_dir=roles)
             self.assertIn("web-app-foo", defaults)
-            self.assertIn("compose", defaults["web-app-foo"])
+            self.assertIn("services", defaults["web-app-foo"])
 
     def test_caches_per_roles_dir(self):
         with tempfile.TemporaryDirectory() as tmp:
@@ -101,10 +98,9 @@ class TestGetVariants(unittest.TestCase):
                 roles / "web-app-foo" / "meta" / "variants.yml",
                 """
                 - {}
-                - compose:
-                    services:
-                      foo:
-                        image: foo-alt
+                - services:
+                    foo:
+                      image: foo-alt
                 """,
             )
             variants = cache_apps.get_variants(roles_dir=roles)
@@ -112,11 +108,11 @@ class TestGetVariants(unittest.TestCase):
             # Variant 0 (default) keeps the canonical image; variant 1 has the
             # override applied.
             self.assertEqual(
-                variants["web-app-foo"][0]["compose"]["services"]["foo"]["image"],
+                variants["web-app-foo"][0]["services"]["foo"]["image"],
                 "foo",
             )
             self.assertEqual(
-                variants["web-app-foo"][1]["compose"]["services"]["foo"]["image"],
+                variants["web-app-foo"][1]["services"]["foo"]["image"],
                 "foo-alt",
             )
 
@@ -133,11 +129,10 @@ class TestBuildRoleBaseConfig(unittest.TestCase):
     def setUp(self) -> None:
         _reset_cache_for_tests()
 
-    def test_empty_config_yields_empty_dict(self):
+    def test_empty_meta_yields_empty_dict(self):
         with tempfile.TemporaryDirectory() as tmp:
             role = Path(tmp) / "roles" / "web-app-empty"
-            (role / "config").mkdir(parents=True)
-            (role / "config" / "main.yml").write_text("", encoding="utf-8")
+            (role / "meta").mkdir(parents=True)
             self.assertEqual(
                 cache_apps._build_role_base_config(role, role.parent),
                 {},
@@ -162,7 +157,7 @@ class TestGetMergedApplicationsRespectsOverrides(unittest.TestCase):
                 variables={
                     "applications": {
                         "web-app-foo": {
-                            "compose": {"services": {"foo": {"image": "override"}}},
+                            "services": {"foo": {"image": "override"}},
                         }
                     }
                 },
@@ -170,7 +165,7 @@ class TestGetMergedApplicationsRespectsOverrides(unittest.TestCase):
                 templar=None,
             )
             self.assertEqual(
-                merged["web-app-foo"]["compose"]["services"]["foo"]["image"],
+                merged["web-app-foo"]["services"]["foo"]["image"],
                 "override",
             )
 

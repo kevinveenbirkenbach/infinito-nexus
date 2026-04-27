@@ -12,7 +12,7 @@ class TestOidcOauth2MutualExclusion(unittest.TestCase):
         failures = []
 
         for role_path in sorted(ROLES_DIR.iterdir()):
-            config_file = role_path / "config" / "main.yml"
+            config_file = role_path / "meta" / "services.yml"
             if not config_file.exists():
                 continue
 
@@ -29,8 +29,8 @@ class TestOidcOauth2MutualExclusion(unittest.TestCase):
 
             if oidc_enabled and oauth2_enabled:
                 failures.append(
-                    f"{config_file}: compose.services.oidc.enabled and "
-                    "compose.services.oauth2.enabled are both true. "
+                    f"{config_file}: services.oidc.enabled and "
+                    "services.oauth2.enabled are both true. "
                     "Enable only one of them, because using both at the same time is redundant."
                 )
 

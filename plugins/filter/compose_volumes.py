@@ -80,7 +80,7 @@ def compose_volumes(
 
       - redis volume if:
           is_docker_service_enabled(redis)
-          or compose.services.oauth2.enabled
+          or services.oauth2.enabled
 
         name: {{ application_id | get_entity_name }}_redis
 
@@ -132,7 +132,7 @@ def compose_volumes(
         get(
             applications=applications,
             application_id=application_id,
-            config_path="compose.services.oauth2.enabled",
+            config_path="services.oauth2.enabled",
             strict=False,
             default=False,
             skip_missing_app=True,

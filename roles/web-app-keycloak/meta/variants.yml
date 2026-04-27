@@ -6,10 +6,9 @@
 # the extra TOTP enrollment step.
 - credentials:
     administrator_password: "'$tr0ng€xampl3PW!"
-  compose:
-    services:
-      keycloak:
-        realm:
-          # TOTP MUST stay disabled in dev so automated specs can sign
-          # in without enrolling an authenticator app.
-          totp_enabled: false
+  services:
+    keycloak:
+      realm:
+        # TOTP MUST stay disabled in dev so automated specs can sign
+        # in without enrolling an authenticator app.
+        totp_enabled: false

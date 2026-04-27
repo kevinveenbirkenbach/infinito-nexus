@@ -18,4 +18,3 @@ galaxy_info:
   - systemd
   repository: https://s.infinito.nexus/code
   documentation: https://docs.infinito.nexus
-  lifecycle: beta

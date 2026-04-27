@@ -7,5 +7,3 @@ galaxy_info:
   - name: Linux
     versions:
     - all
-  # Worked in the past, but current deployment focus on server, can be reactivated later
-  lifecycle: pre-alpha

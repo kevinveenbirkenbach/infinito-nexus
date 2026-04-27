@@ -4,7 +4,7 @@ This page is the design SPOT for the Infinito.Nexus RBAC layer that provisions L
 
 ## LDAP layout contract 🌳
 
-Every role that declares an `rbac:` block in its `config/main.yml` MUST be provisioned with a per-application namespace under the container named by `RBAC.GROUP.NAME` (default `roles`). Each LDAP group entry is a direct child of that container; the application identifier (and the tenant identifier, if any) is encoded into the CN with hyphen separators:
+Every role that declares RBAC at the file root of its `meta/rbac.yml` (per [req-008](../../../requirements/008-role-meta-layout.md)) MUST be provisioned with a per-application namespace under the container named by `RBAC.GROUP.NAME` (default `roles`). Each LDAP group entry is a direct child of that container; the application identifier (and the tenant identifier, if any) is encoded into the CN with hyphen separators:
 
 ```
 cn=<application_id>-<role_name>,ou=roles,<LDAP_DN_BASE>                       # non-tenant / global role

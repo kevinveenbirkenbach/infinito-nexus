@@ -1,7 +1,6 @@
 galaxy_info:
   author: Kevin Veen-Birkenbach
-  description: Injects a JS snippet into HTML to notify parent windows of iframe location changes and force external links
-    to new tabs.
+  description: Injects a JS snippet into HTML to notify parent windows of iframe location changes and force external links to new tabs.
   company: "Kevin Veen-Birkenbach  \nConsulting & Coaching Solutions  \nhttps://www.veen.world\n"
   license: Infinito.Nexus Community License (Non-Commercial)
   repository: https://s.infinito.nexus/code
@@ -20,4 +19,3 @@ galaxy_info:
   - csp
   - security
   - postMessage
-  lifecycle: beta

@@ -3,10 +3,13 @@ galaxy_info:
   description: Installs MinIO — an S3-compatible object storage service for media, backups, and AI artifacts.
   license: Infinito.Nexus Community License (Non-Commercial)
   license_url: https://s.infinito.nexus/license
-  company: |
-    Kevin Veen-Birkenbach
+  company: 'Kevin Veen-Birkenbach
+
     Consulting & Coaching Solutions
+
     https://www.veen.world
+
+    '
   galaxy_tags:
   - s3
   - object-storage
@@ -22,8 +25,4 @@ galaxy_info:
   documentation: https://s.infinito.nexus/code/
   logo:
     class: fa-solid fa-database
-  run_after:
-  - web-app-keycloak
-  - web-app-matomo
-  lifecycle: pre-alpha
 dependencies: []

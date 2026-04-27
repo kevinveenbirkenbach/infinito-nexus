@@ -1,7 +1,7 @@
 ---
 # Requirement 005: WordPress Multisite opt-in.
 #
-# Runs only when `compose.services.wordpress.multisite.enabled` is true.
+# Runs only when `services.wordpress.multisite.enabled` is true.
 # Converts the fresh Single-Site installation into a sub-domain Multisite
 # network and creates one site per canonical domain beyond the first.
 # Domain mapping is handled natively by WordPress core since 4.5.

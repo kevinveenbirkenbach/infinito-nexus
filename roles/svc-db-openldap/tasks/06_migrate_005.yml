@@ -107,8 +107,8 @@
 - name: "Migration 005: Keycloak logout-all after LDAP rewrite"
   ansible.builtin.shell: |
     set -o pipefail
-    KC_CONTAINER={{ lookup('applications', 'web-app-keycloak').compose.services.keycloak.name | quote }}
-    KC_ADMIN_USER={{ lookup('config', 'web-app-keycloak', 'accounts.system.username') | quote }}
+    KC_CONTAINER={{ lookup('applications', 'web-app-keycloak').services.keycloak.name | quote }}
+    KC_ADMIN_USER={{ lookup('config', 'web-app-keycloak', 'services.keycloak.accounts.system.username') | quote }}
     KC_ADMIN_PASS={{ lookup('config', 'web-app-keycloak', 'credentials.administrator_password') | quote }}
     container exec "${KC_CONTAINER}" /opt/keycloak/bin/kcadm.sh config credentials \
       --server http://localhost:8080 \

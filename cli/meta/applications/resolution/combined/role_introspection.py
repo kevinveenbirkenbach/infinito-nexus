@@ -34,33 +34,25 @@ def has_application_id(role_name: str) -> bool:
 
 
 def load_run_after(role_name: str) -> List[str]:
+    """Return ``run_after`` for the role (or ``[]`` when absent).
+
+    Per req-010 the value lives at
+    ``meta/services.yml.<primary_entity>.run_after``. Delegates to
+    :func:`utils.roles.meta_lookup.get_role_run_after` so the
+    primary-entity derivation stays in one place.
     """
-    Read galaxy_info.run_after from roles/<role_name>/meta/main.yml.
-    Missing meta/main.yml => [].
-    """
-    meta = role_meta_path(role_name)
-    if not meta.exists():
+    from utils.roles.meta_lookup import (
+        MetaServicesShapeError,
+        get_role_run_after,
+    )
+
+    role_path = role_dir(role_name)
+    if not role_path.is_dir():
         return []
-
-    data = load_yaml_file(meta)
-    galaxy_info = data.get("galaxy_info", {}) or {}
-    run_after = galaxy_info.get("run_after", []) or []
-
-    if run_after is None:
-        return []
-    if not isinstance(run_after, list):
-        raise CombinedResolutionError(
-            f"Invalid run_after type in {meta}: expected list, got {type(run_after).__name__}"
-        )
-
-    cleaned: List[str] = []
-    for item in run_after:
-        if isinstance(item, str) and item.strip():
-            cleaned.append(item.strip())
-        else:
-            raise CombinedResolutionError(
-                f"Invalid run_after entry in {meta}: {item!r} (expected non-empty string)"
-            )
+    try:
+        cleaned = get_role_run_after(role_path, role_name=role_name)
+    except MetaServicesShapeError as exc:
+        raise CombinedResolutionError(str(exc)) from exc
     return _stable_dedup(cleaned)
 
 
@@ -89,8 +81,8 @@ def load_dependencies_app_only(role_name: str) -> List[str]:
 
 def load_shared_service_roles_for_app(role_name: str) -> List[str]:
     """
-    If role is an application role, inspect roles/<role>/config/main.yml and
-    return provider roles implied by compose.services.* flags.
+    If role is an application role, inspect roles/<role>/meta/services.yml and
+    return provider roles implied by services.* flags.
 
     Logic is centralized in cli.meta.applications.resolution.services.resolver.
     """
@@ -101,7 +93,11 @@ def load_shared_service_roles_for_app(role_name: str) -> List[str]:
     if not cfg_path.exists():
         return []
 
-    cfg = load_yaml_file(cfg_path)
+    services_map = load_yaml_file(cfg_path)
+    # Per req-008 the meta/services.yml file root IS the services map.
+    # resolve_direct_service_roles_from_config still expects the legacy
+    # `{"services": {...}}` envelope, so wrap accordingly.
+    cfg = {"services": services_map} if isinstance(services_map, dict) else {}
 
     try:
         includes = resolve_direct_service_roles_from_config(cfg)

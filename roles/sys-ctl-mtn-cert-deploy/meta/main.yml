@@ -3,9 +3,7 @@ galaxy_info:
   description: Deploys Let’s Encrypt certificates into Docker Compose Nginx setups via systemd service and timer.
   license: Infinito.Nexus Community License (Non-Commercial)
   license_url: https://s.infinito.nexus/license
-  company: 'Kevin Veen-Birchenbach
-    Consulting & Coaching Solutions
-    https://www.veen.world'
+  company: Kevin Veen-Birchenbach Consulting & Coaching Solutions https://www.veen.world
   galaxy_tags:
   - nginx
   - letsencrypt
@@ -19,4 +17,3 @@ galaxy_info:
   - name: Any
     versions:
     - all
-  lifecycle: beta

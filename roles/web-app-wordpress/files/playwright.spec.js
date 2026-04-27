@@ -722,7 +722,7 @@ const RBAC_ROLE_SEQUENCE = ["subscriber", "editor", "administrator"];
 // below.
 //
 // Multisite scenarios (requirement 005): only run when multisite is opted
-// in via `compose.services.wordpress.multisite.enabled = true`. The default
+// in via `services.wordpress.multisite.enabled = true`. The default
 // path continues to run the Single-Site scenarios below.
 
 for (const role of RBAC_ROLE_SEQUENCE) {
@@ -856,7 +856,7 @@ for (const role of RBAC_ROLE_SEQUENCE) {
 // Requirement 005 Multisite scenarios.
 //
 // Placeholder: Multisite is opt-in via
-// `compose.services.wordpress.multisite.enabled = true`. The spec records
+// `services.wordpress.multisite.enabled = true`. The spec records
 // a deliberate skip when Multisite is disabled so the contributor knows
 // which scenarios are out of scope for this deploy instead of wondering
 // why nothing ran. When Multisite is enabled the full per-site scenarios

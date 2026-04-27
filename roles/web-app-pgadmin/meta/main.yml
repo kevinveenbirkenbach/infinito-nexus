@@ -1,8 +1,6 @@
 galaxy_info:
   author: Kevin Veen-Birkenbach
-  description: Take control of your PostgreSQL databases with pgAdmin — a powerful, open source, web-app-based administration
-    tool offering an intuitive user interface, multi‑server management, robust configuration options, and optional OAuth2
-    integration for enhanced security.
+  description: Take control of your PostgreSQL databases with pgAdmin — a powerful, open source, web-app-based administration tool offering an intuitive user interface, multi‑server management, robust configuration options, and optional OAuth2 integration for enhanced security.
   license: Infinito.Nexus Community License (Non-Commercial)
   license_url: https://s.infinito.nexus/license
   company: "Kevin Veen-Birkenbach  \nConsulting & Coaching Solutions  \nhttps://www.veen.world\n"
@@ -22,7 +20,3 @@ galaxy_info:
   documentation: https://docs.infinito.nexus
   logo:
     class: fa-solid fa-database
-  run_after:
-  - web-app-matomo
-  - web-app-keycloak
-  lifecycle: beta

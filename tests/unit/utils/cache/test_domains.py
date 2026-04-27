@@ -28,7 +28,7 @@ def _write(path: Path, content: str) -> None:
 def _seed_minimal_role(tmp: Path) -> Path:
     role = tmp / "roles" / "web-app-foo"
     _write(
-        role / "config" / "main.yml",
+        role / "meta" / "services.yml",
         """
         server:
           domains:
@@ -37,7 +37,7 @@ def _seed_minimal_role(tmp: Path) -> Path:
             aliases: []
         """,
     )
-    _write(role / "users" / "main.yml", "users: {}\n")
+    _write(role / "meta" / "users.yml", "users: {}\n")
     return tmp / "roles"
 
 

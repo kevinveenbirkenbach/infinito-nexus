@@ -58,13 +58,12 @@ def _compute_reserved_usernames(roles_dir: Path) -> list[str]:
 
 
 def _load_user_defs(roles_dir: Path) -> OrderedDict[str, dict[str, Any]]:
-    pattern = os.path.join(str(roles_dir), "*/users/main.yml")
+    pattern = os.path.join(str(roles_dir), "*/meta/users.yml")
     files = sorted(glob.glob(pattern))
     merged: OrderedDict[str, dict[str, Any]] = OrderedDict()
 
     for filepath in files:
-        data = _load_yaml_mapping(Path(filepath))
-        users = data.get("users", {})
+        users = _load_yaml_mapping(Path(filepath))
         if not isinstance(users, dict):
             continue
 

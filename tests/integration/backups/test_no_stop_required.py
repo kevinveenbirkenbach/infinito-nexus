@@ -12,13 +12,13 @@ class TestNoStopRequiredIntegrity(unittest.TestCase):
 
     def test_backup_no_stop_required_consistency(self):
         """
-        Ensure that if `backup.no_stop_required: true` is set for any compose.services[*]:
+        Ensure that if `backup.no_stop_required: true` is set for any services[*]:
           - it's a boolean value
           - the containing service dict has an `image` entry at the same level
         """
         for role in os.listdir(self.roles_dir):
             docker_config_path = os.path.join(
-                self.roles_dir, role, "config", "main.yml"
+                self.roles_dir, role, "meta", "services.yml"
             )
             if not os.path.isfile(docker_config_path):
                 continue

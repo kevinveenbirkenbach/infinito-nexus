@@ -59,7 +59,7 @@ def _decrypt_ansible_encrypted_strings(value: Any) -> Any:
 # `utils/cache/base.py` lives two levels deep: utils/cache/base.py -> repo
 # root. parents[1] would point at utils/ (the python module), so callers that
 # fall back to the implicit ROLES_DIR would walk a non-existent
-# `<repo>/utils/roles/*/users/main.yml` glob and silently yield no role
+# `<repo>/utils/roles/*/meta/users.yml` glob and silently yield no role
 # defaults — making `lookup('users', '<role-defined-key>')` raise as if the
 # user didn't exist.
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
@@ -158,7 +158,7 @@ def _load_yaml_variant_list(path: Path) -> list[dict[str, Any]]:
     """Load a `roles/<role>/meta/variants.yml` variant list.
 
     Each entry is a deep-merge override for the role's
-    `config/main.yml`; `null` and `{}` are valid no-op entries. Missing
+    `meta/services.yml`; `null` and `{}` are valid no-op entries. Missing
     file or empty list collapses to a single empty variant so the
     role behaves exactly like before this layer was introduced.
     """

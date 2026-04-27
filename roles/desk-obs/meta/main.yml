@@ -3,9 +3,7 @@ galaxy_info:
   description: Installs OBS Studio for streaming and recording on Pacman-based systems.
   license: Infinito.Nexus Community License (Non-Commercial)
   license_url: https://s.infinito.nexus/license
-  company: 'Kevin Veen-Birchenbach
-    Consulting & Coaching Solutions
-    https://www.veen.world'
+  company: Kevin Veen-Birchenbach Consulting & Coaching Solutions https://www.veen.world
   galaxy_tags:
   - obs
   - streaming
@@ -18,5 +16,4 @@ galaxy_info:
   - name: Archlinux
     versions:
     - all
-  lifecycle: pre-alpha
 dependencies: []

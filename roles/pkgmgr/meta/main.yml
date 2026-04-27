@@ -1,13 +1,15 @@
 galaxy_info:
   author: Kevin Veen-Birkenbach
-  description: Automates the installation of Kevin's Package Manager — a tool for managing multiple repositories and automating
-    Git operations.
+  description: Automates the installation of Kevin's Package Manager — a tool for managing multiple repositories and automating Git operations.
   license: Infinito.Nexus Community License (Non-Commercial)
   license_url: https://s.infinito.nexus/license
-  company: |
-    Kevin Veen-Birkenbach
+  company: 'Kevin Veen-Birkenbach
+
     Consulting & Coaching Solutions
+
     https://www.veen.world
+
+    '
   min_ansible_version: '2.9'
   platforms:
   - name: Debian
@@ -32,4 +34,3 @@ galaxy_info:
   repository: https://github.com/kevinveenbirkenbach/package-manager
   issue_tracker_url: https://github.com/kevinveenbirkenbach/package-manager/issues
   documentation: https://github.com/kevinveenbirkenbach/package-manager
-  lifecycle: beta

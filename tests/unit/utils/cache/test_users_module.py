@@ -30,15 +30,16 @@ def _write(path: Path, content: str) -> None:
 
 
 def _seed_minimal_user_role(tmp: Path, role_name: str = "web-app-foo") -> Path:
+    # Per req-008 the file root of meta/users.yml IS the users map
+    # (no `users:` wrapper).
     roles = tmp / "roles"
     role = roles / role_name
-    _write(role / "config" / "main.yml", "compose: {}\n")
+    _write(role / "meta" / "services.yml", "{}\n")
     _write(
-        role / "users" / "main.yml",
+        role / "meta" / "users.yml",
         f"""
-        users:
-          {role_name.split("-")[-1]}:
-            description: "test-only user"
+        {role_name.split("-")[-1]}:
+          description: "test-only user"
         """,
     )
     return roles
@@ -63,11 +64,10 @@ class TestLoadUserDefs(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmp:
             roles = _seed_minimal_user_role(Path(tmp), "web-app-alpha")
             _write(
-                roles / "web-app-beta" / "users" / "main.yml",
+                roles / "web-app-beta" / "meta" / "users.yml",
                 """
-                users:
-                  beta:
-                    description: "beta user"
+                beta:
+                  description: "beta user"
                 """,
             )
             defs = cache_users._load_user_defs(roles)
@@ -78,17 +78,15 @@ class TestLoadUserDefs(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmp:
             roles = Path(tmp) / "roles"
             _write(
-                roles / "web-app-a" / "users" / "main.yml",
+                roles / "web-app-a" / "meta" / "users.yml",
                 """
-                users:
-                  shared: {description: from-a}
+                shared: {description: from-a}
                 """,
             )
             _write(
-                roles / "web-app-b" / "users" / "main.yml",
+                roles / "web-app-b" / "meta" / "users.yml",
                 """
-                users:
-                  shared: {description: from-b}
+                shared: {description: from-b}
                 """,
             )
             with self.assertRaisesRegex(ValueError, "Conflict for user 'shared'"):
@@ -274,7 +272,7 @@ class TestGetUserDefaults(unittest.TestCase):
 
     def test_reserved_usernames_added_when_missing(self):
         with tempfile.TemporaryDirectory() as tmp:
-            # Seed a role whose `users/main.yml` does NOT declare the
+            # Seed a role whose `meta/users.yml` does NOT declare the
             # role-suffix as a user. Then create an additional bare
             # role directory whose suffix MUST be auto-reserved.
             roles = _seed_minimal_user_role(Path(tmp), "web-app-foo")

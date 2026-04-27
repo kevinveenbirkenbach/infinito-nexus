@@ -8,7 +8,7 @@ import os
 def compute_application_gid(application_id, roles_dir="roles", base_gid=10000):
     """Pure-Python GID resolver — no ansible dependency.
 
-    Sorts every `<roles_dir>/<role>/config/main.yml`-bearing role
+    Sorts every `<roles_dir>/<role>/meta/services.yml`-bearing role
     alphabetically by `<role>` and returns ``base_gid + index`` for the
     requested ``application_id``. Extracted so callers that only need
     the GID computation (e.g. ``utils.cache.applications._build_variants`` on
@@ -23,15 +23,30 @@ def compute_application_gid(application_id, roles_dir="roles", base_gid=10000):
     if not os.path.isdir(roles_dir):
         raise ValueError(f"Roles directory '{roles_dir}' not found")
 
-    sorted_ids = sorted(
-        os.path.basename(os.path.dirname(os.path.dirname(path)))
-        for path in (
-            os.path.join(root, file_name)
-            for root, _dirs, files in os.walk(roles_dir)
-            for file_name in files
-            if file_name == "main.yml" and os.path.basename(root) == "config"
-        )
-    )
+    # Per req-008, an "application role" is identified by the presence of
+    # at least one of the project-owned `meta/<topic>.yml` files (services,
+    # server, rbac, volumes, schema, users). This preserves the prior
+    # assignment ordering: every role that previously had `meta/services.yml`
+    # now has at least one of these files.
+    application_marker_files = {
+        "services.yml",
+        "server.yml",
+        "rbac.yml",
+        "volumes.yml",
+        "schema.yml",
+        "users.yml",
+    }
+    discovered: set[str] = set()
+    for entry in os.listdir(roles_dir):
+        role_dir = os.path.join(roles_dir, entry)
+        meta_dir = os.path.join(role_dir, "meta")
+        if not os.path.isdir(meta_dir):
+            continue
+        for marker in application_marker_files:
+            if os.path.isfile(os.path.join(meta_dir, marker)):
+                discovered.add(entry)
+                break
+    sorted_ids = sorted(discovered)
 
     try:
         index = sorted_ids.index(application_id)

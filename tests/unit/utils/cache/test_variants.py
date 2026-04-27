@@ -23,13 +23,27 @@ from utils.cache.base import _load_yaml_variant_list  # noqa: E402
 
 
 def _write_role(
-    roles_dir: Path, name: str, *, config: str, meta: str | None = None
+    roles_dir: Path,
+    name: str,
+    *,
+    config: str | None = None,
+    meta: str | None = None,
+    server: str | None = None,
 ) -> None:
+    """Write a synthetic role tree under <roles_dir>/<name>/meta/.
+
+    ``config``  -> meta/services.yml content (the file root IS the services
+                   map post req-008)
+    ``server``  -> meta/server.yml content
+    ``meta``    -> meta/variants.yml content (matrix-deploy variant list)
+    """
     role = roles_dir / name
-    (role / "config").mkdir(parents=True, exist_ok=True)
-    (role / "config" / "main.yml").write_text(textwrap.dedent(config))
+    (role / "meta").mkdir(parents=True, exist_ok=True)
+    if config is not None:
+        (role / "meta" / "services.yml").write_text(textwrap.dedent(config))
+    if server is not None:
+        (role / "meta" / "server.yml").write_text(textwrap.dedent(server))
     if meta is not None:
-        (role / "meta").mkdir(parents=True, exist_ok=True)
         (role / "meta" / "variants.yml").write_text(textwrap.dedent(meta))
 
 
@@ -85,41 +99,54 @@ class TestApplicationVariants(unittest.TestCase):
         _reset_cache_for_tests()
 
     def test_role_without_meta_yields_single_variant(self):
-        _write_role(self.roles_dir, "web-app-foo", config="hello: world\n")
+        _write_role(self.roles_dir, "web-app-foo", config="foo:\n  hello: world\n")
         variants = _build_variants(self.roles_dir)
         self.assertEqual(list(variants.keys()), ["web-app-foo"])
         self.assertEqual(len(variants["web-app-foo"]), 1)
-        self.assertEqual(variants["web-app-foo"][0]["hello"], "world")
+        self.assertEqual(
+            variants["web-app-foo"][0]["services"]["foo"]["hello"], "world"
+        )
 
     def test_role_with_two_variants_deep_merges_each_entry(self):
-        _write_role(
-            self.roles_dir,
-            "web-app-bar",
-            config=textwrap.dedent(
+        # Per req-008, the role's meta is split: server -> meta/server.yml,
+        # services -> meta/services.yml. The variants file overrides the
+        # assembled payload (top-level keys: server, services, ...).
+        role = self.roles_dir / "web-app-bar"
+        (role / "meta").mkdir(parents=True, exist_ok=True)
+        (role / "meta" / "services.yml").write_text(
+            textwrap.dedent(
                 """
-                server:
-                  domains:
-                    canonical: ["bar.example"]
-                feature:
+                bar:
                   enabled: false
                 """
-            ),
-            meta=textwrap.dedent(
+            )
+        )
+        (role / "meta" / "server.yml").write_text(
+            textwrap.dedent(
+                """
+                domains:
+                  canonical: ["bar.example"]
+                """
+            )
+        )
+        (role / "meta" / "variants.yml").write_text(
+            textwrap.dedent(
                 """
                 - {}
-                - feature:
-                    enabled: true
+                - services:
+                    bar:
+                      enabled: true
                   server:
                     domains:
                       canonical: ["bar.example", "shop.bar.example"]
                 """
-            ),
+            )
         )
         variants = _build_variants(self.roles_dir)["web-app-bar"]
         self.assertEqual(len(variants), 2)
-        self.assertEqual(variants[0]["feature"]["enabled"], False)
+        self.assertEqual(variants[0]["services"]["bar"]["enabled"], False)
         self.assertEqual(variants[0]["server"]["domains"]["canonical"], ["bar.example"])
-        self.assertEqual(variants[1]["feature"]["enabled"], True)
+        self.assertEqual(variants[1]["services"]["bar"]["enabled"], True)
         self.assertEqual(
             variants[1]["server"]["domains"]["canonical"],
             ["bar.example", "shop.bar.example"],
@@ -129,26 +156,30 @@ class TestApplicationVariants(unittest.TestCase):
         _write_role(
             self.roles_dir,
             "web-app-baz",
-            config="value: 1\n",
+            config="baz:\n  value: 1\n",
             meta=textwrap.dedent(
                 """
                 - {}
-                - value: 2
+                - services:
+                    baz:
+                      value: 2
                 """
             ),
         )
         defaults = get_application_defaults(roles_dir=self.roles_dir)
-        self.assertEqual(defaults["web-app-baz"]["value"], 1)
+        self.assertEqual(defaults["web-app-baz"]["services"]["baz"]["value"], 1)
 
     def test_get_variants_caches_per_roles_dir(self):
-        _write_role(self.roles_dir, "web-app-cache", config="x: 1\n")
+        _write_role(self.roles_dir, "web-app-cache", config="cache:\n  x: 1\n")
         first = get_variants(roles_dir=self.roles_dir)
         second = get_variants(roles_dir=self.roles_dir)
         self.assertEqual(first, second)
         # Mutating the returned copy MUST NOT corrupt the cache.
-        second["web-app-cache"][0]["x"] = 999
+        second["web-app-cache"][0]["services"]["cache"]["x"] = 999
         self.assertEqual(
-            get_variants(roles_dir=self.roles_dir)["web-app-cache"][0]["x"],
+            get_variants(roles_dir=self.roles_dir)["web-app-cache"][0]["services"][
+                "cache"
+            ]["x"],
             1,
         )
 
@@ -170,11 +201,10 @@ class TestMergedApplicationsAlwaysVariantZero(unittest.TestCase):
         _write_role(
             self.roles_dir,
             "web-app-multi",
-            config=textwrap.dedent(
+            server=textwrap.dedent(
                 """
-                server:
-                  domains:
-                    canonical: ["multi.example"]
+                domains:
+                  canonical: ["multi.example"]
                 """
             ),
             meta=textwrap.dedent(

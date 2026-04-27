@@ -35,7 +35,7 @@
   # build_ldap_role_entries always adds the implicit `administrator`
   # role for every deployed application, so a per-app Keycloak mapper
   # is needed for every deployed app — not only those with an explicit
-  # `rbac:` block in `config/main.yml`.
+  # `rbac:` block in `meta/services.yml`.
   ansible.builtin.set_fact:
     kc_rbac_deployed_app_ids: >-
       {{

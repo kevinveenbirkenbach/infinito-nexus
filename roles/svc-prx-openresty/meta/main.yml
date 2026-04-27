@@ -15,4 +15,3 @@ galaxy_info:
   issue_tracker_url: https://s.infinito.nexus/issues
   documentation: https://s.infinito.nexus/code/tree/main/roles/svc-prx-openresty
   min_ansible_version: '2.9'
-  lifecycle: beta

@@ -1,4 +1,4 @@
-"""Check Docker image versions in roles/web-*/config/main.yml.
+"""Check Docker image versions in roles/web-*/meta/services.yml.
 
 For each service with a semver-compatible version tag the latest available
 tag on Docker Hub is fetched and compared. Outdated versions are reported as
@@ -234,7 +234,7 @@ def _collect_entries() -> list[dict]:
         # Only semver versions
         if not _is_semver(ref.version):
             continue
-        cfg_path = _ROLES_ROOT / ref.role / "config" / "main.yml"
+        cfg_path = _ROLES_ROOT / ref.role / "meta" / "services.yml"
         # Check nocheck suppression
         if ref.service in _suppressed_services(cfg_path):
             continue
@@ -281,7 +281,7 @@ def _emit_unchecked_annotation(
 
 
 class TestDockerImageVersions(unittest.TestCase):
-    """Warn about outdated live Docker image versions in roles/web-*/config/main.yml."""
+    """Warn about outdated live Docker image versions in roles/web-*/meta/services.yml."""
 
     def test_image_versions_are_current(self) -> None:
         entries = _collect_entries()

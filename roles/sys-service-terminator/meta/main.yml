@@ -12,5 +12,4 @@ galaxy_info:
   - systemd
   - services
   - infinito
-  lifecycle: beta
 dependencies: []

@@ -1,8 +1,6 @@
 galaxy_info:
   author: Kevin Veen-Birkenbach
-  description: 'Transform your project management with OpenProject, a vibrant and collaborative tool that brings clarity and
-    energy to your planning, tracking, and team communication. Experience streamlined workflows and an innovative platform
-    that propels your projects forward.
+  description: 'Transform your project management with OpenProject, a vibrant and collaborative tool that brings clarity and energy to your planning, tracking, and team communication. Experience streamlined workflows and an innovative platform that propels your projects forward.
 
     '
   license: Infinito.Nexus Community License (Non-Commercial)
@@ -26,6 +24,3 @@ galaxy_info:
   documentation: https://docs.infinito.nexus
   logo:
     class: fa-solid fa-project-diagram
-  run_after:
-  - web-app-keycloak
-  lifecycle: beta

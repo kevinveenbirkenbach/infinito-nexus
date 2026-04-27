@@ -1,7 +1,6 @@
 galaxy_info:
   author: Kevin Veen‑Birkenbach
-  description: 'Deploys the universal logout service: a Dockerized Python container, Nginx `/logout` proxies for `*.infinito.nexus`,
-    and the `conductor.html.j2` template for unified logout orchestration.
+  description: 'Deploys the universal logout service: a Dockerized Python container, Nginx `/logout` proxies for `*.infinito.nexus`, and the `conductor.html.j2` template for unified logout orchestration.
 
     '
   license: Infinito.Nexus Community License (Non-Commercial)
@@ -38,4 +37,3 @@ galaxy_info:
   documentation: https://github.com/kevinveenbirkenbach/universal-logout#readme
   logo:
     class: fa fa-sign-out-alt
-  lifecycle: beta

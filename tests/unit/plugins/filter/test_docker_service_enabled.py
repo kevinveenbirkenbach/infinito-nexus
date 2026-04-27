@@ -23,11 +23,9 @@ class TestIsDockerServiceEnabledFilter(unittest.TestCase):
     def test_enabled_true(self):
         applications = {
             "app1": {
-                "compose": {
-                    "services": {
-                        "redis": {"enabled": True},
-                        "database": {"enabled": True},
-                    }
+                "services": {
+                    "redis": {"enabled": True},
+                    "database": {"enabled": True},
                 }
             }
         }
@@ -37,11 +35,9 @@ class TestIsDockerServiceEnabledFilter(unittest.TestCase):
     def test_enabled_false(self):
         applications = {
             "app1": {
-                "compose": {
-                    "services": {
-                        "redis": {"enabled": False},
-                        "database": {"enabled": False},
-                    }
+                "services": {
+                    "redis": {"enabled": False},
+                    "database": {"enabled": False},
                 }
             }
         }
@@ -51,11 +47,9 @@ class TestIsDockerServiceEnabledFilter(unittest.TestCase):
     def test_missing_enabled_key(self):
         applications = {
             "app1": {
-                "compose": {
-                    "services": {
-                        "redis": {},
-                        "database": {},
-                    }
+                "services": {
+                    "redis": {},
+                    "database": {},
                 }
             }
         }
@@ -65,10 +59,8 @@ class TestIsDockerServiceEnabledFilter(unittest.TestCase):
     def test_missing_service_key(self):
         applications = {
             "app1": {
-                "compose": {
-                    "services": {
-                        # no 'redis' or 'database'
-                    }
+                "services": {
+                    # no 'redis' or 'database'
                 }
             }
         }

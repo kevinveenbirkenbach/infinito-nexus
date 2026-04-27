@@ -31,8 +31,7 @@ def main() -> int:
             continue
 
         app = applications.setdefault(img.role, {})
-        docker = app.setdefault("compose", {})
-        services = docker.setdefault("services", {})
+        services = app.setdefault("services", {})
         services[str(img.service)] = {
             "image": provider.image_base(img),
             "version": img.version,

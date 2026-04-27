@@ -3,7 +3,6 @@
 
 # variant 0: development convenience: autologin lets specs land on
 # the phpMyAdmin home view without re-entering the dev password.
-- compose:
-    services:
-      phpmyadmin:
-        autologin: true
+- services:
+    phpmyadmin:
+      autologin: true

@@ -40,7 +40,7 @@ def get(
     skip_missing_app=False,
 ):
     # Path to the schema file for this application
-    schema_path = os.path.join("roles", application_id, "schema", "main.yml")
+    schema_path = os.path.join("roles", application_id, "meta", "schema.yml")
 
     def schema_defines(path):
         if not os.path.isfile(schema_path):

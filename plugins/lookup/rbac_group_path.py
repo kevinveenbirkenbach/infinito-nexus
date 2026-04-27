@@ -25,7 +25,7 @@ Usage:
 
 Contract:
 - `application_id` MUST refer to a role that declares an `rbac:` block
-  in its `config/main.yml`. The role may be tenant-aware
+  in its `meta/services.yml`. The role may be tenant-aware
   (`rbac.tenancy.axis == "domain"`) or not (default).
 - `role` MUST appear under `rbac.roles.<role>` or be the implicit
   `administrator` that requirement 004 auto-adds.
@@ -91,7 +91,7 @@ def _resolve_role_scope(app_cfg, application_id, role):
     if not isinstance(rbac, dict):
         raise AnsibleError(
             f"rbac_group_path: application '{application_id}' has no valid "
-            f"'rbac' block in config/main.yml."
+            f"'rbac' block in meta/services.yml."
         )
 
     roles = rbac.get("roles") or {}

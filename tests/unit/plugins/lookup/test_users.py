@@ -14,9 +14,10 @@ from utils.cache import base as runtime_data_base
 
 
 def _write_users(base_dir: Path, role_name: str, users: dict) -> None:
-    users_path = base_dir / "roles" / role_name / "users" / "main.yml"
+    """Write meta/users.yml — file root IS the users map (req-008)."""
+    users_path = base_dir / "roles" / role_name / "meta" / "users.yml"
     users_path.parent.mkdir(parents=True, exist_ok=True)
-    users_path.write_text(yaml.safe_dump({"users": users}), encoding="utf-8")
+    users_path.write_text(yaml.safe_dump(users), encoding="utf-8")
 
 
 class TestUsersLookup(unittest.TestCase):

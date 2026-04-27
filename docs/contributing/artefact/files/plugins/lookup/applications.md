@@ -23,7 +23,7 @@ The `applications` lookup is the ONLY supported runtime entry point for merged a
 
 The lookup merges exactly two sources:
 
-1. **Defaults** discovered from every `roles/*/config/main.yml` in the repository.
+1. **Defaults** discovered from each role's per-topic meta files: `roles/*/meta/server.yml`, `roles/*/meta/rbac.yml`, `roles/*/meta/services.yml`, `roles/*/meta/volumes.yml`, plus `roles/*/meta/schema.yml` (post-`apply_schema()`). Variants from `roles/*/meta/variants.yml` deep-merge over the assembled per-role payload. See [layout.md](../../../../design/services/layout.md).
 2. **Overrides** supplied through the normal Ansible variable `applications` in inventory, group vars, host vars, or role vars.
 
 No intermediate merged `applications` fact exists. No other source is consulted.
@@ -32,9 +32,9 @@ No intermediate merged `applications` fact exists. No other source is consulted.
 
 You MUST add new application defaults in the owning role:
 
-1. Create or edit `roles/<application_id>/config/main.yml`.
-2. The role directory name is the `application_id`. For example `roles/web-app-mailu/config/main.yml` is exposed as `applications['web-app-mailu']`.
-3. Keep all application-scoped defaults (compose services, features, server settings) inside that role-local file.
+1. Create or edit the appropriate `roles/<application_id>/meta/<topic>.yml` files (`services.yml`, `server.yml`, `rbac.yml`, `volumes.yml`, `schema.yml`) — see [layout.md](../../../../design/services/layout.md) for the per-topic content.
+2. The role directory name is the `application_id`. For example `roles/web-app-mailu/meta/services.yml` is exposed as `applications['web-app-mailu'].services`, `roles/web-app-mailu/meta/server.yml` as `applications['web-app-mailu'].server`, and so on.
+3. Keep all application-scoped defaults (services, server settings, RBAC, volumes, credentials schema) inside those role-local meta files.
 
 The lookup discovers the entry automatically on the next run. No generator step is required.
 
@@ -54,7 +54,7 @@ applications:
 
 - Overrides MUST use the canonical `application_id` as the key.
 - Overrides merge recursively on top of role-local defaults.
-- Overrides MUST NOT be written back into `roles/*/config/main.yml`; that file is for defaults only.
+- Overrides MUST NOT be written back into `roles/*/meta/*.yml`; those files are for defaults only.
 
 ## What Not To Do 🚫
 

@@ -43,7 +43,7 @@ class ImageRef:
     registry: str = (
         "docker.io"  # source registry hostname, e.g. docker.io, quay.io, ghcr.io
     )
-    source_file: str = "config/main.yml"  # "config/main.yml" or "defaults/main.yml"
+    source_file: str = "meta/services.yml"  # "meta/services.yml" or "defaults/main.yml"
 
 
 def load_yaml(path: Path) -> dict:
@@ -175,20 +175,18 @@ def iter_role_images(repo_root: Path) -> Iterable[ImageRef]:
     Yield all ImageRef entries discovered across all roles in *repo_root*.
 
     Sources:
-      1. roles/**/config/main.yml   → compose.services.<svc>.{image,version}
+      1. roles/**/meta/services.yml → <entity>.{image,version}   (post-req-008)
       2. roles/**/defaults/main.yml → images.<name>.{image,version}
 
     See docs/contributing/artefact/image.md for the full format reference.
     """
     roles_dir = repo_root / "roles"
 
-    # 1. Images from config/main.yml → compose.services
-    for config_file in roles_dir.glob("**/config/main.yml"):
-        role_name = config_file.parent.parent.name
-        data = load_yaml(config_file)
-
-        docker = data.get("compose", {})
-        services = docker.get("services", {})
+    # 1. Images from meta/services.yml. The file root IS the services map
+    # (per req-008 file-root convention) keyed by <entity_name>.
+    for services_file in roles_dir.glob("**/meta/services.yml"):
+        role_name = services_file.parent.parent.name
+        services = load_yaml(services_file)
 
         if not isinstance(services, dict):
             continue
@@ -213,7 +211,7 @@ def iter_role_images(repo_root: Path) -> Iterable[ImageRef]:
                 version=version,
                 source=image_source(image, version),
                 registry=_detect_registry(image),
-                source_file="config/main.yml",
+                source_file="meta/services.yml",
             )
 
     # 2. Images from defaults/main.yml → images.<name>.{image,version}

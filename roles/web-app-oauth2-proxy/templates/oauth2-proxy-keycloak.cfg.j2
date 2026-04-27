@@ -1,7 +1,7 @@
-http_address            =   "0.0.0.0:{{ lookup('config', 'web-app-oauth2-proxy', 'compose.services.oauth2-proxy.port') }}"
+http_address            =   "0.0.0.0:{{ lookup('config', 'web-app-oauth2-proxy', 'services.oauth2-proxy.ports.inter') }}"
 cookie_secret           =   "{{ lookup('config',oauth2_proxy_application_id, 'credentials.oauth2_proxy_cookie_secret') }}"
 cookie_secure           =   "{{ lookup('tls', application_id, 'enabled') | string | lower }}"                                                                            # True is necessary to force the cookie set via https
-upstreams               =   "http://{{ lookup('config',oauth2_proxy_application_id, 'compose.services.oauth2.origin.host') }}:{{ lookup('config',oauth2_proxy_application_id, 'compose.services.oauth2.origin.port') }}"
+upstreams               =   "http://{{ lookup('config',oauth2_proxy_application_id, 'services.oauth2.origin.host') }}:{{ lookup('config',oauth2_proxy_application_id, 'services.oauth2.origin.port') }}"
 cookie_domains          =   ["{{ lookup('domain',oauth2_proxy_application_id) }}", "{{ lookup('domain','web-app-keycloak') }}"]   # Required so cookie can be read on all subdomains.
 whitelist_domains       =   [".{{ DOMAIN_PRIMARY }}"]                                                                                       # Required to allow redirection back to original requested target.
 
@@ -13,7 +13,7 @@ oidc_issuer_url         =   "{{ OIDC.CLIENT.ISSUER_URL }}"
 provider                =   "oidc"
 provider_display_name   =   "{{ OIDC.BUTTON_TEXT }}"
 
-{% set allowed_groups_raw = lookup('config', oauth2_proxy_application_id, 'compose.services.oauth2.allowed_groups', False) %}
+{% set allowed_groups_raw = lookup('config', oauth2_proxy_application_id, 'services.oauth2.allowed_groups', False) %}
 {% if allowed_groups_raw %}
 {# role based restrictions #}
 scope                   =   "openid email profile {{ RBAC.GROUP.CLAIM }}"

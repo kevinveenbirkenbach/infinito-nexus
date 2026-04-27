@@ -14,7 +14,7 @@ from utils.cache.applications import get_merged_applications
 class LookupModule(LookupBase):
     """
     Return a sorted list of deployed application IDs that satisfy both:
-      1. compose.services.prometheus.native_metrics.enabled: true in their role config
+      1. services.prometheus.native_metrics.enabled: true in their role config
       2. a prometheus.yml.j2 template at roles/<app_id>/templates/
 
     Used by web-app-prometheus/templates/configuration/prometheus.yml.j2 to auto-discover apps
@@ -53,7 +53,7 @@ class LookupModule(LookupBase):
             enabled = get_app_conf(
                 applications=applications,
                 application_id=app_id,
-                config_path="compose.services.prometheus.native_metrics.enabled",
+                config_path="services.prometheus.native_metrics.enabled",
                 strict=False,
                 default=False,
                 skip_missing_app=True,

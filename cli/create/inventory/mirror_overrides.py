@@ -90,17 +90,12 @@ def apply_mirror_overrides(host_vars_file: Path, mirrors_file: Path) -> None:
             if not isinstance(app_block, dict):
                 continue
 
-            docker = app_block.get("compose") or {}
-            if not isinstance(docker, dict):
-                continue
-
-            services = docker.get("services") or {}
+            services = app_block.get("services") or {}
             if not isinstance(services, dict):
                 continue
 
             app_doc = _ensure_ruamel_map(apps_doc, str(app_id))
-            docker_doc = _ensure_ruamel_map(app_doc, "compose")
-            services_doc = _ensure_ruamel_map(docker_doc, "services")
+            services_doc = _ensure_ruamel_map(app_doc, "services")
 
             for svc_name, svc_block in services.items():
                 if not isinstance(svc_block, dict):

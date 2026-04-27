@@ -1,14 +1,15 @@
 galaxy_info:
   author: Kevin Veen-Birkenbach
-  description: Take control of your LDAP directory with phpldapadmin — a web‑based LDAP client offering an intuitive interface
-    to manage your LDAP directories. This containerized deployment simplifies administration and provides secure, flexible
-    configuration options.
+  description: Take control of your LDAP directory with phpldapadmin — a web‑based LDAP client offering an intuitive interface to manage your LDAP directories. This containerized deployment simplifies administration and provides secure, flexible configuration options.
   license: Infinito.Nexus Community License (Non-Commercial)
   license_url: https://s.infinito.nexus/license
-  company: |
-    Kevin Veen-Birkenbach
+  company: 'Kevin Veen-Birkenbach
+
     Consulting & Coaching Solutions
+
     https://www.veen.world
+
+    '
   min_ansible_version: '2.9'
   platforms:
   - name: Archlinux
@@ -24,7 +25,3 @@ galaxy_info:
   documentation: https://docs.infinito.nexus
   logo:
     class: fa-solid fa-user-lock
-  run_after:
-  - web-app-matomo
-  - web-app-keycloak
-  lifecycle: pre-alpha

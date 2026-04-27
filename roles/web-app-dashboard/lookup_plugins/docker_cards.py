@@ -155,7 +155,7 @@ class LookupModule(LookupBase):
             iframe = get(
                 applications,
                 application_id,
-                "compose.services.dashboard.enabled",
+                "services.dashboard.enabled",
                 strict=False,
                 default=False,
             )

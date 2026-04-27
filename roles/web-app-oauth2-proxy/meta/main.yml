@@ -3,9 +3,7 @@ galaxy_info:
   description: Configures OAuth2 Proxy with Keycloak integration for protecting web applications in Docker Compose.
   license: Infinito.Nexus Community License (Non-Commercial)
   license_url: https://s.infinito.nexus/license
-  company: 'Kevin Veen-Birchenbach
-    Consulting & Coaching Solutions
-    https://www.veen.world'
+  company: Kevin Veen-Birchenbach Consulting & Coaching Solutions https://www.veen.world
   galaxy_tags:
   - oauth2
   - proxy
@@ -19,5 +17,3 @@ galaxy_info:
   - name: Any
     versions:
     - all
-  # Set to pre-alpha, because it isn't a autonomous role atm. Can be reactivated later
-  lifecycle: pre-alpha

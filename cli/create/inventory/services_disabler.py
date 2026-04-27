@@ -26,8 +26,16 @@ def parse_services_disabled(env_value: str) -> list[str]:
 
 def find_roles_with_service(service_name: str, roles_dir: Path) -> set[str]:
     """
-    Return all role IDs whose config/main.yml defines the given service under
-    compose.services (regardless of whether an image is set).
+    Return all role IDs whose meta/services.yml declares the given service as
+    a consumer/provider — i.e. the entry carries at least one of
+    ``enabled`` / ``shared`` / ``provides``. Pure metadata entries (e.g. a
+    primary entity that only carries ``lifecycle``/``run_after``) are
+    intentionally excluded so SERVICES_DISABLED doesn't add bogus
+    ``enabled: false`` overrides that turn metadata into spurious provider
+    declarations downstream.
+
+    Per req-008 the file root of meta/services.yml IS the services map
+    (no `compose.services` wrapper).
     """
     role_ids: set[str] = set()
     if not roles_dir.exists():
@@ -36,16 +44,20 @@ def find_roles_with_service(service_name: str, roles_dir: Path) -> set[str]:
     for role_dir in sorted(roles_dir.iterdir()):
         if not role_dir.is_dir():
             continue
-        config_file = role_dir / "config" / "main.yml"
-        if not config_file.exists():
+        services_file = role_dir / "meta" / "services.yml"
+        if not services_file.exists():
             continue
         try:
-            with config_file.open("r", encoding="utf-8") as f:
-                config = yaml.safe_load(f) or {}
+            with services_file.open("r", encoding="utf-8") as f:
+                services = yaml.safe_load(f) or {}
         except Exception:
             continue
-        compose_services = (config.get("compose") or {}).get("services") or {}
-        if service_name in compose_services:
+        if not isinstance(services, dict):
+            continue
+        entry = services.get(service_name)
+        if not isinstance(entry, dict):
+            continue
+        if any(flag in entry for flag in ("enabled", "shared", "provides")):
             role_ids.add(role_dir.name)
 
     return role_ids
@@ -126,10 +138,13 @@ def apply_services_disabled(
     inventory_file: Optional[Path] = None,
 ) -> None:
     """
-    For every role under roles_dir whose config/main.yml defines a service listed
+    For every role under roles_dir whose meta/services.yml defines a service listed
     in `services`, set enabled: false and shared: false in host_vars_file under
-    applications.<app_id>.compose.services.<svc_name>.  Missing application,
-    compose, or services blocks are created as needed.
+    applications.<app_id>.services.<svc_name>.  Missing application
+    or services blocks are created as needed.
+
+    Per req-008 the materialised path is ``applications.<app>.services.<svc>``
+    (no ``compose.services`` wrapper).
 
     If inventory_file is provided, also removes the provider role for each service
     from the inventory (devices.yml).
@@ -162,15 +177,10 @@ def apply_services_disabled(
                 app_data = CommentedMap()
                 applications[app_id] = app_data
 
-            compose = app_data.get("compose")
-            if not isinstance(compose, CommentedMap):
-                compose = CommentedMap()
-                app_data["compose"] = compose
-
-            svc_map = compose.get("services")
+            svc_map = app_data.get("services")
             if not isinstance(svc_map, CommentedMap):
                 svc_map = CommentedMap()
-                compose["services"] = svc_map
+                app_data["services"] = svc_map
 
             svc = svc_map.get(svc_name)
             if not isinstance(svc, CommentedMap):
@@ -180,7 +190,7 @@ def apply_services_disabled(
             svc["shared"] = False
             changed = True
             print(
-                f"[INFO] SERVICES_DISABLED: {app_id}.compose.services.{svc_name} "
+                f"[INFO] SERVICES_DISABLED: {app_id}.services.{svc_name} "
                 "→ enabled=false, shared=false"
             )
 
@@ -279,8 +289,9 @@ def find_services_disabled_conflicts(
                 continue
             for app_id in sorted(deployed_app_ids):
                 app_conf = applications.get(app_id) or {}
-                compose = app_conf.get("compose") or {}
-                service_map = compose.get("services") or {}
+                # Per req-008 services live at applications.<app>.services
+                # directly (no `compose.services` wrapper).
+                service_map = app_conf.get("services") or {}
                 if not isinstance(service_map, dict):
                     continue
                 for service_key in equivalent_keys:
@@ -292,7 +303,7 @@ def find_services_disabled_conflicts(
                     if enabled or shared:
                         conflicts.append(
                             f"service '{service}' is disabled, but "
-                            f"{host_vars_file}:{app_id}.compose.services.{service_key} "
+                            f"{host_vars_file}:{app_id}.services.{service_key} "
                             f"still has enabled={enabled}, shared={shared}"
                         )
 

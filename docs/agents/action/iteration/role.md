@@ -12,7 +12,7 @@ For workflow-level iteration with Act, see [Workflow Loop](workflow.md).
   - ACTION: ask user "disable matomo and email providers? [Y/n]".
   - DEFAULT: yes (disable both).
   - SKIP ASK: only if user already answered explicitly in this iteration.
-  - ON YES: pass `SERVICES_DISABLED="matomo,email"` verbatim to every deploy command. The value is a comma-separated list of provider keys, NOT a glob, NOT a `web-app-*.compose.services.*` path.
+  - ON YES: pass `SERVICES_DISABLED="matomo,email"` verbatim to every deploy command. The value is a comma-separated list of provider keys, NOT a glob, NOT a `web-app-*.services.*` path.
   - ON NO: omit the variable entirely.
   - SIDE EFFECT (yes): inventory initializer auto-removes `web-app-matomo` and `web-app-mailu` provider roles. Do NOT list them in `APPS`.
   - PERSIST: record answer at top of iteration. Reuse for all subsequent deploys without re-asking.

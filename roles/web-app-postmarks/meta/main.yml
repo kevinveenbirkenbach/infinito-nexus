@@ -1,13 +1,15 @@
 galaxy_info:
   author: Kevin Veen-Birkenbach
-  description: Installs and configures the Postmarks mail service client via Docker Compose, ready for use with applications
-    requiring SMTP.
+  description: Installs and configures the Postmarks mail service client via Docker Compose, ready for use with applications requiring SMTP.
   license: Infinito.Nexus Community License (Non-Commercial)
   license_url: https://s.infinito.nexus/license
-  company: |
-    Kevin Veen-Birkenbach
+  company: 'Kevin Veen-Birkenbach
+
     Consulting & Coaching Solutions
+
     https://www.veen.world
+
+    '
   galaxy_tags:
   - postmarks
   - mail
@@ -20,4 +22,3 @@ galaxy_info:
   - name: Any
     versions:
     - all
-  lifecycle: pre-alpha

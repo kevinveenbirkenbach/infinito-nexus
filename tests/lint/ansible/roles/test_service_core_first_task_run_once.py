@@ -34,7 +34,7 @@ def unique_roles(registry):
 
 
 RECURSION_HINT = (
-    "Service roles discovered from role-local compose.services metadata are loaded "
+    "Service roles discovered from role-local services metadata are loaded "
     "dynamically via "
     "load_app.yml, which checks the run_once_<role> flag before loading a role. "
     "If tasks/01_core.yml does not set this flag as its very first task, the flag "

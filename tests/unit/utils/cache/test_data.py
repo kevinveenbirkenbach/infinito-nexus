@@ -177,24 +177,24 @@ class TestStableVariablesSignature(unittest.TestCase):
 
 class TestLoadUserDefs(unittest.TestCase):
     def test_merges_non_conflicting_across_roles(self):
+        # Per req-008 the file root of meta/users.yml IS the users map
+        # (no `users:` wrapper).
         with tempfile.TemporaryDirectory() as tmp:
             roles = Path(tmp)
             _write(
-                roles / "role-a/users/main.yml",
+                roles / "role-a/meta/users.yml",
                 """
-                users:
-                  alice:
-                    username: alice
+                alice:
+                  username: alice
                 """,
             )
             _write(
-                roles / "role-b/users/main.yml",
+                roles / "role-b/meta/users.yml",
                 """
-                users:
-                  alice:
-                    email: alice@x
-                  bob:
-                    username: bob
+                alice:
+                  email: alice@x
+                bob:
+                  username: bob
                 """,
             )
             defs = _load_user_defs(roles)
@@ -205,19 +205,17 @@ class TestLoadUserDefs(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmp:
             roles = Path(tmp)
             _write(
-                roles / "role-a/users/main.yml",
+                roles / "role-a/meta/users.yml",
                 """
-                users:
-                  alice:
-                    uid: 1001
+                alice:
+                  uid: 1001
                 """,
             )
             _write(
-                roles / "role-b/users/main.yml",
+                roles / "role-b/meta/users.yml",
                 """
-                users:
-                  alice:
-                    uid: 2002
+                alice:
+                  uid: 2002
                 """,
             )
             with self.assertRaisesRegex(ValueError, "Conflict for user 'alice'"):
@@ -227,10 +225,9 @@ class TestLoadUserDefs(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmp:
             roles = Path(tmp)
             _write(
-                roles / "role-a/users/main.yml",
+                roles / "role-a/meta/users.yml",
                 """
-                users:
-                  alice: "not-a-dict"
+                alice: "not-a-dict"
                 """,
             )
             with self.assertRaisesRegex(ValueError, "Invalid definition"):
@@ -354,24 +351,24 @@ class TestGetApplicationDefaults(unittest.TestCase):
         _reset_cache_for_tests()
 
     def test_reads_role_config_files(self):
+        # Per req-008 the server topic now lives in its own
+        # `meta/server.yml`, not nested inside `meta/services.yml`.
         with tempfile.TemporaryDirectory() as tmp:
             roles = Path(tmp)
             _write(
-                roles / "web-app-alpha/config/main.yml",
+                roles / "web-app-alpha/meta/server.yml",
                 """
-                server:
-                  domains:
-                    canonical:
-                      - alpha.example
+                domains:
+                  canonical:
+                    - alpha.example
                 """,
             )
             _write(
-                roles / "web-app-beta/config/main.yml",
+                roles / "web-app-beta/meta/server.yml",
                 """
-                server:
-                  domains:
-                    canonical:
-                      - beta.example
+                domains:
+                  canonical:
+                    - beta.example
                 """,
             )
             defaults = get_application_defaults(roles_dir=roles)
@@ -386,17 +383,16 @@ class TestGetApplicationDefaults(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmp:
             roles = Path(tmp)
             _write(
-                roles / "web-app-alpha/config/main.yml",
+                roles / "web-app-alpha/meta/server.yml",
                 """
-                server: {}
+                {}
                 """,
             )
             _write(
-                roles / "web-app-alpha/users/main.yml",
+                roles / "web-app-alpha/meta/users.yml",
                 """
-                users:
-                  administrator:
-                    username: administrator
+                administrator:
+                  username: administrator
                 """,
             )
             defaults = get_application_defaults(roles_dir=roles)
@@ -409,12 +405,11 @@ class TestGetApplicationDefaults(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmp:
             roles = Path(tmp)
             _write(
-                roles / "web-app-alpha/config/main.yml",
+                roles / "web-app-alpha/meta/server.yml",
                 """
-                server:
-                  domains:
-                    canonical:
-                      - alpha.example
+                domains:
+                  canonical:
+                    - alpha.example
                 """,
             )
             first = get_application_defaults(roles_dir=roles)
@@ -434,11 +429,10 @@ class TestGetUserDefaults(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmp:
             roles = Path(tmp)
             _write(
-                roles / "web-app-alpha/users/main.yml",
+                roles / "web-app-alpha/meta/users.yml",
                 """
-                users:
-                  administrator:
-                    username: administrator
+                administrator:
+                  username: administrator
                 """,
             )
             users = get_user_defaults(roles_dir=roles)
@@ -460,11 +454,10 @@ class TestGetUserDefaults(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmp:
             roles = Path(tmp)
             _write(
-                roles / "web-app-alpha/users/main.yml",
+                roles / "web-app-alpha/meta/users.yml",
                 """
-                users:
-                  administrator:
-                    username: administrator
+                administrator:
+                  username: administrator
                 """,
             )
             first = get_user_defaults(roles_dir=roles)
@@ -481,7 +474,7 @@ class TestImplicitRolesDir(unittest.TestCase):
     `utils/cache/base.py` (and previously `utils/cache/data.py`),
     `parents[1]` silently became `utils/`, which is itself a python
     package. Glob walks like
-    `<utils>/roles/*/users/main.yml` then yielded zero matches and
+    `<utils>/roles/*/meta/users.yml` then yielded zero matches and
     `lookup('users', 'contact')` started failing during deploy as if
     `contact` were undefined. Encode the invariant explicitly so any
     future move that changes the depth is caught here, not by a

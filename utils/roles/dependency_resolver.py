@@ -238,22 +238,20 @@ class RoleDependencyResolver:
         return deps
 
     def _extract_meta_run_after(self, role_path: str) -> Set[str]:
-        deps: Set[str] = set()
-        meta_main = os.path.join(role_path, "meta", "main.yml")
-        if not os.path.isfile(meta_main):
-            return deps
+        # Per req-010 `run_after` lives on the role's primary entity at
+        # `meta/services.yml.<primary_entity>.run_after`. Delegate to the
+        # canonical helper so the primary-entity derivation is in one
+        # place, and degrade gracefully if the file is absent.
+        from utils.roles.meta_lookup import get_role_run_after
+
         try:
-            with open(meta_main, "r", encoding="utf-8") as f:
-                meta = yaml.safe_load(f) or {}
-            galaxy_info = meta.get("galaxy_info", {})
-            run_after = galaxy_info.get("run_after", [])
-            if isinstance(run_after, list):
-                for item in run_after:
-                    if isinstance(item, str) and item.strip():
-                        deps.add(item.strip())
+            entries = get_role_run_after(role_path)
         except Exception:
-            logging.exception(f"Failed to parse run_after from {meta_main}")
-        return deps
+            logging.exception(
+                f"Failed to parse run_after from {role_path}/meta/services.yml"
+            )
+            return set()
+        return {dep for dep in entries if dep}
 
     # -------------------------- small utils --------------------------
 

@@ -13,7 +13,7 @@ from __future__ import annotations
 import copy
 import os
 from pathlib import Path
-from typing import Any, Optional
+from typing import Any, Mapping, Optional
 
 from plugins.filter.merge_with_defaults import merge_with_defaults
 
@@ -34,15 +34,89 @@ _APPLICATIONS_DEFAULTS_CACHE: dict[str, dict[str, Any]] = {}
 _VARIANTS_CACHE: dict[str, dict[str, list[Any]]] = {}
 _MERGED_APPLICATIONS_CACHE: dict[tuple, dict[str, Any]] = {}
 
+# Per req-008, every role's metadata lives under these `meta/<topic>.yml`
+# files. The file root IS the value of `applications.<app>.<topic>` — there
+# is NO wrapping key matching the filename.
+_META_TOPICS: tuple[str, ...] = ("server", "rbac", "services", "volumes")
+
+
+def _extract_default_credentials(creds_node: Any) -> dict[str, Any]:
+    """Walk a `meta/schema.yml` `credentials:` tree and return the subset of
+    leaves that carry a literal `default:` Jinja string.
+
+    The shape mirrors the schema tree: nested keys stay nested. Per req-008
+    the literal string is preserved verbatim — no rendering, no validation.
+    Leaves WITHOUT `default:` are intentionally absent so the inventory's
+    apply_schema-generated values win the merge.
+    """
+    if not isinstance(creds_node, Mapping):
+        return {}
+
+    is_leaf = any(
+        marker in creds_node
+        for marker in ("default", "algorithm", "validation", "description")
+    )
+    if is_leaf:
+        return {}
+
+    out: dict[str, Any] = {}
+    for key, value in creds_node.items():
+        if not isinstance(value, Mapping):
+            continue
+        leaf = any(
+            marker in value
+            for marker in ("default", "algorithm", "validation", "description")
+        )
+        if leaf:
+            if "default" in value:
+                out[key] = value["default"]
+        else:
+            nested = _extract_default_credentials(value)
+            if nested:
+                out[key] = nested
+    return out
+
+
+def _has_application_metadata(role_dir: Path) -> bool:
+    """Detect whether a role behaves as an application after req-008.
+
+    A role is an "application" iff at least one of its `meta/<topic>.yml`
+    files exists (plus `meta/schema.yml` and `meta/users.yml` for the
+    schema-only / users-only special cases). Replaces the legacy
+    `roles/<role>/meta/services.yml`-presence test.
+    """
+    meta_dir = role_dir / "meta"
+    if not meta_dir.is_dir():
+        return False
+    for topic in _META_TOPICS:
+        if (meta_dir / f"{topic}.yml").is_file():
+            return True
+    if (meta_dir / "schema.yml").is_file():
+        return True
+    if (meta_dir / "users.yml").is_file():
+        return True
+    return False
+
 
 def _build_role_base_config(
     role_dir: Path,
     roles_dir: Path,
 ) -> dict[str, Any]:
-    """Return the post-augmentation `config/main.yml` payload for a
-    role: `group_id` resolved, `users` references rewritten to
-    `lookup('users', ...)`. Empty config collapses to `{}` (no
-    overrides applied)."""
+    """Assemble a role's effective `applications.<app>` payload from its
+    `meta/<topic>.yml` files.
+
+    `meta/server.yml`   → `server`
+    `meta/rbac.yml`     → `rbac`
+    `meta/services.yml` → `services`
+    `meta/volumes.yml`  → `volumes`
+    `meta/schema.yml`   → `credentials` (only the literal `default:` values;
+                         non-default credentials are filled by the
+                         inventory's apply_schema step and merged in by the
+                         caller).
+    `meta/users.yml`    → `users` (rewritten to `lookup('users', ...)` so the
+                         user-domain cache stays the source of truth).
+    Empty role collapses to ``{}`` (no overrides applied).
+    """
     # Pure-Python GID resolver — does NOT pull ansible. The previous
     # `ApplicationGidLookup().run([...])` call dragged
     # `ansible.plugins.lookup.LookupBase` into this code path and broke
@@ -54,37 +128,55 @@ def _build_role_base_config(
     from plugins.lookup.application_gid import compute_application_gid
 
     application_id = role_dir.name
-    config_data = _load_yaml_mapping(role_dir / "config" / "main.yml")
+    config_data: dict[str, Any] = {}
+    meta_dir = role_dir / "meta"
+
+    for topic in _META_TOPICS:
+        topic_data = _load_yaml_mapping(meta_dir / f"{topic}.yml")
+        if topic_data:
+            config_data[topic] = topic_data
+
+    schema_data = _load_yaml_mapping(meta_dir / "schema.yml")
+    if schema_data:
+        creds_defaults = _extract_default_credentials(
+            schema_data.get("credentials") or {}
+        )
+        if creds_defaults:
+            config_data["credentials"] = creds_defaults
+
+    users_meta = _load_yaml_mapping(meta_dir / "users.yml")
+    if isinstance(users_meta, dict) and users_meta:
+        config_data["users"] = {
+            user_key: "{{ lookup('users', " + repr(user_key) + ") }}"
+            for user_key in users_meta
+        }
+
     if not config_data:
         return {}
 
-    group_id = compute_application_gid(application_id, str(roles_dir))
-    config_data["group_id"] = group_id
-
-    users_meta = _load_yaml_mapping(role_dir / "users" / "main.yml")
-    users_data = users_meta.get("users", {})
-    if isinstance(users_data, dict) and users_data:
-        config_data["users"] = {
-            user_key: "{{ lookup('users', " + repr(user_key) + ") }}"
-            for user_key in users_data
-        }
+    config_data["group_id"] = compute_application_gid(application_id, str(roles_dir))
     return config_data
+
+
+def _iter_application_role_dirs(roles_dir: Path):
+    """Yield application role directories in deterministic alphabetical order."""
+    for child in sorted(p for p in roles_dir.iterdir() if p.is_dir()):
+        if _has_application_metadata(child):
+            yield child
 
 
 def _build_variants(roles_dir: Path) -> dict[str, list[Any]]:
     """Return ``{application_id: [variant_0, variant_1, ...]}``.
 
-    Each variant is the role's `config/main.yml` payload deep-merged
-    with the corresponding entry from
-    `roles/<role>/meta/variants.yml`. A missing/empty
-    `meta/variants.yml` collapses to a single empty variant so the
-    role keeps its pre-variant behaviour. The single-variant case is
-    equivalent to the legacy `_build_application_defaults` output.
+    Each variant is the role's assembled `meta/<topic>.yml` payload
+    deep-merged with the corresponding entry from
+    `roles/<role>/meta/variants.yml`. A missing/empty `meta/variants.yml`
+    collapses to a single empty variant so the role keeps its pre-variant
+    behaviour.
     """
     variants: dict[str, list[Any]] = {}
 
-    for config_file in sorted(roles_dir.glob("*/config/main.yml")):
-        role_dir = config_file.parents[1]
+    for role_dir in _iter_application_role_dirs(roles_dir):
         application_id = role_dir.name
         base_config = _build_role_base_config(role_dir, roles_dir)
         meta_path = role_dir / "meta" / "variants.yml"
@@ -94,11 +186,10 @@ def _build_variants(roles_dir: Path) -> dict[str, list[Any]]:
             if base_config:
                 role_variants.append(_deep_merge(base_config, override))
             else:
-                # Role has no config/main.yml payload, but a variant list
-                # MAY still legitimately produce an override-only result
-                # (e.g. when a role declares its inventory entirely from
-                # meta/variants.yml). Fall back to a deep copy of the
-                # override so callers never observe shared mutable state.
+                # Role has no meta payload, but a variant list MAY still
+                # legitimately produce an override-only result. Fall back
+                # to a deep copy of the override so callers never observe
+                # shared mutable state.
                 role_variants.append(copy.deepcopy(override))
         variants[application_id] = role_variants
 
@@ -133,7 +224,7 @@ def get_variants(
     """Return ``{application_id: [variant_0, ...]}`` cached per
     ``roles_dir``. Each variant is the role's effective configuration
     after the corresponding `meta/variants.yml` override has been
-    deep-merged on top of `config/main.yml`."""
+    deep-merged on top of `meta/services.yml`."""
     resolved_roles_dir = _resolve_roles_dir(roles_dir=roles_dir)
     key = _cache_key(resolved_roles_dir)
     cached = _VARIANTS_CACHE.get(key)
@@ -167,7 +258,7 @@ def get_merged_applications(
     if cached is not None:
         return cached
 
-    # Defaults always come from variant 0 (= the legacy `config/main.yml`
+    # Defaults always come from variant 0 (= the legacy `meta/services.yml`
     # payload, deep-merged with the empty `{}` entry). Per-round variant
     # overrides are baked into the inventory's `applications.<app>` block at
     # init time (see `cli.deploy.development.inventory.build_dev_inventory`)

@@ -15,7 +15,7 @@ from utils.cache import users as cache_users
 
 
 def _write_role_config(base_dir: Path, role_name: str, payload: dict) -> None:
-    config_path = base_dir / "roles" / role_name / "config" / "main.yml"
+    config_path = base_dir / "roles" / role_name / "meta" / "services.yml"
     config_path.parent.mkdir(parents=True, exist_ok=True)
     config_path.write_text(yaml.safe_dump(payload), encoding="utf-8")
 
@@ -81,10 +81,12 @@ class TestEmailLookup(unittest.TestCase):
         self.assertEqual(result["host"], "localhost")
 
     def test_application_override_wins_over_defaults(self) -> None:
+        # Per req-008 the file root of meta/services.yml IS the services map
+        # (no `compose.services` envelope).
         _write_role_config(
             self._tmp,
             "web-app-x",
-            {"compose": {"services": {"email": {"host": "smtp.app.org", "port": 587}}}},
+            {"email": {"host": "smtp.app.org", "port": 587}},
         )
         variables = {
             "SYSTEM_EMAIL_HOST": "smtp.global.org",
@@ -116,7 +118,7 @@ class TestEmailLookup(unittest.TestCase):
         _write_role_config(
             self._tmp,
             "web-app-nomail",
-            {"compose": {"services": {"logout": {"enabled": True}}}},
+            {"logout": {"enabled": True}},
         )
         variables = {
             "SYSTEM_EMAIL_HOST": "smtp.global.org",

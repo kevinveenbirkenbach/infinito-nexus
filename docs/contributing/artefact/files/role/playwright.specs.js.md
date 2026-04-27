@@ -13,7 +13,7 @@ For the matching rendered environment contract, see [Agent `playwright.env.j2`](
 ## Entry Point 🚪
 
 - The flow MUST start at `APP_BASE_URL`.
-- When the role exposes the dashboard entry (`compose.services.dashboard.enabled` is set), the first navigation MUST go through the dashboard, not straight into the app.
+- When the role exposes the dashboard entry (`services.dashboard.enabled` is set), the first navigation MUST go through the dashboard, not straight into the app.
 
 ## Scenarios 🎬
 
@@ -45,7 +45,7 @@ For the matching rendered environment contract, see [Agent `playwright.env.j2`](
 - Baseline scenarios (reachability, CSP, canonical-domain DOM assertion, logged-out final state) MUST NOT gate on any service. Disabling every shared service MUST still leave a passing baseline suite for the role.
 - When the role's own compose service IS the shared service under test (e.g. the Keycloak spec running against Keycloak itself), the admin-facing baseline MUST NOT gate on that service. Gate only the scenarios that assert a downstream integration (e.g. LDAP federation).
 - When a `<SERVICE>_SERVICE_ENABLED` variable is absent from the env (local iteration via `scripts/tests/e2e/rerun-spec.sh` against an older staged `.env`), the helper MUST treat that service as enabled. This preserves the current behaviour for iterative spec development against a fully-featured deploy. An explicit `<SERVICE>_SERVICE_ENABLED=false` MUST be the only way to trigger a skip.
-- The role's `templates/playwright.env.j2` MUST render every `<SERVICE>_SERVICE_ENABLED` flag the spec references, derived from `applications[<role>].compose.services.<name>.enabled` minus `SERVICES_DISABLED`. The env template IS the registry: a service that the spec may gate on MUST be declared there.
+- The role's `templates/playwright.env.j2` MUST render every `<SERVICE>_SERVICE_ENABLED` flag the spec references, derived from `applications[<role>].services.<name>.enabled` minus `SERVICES_DISABLED`. The env template IS the registry: a service that the spec may gate on MUST be declared there.
 
 ## Final State ✅
 

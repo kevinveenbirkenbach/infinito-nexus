@@ -20,14 +20,14 @@ class TestInventoryManager(TestCase):
             inv_path = Path(tmpdir) / "inventory.yml"
 
             role_path.mkdir(parents=True, exist_ok=True)
-            (role_path / "schema").mkdir(parents=True, exist_ok=True)
+            (role_path / "meta").mkdir(parents=True, exist_ok=True)
             (role_path / "vars").mkdir(parents=True, exist_ok=True)
             (role_path / "config").mkdir(parents=True, exist_ok=True)
 
             # IMPORTANT: ensure files exist for .exists() checks
-            (role_path / "schema" / "main.yml").write_text("{}", encoding="utf-8")
+            (role_path / "meta" / "schema.yml").write_text("{}", encoding="utf-8")
             (role_path / "vars" / "main.yml").write_text("{}", encoding="utf-8")
-            (role_path / "config" / "main.yml").write_text("{}", encoding="utf-8")
+            (role_path / "meta" / "services.yml").write_text("{}", encoding="utf-8")
             inv_path.write_text("{}", encoding="utf-8")
 
             inventory_path = inv_path
@@ -36,11 +36,11 @@ class TestInventoryManager(TestCase):
                 p = Path(path)
                 if p == inventory_path:
                     return {}
-                if p == role_path / "schema" / "main.yml":
+                if p == role_path / "meta" / "schema.yml":
                     return {}
                 if p == role_path / "vars" / "main.yml":
                     return {}  # missing application_id on purpose
-                if p == role_path / "config" / "main.yml":
+                if p == role_path / "meta" / "services.yml":
                     return {"compose": {"services": {}}}
                 return {}
 
@@ -70,15 +70,15 @@ class TestInventoryManager(TestCase):
             inv_path = Path(tmpdir) / "inventory.yml"
 
             role_path.mkdir(parents=True, exist_ok=True)
-            (role_path / "schema").mkdir(parents=True, exist_ok=True)
+            (role_path / "meta").mkdir(parents=True, exist_ok=True)
             (role_path / "vars").mkdir(parents=True, exist_ok=True)
             (role_path / "config").mkdir(parents=True, exist_ok=True)
             inv_path.write_text("{}", encoding="utf-8")
 
             # IMPORTANT: ensure files exist for .exists() checks
-            (role_path / "schema" / "main.yml").write_text("{}", encoding="utf-8")
+            (role_path / "meta" / "schema.yml").write_text("{}", encoding="utf-8")
             (role_path / "vars" / "main.yml").write_text("{}", encoding="utf-8")
-            (role_path / "config" / "main.yml").write_text("{}", encoding="utf-8")
+            (role_path / "meta" / "services.yml").write_text("{}", encoding="utf-8")
 
             inventory_path = inv_path
 
@@ -96,11 +96,11 @@ class TestInventoryManager(TestCase):
                 p = Path(path)
                 if p == inventory_path:
                     return {"applications": {}}
-                if p == role_path / "schema" / "main.yml":
+                if p == role_path / "meta" / "schema.yml":
                     return schema_data
                 if p == role_path / "vars" / "main.yml":
                     return {"application_id": "app_test"}
-                if p == role_path / "config" / "main.yml":
+                if p == role_path / "meta" / "services.yml":
                     return {"compose": {"services": {}}}
                 return {}
 
@@ -132,15 +132,15 @@ class TestInventoryManager(TestCase):
             inv_path = Path(tmpdir) / "inventory.yml"
 
             role_path.mkdir(parents=True, exist_ok=True)
-            (role_path / "schema").mkdir(parents=True, exist_ok=True)
+            (role_path / "meta").mkdir(parents=True, exist_ok=True)
             (role_path / "vars").mkdir(parents=True, exist_ok=True)
             (role_path / "config").mkdir(parents=True, exist_ok=True)
             inv_path.write_text("{}", encoding="utf-8")
 
             # IMPORTANT: ensure files exist for .exists() checks
-            (role_path / "schema" / "main.yml").write_text("{}", encoding="utf-8")
+            (role_path / "meta" / "schema.yml").write_text("{}", encoding="utf-8")
             (role_path / "vars" / "main.yml").write_text("{}", encoding="utf-8")
-            (role_path / "config" / "main.yml").write_text("{}", encoding="utf-8")
+            (role_path / "meta" / "services.yml").write_text("{}", encoding="utf-8")
 
             inventory_path = inv_path
 
@@ -158,11 +158,11 @@ class TestInventoryManager(TestCase):
                 p = Path(path)
                 if p == inventory_path:
                     return {"applications": {}}
-                if p == role_path / "schema" / "main.yml":
+                if p == role_path / "meta" / "schema.yml":
                     return schema_data
                 if p == role_path / "vars" / "main.yml":
                     return {"application_id": "app_test"}
-                if p == role_path / "config" / "main.yml":
+                if p == role_path / "meta" / "services.yml":
                     return {"compose": {"services": {}}}
                 return {}
 
@@ -203,14 +203,14 @@ class TestInventoryManager(TestCase):
             inv_path = Path(tmpdir) / "inventory.yml"
 
             role_path.mkdir(parents=True, exist_ok=True)
-            (role_path / "schema").mkdir(parents=True, exist_ok=True)
+            (role_path / "meta").mkdir(parents=True, exist_ok=True)
             (role_path / "vars").mkdir(parents=True, exist_ok=True)
             (role_path / "config").mkdir(parents=True, exist_ok=True)
             inv_path.write_text("{}", encoding="utf-8")
 
-            (role_path / "schema" / "main.yml").write_text("{}", encoding="utf-8")
+            (role_path / "meta" / "schema.yml").write_text("{}", encoding="utf-8")
             (role_path / "vars" / "main.yml").write_text("{}", encoding="utf-8")
-            (role_path / "config" / "main.yml").write_text("{}", encoding="utf-8")
+            (role_path / "meta" / "services.yml").write_text("{}", encoding="utf-8")
 
             inventory_path = inv_path
 
@@ -228,12 +228,14 @@ class TestInventoryManager(TestCase):
                 p = Path(path)
                 if p == inventory_path:
                     return {"applications": {}}
-                if p == role_path / "schema" / "main.yml":
+                if p == role_path / "meta" / "schema.yml":
                     return schema_data
                 if p == role_path / "vars" / "main.yml":
                     return {"application_id": "app_test"}
-                if p == role_path / "config" / "main.yml":
-                    return {"compose": {"services": {"oauth2": {"enabled": True}}}}
+                if p == role_path / "meta" / "services.yml":
+                    # Per req-008 the file root IS the services map
+                    # (no `compose.services` envelope).
+                    return {"oauth2": {"enabled": True}}
                 return {}
 
             with (
@@ -272,15 +274,15 @@ class TestInventoryManager(TestCase):
             inv_path = Path(tmpdir) / "inventory.yml"
 
             role_path.mkdir(parents=True, exist_ok=True)
-            (role_path / "schema").mkdir(parents=True, exist_ok=True)
+            (role_path / "meta").mkdir(parents=True, exist_ok=True)
             (role_path / "vars").mkdir(parents=True, exist_ok=True)
             (role_path / "config").mkdir(parents=True, exist_ok=True)
             inv_path.write_text("{}", encoding="utf-8")
 
             # IMPORTANT: ensure files exist for .exists() checks
-            (role_path / "schema" / "main.yml").write_text("{}", encoding="utf-8")
+            (role_path / "meta" / "schema.yml").write_text("{}", encoding="utf-8")
             (role_path / "vars" / "main.yml").write_text("{}", encoding="utf-8")
-            (role_path / "config" / "main.yml").write_text("{}", encoding="utf-8")
+            (role_path / "meta" / "services.yml").write_text("{}", encoding="utf-8")
 
             inventory_path = inv_path
 
@@ -298,11 +300,11 @@ class TestInventoryManager(TestCase):
                 p = Path(path)
                 if p == inventory_path:
                     return {"applications": {}}
-                if p == role_path / "schema" / "main.yml":
+                if p == role_path / "meta" / "schema.yml":
                     return schema_data
                 if p == role_path / "vars" / "main.yml":
                     return {"application_id": "app_test"}
-                if p == role_path / "config" / "main.yml":
+                if p == role_path / "meta" / "services.yml":
                     return {"compose": {"services": {}}}
                 return {}
 
@@ -355,15 +357,15 @@ class TestInventoryManager(TestCase):
             inv_path = Path(tmpdir) / "inventory.yml"
 
             role_path.mkdir(parents=True, exist_ok=True)
-            (role_path / "schema").mkdir(parents=True, exist_ok=True)
+            (role_path / "meta").mkdir(parents=True, exist_ok=True)
             (role_path / "vars").mkdir(parents=True, exist_ok=True)
             (role_path / "config").mkdir(parents=True, exist_ok=True)
             inv_path.write_text("{}", encoding="utf-8")
 
             # IMPORTANT: ensure files exist for .exists() checks
-            (role_path / "schema" / "main.yml").write_text("{}", encoding="utf-8")
+            (role_path / "meta" / "schema.yml").write_text("{}", encoding="utf-8")
             (role_path / "vars" / "main.yml").write_text("{}", encoding="utf-8")
-            (role_path / "config" / "main.yml").write_text("{}", encoding="utf-8")
+            (role_path / "meta" / "services.yml").write_text("{}", encoding="utf-8")
 
             inventory_path = inv_path
 
@@ -400,11 +402,11 @@ class TestInventoryManager(TestCase):
                 p = Path(path)
                 if p == inventory_path:
                     return inventory_data
-                if p == role_path / "schema" / "main.yml":
+                if p == role_path / "meta" / "schema.yml":
                     return schema_data
                 if p == role_path / "vars" / "main.yml":
                     return {"application_id": "app_test"}
-                if p == role_path / "config" / "main.yml":
+                if p == role_path / "meta" / "services.yml":
                     # No provider resolution / no special rules
                     return {"compose": {"services": {}}}
                 return {}
