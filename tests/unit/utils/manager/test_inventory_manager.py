@@ -41,7 +41,9 @@ class TestInventoryManager(TestCase):
                 if p == role_path / "vars" / "main.yml":
                     return {}  # missing application_id on purpose
                 if p == role_path / "meta" / "services.yml":
-                    return {"compose": {"services": {}}}
+                    # Per req-008: meta/services.yml file root IS the
+                    # services map (no `compose.services` envelope).
+                    return {}
                 return {}
 
             with (
@@ -101,7 +103,9 @@ class TestInventoryManager(TestCase):
                 if p == role_path / "vars" / "main.yml":
                     return {"application_id": "app_test"}
                 if p == role_path / "meta" / "services.yml":
-                    return {"compose": {"services": {}}}
+                    # Per req-008: meta/services.yml file root IS the
+                    # services map (no `compose.services` envelope).
+                    return {}
                 return {}
 
             with (
@@ -163,7 +167,9 @@ class TestInventoryManager(TestCase):
                 if p == role_path / "vars" / "main.yml":
                     return {"application_id": "app_test"}
                 if p == role_path / "meta" / "services.yml":
-                    return {"compose": {"services": {}}}
+                    # Per req-008: meta/services.yml file root IS the
+                    # services map (no `compose.services` envelope).
+                    return {}
                 return {}
 
             with (
@@ -305,7 +311,9 @@ class TestInventoryManager(TestCase):
                 if p == role_path / "vars" / "main.yml":
                     return {"application_id": "app_test"}
                 if p == role_path / "meta" / "services.yml":
-                    return {"compose": {"services": {}}}
+                    # Per req-008: meta/services.yml file root IS the
+                    # services map (no `compose.services` envelope).
+                    return {}
                 return {}
 
             fake_snippet = "!vault |\n  $ANSIBLE_VAULT;1.1;AES256\n    ENCRYPTEDVALUE"
@@ -408,7 +416,9 @@ class TestInventoryManager(TestCase):
                     return {"application_id": "app_test"}
                 if p == role_path / "meta" / "services.yml":
                     # No provider resolution / no special rules
-                    return {"compose": {"services": {}}}
+                    # Per req-008: meta/services.yml file root IS the
+                    # services map (no `compose.services` envelope).
+                    return {}
                 return {}
 
             with (

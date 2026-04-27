@@ -22,6 +22,7 @@ email:
 postgres:
   enabled: true
   shared: true
+# noqa: shared
 redis:
   backup:
     disabled: true

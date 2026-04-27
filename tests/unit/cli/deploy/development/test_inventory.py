@@ -294,7 +294,9 @@ class TestBuildDevInventory(unittest.TestCase):
                     "server": {
                         "domains": {"canonical": ["blog.multi.example"]},
                     },
-                    "compose": {"services": {"x": {"flag": True}}},
+                    # Per req-008: services live at applications.<app>.services
+                    # directly (no `compose.services` envelope).
+                    "services": {"x": {"flag": True}},
                 },
             ],
         },
@@ -324,7 +326,7 @@ class TestBuildDevInventory(unittest.TestCase):
             ["blog.multi.example"],
         )
         self.assertEqual(
-            baked["applications"]["web-app-multi"]["compose"]["services"]["x"],
+            baked["applications"]["web-app-multi"]["services"]["x"],
             {"flag": True},
         )
         # Implicit overrides untouched:

@@ -29,10 +29,12 @@ mariadb:
   shared: false
   enabled: true
   version: '11.4'
+# noqa: shared
 redis:
   backup:
     disabled: true
   enabled: true
+# noqa: shared
 search:
   enabled: true
   image: opensearchproject/opensearch

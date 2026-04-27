@@ -57,8 +57,8 @@ def _collect_entries() -> list[dict]:
         # Only web-* roles
         if not ref.role.startswith("web-"):
             continue
-        # Only compose services from config/main.yml, not vars
-        if ref.source_file != "config/main.yml":
+        # Only services from meta/services.yml, not defaults/main.yml.
+        if ref.source_file != "meta/services.yml":
             continue
         # Only semver versions (pure or `<semver>-<flavor>`)
         if not is_semver(ref.version):

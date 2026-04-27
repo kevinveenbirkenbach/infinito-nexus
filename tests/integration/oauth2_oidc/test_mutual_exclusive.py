@@ -23,7 +23,9 @@ class TestOidcOauth2MutualExclusion(unittest.TestCase):
                 failures.append(f"{config_file}: failed to parse YAML ({error})")
                 continue
 
-            services = data.get("compose", {}).get("services", {})
+            # Per req-008 the file root of meta/services.yml IS the
+            # services map (no `compose.services` wrapper).
+            services = data if isinstance(data, dict) else {}
             oidc_enabled = services.get("oidc", {}).get("enabled") is True
             oauth2_enabled = services.get("oauth2", {}).get("enabled") is True
 

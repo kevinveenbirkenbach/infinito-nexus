@@ -7,6 +7,7 @@ dashboard:
 matomo:
   enabled: true
   shared: true
+# noqa: shared
 redis:
   backup:
     disabled: true

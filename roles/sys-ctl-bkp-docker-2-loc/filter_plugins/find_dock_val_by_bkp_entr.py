@@ -18,8 +18,9 @@ def find_dock_val_by_bkp_entr(applications, search_string, mapped_entry):
     results = []
 
     for app in applications.values():
-        docker = app.get("compose", {})
-        services = docker.get("services", {})
+        # Per req-008 the materialised payload exposes services under
+        # the bare `services` key (no `compose.services` envelope).
+        services = app.get("services", {}) if isinstance(app, dict) else {}
         if not isinstance(services, dict):
             continue
         for svc in services.values():

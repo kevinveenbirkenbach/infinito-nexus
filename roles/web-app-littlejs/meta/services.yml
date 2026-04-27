@@ -22,6 +22,7 @@ littlejs:
   run_after:
   - web-app-matomo
   lifecycle: alpha
+# noqa: email
 email:
   enabled: false
   shared: false

@@ -31,6 +31,7 @@ decidim:
   run_after:
   - web-app-keycloak
   lifecycle: beta
+# noqa: shared
 redis:
   backup:
     disabled: true

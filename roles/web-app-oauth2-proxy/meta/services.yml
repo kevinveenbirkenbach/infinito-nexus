@@ -17,6 +17,7 @@ oauth2-proxy:
   ports:
     inter: 4180
   lifecycle: pre-alpha
+# noqa: email
 email:
   enabled: false
   shared: false

@@ -30,7 +30,9 @@ class TestBackupsEnabledIntegrity(unittest.TestCase):
                     self.fail(f"YAML parsing failed for {docker_config_path}: {e}")
                     continue
 
-            services = (config.get("compose", {}) or {}).get("services", {}) or {}
+            # Per req-008 the file root of meta/services.yml IS the
+            # services map (no `compose.services` wrapper).
+            services = config if isinstance(config, dict) else {}
 
             for service_key, service in services.items():
                 if not isinstance(service, dict):

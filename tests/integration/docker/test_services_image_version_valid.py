@@ -25,8 +25,9 @@ def _iter_role_config_files(repo_root: Path) -> List[Path]:
 
 
 def _extract_services(cfg: Dict[str, Any]) -> Dict[str, Any]:
-    docker = _safe_mapping(cfg.get("compose"))
-    return _safe_mapping(docker.get("services"))
+    # Per req-008 the file root of meta/services.yml IS the services
+    # map (no `compose.services` wrapper).
+    return _safe_mapping(cfg)
 
 
 def _iter_declared_fields(

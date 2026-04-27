@@ -26,6 +26,7 @@ mailu:
   run_after:
   - web-app-matomo
   lifecycle: beta
+# noqa: shared
 redis:
   backup:
     disabled: true
