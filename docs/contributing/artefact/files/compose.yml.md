@@ -101,9 +101,9 @@ When the proxy is active, the drop-in registers the install script as
 
 | Variable                                | Default                                | Purpose                                                                                                              |
 |-----------------------------------------|----------------------------------------|----------------------------------------------------------------------------------------------------------------------|
-| `INFINITO_REGISTRY_CACHE_HOST_PATH`     | `/tmp/infinito/core/registry-cache/mirror`  | Host path bind-mounted into `registry-cache` for blob/manifest persistence.                                          |
-| `INFINITO_REGISTRY_CACHE_CA_HOST_PATH`  | `/tmp/infinito/core/registry-cache/ca`      | Host path holding the proxy MITM CA bundle. Mounted writable into `registry-cache`, read-only into `infinito`.       |
-| `INFINITO_REGISTRY_CACHE_MAX_SIZE`      | `32g`                                  | Maximum on-disk size of the cache. Older entries are evicted when this is reached.                                   |
+| `INFINITO_REGISTRY_CACHE_HOST_PATH`     | none (required)                        | Host path bind-mounted into `registry-cache` for blob/manifest persistence. Default supplied by [registry_cache.sh](../../../../scripts/meta/env/registry_cache.sh) (`/tmp/infinito/core/registry-cache/mirror`). |
+| `INFINITO_REGISTRY_CACHE_CA_HOST_PATH`  | none (required)                        | Host path holding the proxy MITM CA bundle. Mounted writable into `registry-cache`, read-only into `infinito`. Default supplied by [registry_cache.sh](../../../../scripts/meta/env/registry_cache.sh) (`/tmp/infinito/core/registry-cache/ca`). |
+| `INFINITO_REGISTRY_CACHE_MAX_SIZE`      | none (required)                        | Maximum on-disk size of the cache. Older entries are evicted when reached. Default computed by [registry_cache.sh](../../../../scripts/meta/env/registry_cache.sh) as half the free disk space at the cache path, minimum `1g`, fallback `2g` if `df` fails. |
 | `INFINITO_REGISTRY_CACHE_PROXY_CONF`    | `/dev/null`                            | Bind-mount source for the systemd drop-in inside `infinito`. Set by the dev tooling to the real `proxy.conf` only when the `cache` profile is active; the `/dev/null` default makes systemd load an empty drop-in so dockerd boots without `HTTP_PROXY`. |
 
 ### Networking
