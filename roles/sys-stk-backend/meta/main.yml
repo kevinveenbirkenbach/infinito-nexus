@@ -11,10 +11,9 @@ galaxy_info:
 
     '
   license: Infinito.Nexus Community License (Non-Commercial)
-  license_url: https://s.infinito.nexus/license
   galaxy_tags:
-  - docker
-  - database
-  - rdbms
-  - backup
-  - compose
+    - docker
+    - database
+    - rdbms
+    - backup
+    - compose

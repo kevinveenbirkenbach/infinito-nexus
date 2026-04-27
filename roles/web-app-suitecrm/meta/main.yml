@@ -4,7 +4,6 @@ galaxy_info:
 
     '
   license: Infinito.Nexus Community License (Non-Commercial)
-  license_url: https://s.infinito.nexus/license
   company: 'Kevin Veen-Birkenbach
 
     Consulting & Coaching Solutions
@@ -13,11 +12,9 @@ galaxy_info:
 
     '
   galaxy_tags:
-  - suitecrm
-  - crm
-  - sales
-  repository: https://s.infinito.nexus/code
+    - suitecrm
+    - crm
+    - sales
   issue_tracker_url: https://s.infinito.nexus/issues
-  documentation: https://docs.infinito.nexus
   logo:
     class: fa-solid fa-phone

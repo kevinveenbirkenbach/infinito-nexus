@@ -2,7 +2,6 @@ galaxy_info:
   author: Kevin Veen-Birkenbach
   description: Elevate your website management with Joomla, a powerful content management system that fuses versatility with dynamic design, inspiring creativity and driving your digital presence to new heights.
   license: Infinito.Nexus Community License (Non-Commercial)
-  license_url: https://s.infinito.nexus/license
   company: 'Kevin Veen-Birkenbach
 
     Consulting & Coaching Solutions
@@ -11,14 +10,12 @@ galaxy_info:
 
     '
   galaxy_tags:
-  - joomla
-  - docker
-  - cms
-  - content management
-  - self-hosted
-  repository: https://s.infinito.nexus/code
+    - joomla
+    - docker
+    - cms
+    - content management
+    - self-hosted
   issue_tracker_url: https://s.infinito.nexus/issues
-  documentation: https://docs.infinito.nexus/
   logo:
     class: fa-solid fa-sitemap
 dependencies: []

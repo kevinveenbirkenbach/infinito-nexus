@@ -4,7 +4,6 @@ galaxy_info:
 
     '
   license: Infinito.Nexus Community License (Non-Commercial)
-  license_url: https://s.infinito.nexus/license
   company: 'Kevin Veen-Birkenbach
 
     Consulting & Coaching Solutions
@@ -13,15 +12,13 @@ galaxy_info:
 
     '
   galaxy_tags:
-  - linux
-  - development
-  - build
-  - tools
-  - compiler
-  - package-management
-  repository: https://s.infinito.nexus/code
+    - linux
+    - development
+    - build
+    - tools
+    - compiler
+    - package-management
   issue_tracker_url: https://s.infinito.nexus/issues
-  documentation: https://docs.infinito.nexus
   logo:
     class: fas fa-tools
 dependencies: []

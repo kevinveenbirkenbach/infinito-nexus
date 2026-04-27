@@ -4,7 +4,6 @@ galaxy_info:
 
     '
   license: Infinito.Nexus Community License (Non-Commercial)
-  license_url: https://s.infinito.nexus/license
   company: 'Kevin Veen-Birkenbach
 
     Consulting & Coaching Solutions
@@ -13,14 +12,12 @@ galaxy_info:
 
     '
   galaxy_tags:
-  - infinito
-  - meta
-  - visualization
-  - dependencies
-  - graph
-  - mig
-  repository: https://github.com/kevinveenbirkenbach/meta-infinite-graph
+    - infinito
+    - meta
+    - visualization
+    - dependencies
+    - graph
+    - mig
   issue_tracker_url: https://github.com/kevinveenbirkenbach/meta-infinite-graph/issues
-  documentation: https://github.com/kevinveenbirkenbach/meta-infinite-graph/
   logo:
     class: fa-solid fa-brain

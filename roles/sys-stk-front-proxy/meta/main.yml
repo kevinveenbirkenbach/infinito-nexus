@@ -2,7 +2,6 @@ galaxy_info:
   author: Kevin Veen-Birkenbach
   description: Automated domain provisioning (TLS, vHost, OAuth2) for Nginx.
   license: Infinito.Nexus Community License (Non-Commercial)
-  license_url: https://s.infinito.nexus/license
   company: 'Kevin Veen-Birkenbach
 
     Consulting & Coaching Solutions
@@ -12,16 +11,14 @@ galaxy_info:
     '
   min_ansible_version: '2.9'
   platforms:
-  - name: Archlinux
-    versions:
-    - rolling
+    - name: Archlinux
+      versions:
+        - rolling
   galaxy_tags:
-  - nginx
-  - tls
-  - letsencrypt
-  - oauth2
-  - automation
-  - archlinux
-  repository: https://s.infinito.nexus/code
+    - nginx
+    - tls
+    - letsencrypt
+    - oauth2
+    - automation
+    - archlinux
   issue_tracker_url: https://s.infinito.nexus/issues
-  documentation: https://docs.infinito.nexus/

@@ -2,7 +2,6 @@ galaxy_info:
   author: Kevin Veen-Birkenbach
   description: Experience Mobilizon, an open-source event management platform that empowers communities to create, manage, and attend events with ease, prioritizing privacy and decentralization.
   license: Infinito.Nexus Community License (Non-Commercial)
-  license_url: https://s.infinito.nexus/license
   company: 'Kevin Veen-Birkenbach
 
     Consulting & Coaching Solutions
@@ -11,12 +10,10 @@ galaxy_info:
 
     '
   galaxy_tags:
-  - mobilizon
-  - docker
-  - event-management
-  - open-source
-  repository: https://s.infinito.nexus/code
+    - mobilizon
+    - docker
+    - event-management
+    - open-source
   issue_tracker_url: https://s.infinito.nexus/issues
-  documentation: https://docs.infinito.nexus
   logo:
     class: fa-solid fa-calendar-days

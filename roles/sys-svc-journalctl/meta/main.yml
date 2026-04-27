@@ -2,7 +2,6 @@ galaxy_info:
   author: Kevin Veen-Birkenbach
   description: Configure and manage systemd-journald settings
   license: Infinito.Nexus Community License (Non-Commercial)
-  license_url: https://s.infinito.nexus/license
   company: 'Kevin Veen-Birkenbach
 
     Consulting & Coaching Solutions
@@ -11,9 +10,7 @@ galaxy_info:
 
     '
   galaxy_tags:
-  - system
-  - logging
-  - journald
-  repository: https://s.infinito.nexus/code
+    - system
+    - logging
+    - journald
   issue_tracker_url: https://s.infinito.nexus/issues
-  documentation: https://s.infinito.nexus/code/roles/sys-svc-journalctl

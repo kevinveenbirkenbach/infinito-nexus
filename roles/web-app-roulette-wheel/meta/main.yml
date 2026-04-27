@@ -4,7 +4,6 @@ galaxy_info:
 
     '
   license: Infinito.Nexus Community License (Non-Commercial)
-  license_url: https://s.infinito.nexus/license
   company: 'Kevin Veen-Birkenbach
 
     Consulting & Coaching Solutions
@@ -13,13 +12,11 @@ galaxy_info:
 
     '
   galaxy_tags:
-  - docker
-  - nodejs
-  - roulette
-  - webapp
-  - game
-  repository: https://s.infinito.nexus/code
+    - docker
+    - nodejs
+    - roulette
+    - webapp
+    - game
   issue_tracker_url: https://s.infinito.nexus/issues
-  documentation: https://docs.infinito.nexus
   logo:
     class: fa-solid fa-fan

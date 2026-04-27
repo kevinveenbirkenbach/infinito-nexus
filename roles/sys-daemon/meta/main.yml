@@ -2,7 +2,6 @@ galaxy_info:
   author: Kevin Veen-Birkenbach
   description: Role to reset and configure the systemd manager (drop-ins, defaults, validation).
   license: Infinito.Nexus Community License (Non-Commercial)
-  license_url: https://s.infinito.nexus/license
   company: 'Kevin Veen-Birkenbach
 
     Consulting & Coaching Solutions
@@ -11,11 +10,9 @@ galaxy_info:
 
     '
   galaxy_tags:
-  - systemd
-  - infinito
-  - daemon
-  - cleanup
-  repository: https://s.infinito.nexus/code
+    - systemd
+    - infinito
+    - daemon
+    - cleanup
   issue_tracker_url: https://s.infinito.nexus/issues
-  documentation: https://www.freedesktop.org/software/systemd/man/systemd-system.conf.html
 dependencies: []

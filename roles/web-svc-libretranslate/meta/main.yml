@@ -2,7 +2,6 @@ galaxy_info:
   author: Kevin Veen-Birkenbach
   description: Deploys LibreTranslate via Docker Compose with configurable Redis and database backends, and optional Matomo tracking.
   license: Infinito.Nexus Community License (Non-Commercial)
-  license_url: https://s.infinito.nexus/license
   company: 'Kevin Veen-Birkenbach
 
     Consulting & Coaching Solutions
@@ -11,9 +10,7 @@ galaxy_info:
 
     '
   galaxy_tags: []
-  repository: https://s.infinito.nexus/code
   issue_tracker_url: https://s.infinito.nexus/issues
-  documentation: https://s.infinito.nexus/code/
   logo:
     class: ''
 dependencies: []

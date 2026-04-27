@@ -2,7 +2,6 @@ galaxy_info:
   author: Kevin Veen-Birkenbach
   description: Installs GNU Make using the Pacman package manager on Arch Linux systems.
   license: Infinito.Nexus Community License (Non-Commercial)
-  license_url: https://s.infinito.nexus/license
   company: 'Kevin Veen-Birkenbach
 
     Consulting & Coaching Solutions
@@ -12,12 +11,12 @@ galaxy_info:
     '
   min_ansible_version: '2.9'
   platforms:
-  - name: Archlinux
-    versions:
-    - rolling
+    - name: Archlinux
+      versions:
+        - rolling
   galaxy_tags:
-  - make
-  - build
-  - automation
-  - archlinux
+    - make
+    - build
+    - automation
+    - archlinux
 dependencies: []

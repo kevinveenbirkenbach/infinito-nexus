@@ -2,7 +2,6 @@ galaxy_info:
   author: Kevin Veen-Birkenbach
   description: Installs Open WebUI — a clean, fast chat interface for local/private AI models (e.g., via Ollama).
   license: Infinito.Nexus Community License (Non-Commercial)
-  license_url: https://s.infinito.nexus/license
   company: 'Kevin Veen-Birkenbach
 
     Consulting & Coaching Solutions
@@ -11,17 +10,15 @@ galaxy_info:
 
     '
   galaxy_tags:
-  - ai
-  - llm
-  - chat
-  - privacy
-  - self-hosted
-  - offline
-  - openwebui
-  - ollama
-  repository: https://s.infinito.nexus/code
+    - ai
+    - llm
+    - chat
+    - privacy
+    - self-hosted
+    - offline
+    - openwebui
+    - ollama
   issue_tracker_url: https://s.infinito.nexus/issues
-  documentation: https://s.infinito.nexus/code/
   logo:
     class: fa-solid fa-comments
 dependencies: []

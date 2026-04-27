@@ -2,7 +2,6 @@ galaxy_info:
   author: Kevin Veen-Birkenbach
   description: Aggregates essential GNOME desktop roles—including caffeine, extensions, and terminal—for a complete GNOME environment on Linux.
   license: Infinito.Nexus Community License (Non-Commercial)
-  license_url: https://s.infinito.nexus/license
   company: 'Kevin Veen-Birkenbach
 
     Consulting & Coaching Solutions
@@ -12,11 +11,11 @@ galaxy_info:
     '
   min_ansible_version: '2.9'
   platforms:
-  - name: Archlinux
-    versions:
-    - rolling
+    - name: Archlinux
+      versions:
+        - rolling
   galaxy_tags:
-  - gnome
-  - desktop
-  - archlinux
-  - automation
+    - gnome
+    - desktop
+    - archlinux
+    - automation

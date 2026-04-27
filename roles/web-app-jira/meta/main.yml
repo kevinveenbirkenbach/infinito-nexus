@@ -2,7 +2,6 @@ galaxy_info:
   author: Kevin Veen-Birkenbach
   description: Jira Software is Atlassian’s issue & project tracking platform. This role deploys Jira in Docker, adds optional OIDC support, and integrates with the Infinito.Nexus ecosystem.
   license: Infinito.Nexus Community License (Non-Commercial)
-  license_url: https://s.infinito.nexus/license
   company: 'Kevin Veen-Birkenbach
 
     Consulting & Coaching Solutions
@@ -11,11 +10,9 @@ galaxy_info:
 
     '
   galaxy_tags:
-  - jira
-  - project management
-  repository: https://s.infinito.nexus/code
+    - jira
+    - project management
   issue_tracker_url: https://s.infinito.nexus/issues
-  documentation: https://s.infinito.nexus/code/
   logo:
     class: fas fa-diagram-project
 dependencies: []

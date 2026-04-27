@@ -2,7 +2,6 @@ galaxy_info:
   author: Kevin Veen-Birkenbach
   description: Install and run dockreap to clean up unused anonymous Docker volumes
   license: Infinito.Nexus Community License (Non-Commercial)
-  license_url: https://s.infinito.nexus/license
   company: 'Kevin Veen-Birkenbach
 
     Consulting & Coaching Solutions
@@ -12,13 +11,13 @@ galaxy_info:
     '
   min_ansible_version: '2.9'
   platforms:
-  - name: Linux
-    versions:
-    - all
+    - name: Linux
+      versions:
+        - all
   galaxy_tags:
-  - docker
-  - cleanup
-  - automation
-  - maintenance
-  - volumes
-  - pkgmgr
+    - docker
+    - cleanup
+    - automation
+    - maintenance
+    - volumes
+    - pkgmgr

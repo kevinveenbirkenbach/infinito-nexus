@@ -2,7 +2,6 @@ galaxy_info:
   author: Kevin Veen-Birkenbach
   description: Centralizes system update operations by conditionally invoking platform-specific update roles and Docker image updates.
   license: Infinito.Nexus Community License (Non-Commercial)
-  license_url: https://s.infinito.nexus/license
   company: 'Kevin Veen-Birkenbach
 
     Consulting & Coaching Solutions
@@ -12,20 +11,18 @@ galaxy_info:
     '
   min_ansible_version: '2.9'
   platforms:
-  - name: Archlinux
-    versions:
-    - rolling
-  - name: Debian
-    versions:
-    - all
+    - name: Archlinux
+      versions:
+        - rolling
+    - name: Debian
+      versions:
+        - all
   galaxy_tags:
-  - update
-  - system
-  - maintenance
-  - docker
-  - apt
-  - pacman
-  repository: https://s.infinito.nexus/code
+    - update
+    - system
+    - maintenance
+    - docker
+    - apt
+    - pacman
   issue_tracker_url: https://s.infinito.nexus/issues
-  documentation: https://docs.infinito.nexus
 dependencies: []

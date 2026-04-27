@@ -4,7 +4,6 @@ galaxy_info:
 
     '
   license: Infinito.Nexus Community License (Non-Commercial)
-  license_url: https://s.infinito.nexus/license
   company: 'Kevin Veen-Birkenbach
 
     Consulting & Coaching Solutions
@@ -14,12 +13,12 @@ galaxy_info:
     '
   min_ansible_version: '2.9'
   platforms:
-  - name: all
+    - name: all
   galaxy_tags:
-  - infinito
-  - testing
-  - e2e
-  - playwright
-  - docker
-  - automation
+    - infinito
+    - testing
+    - e2e
+    - playwright
+    - docker
+    - automation
 dependencies: []

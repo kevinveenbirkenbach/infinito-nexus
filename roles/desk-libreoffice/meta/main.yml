@@ -2,7 +2,6 @@ galaxy_info:
   author: Kevin Veen-Birkenbach
   description: Installs LibreOffice along with Liberation fonts and language packages on Arch Linux systems for a complete office suite experience.
   license: Infinito.Nexus Community License (Non-Commercial)
-  license_url: https://s.infinito.nexus/license
   company: 'Kevin Veen-Birkenbach
 
     Consulting & Coaching Solutions
@@ -12,13 +11,13 @@ galaxy_info:
     '
   min_ansible_version: '2.9'
   platforms:
-  - name: Archlinux
-    versions:
-    - rolling
+    - name: Archlinux
+      versions:
+        - rolling
   galaxy_tags:
-  - libreoffice
-  - office-suite
-  - archlinux
-  - automation
+    - libreoffice
+    - office-suite
+    - archlinux
+    - automation
 dependencies:
-- gen-hunspell
+  - gen-hunspell

@@ -2,7 +2,6 @@ galaxy_info:
   author: Kevin Veen-Birkenbach
   description: Adapts iptables rules to enable proper connectivity for a WireGuard client running behind a NAT or firewall, ensuring that traffic is correctly forwarded and masqueraded.
   license: Infinito.Nexus Community License (Non-Commercial)
-  license_url: https://s.infinito.nexus/license
   company: 'Kevin Veen-Birkenbach
 
     Consulting & Coaching Solutions
@@ -12,17 +11,15 @@ galaxy_info:
     '
   min_ansible_version: '2.9'
   platforms:
-  - name: Linux
-    versions:
-    - all
+    - name: Linux
+      versions:
+        - all
   galaxy_tags:
-  - wireguard
-  - nat
-  - firewall
-  - iptables
-  - networking
-  repository: https://s.infinito.nexus/code
+    - wireguard
+    - nat
+    - firewall
+    - iptables
+    - networking
   issue_tracker_url: https://s.infinito.nexus/issues
-  documentation: https://docs.infinito.nexus
 dependencies:
-- svc-net-wireguard-plain
+  - svc-net-wireguard-plain

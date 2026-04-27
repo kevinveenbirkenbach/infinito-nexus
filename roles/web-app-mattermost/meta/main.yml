@@ -2,7 +2,6 @@ galaxy_info:
   author: Alejandro Roman Ibanez
   description: Unite your team with Mattermost, an open-source, self-hosted messaging platform that delivers secure, real-time collaboration through channels, threads, and integrations — keeping your conversations private and under your control.
   license: Infinito.Nexus Community License (Non-Commercial)
-  license_url: https://s.infinito.nexus/license
   company: 'Kevin Veen-Birkenbach
 
     Consulting & Coaching Solutions
@@ -11,15 +10,13 @@ galaxy_info:
 
     '
   galaxy_tags:
-  - mattermost
-  - docker
-  - messaging
-  - team-chat
-  - collaboration
-  - self-hosted
-  repository: https://s.infinito.nexus/code
+    - mattermost
+    - docker
+    - messaging
+    - team-chat
+    - collaboration
+    - self-hosted
   issue_tracker_url: https://s.infinito.nexus/issues
-  documentation: https://docs.infinito.nexus/
   logo:
     class: fa-solid fa-comments
 dependencies: []

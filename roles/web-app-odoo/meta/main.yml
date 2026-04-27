@@ -2,20 +2,17 @@ galaxy_info:
   author: Evangelos Tsakoudis
   description: Deploy and manage Odoo ERP within the Infinito.Nexus ecosystem. A comprehensive enterprise resource planning solution for managing finance, CRM, inventory, HR, sales, website, marketing and other business workflows with full OIDC/LDAP identity integration.
   license: Infinito.Nexus Community License (Non-Commercial)
-  license_url: https://s.infinito.nexus/license
   galaxy_tags:
-  - odoo
-  - erp
-  - crm
-  - business
-  - finance
-  - inventory
-  - sales
-  - hr
-  - website
-  - marketing
-  repository: https://s.infinito.nexus/code
+    - odoo
+    - erp
+    - crm
+    - business
+    - finance
+    - inventory
+    - sales
+    - hr
+    - website
+    - marketing
   issue_tracker_url: https://s.infinito.nexus/issues
-  documentation: https://docs.infinito.nexus
   logo:
     class: fa-solid fa-briefcase
