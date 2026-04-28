@@ -42,8 +42,6 @@ discourse:
   ports:
     local:
       http: 8020
-  run_after:
-  - web-app-wordpress
   lifecycle: beta
 css:
   enabled: true
