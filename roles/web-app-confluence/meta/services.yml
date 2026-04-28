@@ -33,7 +33,7 @@ confluence:
   - web-app-matomo
   - web-app-keycloak
   - web-app-mailu
-  lifecycle: alpha
+  lifecycle: unsupported
 css:
   enabled: true
   shared: true
