@@ -40,10 +40,13 @@ class TestPlaywrightEnvServiceFlags(unittest.TestCase):
             for match in SERVICE_FLAG_LINE.finditer(content):
                 rhs = match.group(2).strip()
                 # The rhs MUST be a Jinja expression that yields "true" or
-                # "false" as literal strings. Two acceptable shapes:
-                #   1) A `{{ ... }}` expression ending with `else 'false' }}`
-                #      or ending with `'true'` or `'false'`.
-                #   2) The literal string "true" or "false".
+                # "false" as literal strings. Three acceptable shapes:
+                #   1) A `{{ ... }}` ternary that ends with `'true'` and
+                #      `'false'` (both quote styles accepted).
+                #   2) A `{{ ... | string | lower }}` expression whose
+                #      operand is a Python boolean (`True`/`False`
+                #      lower-case to "true"/"false").
+                #   3) The literal string "true" or "false".
                 if rhs in ("true", "false"):
                     continue
                 looks_like_ternary = "{{" in rhs and (
@@ -51,6 +54,11 @@ class TestPlaywrightEnvServiceFlags(unittest.TestCase):
                     or ('"true"' in rhs and '"false"' in rhs)
                 )
                 if looks_like_ternary:
+                    continue
+                looks_like_string_lower = "{{" in rhs and re.search(
+                    r"\|\s*string\s*\|\s*lower\b", rhs
+                )
+                if looks_like_string_lower:
                     continue
                 offenders.append(f"{role}: {match.group(1)}_SERVICE_ENABLED = {rhs}")
         self.assertEqual(
