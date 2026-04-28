@@ -240,9 +240,15 @@ def handler(args: argparse.Namespace) -> int:
     # variant changed; apps that stayed on variant 0 are NOT purged. The
     # final round is followed by no purge so the last state remains
     # available for inspection / follow-up specs.
+    # Matrix planning MUST use the same include set as the init step
+    # (`deploy_ids` = primary apps + transitive deps). Using only the
+    # primary apps here can produce a smaller round count when a
+    # transitive dep is the only multi-variant role, which makes deploy
+    # look at `<dir>` while init created `<dir>-0` / `<dir>-1` and the
+    # inventory file is silently missing.
     plan = plan_dev_inventory_matrix(
         roles_dir=str(compose.repo_root / "roles"),
-        include=primary_app_ids,
+        include=deploy_ids,
         base_inventory_dir=str(args.inventory_dir),
     )
     try:
