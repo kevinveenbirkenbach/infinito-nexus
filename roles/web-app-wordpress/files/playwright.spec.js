@@ -927,6 +927,13 @@ test("wordpress post published with discourse toggle appears as a Discourse topi
   browser,
 }) => {
   skipUnlessServiceEnabled("discourse");
+  // 10 min for this end-to-end round-trip: two browser contexts +
+  // two OIDC logins (main + cleanup) + WP editor + Discourse polling
+  // + post-status cleanup across 5 statuses comfortably exceeds the
+  // default 300s budget on cold caches. The individual step timeouts
+  // (60s OIDC, 30s editor expects, 60s snackbar, 60s discourse poll)
+  // remain in place to fail fast on real regressions.
+  test.setTimeout(600_000);
   const stamp = Date.now();
     const unique = Math.random().toString(36).slice(2, 8);
     const postTitle = `infinito-playwright-discourse-roundtrip-${stamp}-${unique}`;
@@ -980,29 +987,50 @@ test("wordpress post published with discourse toggle appears as a Discourse topi
       });
       await titleBox.fill(postTitle);
 
-      // Fill body content. Gutenberg's empty default block has carried
-      // several different aria-labels across WP versions ("Empty block",
-      // "Type / to choose a block", "Block: Paragraph", a generic
-      // contenteditable wrapper, or the rich-text "writeflow" area).
-      // Tabbing from the title moves focus into the body block, which
-      // is also how a regular user would proceed; this is robust against
-      // future aria-label renames.
-      await wpPage.keyboard.press("Tab");
+      // Fill body content. Pressing Enter at the end of the title block
+      // is the natural Gutenberg flow: the editor splits a new paragraph
+      // block below, focused, ready to receive text. `keyboard.press('Tab')`
+      // is unsafe — it can land on the WP block-editor command-palette
+      // trigger; subsequent typing then ends up in the palette's search
+      // field instead of the post body, leaving the body empty.
+      await titleBox.press("Enter");
       await wpPage.keyboard.type(postBody);
+      // Defensive: if a previous keypress accidentally surfaced WP's
+      // command palette ("Search commands and settings"), close it so it
+      // doesn't intercept later clicks.
+      await wpPage.keyboard.press("Escape").catch(() => {});
 
-      // Toggle "Publish to Discourse" in the wp-discourse sidebar. The
-      // plugin persists this as the `publish_to_discourse` post-meta.
-      await wpPage
-        .getByRole("button", { name: /(discourse|wp ?discourse)/i })
-        .first()
-        .click()
-        .catch(() => {});
+      // wp-discourse 2.6+ ships a Gutenberg PluginSidebar
+      // (name="discourse-sidebar", title="Discourse"). It is NOT a panel
+      // inside the document sidebar, so the post-info column never shows
+      // a "Discourse" section — instead the editor toolbar grows a
+      // standalone Discourse icon button that toggles a separate sidebar
+      // open. We open it by aria-label "Discourse" (anchored on word
+      // boundaries so the OIDC "Login with Discourse" button on /wp-login
+      // doesn't match here, which it can't anyway since we are post-login,
+      // but defensive). Click is a no-op if it is already open from a
+      // previous run.
+      const discourseSidebarToggle = wpPage
+        .getByRole("button", { name: /^\s*discourse\s*$/i })
+        .first();
+      await expect(
+        discourseSidebarToggle,
+        "Expected the wp-discourse PluginSidebar toolbar toggle"
+      ).toBeVisible({ timeout: 30_000 });
+      await discourseSidebarToggle.click();
+
+      // The checkbox inside the wp-discourse sidebar carries no aria-label,
+      // no name, no id — only a className. Target it directly. Source:
+      // wp-content/plugins/wp-discourse/admin/discourse-sidebar/src/index.js
+      // (`<input type="checkBox" className="wpdc-publish-topic-checkbox" />`).
+      // The plugin persists the user's choice as the
+      // `publish_to_discourse` post-meta on save.
       const publishToggle = wpPage
-        .getByRole("checkbox", { name: /publish.+discourse/i })
+        .locator("input.wpdc-publish-topic-checkbox")
         .first();
       await expect(
         publishToggle,
-        "Expected the wp-discourse 'Publish to Discourse' checkbox in the post sidebar"
+        "Expected the wp-discourse 'Publish' checkbox inside the Discourse sidebar"
       ).toBeVisible({ timeout: 30_000 });
       if (!(await publishToggle.isChecked())) {
         await publishToggle.check();
@@ -1060,48 +1088,72 @@ test("wordpress post published with discourse toggle appears as a Discourse topi
     } finally {
       // Teardown (see requirement 007): remove both sides regardless of
       // outcome. Cover draft/unpublished posts too to handle crashes
-      // between create and publish.
+      // between create and publish. The whole WP-side cleanup is bounded
+      // to 60s — Playwright counts the finally block toward the test
+      // budget, so a hung Trash-link click previously consumed the full
+      // 600s timeout even when every assertion above had passed (the
+      // Trash link's post-click `waitForLoadState('domcontentloaded')`
+      // hangs on some WP/Gutenberg combos because the move-to-trash is
+      // an XHR, not a navigation).
+      const wpCleanupBudgetMs = 60_000;
+      const wpCleanupDeadline = Date.now() + wpCleanupBudgetMs;
       try {
         const wpPageCleanup = await wpCtx.newPage();
-        await wpAdminLoginViaOidc(
-          wpPageCleanup,
-          wpBaseUrl,
-          adminUsername,
-          adminPassword
-        ).catch(() => {});
-        for (const status of ["publish", "draft", "pending", "private", "future"]) {
-          await wpPageCleanup
-            .goto(
-              `${wpBaseUrl}/wp-admin/edit.php?post_status=${status}&s=${encodeURIComponent(postTitle)}`,
-              { waitUntil: "domcontentloaded" }
-            )
-            .catch(() => {});
-          const trashLinks = wpPageCleanup.locator(
-            `tr:has-text("${postTitle}") a.submitdelete`
-          );
-          const n = await trashLinks.count().catch(() => 0);
-          for (let i = 0; i < n; i += 1) {
-            await trashLinks
-              .nth(i)
-              .click()
-              .catch(() => {});
-            await wpPageCleanup
-              .waitForLoadState("domcontentloaded")
-              .catch(() => {});
-          }
-        }
-        // Empty trash.
-        await wpPageCleanup
-          .goto(`${wpBaseUrl}/wp-admin/edit.php?post_status=trash`, {
-            waitUntil: "domcontentloaded",
-          })
-          .catch(() => {});
-        const emptyTrash = wpPageCleanup
-          .getByRole("button", { name: /empty\s*trash/i })
-          .first();
-        if ((await emptyTrash.count().catch(() => 0)) > 0) {
-          await emptyTrash.click().catch(() => {});
-        }
+        await Promise.race([
+          (async () => {
+            await wpAdminLoginViaOidc(
+              wpPageCleanup,
+              wpBaseUrl,
+              adminUsername,
+              adminPassword
+            ).catch(() => {});
+            for (const status of [
+              "publish",
+              "draft",
+              "pending",
+              "private",
+              "future",
+            ]) {
+              if (Date.now() >= wpCleanupDeadline) break;
+              await wpPageCleanup
+                .goto(
+                  `${wpBaseUrl}/wp-admin/edit.php?post_status=${status}&s=${encodeURIComponent(postTitle)}`,
+                  { waitUntil: "domcontentloaded", timeout: 10_000 }
+                )
+                .catch(() => {});
+              const trashLinks = wpPageCleanup.locator(
+                `tr:has-text("${postTitle}") a.submitdelete`
+              );
+              const n = await trashLinks.count().catch(() => 0);
+              for (let i = 0; i < n; i += 1) {
+                if (Date.now() >= wpCleanupDeadline) break;
+                await trashLinks
+                  .nth(i)
+                  .click()
+                  .catch(() => {});
+                await wpPageCleanup
+                  .waitForLoadState("domcontentloaded", { timeout: 5_000 })
+                  .catch(() => {});
+              }
+            }
+            // Empty trash.
+            if (Date.now() < wpCleanupDeadline) {
+              await wpPageCleanup
+                .goto(`${wpBaseUrl}/wp-admin/edit.php?post_status=trash`, {
+                  waitUntil: "domcontentloaded",
+                  timeout: 10_000,
+                })
+                .catch(() => {});
+              const emptyTrash = wpPageCleanup
+                .getByRole("button", { name: /empty\s*trash/i })
+                .first();
+              if ((await emptyTrash.count().catch(() => 0)) > 0) {
+                await emptyTrash.click().catch(() => {});
+              }
+            }
+          })(),
+          new Promise((resolve) => setTimeout(resolve, wpCleanupBudgetMs)),
+        ]);
         await wpPageCleanup.close().catch(() => {});
       } catch (err) {
         // eslint-disable-next-line no-console
