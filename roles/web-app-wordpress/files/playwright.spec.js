@@ -949,6 +949,27 @@ test("wordpress post published with discourse toggle appears as a Discourse topi
         waitUntil: "domcontentloaded",
       });
 
+      // First-time editor visit shows a "Welcome to the editor" guide
+      // modal that hides the title textbox from the accessibility tree.
+      // The close button only carries aria-label="Close" so a generic
+      // /close/i query also matches unrelated buttons in the editor
+      // toolbar; instead, scope to the dialog and click its Close.
+      // Wait briefly so the dialog has time to mount.
+      const welcomeDialog = wpPage.getByRole("dialog", {
+        name: /welcome to the editor/i,
+      });
+      if (
+        await welcomeDialog.isVisible({ timeout: 5_000 }).catch(() => false)
+      ) {
+        await welcomeDialog
+          .getByRole("button", { name: /^close$/i })
+          .click()
+          .catch(async () => {
+            // Fallback: Escape always closes a dialog.
+            await wpPage.keyboard.press("Escape");
+          });
+      }
+
       // WP Gutenberg editor: fill title. The title textarea exposes
       // aria-label "Add title" across modern WP versions.
       const titleBox = wpPage
@@ -959,21 +980,14 @@ test("wordpress post published with discourse toggle appears as a Discourse topi
       });
       await titleBox.fill(postTitle);
 
-      // Fill body content. The Gutenberg default block exposes
-      // aria-label "Empty block; start writing or type forward slash to choose a block"
-      // or similar; fall back to the content editable area under [role='document'].
-      const bodyBox = wpPage
-        .locator(
-          "div[role='document'][aria-label*='Empty block' i], " +
-            "div[role='document'][aria-label*='Type / to choose a block' i], " +
-            "p[role='document']"
-        )
-        .first();
-      await expect(
-        bodyBox,
-        "Expected the post body editor in Gutenberg"
-      ).toBeVisible({ timeout: 30_000 });
-      await bodyBox.click();
+      // Fill body content. Gutenberg's empty default block has carried
+      // several different aria-labels across WP versions ("Empty block",
+      // "Type / to choose a block", "Block: Paragraph", a generic
+      // contenteditable wrapper, or the rich-text "writeflow" area).
+      // Tabbing from the title moves focus into the body block, which
+      // is also how a regular user would proceed; this is robust against
+      // future aria-label renames.
+      await wpPage.keyboard.press("Tab");
       await wpPage.keyboard.type(postBody);
 
       // Toggle "Publish to Discourse" in the wp-discourse sidebar. The
