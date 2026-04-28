@@ -21,7 +21,7 @@ set -euo pipefail
 # this redeploy to the chosen round so the operator can iterate one
 # specific variant without re-running the full matrix. Without VARIANT
 # the unsuffixed path is used, which is correct for single-variant
-# deploys (N=1). See docs/contributing/design/matrix-deploy.md.
+# deploys (N=1). See docs/contributing/design/variants.md.
 if [[ -n "${VARIANT:-}" ]]; then
 	INVENTORY_DIR="${INVENTORY_DIR}-${VARIANT}"
 	INVENTORY_FILE="${INVENTORY_DIR}/devices.yml"

@@ -2,7 +2,7 @@
 
 Per-role matrix-deploy variant overrides. Each list entry declares one variant of the role's effective configuration; the development deploy CLI materialises one inventory folder per entry so every variant can be exercised against a real host.
 For general documentation rules such as links, writing style, RFC 2119 keywords, and Sphinx behavior, see [documentation.md](../../../documentation.md).
-For how the file is consumed at runtime (folder-per-round model, `--variant` / `--full-cycle`, cleanup behaviour), see [matrix-deploy.md](../../../design/matrix-deploy.md).
+For how the file is consumed at runtime (folder-per-round model, `--variant` / `--full-cycle`, cleanup behaviour), see [variants.md](../../../design/variants.md).
 
 ## Placement 📁
 

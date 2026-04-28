@@ -1,6 +1,6 @@
 # Local Deploy 🚀
 
-Contributor guidance for running deploys against a local development stack on your workstation. For production deploy guidance see the [Deploy Guide](../../administration/deploy.md). For the agent-driven role iteration loop see [role.md](../../agents/action/iteration/role.md). For the matrix-variant mechanism that this page references throughout see [matrix-deploy.md](../design/matrix-deploy.md).
+Contributor guidance for running deploys against a local development stack on your workstation. For production deploy guidance see the [Deploy Guide](../../administration/deploy.md). For the agent-driven role iteration loop see [role.md](../../agents/action/iteration/role.md). For the matrix-variant mechanism that this page references throughout see [variants.md](../design/variants.md).
 
 ## Entry Points 🧭
 
@@ -21,9 +21,9 @@ Use `deploy-fresh-purged-apps` to bring up a clean slate:
 make deploy-fresh-purged-apps APPS="<role> <role>" FULL_CYCLE=true
 ```
 
-- `FULL_CYCLE=true` adds the async update pass (pass 2) and SHOULD stay on for the baseline. The behaviour, per-variant interleaving, and `--full-cycle` flag mechanics are documented in [matrix-deploy.md](../design/matrix-deploy.md).
+- `FULL_CYCLE=true` adds the async update pass (pass 2) and SHOULD stay on for the baseline. The behaviour, per-variant interleaving, and `--full-cycle` flag mechanics are documented in [variants.md](../design/variants.md).
 - The wrapper runs init, then deploy. Init materialises the inventory under `${INVENTORY_DIR}` (set by [inventory.sh](../../../scripts/meta/env/inventory.sh) via [resolve.sh](../../../scripts/inventory/resolve.sh)).
-- For roles with a `roles/<role>/meta/variants.yml` the init step produces one inventory folder per variant; the deploy step iterates them. Folder layout, round semantics, cleanup rules, and the link to the file-format reference live in [matrix-deploy.md](../design/matrix-deploy.md).
+- For roles with a `roles/<role>/meta/variants.yml` the init step produces one inventory folder per variant; the deploy step iterates them. Folder layout, round semantics, cleanup rules, and the link to the file-format reference live in [variants.md](../design/variants.md).
 
 ## Edit / Fix / Redeploy Loop 🔁
 
@@ -58,7 +58,7 @@ VARIANT=1 make deploy-fresh-purged-apps APPS="<role>" FULL_CYCLE=true
 VARIANT=1 make deploy-reuse-kept-apps APPS="<role>"
 ```
 
-Pinning is sticky: when iterating with `VARIANT=<idx>`, you MUST set it on every command in the iteration. Mixing pinned and unpinned commands silently retargets a different folder. The full semantics (single-folder mode, no inter-round cleanup, out-of-range error) live in [matrix-deploy.md](../design/matrix-deploy.md).
+Pinning is sticky: when iterating with `VARIANT=<idx>`, you MUST set it on every command in the iteration. Mixing pinned and unpinned commands silently retargets a different folder. The full semantics (single-folder mode, no inter-round cleanup, out-of-range error) live in [variants.md](../design/variants.md).
 
 ## Direct CLI Invocation ⚙️
 
@@ -87,5 +87,5 @@ For TLS-enabled local sites, run [`make trust-ca`](../../../Makefile) once after
 | [dev CLI tree](../../../cli/deploy/development/) | Python CLI for init, deploy, up, down, exec, etc. |
 | [inventory.sh](../../../scripts/meta/env/inventory.sh) | Resolves `INVENTORY_DIR`, `INVENTORY_FILE`, and `INVENTORY_VARS_FILE` for the dev CLI. |
 | [local deploy scripts](../../../scripts/tests/deploy/local/) | Bash glue behind the make targets (fresh / reuse / purge variants). |
-| [matrix-deploy.md](../design/matrix-deploy.md) | Matrix-variant deep dive. |
+| [variants.md](../design/variants.md) | Matrix-variant deep dive. |
 | [role.md](../../agents/action/iteration/role.md) | Role-iteration loop for agents. Recommended reading even for human contributors. |

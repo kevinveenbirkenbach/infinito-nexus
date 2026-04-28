@@ -1,15 +1,16 @@
-# Matrix-deploy 🧬
+# Variants 🧬
 
 How the development deploy CLI consumes per-role `meta/variants.yml` and iterates the resulting matrix at deploy time.
 For general documentation rules such as links, writing style, RFC 2119 keywords, and Sphinx behavior, see [documentation.md](../documentation.md).
 For the file format itself see [variants.md](../artefact/files/role/variants.md).
+For how a single round's inventory is assembled (the layer this matrix wrapper sits on top of), see [inventory.md](inventory.md).
 For the contributor-facing make target / dev-CLI workflow see [deploy.md](../actions/deploy.md).
 
-## Folder-Per-Round Model 🎛️
+## Folder-per-round model 🎛️
 
 The development deploy CLI uses a **folder-per-round model** that splits cleanly between the init step (which materialises the inventories) and the deploy step (which iterates them):
 
-1. **Round count.** `total_rounds = max(variant_count for app in primary_apps)`. If every primary app has only one variant, both steps degrade to a single folder and the legacy unsuffixed inventory path is used.
+1. **Round count.** `total_rounds = max(variant_count for app in primary_apps)`. If every primary app has only one variant, both steps degrade to a single folder and the unsuffixed inventory path is used.
 2. **Per-round variant selection.** In round R every primary app uses variant index `R if R < its_variant_count else 0`. So a single-variant app stays on variant 0 in every round, and a 3-variant app in a 5-round deploy follows `0, 1, 2, 0, 0`.
 3. **Inventory folders.** [init.py](../../../cli/deploy/development/init.py) calls [build_dev_inventory_matrix](../../../cli/deploy/development/inventory.py), which creates one folder per round at `<inventory-dir>-<round>` (or just `<inventory-dir>` when there is a single round). For each folder, `build_dev_inventory` resolves the round's per-app variant payload and bakes it into the inventory's `host_vars` as `applications.<app>: <variant-payload>` overrides. The inventory is therefore variant-resolved on disk; no runtime selector is needed.
 4. **Deploy iteration.** [deploy.py](../../../cli/deploy/development/deploy.py) re-derives the same plan via `plan_dev_inventory_matrix` (the planner is a pure function shared between init and deploy) and runs one deploy per folder. **Round 0 deploys the full include set** (the baseline state, including dependencies). **Rounds R>0 only re-deploy apps that have a real variant for that round** (i.e. `round_variants[app] == R`); apps that would only fall back to variant 0 are left at whatever state the previous round produced. This is the user-facing default: if variant 1 only exists for WordPress, round 1 re-deploys WordPress alone, not Keycloak or other dependencies. A round in which no app has a real variant is skipped entirely.
@@ -19,13 +20,13 @@ The development deploy CLI uses a **folder-per-round model** that splits cleanly
 
 The in-play loader (`utils.cache.applications.get_merged_applications`) always uses variant 0 as the default and lets the inventory's `applications.<app>` overrides win via deep merge: the inventory itself is the source of truth for what variant a round runs against.
 
-## What Not To Do 🚫
+## What not to do 🚫
 
 - You MUST NOT introduce a parallel cache. The variants are cached per `roles_dir` inside `utils/cache/applications.py` and returned as deep copies; mutating the result MUST NOT corrupt subsequent lookups.
 - You MUST NOT skip the inter-round purge.
 - You MUST NOT introduce a runtime variant-selector extra-var. Variant data lives in the inventory after init; the deploy stage reads it as plain `applications.<app>` overrides.
 
-## Reference Files 📌
+## Reference files 📌
 
 | File | Purpose |
 |---|---|

@@ -30,7 +30,7 @@ For workflow-level iteration with Act, see [Workflow Loop](workflow.md).
 
 ## Matrix variants
 
-For the matrix-deploy mechanism (folder layout, round semantics, `--variant` / `--full-cycle` flags) see [matrix-deploy.md](../../../contributing/design/matrix-deploy.md). The agent-side iteration rules below assume that mechanism as background.
+For the matrix-variant mechanism (folder layout, round semantics, `--variant` / `--full-cycle` flags) see [variants.md](../../../contributing/design/variants.md). The agent-side iteration rules below assume that mechanism as background.
 
 - Before you start a Role Loop on a matrix-variant role, you MUST decide if the iteration targets the FULL matrix (validates every variant) or ONE specific variant (focused debug). State the choice explicitly before the first deploy.
 - For focused debug on variant `<idx>`, you MUST pin `VARIANT=<idx>` on every command in the iteration. Mixing pinned and unpinned commands silently retargets a different folder.
