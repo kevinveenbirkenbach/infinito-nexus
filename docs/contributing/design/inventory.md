@@ -64,12 +64,12 @@ The matrix-variant planner (see [variants.md](variants.md)) calls the expansion 
 
 ## Worked example: WordPress and Discourse 🧪
 
-The wp-discourse plugin install in [roles/web-app-wordpress/tasks/plugins/wp-discourse.yml](../../../../roles/web-app-wordpress/tasks/plugins/wp-discourse.yml) does `container exec discourse rake api_key:create_master[...]` during the WordPress play. The Discourse container therefore has to exist by the time WordPress runs.
+The wp-discourse plugin install in [roles/web-app-wordpress/tasks/plugins/wp-discourse.yml](../../../roles/web-app-wordpress/tasks/plugins/wp-discourse.yml) does `container exec discourse rake api_key:create_master[...]` during the WordPress play. The Discourse container therefore has to exist by the time WordPress runs.
 
 The wiring that makes this work is purely in the `services` declaration, not in `run_after`:
 
-- [roles/web-app-wordpress/meta/services.yml](../../../../roles/web-app-wordpress/meta/services.yml) declares `services.discourse.shared: true` plus a fallback `enabled: "{{ 'web-app-discourse' in group_names }}"`.
-- [roles/web-app-wordpress/meta/variants.yml](../../../../roles/web-app-wordpress/meta/variants.yml) variant 0 (canonical Single-Site) overrides `services.discourse.enabled: true`. Variant 1 (Multisite) overrides it to `false`.
+- [roles/web-app-wordpress/meta/services.yml](../../../roles/web-app-wordpress/meta/services.yml) declares `services.discourse.shared: true` plus a fallback `enabled: "{{ 'web-app-discourse' in group_names }}"`.
+- [roles/web-app-wordpress/meta/variants.yml](../../../roles/web-app-wordpress/meta/variants.yml) variant 0 (canonical Single-Site) overrides `services.discourse.enabled: true`. Variant 1 (Multisite) overrides it to `false`.
 - The variant override is baked as a real boolean into the inventory, so the shared-service auto-include picks it up at build time. Variant 0 therefore pulls `web-app-discourse` into the include set. Variant 1 does not.
 - Discourse's role itself has no `run_after`, so deploying just `--apps web-app-discourse` does not drag WordPress along.
 
