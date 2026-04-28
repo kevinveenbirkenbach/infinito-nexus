@@ -14,7 +14,7 @@ mariadb:
   enabled: true
   shared: true
 discourse:
-  enabled: false
+  enabled: "{{ 'web-app-discourse' in group_names }}"
   shared: true
 wordpress:
   version: latest
@@ -33,16 +33,16 @@ wordpress:
     enabled: false
   plugins:
     wp-discourse:
-      enabled: '{{ (''web-app-discourse'' in (group_names | default([]))) | bool }}'
+      enabled: "{{ lookup('config', application_id, 'services.discourse.enabled') | bool }}"
     daggerhart-openid-connect-generic:
-      enabled: true
+      enabled: "{{ lookup('config', application_id, 'services.oidc.enabled') | bool }}"
     activitypub:
       enabled: true
   ports:
     local:
       http: 8003
   run_after:
-  - web-app-keycloak
+    - web-app-keycloak
   lifecycle: beta
 css:
   enabled: false

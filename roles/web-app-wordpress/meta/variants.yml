@@ -8,7 +8,9 @@
 # See docs/contributing/artefact/files/role/variants.md for the file format.
 
 # variant 0: canonical Single-Site deploy.
-- {}
+- services:
+    discourse:
+      enabled: true
 
 # variant 1: Multisite deploy across blog/shop/news subdomains.
 - server:
@@ -21,3 +23,5 @@
     wordpress:
       multisite:
         enabled: true
+    discourse:
+      enabled: false
