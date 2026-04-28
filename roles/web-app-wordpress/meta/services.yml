@@ -33,9 +33,9 @@ wordpress:
     enabled: false
   plugins:
     wp-discourse:
-      enabled: "{{ lookup('config', application_id, 'services.discourse.enabled') | bool }}"
+      enabled: "{{ lookup('config', 'web-app-wordpress', 'services.discourse.enabled') | bool }}"
     daggerhart-openid-connect-generic:
-      enabled: "{{ lookup('config', application_id, 'services.oidc.enabled') | bool }}"
+      enabled: "{{ lookup('config', 'web-app-wordpress', 'services.oidc.enabled') | bool }}"
     activitypub:
       enabled: true
   ports:
