@@ -91,7 +91,7 @@ package-cache:
     INSTALL4J_ADD_VM_PARAMS: "-Xms${INFINITO_PACKAGE_CACHE_HEAP:?…} -Xmx${INFINITO_PACKAGE_CACHE_HEAP:?…} -XX:MaxDirectMemorySize=${INFINITO_PACKAGE_CACHE_DIRECT_MEM:?…}"
   volumes:
     - type: bind
-      source: ${INFINITO_PACKAGE_CACHE_HOST_PATH:?Source scripts/meta/env/package_cache.sh before running docker compose}
+      source: ${INFINITO_PACKAGE_CACHE_HOST_PATH:?Source scripts/meta/env/cache/package.sh before running docker compose}
       target: /nexus-data
       bind:
         create_host_path: true
@@ -121,20 +121,20 @@ the service in, and the runner boots without it.
 
 ### Env defaults
 
-A new file `scripts/meta/env/package_cache.sh`, modelled on
-[scripts/meta/env/registry_cache.sh](../../scripts/meta/env/registry_cache.sh),
+A new file `scripts/meta/env/cache/package.sh`, modelled on
+[scripts/meta/env/cache/registry.sh](../../scripts/meta/env/cache/registry.sh),
 sourced via `scripts/meta/env/all.sh`:
 
 | Variable                              | Default                                                  | Notes                                                                       |
 |---------------------------------------|----------------------------------------------------------|-----------------------------------------------------------------------------|
-| `INFINITO_PACKAGE_CACHE_HOST_PATH`    | `/tmp/infinito/core/package-cache/data`                  | Bind target for `/nexus-data`. Created on first start.                      |
+| `INFINITO_PACKAGE_CACHE_HOST_PATH`    | `/var/cache/infinito/core/cache/package/data`                  | Bind target for `/nexus-data`. Created on first start.                      |
 | `INFINITO_PACKAGE_CACHE_HEAP`         | derived from free RAM, capped at `2g`, floor `1g`        | JVM heap (`-Xms` / `-Xmx`); Nexus 3 OSS minimum is 1 GiB.                   |
 | `INFINITO_PACKAGE_CACHE_DIRECT_MEM`   | derived; floor `1g`                                      | `MaxDirectMemorySize`; per Nexus sizing guide.                              |
 | `INFINITO_PACKAGE_CACHE_BLOBSTORE_MAX`| half of free disk space at the cache path, floor `2g`    | Soft cap reflected in the bootstrap helper's blobstore quota.               |
 | `INFINITO_PACKAGE_CACHE_ADMIN_PASSWORD` | empty (operator-supplied)                              | First-start bootstrap rotates the auto-generated admin password to this.    |
 
 `compose.yml` MUST consume each of these strictly via
-`${VAR:?Source scripts/meta/env/package_cache.sh before running docker compose}`.
+`${VAR:?Source scripts/meta/env/cache/package.sh before running docker compose}`.
 Running `docker compose config` without sourcing the env script MUST
 fail explicitly with the same shape of error the registry-cache vars
 produce today.
@@ -149,10 +149,10 @@ already gates the `cache` profile to local-dev (active) vs. CI
 
 ### Bootstrap of proxy repositories
 
-A new helper `scripts/docker/package-cache-bootstrap.sh`, idempotent,
+A new helper `scripts/docker/cache/package.sh`, idempotent,
 invoked once on first start of the runner under the `cache` profile
 (analog to how
-[scripts/docker/registry-cache-ca.sh](../../scripts/docker/registry-cache-ca.sh)
+[scripts/docker/cache/registry-ca.sh](../../scripts/docker/cache/registry-ca.sh)
 is invoked via `ExecStartPre`):
 
 - Reads the auto-generated admin password from
@@ -236,12 +236,12 @@ gains a Package Cache section beside the existing Registry Cache one.
 
 ### Env defaults
 
-- [ ] `scripts/meta/env/package_cache.sh` exists and exports
+- [ ] `scripts/meta/env/cache/package.sh` exists and exports
       `INFINITO_PACKAGE_CACHE_HOST_PATH`, `INFINITO_PACKAGE_CACHE_HEAP`,
       `INFINITO_PACKAGE_CACHE_DIRECT_MEM`,
       `INFINITO_PACKAGE_CACHE_BLOBSTORE_MAX`, and
       `INFINITO_PACKAGE_CACHE_ADMIN_PASSWORD`.
-- [ ] `scripts/meta/env/package_cache.sh` is sourced by
+- [ ] `scripts/meta/env/cache/package.sh` is sourced by
       `scripts/meta/env/all.sh`.
 - [ ] `compose.yml` consumes every package-cache env var strictly via
       `${VAR:?…}`. Running `docker compose config` without sourcing the
@@ -249,7 +249,7 @@ gains a Package Cache section beside the existing Registry Cache one.
 
 ### Bootstrap & repos
 
-- [ ] `scripts/docker/package-cache-bootstrap.sh` exists, is idempotent
+- [ ] `scripts/docker/cache/package.sh` exists, is idempotent
       (repeated runs MUST NOT error on already-existing repos), and is
       invoked once on first start under the `cache` profile.
 - [ ] On first start, the auto-generated Nexus admin password is

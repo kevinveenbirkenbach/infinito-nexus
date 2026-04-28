@@ -186,6 +186,12 @@ class TestComposeUpRetries(unittest.TestCase):
             "INFINITO_NO_BUILD": "0",
             "INFINITO_IMAGE": "infinito-debian",
             "INFINITO_PULL_POLICY": "never",
+            # Pin to CI mode so the cache profile stays inactive: this
+            # test asserts build behaviour, not the cache-services
+            # ordering, which has its own coverage above.
+            "CI": "true",
+            "GITHUB_ACTIONS": "true",
+            "RUNNING_ON_GITHUB": "true",
         },
         clear=False,
     )
@@ -206,7 +212,13 @@ class TestComposeUpRetries(unittest.TestCase):
 
     @patch.dict(
         os.environ,
-        {"INFINITO_NO_BUILD": "1", "INFINITO_IMAGE": "test-image/arch"},
+        {
+            "INFINITO_NO_BUILD": "1",
+            "INFINITO_IMAGE": "test-image/arch",
+            "CI": "true",
+            "GITHUB_ACTIONS": "true",
+            "RUNNING_ON_GITHUB": "true",
+        },
         clear=False,
     )
     def test_up_skips_build_when_no_build_flag_is_enabled(self) -> None:
@@ -223,6 +235,47 @@ class TestComposeUpRetries(unittest.TestCase):
             delay_s=30,
         )
         compose.wait_for_healthy.assert_called_once_with()
+
+    @patch.dict(
+        os.environ,
+        {
+            "INFINITO_NO_BUILD": "0",
+            "INFINITO_IMAGE": "infinito-debian",
+            "INFINITO_PULL_POLICY": "never",
+            "CI": "",
+            "GITHUB_ACTIONS": "",
+            "RUNNING_ON_GITHUB": "",
+        },
+        clear=False,
+    )
+    def test_up_includes_cache_services_when_local(self) -> None:
+        compose = self._compose()
+        compose._render_coredns_corefile = MagicMock()
+        compose._compose_up_with_retries = MagicMock()
+        compose.wait_for_healthy = MagicMock()
+        compose._bootstrap_package_cache = MagicMock()
+
+        compose.up(run_entry_init=False)
+
+        # Local mode -> cache profile active, registry-cache and
+        # package-cache must precede coredns + infinito so they boot
+        # first and the depends_on health gate resolves.
+        compose._compose_up_with_retries.assert_called_once_with(
+            [
+                "--env-file",
+                "env.ci",
+                "up",
+                "-d",
+                "registry-cache",
+                "package-cache",
+                "coredns",
+                "infinito",
+            ],
+            attempts=6,
+            delay_s=30,
+        )
+        compose.wait_for_healthy.assert_called_once_with()
+        compose._bootstrap_package_cache.assert_called_once()
 
 
 if __name__ == "__main__":  # pragma: no cover

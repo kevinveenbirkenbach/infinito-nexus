@@ -90,7 +90,7 @@ container start without an image rebuild):
   systemd reads an empty drop-in when the proxy is not running and
   dockerd boots without `HTTP_PROXY`,
 - the install script
-  [registry-cache-ca.sh](../../../../scripts/docker/registry-cache-ca.sh)
+  [registry-ca.sh](../../../../scripts/docker/cache/registry-ca.sh)
   at `/usr/local/bin/registry-cache-ca.sh` (must keep its git
   +x bit; bind-mounts preserve host permissions).
 
@@ -101,10 +101,56 @@ When the proxy is active, the drop-in registers the install script as
 
 | Variable                                | Default                                | Purpose                                                                                                              |
 |-----------------------------------------|----------------------------------------|----------------------------------------------------------------------------------------------------------------------|
-| `INFINITO_REGISTRY_CACHE_HOST_PATH`     | none (required)                        | Host path bind-mounted into `registry-cache` for blob/manifest persistence. Default supplied by [registry_cache.sh](../../../../scripts/meta/env/registry_cache.sh) (`/tmp/infinito/core/registry-cache/mirror`). |
-| `INFINITO_REGISTRY_CACHE_CA_HOST_PATH`  | none (required)                        | Host path holding the proxy MITM CA bundle. Mounted writable into `registry-cache`, read-only into `infinito`. Default supplied by [registry_cache.sh](../../../../scripts/meta/env/registry_cache.sh) (`/tmp/infinito/core/registry-cache/ca`). |
-| `INFINITO_REGISTRY_CACHE_MAX_SIZE`      | none (required)                        | Maximum on-disk size of the cache. Older entries are evicted when reached. Default computed by [registry_cache.sh](../../../../scripts/meta/env/registry_cache.sh) as half the free disk space at the cache path, minimum `1g`, fallback `2g` if `df` fails. |
+| `INFINITO_REGISTRY_CACHE_HOST_PATH`     | none (required)                        | Host path bind-mounted into `registry-cache` for blob/manifest persistence. Default supplied by [registry.sh](../../../../scripts/meta/env/cache/registry.sh) (`/var/cache/infinito/core/cache/registry/mirror`). |
+| `INFINITO_REGISTRY_CACHE_CA_HOST_PATH`  | none (required)                        | Host path holding the proxy MITM CA bundle. Mounted writable into `registry-cache`, read-only into `infinito`. Default supplied by [registry.sh](../../../../scripts/meta/env/cache/registry.sh) (`/var/cache/infinito/core/cache/registry/ca`). |
+| `INFINITO_REGISTRY_CACHE_MAX_SIZE`      | none (required)                        | Maximum on-disk size of the cache. Older entries are evicted when reached. Default computed by [registry.sh](../../../../scripts/meta/env/cache/registry.sh) as half the free disk space at the cache path, minimum `1g`, fallback `2g` if `df` fails. |
 | `INFINITO_REGISTRY_CACHE_PROXY_CONF`    | `/dev/null`                            | Bind-mount source for the systemd drop-in inside `infinito`. Set by the dev tooling to the real `proxy.conf` only when the `cache` profile is active; the `/dev/null` default makes systemd load an empty drop-in so dockerd boots without `HTTP_PROXY`. |
+
+### Package Cache
+
+The `package-cache` service runs `sonatype/nexus3` as a Sonatype Nexus
+3 OSS instance and exposes pull-through proxy repositories for
+package-manager downloads from the runner: pypi, npm, apt
+(Debian and Ubuntu), helm, raw. Companion to the registry-cache,
+which covers Docker image pulls. Both services share the `cache`
+compose profile and the same `Profile` gate (active locally,
+inactive in CI).
+
+`infinito.depends_on.package-cache` is `condition: service_healthy,
+required: false`: with the `cache` profile inactive, Compose neither
+starts the proxy nor blocks the runner. With the profile active, the
+runner waits for Nexus's REST API to answer before starting.
+
+Three client-config snippets in
+[compose/package-cache/](../../../../compose/package-cache/) bind-mount
+into the runner via `${INFINITO_PACKAGE_CACHE_*_CONF:-/dev/null}` env
+vars (set by the [Profile](../../../../cli/deploy/development/profile.py)
+class only when `cache` is active): `pip.conf` -> `/etc/pip.conf`,
+`npmrc` -> `/root/.npmrc`, `apt.list` ->
+`/etc/apt/sources.list.d/package-cache.list`. With the profile off,
+the bind sources fall back to `/dev/null` and package managers default
+to upstream traffic.
+
+A host-side bootstrap helper
+[package.sh](../../../../scripts/docker/cache/package.sh)
+runs once after the stack is healthy, invoked from
+[up.py](../../../../cli/deploy/development/compose.py). It rotates the
+auto-generated admin password, creates a single blobstore quota'd to
+`INFINITO_PACKAGE_CACHE_BLOBSTORE_MAX`, and registers the MVP set of
+proxy repos: `apt-debian`, `apt-ubuntu`, `pypi-proxy`, `npm-proxy`,
+`helm-bitnami`, `raw-githubusercontent`. The helper is idempotent.
+
+| Variable                                | Default          | Purpose                                                                                                              |
+|-----------------------------------------|------------------|----------------------------------------------------------------------------------------------------------------------|
+| `INFINITO_PACKAGE_CACHE_HOST_PATH`      | none (required)  | Host path bind-mounted at `/nexus-data` inside the proxy. Default supplied by [package.sh](../../../../scripts/meta/env/cache/package.sh) (`/var/cache/infinito/core/cache/package/data`). |
+| `INFINITO_PACKAGE_CACHE_HEAP`           | none (required)  | JVM heap (`-Xms` / `-Xmx`). Default computed by [package.sh](../../../../scripts/meta/env/cache/package.sh) as half free RAM, capped at `2g`, floor `1g` (Nexus 3 OSS minimum). |
+| `INFINITO_PACKAGE_CACHE_DIRECT_MEM`     | none (required)  | `MaxDirectMemorySize`. Default mirrors `INFINITO_PACKAGE_CACHE_HEAP`.                                                |
+| `INFINITO_PACKAGE_CACHE_BLOBSTORE_MAX`  | none (required)  | Soft quota for the default blobstore, applied during bootstrap. Default computed as half the free disk space at the cache path, floor `2g`. |
+| `INFINITO_PACKAGE_CACHE_ADMIN_PASSWORD` | none (required)  | Target value for the rotated Nexus admin password. Operator-supplied; the env script synthesises a stable per-host hash if unset. |
+| `INFINITO_PACKAGE_CACHE_PORT`           | `8081`           | Host-side port that maps to Nexus's `8081` (UI / REST). Bound to `${BIND_IP}` only.                                  |
+| `INFINITO_PACKAGE_CACHE_PIP_CONF`       | `/dev/null`      | Bind source for `/etc/pip.conf`. Set by the dev tooling to `compose/package-cache/pip.conf` when the `cache` profile is active. |
+| `INFINITO_PACKAGE_CACHE_NPMRC`          | `/dev/null`      | Bind source for `/root/.npmrc`. Set to `compose/package-cache/npmrc` when active.                                    |
+| `INFINITO_PACKAGE_CACHE_APT_LIST`       | `/dev/null`      | Bind source for `/etc/apt/sources.list.d/package-cache.list`. Set to `compose/package-cache/apt.list` when active.   |
 
 ### Networking
 

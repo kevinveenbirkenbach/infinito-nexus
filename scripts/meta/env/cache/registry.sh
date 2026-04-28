@@ -10,8 +10,8 @@
 
 set -euo pipefail
 
-: "${INFINITO_REGISTRY_CACHE_HOST_PATH:=/tmp/infinito/core/registry-cache/mirror}"
-: "${INFINITO_REGISTRY_CACHE_CA_HOST_PATH:=/tmp/infinito/core/registry-cache/ca}"
+: "${INFINITO_REGISTRY_CACHE_HOST_PATH:=/var/cache/infinito/core/cache/registry/mirror}"
+: "${INFINITO_REGISTRY_CACHE_CA_HOST_PATH:=/var/cache/infinito/core/cache/registry/ca}"
 export INFINITO_REGISTRY_CACHE_HOST_PATH
 export INFINITO_REGISTRY_CACHE_CA_HOST_PATH
 

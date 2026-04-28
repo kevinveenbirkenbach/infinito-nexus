@@ -45,6 +45,9 @@ class Compose:
             env["INFINITO_REGISTRY_CACHE_PROXY_CONF"] = (
                 "./compose/registry-cache/proxy.conf"
             )
+            env["INFINITO_PACKAGE_CACHE_PIP_CONF"] = "./compose/package-cache/pip.conf"
+            env["INFINITO_PACKAGE_CACHE_NPMRC"] = "./compose/package-cache/npmrc"
+            env["INFINITO_PACKAGE_CACHE_APT_LIST"] = "./compose/package-cache/apt.list"
         return env
 
     def run(
@@ -115,6 +118,28 @@ class Compose:
         if last_exc is not None:
             raise last_exc
 
+    def _bootstrap_package_cache(self, env: dict[str, str]) -> None:
+        """Run the host-side Nexus 3 OSS bootstrap helper. The script is
+        idempotent and exits 0 once the blobstore and proxy repos are
+        in place. Failure here MUST NOT abort the up() flow because the
+        rest of the stack is already healthy and a manual re-run via
+        `scripts/docker/cache/package.sh` is the standard
+        recovery path."""
+        helper = self.repo_root / "scripts" / "docker" / "cache" / "package.sh"
+        print(">>> Bootstrapping package-cache proxy repos")
+        r = subprocess.run(
+            [str(helper)],
+            cwd=self.repo_root,
+            env=env,
+            check=False,
+            text=True,
+        )
+        if r.returncode != 0:
+            print(
+                f">>> WARNING: package-cache bootstrap exited rc={r.returncode}; "
+                f"re-run {helper} manually or inspect docker logs infinito-package-cache"
+            )
+
     def _render_coredns_corefile(self) -> None:
         renderer = CoreDNSCorefileRenderer(repo_root=self.repo_root)
         out = renderer.render(show_preview=True, preview_lines=25)
@@ -157,12 +182,24 @@ class Compose:
         args += ["up", "-d"]
         if no_build:
             args.append("--no-build")
+        # Cache services are profile-gated AND `required: false` on the
+        # infinito depends_on, so they would NOT auto-start from the
+        # named-services list alone. List them explicitly when the cache
+        # profile is active so the proxies come up before infinito.
+        if self.profile.registry_cache_active():
+            args += ["registry-cache", "package-cache"]
         args += ["coredns", "infinito"]
 
         # Retry to avoid transient registry/HTTP 5xx errors when pulling images.
         self._compose_up_with_retries(args, attempts=6, delay_s=30)
 
         self.wait_for_healthy()
+
+        # Bootstrap Nexus proxies once the stack is healthy. Idempotent;
+        # re-runs no-op once the blobstore + repos exist. See
+        # docs/requirements/012-package-cache-nexus3-oss.md.
+        if self.profile.registry_cache_active():
+            self._bootstrap_package_cache(env)
 
         if run_entry_init:
             print(">>> Running infinito entry.sh init")

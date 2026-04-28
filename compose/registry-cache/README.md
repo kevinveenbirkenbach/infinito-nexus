@@ -34,7 +34,7 @@ without `HTTP_PROXY`.
   Changes take effect on the next container start without an image
   rebuild.
 - The companion CA-install script lives at
-  [registry-cache-ca.sh](../../scripts/docker/registry-cache-ca.sh)
+  [registry-ca.sh](../../scripts/docker/cache/registry-ca.sh)
   because it is called by dockerd's `ExecStartPre`, which expects the
   binary on the runner's `$PATH`. It is bind-mounted to
   `/usr/local/bin/registry-cache-ca.sh`; the file MUST keep its

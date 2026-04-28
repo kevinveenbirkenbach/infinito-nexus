@@ -19,7 +19,7 @@ endif
 .PHONY: \
 	setup setup-clean install install-ansible install-lint install-venv install-python install-system-python install-skills update-skills agent-install \
 	test lint lint-action lint-ansible lint-python lint-shellcheck autoformat test-lint test-unit test-integration test-external test-deploy test-deploy-app \
-	clean clean-sudo down \
+	clean clean-sudo down cache-clean \
 	system-purge system-disk-usage \
 	list tree mig dockerignore chmod-scripts \
 	print-python \
@@ -104,6 +104,13 @@ clean:
 		echo "WARNING: not inside a git repository -> skipping 'git clean -fdX'"; \
 		echo "WARNING: (cleanup continues)"; \
 	fi
+
+# Wipe the on-disk caches populated by the `cache` compose profile
+# (registry-cache mirror + MITM CA, package-cache Nexus data dir).
+# Stops the cache containers first, then removes the host paths under
+# /var/cache/infinito/core/cache/ . Re-run `make up` to recreate.
+cache-clean:
+	@bash scripts/system/cache/clean.sh
 
 # Remove ignored files from the working tree with sudo.
 clean-sudo:
