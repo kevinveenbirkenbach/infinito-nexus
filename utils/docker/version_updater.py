@@ -19,7 +19,6 @@ from utils.docker.image.ref import (
 )
 
 _SEMVER_CORE = r"v?\d+(?:\.\d+){0,3}"
-_SEMVER_RE = re.compile(rf"^{_SEMVER_CORE}$")
 # Tags that extend a semver with a `-<flavor>` suffix, e.g. the Docker
 # Official image tag `5.4.5-php8.3-apache`. The flavor is treated as an
 # opaque discriminator: tags are only considered upgrade candidates for
