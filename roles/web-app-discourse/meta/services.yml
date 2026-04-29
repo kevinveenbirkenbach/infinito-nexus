@@ -28,6 +28,15 @@ redis:
     disabled: true
   enabled: true
 discourse:
+  # `shared: true` is required so the service registry recognises this
+  # role as the provider of the `discourse` service. Other roles
+  # declare `services.discourse.enabled: ...` (e.g.
+  # web-app-wordpress' wp-discourse plugin gate); without this flag
+  # the variant-aware deploy planner cannot resolve those declarations
+  # to web-app-discourse, and the consumer ends up trying to
+  # `docker exec discourse` against a container that was never pulled.
+  shared: true
+  enabled: true
   name: discourse
   version: main
   min_storage: 15GB
