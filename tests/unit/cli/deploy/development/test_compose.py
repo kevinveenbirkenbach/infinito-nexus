@@ -152,6 +152,11 @@ class TestComposeUpRetries(unittest.TestCase):
             "GITHUB_ACTIONS": "",
             "RUNNING_ON_GITHUB": "",
             "CI": "",
+            # SPOT for the host CA dir is scripts/meta/env/cache/package.sh
+            # (sourced via BASH_ENV in production callers). Tests that
+            # run outside that env-layer set the var explicitly so the
+            # cache_env_overrides() SPOT-strict guard does not raise.
+            "INFINITO_PACKAGE_CACHE_FRONTEND_CA_DIR": "/var/cache/infinito/test/ca",
         },
         clear=False,
     )
@@ -268,6 +273,12 @@ class TestComposeUpRetries(unittest.TestCase):
             "CI": "",
             "GITHUB_ACTIONS": "",
             "RUNNING_ON_GITHUB": "",
+            # SPOT for the host CA dir is scripts/meta/env/cache/package.sh
+            # (sourced via BASH_ENV in production callers). The local
+            # cache branch in _base_env reads it strictly via
+            # cache_env_overrides(); this test runs outside that env
+            # layer so the var is set explicitly.
+            "INFINITO_PACKAGE_CACHE_FRONTEND_CA_DIR": "/var/cache/infinito/test/ca",
         },
         clear=False,
     )

@@ -5,6 +5,7 @@ import subprocess
 import time
 from pathlib import Path
 
+from .common import cache_env_overrides, compose_file_args
 from .coredns import CoreDNSCorefileRenderer
 from .network import detect_outer_network_mtu
 from .proc import run_streaming
@@ -41,38 +42,10 @@ class Compose:
                 check=True,
             )
             env["INFINITO_IMAGE"] = result.stdout.strip()
-        if self.profile.registry_cache_active():
-            env["INFINITO_REGISTRY_CACHE_PROXY_CONF"] = (
-                "./compose/registry-cache/proxy.conf"
-            )
-            env["INFINITO_PACKAGE_CACHE_PIP_CONF"] = "./compose/package-cache/pip.conf"
-            env["INFINITO_PACKAGE_CACHE_NPMRC"] = "./compose/package-cache/npmrc"
-            env["INFINITO_PACKAGE_CACHE_APT_LIST"] = "./compose/package-cache/apt.list"
-            # Wire the package-cache-frontend CA file into the runner.
-            # The host path is constructed from the env-script default
-            # (INFINITO_PACKAGE_CACHE_FRONTEND_CA_DIR); the cache
-            # override binds it onto /opt/package-frontend-ca.crt for
-            # the runner-side CA installer. The override is only
-            # layered when this branch runs, so the var is consumed
-            # strictly via `${VAR:?...}` over there.
-            ca_dir = env.get(
-                "INFINITO_PACKAGE_CACHE_FRONTEND_CA_DIR",
-                "/var/cache/infinito/core/cache/package/frontend/ca",
-            )
-            env["INFINITO_PACKAGE_CACHE_FRONTEND_CA_FILE"] = f"{ca_dir}/ca.crt"
+        # SPOT for cache-override env vars lives in `common.py` so up
+        # and down resolve identically — see `cache_env_overrides()`.
+        env.update(cache_env_overrides())
         return env
-
-    def _compose_file_args(self) -> list[str]:
-        """Compose `-f ...` flags. The base compose.yml describes the
-        bare CI/runtime stack (coredns + infinito) — no cache. The
-        cache override layers in registry-cache, package-cache,
-        package-cache-frontend, plus all runner-side mounts and
-        extra_hosts that wire the runner to them.
-        """
-        out = ["-f", "compose.yml"]
-        if self.profile.registry_cache_active():
-            out += ["-f", "compose/cache.override.yml"]
-        return out
 
     def run(
         self,
@@ -87,7 +60,7 @@ class Compose:
         cmd = [
             "docker",
             "compose",
-            *self._compose_file_args(),
+            *compose_file_args(),
             *self.profile.args(),
             *args,
         ]
