@@ -122,10 +122,22 @@ class TestComposeUpRetries(unittest.TestCase):
         # On GitHub-hosted runners the registry-cache stays inactive:
         # fresh disk per job means no cross-run amortization, so the
         # proxy adds startup latency without a payoff. Only the `ci`
-        # profile fires.
+        # profile fires, and the cache override is NOT layered in
+        # (so the cache services are absent and the runner gets no
+        # cache-related mounts or DNS-hijack entries).
         self.assertEqual(
             cmd,
-            ["docker", "compose", "--profile", "ci", "ps", "-q", "infinito"],
+            [
+                "docker",
+                "compose",
+                "-f",
+                "compose.yml",
+                "--profile",
+                "ci",
+                "ps",
+                "-q",
+                "infinito",
+            ],
         )
         self.assertEqual(env["INFINITO_DISTRO"], "arch")
         self.assertNotIn("COMPOSE_PROFILES", env)
@@ -156,18 +168,23 @@ class TestComposeUpRetries(unittest.TestCase):
         cmd = run_mock.call_args.args[0]
         env = run_mock.call_args.kwargs["env"]
 
-        # On a developer machine the cache profile activates so the
-        # registry-cache joins the stack and infinito's depends_on
-        # gates it via service_healthy.
+        # On a developer machine the cache override is layered onto
+        # compose.yml — adding the registry-cache, package-cache,
+        # package-cache-frontend services plus all runner-side cache
+        # mounts/extra_hosts. The override file is the cache's only
+        # gate; the cache services no longer carry a profile
+        # attribute, so no `--profile cache` flag is emitted.
         self.assertEqual(
             cmd,
             [
                 "docker",
                 "compose",
+                "-f",
+                "compose.yml",
+                "-f",
+                "compose/cache.override.yml",
                 "--profile",
                 "ci",
-                "--profile",
-                "cache",
                 "ps",
                 "-q",
                 "infinito",
@@ -178,6 +195,12 @@ class TestComposeUpRetries(unittest.TestCase):
         self.assertEqual(
             env["INFINITO_REGISTRY_CACHE_PROXY_CONF"],
             "./compose/registry-cache/proxy.conf",
+        )
+        # Frontend CA file path resolves under the host cache dir;
+        # compose binds it onto /opt/package-frontend-ca.crt for the
+        # runner-side CA installer.
+        self.assertTrue(
+            env["INFINITO_PACKAGE_CACHE_FRONTEND_CA_FILE"].endswith("/ca.crt")
         )
 
     @patch.dict(
@@ -254,12 +277,16 @@ class TestComposeUpRetries(unittest.TestCase):
         compose._compose_up_with_retries = MagicMock()
         compose.wait_for_healthy = MagicMock()
         compose._bootstrap_package_cache = MagicMock()
+        compose._generate_package_frontend_certs = MagicMock()
+        compose._install_package_frontend_ca_in_runner = MagicMock()
 
         compose.up(run_entry_init=False)
 
-        # Local mode -> cache profile active, registry-cache and
-        # package-cache must precede coredns + infinito so they boot
-        # first and the depends_on health gate resolves.
+        # Local mode -> cache profile active. Cache services must
+        # precede coredns + infinito so they boot first and the
+        # depends_on health gate resolves. package-cache-frontend
+        # joins the list because the runner's extra_hosts hijack
+        # depends on it being healthy too.
         compose._compose_up_with_retries.assert_called_once_with(
             [
                 "--env-file",
@@ -268,6 +295,7 @@ class TestComposeUpRetries(unittest.TestCase):
                 "-d",
                 "registry-cache",
                 "package-cache",
+                "package-cache-frontend",
                 "coredns",
                 "infinito",
             ],
@@ -276,6 +304,11 @@ class TestComposeUpRetries(unittest.TestCase):
         )
         compose.wait_for_healthy.assert_called_once_with()
         compose._bootstrap_package_cache.assert_called_once()
+        # Cert generation MUST happen before compose-up so nginx has
+        # ssl_certificate files to load; CA install runs after the
+        # stack is healthy so the runner's bind for ca.crt is wired.
+        compose._generate_package_frontend_certs.assert_called_once()
+        compose._install_package_frontend_ca_in_runner.assert_called_once()
 
 
 if __name__ == "__main__":  # pragma: no cover

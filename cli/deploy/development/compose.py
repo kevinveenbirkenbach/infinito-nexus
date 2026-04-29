@@ -48,7 +48,31 @@ class Compose:
             env["INFINITO_PACKAGE_CACHE_PIP_CONF"] = "./compose/package-cache/pip.conf"
             env["INFINITO_PACKAGE_CACHE_NPMRC"] = "./compose/package-cache/npmrc"
             env["INFINITO_PACKAGE_CACHE_APT_LIST"] = "./compose/package-cache/apt.list"
+            # Wire the package-cache-frontend CA file into the runner.
+            # The host path is constructed from the env-script default
+            # (INFINITO_PACKAGE_CACHE_FRONTEND_CA_DIR); the cache
+            # override binds it onto /opt/package-frontend-ca.crt for
+            # the runner-side CA installer. The override is only
+            # layered when this branch runs, so the var is consumed
+            # strictly via `${VAR:?...}` over there.
+            ca_dir = env.get(
+                "INFINITO_PACKAGE_CACHE_FRONTEND_CA_DIR",
+                "/var/cache/infinito/core/cache/package/frontend/ca",
+            )
+            env["INFINITO_PACKAGE_CACHE_FRONTEND_CA_FILE"] = f"{ca_dir}/ca.crt"
         return env
+
+    def _compose_file_args(self) -> list[str]:
+        """Compose `-f ...` flags. The base compose.yml describes the
+        bare CI/runtime stack (coredns + infinito) — no cache. The
+        cache override layers in registry-cache, package-cache,
+        package-cache-frontend, plus all runner-side mounts and
+        extra_hosts that wire the runner to them.
+        """
+        out = ["-f", "compose.yml"]
+        if self.profile.registry_cache_active():
+            out += ["-f", "compose/cache.override.yml"]
+        return out
 
     def run(
         self,
@@ -60,7 +84,13 @@ class Compose:
         text: bool = True,
         extra_env: dict[str, str] | None = None,
     ) -> subprocess.CompletedProcess:
-        cmd = ["docker", "compose", *self.profile.args(), *args]
+        cmd = [
+            "docker",
+            "compose",
+            *self._compose_file_args(),
+            *self.profile.args(),
+            *args,
+        ]
         env = self._base_env()
         if extra_env:
             env.update({k: str(v) for k, v in extra_env.items()})
@@ -140,6 +170,49 @@ class Compose:
                 f"re-run {helper} manually or inspect docker logs infinito-package-cache"
             )
 
+    def _generate_package_frontend_certs(self, env: dict[str, str]) -> None:
+        """Generate the package-cache-frontend CA + per-hostname leaf
+        certs on the host before the frontend nginx service starts. The
+        helper is idempotent — already-valid certs are kept as-is. MUST
+        run before `docker compose up` brings up the frontend, since
+        nginx fails to start when its `ssl_certificate` files are
+        missing."""
+        helper = (
+            self.repo_root
+            / "scripts"
+            / "docker"
+            / "cache"
+            / "package-frontend-certs.sh"
+        )
+        print(">>> Generating package-cache-frontend CA + per-hostname certs")
+        subprocess.run(
+            [str(helper)],
+            cwd=self.repo_root,
+            env=env,
+            check=True,
+            text=True,
+        )
+
+    def _install_package_frontend_ca_in_runner(self) -> None:
+        """Install the package-cache-frontend CA into the runner's
+        system trust store. MUST run after the runner is healthy
+        (compose has wired the read-only bind for ca.crt) and before
+        any deploy step uses TLS against a hijacked upstream hostname.
+        Idempotent."""
+        print(">>> Installing package-cache-frontend CA into runner trust store")
+        r = self.exec(
+            ["sh", "-lc", "/usr/local/bin/package-frontend-ca.sh"],
+            check=False,
+            live=False,
+        )
+        if r.returncode != 0:
+            print(
+                ">>> WARNING: package-frontend-ca installer exited "
+                f"rc={r.returncode}; cache TLS via DNS-hijack may fail. "
+                "Re-run /usr/local/bin/package-frontend-ca.sh inside the "
+                "runner manually."
+            )
+
     def _render_coredns_corefile(self) -> None:
         renderer = CoreDNSCorefileRenderer(repo_root=self.repo_root)
         out = renderer.render(show_preview=True, preview_lines=25)
@@ -186,8 +259,13 @@ class Compose:
         # infinito depends_on, so they would NOT auto-start from the
         # named-services list alone. List them explicitly when the cache
         # profile is active so the proxies come up before infinito.
+        # NOTE: certs for package-cache-frontend MUST exist before the
+        # service starts (nginx fails on missing ssl_certificate). The
+        # helper runs idempotently and short-circuits on already-valid
+        # output.
         if self.profile.registry_cache_active():
-            args += ["registry-cache", "package-cache"]
+            self._generate_package_frontend_certs(env)
+            args += ["registry-cache", "package-cache", "package-cache-frontend"]
         args += ["coredns", "infinito"]
 
         # Retry to avoid transient registry/HTTP 5xx errors when pulling images.
@@ -200,6 +278,12 @@ class Compose:
         # docs/requirements/012-package-cache-nexus3-oss.md.
         if self.profile.registry_cache_active():
             self._bootstrap_package_cache(env)
+            # Trust the package-cache-frontend CA in the runner so
+            # subsequent deploy steps can talk TLS against the
+            # DNS-hijacked upstream hostnames. MUST run after the
+            # runner is healthy (compose has wired the bind for
+            # ca.crt) and before entry.sh kicks off Ansible.
+            self._install_package_frontend_ca_in_runner()
 
         if run_entry_init:
             print(">>> Running infinito entry.sh init")

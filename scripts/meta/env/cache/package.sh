@@ -81,3 +81,25 @@ export INFINITO_PACKAGE_CACHE_ADMIN_PASSWORD
 # host.
 : "${INFINITO_PACKAGE_CACHE_PORT:=8081}"
 export INFINITO_PACKAGE_CACHE_PORT
+
+# --------------------------------------------------------------------
+# package-cache-frontend (transparent TLS reverse proxy)
+# --------------------------------------------------------------------
+# See compose/package-cache-frontend/README.md.
+#
+# CA + per-hostname leaf certs are generated host-side by
+# scripts/docker/cache/package-frontend-certs.sh and bind-mounted
+# read-only into the frontend container.
+: "${INFINITO_PACKAGE_CACHE_FRONTEND_CA_DIR:=/var/cache/infinito/core/cache/package/frontend/ca}"
+: "${INFINITO_PACKAGE_CACHE_FRONTEND_CERTS_DIR:=/var/cache/infinito/core/cache/package/frontend/certs}"
+export INFINITO_PACKAGE_CACHE_FRONTEND_CA_DIR
+export INFINITO_PACKAGE_CACHE_FRONTEND_CERTS_DIR
+
+# Static frontend IP inside the compose default network. Used as the
+# extra_hosts target on the `infinito` runner so package-manager
+# clients hit the frontend instead of the real upstream. Must sit
+# inside ${SUBNET}; defaults to the .4 host of the default 172.30.0.0/24
+# subnet (registry-cache/coredns/infinito occupy other reserved
+# addresses).
+: "${INFINITO_PACKAGE_CACHE_FRONTEND_IP:=172.30.0.4}"
+export INFINITO_PACKAGE_CACHE_FRONTEND_IP

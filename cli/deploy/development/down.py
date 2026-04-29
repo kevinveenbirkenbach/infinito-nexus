@@ -32,10 +32,19 @@ def _compose_run(*, repo_root: Path, distro: str, args: list[str]) -> None:
     if env_development.exists():
         cmd += ["--env-file", "env.development"]
 
+    # Layer the cache override on top of compose.yml when the cache
+    # profile is active, mirroring the `up` flow in compose.py — `up`
+    # and `down` MUST resolve to the same service set or
+    # `docker compose down` leaves orphans.
+    cmd += ["-f", "compose.yml"]
+    profile = Profile()
+    if profile.registry_cache_active():
+        cmd += ["-f", "compose/cache.override.yml"]
+
     # Tear the registry-cache down too if it was activated for the
     # corresponding `up`. Reuse the Profile decision so up/down cannot
     # disagree about which services are part of the stack.
-    cmd += Profile().args()
+    cmd += profile.args()
     cmd += list(args)
     env = _base_env(distro=distro)
     env.setdefault("NIX_CONFIG", "")

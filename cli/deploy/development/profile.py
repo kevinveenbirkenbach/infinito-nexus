@@ -10,11 +10,15 @@ site:
 
 * ``ci``   - always active. Carries `coredns`, `infinito` and any
              other future "always present" service.
-* ``cache``- active on developer machines, inactive on CI runners.
-             Carries `registry-cache`. Local hosts amortize the proxy
-             across many runs (cross-run image dedup); CI runners
-             get a fresh disk per job, so the proxy adds startup
-             latency without payoff.
+* cache    - active on developer machines, inactive on CI runners.
+             Local hosts amortize the cache services across many runs
+             (cross-run image dedup, cross-run package-manager dedup);
+             CI runners get a fresh disk per job, so the proxies add
+             startup latency without payoff. The decision is exposed
+             via ``registry_cache_active()``; the cache stack itself
+             is gated by file inclusion (the dev tooling layers
+             ``compose/cache.override.yml`` only when active), so no
+             dedicated ``--profile cache`` flag is emitted.
 """
 
 from __future__ import annotations
@@ -48,8 +52,11 @@ class Profile:
         return not self.is_ci()
 
     def args(self) -> list[str]:
-        """The ``--profile ...`` flag list to pass to docker compose."""
-        out = ["--profile", "ci"]
-        if self.registry_cache_active():
-            out += ["--profile", "cache"]
-        return out
+        """The ``--profile ...`` flag list to pass to docker compose.
+
+        Only ``--profile ci`` is emitted; the cache stack is gated by
+        compose-file inclusion (``compose/cache.override.yml``) and
+        does not carry a profile attribute, so a ``--profile cache``
+        flag would be a no-op.
+        """
+        return ["--profile", "ci"]

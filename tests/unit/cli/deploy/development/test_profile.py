@@ -91,20 +91,19 @@ class TestProfileRegistryCacheActive(unittest.TestCase):
 class TestProfileArgs(unittest.TestCase):
     @patch.dict(os.environ, {**_BLANK_CI_ENV, "CI": "true"}, clear=False)
     def test_args_ci_only_on_runner(self) -> None:
-        # On CI the cache profile stays inactive (fresh disk per job
-        # gives no cross-run amortization) so docker compose only sees
-        # the ci profile.
+        # On CI the cache stack stays inactive (fresh disk per job
+        # gives no cross-run amortization) and the cache override is
+        # not loaded; only the ci profile flag fires.
         self.assertEqual(Profile().args(), ["--profile", "ci"])
 
     @patch.dict(os.environ, _BLANK_CI_ENV, clear=False)
-    def test_args_includes_cache_profile_locally(self) -> None:
-        # Locally the cache profile activates so the registry-cache
-        # joins the stack and infinito's depends_on gates it via
-        # service_healthy.
-        self.assertEqual(
-            Profile().args(),
-            ["--profile", "ci", "--profile", "cache"],
-        )
+    def test_args_returns_only_ci_profile_locally(self) -> None:
+        # Locally the cache stack activates via compose-file inclusion
+        # (compose/cache.override.yml). The cache services do not
+        # carry a `profiles: ["cache"]` attribute, so no
+        # `--profile cache` flag is emitted — file inclusion is the
+        # only gate.
+        self.assertEqual(Profile().args(), ["--profile", "ci"])
 
     @patch.dict(os.environ, _BLANK_CI_ENV, clear=False)
     def test_args_returns_a_fresh_list_each_call(self) -> None:

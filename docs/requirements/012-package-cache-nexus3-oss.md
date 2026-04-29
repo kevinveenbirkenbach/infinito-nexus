@@ -176,6 +176,13 @@ MVP proxy repos:
 | `npm`      | `npm-proxy`            | `https://registry.npmjs.org/`                             |
 | `helm`     | `helm-bitnami`         | `https://charts.bitnami.com/bitnami`                      |
 | `raw`      | `raw-githubusercontent`| `https://raw.githubusercontent.com/`                      |
+| `raw`      | `raw-codeload-github`  | `https://codeload.github.com/`                            |
+| `rubygems` | `gem-proxy`            | `https://rubygems.org/`                                   |
+| `go`       | `go-proxy`             | `https://proxy.golang.org/`                               |
+| `yum`      | `yum-rocky`            | `https://download.rockylinux.org/pub/rocky/`              |
+| `yum`      | `yum-fedora`           | `https://dl.fedoraproject.org/pub/fedora/linux/`          |
+| `raw`      | `raw-packagist`        | `https://repo.packagist.org/`                             |
+| `raw`      | `raw-alpine`           | `https://dl-cdn.alpinelinux.org/alpine/`                  |
 
 Adding more formats later (yum, go, composer, cargo-via-raw, …) is an
 allowlist update in the same helper; out of scope for the MVP.
@@ -257,7 +264,9 @@ gains a Package Cache section beside the existing Registry Cache one.
       `INFINITO_PACKAGE_CACHE_ADMIN_PASSWORD`.
 - [ ] On first start, the MVP proxy repositories are created:
       `apt-debian`, `apt-ubuntu`, `pypi-proxy`, `npm-proxy`,
-      `helm-bitnami`, `raw-githubusercontent`.
+      `helm-bitnami`, `raw-githubusercontent`, `raw-codeload-github`,
+      `gem-proxy`, `go-proxy`, `yum-rocky`, `yum-fedora`,
+      `raw-packagist`, `raw-alpine`.
 - [ ] The blobstore `default` is created with quota
       `INFINITO_PACKAGE_CACHE_BLOBSTORE_MAX`.
 
@@ -303,6 +312,51 @@ gains a Package Cache section beside the existing Registry Cache one.
 - [ ] `docs/contributing/artefact/files/compose.yml.md` documents the
       package-cache env-var contract beside the existing Registry
       Cache section.
+
+## Frontend (transparent TLS-terminating reverse proxy)
+
+A second compose service, `package-cache-frontend`, makes the Nexus
+proxy repos reachable transparently under their real upstream
+hostnames (`pypi.org`, `registry.npmjs.org`, `rubygems.org`,
+`repo.packagist.org`, `proxy.golang.org`, `dl-cdn.alpinelinux.org`,
+`raw.githubusercontent.com`, `codeload.github.com`,
+`files.pythonhosted.org`, `index.rubygems.org`).
+
+Mechanism:
+
+- A dedicated CA + per-hostname leaf certs, generated host-side by
+  [package-frontend-certs.sh](../../scripts/docker/cache/package-frontend-certs.sh)
+  before `docker compose up` (nginx fails to start without the cert
+  files).
+- `nginx:1.27-alpine` listens on port 443 inside the compose default
+  network, terminates TLS with the matching SNI cert per hostname,
+  and reverse-proxies onto `http://package-cache:8081/repository/<repo>/`.
+- `extra_hosts` entries on the `infinito` runner (in
+  [compose/cache.override.yml](../../compose/cache.override.yml),
+  layered only when the `cache` profile is active) DNS-hijack each
+  upstream hostname onto the frontend's static IP.
+- A runner-side helper
+  [package-frontend-ca.sh](../../scripts/docker/cache/package-frontend-ca.sh)
+  installs the CA into the runner's system trust store after the
+  stack is healthy, so apt/pip/curl/etc. accept TLS against the
+  hijacked upstreams.
+
+Scope today is **runner-only**: only the `infinito` runner gets the
+extra_hosts + CA-trust wiring. Inner-`dockerd` Dockerfile builds for
+app services are not routed through the frontend; that requires
+build-time CA injection (deferred to a follow-up).
+
+The hostname list is duplicated by design across three artifacts:
+
+- `HOSTNAMES` in [package-frontend-certs.sh](../../scripts/docker/cache/package-frontend-certs.sh)
+  (one leaf cert per entry).
+- `server_name` directives in
+  [compose/package-cache-frontend/upstreams.conf](../../compose/package-cache-frontend/upstreams.conf)
+  (one server-block per hostname).
+- `extra_hosts` entries in
+  [compose/cache.override.yml](../../compose/cache.override.yml).
+
+When adding/removing an upstream, edit all three.
 
 ## Validation Apps
 

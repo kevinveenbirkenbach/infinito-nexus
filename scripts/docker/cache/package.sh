@@ -161,6 +161,30 @@ ensure_all_proxies() {
 	ensure_proxy_repo helm helm-bitnami "$(printf '{"name":"helm-bitnami","online":true,%s,"proxy":{"remoteUrl":"https://charts.bitnami.com/bitnami","contentMaxAge":1440,"metadataMaxAge":1440}}' "${storage}")"
 	# raw-githubusercontent.
 	ensure_proxy_repo raw raw-githubusercontent "$(printf '{"name":"raw-githubusercontent","online":true,%s,"proxy":{"remoteUrl":"https://raw.githubusercontent.com/","contentMaxAge":1440,"metadataMaxAge":1440},"raw":{"contentDisposition":"ATTACHMENT"}}' "${storage}")"
+	# raw-codeload-github. Caches GitHub source archives served by
+	# codeload.github.com (e.g. /<owner>/<repo>/tar.gz/refs/tags/<tag>,
+	# /zip/refs/heads/<branch>). Tag-pinned URLs are immutable in
+	# practice; branch-pinned URLs revalidate via contentMaxAge.
+	ensure_proxy_repo raw raw-codeload-github "$(printf '{"name":"raw-codeload-github","online":true,%s,"proxy":{"remoteUrl":"https://codeload.github.com/","contentMaxAge":1440,"metadataMaxAge":1440},"raw":{"contentDisposition":"ATTACHMENT"}}' "${storage}")"
+	# gem-proxy. Caches RubyGems for Bundler / `gem install` invocations
+	# inside Dockerfile builds (Discourse, OpenProject, Decidim, ...).
+	ensure_proxy_repo rubygems gem-proxy "$(printf '{"name":"gem-proxy","online":true,%s,"proxy":{"remoteUrl":"https://rubygems.org/","contentMaxAge":1440,"metadataMaxAge":1440}}' "${storage}")"
+	# go-proxy. Registered for future Go-based roles; no client wiring
+	# today (no role builds Go binaries).
+	ensure_proxy_repo go go-proxy "$(printf '{"name":"go-proxy","online":true,%s,"proxy":{"remoteUrl":"https://proxy.golang.org/","contentMaxAge":1440,"metadataMaxAge":1440}}' "${storage}")"
+	# yum-rocky / yum-fedora. Registered for future RHEL-family roles;
+	# no client wiring today (stack is Debian/Ubuntu).
+	ensure_proxy_repo yum yum-rocky "$(printf '{"name":"yum-rocky","online":true,%s,"proxy":{"remoteUrl":"https://download.rockylinux.org/pub/rocky/","contentMaxAge":1440,"metadataMaxAge":1440},"yum":{"repodataDepth":5}}' "${storage}")"
+	ensure_proxy_repo yum yum-fedora "$(printf '{"name":"yum-fedora","online":true,%s,"proxy":{"remoteUrl":"https://dl.fedoraproject.org/pub/fedora/linux/","contentMaxAge":1440,"metadataMaxAge":1440},"yum":{"repodataDepth":5}}' "${storage}")"
+	# raw-packagist. Composer is Pro-only as a native Nexus format, so
+	# packagist metadata + dist tarballs are cached as raw. Covers
+	# MediaWiki extensions, Nextcloud, Decidim, SuiteCRM, Shopware,
+	# Magento, Friendica composer-driven Dockerfile builds.
+	ensure_proxy_repo raw raw-packagist "$(printf '{"name":"raw-packagist","online":true,%s,"proxy":{"remoteUrl":"https://repo.packagist.org/","contentMaxAge":1440,"metadataMaxAge":1440},"raw":{"contentDisposition":"ATTACHMENT"}}' "${storage}")"
+	# raw-alpine. Nexus has no apk format; Alpine package index +
+	# .apk blobs are cached as raw. Relevant for locally-built
+	# Dockerfiles that run `apk add` during build.
+	ensure_proxy_repo raw raw-alpine "$(printf '{"name":"raw-alpine","online":true,%s,"proxy":{"remoteUrl":"https://dl-cdn.alpinelinux.org/alpine/","contentMaxAge":1440,"metadataMaxAge":1440},"raw":{"contentDisposition":"ATTACHMENT"}}' "${storage}")"
 }
 
 # Accept the Sonatype Nexus Repository - Community Edition EULA. Since

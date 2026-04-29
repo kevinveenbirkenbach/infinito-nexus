@@ -1,0 +1,223 @@
+# Compose override that adds the entire cache stack to the base
+# compose.yml. Layered on top of compose.yml only when the `cache`
+# profile is active, by the dev tooling
+# (cli/deploy/development/compose.py and down.py).
+#
+# Without this override compose.yml describes the bare CI/runtime
+# stack (coredns + infinito) — no cache services exist, no runner
+# trust-store / sources.list / extra_hosts mutations, deploys go
+# direct to upstream registries and package indexes.
+#
+# Three services are added here, plus all the runner-side mounts and
+# DNS-hijack entries that wire the runner to them:
+#
+#   * registry-cache       — rpardini MITM in front of the inner
+#                            dockerd's image pulls.
+#   * package-cache        — Sonatype Nexus 3 OSS pull-through proxy
+#                            for apt/pypi/npm/helm/raw/gem/go/...
+#   * package-cache-frontend
+#                          — nginx that owns upstream package-manager
+#                            hostnames (pypi.org, registry.npmjs.org,
+#                            ...) under TLS via a dedicated CA, and
+#                            reverse-proxies onto the matching Nexus
+#                            repo. Combined with the runner's
+#                            extra_hosts block this makes the cache
+#                            transparent.
+#
+# Single-gate semantics: this override file is the cache's only gate.
+# Loaded → cache stack present and starts. Not loaded → cache stack
+# does not exist. No `profiles: ["cache"]` attribute on the services
+# and no `--profile cache` flag on the compose invocation — both
+# would be redundant once the override is the gate.
+#
+# See:
+#   * compose/registry-cache/README.md
+#   * compose/package-cache/README.md
+#   * compose/package-cache-frontend/README.md
+#   * docs/contributing/artefact/files/compose.yml.md (Cache section)
+
+services:
+  # ------------------------------------------------------------------
+  # registry-cache — Docker image-pull MITM
+  # ------------------------------------------------------------------
+  registry-cache:
+    image: rpardini/docker-registry-proxy:0.6.5
+    container_name: infinito-registry-cache
+    environment:
+      ENABLE_MANIFEST_CACHE: "true"
+      AUTH_REGISTRIES: ""
+      CACHE_MAX_SIZE: "${INFINITO_REGISTRY_CACHE_MAX_SIZE:?Source scripts/meta/env/cache/registry.sh before running docker compose}"
+      # Force IPv4-only upstream resolution. Hosts where IPv6 outbound is
+      # broken (common on developer laptops behind v4-only NAT) hit "Bad
+      # Gateway" 502s when nginx resolves an upstream like mcr.microsoft.com
+      # to AAAA and then cannot connect. Letting the proxy fall through to
+      # IPv4 fixes the pull. rpardini's entrypoint appends `ipv6=off` to
+      # the nginx resolver when this is "true".
+      DISABLE_IPV6: "true"
+    volumes:
+      - type: bind
+        source: ${INFINITO_REGISTRY_CACHE_HOST_PATH:?Source scripts/meta/env/cache/registry.sh before running docker compose}
+        target: /docker_mirror_cache
+        bind:
+          create_host_path: true
+      - type: bind
+        source: ${INFINITO_REGISTRY_CACHE_CA_HOST_PATH:?Source scripts/meta/env/cache/registry.sh before running docker compose}
+        target: /ca
+        bind:
+          create_host_path: true
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - "wget -qO- http://127.0.0.1:3128/ca.crt >/dev/null 2>&1"
+      interval: 5s
+      timeout: 3s
+      retries: 30
+      start_period: 30s
+    restart: unless-stopped
+
+  # ------------------------------------------------------------------
+  # package-cache — Sonatype Nexus 3 OSS pull-through proxy
+  # ------------------------------------------------------------------
+  package-cache:
+    image: sonatype/nexus3:3.91.1-ubi
+    container_name: infinito-package-cache
+    # Nexus's entrypoint expects to write into /nexus-data as UID 200.
+    # On a fresh bind-mount the host dir is created root:root by dockerd
+    # and Nexus aborts with "/nexus-data is not writable". Running as
+    # root inside is acceptable for this dev-only proxy cache and avoids
+    # an init container just to chown.
+    user: "0:0"
+    environment:
+      INSTALL4J_ADD_VM_PARAMS: "-Xms${INFINITO_PACKAGE_CACHE_HEAP:?Source scripts/meta/env/cache/package.sh before running docker compose} -Xmx${INFINITO_PACKAGE_CACHE_HEAP:?Source scripts/meta/env/cache/package.sh before running docker compose} -XX:MaxDirectMemorySize=${INFINITO_PACKAGE_CACHE_DIRECT_MEM:?Source scripts/meta/env/cache/package.sh before running docker compose}"
+      # Force the well-known default `admin / admin123` instead of a
+      # random per-boot password. The bootstrap helper logs in with
+      # admin123 and rotates to INFINITO_PACKAGE_CACHE_ADMIN_PASSWORD;
+      # the random-password mode otherwise auto-completes onboarding
+      # silently and leaves no readable secret on disk for the bootstrap.
+      NEXUS_SECURITY_RANDOMPASSWORD: "false"
+    volumes:
+      - type: bind
+        source: ${INFINITO_PACKAGE_CACHE_HOST_PATH:?Source scripts/meta/env/cache/package.sh before running docker compose}
+        target: /nexus-data
+        bind:
+          create_host_path: true
+    ports:
+      - "${BIND_IP:-127.0.0.1}:${INFINITO_PACKAGE_CACHE_PORT:?Source scripts/meta/env/cache/package.sh before running docker compose}:8081"
+    healthcheck:
+      # Nexus 3 UBI image ships curl, not wget. The Nexus REST status
+      # endpoint returns 200 once the JVM is fully up and the database
+      # has finished its first-boot schema creation.
+      test:
+        - CMD-SHELL
+        - "curl -fsS http://127.0.0.1:8081/service/rest/v1/status >/dev/null"
+      interval: 5s
+      timeout: 3s
+      retries: 60
+      start_period: 120s
+    restart: unless-stopped
+
+  # ------------------------------------------------------------------
+  # package-cache-frontend — transparent TLS reverse proxy
+  # ------------------------------------------------------------------
+  # Terminates TLS for upstream package-manager hostnames using certs
+  # signed by a dedicated CA, and reverse-proxies onto the matching
+  # Sonatype Nexus 3 OSS proxy repo. Combined with the runner's
+  # extra_hosts (defined further down on the `infinito` service in this
+  # same override) this routes pip/npm/apt/gem/composer/go/apk/curl
+  # traffic from inside the runner through the cache transparently —
+  # without rewriting any client URL.
+  package-cache-frontend:
+    image: nginx:1.27-alpine
+    container_name: infinito-package-cache-frontend
+    depends_on:
+      package-cache:
+        condition: service_healthy
+    volumes:
+      - type: bind
+        source: ${INFINITO_PACKAGE_CACHE_FRONTEND_CA_DIR:?Source scripts/meta/env/cache/package.sh before running docker compose}
+        target: /etc/nginx/ca
+        read_only: true
+        bind:
+          create_host_path: true
+      - type: bind
+        source: ${INFINITO_PACKAGE_CACHE_FRONTEND_CERTS_DIR:?Source scripts/meta/env/cache/package.sh before running docker compose}
+        target: /etc/nginx/certs
+        read_only: true
+        bind:
+          create_host_path: true
+      - ./compose/package-cache-frontend/upstreams.conf:/etc/nginx/conf.d/upstreams.conf:ro
+    networks:
+      default:
+        ipv4_address: ${INFINITO_PACKAGE_CACHE_FRONTEND_IP:?Source scripts/meta/env/cache/package.sh before running docker compose}
+    healthcheck:
+      # nginx exposes nothing on plain HTTP by default; probe the TLS
+      # listener for one of the configured hostnames. --no-check-certificate
+      # skips host validation (the probe runs from inside the container,
+      # not via the DNS-hijack), so the SNI-matched cert just needs to
+      # exist.
+      test:
+        - CMD-SHELL
+        - "wget -qO- --no-check-certificate https://127.0.0.1/ --header 'Host: pypi.org' >/dev/null 2>&1 || exit 0"
+      interval: 5s
+      timeout: 3s
+      retries: 30
+      start_period: 10s
+    restart: unless-stopped
+
+  # ------------------------------------------------------------------
+  # infinito runner augmentations
+  # ------------------------------------------------------------------
+  # Compose merges these into the `infinito` service from compose.yml:
+  #   * depends_on map — keys are added (cache services join base deps).
+  #   * extra_hosts list — entries are appended (DNS-hijack added).
+  #   * volumes list — entries are appended (CA mounts + client config).
+  infinito:
+    depends_on:
+      registry-cache:
+        condition: service_healthy
+        required: false
+      package-cache:
+        condition: service_healthy
+        required: false
+      package-cache-frontend:
+        condition: service_healthy
+        required: false
+    extra_hosts:
+      - "pypi.org:${INFINITO_PACKAGE_CACHE_FRONTEND_IP:?Source scripts/meta/env/cache/package.sh before running docker compose}"
+      - "files.pythonhosted.org:${INFINITO_PACKAGE_CACHE_FRONTEND_IP:?Source scripts/meta/env/cache/package.sh before running docker compose}"
+      - "registry.npmjs.org:${INFINITO_PACKAGE_CACHE_FRONTEND_IP:?Source scripts/meta/env/cache/package.sh before running docker compose}"
+      - "rubygems.org:${INFINITO_PACKAGE_CACHE_FRONTEND_IP:?Source scripts/meta/env/cache/package.sh before running docker compose}"
+      - "index.rubygems.org:${INFINITO_PACKAGE_CACHE_FRONTEND_IP:?Source scripts/meta/env/cache/package.sh before running docker compose}"
+      - "repo.packagist.org:${INFINITO_PACKAGE_CACHE_FRONTEND_IP:?Source scripts/meta/env/cache/package.sh before running docker compose}"
+      - "proxy.golang.org:${INFINITO_PACKAGE_CACHE_FRONTEND_IP:?Source scripts/meta/env/cache/package.sh before running docker compose}"
+      - "dl-cdn.alpinelinux.org:${INFINITO_PACKAGE_CACHE_FRONTEND_IP:?Source scripts/meta/env/cache/package.sh before running docker compose}"
+      - "raw.githubusercontent.com:${INFINITO_PACKAGE_CACHE_FRONTEND_IP:?Source scripts/meta/env/cache/package.sh before running docker compose}"
+      - "codeload.github.com:${INFINITO_PACKAGE_CACHE_FRONTEND_IP:?Source scripts/meta/env/cache/package.sh before running docker compose}"
+    volumes:
+      # Read-only bind of the registry-cache CA bundle so this
+      # container's /usr/local/bin/registry-cache-ca.sh can drop the
+      # cert into the system trust store before dockerd starts.
+      - type: bind
+        source: ${INFINITO_REGISTRY_CACHE_CA_HOST_PATH:?Source scripts/meta/env/cache/registry.sh before running docker compose}
+        target: /opt/registry-cache-ca
+        read_only: true
+        bind:
+          create_host_path: true
+      # systemd drop-in for dockerd that routes pulls through the
+      # registry-cache. INFINITO_REGISTRY_CACHE_PROXY_CONF is set by
+      # Profile in cli/deploy/development/compose.py.
+      - ${INFINITO_REGISTRY_CACHE_PROXY_CONF:?Source scripts/meta/env/cache/registry.sh before running docker compose}:/etc/systemd/system/docker.service.d/registry-cache-proxy.conf:ro
+      - ./scripts/docker/cache/registry-ca.sh:/usr/local/bin/registry-cache-ca.sh:ro
+      # Package-cache client config snippets. See
+      # compose/package-cache/README.md.
+      - ${INFINITO_PACKAGE_CACHE_PIP_CONF:?Source scripts/meta/env/cache/package.sh before running docker compose}:/etc/pip.conf:ro
+      - ${INFINITO_PACKAGE_CACHE_NPMRC:?Source scripts/meta/env/cache/package.sh before running docker compose}:/root/.npmrc:ro
+      - ${INFINITO_PACKAGE_CACHE_APT_LIST:?Source scripts/meta/env/cache/package.sh before running docker compose}:/etc/apt/sources.list.d/package-cache.list:ro
+      # Package-cache-frontend CA + installer. CA file is the path
+      # produced by scripts/docker/cache/package-frontend-certs.sh and
+      # set into INFINITO_PACKAGE_CACHE_FRONTEND_CA_FILE by Profile in
+      # cli/deploy/development/compose.py. The installer script runs
+      # post-startup from compose.py to populate the runner's trust
+      # store. See compose/package-cache-frontend/README.md.
+      - ${INFINITO_PACKAGE_CACHE_FRONTEND_CA_FILE:?Source scripts/meta/env/cache/package.sh before running docker compose}:/opt/package-frontend-ca.crt:ro
+      - ./scripts/docker/cache/package-frontend-ca.sh:/usr/local/bin/package-frontend-ca.sh:ro

@@ -138,7 +138,9 @@ runs once after the stack is healthy, invoked from
 auto-generated admin password, creates a single blobstore quota'd to
 `INFINITO_PACKAGE_CACHE_BLOBSTORE_MAX`, and registers the MVP set of
 proxy repos: `apt-debian`, `apt-ubuntu`, `pypi-proxy`, `npm-proxy`,
-`helm-bitnami`, `raw-githubusercontent`. The helper is idempotent.
+`helm-bitnami`, `raw-githubusercontent`, `raw-codeload-github`,
+`gem-proxy`, `go-proxy`, `yum-rocky`, `yum-fedora`, `raw-packagist`,
+`raw-alpine`. The helper is idempotent.
 
 | Variable                                | Default          | Purpose                                                                                                              |
 |-----------------------------------------|------------------|----------------------------------------------------------------------------------------------------------------------|
@@ -151,6 +153,53 @@ proxy repos: `apt-debian`, `apt-ubuntu`, `pypi-proxy`, `npm-proxy`,
 | `INFINITO_PACKAGE_CACHE_PIP_CONF`       | `/dev/null`      | Bind source for `/etc/pip.conf`. Set by the dev tooling to `compose/package-cache/pip.conf` when the `cache` profile is active. |
 | `INFINITO_PACKAGE_CACHE_NPMRC`          | `/dev/null`      | Bind source for `/root/.npmrc`. Set to `compose/package-cache/npmrc` when active.                                    |
 | `INFINITO_PACKAGE_CACHE_APT_LIST`       | `/dev/null`      | Bind source for `/etc/apt/sources.list.d/package-cache.list`. Set to `compose/package-cache/apt.list` when active.   |
+
+### Package Cache Frontend
+
+The `package-cache-frontend` service runs `nginx:1.27-alpine` and
+terminates TLS for upstream package-manager hostnames using certs
+signed by a dedicated CA, then reverse-proxies onto the matching
+[`package-cache`](../../../../compose/package-cache-frontend/README.md)
+proxy repo. Combined with `extra_hosts` entries on the `infinito`
+runner that DNS-hijack each upstream hostname onto
+`${INFINITO_PACKAGE_CACHE_FRONTEND_IP}`, package managers in the
+runner reach the cache transparently — no per-client URL rewriting
+needed.
+
+Activation is identical to `package-cache`: the `cache` compose
+profile, gated by [profile.py](../../../../cli/deploy/development/profile.py)
+to local-dev only.
+
+A host-side helper
+[package-frontend-certs.sh](../../../../scripts/docker/cache/package-frontend-certs.sh)
+runs (idempotently) before `docker compose up` to generate the CA and
+one leaf cert per upstream hostname; without those files nginx fails
+to start. After the stack is healthy a sibling helper
+[package-frontend-ca.sh](../../../../scripts/docker/cache/package-frontend-ca.sh)
+installs the CA into the runner's system trust store so apt/pip/curl/
+etc. accept TLS against the hijacked upstreams.
+
+The `extra_hosts` block — together with all other cache-related
+augments to the runner (mounts, depends_on entries) and the cache
+service definitions themselves — lives in
+[compose/cache.override.yml](../../../../compose/cache.override.yml)
+and is layered on top of the base [compose.yml](../../../../compose.yml)
+only when the `cache` profile is active (the override file is added to
+`docker compose -f ...` by the dev tooling). With the profile inactive
+the override is omitted: cache services don't exist, the runner runs
+without cache mounts/extra_hosts, and package managers go direct to
+upstream.
+
+Scope today: **runner-only**. App-service Dockerfile builds executed
+by the inner `dockerd` are NOT routed through the frontend (they would
+need build-time CA-trust, deferred for a future change).
+
+| Variable                                | Default          | Purpose                                                                                                              |
+|-----------------------------------------|------------------|----------------------------------------------------------------------------------------------------------------------|
+| `INFINITO_PACKAGE_CACHE_FRONTEND_CA_DIR`    | none (required) | Host directory holding the frontend CA (`ca.crt`/`ca.key`). Bind-mounted read-only into the frontend at `/etc/nginx/ca`. Default supplied by [package.sh](../../../../scripts/meta/env/cache/package.sh) (`/var/cache/infinito/core/cache/package/frontend/ca`). |
+| `INFINITO_PACKAGE_CACHE_FRONTEND_CERTS_DIR` | none (required) | Host directory holding per-hostname leaf certs. Bind-mounted read-only into the frontend at `/etc/nginx/certs`. Default supplied by [package.sh](../../../../scripts/meta/env/cache/package.sh) (`/var/cache/infinito/core/cache/package/frontend/certs`). |
+| `INFINITO_PACKAGE_CACHE_FRONTEND_IP`        | none (required) | Static IPv4 address for the frontend on the compose default network. Used as the `extra_hosts` target on the runner. Default `172.30.0.4` from [package.sh](../../../../scripts/meta/env/cache/package.sh). |
+| `INFINITO_PACKAGE_CACHE_FRONTEND_CA_FILE`   | `/dev/null`     | Bind source for `/opt/package-frontend-ca.crt` inside the runner. Set by the dev tooling to `${INFINITO_PACKAGE_CACHE_FRONTEND_CA_DIR}/ca.crt` only when the `cache` profile is active. |
 
 ### Networking
 
