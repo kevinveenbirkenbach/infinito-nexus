@@ -11,8 +11,6 @@ from .profile import Profile
 
 
 def _repo_root_from_here() -> Path:
-    # Derive the repository root relative to this file.
-    # Adjust the number of parents if the project layout changes.
     return Path(__file__).resolve().parents[3]
 
 
@@ -23,8 +21,6 @@ CI_DOCKER_ROOT_STR = str(CI_DOCKER_ROOT)
 def _base_env(*, distro: str) -> dict[str, str]:
     env = dict(os.environ)
     env["INFINITO_DISTRO"] = distro
-    # SPOT for cache-override env vars lives in `common.py` so up
-    # and down resolve identically — see `cache_env_overrides()`.
     env.update(cache_env_overrides())
     return env
 
@@ -35,10 +31,6 @@ def _compose_run(*, repo_root: Path, distro: str, args: list[str]) -> None:
     if env_development.exists():
         cmd += ["--env-file", "env.development"]
 
-    # SPOT for compose -f and --profile flags: shared with the `up`
-    # flow in compose.py via common.compose_file_args + Profile.args.
-    # Up and down MUST resolve to the same service set or
-    # `docker compose down` leaves orphans.
     cmd += compose_file_args()
     cmd += Profile().args()
     cmd += list(args)

@@ -1,20 +1,7 @@
 #!/usr/bin/env bash
 # shellcheck shell=bash
-#
-# Host wrapper that runs the in-container cert generator
-# (compose/package-cache-frontend/cert-gen.sh) inside a throw-away
-# alpine container. The container approach lets the docker daemon
-# create the bind-mount source paths under /var/cache/infinito/...
-# without requiring the invoking shell to have write access to those
-# host paths (sandboxed tooling, non-root operators, …).
-#
-# Pattern equivalent to scripts/docker/cache/registry-ca.sh except
-# that this layer needs the certs to exist on the host BEFORE the
-# package-cache-frontend nginx service starts (nginx fails on
-# missing ssl_certificate files), so the generation is not done
-# inside the frontend container itself.
-#
-# See docs/requirements/012-package-cache-nexus3-oss.md.
+# Host wrapper for the in-container cert generator.
+# See docs/contributing/environment/cache.md.
 
 set -euo pipefail
 
@@ -29,8 +16,6 @@ if [[ ! -r "${INNER_SCRIPT}" ]]; then
 	exit 1
 fi
 
-# Pin the alpine tag so re-runs are deterministic and the apk index
-# the container fetches stays consistent across hosts.
 ALPINE_IMAGE="${INFINITO_PACKAGE_CACHE_FRONTEND_INIT_IMAGE:-alpine:3.20}"
 
 exec docker run --rm \

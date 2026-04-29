@@ -119,12 +119,7 @@ class TestComposeUpRetries(unittest.TestCase):
         cmd = run_mock.call_args.args[0]
         env = run_mock.call_args.kwargs["env"]
 
-        # On GitHub-hosted runners the registry-cache stays inactive:
-        # fresh disk per job means no cross-run amortization, so the
-        # proxy adds startup latency without a payoff. Only the `ci`
-        # profile fires, and the cache override is NOT layered in
-        # (so the cache services are absent and the runner gets no
-        # cache-related mounts or DNS-hijack entries).
+        # CI: only the ci profile fires; cache override is not layered in.
         self.assertEqual(
             cmd,
             [
@@ -141,8 +136,6 @@ class TestComposeUpRetries(unittest.TestCase):
         )
         self.assertEqual(env["INFINITO_DISTRO"], "arch")
         self.assertNotIn("COMPOSE_PROFILES", env)
-        # And the proxy.conf bind-mount stays at /dev/null (the default
-        # baked into compose.yml), so dockerd does direct pulls.
         self.assertNotIn("INFINITO_REGISTRY_CACHE_PROXY_CONF", env)
 
     @patch.dict(
@@ -152,10 +145,7 @@ class TestComposeUpRetries(unittest.TestCase):
             "GITHUB_ACTIONS": "",
             "RUNNING_ON_GITHUB": "",
             "CI": "",
-            # SPOT for the host CA dir is scripts/meta/env/cache/package.sh
-            # (sourced via BASH_ENV in production callers). Tests that
-            # run outside that env-layer set the var explicitly so the
-            # cache_env_overrides() SPOT-strict guard does not raise.
+            # Tests bypass BASH_ENV; set explicitly so cache_env_overrides() passes.
             "INFINITO_PACKAGE_CACHE_FRONTEND_CA_DIR": "/var/cache/infinito/test/ca",
         },
         clear=False,
@@ -173,12 +163,7 @@ class TestComposeUpRetries(unittest.TestCase):
         cmd = run_mock.call_args.args[0]
         env = run_mock.call_args.kwargs["env"]
 
-        # On a developer machine the cache override is layered onto
-        # compose.yml — adding the registry-cache, package-cache,
-        # package-cache-frontend services plus all runner-side cache
-        # mounts/extra_hosts. The override file is the cache's only
-        # gate; the cache services no longer carry a profile
-        # attribute, so no `--profile cache` flag is emitted.
+        # Local: cache override is layered onto compose.yml; no --profile cache.
         self.assertEqual(
             cmd,
             [
@@ -195,15 +180,10 @@ class TestComposeUpRetries(unittest.TestCase):
                 "infinito",
             ],
         )
-        # And the proxy.conf bind-mount points at the real file so
-        # dockerd loads the systemd drop-in and routes pulls.
         self.assertEqual(
             env["INFINITO_REGISTRY_CACHE_PROXY_CONF"],
             "./compose/registry-cache/proxy.conf",
         )
-        # Frontend CA file path resolves under the host cache dir;
-        # compose binds it onto /opt/package-frontend-ca.crt for the
-        # runner-side CA installer.
         self.assertTrue(
             env["INFINITO_PACKAGE_CACHE_FRONTEND_CA_FILE"].endswith("/ca.crt")
         )
@@ -214,9 +194,7 @@ class TestComposeUpRetries(unittest.TestCase):
             "INFINITO_NO_BUILD": "0",
             "INFINITO_IMAGE": "infinito-debian",
             "INFINITO_PULL_POLICY": "never",
-            # Pin to CI mode so the cache profile stays inactive: this
-            # test asserts build behaviour, not the cache-services
-            # ordering, which has its own coverage above.
+            # CI-pinned so cache stays inactive; this test asserts build behaviour only.
             "CI": "true",
             "GITHUB_ACTIONS": "true",
             "RUNNING_ON_GITHUB": "true",
@@ -273,11 +251,7 @@ class TestComposeUpRetries(unittest.TestCase):
             "CI": "",
             "GITHUB_ACTIONS": "",
             "RUNNING_ON_GITHUB": "",
-            # SPOT for the host CA dir is scripts/meta/env/cache/package.sh
-            # (sourced via BASH_ENV in production callers). The local
-            # cache branch in _base_env reads it strictly via
-            # cache_env_overrides(); this test runs outside that env
-            # layer so the var is set explicitly.
+            # Tests bypass BASH_ENV; set explicitly so cache_env_overrides() passes.
             "INFINITO_PACKAGE_CACHE_FRONTEND_CA_DIR": "/var/cache/infinito/test/ca",
         },
         clear=False,
@@ -293,11 +267,7 @@ class TestComposeUpRetries(unittest.TestCase):
 
         compose.up(run_entry_init=False)
 
-        # Local mode -> cache profile active. Cache services must
-        # precede coredns + infinito so they boot first and the
-        # depends_on health gate resolves. package-cache-frontend
-        # joins the list because the runner's extra_hosts hijack
-        # depends on it being healthy too.
+        # Cache services precede coredns + infinito so depends_on health gates resolve.
         compose._compose_up_with_retries.assert_called_once_with(
             [
                 "--env-file",
@@ -315,9 +285,6 @@ class TestComposeUpRetries(unittest.TestCase):
         )
         compose.wait_for_healthy.assert_called_once_with()
         compose._bootstrap_package_cache.assert_called_once()
-        # Cert generation MUST happen before compose-up so nginx has
-        # ssl_certificate files to load; CA install runs after the
-        # stack is healthy so the runner's bind for ca.crt is wired.
         compose._generate_package_frontend_certs.assert_called_once()
         compose._install_package_frontend_ca_in_runner.assert_called_once()
 

@@ -1,16 +1,6 @@
 #!/usr/bin/env bash
-# Install the package-cache-frontend CA into the runner's system trust
-# store before any package manager (apt, pip, npm, gem, composer, …)
-# makes outbound HTTPS calls.
-#
-# Pattern mirrors registry-cache-ca.sh. Difference in scope:
-#   * registry-cache-ca.sh: trust store consumed by inner dockerd
-#     (image pulls).
-#   * package-frontend-ca.sh: trust store consumed by the runner's
-#     own OS clients (apt-get/pip/curl/etc.) so they accept TLS
-#     against the package-cache-frontend's per-hostname certs.
-#
-# Idempotent: safe to run on every boot.
+# Install the frontend CA into the runner's trust store. Idempotent.
+# See docs/contributing/environment/cache.md.
 set -eu
 
 CA_SRC="/opt/package-frontend-ca.crt"
@@ -26,9 +16,7 @@ else
 	exit 1
 fi
 
-# Bind-mount source defaults to /dev/null when the cache profile is
-# inactive. An empty CA_SRC means: cache disabled, nothing to install.
-# Exit cleanly so the runner deploys identically with the cache off.
+# Empty CA_SRC = cache profile inactive.
 if [ ! -s "${CA_SRC}" ]; then
 	echo "[package-frontend-ca] ${CA_SRC} empty/absent; cache profile inactive; skipping" >&2
 	exit 0

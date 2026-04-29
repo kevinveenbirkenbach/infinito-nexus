@@ -1,58 +1,28 @@
 #!/usr/bin/env bash
 # shellcheck shell=bash
-#
-# Idempotent bootstrap for the Sonatype Nexus 3 OSS proxy repositories
-# served by the `package-cache` compose service. Invoked from
-# cli/deploy/development/up.py after the stack is healthy whenever the
-# `cache` profile is active.
-#
-# Reads the auto-generated admin password from the bind-mounted
-# /nexus-data, rotates it to ${INFINITO_PACKAGE_CACHE_ADMIN_PASSWORD},
-# creates one default blobstore with quota
-# ${INFINITO_PACKAGE_CACHE_BLOBSTORE_MAX}, and creates the MVP set of
-# proxy repositories. Repeated invocations no-op once the system is
-# converged.
-#
-# See docs/requirements/012-package-cache-nexus3-oss.md.
+# Idempotent Nexus 3 OSS proxy bootstrap.
+# See docs/contributing/environment/cache.md.
 
 set -euo pipefail
 
 : "${INFINITO_PACKAGE_CACHE_HOST_PATH:?Source scripts/meta/env/cache/package.sh first}"
 : "${INFINITO_PACKAGE_CACHE_ADMIN_PASSWORD:?Source scripts/meta/env/cache/package.sh first}"
 : "${INFINITO_PACKAGE_CACHE_BLOBSTORE_MAX:?Source scripts/meta/env/cache/package.sh first}"
+: "${INFINITO_PACKAGE_CACHE_MAX_AGE_MIN:?Source scripts/meta/env/cache/package.sh first}"
 
-# All REST calls go through `docker exec` against the package-cache
-# container's curl. This sidesteps host-vs-sandbox network namespace
-# differences (the published port is reachable from a normal host
-# shell but not from the sandbox the dev tooling may run in) and
-# avoids depending on whether BIND_IP forwards to localhost. The
-# nexus3 UBI image ships curl, not wget.
+CACHE_MAX_AGE_MIN="${INFINITO_PACKAGE_CACHE_MAX_AGE_MIN}"
+
+# REST goes via `docker exec curl` to bypass sandbox network isolation.
 PKGCACHE_CONTAINER="infinito-package-cache"
 NEXUS_REST="http://127.0.0.1:8081/service/rest"
 
-# Marker file lives INSIDE the container at /nexus-data, not at the
-# host bind-mount path. Writing through `docker exec` works regardless
-# of host-side sandbox restrictions on /var/cache; the bind-mount means
-# the file is still visible from the host for inspection.
 BOOTSTRAP_DONE_FILE="/nexus-data/.infinito-bootstrap-done"
-
-# Default admin password baked into Nexus when
-# `NEXUS_SECURITY_RANDOMPASSWORD=false` (set in compose.yml). The
-# helper logs in with this on first boot and rotates to the operator's
-# INFINITO_PACKAGE_CACHE_ADMIN_PASSWORD so subsequent calls authenticate
-# with the configured value. Random-password mode is unusable here
-# because Nexus auto-completes onboarding silently and leaves no
-# readable secret on disk for an automated bootstrap to pick up.
 NEXUS_DEFAULT_PASSWORD="admin123"
 
 log() { printf '[package-cache-bootstrap] %s\n' "$*" >&2; }
 
 nexus_curl() { docker exec "${PKGCACHE_CONTAINER}" curl "$@"; }
 
-# Wait until Nexus's REST API answers 200 on /v1/status. Compose
-# already gates infinito on package-cache health, but bootstrap can
-# also be called manually before infinito starts; the wait keeps
-# both paths reliable.
 wait_for_nexus() {
 	local _attempt
 	for _attempt in $(seq 1 120); do
@@ -65,12 +35,6 @@ wait_for_nexus() {
 	return 1
 }
 
-# Resolve the admin password to use for REST calls. Two cases:
-#  1. Already bootstrapped (BOOTSTRAP_DONE_FILE exists): use
-#     INFINITO_PACKAGE_CACHE_ADMIN_PASSWORD directly.
-#  2. First bootstrap: log in with the well-known default `admin123`
-#     (compose.yml pins NEXUS_SECURITY_RANDOMPASSWORD=false), rotate to
-#     the operator's password, mark done.
 rotate_admin_password() {
 	ADMIN_USER="admin"
 	if docker exec "${PKGCACHE_CONTAINER}" test -f "${BOOTSTRAP_DONE_FILE}"; then
@@ -84,9 +48,7 @@ rotate_admin_password() {
 		-H "Content-Type: text/plain" \
 		-X PUT "${NEXUS_REST}/v1/security/users/admin/change-password" \
 		--data-binary "${INFINITO_PACKAGE_CACHE_ADMIN_PASSWORD}"; then
-		# Default password may already have been rotated by a previous
-		# (partially-completed) bootstrap. Probe with the configured
-		# password before giving up.
+		# Recover from a partially-completed previous bootstrap.
 		if nexus_curl -fsS -o /dev/null -u "admin:${INFINITO_PACKAGE_CACHE_ADMIN_PASSWORD}" \
 			"${NEXUS_REST}/v1/repositories" >/dev/null 2>&1; then
 			log "Default rotation rejected but configured password authenticates; assuming previous bootstrap, marking done"
@@ -100,11 +62,8 @@ rotate_admin_password() {
 	ADMIN_PASS="${INFINITO_PACKAGE_CACHE_ADMIN_PASSWORD}"
 }
 
-# Ensure a single named blobstore "default" with quota equal to
-# INFINITO_PACKAGE_CACHE_BLOBSTORE_MAX. POST returns 201 on create,
-# 400/409 if the name is taken; both are acceptable.
 ensure_blobstore() {
-	# Quota expects MB integer; convert from "Ng".
+	# Nexus quota expects MB; convert from "Ng".
 	local quota_gb="${INFINITO_PACKAGE_CACHE_BLOBSTORE_MAX%g}"
 	local quota_mb=$((quota_gb * 1024))
 	local payload
@@ -125,8 +84,6 @@ ensure_blobstore() {
 	esac
 }
 
-# Create one proxy repo. The Nexus REST API differs slightly per
-# format, so we accept the per-format payload from the caller.
 ensure_proxy_repo() {
 	local format="$1" name="$2" payload="$3"
 	local code
@@ -146,59 +103,29 @@ ensure_proxy_repo() {
 }
 
 ensure_all_proxies() {
-	local storage='"storage":{"blobStoreName":"default","strictContentTypeValidation":true},"proxy":{"contentMaxAge":1440,"metadataMaxAge":1440},"negativeCache":{"enabled":true,"timeToLive":1440},"httpClient":{"blocked":false,"autoBlock":true}'
+	local storage='"storage":{"blobStoreName":"default","strictContentTypeValidation":true},"proxy":{"contentMaxAge":'"${CACHE_MAX_AGE_MIN}"',"metadataMaxAge":'"${CACHE_MAX_AGE_MIN}"'},"negativeCache":{"enabled":true,"timeToLive":'"${CACHE_MAX_AGE_MIN}"'},"httpClient":{"blocked":false,"autoBlock":true}'
 
-	# apt-debian. Distribution required for apt format.
-	ensure_proxy_repo apt apt-debian "$(printf '{"name":"apt-debian","online":true,%s,"proxy":{"remoteUrl":"http://deb.debian.org/debian","contentMaxAge":1440,"metadataMaxAge":1440},"apt":{"distribution":"bookworm","flat":false}}' "${storage}")"
-	# apt-ubuntu.
-	ensure_proxy_repo apt apt-ubuntu "$(printf '{"name":"apt-ubuntu","online":true,%s,"proxy":{"remoteUrl":"http://archive.ubuntu.com/ubuntu","contentMaxAge":1440,"metadataMaxAge":1440},"apt":{"distribution":"jammy","flat":false}}' "${storage}")"
-	# pypi.
-	ensure_proxy_repo pypi pypi-proxy "$(printf '{"name":"pypi-proxy","online":true,%s,"proxy":{"remoteUrl":"https://pypi.org/","contentMaxAge":1440,"metadataMaxAge":1440}}' "${storage}")"
-	# npm.
-	ensure_proxy_repo npm npm-proxy "$(printf '{"name":"npm-proxy","online":true,%s,"proxy":{"remoteUrl":"https://registry.npmjs.org/","contentMaxAge":1440,"metadataMaxAge":1440}}' "${storage}")"
-	# helm-bitnami. Registered for future helm-driven roles; no client
-	# wiring today since no role pulls helm charts.
-	ensure_proxy_repo helm helm-bitnami "$(printf '{"name":"helm-bitnami","online":true,%s,"proxy":{"remoteUrl":"https://charts.bitnami.com/bitnami","contentMaxAge":1440,"metadataMaxAge":1440}}' "${storage}")"
-	# raw-githubusercontent.
-	ensure_proxy_repo raw raw-githubusercontent "$(printf '{"name":"raw-githubusercontent","online":true,%s,"proxy":{"remoteUrl":"https://raw.githubusercontent.com/","contentMaxAge":1440,"metadataMaxAge":1440},"raw":{"contentDisposition":"ATTACHMENT"}}' "${storage}")"
-	# raw-codeload-github. Caches GitHub source archives served by
-	# codeload.github.com (e.g. /<owner>/<repo>/tar.gz/refs/tags/<tag>,
-	# /zip/refs/heads/<branch>). Tag-pinned URLs are immutable in
-	# practice; branch-pinned URLs revalidate via contentMaxAge.
-	ensure_proxy_repo raw raw-codeload-github "$(printf '{"name":"raw-codeload-github","online":true,%s,"proxy":{"remoteUrl":"https://codeload.github.com/","contentMaxAge":1440,"metadataMaxAge":1440},"raw":{"contentDisposition":"ATTACHMENT"}}' "${storage}")"
-	# gem-proxy. Caches RubyGems for Bundler / `gem install` invocations
-	# inside Dockerfile builds (Discourse, OpenProject, Decidim, ...).
-	ensure_proxy_repo rubygems gem-proxy "$(printf '{"name":"gem-proxy","online":true,%s,"proxy":{"remoteUrl":"https://rubygems.org/","contentMaxAge":1440,"metadataMaxAge":1440}}' "${storage}")"
-	# go-proxy. Registered for future Go-based roles; no client wiring
-	# today (no role builds Go binaries).
-	ensure_proxy_repo go go-proxy "$(printf '{"name":"go-proxy","online":true,%s,"proxy":{"remoteUrl":"https://proxy.golang.org/","contentMaxAge":1440,"metadataMaxAge":1440}}' "${storage}")"
-	# yum-rocky / yum-fedora. Registered for future RHEL-family roles;
-	# no client wiring today (stack is Debian/Ubuntu).
-	ensure_proxy_repo yum yum-rocky "$(printf '{"name":"yum-rocky","online":true,%s,"proxy":{"remoteUrl":"https://download.rockylinux.org/pub/rocky/","contentMaxAge":1440,"metadataMaxAge":1440},"yum":{"repodataDepth":5}}' "${storage}")"
-	ensure_proxy_repo yum yum-fedora "$(printf '{"name":"yum-fedora","online":true,%s,"proxy":{"remoteUrl":"https://dl.fedoraproject.org/pub/fedora/linux/","contentMaxAge":1440,"metadataMaxAge":1440},"yum":{"repodataDepth":5}}' "${storage}")"
-	# raw-packagist. Composer is Pro-only as a native Nexus format, so
-	# packagist metadata + dist tarballs are cached as raw. Covers
-	# MediaWiki extensions, Nextcloud, Decidim, SuiteCRM, Shopware,
-	# Magento, Friendica composer-driven Dockerfile builds.
-	ensure_proxy_repo raw raw-packagist "$(printf '{"name":"raw-packagist","online":true,%s,"proxy":{"remoteUrl":"https://repo.packagist.org/","contentMaxAge":1440,"metadataMaxAge":1440},"raw":{"contentDisposition":"ATTACHMENT"}}' "${storage}")"
-	# raw-alpine. Nexus has no apk format; Alpine package index +
-	# .apk blobs are cached as raw. Relevant for locally-built
-	# Dockerfiles that run `apk add` during build.
-	ensure_proxy_repo raw raw-alpine "$(printf '{"name":"raw-alpine","online":true,%s,"proxy":{"remoteUrl":"https://dl-cdn.alpinelinux.org/alpine/","contentMaxAge":1440,"metadataMaxAge":1440},"raw":{"contentDisposition":"ATTACHMENT"}}' "${storage}")"
+	ensure_proxy_repo apt apt-debian "$(printf '{"name":"apt-debian","online":true,%s,"proxy":{"remoteUrl":"http://deb.debian.org/debian","contentMaxAge":'"${CACHE_MAX_AGE_MIN}"',"metadataMaxAge":'"${CACHE_MAX_AGE_MIN}"'},"apt":{"distribution":"bookworm","flat":false}}' "${storage}")"
+	ensure_proxy_repo apt apt-ubuntu "$(printf '{"name":"apt-ubuntu","online":true,%s,"proxy":{"remoteUrl":"http://archive.ubuntu.com/ubuntu","contentMaxAge":'"${CACHE_MAX_AGE_MIN}"',"metadataMaxAge":'"${CACHE_MAX_AGE_MIN}"'},"apt":{"distribution":"jammy","flat":false}}' "${storage}")"
+	ensure_proxy_repo apt apt-debian-security "$(printf '{"name":"apt-debian-security","online":true,%s,"proxy":{"remoteUrl":"http://deb.debian.org/debian-security","contentMaxAge":'"${CACHE_MAX_AGE_MIN}"',"metadataMaxAge":'"${CACHE_MAX_AGE_MIN}"'},"apt":{"distribution":"bookworm-security","flat":false}}' "${storage}")"
+	ensure_proxy_repo apt apt-ubuntu-security "$(printf '{"name":"apt-ubuntu-security","online":true,%s,"proxy":{"remoteUrl":"http://security.ubuntu.com/ubuntu","contentMaxAge":'"${CACHE_MAX_AGE_MIN}"',"metadataMaxAge":'"${CACHE_MAX_AGE_MIN}"'},"apt":{"distribution":"jammy-security","flat":false}}' "${storage}")"
+	ensure_proxy_repo pypi pypi-proxy "$(printf '{"name":"pypi-proxy","online":true,%s,"proxy":{"remoteUrl":"https://pypi.org/","contentMaxAge":'"${CACHE_MAX_AGE_MIN}"',"metadataMaxAge":'"${CACHE_MAX_AGE_MIN}"'}}' "${storage}")"
+	ensure_proxy_repo npm npm-proxy "$(printf '{"name":"npm-proxy","online":true,%s,"proxy":{"remoteUrl":"https://registry.npmjs.org/","contentMaxAge":'"${CACHE_MAX_AGE_MIN}"',"metadataMaxAge":'"${CACHE_MAX_AGE_MIN}"'}}' "${storage}")"
+	ensure_proxy_repo helm helm-bitnami "$(printf '{"name":"helm-bitnami","online":true,%s,"proxy":{"remoteUrl":"https://charts.bitnami.com/bitnami","contentMaxAge":'"${CACHE_MAX_AGE_MIN}"',"metadataMaxAge":'"${CACHE_MAX_AGE_MIN}"'}}' "${storage}")"
+	ensure_proxy_repo raw raw-githubusercontent "$(printf '{"name":"raw-githubusercontent","online":true,%s,"proxy":{"remoteUrl":"https://raw.githubusercontent.com/","contentMaxAge":'"${CACHE_MAX_AGE_MIN}"',"metadataMaxAge":'"${CACHE_MAX_AGE_MIN}"'},"raw":{"contentDisposition":"ATTACHMENT"}}' "${storage}")"
+	ensure_proxy_repo raw raw-codeload-github "$(printf '{"name":"raw-codeload-github","online":true,%s,"proxy":{"remoteUrl":"https://codeload.github.com/","contentMaxAge":'"${CACHE_MAX_AGE_MIN}"',"metadataMaxAge":'"${CACHE_MAX_AGE_MIN}"'},"raw":{"contentDisposition":"ATTACHMENT"}}' "${storage}")"
+	ensure_proxy_repo rubygems gem-proxy "$(printf '{"name":"gem-proxy","online":true,%s,"proxy":{"remoteUrl":"https://rubygems.org/","contentMaxAge":'"${CACHE_MAX_AGE_MIN}"',"metadataMaxAge":'"${CACHE_MAX_AGE_MIN}"'}}' "${storage}")"
+	ensure_proxy_repo go go-proxy "$(printf '{"name":"go-proxy","online":true,%s,"proxy":{"remoteUrl":"https://proxy.golang.org/","contentMaxAge":'"${CACHE_MAX_AGE_MIN}"',"metadataMaxAge":'"${CACHE_MAX_AGE_MIN}"'}}' "${storage}")"
+	ensure_proxy_repo yum yum-rocky "$(printf '{"name":"yum-rocky","online":true,%s,"proxy":{"remoteUrl":"https://download.rockylinux.org/pub/rocky/","contentMaxAge":'"${CACHE_MAX_AGE_MIN}"',"metadataMaxAge":'"${CACHE_MAX_AGE_MIN}"'},"yum":{"repodataDepth":5}}' "${storage}")"
+	ensure_proxy_repo yum yum-fedora "$(printf '{"name":"yum-fedora","online":true,%s,"proxy":{"remoteUrl":"https://dl.fedoraproject.org/pub/fedora/linux/","contentMaxAge":'"${CACHE_MAX_AGE_MIN}"',"metadataMaxAge":'"${CACHE_MAX_AGE_MIN}"'},"yum":{"repodataDepth":5}}' "${storage}")"
+	ensure_proxy_repo raw raw-packagist "$(printf '{"name":"raw-packagist","online":true,%s,"proxy":{"remoteUrl":"https://repo.packagist.org/","contentMaxAge":'"${CACHE_MAX_AGE_MIN}"',"metadataMaxAge":'"${CACHE_MAX_AGE_MIN}"'},"raw":{"contentDisposition":"ATTACHMENT"}}' "${storage}")"
+	ensure_proxy_repo raw raw-alpine "$(printf '{"name":"raw-alpine","online":true,%s,"proxy":{"remoteUrl":"https://dl-cdn.alpinelinux.org/alpine/","contentMaxAge":'"${CACHE_MAX_AGE_MIN}"',"metadataMaxAge":'"${CACHE_MAX_AGE_MIN}"'},"raw":{"contentDisposition":"ATTACHMENT"}}' "${storage}")"
 }
 
-# Accept the Sonatype Nexus Repository - Community Edition EULA. Since
-# 3.71+ the CE build refuses to serve cached artifacts (HTTP 403 with a
-# `You must accept the End User License Agreement` body) until the EULA
-# flag is flipped via REST. The simple index (and other metadata) is
-# unaffected, so the symptom is "pip resolves but every .whl GET 403s".
-# Repeated POSTs are accepted (204) once the flag is true.
 ensure_eula_accepted() {
 	local code
-	# Sonatype rejects (HTTP 500) any payload whose `disclaimer` field is
-	# not byte-identical to the canonical text — including the curly
-	# unicode single quotes around `accepted:false` / `accepted:true`.
-	# Hence the SC1112 suppression: the unicode quotes are intentional.
+	# Sonatype rejects payloads whose disclaimer is not byte-identical;
+	# the unicode quotes around accepted:* are intentional.
 	# shellcheck disable=SC1112
 	code="$(nexus_curl -sS -o /dev/null -w '%{http_code}' \
 		-u "${ADMIN_USER}:${ADMIN_PASS}" \
@@ -214,11 +141,6 @@ ensure_eula_accepted() {
 	esac
 }
 
-# Enable anonymous read access globally so client tools (pip, npm,
-# apt, helm) can hit /repository/<name>/... without credentials baked
-# into pip.conf / .npmrc / sources.list. Nexus 3 ships with anonymous
-# disabled; without this PUT every proxy GET returns 401 and pip
-# prompts for a password (EOFError under non-interactive use).
 ensure_anonymous_access() {
 	local code
 	code="$(nexus_curl -sS -o /dev/null -w '%{http_code}' \

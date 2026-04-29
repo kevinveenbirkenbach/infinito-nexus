@@ -44,25 +44,14 @@ class TestComposePull(unittest.TestCase):
         self.assertEqual(rc, 7)
         self.assertEqual(out, "hello\n")
 
-    def test_base_compose_cmd_includes_project_files_and_env(self) -> None:
-        cmd = self.m.base_compose_cmd(
-            project="p", compose_files="-f a.yml -f b.yml", env_file="/x/.env"
-        )
-        self.assertEqual(cmd[:4], ["docker", "compose", "-p", "p"])
-        self.assertIn("-f", cmd)
-        self.assertIn("a.yml", cmd)
-        self.assertIn("b.yml", cmd)
-        self.assertIn("--env-file", cmd)
-        self.assertIn("/x/.env", cmd)
-
-    def test_base_compose_cmd_omits_env_when_empty(self) -> None:
-        cmd = self.m.base_compose_cmd(
-            project="p", compose_files="-f a.yml", env_file=""
-        )
-        self.assertEqual(cmd[:4], ["docker", "compose", "-p", "p"])
-        self.assertIn("-f", cmd)
-        self.assertIn("a.yml", cmd)
-        self.assertNotIn("--env-file", cmd)
+    def test_base_compose_cmd_delegates_to_wrapper(self) -> None:
+        cmd = self.m.base_compose_cmd(project="p", cwd=Path("/x"))
+        self.assertEqual(cmd[0], "/usr/bin/compose")
+        self.assertIn("--chdir", cmd)
+        self.assertIn("/x", cmd)
+        self.assertIn("--project", cmd)
+        self.assertIn("p", cmd)
+        self.assertEqual(cmd[-1], "--")
 
     def test_has_buildable_services_true(self) -> None:
         config_out = """
