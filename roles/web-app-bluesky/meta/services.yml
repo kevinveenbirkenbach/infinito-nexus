@@ -39,4 +39,4 @@ bluesky:
   - web-app-matomo
   - web-app-keycloak
   - web-app-mailu
-  lifecycle: pre-alpha
+  lifecycle: beta

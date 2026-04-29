@@ -1,0 +1,18 @@
+{% include 'roles/sys-svc-compose/templates/base.yml.j2' %}
+
+  application:
+    {{ lookup('template', 'roles/sys-svc-container/templates/build.yml.j2') | indent(4) }}
+      args:
+        POSTMARKS_REPO_URL: "{{ POSTMARKS_REPO_URL }}"
+        POSTMARKS_REPO_BRANCH: "{{ POSTMARKS_REPO_BRANCH }}"
+        CONTAINER_PORT: "{{ container_port | string }}"
+    image: "{{ POSTMARKS_IMAGE }}:{{ POSTMARKS_VERSION }}"
+    container_name: "{{ POSTMARKS_CONTAINER }}"
+    hostname: "{{ container_hostname }}"
+    ports:
+      - "{{ DOCKER_BIND_HOST }}:{{ http_port }}:{{ container_port }}"
+{% include 'roles/sys-svc-container/templates/healthcheck/tcp.yml.j2' %}
+{% include 'roles/sys-svc-container/templates/base.yml.j2' %}
+{% include 'roles/sys-svc-container/templates/networks.yml.j2' %}
+
+{% include 'roles/sys-svc-compose/templates/networks.yml.j2' %}

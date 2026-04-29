@@ -21,5 +21,19 @@ Upstream docs & dev notes:
 2) Enable/disable the emulator in `meta/services.yml`.  
 3) Run the role; your front proxy will publish the app.
 
+## Single sign-on
+
+This role does not configure OIDC against `web-app-keycloak`, LDAP
+against `svc-db-openldap`, or any role-claim / LDAP-group RBAC
+mapping, because Bridgy Fed authenticates users via their fediverse
+or atproto credentials at the source platform, not via local
+accounts. There is no local user table to bind an external IDP to,
+and no in-app authorisation tier to map a Keycloak role or LDAP
+group onto. Placing Bridgy Fed behind `web-app-oauth2-proxy` would
+break inbound federation traffic and is not supported. This SSO and
+RBAC exception is documented per
+[lifecycle.md](../../docs/contributing/design/services/lifecycle.md)
+and [requirement 013](../../docs/requirements/013-alpha-to-beta-promotion.md).
+
 ## Notes
 - Emulator is **not** for production; it’s in-memory unless you mount a volume/configure import/export.

@@ -1,5 +1,5 @@
 libretranslate:
-  enabled: false
+  enabled: true
   shared: true
   image: libretranslate/libretranslate
   version: latest
@@ -7,9 +7,10 @@ libretranslate:
   ports:
     local:
       http: 8045
-  lifecycle: pre-alpha
+  lifecycle: beta
 oauth2:
   enabled: false
+  shared: false
 logout:
   enabled: false
   shared: false

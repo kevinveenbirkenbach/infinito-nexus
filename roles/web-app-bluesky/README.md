@@ -12,6 +12,24 @@ For DNS configuration and other setup details, see [Installation.md](./Installat
 - **Scalable Infrastructure:** Leverage a Dockerized deployment that adapts to growing workloads efficiently.
 - **Real-Time Content Delivery:** Enjoy dynamic and instantaneous updates for a modern social experience.
 - **Developer-Friendly API:** Integrate with external systems and extend functionalities through a robust set of APIs.
+
+## Single sign-on
+
+OIDC is wired in via a Keycloak event-listener bridge to the PDS
+`com.atproto.server.createAccount` endpoint. The bridge stores the
+synthesised app-password as a Keycloak user attribute, and the
+user's self-service portal surfaces that password so it can be
+pasted into the official Bluesky web/app client. LDAP feeds the
+same bridge via Keycloak's LDAP federation against
+`svc-db-openldap`; direct LDAP-to-PDS sync is not supported, the
+Keycloak federation layer is the single source of truth.
+
+RBAC is not feasible: the PDS has no in-app role concept beyond
+"account exists / does not exist". This RBAC exception is
+documented per
+[lifecycle.md](../../docs/contributing/design/services/lifecycle.md)
+and [requirement 013](../../docs/requirements/013-alpha-to-beta-promotion.md).
+
 ## Further Resources
 - [Self-hosting Bluesky with Docker and SWAG](https://therobbiedavis.com/selfhosting-bluesky-with-web-app-and-swag/)
 - [Notes on Self-hosting Bluesky PDS with Other Services](https://cprimozic.net/notes/posts/notes-on-self-hosting-bluesky-pds-alongside-other-services/)

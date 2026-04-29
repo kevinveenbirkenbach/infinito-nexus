@@ -30,4 +30,4 @@ bridgy-fed:
   ports:
     local:
       http: 8053
-  lifecycle: planned
+  lifecycle: beta

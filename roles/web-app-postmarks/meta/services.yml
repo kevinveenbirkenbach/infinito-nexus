@@ -1,7 +1,36 @@
-postmarks:
-  lifecycle: pre-alpha
+oidc:
+  enabled: false
+  shared: false
+oauth2:
+  enabled: false
+  shared: false
+logout:
+  enabled: false
+  shared: false
+dashboard:
+  enabled: true
+  shared: true
+matomo:
+  enabled: true
+  shared: true
+css:
+  enabled: true
+  shared: true
+# noqa: email
+email:
+  enabled: false
+  shared: false
 prometheus:
   enabled: true
   shared: true
-logout:
-  enabled: false
+application:
+  image: node
+  version: 20-bookworm
+  name: web-app-postmarks
+  repository: https://github.com/ckolderup/postmarks.git
+  branch: main
+postmarks:
+  ports:
+    local:
+      http: 8071
+  lifecycle: beta

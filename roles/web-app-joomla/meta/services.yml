@@ -1,4 +1,7 @@
 oidc:
+  enabled: true
+  shared: true
+ldap:
   enabled: false
   shared: false
 logout:
@@ -33,7 +36,7 @@ joomla:
   - web-app-matomo
   - web-app-keycloak
   - web-app-mailu
-  lifecycle: alpha
+  lifecycle: beta
 css:
   enabled: true
   shared: true
