@@ -6,9 +6,16 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 # shellcheck source=scripts/tests/environment/lib.sh
 source "${SCRIPT_DIR}/lib.sh"
 
+echo "Snapshotting cache counters before the deploy."
+CACHE_BEFORE="$(cache_snapshot)"
+
 echo "Deploying dashboard with matomo disabled to verify SERVICES_DISABLED suppresses the shared service in the inventory."
 make deploy-fresh-purged-apps APPS="${DASHBOARD_APP}" SERVICES_DISABLED="matomo"
 inspect
+
+echo "Verifying that the local caches saw deploy traffic."
+CACHE_AFTER="$(cache_snapshot)"
+assert_cache_used "${CACHE_BEFORE}" "${CACHE_AFTER}"
 
 echo "Trusting the local CA certificate so HTTPS endpoints are reachable from the host."
 make trust-ca
