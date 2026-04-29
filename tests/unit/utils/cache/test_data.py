@@ -593,13 +593,14 @@ class TestImportableWithoutAnsible(unittest.TestCase):
             "sample = [apps[0]]\n"
             "plan = plan_dev_inventory_matrix(\n"
             "    roles_dir=str(ROLES_DIR),\n"
-            "    include=sample,\n"
+            "    primary_apps=sample,\n"
             "    base_inventory_dir='/tmp/_inv_unused',\n"
             ")\n"
             "assert len(plan) > 0\n"
-            "round_index, inv_dir, round_variants = plan[0]\n"
+            "round_index, inv_dir, round_variants, include_R = plan[0]\n"
             "assert round_index == 0\n"
             "assert sample[0] in round_variants\n"
+            "assert sample[0] in include_R\n"
             "print('OK')\n"
         )
         self.assertEqual(rc, 0, msg=f"stderr=\n{err}\nstdout=\n{out}")

@@ -15,7 +15,6 @@ from .common import (
     make_compose,
     repo_root_from_here,
     resolve_container,
-    resolve_deploy_ids_for_apps,
 )
 from .inventory import filter_plan_to_variant, plan_dev_inventory_matrix
 
@@ -206,26 +205,29 @@ def handler(args: argparse.Namespace) -> int:
     compose = make_compose()
 
     if args.apps:
-        deploy_ids = resolve_deploy_ids_for_apps(compose, args.apps)
         primary_app_ids = [
             a.strip() for a in args.apps.replace(",", " ").split() if a.strip()
         ]
     else:
-        deploy_ids = list(args.id or [])
-        primary_app_ids = list(deploy_ids)
+        primary_app_ids = list(args.id or [])
 
-    # Remove any app IDs that were disabled via SERVICES_DISABLED so the deploy
-    # list stays consistent with the inventory created by the init step.
+    # Remove any app IDs that were disabled via SERVICES_DISABLED so the
+    # deploy list stays consistent with the inventory created by init.
     raw_disabled = os.environ.get("SERVICES_DISABLED", "").strip()
+    disabled_app_ids: set[str] = set()
     if raw_disabled:
         services = parse_services_disabled(raw_disabled)
         roles_dir = compose.repo_root / "roles"
         provider_map = find_provider_roles(services, roles_dir)
         disabled_app_ids = set(provider_map.values())
-        deploy_ids = [app_id for app_id in deploy_ids if app_id not in disabled_app_ids]
         primary_app_ids = [
             app_id for app_id in primary_app_ids if app_id not in disabled_app_ids
         ]
+
+    if not primary_app_ids:
+        raise SystemExit(
+            "All primary apps disabled by SERVICES_DISABLED — nothing to deploy"
+        )
 
     # argparse.REMAINDER includes the leading '--' if present; drop it
     passthrough = list(args.ansible_args or [])
@@ -240,15 +242,15 @@ def handler(args: argparse.Namespace) -> int:
     # variant changed; apps that stayed on variant 0 are NOT purged. The
     # final round is followed by no purge so the last state remains
     # available for inspection / follow-up specs.
-    # Matrix planning MUST use the same include set as the init step
-    # (`deploy_ids` = primary apps + transitive deps). Using only the
-    # primary apps here can produce a smaller round count when a
-    # transitive dep is the only multi-variant role, which makes deploy
-    # look at `<dir>` while init created `<dir>-0` / `<dir>-1` and the
-    # inventory file is silently missing.
+    #
+    # Matrix planning is variant-aware (see inventory.py): for each round
+    # the planner consults the variant-merged services map of every
+    # primary app and pulls in transitive deps that ROUND wants. This
+    # is the single SPOT for "what is in this round's deploy" — both
+    # init and deploy walk the same plan so they cannot drift.
     plan = plan_dev_inventory_matrix(
         roles_dir=str(compose.repo_root / "roles"),
-        include=deploy_ids,
+        primary_apps=primary_app_ids,
         base_inventory_dir=str(args.inventory_dir),
     )
     try:
@@ -263,19 +265,26 @@ def handler(args: argparse.Namespace) -> int:
 
     rc = 0
     previous_round_variants: dict[str, int] = {}
-    for round_index, inv_dir, round_variants in plan:
-        # Round 0 always deploys the full include set (the baseline state
-        # of every primary app + its dependencies). Rounds R>0 only
-        # re-deploy apps that ACTUALLY have a variant N for that round
-        # (i.e. `round_variants[app] == round_index`); apps that fall back
-        # to variant 0 are left at whatever state the previous round
-        # produced. This avoids wasted re-deploys of apps that have no
-        # real variant for the current round.
+    for round_index, inv_dir, round_variants, include_R in plan:
+        # Apply SERVICES_DISABLED filter to the round's include set so
+        # disabled provider roles are not handed to ansible just because
+        # the variant-aware resolver pulled them in via service edges.
+        round_include = [role for role in include_R if role not in disabled_app_ids]
+        # Round 0 always deploys the full (filtered) include set — the
+        # baseline state of every primary app + its dependencies.
+        # Rounds R>0 only re-deploy apps that ACTUALLY have a variant N
+        # for that round (`round_variants[app] == round_index`); apps
+        # that fall back to variant 0 are left at whatever state the
+        # previous round produced. This avoids wasted re-deploys of
+        # apps that have no real variant for the current round.
         if round_index == 0:
-            round_deploy_ids = deploy_ids
+            round_deploy_ids = round_include
         else:
+            allowed = set(round_include)
             round_deploy_ids = sorted(
-                app_id for app_id, idx in round_variants.items() if idx == round_index
+                app_id
+                for app_id, idx in round_variants.items()
+                if idx == round_index and app_id in allowed
             )
             if not round_deploy_ids:
                 print(
