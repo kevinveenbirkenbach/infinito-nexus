@@ -70,6 +70,7 @@ labels:
 | `file-size`         | head (first 30 lines) | [test_python_file_size.py](../../../../tests/lint/repository/test_python_file_size.py)                                     | Opts the entire `.py` file out of the 500-line cap.                                                              |
 | `run-once`          | anywhere            | [test_run_once_tags.py](../../../../tests/lint/ansible/test_run_once_tags.py), [test_schema.py](../../../../tests/integration/roles/run_once/test_schema.py) | Marks a role's `tasks/main.yml` as intentionally re-runnable; skips both the run-once tag check and the suffix check. |
 | `run-once-suffix`   | same line           | [test_schema.py](../../../../tests/integration/roles/run_once/test_schema.py)                                                | Allows a single `when:` item to reference a `run_once_<other>` flag whose suffix differs from the current role.   |
+| `raw-docker`        | same or above; head (first 30 lines) | [test_no_raw_docker.py](../../../../tests/integration/docker/test_no_raw_docker.py)                       | Marks a single line or a whole file as legitimately calling `docker` / `docker compose` / `docker-compose` directly because the `container` wrapper is unavailable (CI workflows on hosted runners, bootstrap scripts). |
 
 ## Examples 💡
 
@@ -137,6 +138,21 @@ email:
 ```yaml
 when:
   - run_once_svc_db_openldap is not defined   # noqa: run-once-suffix
+```
+
+`raw-docker`, file-level at the top of a CI workflow that legitimately
+runs `docker` directly:
+
+```yaml
+# nocheck: raw-docker. Runs on a GitHub-hosted runner; the `container` wrapper is not installed there.
+name: "🐳 Build: CI Images (all distros)"
+```
+
+`raw-docker`, per-line for a single bootstrap call inside an otherwise
+clean shell script:
+
+```sh
+docker buildx build --push  # noqa: raw-docker
 ```
 
 ## Adding a new rule 🆕

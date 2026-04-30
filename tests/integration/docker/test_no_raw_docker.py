@@ -23,15 +23,29 @@ Three forms are detected:
 3. Inline shell/command scalars like
    `ansible.builtin.shell: "docker exec ..."`.
 
-File enumeration and content reading both go through
-`utils.cache.files`, so:
+Suppression
+-----------
+Use the unified marker grammar (rule key ``raw-docker``) documented at
+``docs/contributing/actions/testing/suppression.md``:
 
-- The set of files to scan respects `.gitignore` (no other ignore lists).
-- The full project-tree walk is memoised process-wide via
-  `iter_non_ignored_files`'s `lru_cache`.
-- File contents are memoised via `read_text`'s `lru_cache`. Repeat runs
-  inside the same process (e.g. a pytest session that re-uses imported
-  modules) avoid both the re-walk and the re-read.
+* File-level: ``# nocheck: raw-docker`` anywhere in the first 30 lines
+  excludes the whole file. Reserve this for places where the wrapper
+  is genuinely unavailable (CI workflow files on hosted runners,
+  bootstrap scripts that install the wrapper itself).
+* Per-line: ``# noqa: raw-docker`` (or ``# nocheck: raw-docker``) on
+  the offending line or the line directly above suppresses that single
+  finding.
+
+File enumeration and content reading both go through
+``utils.cache.files``, so:
+
+* The set of files to scan respects ``.gitignore`` (no other ignore
+  lists).
+* The full project-tree walk is memoised process-wide via
+  ``iter_non_ignored_files``'s ``lru_cache``.
+* File contents are memoised via ``read_text``'s ``lru_cache``. Repeat
+  runs inside the same process (e.g. a pytest session that re-uses
+  imported modules) avoid both the re-walk and the re-read.
 """
 
 from __future__ import annotations
@@ -42,6 +56,10 @@ import unittest
 from dataclasses import dataclass
 from typing import List, Sequence, Tuple
 
+from utils.annotations.suppress import (
+    is_suppressed_at,
+    is_suppressed_in_head,
+)
 from utils.cache.base import PROJECT_ROOT
 from utils.cache.files import iter_non_ignored_files, read_text
 
@@ -298,19 +316,11 @@ def format_findings(findings: Sequence[Finding]) -> str:
 # wrapper) are out of scope.
 SCAN_EXTENSIONS: Tuple[str, ...] = (".yml", ".yaml", ".j2", ".sh")
 
-# File-level opt-out marker. A file whose first 10 lines contain
-# `no-raw-docker: skip` (case-insensitive) is excluded from this guard.
-# Use this only where the wrapper is genuinely unavailable (e.g. CI
-# workflow files running on GitHub-hosted runners that do not install
-# `sys-svc-container`'s container CLI). Document the reason on the same
-# comment line.
-HEADER_SKIP_MARKER = re.compile(r"no-raw-docker:\s*skip", re.IGNORECASE)
-HEADER_SCAN_LINES = 10
-
-
-def _has_skip_marker(text: str) -> bool:
-    head = "\n".join(text.splitlines()[:HEADER_SCAN_LINES])
-    return bool(HEADER_SKIP_MARKER.search(head))
+# Rule key under the unified suppression grammar. See
+# docs/contributing/actions/testing/suppression.md. File-level head
+# scans cover the first 30 lines (matches the catalog default).
+SUPPRESS_RULE: str = "raw-docker"
+HEAD_SCAN_LINES: int = 30
 
 
 class TestNoRawDockerCommands(unittest.TestCase):
@@ -322,10 +332,16 @@ class TestNoRawDockerCommands(unittest.TestCase):
                 text = read_text(path)
             except (OSError, UnicodeDecodeError):
                 continue
-            if _has_skip_marker(text):
+            lines = text.splitlines()
+            if is_suppressed_in_head(lines, SUPPRESS_RULE, scan_lines=HEAD_SCAN_LINES):
                 continue
             rel = os.path.relpath(path, project_root_str).replace(os.sep, "/")
-            findings.extend(scan_text(text, rel))
+            for finding in scan_text(text, rel):
+                if is_suppressed_at(
+                    lines, finding.line_no, SUPPRESS_RULE, mode="same-or-above"
+                ):
+                    continue
+                findings.append(finding)
 
         if findings:
             self.fail(format_findings(findings))
