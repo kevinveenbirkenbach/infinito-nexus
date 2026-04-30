@@ -34,7 +34,9 @@ class TestClaudeSettingsSorted(unittest.TestCase):
                 self.assertEqual(
                     obj,
                     sorted(obj),
-                    f"{label} is not ASCII-sorted ascending in {SETTINGS_PATH}",
+                    f"{label} is not ASCII-sorted ascending in {SETTINGS_PATH}. "
+                    f"Fix: run `bash scripts/lint/sort_claude_settings.sh` "
+                    f"(also wired into `scripts/lint/autoformat.sh`).",
                 )
 
 

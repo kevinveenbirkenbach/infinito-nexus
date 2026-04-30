@@ -11,6 +11,8 @@ from urllib.parse import quote, urlencode
 
 import yaml
 
+from utils.annotations.suppress import is_suppressed_at
+from utils.cache.files import read_text
 from utils.docker.image.discovery import iter_role_images
 from utils.docker.image.ref import (
     DOCKER_HUB_REGISTRIES,
@@ -24,7 +26,6 @@ _SEMVER_CORE = r"v?\d+(?:\.\d+){0,3}"
 # opaque discriminator: tags are only considered upgrade candidates for
 # each other when their flavor strings match.
 _VERSIONED_TAG_RE = re.compile(rf"^(?P<semver>{_SEMVER_CORE})(?P<flavor>-\S+)?$")
-_NOCHECK_TAG = "# nocheck: docker-version"
 _KEY_RE = re.compile(r"^(?P<indent>\s*)(?P<key>[A-Za-z0-9_-]+):(?P<rest>.*)$")
 _VERSION_VALUE_RE = re.compile(
     r"^(?P<prefix>\s*version\s*:\s*)(?P<quote>[\"']?)(?P<value>[^\"'#\s]+)(?P=quote)(?P<suffix>\s*(?:#.*)?)$"
@@ -189,25 +190,21 @@ def fetch_ghcr_tags(image: str) -> list[str]:
 
 
 def suppressed_services(config_path: Path) -> set[str]:
-    """Return service names whose `version:` line carries the suppress tag.
+    """Return service names whose `version:` line is annotated with the
+    unified ``# nocheck: docker-version`` / ``# noqa: docker-version`` marker.
 
-    Post req-008 the file root of `meta/services.yml` IS the services map —
-    there is no `services.` wrapper to walk into.
+    Post req-008 the file root of `meta/services.yml` IS the services map.
+    There is no `services.` wrapper to walk into.
     """
-    raw = config_path.read_text(encoding="utf-8")
+    raw = read_text(str(config_path))
     lines = raw.splitlines()
 
-    suppressed_lines: set[int] = set()
-    for index, line in enumerate(lines):
-        if not re.search(r"^\s+version\s*:", line):
-            continue
-        for prev_index in range(index - 1, -1, -1):
-            prev = lines[prev_index].strip()
-            if prev == _NOCHECK_TAG:
-                suppressed_lines.add(index)
-                break
-            if prev and not prev.startswith("#"):
-                break
+    suppressed_lines: set[int] = {
+        index
+        for index, line in enumerate(lines)
+        if re.search(r"^\s+version\s*:", line)
+        and is_suppressed_at(lines, index + 1, "docker-version", mode="line-above")
+    }
 
     if not suppressed_lines:
         return set()

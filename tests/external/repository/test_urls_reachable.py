@@ -2,7 +2,9 @@
 
 Scans git-tracked and untracked-but-not-ignored text files for literal
 ``http://`` and ``https://`` URLs. Placeholder/template URLs and reserved
-local/example hosts are skipped.
+local/example hosts are skipped. Per-line suppression uses the unified
+``# nocheck: url`` / ``# noqa: url`` marker. See
+``docs/contributing/actions/testing/suppression.md``.
 
 This is an external test because it performs live HTTP requests against the
 referenced third-party URLs. HTTP ``401`` (Unauthorized), ``403`` (Forbidden),
@@ -10,7 +12,7 @@ and ``405`` (Method Not Allowed) are treated as reachable (server is alive but
 auth-gated or method-restricted). HTTP ``418`` (I'm a teapot), ``429`` (Too
 Many Requests), ``451`` (Unavailable For Legal Reasons), every ``5xx`` server
 response, plus timeouts and connection errors (reset, aborted) emit warning
-annotations rather than failing the test — these signal an upstream issue
+annotations rather than failing the test, since these signal an upstream issue
 outside this repository's control. All other ``4xx`` codes fail the test.
 """
 
@@ -30,14 +32,11 @@ from urllib.parse import urlsplit, urlunsplit
 import requests
 
 from utils.annotations.message import error, warning
+from utils.annotations.suppress import is_suppressed_at
 
 _REPO_ROOT = Path(__file__).resolve().parents[3]
 _URL_RE = re.compile(r"https?://[^\s<>'\"`\]]+")
 _TEMPLATE_MARKERS = ("${", "{{", "}}", "{%", "%}")
-# Lines that contain any of these strings are excluded from URL probing.
-# Use this for CDN roots, API base URLs, and other entries that are valid
-# application configuration values but return 4xx when probed without a path.
-_NOCHECK_MARKERS = ("# nocheck: url", "{# nocheck: url #}", "<!-- nocheck: url -->")
 _PUBLIC_HOST_RE = re.compile(r"^[A-Za-z0-9.-]+$")
 _RESERVED_HOSTS = {
     "example",
@@ -313,8 +312,7 @@ def _extract_urls(path: Path) -> list[UrlOccurrence]:
 
     occurrences: list[UrlOccurrence] = []
     for line_no, line in enumerate(lines, start=1):
-        prev_line = lines[line_no - 2] if line_no >= 2 else ""
-        if any(marker in line or marker in prev_line for marker in _NOCHECK_MARKERS):
+        if is_suppressed_at(lines, line_no, "url"):
             continue
         for match in _URL_RE.finditer(line):
             url = _normalize_url(match.group(0))

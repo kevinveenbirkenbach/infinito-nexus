@@ -1,4 +1,4 @@
-# run_once_sys_svc_rdbms: deactivated
+# nocheck: run-once
 - name: "For '{{ application_id }}': Freeze database consumer id before provider includes"
   set_fact:
     _database_consumer_id: "{{ database_consumer_id | default(application_id) }}"

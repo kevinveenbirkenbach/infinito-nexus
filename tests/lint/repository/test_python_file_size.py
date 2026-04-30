@@ -2,7 +2,7 @@
 
 Every production ``.py`` file tracked by the repository (i.e. not
 matched by ``.gitignore``) must be at most :data:`MAX_PY_LINES` lines
-long. The threshold is a soft architectural cue — a file approaching
+long. The threshold is a soft architectural cue. A file approaching
 the cap is usually doing too many things and is a candidate for a
 split.
 
@@ -13,12 +13,13 @@ so length here reflects coverage breadth rather than design weight.
 Per-file opt-out
 ----------------
 
-A file may opt out of this cap by including the marker
-:data:`NOCHECK_MARKER_REGEX` (matches ``#nocheck`` or ``# nocheck``)
-inside the first :data:`NOCHECK_SCAN_LINES` lines — typically the
-module docstring or a comment at the top. The opt-out is intentionally
-visible at the top of the file so the cost of carrying long modules is
-not silently buried.
+A file may opt out of this cap by including a unified
+``# nocheck: file-size`` (or ``# noqa: file-size``) marker inside the
+first :data:`SCAN_LINES` lines, typically the module docstring or a
+comment at the top. The opt-out is intentionally visible at the top of
+the file so the cost of carrying long modules is not silently buried.
+See ``docs/contributing/actions/testing/suppression.md`` for the full
+marker grammar.
 
 The walker uses the SPOT helpers in :mod:`utils.cache.files` so the
 lint runs in environments where ``.git/`` is not mounted (the
@@ -28,28 +29,23 @@ aware lint tests.
 
 from __future__ import annotations
 
-import re
 import unittest
 from pathlib import Path
 
+from utils.annotations.suppress import is_suppressed_in_head
 from utils.cache.base import PROJECT_ROOT
 from utils.cache.files import iter_non_ignored_files
 
 
 # A file at this length is generally too coupled / too scope-broad and
 # should be split. Bumping this number requires a corresponding cleanup
-# pass — do not raise it just to silence the linter.
+# pass. Do not raise it just to silence the linter.
 MAX_PY_LINES: int = 500
 
 # Number of leading lines to scan for the per-file opt-out marker. Kept
 # small so the marker has to live near the top of the file (visible,
 # not buried) and so the scan stays cheap.
-NOCHECK_SCAN_LINES: int = 30
-
-# Matches `#nocheck` and `# nocheck`. The trailing word boundary keeps
-# unrelated tokens (`#nocheckpoint`, `#nochecksum`) from accidentally
-# silencing the lint.
-NOCHECK_MARKER_REGEX = re.compile(r"#\s*nocheck\b")
+SCAN_LINES: int = 30
 
 
 def _line_count(path: Path) -> int:
@@ -69,15 +65,10 @@ def _line_count(path: Path) -> int:
 def _has_nocheck_marker(path: Path) -> bool:
     try:
         with path.open("r", encoding="utf-8", errors="replace") as fh:
-            head_lines: list[str] = []
-            for idx, line in enumerate(fh):
-                if idx >= NOCHECK_SCAN_LINES:
-                    break
-                head_lines.append(line)
+            head_lines = [next(fh, "") for _ in range(SCAN_LINES)]
     except OSError:
         return False
-    head = "".join(head_lines)
-    return bool(NOCHECK_MARKER_REGEX.search(head))
+    return is_suppressed_in_head(head_lines, "file-size", scan_lines=SCAN_LINES)
 
 
 class TestPythonFileSize(unittest.TestCase):

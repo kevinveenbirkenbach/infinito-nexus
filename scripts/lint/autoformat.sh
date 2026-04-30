@@ -22,6 +22,14 @@ else
 	skipped+=("ruff")
 fi
 
+# ── sort .claude/settings.json (curated arrays) ──────────────────────────────
+if command -v python3 &>/dev/null; then
+	bash "${SCRIPT_DIR}/sort_claude_settings.sh"
+	ran+=("sort-claude-settings")
+else
+	skipped+=("sort-claude-settings")
+fi
+
 # ── shfmt (shell script formatter) ───────────────────────────────────────────
 if command -v shfmt &>/dev/null; then
 	shfmt -w scripts

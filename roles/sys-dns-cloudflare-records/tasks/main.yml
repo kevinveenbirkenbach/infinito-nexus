@@ -1,5 +1,5 @@
 ---
-# run_once_sys_dns_cloudflare_records: deactivated
+# nocheck: run-once
 
 - name: Assert token
   ansible.builtin.assert:

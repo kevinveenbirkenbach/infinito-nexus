@@ -1,7 +1,10 @@
 import unittest
 import glob
-import yaml
 from pathlib import Path
+
+from utils.annotations.suppress import line_has_rule
+from utils.cache.files import read_text
+from utils.cache.yaml import load_yaml_any
 
 
 class TestServiceSharedConsistency(unittest.TestCase):
@@ -9,35 +12,36 @@ class TestServiceSharedConsistency(unittest.TestCase):
     For all roles in roles/*/meta/services.yml enforce two rules on every
     services.<name> entry:
 
-    Rule 1 — enabled requires shared:
+    Rule 1, enabled requires shared:
       When a service has ``enabled: true`` it MUST also declare
       ``shared: true``.  If the requirement does not apply (e.g. the
       service is inherently role-local), mark the service key with a
-      ``# noqa: shared`` comment on the line directly above it to
-      register the intentional exception.
+      ``# noqa: shared`` (or ``# nocheck: shared``) comment directly
+      above it. Stacked comments are supported as long as no blank line
+      breaks the comment block above the key. See
+      ``docs/contributing/actions/testing/suppression.md``.
 
-    Rule 2 — shared requires enabled:
+    Rule 2, shared requires enabled:
       When a service declares a ``shared`` key, it MUST also declare an
       ``enabled`` key (value may be ``true`` or ``false``).  A ``shared``
       key without a corresponding ``enabled`` key is ambiguous and
       therefore not allowed.
     """
 
-    EXCEPTION_MARKER = "noqa: shared"
-
     def _exception_services(self, file_path: str) -> set:
         """
         Scan the raw YAML text and return the set of service names whose
-        key line is preceded directly (no blank line in between) by a
-        comment that contains EXCEPTION_MARKER.
+        key line is preceded by a contiguous comment block (no blank
+        line in between) where any comment line carries the ``shared``
+        suppression marker.
         """
-        exceptions = set()
-        lines = Path(file_path).read_text(encoding="utf-8").splitlines()
+        exceptions: set[str] = set()
+        lines = read_text(file_path).splitlines()
         pending_exception = False
         for line in lines:
             stripped = line.strip()
             if stripped.startswith("#"):
-                if self.EXCEPTION_MARKER in stripped:
+                if line_has_rule(line, "shared"):
                     pending_exception = True
                 # Non-matching comment does not reset pending state so that
                 # stacked comments still work.
@@ -64,8 +68,8 @@ class TestServiceSharedConsistency(unittest.TestCase):
         for file_path in sorted(files):
             role_name = Path(file_path).parts[-3]
             try:
-                cfg = yaml.safe_load(Path(file_path).read_text(encoding="utf-8")) or {}
-            except yaml.YAMLError as exc:
+                cfg = load_yaml_any(file_path, default_if_missing={}) or {}
+            except Exception as exc:
                 errors.append(f"{role_name}: YAML parse error in {file_path}: {exc}")
                 continue
 
@@ -89,7 +93,7 @@ class TestServiceSharedConsistency(unittest.TestCase):
                         errors.append(
                             f"{role_name}: services.{svc_name} has enabled=true "
                             f"but is missing shared=true. "
-                            f"Add 'shared: true' or place a '# {self.EXCEPTION_MARKER}' "
+                            f"Add 'shared: true' or place a '# noqa: shared' "
                             f"comment on the line directly above '{svc_name}:' to mark "
                             f"the intentional exception. ({file_path})"
                         )

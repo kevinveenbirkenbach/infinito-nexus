@@ -15,12 +15,12 @@ semantics consistent.
 
 Allowed
 =======
-* ``utils/cache/yaml.py`` — IS the cache, MUST call ``yaml.safe_load`` /
+* ``utils/cache/yaml.py``: IS the cache, MUST call ``yaml.safe_load`` /
   ``yaml.safe_dump`` directly.
-* ``tasks/utils/migrate_meta_layout.py`` — migration script that
+* ``tasks/utils/migrate_meta_layout.py``: migration script that
   operates pre-migration on raw on-disk YAML; predates the cache by
   design.
-* ``tests/`` — test fixtures may legitimately write synthetic YAML to
+* ``tests/``: test fixtures may legitimately write synthetic YAML to
   tempdirs and read it back. NOT scanned.
 
 Detection
@@ -34,17 +34,19 @@ tracked: ``import yaml as Y`` ⇒ ``Y.safe_load(...)`` is flagged;
 ``from yaml import safe_load`` ⇒ bare ``safe_load(...)`` is flagged.
 
 Plain attribute access without a call (``yaml.YAMLError`` for exception
-typing, ``yaml.YAMLObject`` for class hierarchies) is NOT flagged —
-only call expressions are.
+typing, ``yaml.YAMLObject`` for class hierarchies) is NOT flagged. Only
+call expressions are.
 
-Per-line opt-out: add ``# noqa: direct-yaml`` (case-insensitive) on the
-line of the call, the line that opens the multi-line call, OR anywhere
-on the same physical line in the source file. The lint then skips that
+Per-line opt-out: add ``# noqa: direct-yaml`` (or
+``# nocheck: direct-yaml``; case-insensitive) on the line of the
+call, the line that opens the multi-line call, OR anywhere on the
+same physical line in the source file. The lint then skips that
 specific call while still flagging any other direct yaml calls in the
 same file. Use this for legitimate exceptions (custom Loader/Dumper
 subclasses, runtime-deployed scripts that lack the project's
-``utils/`` package on PYTHONPATH, etc.) — keep the exemption next to
-the code it covers, not in this lint's allow-list.
+``utils/`` package on PYTHONPATH, etc.). Keep the exemption next to
+the code it covers, not in this lint's allow-list. The marker grammar
+is documented at ``docs/contributing/actions/testing/suppression.md``.
 
 Caching
 =======
@@ -58,6 +60,7 @@ import ast
 import unittest
 from pathlib import Path
 
+from utils.annotations.suppress import suppressed_line_numbers
 from utils.cache.files import PROJECT_ROOT, iter_project_files, read_text
 
 
@@ -86,14 +89,6 @@ _SCAN_DIRS: frozenset[str] = frozenset(
         "tasks",
     }
 )
-
-# Marker comment that opts a single call out of the lint. Match is
-# case-insensitive and may appear anywhere on the call's physical line
-# (or any line spanned by a multi-line call). The cache implementation
-# itself, the migration script, vault-aware loaders/dumpers and any
-# runtime-deployed scripts opt out via this marker — there is no
-# central exemption list.
-_NOQA_MARKER: str = "noqa: direct-yaml"
 
 
 def _file_offenders(path: Path) -> list[str]:
@@ -127,14 +122,9 @@ def _file_offenders(path: Path) -> list[str]:
                     if alias.name in _FORBIDDEN_FUNCTIONS:
                         direct_function_aliases[alias.asname or alias.name] = alias.name
 
-    # Build a set of line numbers (1-based) carrying the noqa marker.
-    # The marker may appear on the call's own line OR — for multi-line
-    # calls — on any line spanned by the call expression.
-    noqa_lines: set[int] = {
-        idx
-        for idx, line in enumerate(src.splitlines(), start=1)
-        if _NOQA_MARKER in line.lower()
-    }
+    # The marker may appear on the call's own line OR, for multi-line
+    # calls, on any line spanned by the call expression.
+    noqa_lines = suppressed_line_numbers(src.splitlines(), "direct-yaml")
 
     def _is_noqa(node: ast.Call) -> bool:
         start = node.lineno

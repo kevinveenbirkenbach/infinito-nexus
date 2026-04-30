@@ -1,5 +1,5 @@
 ---
-# run_once_sys_stk_front_proxy: deactivated
+# nocheck: run-once
 
 - name: Freeze front proxy context before nested role loads
   ansible.builtin.set_fact:

@@ -1,4 +1,4 @@
-# run_once_sys_aur_install: deactivated
+# nocheck: run-once
 
 - name: Include dependency 'sys-aur'
   include_role:

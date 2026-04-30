@@ -2,7 +2,10 @@ import os
 import glob
 import re
 import unittest
-import yaml
+
+from utils.annotations.suppress import is_suppressed_anywhere, line_has_rule
+from utils.cache.files import read_text
+from utils.cache.yaml import load_yaml_str
 
 
 class RunOnceSchemaTest(unittest.TestCase):
@@ -10,17 +13,17 @@ class RunOnceSchemaTest(unittest.TestCase):
     Ensure that any occurrence of 'run_once_' in roles/*/tasks/main.yml
     matches 'run_once_' + (role_name with '-' replaced by '_'),
     unless explicitly deactivated with:
-      # run_once_<role_suffix>: deactivated
+      # nocheck: run-once
 
     Exception (per-when item):
-      If the *same line* that contains the run_once_ condition also contains:
-        # pass test_run_once_suffix_matches_role
-      then this specific condition is ignored by this test.
+      If the *same line* that contains the run_once_ condition also
+      carries a ``# noqa: run-once-suffix`` (or ``# nocheck: run-once-suffix``)
+      marker, that specific condition is ignored by this test.
 
-    Only block-level 'when' conditions in main.yml are considered.
+    Only block-level 'when' conditions in main.yml are considered. The
+    unified suppression-marker grammar is documented at
+    ``docs/contributing/actions/testing/suppression.md``.
     """
-
-    PASS_MARKER = "pass test_run_once_suffix_matches_role"
 
     @staticmethod
     def _run_once_vars_from_when(when_clause):
@@ -34,19 +37,19 @@ class RunOnceSchemaTest(unittest.TestCase):
             return [when_clause] if when_clause.startswith("run_once_") else []
         return []
 
-    @classmethod
-    def _has_pass_marker_for_var(cls, content: str, var: str) -> bool:
-        """
-        Check whether the exact list-item line that contains `var` also contains the PASS_MARKER.
-        Example line in YAML:
-          - run_once_svc_db_openldap is not defined   # pass test_run_once_suffix_matches_role
+    @staticmethod
+    def _line_has_suffix_opt_out(content: str, var: str) -> bool:
+        """Return True iff the list-item line that contains *var* carries
+        a ``run-once-suffix`` suppression marker.
         """
         line_re = re.compile(
-            rf"^\s*-\s*{re.escape(var)}\s*(#.*\b{re.escape(cls.PASS_MARKER)}\b.*)?\s*$",
+            rf"^.*-\s*{re.escape(var)}\b.*$",
             flags=re.IGNORECASE | re.MULTILINE,
         )
-        m = line_re.search(content)
-        return bool(m and m.group(1))
+        return any(
+            line_has_rule(match.group(0), "run-once-suffix")
+            for match in line_re.finditer(content)
+        )
 
     def test_run_once_suffix_matches_role(self):
         project_root = os.path.abspath(
@@ -59,20 +62,18 @@ class RunOnceSchemaTest(unittest.TestCase):
             role_name = os.path.normpath(filepath).split(os.sep)[-3]
             expected_suffix = role_name.lower().replace("-", "_")
 
-            with open(filepath, "r", encoding="utf-8") as f:
-                content = f.read()
+            try:
+                content = read_text(filepath)
+            except (OSError, UnicodeDecodeError) as e:
+                violations.append(f"{filepath}: read error: {e}")
+                continue
 
-            # Skip this role if deactivated
-            deactivated_re = re.compile(
-                rf"^\s*#\s*run_once_{re.escape(expected_suffix)}\s*:\s*deactivated\s*$",
-                flags=re.IGNORECASE | re.MULTILINE,
-            )
-            if deactivated_re.search(content):
+            if is_suppressed_anywhere(content.splitlines(), "run-once"):
                 continue
 
             try:
-                data = yaml.safe_load(content)
-            except yaml.YAMLError as e:
+                data = load_yaml_str(content)
+            except Exception as e:
                 violations.append(f"{filepath}: YAML parse error: {e}")
                 continue
 
@@ -93,8 +94,7 @@ class RunOnceSchemaTest(unittest.TestCase):
                     continue
 
                 for var in run_once_vars:
-                    # Allow per-line opt-out with marker comment in the source YAML
-                    if self._has_pass_marker_for_var(content, var):
+                    if self._line_has_suffix_opt_out(content, var):
                         continue
 
                     # strip any ' is not defined' etc.
