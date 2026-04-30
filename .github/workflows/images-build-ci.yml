@@ -1,3 +1,4 @@
+# no-raw-docker: skip. Runs on a GitHub-hosted runner; the `container` wrapper is not installed there.
 name: "🐳 Build: CI Images (all distros)"
 
 on:
