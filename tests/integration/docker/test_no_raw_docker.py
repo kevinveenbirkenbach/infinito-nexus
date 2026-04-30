@@ -1,10 +1,14 @@
 """Guard: forbid raw `docker` / `docker compose` / `docker-compose` CLI
-invocations in tracked repository files.
+invocations in role tasks, vars, templates, and bundled shell scripts
+under ``roles/``.
 
 The project ships a `container` / `compose` wrapper around the underlying
 engine so that swapping Docker for Podman (or another OCI runtime) does
-not require a sweep of every role. This test fails when a file calls the
-raw CLI in a place that should go through the wrapper.
+not require a sweep of every role. This test fails when a file under
+``roles/`` calls the raw CLI in a place that should go through the
+wrapper. Bootstrap scripts and CI workflows live outside ``roles/`` and
+are intentionally out of scope: the wrapper is not yet (or never) on
+their PATH.
 
 Three forms are detected:
 
@@ -308,13 +312,15 @@ def format_findings(findings: Sequence[Finding]) -> str:
     return "\n".join(lines)
 
 
-# Files that can legitimately contain raw `docker` commands. The wrapper
-# convention only applies to executable / templated content where the
-# wrapper is reachable: Ansible playbooks/roles (.yml, .yaml, .j2) and
-# shell scripts (.sh). Documentation (.md), Python source, JSON config,
-# and CI workflow files (which run on managed runners without the
-# wrapper) are out of scope.
+# Extensions where the wrapper convention applies inside `roles/`:
+# Ansible task/var/meta YAML, Jinja2 templates, and bundled shell
+# scripts that ship as role files. Documentation (.md), JSON config,
+# and Python sources under roles/ are out of scope.
 SCAN_EXTENSIONS: Tuple[str, ...] = (".yml", ".yaml", ".j2", ".sh")
+
+# Project-relative path prefix that scopes the scan. Every file outside
+# this prefix is skipped before any rule fires.
+SCAN_PATH_PREFIX: str = "roles/"
 
 # Rule key under the unified suppression grammar. See
 # docs/contributing/actions/testing/suppression.md. File-level head
@@ -324,10 +330,13 @@ HEAD_SCAN_LINES: int = 30
 
 
 class TestNoRawDockerCommands(unittest.TestCase):
-    def test_no_raw_docker_commands_in_repo(self) -> None:
+    def test_no_raw_docker_commands_in_roles(self) -> None:
         findings: List[Finding] = []
         project_root_str = str(PROJECT_ROOT)
         for path in iter_non_ignored_files(extensions=SCAN_EXTENSIONS):
+            rel = os.path.relpath(path, project_root_str).replace(os.sep, "/")
+            if not rel.startswith(SCAN_PATH_PREFIX):
+                continue
             try:
                 text = read_text(path)
             except (OSError, UnicodeDecodeError):
@@ -335,7 +344,6 @@ class TestNoRawDockerCommands(unittest.TestCase):
             lines = text.splitlines()
             if is_suppressed_in_head(lines, SUPPRESS_RULE, scan_lines=HEAD_SCAN_LINES):
                 continue
-            rel = os.path.relpath(path, project_root_str).replace(os.sep, "/")
             for finding in scan_text(text, rel):
                 if is_suppressed_at(
                     lines, finding.line_no, SUPPRESS_RULE, mode="same-or-above"

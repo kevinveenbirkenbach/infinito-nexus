@@ -1,4 +1,3 @@
-# nocheck: raw-docker. Runs on a GitHub-hosted runner; the `container` wrapper is not installed there.
 name: "💻 Test: Development Environment"
 
 on:
