@@ -1,4 +1,4 @@
-# run_once_sys_stk_full: deactivated
+# nocheck: run-once
 - name: "For '{{ application_id }}': freeze full-stack context"
   ansible.builtin.set_fact:
     sys_stk_full_application_id: "{{ application_id }}"

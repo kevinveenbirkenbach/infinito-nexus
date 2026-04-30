@@ -1,4 +1,4 @@
-# run_once_sys_front_inj_matomo: deactivated
+# nocheck: run-once
 
 # The Matomo API token may be empty on first deployment or when the Matomo container is
 # already reachable but the bootstrap has not run yet (so sys-token-store never wrote the

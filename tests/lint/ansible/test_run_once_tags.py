@@ -3,6 +3,7 @@ import re
 import unittest
 from collections import defaultdict
 
+from utils.annotations.suppress import is_suppressed_anywhere
 from utils.cache.files import read_text
 
 PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "../../../"))
@@ -67,15 +68,13 @@ def find_role_includes(roles_dir):
 
 
 def check_run_once_tag(content, role_name):
-    """
-    Checks for run_once_{role_name} or # run_once_{role_name}: deactivated in content.
+    """Return True iff the role's tasks define a ``run_once_<key>`` flag
+    or carry the unified ``# nocheck: run-once`` opt-out marker.
     """
     key = role_name.replace("-", "_")
-    pattern = (
-        rf"(run_once_{key})"
-        rf"|(#\s*run_once_{key}: deactivated)"
-    )
-    return re.search(pattern, content, re.IGNORECASE)
+    if re.search(rf"\brun_once_{re.escape(key)}\b", content, re.IGNORECASE):
+        return True
+    return is_suppressed_anywhere(content.splitlines(), "run-once")
 
 
 class TestRunOnceTag(unittest.TestCase):
@@ -104,7 +103,7 @@ class TestRunOnceTag(unittest.TestCase):
                     f'Role "{role_name}" is imported/included but no "run_once_{key}" tag or deactivation comment found.\n'
                     f"First usage at includer: {usages[0][0]}, line {line}\n"
                     f'  → Ensure "run_once_{key}" is defined in {role_tasks} or deactivate with comment.\n'
-                    f'  → For example, add "# run_once_{key}: deactivated" at the top of {role_tasks} to suppress this warning.\n'
+                    f'  → For example, add "# nocheck: run-once" at the top of {role_tasks} to suppress this warning.\n'
                     f"All occurrences:\n"
                     + "".join([f"  - {fp}, line {ln}\n" for fp, ln, _ in usages])
                 )

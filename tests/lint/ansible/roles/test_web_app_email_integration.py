@@ -2,9 +2,10 @@ import re
 import unittest
 from pathlib import Path
 
-import yaml
-
 from utils.annotations.message import warning
+from utils.annotations.suppress import is_suppressed_at
+from utils.cache.files import read_text
+from utils.cache.yaml import load_yaml_any, load_yaml_str
 
 
 _ROLE_PREFIX = "web-app-"
@@ -15,12 +16,11 @@ _SCAN_EXTENSIONS = {".yml", ".yaml", ".j2", ".py", ".sh", ".conf", ".env"}
 # rather than nested under `compose.services.email:`. Match either shape so
 # this lint keeps working during the long tail of role migrations.
 _EMAIL_KEY_RE = re.compile(r"^(\s*)email:\s*(#.*)?$")
-_ANNOTATION_RE = re.compile(r"^\s*#\s*noqa:\s*email\b")
 
 _SILENCER_HINT = (
     "Silence per role by adding to meta/services.yml a "
-    "'# noqa: email' comment directly above an 'email:' block with "
-    "'enabled: false' and 'shared: false'."
+    "'# noqa: email' (or '# nocheck: email') comment directly above an "
+    "'email:' block with 'enabled: false' and 'shared: false'."
 )
 
 
@@ -36,8 +36,8 @@ def _role_uses_email_lookup(role_path: Path) -> bool:
         if not path.is_file() or path.suffix not in _SCAN_EXTENSIONS:
             continue
         try:
-            text = path.read_text(encoding="utf-8", errors="ignore")
-        except OSError:
+            text = read_text(str(path))
+        except (OSError, UnicodeDecodeError):
             continue
         if _EMAIL_LOOKUP_RE.search(text):
             return True
@@ -53,8 +53,8 @@ def _email_service_conf(config_path: Path) -> dict:
     if not config_path.is_file():
         return {}
     try:
-        parsed = yaml.safe_load(config_path.read_text(encoding="utf-8")) or {}
-    except yaml.YAMLError:
+        parsed = load_yaml_any(str(config_path), default_if_missing={}) or {}
+    except Exception:
         return {}
     if not isinstance(parsed, dict):
         return {}
@@ -67,33 +67,29 @@ def _has_opt_out(config_path: Path) -> bool:
 
     1. services.email.enabled is False
     2. services.email.shared is False
-    3. ``# noqa: email`` on the nearest non-empty line directly above the
-       ``email:`` key in the raw YAML source
+    3. ``# noqa: email`` (or ``# nocheck: email``) on the nearest
+       non-empty line directly above the ``email:`` key in the raw
+       YAML source
     """
     if not config_path.is_file():
         return False
     try:
-        text = config_path.read_text(encoding="utf-8")
-    except OSError:
+        text = read_text(str(config_path))
+    except (OSError, UnicodeDecodeError):
         return False
 
     lines = text.splitlines()
-    annotated = False
-    for idx, line in enumerate(lines):
-        if not _EMAIL_KEY_RE.match(line):
-            continue
-        prev_idx = idx - 1
-        while prev_idx >= 0 and lines[prev_idx].strip() == "":
-            prev_idx -= 1
-        if prev_idx >= 0 and _ANNOTATION_RE.match(lines[prev_idx]):
-            annotated = True
-            break
+    annotated = any(
+        _EMAIL_KEY_RE.match(line)
+        and is_suppressed_at(lines, idx + 1, "email", mode="line-above")
+        for idx, line in enumerate(lines)
+    )
     if not annotated:
         return False
 
     try:
-        parsed = yaml.safe_load(text) or {}
-    except yaml.YAMLError:
+        parsed = load_yaml_str(text) or {}
+    except Exception:
         return False
     if not isinstance(parsed, dict):
         return False
