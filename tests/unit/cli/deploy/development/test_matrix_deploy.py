@@ -50,6 +50,21 @@ def _args(
     )
 
 
+def _entry(
+    round_index: int,
+    inv_dir: str,
+    round_variants: dict[str, int],
+    include: tuple[str, ...] | None = None,
+) -> tuple[int, str, dict[str, int], tuple[str, ...]]:
+    """Build a 4-tuple plan entry. Defaults `include` to the keys of
+    `round_variants` so existing test fixtures stay terse — round 0 of
+    the deploy loop deploys whatever is in include, and the variant-aware
+    planner naturally emits the same set."""
+    if include is None:
+        include = tuple(round_variants.keys())
+    return (round_index, inv_dir, round_variants, include)
+
+
 def _make_compose_mock() -> MagicMock:
     compose = MagicMock()
     compose.repo_root = Path("/tmp/infinito-nexus")
@@ -70,7 +85,7 @@ class TestHandlerMatrixDeploy(unittest.TestCase):
     ) -> None:
         make_compose_mock.return_value = _make_compose_mock()
         plan_mock.return_value = [
-            (0, "/srv/inv", {"web-app-jira": 0, "web-app-keycloak": 0}),
+            _entry(0, "/srv/inv", {"web-app-jira": 0, "web-app-keycloak": 0}),
         ]
         run_deploy_mock.return_value = 0
 
@@ -99,8 +114,8 @@ class TestHandlerMatrixDeploy(unittest.TestCase):
         # would only fall back to variant 0 -- already deployed in round 0).
         make_compose_mock.return_value = _make_compose_mock()
         plan_mock.return_value = [
-            (0, "/srv/inv-0", {"web-app-wordpress": 0, "web-app-keycloak": 0}),
-            (1, "/srv/inv-1", {"web-app-wordpress": 1, "web-app-keycloak": 0}),
+            _entry(0, "/srv/inv-0", {"web-app-wordpress": 0, "web-app-keycloak": 0}),
+            _entry(1, "/srv/inv-1", {"web-app-wordpress": 1, "web-app-keycloak": 0}),
         ]
         run_deploy_mock.return_value = 0
 
@@ -131,8 +146,8 @@ class TestHandlerMatrixDeploy(unittest.TestCase):
     ) -> None:
         make_compose_mock.return_value = _make_compose_mock()
         plan_mock.return_value = [
-            (0, "/srv/inv-0", {"web-app-multi": 0, "web-app-keycloak": 0}),
-            (1, "/srv/inv-1", {"web-app-multi": 1, "web-app-keycloak": 0}),
+            _entry(0, "/srv/inv-0", {"web-app-multi": 0, "web-app-keycloak": 0}),
+            _entry(1, "/srv/inv-1", {"web-app-multi": 1, "web-app-keycloak": 0}),
         ]
         run_deploy_mock.return_value = 0
 
@@ -169,17 +184,17 @@ class TestHandlerMatrixDeploy(unittest.TestCase):
         # Keycloak stays at variant 0 from round 0 (no later variants).
         make_compose_mock.return_value = _make_compose_mock()
         plan_mock.return_value = [
-            (
+            _entry(
                 0,
                 "/srv/inv-0",
                 {"web-app-wordpress": 0, "web-app-discourse": 0, "web-app-keycloak": 0},
             ),
-            (
+            _entry(
                 1,
                 "/srv/inv-1",
                 {"web-app-wordpress": 1, "web-app-discourse": 1, "web-app-keycloak": 0},
             ),
-            (
+            _entry(
                 2,
                 "/srv/inv-2",
                 {"web-app-wordpress": 0, "web-app-discourse": 2, "web-app-keycloak": 0},
@@ -243,8 +258,8 @@ class TestHandlerMatrixDeploy(unittest.TestCase):
     ) -> None:
         make_compose_mock.return_value = _make_compose_mock()
         plan_mock.return_value = [
-            (0, "/srv/inv-0", {"web-app-multi": 0}),
-            (1, "/srv/inv-1", {"web-app-multi": 1}),
+            _entry(0, "/srv/inv-0", {"web-app-multi": 0}),
+            _entry(1, "/srv/inv-1", {"web-app-multi": 1}),
         ]
         run_deploy_mock.return_value = 17  # failure exit code
 
@@ -274,8 +289,8 @@ class TestHandlerVariantPin(unittest.TestCase):
     ) -> None:
         make_compose_mock.return_value = _make_compose_mock()
         plan_mock.return_value = [
-            (0, "/srv/inv-0", {"web-app-multi": 0}),
-            (1, "/srv/inv-1", {"web-app-multi": 1}),
+            _entry(0, "/srv/inv-0", {"web-app-multi": 0}),
+            _entry(1, "/srv/inv-1", {"web-app-multi": 1}),
         ]
         run_deploy_mock.return_value = 0
 
@@ -303,8 +318,8 @@ class TestHandlerVariantPin(unittest.TestCase):
     ) -> None:
         make_compose_mock.return_value = _make_compose_mock()
         plan_mock.return_value = [
-            (0, "/srv/inv-0", {"web-app-multi": 0}),
-            (1, "/srv/inv-1", {"web-app-multi": 1}),
+            _entry(0, "/srv/inv-0", {"web-app-multi": 0}),
+            _entry(1, "/srv/inv-1", {"web-app-multi": 1}),
         ]
 
         with self.assertRaisesRegex(SystemExit, "variant 7 out of range"):
@@ -330,8 +345,8 @@ class TestHandlerFullCycle(unittest.TestCase):
     ) -> None:
         make_compose_mock.return_value = _make_compose_mock()
         plan_mock.return_value = [
-            (0, "/srv/inv-0", {"web-app-multi": 0}),
-            (1, "/srv/inv-1", {"web-app-multi": 1}),
+            _entry(0, "/srv/inv-0", {"web-app-multi": 0}),
+            _entry(1, "/srv/inv-1", {"web-app-multi": 1}),
         ]
         run_deploy_mock.return_value = 0
 
@@ -372,8 +387,8 @@ class TestHandlerFullCycle(unittest.TestCase):
     ) -> None:
         make_compose_mock.return_value = _make_compose_mock()
         plan_mock.return_value = [
-            (0, "/srv/inv-0", {"web-app-multi": 0}),
-            (1, "/srv/inv-1", {"web-app-multi": 1}),
+            _entry(0, "/srv/inv-0", {"web-app-multi": 0}),
+            _entry(1, "/srv/inv-1", {"web-app-multi": 1}),
         ]
         # PASS 1 of round 0 fails. PASS 2 of round 0 and the entire round
         # 1 must be skipped to surface the failure cleanly.
@@ -397,8 +412,8 @@ class TestHandlerFullCycle(unittest.TestCase):
     ) -> None:
         make_compose_mock.return_value = _make_compose_mock()
         plan_mock.return_value = [
-            (0, "/srv/inv-0", {"web-app-multi": 0}),
-            (1, "/srv/inv-1", {"web-app-multi": 1}),
+            _entry(0, "/srv/inv-0", {"web-app-multi": 0}),
+            _entry(1, "/srv/inv-1", {"web-app-multi": 1}),
         ]
         run_deploy_mock.return_value = 0
 

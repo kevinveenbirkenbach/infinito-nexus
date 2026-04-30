@@ -79,21 +79,37 @@ def load_dependencies_app_only(role_name: str) -> List[str]:
     return _stable_dedup(out)
 
 
-def load_shared_service_roles_for_app(role_name: str) -> List[str]:
+def load_shared_service_roles_for_app(
+    role_name: str,
+    *,
+    services_override: dict | None = None,
+) -> List[str]:
     """
     If role is an application role, inspect roles/<role>/meta/services.yml and
     return provider roles implied by services.* flags.
 
     Logic is centralized in cli.meta.applications.resolution.services.resolver.
+
+    `services_override`, when provided, replaces the disk read of
+    `meta/services.yml` with an in-memory services map. Used by the
+    variant-aware path: callers merge `meta/variants.yml[round_R]` over
+    `meta/services.yml` and pass the merged dict here so the resolver
+    sees the same topology the inventory will bake into host_vars.
+    Without this, a variant that flips `services.<X>.enabled` to a
+    literal `True` would not pull `<X>`'s provider role into the
+    deploy plan, leaving the role's lookup at runtime asserting an
+    integration that the topology never set up.
     """
     if not has_application_id(role_name):
         return []
 
-    cfg_path = role_config_path(role_name)
-    if not cfg_path.exists():
-        return []
-
-    services_map = load_yaml_file(cfg_path)
+    if services_override is not None:
+        services_map: object = services_override
+    else:
+        cfg_path = role_config_path(role_name)
+        if not cfg_path.exists():
+            return []
+        services_map = load_yaml_file(cfg_path)
     # Per req-008 the meta/services.yml file root IS the services map.
     # resolve_direct_service_roles_from_config still expects the legacy
     # `{"services": {...}}` envelope, so wrap accordingly.

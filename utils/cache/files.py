@@ -15,15 +15,26 @@ Usage:
         ...
 
 `PROJECT_ROOT` is the repo root derived from this file's location.
+
+Gitignore-filtered iteration
+----------------------------
+
+The matcher itself lives in :mod:`utils.cache.gitignore` (single SPOT for
+``.gitignore`` parsing and matching). :func:`iter_non_ignored_files`
+here composes the cached project walk with that matcher and is the
+recommended helper for lint tests that want the "files git would track"
+view without subprocessing.
 """
 
 from __future__ import annotations
 
 import os
 from functools import lru_cache
+from pathlib import Path
 from typing import Iterable, Iterator, Tuple
 
 from .base import PROJECT_ROOT
+from .gitignore import is_path_gitignored, load_gitignore_patterns
 
 # Directories never worth descending into during project-tree scans.
 _DEFAULT_SKIP_DIRS: frozenset[str] = frozenset(
@@ -129,6 +140,35 @@ def iter_project_files_with_content(
         except (OSError, UnicodeDecodeError):
             continue
         yield path, content
+
+
+def iter_non_ignored_files(
+    *,
+    extensions: Iterable[str] | None = None,
+    exclude_tests: bool = False,
+    exclude_dirs: Iterable[str] | None = None,
+    root: str | None = None,
+) -> Iterator[str]:
+    """Yield project files filtered through ``.gitignore``.
+
+    Combines :func:`iter_project_files` with :func:`is_path_gitignored`
+    so callers get the "files git would track" view without spawning a
+    git subprocess. ``root`` defaults to :data:`PROJECT_ROOT`.
+
+    A path is yielded iff it survives both the in-process skip-dir
+    pruning of :func:`iter_project_files` and the ``.gitignore`` match.
+    """
+    base = Path(root) if root else PROJECT_ROOT
+    patterns = load_gitignore_patterns(str(base))
+    for path in iter_project_files(
+        extensions=extensions,
+        exclude_tests=exclude_tests,
+        exclude_dirs=exclude_dirs,
+    ):
+        rel = os.path.relpath(path, str(base)).replace(os.sep, "/")
+        if is_path_gitignored(rel, patterns):
+            continue
+        yield path
 
 
 def _reset() -> None:

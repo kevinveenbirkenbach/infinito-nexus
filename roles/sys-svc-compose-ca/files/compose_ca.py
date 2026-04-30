@@ -1,4 +1,8 @@
 #!/usr/bin/env python3
+# nocheck: file-size — single-host CA orchestration script. Ships as one
+# file because it is delivered to the target via `ansible.builtin.copy`
+# and must run with only the Python stdlib available; splitting it would
+# require also delivering a package, which the role does not do.
 from __future__ import annotations
 
 import argparse

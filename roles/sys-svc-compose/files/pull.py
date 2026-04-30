@@ -34,12 +34,8 @@ def run_or_fail(cmd: list[str], *, cwd: Path, env: dict[str, str], label: str) -
         raise RuntimeError(f"{label} failed (rc={rc})")
 
 
-def base_compose_cmd(*, project: str, compose_files: str, env_file: str) -> list[str]:
-    cmd = ["docker", "compose", "-p", project]
-    cmd += compose_files.split()
-    if env_file.strip():
-        cmd += ["--env-file", env_file.strip()]
-    return cmd
+def base_compose_cmd(*, project: str, cwd: Path) -> list[str]:
+    return ["/usr/bin/compose", "--chdir", str(cwd), "--project", project, "--"]
 
 
 def has_buildable_services(
@@ -94,7 +90,7 @@ def main() -> int:
     lock_dir = Path(args.lock_dir)
     lock_file = lock_dir / f"{args.lock_key}.lock"
 
-    # Preserve previous behavior: lock = already done
+    # Lock present = work already done.
     if lock_file.exists():
         return 0
 
@@ -102,13 +98,8 @@ def main() -> int:
 
     env = dict(os.environ)
 
-    base_cmd = base_compose_cmd(
-        project=args.project,
-        compose_files=args.compose_files,
-        env_file=args.env_file,
-    )
+    base_cmd = base_compose_cmd(project=args.project, cwd=cwd)
 
-    # 1) build --pull if buildable services exist
     if not args.skip_build and has_buildable_services(
         base_cmd=base_cmd, cwd=cwd, env=env
     ):
@@ -119,7 +110,6 @@ def main() -> int:
             label="docker compose build --pull",
         )
 
-    # 2) pull
     pull_cmd = base_cmd + ["pull"]
 
     if args.ignore_buildable:

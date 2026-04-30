@@ -8,14 +8,12 @@ import sys
 from pathlib import Path
 from typing import List, Optional
 
+# `utils.cache.yaml` is unavailable here: this file is copy-deployed.
+import yaml  # noqa: direct-yaml,E402
+
 
 def detect_env_file(project_dir: Path) -> Optional[Path]:
-    """
-    Detect Compose env file in a directory.
-    Preference:
-      1) <dir>/.env (file)
-      2) <dir>/.env/env (file)  (legacy layout)
-    """
+    """Detect compose env file: <dir>/.env or legacy <dir>/.env/env."""
     c1 = project_dir / ".env"
     if c1.is_file():
         return c1
@@ -26,13 +24,7 @@ def detect_env_file(project_dir: Path) -> Optional[Path]:
 
 
 def detect_compose_files(project_dir: Path) -> List[Path]:
-    """
-    Detect Compose file stack in a directory.
-    Always requires compose.yml.
-    Optionals:
-      - compose.override.yml
-      - compose.ca.override.yml
-    """
+    """Detect Compose file stack: compose.yml + optional overrides."""
     base = project_dir / "compose.yml"
     if not base.is_file():
         raise FileNotFoundError(f"Missing compose.yml in: {project_dir}")
@@ -47,13 +39,57 @@ def detect_compose_files(project_dir: Path) -> List[Path]:
     if ca_override.is_file():
         files.append(ca_override)
 
+    cache_override = generate_cache_override(project_dir, base)
+    if cache_override is not None:
+        files.append(cache_override)
+
     return files
 
 
+# Mirrors that speak HTTP by default in their distro's package-manager
+# config. Alpine 3.18+ defaults to HTTPS and would fail TLS verification
+# inside builds that lack the frontend CA, so it is excluded.
+_CACHE_HTTP_HOSTNAMES = (
+    "deb.debian.org",
+    "archive.ubuntu.com",
+    "security.ubuntu.com",
+)
+
+
+def generate_cache_override(project_dir: Path, base_compose: Path) -> Optional[Path]:
+    """Emit transient build.extra_hosts override when cache profile active."""
+    cache_ip = (os.environ.get("INFINITO_PACKAGE_CACHE_FRONTEND_IP") or "").strip()
+    if not cache_ip or not base_compose.is_file():
+        return None
+
+    with open(base_compose) as f:
+        doc = yaml.safe_load(f)  # noqa: direct-yaml
+
+    services = (doc or {}).get("services") or {}
+    services_with_build = sorted(
+        name
+        for name, svc in services.items()
+        if isinstance(svc, dict) and svc.get("build")
+    )
+    if not services_with_build:
+        return None
+
+    extra_hosts = [f"{host}:{cache_ip}" for host in _CACHE_HTTP_HOSTNAMES]
+    override_doc = {
+        "services": {
+            name: {"build": {"extra_hosts": list(extra_hosts)}}
+            for name in services_with_build
+        }
+    }
+
+    out = project_dir / "compose.cache.override.yml"
+    with open(out, "w") as f:
+        yaml.safe_dump(override_doc, f, sort_keys=True)  # noqa: direct-yaml
+    return out
+
+
 def resolve_files(project_dir: Path, files: List[str]) -> List[Path]:
-    """
-    Resolve -f/--file arguments (absolute or relative to project_dir).
-    """
+    """Resolve -f/--file paths against project_dir."""
     out: List[Path] = []
     for f in files:
         p = Path(f)
@@ -69,13 +105,7 @@ def build_cmd(
     passthrough: List[str],
     extra_files: Optional[List[str]] = None,
 ) -> List[str]:
-    """
-    Build final `docker compose ...` command.
-
-    Behavior:
-    - Always auto-detect compose files in project_dir
-    - If -f/--file is provided, append those files *after* autodetected ones
-    """
+    """Auto-detected compose files, with extra_files appended last."""
     files = detect_compose_files(project_dir)
 
     if extra_files:
@@ -157,7 +187,7 @@ def main() -> int:
     if args.debug:
         print(">>> " + " ".join(shlex.quote(x) for x in cmd), file=sys.stderr)
 
-    # execvp keeps signals behavior nice (systemd etc.)
+    # execvp preserves signal handling under systemd.
     os.execvp(cmd[0], cmd)
     return 0
 

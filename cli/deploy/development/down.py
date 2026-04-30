@@ -6,13 +6,11 @@ import shutil
 import subprocess
 from pathlib import Path
 
-from .common import resolve_distro
+from .common import cache_env_overrides, compose_file_args, resolve_distro
 from .profile import Profile
 
 
 def _repo_root_from_here() -> Path:
-    # Derive the repository root relative to this file.
-    # Adjust the number of parents if the project layout changes.
     return Path(__file__).resolve().parents[3]
 
 
@@ -23,6 +21,7 @@ CI_DOCKER_ROOT_STR = str(CI_DOCKER_ROOT)
 def _base_env(*, distro: str) -> dict[str, str]:
     env = dict(os.environ)
     env["INFINITO_DISTRO"] = distro
+    env.update(cache_env_overrides())
     return env
 
 
@@ -32,9 +31,7 @@ def _compose_run(*, repo_root: Path, distro: str, args: list[str]) -> None:
     if env_development.exists():
         cmd += ["--env-file", "env.development"]
 
-    # Tear the registry-cache down too if it was activated for the
-    # corresponding `up`. Reuse the Profile decision so up/down cannot
-    # disagree about which services are part of the stack.
+    cmd += compose_file_args()
     cmd += Profile().args()
     cmd += list(args)
     env = _base_env(distro=distro)

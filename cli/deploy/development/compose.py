@@ -5,6 +5,7 @@ import subprocess
 import time
 from pathlib import Path
 
+from .common import cache_env_overrides, compose_file_args
 from .coredns import CoreDNSCorefileRenderer
 from .network import detect_outer_network_mtu
 from .proc import run_streaming
@@ -12,10 +13,7 @@ from .profile import Profile
 
 
 class Compose:
-    """
-    Small wrapper around:
-      INFINITO_DISTRO=<distro> docker compose --profile ci [--profile cache] ...
-    """
+    """Wrapper around `docker compose` for the dev/CI stack."""
 
     def __init__(self, repo_root: Path, distro: str) -> None:
         self.repo_root = repo_root
@@ -41,13 +39,7 @@ class Compose:
                 check=True,
             )
             env["INFINITO_IMAGE"] = result.stdout.strip()
-        if self.profile.registry_cache_active():
-            env["INFINITO_REGISTRY_CACHE_PROXY_CONF"] = (
-                "./compose/registry-cache/proxy.conf"
-            )
-            env["INFINITO_PACKAGE_CACHE_PIP_CONF"] = "./compose/package-cache/pip.conf"
-            env["INFINITO_PACKAGE_CACHE_NPMRC"] = "./compose/package-cache/npmrc"
-            env["INFINITO_PACKAGE_CACHE_APT_LIST"] = "./compose/package-cache/apt.list"
+        env.update(cache_env_overrides())
         return env
 
     def run(
@@ -60,7 +52,13 @@ class Compose:
         text: bool = True,
         extra_env: dict[str, str] | None = None,
     ) -> subprocess.CompletedProcess:
-        cmd = ["docker", "compose", *self.profile.args(), *args]
+        cmd = [
+            "docker",
+            "compose",
+            *compose_file_args(),
+            *self.profile.args(),
+            *args,
+        ]
         env = self._base_env()
         if extra_env:
             env.update({k: str(v) for k, v in extra_env.items()})
@@ -72,7 +70,7 @@ class Compose:
                 cmd,
                 cwd=self.repo_root,
                 env=env,
-                check=False,  # handle check ourselves for consistent behavior
+                check=False,
                 capture_output=capture,
                 text=text,
             )
@@ -91,10 +89,7 @@ class Compose:
         attempts: int = 6,
         delay_s: int = 30,
     ) -> None:
-        """
-        Retry the underlying `docker compose ... up` to mitigate transient registry errors
-        (e.g., Docker Hub 500 while pulling coredns).
-        """
+        """Retry compose up to mitigate transient registry errors."""
         last_exc: Exception | None = None
 
         for i in range(1, int(attempts) + 1):
@@ -105,7 +100,6 @@ class Compose:
                 last_exc = exc
 
                 if i >= int(attempts):
-                    # Re-raise the last error to keep previous behavior (fail CI).
                     raise
 
                 print(
@@ -114,17 +108,11 @@ class Compose:
                 )
                 time.sleep(int(delay_s))
 
-        # Should be unreachable, but keep mypy happy.
         if last_exc is not None:
             raise last_exc
 
     def _bootstrap_package_cache(self, env: dict[str, str]) -> None:
-        """Run the host-side Nexus 3 OSS bootstrap helper. The script is
-        idempotent and exits 0 once the blobstore and proxy repos are
-        in place. Failure here MUST NOT abort the up() flow because the
-        rest of the stack is already healthy and a manual re-run via
-        `scripts/docker/cache/package.sh` is the standard
-        recovery path."""
+        """Run the host-side Nexus bootstrap helper. Idempotent."""
         helper = self.repo_root / "scripts" / "docker" / "cache" / "package.sh"
         print(">>> Bootstrapping package-cache proxy repos")
         r = subprocess.run(
@@ -138,6 +126,40 @@ class Compose:
             print(
                 f">>> WARNING: package-cache bootstrap exited rc={r.returncode}; "
                 f"re-run {helper} manually or inspect docker logs infinito-package-cache"
+            )
+
+    def _generate_package_frontend_certs(self, env: dict[str, str]) -> None:
+        """Generate frontend CA + leaf certs before nginx starts."""
+        helper = (
+            self.repo_root
+            / "scripts"
+            / "docker"
+            / "cache"
+            / "package-frontend-certs.sh"
+        )
+        print(">>> Generating package-cache-frontend CA + per-hostname certs")
+        subprocess.run(
+            [str(helper)],
+            cwd=self.repo_root,
+            env=env,
+            check=True,
+            text=True,
+        )
+
+    def _install_package_frontend_ca_in_runner(self) -> None:
+        """Install the frontend CA in the runner trust store. Idempotent."""
+        print(">>> Installing package-cache-frontend CA into runner trust store")
+        r = self.exec(
+            ["sh", "-lc", "/usr/local/bin/package-frontend-ca.sh"],
+            check=False,
+            live=False,
+        )
+        if r.returncode != 0:
+            print(
+                ">>> WARNING: package-frontend-ca installer exited "
+                f"rc={r.returncode}; cache TLS via DNS-hijack may fail. "
+                "Re-run /usr/local/bin/package-frontend-ca.sh inside the "
+                "runner manually."
             )
 
     def _render_coredns_corefile(self) -> None:
@@ -166,10 +188,8 @@ class Compose:
         print(">>> env:", {k: env.get(k) for k in keys})
         print(">>> NIX_CONFIG:", "<set>" if env.get("NIX_CONFIG") else "<empty>")
 
-        # IMPORTANT: use the same env snapshot that docker compose will use
         no_build = env.get("INFINITO_NO_BUILD", "0") == "1"
         # Compose env-file precedence: later files override earlier ones.
-        # So env.local should come AFTER env.ci to override CI defaults locally.
         args = ["--env-file", "env.ci"]
 
         env_local = self.repo_root / "env.development"
@@ -182,24 +202,20 @@ class Compose:
         args += ["up", "-d"]
         if no_build:
             args.append("--no-build")
-        # Cache services are profile-gated AND `required: false` on the
-        # infinito depends_on, so they would NOT auto-start from the
-        # named-services list alone. List them explicitly when the cache
-        # profile is active so the proxies come up before infinito.
+        # Cache services have `required: false` on infinito; list them
+        # explicitly so they boot before the runner.
         if self.profile.registry_cache_active():
-            args += ["registry-cache", "package-cache"]
+            self._generate_package_frontend_certs(env)
+            args += ["registry-cache", "package-cache", "package-cache-frontend"]
         args += ["coredns", "infinito"]
 
-        # Retry to avoid transient registry/HTTP 5xx errors when pulling images.
         self._compose_up_with_retries(args, attempts=6, delay_s=30)
 
         self.wait_for_healthy()
 
-        # Bootstrap Nexus proxies once the stack is healthy. Idempotent;
-        # re-runs no-op once the blobstore + repos exist. See
-        # docs/requirements/012-package-cache-nexus3-oss.md.
         if self.profile.registry_cache_active():
             self._bootstrap_package_cache(env)
+            self._install_package_frontend_ca_in_runner()
 
         if run_entry_init:
             print(">>> Running infinito entry.sh init")
@@ -219,12 +235,7 @@ class Compose:
                 raise RuntimeError(f"entry.sh init failed (rc={r.returncode})")
 
     def down(self) -> None:
-        """
-        Tear down the infinito docker compose stack for this repo/distro.
-        """
-        # IMPORTANT:
-        # Keep the same behavior as cli.deploy.development.down (volumes + CI cleanup).
-        # Local import avoids runtime import cycles.
+        """Tear down the stack."""
         from .down import down_stack
 
         down_stack(repo_root=self.repo_root, distro=self.distro)
@@ -240,16 +251,10 @@ class Compose:
         tty: bool | None = None,
         extra_env: dict[str, str] | None = None,
     ) -> subprocess.CompletedProcess:
-        """
-        Execute inside infinito container.
+        """Execute inside the infinito container.
 
-        TTY behavior:
-          - tty=None  -> auto (local: True, CI: False)
-          - tty=True  -> allocate TTY (colors, interactive)
-          - tty=False -> -T (CI safe)
-
-        Streaming:
-          - live=True streams stdout/stderr to terminal.
+        tty=None auto-selects (local: True, CI: False).
+        live=True streams stdout/stderr.
         """
         if tty is None:
             tty = not self.profile.is_ci()
@@ -275,10 +280,6 @@ class Compose:
         )
 
     def _get_infinito_container_id(self) -> str:
-        """
-        Resolve infinito container ID via docker compose.
-        Works independent of project name.
-        """
         r = self.run(["ps", "-q", "infinito"], capture=True, check=True)
         cid = (r.stdout or "").strip()
 
@@ -290,10 +291,7 @@ class Compose:
         return cid
 
     def wait_for_healthy(self, *, timeout_s: int | None = None) -> None:
-        """
-        Wait until infinito container is marked healthy by Docker.
-        On timeout: print last 200 log lines for debugging.
-        """
+        """Wait for the infinito container's healthcheck."""
         if timeout_s is None:
             timeout_s = int(os.environ.get("INFINITO_WAIT_HEALTH_TIMEOUT_S", "200"))
 

@@ -119,18 +119,23 @@ class TestComposeUpRetries(unittest.TestCase):
         cmd = run_mock.call_args.args[0]
         env = run_mock.call_args.kwargs["env"]
 
-        # On GitHub-hosted runners the registry-cache stays inactive:
-        # fresh disk per job means no cross-run amortization, so the
-        # proxy adds startup latency without a payoff. Only the `ci`
-        # profile fires.
+        # CI: only the ci profile fires; cache override is not layered in.
         self.assertEqual(
             cmd,
-            ["docker", "compose", "--profile", "ci", "ps", "-q", "infinito"],
+            [
+                "docker",
+                "compose",
+                "-f",
+                "compose.yml",
+                "--profile",
+                "ci",
+                "ps",
+                "-q",
+                "infinito",
+            ],
         )
         self.assertEqual(env["INFINITO_DISTRO"], "arch")
         self.assertNotIn("COMPOSE_PROFILES", env)
-        # And the proxy.conf bind-mount stays at /dev/null (the default
-        # baked into compose.yml), so dockerd does direct pulls.
         self.assertNotIn("INFINITO_REGISTRY_CACHE_PROXY_CONF", env)
 
     @patch.dict(
@@ -140,6 +145,8 @@ class TestComposeUpRetries(unittest.TestCase):
             "GITHUB_ACTIONS": "",
             "RUNNING_ON_GITHUB": "",
             "CI": "",
+            # Tests bypass BASH_ENV; set explicitly so cache_env_overrides() passes.
+            "INFINITO_PACKAGE_CACHE_FRONTEND_CA_DIR": "/var/cache/infinito/test/ca",
         },
         clear=False,
     )
@@ -156,28 +163,29 @@ class TestComposeUpRetries(unittest.TestCase):
         cmd = run_mock.call_args.args[0]
         env = run_mock.call_args.kwargs["env"]
 
-        # On a developer machine the cache profile activates so the
-        # registry-cache joins the stack and infinito's depends_on
-        # gates it via service_healthy.
+        # Local: cache override is layered onto compose.yml; no --profile cache.
         self.assertEqual(
             cmd,
             [
                 "docker",
                 "compose",
+                "-f",
+                "compose.yml",
+                "-f",
+                "compose/cache.override.yml",
                 "--profile",
                 "ci",
-                "--profile",
-                "cache",
                 "ps",
                 "-q",
                 "infinito",
             ],
         )
-        # And the proxy.conf bind-mount points at the real file so
-        # dockerd loads the systemd drop-in and routes pulls.
         self.assertEqual(
             env["INFINITO_REGISTRY_CACHE_PROXY_CONF"],
             "./compose/registry-cache/proxy.conf",
+        )
+        self.assertTrue(
+            env["INFINITO_PACKAGE_CACHE_FRONTEND_CA_FILE"].endswith("/ca.crt")
         )
 
     @patch.dict(
@@ -186,9 +194,7 @@ class TestComposeUpRetries(unittest.TestCase):
             "INFINITO_NO_BUILD": "0",
             "INFINITO_IMAGE": "infinito-debian",
             "INFINITO_PULL_POLICY": "never",
-            # Pin to CI mode so the cache profile stays inactive: this
-            # test asserts build behaviour, not the cache-services
-            # ordering, which has its own coverage above.
+            # CI-pinned so cache stays inactive; this test asserts build behaviour only.
             "CI": "true",
             "GITHUB_ACTIONS": "true",
             "RUNNING_ON_GITHUB": "true",
@@ -245,6 +251,8 @@ class TestComposeUpRetries(unittest.TestCase):
             "CI": "",
             "GITHUB_ACTIONS": "",
             "RUNNING_ON_GITHUB": "",
+            # Tests bypass BASH_ENV; set explicitly so cache_env_overrides() passes.
+            "INFINITO_PACKAGE_CACHE_FRONTEND_CA_DIR": "/var/cache/infinito/test/ca",
         },
         clear=False,
     )
@@ -254,12 +262,12 @@ class TestComposeUpRetries(unittest.TestCase):
         compose._compose_up_with_retries = MagicMock()
         compose.wait_for_healthy = MagicMock()
         compose._bootstrap_package_cache = MagicMock()
+        compose._generate_package_frontend_certs = MagicMock()
+        compose._install_package_frontend_ca_in_runner = MagicMock()
 
         compose.up(run_entry_init=False)
 
-        # Local mode -> cache profile active, registry-cache and
-        # package-cache must precede coredns + infinito so they boot
-        # first and the depends_on health gate resolves.
+        # Cache services precede coredns + infinito so depends_on health gates resolve.
         compose._compose_up_with_retries.assert_called_once_with(
             [
                 "--env-file",
@@ -268,6 +276,7 @@ class TestComposeUpRetries(unittest.TestCase):
                 "-d",
                 "registry-cache",
                 "package-cache",
+                "package-cache-frontend",
                 "coredns",
                 "infinito",
             ],
@@ -276,6 +285,8 @@ class TestComposeUpRetries(unittest.TestCase):
         )
         compose.wait_for_healthy.assert_called_once_with()
         compose._bootstrap_package_cache.assert_called_once()
+        compose._generate_package_frontend_certs.assert_called_once()
+        compose._install_package_frontend_ca_in_runner.assert_called_once()
 
 
 if __name__ == "__main__":  # pragma: no cover

@@ -155,81 +155,170 @@ class TestBakeOverrides(unittest.TestCase):
 
 
 class TestPlanDevInventoryMatrix(unittest.TestCase):
+    @patch(
+        "cli.deploy.development.inventory._resolve_round_include",
+        autospec=True,
+    )
+    @patch(
+        "cli.deploy.development.inventory._build_services_overrides_for_round",
+        autospec=True,
+        return_value={},
+    )
     @patch("cli.deploy.development.inventory.get_variants", autospec=True)
     def test_single_variant_apps_share_one_unsuffixed_folder(
-        self, get_variants_mock: MagicMock
+        self,
+        get_variants_mock: MagicMock,
+        _overrides_mock: MagicMock,
+        resolve_include_mock: MagicMock,
     ) -> None:
         get_variants_mock.return_value = {
             "web-app-foo": [{}],
             "web-app-bar": [{}],
         }
+        resolve_include_mock.return_value = ("web-app-foo", "web-app-bar")
         plan = plan_dev_inventory_matrix(
             roles_dir="/roles",
-            include=["web-app-foo", "web-app-bar"],
+            primary_apps=["web-app-foo", "web-app-bar"],
             base_inventory_dir="/srv/inv",
         )
         self.assertEqual(
             plan,
-            [(0, "/srv/inv", {"web-app-foo": 0, "web-app-bar": 0})],
+            [
+                (
+                    0,
+                    "/srv/inv",
+                    {"web-app-foo": 0, "web-app-bar": 0},
+                    ("web-app-foo", "web-app-bar"),
+                )
+            ],
         )
 
+    @patch(
+        "cli.deploy.development.inventory._resolve_round_include",
+        autospec=True,
+    )
+    @patch(
+        "cli.deploy.development.inventory._build_services_overrides_for_round",
+        autospec=True,
+        return_value={},
+    )
     @patch("cli.deploy.development.inventory.get_variants", autospec=True)
-    def test_two_variant_app_drives_two_suffixed_folders(
-        self, get_variants_mock: MagicMock
+    def test_two_variant_primary_drives_two_suffixed_folders(
+        self,
+        get_variants_mock: MagicMock,
+        _overrides_mock: MagicMock,
+        resolve_include_mock: MagicMock,
     ) -> None:
         get_variants_mock.return_value = {
             "web-app-multi": [{"variant": 0}, {"variant": 1}],
             "web-app-keycloak": [{}],
         }
+        resolve_include_mock.side_effect = [
+            ("web-app-multi", "web-app-keycloak"),
+            ("web-app-multi", "web-app-keycloak"),
+        ]
         plan = plan_dev_inventory_matrix(
             roles_dir="/roles",
-            include=["web-app-multi", "web-app-keycloak"],
+            primary_apps=["web-app-multi"],
             base_inventory_dir="/srv/inv",
         )
         self.assertEqual(
             plan,
             [
-                (0, "/srv/inv-0", {"web-app-multi": 0, "web-app-keycloak": 0}),
-                (1, "/srv/inv-1", {"web-app-multi": 1, "web-app-keycloak": 0}),
+                (
+                    0,
+                    "/srv/inv-0",
+                    {"web-app-multi": 0, "web-app-keycloak": 0},
+                    ("web-app-multi", "web-app-keycloak"),
+                ),
+                (
+                    1,
+                    "/srv/inv-1",
+                    {"web-app-multi": 1, "web-app-keycloak": 0},
+                    ("web-app-multi", "web-app-keycloak"),
+                ),
             ],
         )
 
+    @patch(
+        "cli.deploy.development.inventory._resolve_round_include",
+        autospec=True,
+    )
+    @patch(
+        "cli.deploy.development.inventory._build_services_overrides_for_round",
+        autospec=True,
+        return_value={},
+    )
     @patch("cli.deploy.development.inventory.get_variants", autospec=True)
-    def test_partial_variant_app_repeats_zero_in_extra_rounds(
-        self, get_variants_mock: MagicMock
+    def test_round_count_driven_by_primary_max_variants(
+        self,
+        get_variants_mock: MagicMock,
+        _overrides_mock: MagicMock,
+        resolve_include_mock: MagicMock,
     ) -> None:
+        # Both primaries; rounds = max(3, 2) = 3.
         get_variants_mock.return_value = {
             "web-app-three": [{}, {}, {}],
             "web-app-two": [{}, {}],
         }
+        resolve_include_mock.side_effect = [
+            ("web-app-three", "web-app-two"),
+            ("web-app-three", "web-app-two"),
+            ("web-app-three", "web-app-two"),
+        ]
         plan = plan_dev_inventory_matrix(
             roles_dir="/roles",
-            include=["web-app-three", "web-app-two"],
+            primary_apps=["web-app-three", "web-app-two"],
             base_inventory_dir="/srv/inv",
         )
-        # Round 0,1,2 -> three has 0,1,2 / two has 0,1,0 (cycles back).
+        # Round 0,1,2 -> three has 0,1,2 / two has 0,1,0 (clamped on R=2).
         self.assertEqual(
             plan,
             [
-                (0, "/srv/inv-0", {"web-app-three": 0, "web-app-two": 0}),
-                (1, "/srv/inv-1", {"web-app-three": 1, "web-app-two": 1}),
-                (2, "/srv/inv-2", {"web-app-three": 2, "web-app-two": 0}),
+                (
+                    0,
+                    "/srv/inv-0",
+                    {"web-app-three": 0, "web-app-two": 0},
+                    ("web-app-three", "web-app-two"),
+                ),
+                (
+                    1,
+                    "/srv/inv-1",
+                    {"web-app-three": 1, "web-app-two": 1},
+                    ("web-app-three", "web-app-two"),
+                ),
+                (
+                    2,
+                    "/srv/inv-2",
+                    {"web-app-three": 2, "web-app-two": 0},
+                    ("web-app-three", "web-app-two"),
+                ),
             ],
         )
 
-    def test_empty_include_rejected(self):
+    def test_empty_primary_apps_rejected(self):
         with self.assertRaises(ValueError):
             plan_dev_inventory_matrix(
                 roles_dir="/roles",
-                include=[],
+                primary_apps=[],
                 base_inventory_dir="/srv/inv",
             )
 
 
 class TestFilterPlanToVariant(unittest.TestCase):
     PLAN = [
-        (0, "/srv/inv-0", {"web-app-multi": 0, "web-app-keycloak": 0}),
-        (1, "/srv/inv-1", {"web-app-multi": 1, "web-app-keycloak": 0}),
+        (
+            0,
+            "/srv/inv-0",
+            {"web-app-multi": 0, "web-app-keycloak": 0},
+            ("web-app-multi", "web-app-keycloak"),
+        ),
+        (
+            1,
+            "/srv/inv-1",
+            {"web-app-multi": 1, "web-app-keycloak": 0},
+            ("web-app-multi", "web-app-keycloak"),
+        ),
     ]
 
     def test_none_returns_full_plan(self):
@@ -436,6 +525,15 @@ class TestBuildDevInventoryMatrix(unittest.TestCase):
         self.compose = MagicMock()
         self.compose.repo_root = Path("/tmp/infinito-nexus")
 
+    @patch(
+        "cli.deploy.development.inventory._resolve_round_include",
+        autospec=True,
+    )
+    @patch(
+        "cli.deploy.development.inventory._build_services_overrides_for_round",
+        autospec=True,
+        return_value={},
+    )
     @patch("cli.deploy.development.inventory.build_dev_inventory", autospec=True)
     @patch(
         "cli.deploy.development.inventory.get_variants",
@@ -449,31 +547,49 @@ class TestBuildDevInventoryMatrix(unittest.TestCase):
         self,
         _variants_mock: MagicMock,
         build_inventory_mock: MagicMock,
+        _overrides_mock: MagicMock,
+        resolve_include_mock: MagicMock,
     ) -> None:
+        resolve_include_mock.side_effect = [
+            ("web-app-multi", "web-app-keycloak"),
+            ("web-app-multi", "web-app-keycloak"),
+        ]
         plan = build_dev_inventory_matrix(
             self.compose,
             base_inventory_dir="/srv/inv",
-            include=("web-app-multi", "web-app-keycloak"),
+            primary_apps=("web-app-multi",),
             storage_constrained=False,
             runtime="dev",
         )
 
         self.assertEqual(
-            [(idx, inv, vs) for idx, inv, vs in plan],
+            [(idx, inv, vs, inc) for idx, inv, vs, inc in plan],
             [
-                (0, "/srv/inv-0", {"web-app-multi": 0, "web-app-keycloak": 0}),
-                (1, "/srv/inv-1", {"web-app-multi": 1, "web-app-keycloak": 0}),
+                (
+                    0,
+                    "/srv/inv-0",
+                    {"web-app-multi": 0, "web-app-keycloak": 0},
+                    ("web-app-multi", "web-app-keycloak"),
+                ),
+                (
+                    1,
+                    "/srv/inv-1",
+                    {"web-app-multi": 1, "web-app-keycloak": 0},
+                    ("web-app-multi", "web-app-keycloak"),
+                ),
             ],
         )
         # One build_dev_inventory call per round; each gets a spec whose
-        # active_variants matches the round's plan entry.
+        # active_variants matches the round's plan entry and whose include
+        # is the round's variant-resolved include set.
         self.assertEqual(build_inventory_mock.call_count, 2)
-        for (round_idx, inv_dir, round_vars), call in zip(
+        for (round_idx, inv_dir, round_vars, include_R), call in zip(
             plan, build_inventory_mock.call_args_list
         ):
             spec_arg = call.args[1]
             self.assertEqual(spec_arg.inventory_dir, inv_dir)
             self.assertEqual(dict(spec_arg.active_variants or {}), round_vars)
+            self.assertEqual(tuple(spec_arg.include), include_R)
 
 
 if __name__ == "__main__":
