@@ -259,18 +259,33 @@ executed and verified.
 
 ### web-app-joomla 🐣
 
-- [ ] **OIDC (✅):** Community OIDC plugin (e.g. `JOOMLAOAuth2`-style)
-  installed via the Joomla extension manager.
+- [ ] **OIDC (✅):** In-role native OIDC plugin
+  `plg_system_keycloak` (under
+  [files/joomla-oidc-plugin/](../../roles/web-app-joomla/files/joomla-oidc-plugin/)),
+  built and installed at deploy time via the Joomla CLI. Modus 3
+  (Force-Frontend, Local-Backup-Backend) is the operational
+  default: every visit to `/` and `/administrator` redirects to
+  Keycloak unless the request explicitly carries `?fallback=local`
+  AND the env-var `JOOMLA_OIDC_FALLBACK_ENABLED` is `true`. The
+  fallback hatch is env-toggleable so high-security deployments can
+  flip to Modus 1 (no local form, IdP is the only path).
 - [ ] **LDAP (✅):** Built-in LDAP authentication plugin shipped with
-  Joomla core.
-- [ ] **RBAC (🛠️):** Joomla user-groups are the role model. Both the
-  OIDC and the LDAP plugin expose a group-mapping config tab,
-  but the mapping is plugin-specific glue and MUST be reviewed
-  per Joomla / plugin version (the matrix is fragile).
-- [ ] **Watch:** Joomla's user-group mapping is independent of
-  Keycloak roles. Configure the default group for newly federated
-  users explicitly, otherwise they land in `Public` and see
-  nothing.
+  Joomla core (exercised by matrix variant 1).
+- [ ] **RBAC (🛠️):** `plg_system_keycloak` maps the Keycloak `groups`
+  claim onto Joomla's standard usergroup IDs:
+  `/roles/web-app-joomla/administrator` → `Super Users` (id 8),
+  `/roles/web-app-joomla/editor` → `Editor` (id 4),
+  `/roles/web-app-joomla` → `Registered` (id 2). A user whose
+  Keycloak groups match none of these paths is refused; this is
+  the documented RBAC gate.
+- [ ] **Watch:** Operators MUST keep an out-of-band record of the
+  bootstrap admin password so the `?fallback=local` hatch can be
+  exercised during a Keycloak outage; the alternative is locking
+  the IdP itself out of the rescue path. The mapping table above
+  is intentionally hardcoded in the plugin to keep the role-meta
+  layer free of Joomla-internal IDs (Super Users / Editor /
+  Registered are first-party Joomla constants and stable across
+  Joomla 4.x → 6.x).
 
 ### web-app-minio 🛣️
 

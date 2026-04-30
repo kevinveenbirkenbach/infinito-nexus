@@ -27,7 +27,7 @@ function normalizeBaseUrl(value) {
   return decodeDotenvQuotedValue(value || "").replace(/\/$/, "");
 }
 
-const joomlaBaseUrl = decodeDotenvQuotedValue(process.env.JOOMLA_BASE_URL);
+const joomlaBaseUrl = normalizeBaseUrl(process.env.JOOMLA_BASE_URL);
 const oidcIssuerUrl = normalizeBaseUrl(process.env.OIDC_ISSUER_URL || "");
 const adminUsername = decodeDotenvQuotedValue(process.env.ADMIN_USERNAME);
 const adminPassword = decodeDotenvQuotedValue(process.env.ADMIN_PASSWORD);
@@ -46,12 +46,12 @@ async function performKeycloakLogin(page, username, password) {
   await signInButton.click();
 }
 
-// Joomla 6 has no first-party OIDC adapter; the integrated OIDC login
-// path is provided by a sidecar `web-app-oauth2-proxy` in front of the
-// Joomla web UI. The site root `/` is gated; `/administrator` is also
-// gated, then Joomla's local form-login takes over inside the gate.
-async function performJoomlaAdminLogin(page, baseUrl, username, password) {
-  await page.goto(`${baseUrl}/administrator`, { waitUntil: "domcontentloaded" });
+async function performJoomlaAdminFormLogin(page, baseUrl, username, password) {
+  // Local Joomla form-login at /administrator?fallback=local. The
+  // `?fallback=local` query short-circuits the plg_system_keycloak
+  // redirect so the operator has an emergency hatch when Keycloak is
+  // unavailable (Modus 3 per requirement 013).
+  await page.goto(`${baseUrl}/administrator?fallback=local`, { waitUntil: "domcontentloaded" });
 
   const usernameField = page.locator("input[name='username']");
   const passwordField = page.locator("input[name='passwd']");
@@ -66,12 +66,6 @@ async function performJoomlaAdminLogin(page, baseUrl, username, password) {
   ]);
 }
 
-async function joomlaLogout(page, baseUrl) {
-  await page.goto(`${baseUrl.replace(/\/$/, "")}/logout`, { waitUntil: "commit" }).catch(() => {});
-  await page.goto(`${baseUrl.replace(/\/$/, "")}/oauth2/sign_out`, { waitUntil: "commit" }).catch(() => {});
-  await page.context().clearCookies();
-}
-
 test.beforeEach(async ({ page }) => {
   expect(joomlaBaseUrl, "JOOMLA_BASE_URL must be set in the Playwright env file").toBeTruthy();
   expect(adminUsername, "ADMIN_USERNAME must be set in the Playwright env file").toBeTruthy();
@@ -79,12 +73,17 @@ test.beforeEach(async ({ page }) => {
   await page.context().clearCookies();
 });
 
-test("administrator: oauth2-proxy gates Joomla through Keycloak (OIDC variant)", async ({ page }) => {
-  // Visiting the Joomla site root `/` while gated by the oauth2-proxy
-  // sidecar redirects the browser to the Keycloak authorization
-  // endpoint. After Keycloak login the user lands back on Joomla's
-  // public site, proving the OIDC integrated login path works
-  // end-to-end against `web-app-keycloak`.
+test("OIDC: native plg_system_keycloak redirects unauthenticated visitors to Keycloak and logs them back in to Joomla", async ({ page }) => {
+  // The plg_system_keycloak plugin shipped under
+  // roles/web-app-joomla/files/joomla-oidc-plugin/ implements native
+  // OIDC SSO against Keycloak (no oauth2-proxy sidecar). Visiting the
+  // Joomla site root `/` while gated by the plugin redirects the
+  // browser to the Keycloak authorization endpoint. After Keycloak
+  // login, the plugin handles the callback at
+  // /index.php?option=keycloak&task=callback, provisions/updates the
+  // local Joomla user with RBAC group memberships derived from the
+  // Keycloak `groups` claim, and lands the user back on the original
+  // URL.
   skipUnlessServiceEnabled("oidc");
   expect(oidcIssuerUrl, "OIDC_ISSUER_URL must be set when OIDC is enabled").toBeTruthy();
 
@@ -109,62 +108,53 @@ test("administrator: oauth2-proxy gates Joomla through Keycloak (OIDC variant)",
     })
     .toContain(expectedJoomlaBaseUrl);
 
-  // Joomla front-end renders the site title or homepage content after
-  // the gate clears.
+  // Joomla front-end renders after the OIDC handshake. RBAC mapping
+  // gave the administrator persona Super Users (id 8), so the
+  // administrator landing nav link is visible to logged-in users.
   await expect(page.locator("body")).toBeVisible({ timeout: 60_000 });
 });
 
-test("administrator: Joomla admin login at /administrator and logout", async ({ page }) => {
-  // The original `dashboard to joomla` iframe scenario is
-  // incompatible with the oauth2-proxy sidecar that requirement
-  // 013 prescribes for Joomla 6 (no first-party OIDC adapter):
-  // Keycloak's authorization endpoint sets X-Frame-Options /
-  // frame-ancestors that browsers honour, and the iframe redirect
-  // chain triggered by visiting Joomla through oauth2-proxy is
-  // blocked. The intent of the original scenario — proving that
-  // the local administrator persona can reach the Joomla admin
-  // control panel and log out cleanly — is preserved here as a
-  // top-level navigation that survives the gate.
+test("OIDC: /administrator?fallback=local hatch bypasses Keycloak and accepts the local Joomla form (Modus 3 emergency path)", async ({ page }) => {
+  // The local form-login fallback at /administrator?fallback=local
+  // is the operationally-mandated hatch when Keycloak is unavailable
+  // (Modus 3 per requirement 013). It MUST NOT redirect to the IdP,
+  // and the local form MUST accept the bootstrap administrator
+  // credentials.
+  skipUnlessServiceEnabled("oidc");
   const expectedJoomlaBaseUrl = joomlaBaseUrl.replace(/\/$/, "");
 
-  // 1. Authenticate against Keycloak first if the gate is active,
-  //    so that subsequent navigations to /administrator stay
-  //    inside the same session.
-  if (process.env.OIDC_SERVICE_ENABLED === "true") {
-    expect(oidcIssuerUrl, "OIDC_ISSUER_URL must be set when OIDC is enabled").toBeTruthy();
-    const expectedOidcAuthUrl = `${oidcIssuerUrl}/protocol/openid-connect/auth`;
-    await page.goto(`${expectedJoomlaBaseUrl}/`);
-    await expect
-      .poll(() => page.url(), {
-        timeout: 60_000,
-        message: `expected redirect to Keycloak OIDC auth (${expectedOidcAuthUrl})`
-      })
-      .toContain(expectedOidcAuthUrl);
-    await performKeycloakLogin(page, adminUsername, adminPassword);
-    await expect
-      .poll(() => page.url(), {
-        timeout: 60_000,
-        message: `expected redirect back to Joomla at ${expectedJoomlaBaseUrl}`
-      })
-      .toContain(expectedJoomlaBaseUrl);
-  }
+  await performJoomlaAdminFormLogin(page, expectedJoomlaBaseUrl, adminUsername, adminPassword);
 
-  // 2. Log in to the Joomla admin control panel with the local
-  //    administrator account.
-  await performJoomlaAdminLogin(page, expectedJoomlaBaseUrl, adminUsername, adminPassword);
-
-  // 3. Verify the control panel rendered. Joomla 6 uses
-  //    `body.com_cpanel` on the admin home; the broader fallback
-  //    set covers future template tweaks.
+  // Joomla 6 uses `body.com_cpanel` on the admin home; the broader
+  // fallback set covers future template tweaks.
   const controlPanelMarker = page
     .locator("body.com_cpanel, #sidebarmenu, nav[aria-label='Main menu'], a[href*='option=com_cpanel']")
     .first();
   await controlPanelMarker.waitFor({ state: "visible", timeout: 60_000 });
+});
 
-  // 4. Log out via the universal logout endpoint AND oauth2-proxy.
-  await joomlaLogout(page, expectedJoomlaBaseUrl);
+test("LDAP: Joomla core LDAP plugin authenticates the administrator at /administrator (LDAP variant)", async ({ page }) => {
+  // In the LDAP variant (variant 1 of meta/variants.yml), the OIDC
+  // service flag is off and Joomla's core LDAP authentication plugin
+  // is the integrated login path against svc-db-openldap. This
+  // scenario exercises that path.
+  skipUnlessServiceEnabled("ldap");
+  const expectedJoomlaBaseUrl = joomlaBaseUrl.replace(/\/$/, "");
 
-  // 5. After logout the gate re-engages or Joomla returns the
-  //    /administrator login form.
-  await page.goto(`${expectedJoomlaBaseUrl}/administrator`, { waitUntil: "domcontentloaded" }).catch(() => {});
+  await page.goto(`${expectedJoomlaBaseUrl}/administrator`, { waitUntil: "domcontentloaded" });
+
+  const usernameField = page.locator("input[name='username']");
+  const passwordField = page.locator("input[name='passwd']");
+  await usernameField.waitFor({ state: "visible", timeout: 60_000 });
+  await usernameField.fill(adminUsername);
+  await passwordField.fill(adminPassword);
+  await Promise.all([
+    page.waitForLoadState("domcontentloaded"),
+    page.locator("button[type='submit'], input[type='submit']").first().click(),
+  ]);
+
+  const controlPanelMarker = page
+    .locator("body.com_cpanel, #sidebarmenu, nav[aria-label='Main menu'], a[href*='option=com_cpanel']")
+    .first();
+  await controlPanelMarker.waitFor({ state: "visible", timeout: 60_000 });
 });

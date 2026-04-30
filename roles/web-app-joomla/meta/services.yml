@@ -1,23 +1,25 @@
 oidc:
-  enabled: false
+  enabled: true
   shared: false
+  # Modus 3 per requirement 013: when `fallback_enabled` is true, the
+  # local Joomla form-login at `/administrator?fallback=local` is
+  # available as an emergency hatch (recommended default). Set to
+  # `false` for high-security deployments where the IdP is the only
+  # admin path (Modus 1 effective).
+  fallback_enabled: true
 ldap:
   enabled: false
   shared: false
-# Joomla 6 ships no first-party OIDC adapter and the JED community
-# plugins lag the Joomla 6 release. The integrated OIDC login path is
-# therefore provided by a sidecar `web-app-oauth2-proxy` in front of
-# the Joomla web UI per requirement 013's per-role notes (the marker
-# is technically 🛠️ glue, not ✅ native). LDAP integration uses the
-# same oauth2-proxy with an LDAP backend.
+# Joomla 6 has no first-party OIDC adapter; this role ships its own
+# `plg_system_keycloak` plugin (under `files/joomla-oidc-plugin/`) that
+# implements native OIDC SSO against Keycloak with RBAC group mapping
+# (Modus 3 per requirement 013: Force-Frontend, Local-Backup-Backend
+# at `/administrator?fallback=local`, env-toggleable via
+# `JOOMLA_OIDC_FALLBACK_ENABLED`). The LDAP variant uses Joomla's
+# core LDAP authentication plugin.
 oauth2:
-  enabled: true
+  enabled: false
   shared: false
-  origin:
-    host: joomla
-    port: 80
-  allowed_groups:
-  - '{{ lookup(''rbac_group_path'', application_id=''web-app-joomla'', role=''administrator'') }}'
 logout:
   enabled: true
   shared: true
@@ -46,7 +48,6 @@ joomla:
   ports:
     local:
       http: 8014
-      oauth2: 16495
   run_after:
   - web-app-matomo
   - web-app-keycloak
