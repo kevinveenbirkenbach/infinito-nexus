@@ -118,7 +118,7 @@ ensure_all_proxies() {
 	ensure_proxy_repo go go-proxy "$(printf '{"name":"go-proxy","online":true,%s,"proxy":{"remoteUrl":"https://proxy.golang.org/","contentMaxAge":'"${CACHE_MAX_AGE_MIN}"',"metadataMaxAge":'"${CACHE_MAX_AGE_MIN}"'}}' "${storage}")"
 	ensure_proxy_repo yum yum-rocky "$(printf '{"name":"yum-rocky","online":true,%s,"proxy":{"remoteUrl":"https://download.rockylinux.org/pub/rocky/","contentMaxAge":'"${CACHE_MAX_AGE_MIN}"',"metadataMaxAge":'"${CACHE_MAX_AGE_MIN}"'},"yum":{"repodataDepth":5}}' "${storage}")"
 	ensure_proxy_repo yum yum-fedora "$(printf '{"name":"yum-fedora","online":true,%s,"proxy":{"remoteUrl":"https://dl.fedoraproject.org/pub/fedora/linux/","contentMaxAge":'"${CACHE_MAX_AGE_MIN}"',"metadataMaxAge":'"${CACHE_MAX_AGE_MIN}"'},"yum":{"repodataDepth":5}}' "${storage}")"
-	ensure_proxy_repo raw raw-packagist "$(printf '{"name":"raw-packagist","online":true,%s,"proxy":{"remoteUrl":"https://repo.packagist.org/","contentMaxAge":'"${CACHE_MAX_AGE_MIN}"',"metadataMaxAge":'"${CACHE_MAX_AGE_MIN}"'},"raw":{"contentDisposition":"ATTACHMENT"}}' "${storage}")"
+	ensure_proxy_repo raw raw-packagist "$(printf '{"name":"raw-packagist","online":true,%s,"proxy":{"remoteUrl":"https://repo.packagist.org/","contentMaxAge":'"${CACHE_MAX_AGE_MIN}"',"metadataMaxAge":'"${CACHE_MAX_AGE_MIN}"'},"raw":{"contentDisposition":"ATTACHMENT"}}' "${storage}")" # nocheck: url
 	ensure_proxy_repo raw raw-alpine "$(printf '{"name":"raw-alpine","online":true,%s,"proxy":{"remoteUrl":"https://dl-cdn.alpinelinux.org/alpine/","contentMaxAge":'"${CACHE_MAX_AGE_MIN}"',"metadataMaxAge":'"${CACHE_MAX_AGE_MIN}"'},"raw":{"contentDisposition":"ATTACHMENT"}}' "${storage}")"
 }
 
