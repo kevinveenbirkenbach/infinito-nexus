@@ -1,0 +1,112 @@
+---
+# Provision the Keycloak service-account client used by the Bluesky
+# login-broker (variant A+ per requirement 013). The client must:
+#
+#   - have `serviceAccountsEnabled: true` (client_credentials grant)
+#   - carry a deterministic `clientSecret` from the credentials
+#     vault (`kc_admin_client_secret`) so the broker container has a
+#     stable secret across redeploys
+#   - hold the realm-management `view-users` and `manage-users`
+#     roles so it can read & write the encrypted Bluesky
+#     app-password user attribute
+#
+# Notes on JVM warnings: kcadm.sh prints cgroup-detection warnings to
+# stderr on every invocation when the host runs cgroup v2 with
+# Docker. Without explicit `2>/dev/null` redirection those warnings
+# end up on Ansible's `stdout_lines` and break naïve `| last | trim`
+# parsers. Every kcadm `get` task below redirects stderr so the
+# captured stdout contains only the requested CSV/JSON payload.
+
+- name: "Bluesky | Keycloak — kcadm authenticate"
+  ansible.builtin.shell: >-
+    container exec -i {{ BLUESKY_KEYCLOAK_CONTAINER }}
+    /opt/keycloak/bin/kcadm.sh config credentials
+    --server "http://localhost:8080"
+    --realm master
+    --user {{ BLUESKY_KEYCLOAK_ADMIN_USER | quote }}
+    --password {{ BLUESKY_KEYCLOAK_ADMIN_PASS | quote }}
+    2>/dev/null
+  changed_when: false
+  no_log: "{{ MASK_CREDENTIALS_IN_LOGS | bool }}"
+
+- name: "Bluesky | Keycloak — resolve broker client UUID (if it exists)"
+  ansible.builtin.shell: >-
+    container exec -i {{ BLUESKY_KEYCLOAK_CONTAINER }}
+    /opt/keycloak/bin/kcadm.sh get clients
+    -r {{ OIDC.CLIENT.REALM | quote }}
+    -q clientId={{ BLUESKY_BROKER_KC_CLIENT_ID | quote }}
+    --fields id --format csv --noquotes
+    2>/dev/null
+  register: bsky_broker_client_lookup
+  changed_when: false
+
+- name: "Bluesky | Keycloak — create broker client (service-account, deterministic secret)"
+  ansible.builtin.shell: >-
+    container exec -i {{ BLUESKY_KEYCLOAK_CONTAINER }}
+    /opt/keycloak/bin/kcadm.sh create clients
+    -r {{ OIDC.CLIENT.REALM | quote }}
+    -s clientId={{ BLUESKY_BROKER_KC_CLIENT_ID | quote }}
+    -s protocol=openid-connect
+    -s publicClient=false
+    -s serviceAccountsEnabled=true
+    -s standardFlowEnabled=false
+    -s directAccessGrantsEnabled=false
+    -s clientAuthenticatorType=client-secret
+    -s 'secret={{ BLUESKY_KC_ADMIN_CLIENT_SECRET }}'
+    2>/dev/null
+  when: bsky_broker_client_lookup.stdout_lines | select('match', '^[A-Fa-f0-9-]{36}$') | list | length == 0
+  no_log: "{{ MASK_CREDENTIALS_IN_LOGS | bool }}"
+
+- name: "Bluesky | Keycloak — re-resolve broker client UUID after create"
+  ansible.builtin.shell: >-
+    container exec -i {{ BLUESKY_KEYCLOAK_CONTAINER }}
+    /opt/keycloak/bin/kcadm.sh get clients
+    -r {{ OIDC.CLIENT.REALM | quote }}
+    -q clientId={{ BLUESKY_BROKER_KC_CLIENT_ID | quote }}
+    --fields id --format csv --noquotes
+    2>/dev/null
+  register: bsky_broker_client_uuid
+  changed_when: false
+  failed_when: bsky_broker_client_uuid.stdout_lines | select('match', '^[A-Fa-f0-9-]{36}$') | list | length == 0
+
+- name: "Bluesky | Keycloak — set broker client secret (deterministic)"
+  ansible.builtin.shell: >-
+    container exec -i {{ BLUESKY_KEYCLOAK_CONTAINER }}
+    /opt/keycloak/bin/kcadm.sh update
+    clients/{{ bsky_broker_client_uuid.stdout_lines | select('match', '^[A-Fa-f0-9-]{36}$') | list | first }}
+    -r {{ OIDC.CLIENT.REALM | quote }}
+    -s 'secret={{ BLUESKY_KC_ADMIN_CLIENT_SECRET }}'
+    -s serviceAccountsEnabled=true
+    -s standardFlowEnabled=false
+    -s directAccessGrantsEnabled=false
+    2>/dev/null
+  changed_when: true
+  no_log: "{{ MASK_CREDENTIALS_IN_LOGS | bool }}"
+
+- name: "Bluesky | Keycloak — resolve broker service-account user id"
+  ansible.builtin.shell: >-
+    container exec -i {{ BLUESKY_KEYCLOAK_CONTAINER }}
+    /opt/keycloak/bin/kcadm.sh get
+    clients/{{ bsky_broker_client_uuid.stdout_lines | select('match', '^[A-Fa-f0-9-]{36}$') | list | first }}/service-account-user
+    -r {{ OIDC.CLIENT.REALM | quote }}
+    --fields id --format csv --noquotes
+    2>/dev/null
+  register: bsky_broker_svc_user
+  changed_when: false
+  failed_when: bsky_broker_svc_user.stdout_lines | select('match', '^[A-Fa-f0-9-]{36}$') | list | length == 0
+
+- name: "Bluesky | Keycloak — grant realm-management roles (view-users, manage-users) to the broker service account"
+  ansible.builtin.shell: >-
+    container exec -i {{ BLUESKY_KEYCLOAK_CONTAINER }}
+    /opt/keycloak/bin/kcadm.sh add-roles
+    -r {{ OIDC.CLIENT.REALM | quote }}
+    --uusername service-account-{{ BLUESKY_BROKER_KC_CLIENT_ID }}
+    --cclientid realm-management
+    --rolename view-users
+    --rolename manage-users
+    2>/dev/null
+  register: bsky_broker_roles
+  changed_when: "'is already' not in (bsky_broker_roles.stderr | default(''))"
+  failed_when:
+    - bsky_broker_roles.rc != 0
+    - "'is already' not in (bsky_broker_roles.stderr | default(''))"

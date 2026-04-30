@@ -164,22 +164,43 @@ executed and verified.
 
 ### web-app-bluesky 🛠️
 
-- [ ] **OIDC (🛠️):** Keycloak event-listener bridge to PDS
-  `com.atproto.server.createAccount` that stores the synthesised
-  app-password as a Keycloak user attribute. Surface that password
-  in the user's self-service portal so the user can paste it into
-  the official Bluesky web/app client.
-- [ ] **LDAP (🛠️):** Same bridge, fed by Keycloak's LDAP federation
-  against `svc-db-openldap`. Do NOT attempt direct LDAP-to-PDS
-  sync; Keycloak's federation layer is the single source of truth.
+- [ ] **OIDC (🛠️):** Variant A+ in-role login-broker (under
+  [files/login-broker/](../../roles/web-app-bluesky/files/login-broker/))
+  sits behind `web-app-oauth2-proxy` and in front of the official
+  `@bluesky-social/social-app` web client. On a user's first
+  OIDC-authenticated visit the broker auto-provisions a Bluesky PDS
+  account via `com.atproto.server.createAccount`, encrypts the
+  synthesised app-password with **AES-256-GCM** (32-byte key from
+  the credentials vault, `base64:`-prefixed per the project canon),
+  and stores the ciphertext as the `bluesky_app_password_enc`
+  Keycloak user attribute. Subsequent visits decrypt the stored
+  password in-broker, exchange it for a PDS session via
+  `com.atproto.server.createSession`, and drop the resulting JWTs
+  into `localStorage["BSKY_STORAGE"]` through an HTML handoff page
+  so the user reaches social-app as an authenticated Bluesky account
+  WITHOUT ever seeing the synthesised app-password.
+- [ ] **LDAP (🛠️):** Same broker, fed by Keycloak's LDAP federation
+  against `svc-db-openldap`. The integration path is identical from
+  Bluesky's perspective; only the Keycloak user-storage backend
+  changes (matrix variant 1).
 - [ ] **RBAC (❌):** PDS has no in-app role concept beyond "account
-  exists / does not exist". Document the SSO/RBAC exception per
-  [lifecycle.md](../contributing/design/services/lifecycle.md).
-- [ ] **Watch:** PDS handle uniqueness collides with Keycloak's username
-  freedoms (dots, plus signs). The bridge MUST sanitise handles to
-  the AT Protocol's allowed character set and surface the sanitised
-  handle back to the user. The PLC-directory dependency also makes
-  the initial provisioning network-bound; budget retries.
+  exists / does not exist". Membership in the
+  `/roles/web-app-bluesky` Keycloak group gates entry at the
+  oauth2-proxy level (allowlist); finer-grained authorisation is
+  not feasible upstream. Document the SSO/RBAC exception per
+  [lifecycle.md](../contributing/design/services/lifecycle.md) for
+  the in-app tier.
+- [ ] **Watch:** The encrypted app-password lives at rest in the
+  Keycloak user-attribute table. AES-256-GCM with the
+  `bridge_encryption_key` credential keeps the at-rest Bluesky
+  credential out of any post-DB-dump exposure path. PDS handle
+  uniqueness collides with Keycloak's username freedoms (dots,
+  plus signs); the broker sanitises handles to the AT Protocol's
+  allowed character set (`[a-z0-9-]`) before calling
+  createAccount. PLC-directory provisioning is network-bound, the
+  broker surfaces failures synchronously so the operator can
+  retry. Encryption-key rotation and an external secrets store are
+  tracked under **Future hardening** below.
 
 ### web-app-bookwyrm 🐣
 
@@ -482,6 +503,41 @@ that MUST be ticked before the next step starts:
   an equivalent already covered by `permissions.allow` in
   [.claude/settings.json](../../.claude/settings.json) instead of
   pausing for confirmation.
+
+## Future hardening 🔐 (post-013)
+
+The items below are identified gaps in the at-rest secret hygiene
+and operational posture of the in-scope roles. They are NOT
+blockers for the `lifecycle: beta` promotion but are tracked here
+so they don't get lost between this requirement and the next one.
+
+- **Bluesky encryption-key rotation.** The
+  [login-broker](../../roles/web-app-bluesky/files/login-broker/)
+  encrypts each user's PDS app-password with a single symmetric
+  AES-256-GCM key (`bridge_encryption_key`). Rotating the key
+  requires re-encrypting every existing
+  `bluesky_app_password_enc` user-attribute. A standalone
+  rotation task plus a documented two-key transition window is
+  out of scope for 013 and tracked here as a follow-up.
+- **External secrets store for the Bluesky app-password.** Holding
+  the encrypted app-password as a Keycloak user attribute is
+  acceptable for the at-rest threat model agreed in 013, but a
+  dedicated secrets backend (HashiCorp Vault / OpenBao) with
+  per-secret access logs would lift the dependency on Keycloak's
+  user-attribute table and make audit trails first-class.
+- **Joomla `?fallback=local` IP allowlist.** For deployments that
+  want to keep the operational hatch in `plg_system_keycloak`
+  without exposing it to the public internet, an IP-allowlist on
+  the `?fallback=local` query would let the hatch live behind a
+  VPN. Out of scope for 013.
+- **Bluesky Keycloak event-listener SPI.** The Java SPI source
+  under
+  [files/keycloak-bluesky-bridge/](../../roles/web-app-bluesky/files/keycloak-bluesky-bridge/)
+  is shaped to perform the same provisioning at Keycloak event
+  time (REGISTER / LOGIN), independently of the broker. Building
+  the JAR and registering the listener would let the broker
+  recover faster after a cold start. Build pipeline + realm
+  wiring is multi-day work and tracked here as a follow-up.
 
 ## Acceptance ✅
 

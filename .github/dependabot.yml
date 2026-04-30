@@ -72,17 +72,18 @@ updates:
       - "ci"
 
   # ------------------------------------------------------------
-  # npm / Node.js (package.json)
+  # npm / Node.js (package.json) — Bluesky login-broker has zero
+  # runtime npm deps but ships a package.json metadata stub.
   # ------------------------------------------------------------
-  #- package-ecosystem: "npm"
-  #  directories:
-  #    - "/roles/test-e2e-playwright/files"
-  #  schedule:
-  #    interval: "daily"
-  #    time: "00:00"
-  #  labels:
-  #    - "dependencies"
-  #    - "javascript"
+  - package-ecosystem: "npm"
+    directories:
+      - "/roles/web-app-bluesky/files/login-broker"
+    schedule:
+      interval: "daily"
+      time: "00:00"
+    labels:
+      - "dependencies"
+      - "javascript"
 
   # ------------------------------------------------------------
   # Composer / PHP (composer.json) — Joomla OIDC plugin

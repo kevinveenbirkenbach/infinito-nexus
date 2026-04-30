@@ -49,3 +49,23 @@ BLUESKY_ADMIN_PASSWORD:         "{{ lookup('users', 'administrator').password }}
 # Front proxy
 BLUESKY_FRONT_PROXY_CONTENT:    "{{ lookup('template', 'extra_locations.conf.j2') }}"
 BLUESKY_CONFIG_UPSTREAM_URL:    "{{ lookup('config', application_id, 'server.config_upstream_url') }}"
+
+## Login broker (variant A+ per requirement 013)
+BLUESKY_BROKER_BUILD_CONTEXT:   "{{ [ lookup('container', application_id, 'directories.services'), 'login-broker' ] | path_join }}"
+BLUESKY_BROKER_SRC_DIR:         "{{ role_path }}/files/login-broker"
+BLUESKY_BROKER_IMAGE:           "bluesky_broker_custom"
+BLUESKY_BROKER_CONTAINER:       "{{ application_id | get_entity_name }}-broker"
+BLUESKY_BROKER_KC_CLIENT_ID:    "web-app-bluesky-broker"
+
+## Keycloak provisioning (broker service-account client)
+BLUESKY_KEYCLOAK_CONTAINER:     "{{ lookup('config', 'web-app-keycloak', 'services.keycloak.name') }}"
+BLUESKY_KEYCLOAK_ADMIN_USER:    "{{ lookup('config', 'web-app-keycloak', 'services.keycloak.accounts.system.username') }}"
+BLUESKY_KEYCLOAK_ADMIN_PASS:    "{{ lookup('users', 'administrator').password }}"
+
+## Credentials
+BLUESKY_BRIDGE_ENCRYPTION_KEY:  "{{ lookup('config', application_id, 'credentials.bridge_encryption_key') }}"
+BLUESKY_KC_ADMIN_CLIENT_SECRET: "{{ lookup('config', application_id, 'credentials.kc_admin_client_secret') }}"
+
+## oauth2-proxy bind-mount paths (used by the heal-bind-mount task)
+BLUESKY_OAUTH2_PROXY_CONTAINER: "{{ application_id | get_entity_name }}-oauth2-proxy"
+BLUESKY_OAUTH2_PROXY_CFG_PATH:  "{{ [ lookup('container', application_id, 'directories.volumes'), lookup('config', 'web-app-oauth2-proxy', 'services.oauth2-proxy.configuration_file') ] | path_join }}"

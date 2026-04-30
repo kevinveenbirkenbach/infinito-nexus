@@ -7,3 +7,20 @@ credentials:
     description: PLC rotation key in hex format (32 bytes)
     algorithm: sha256
     validation: ^[a-f0-9]{64}$
+  bridge_encryption_key:
+    description: |-
+      AES-256-GCM symmetric key used by the login-broker to encrypt
+      the per-user Bluesky app-password before it is stored on the
+      Keycloak user record (attribute `bluesky_app_password_enc`).
+      Format: `base64:<44-char-base64-of-32-random-bytes>`. The
+      broker strips the `base64:` prefix at startup.
+    algorithm: base64_prefixed_32
+    validation: ^base64:[A-Za-z0-9+/]{43}=$
+  kc_admin_client_secret:
+    description: |-
+      Service-account `client_secret` for the Keycloak Admin client
+      that the login-broker uses to read & write the user attribute
+      that holds the encrypted Bluesky app-password. Provisioned
+      against the Keycloak realm at deploy time.
+    algorithm: alphanumeric
+    validation: ^[A-Za-z0-9]{32,}$

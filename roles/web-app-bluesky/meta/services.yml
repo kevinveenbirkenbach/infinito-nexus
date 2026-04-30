@@ -11,11 +11,53 @@ email:
   enabled: true
   shared: true
 # noqa: shared
+oidc:
+  # The login-broker authenticates Keycloak users via the
+  # `web-app-oauth2-proxy` sidecar (X-Forwarded-User header),
+  # so the Bluesky role does NOT need a per-app native-OIDC client.
+  # The broker's OWN service-account client for the Keycloak Admin API
+  # is provisioned separately by `tasks/05_keycloak_admin_client.yml`
+  # and is independent of `services.oidc.enabled`.
+  enabled: false
+  shared: false
+ldap:
+  # PDS DID-based auth has no LDAP path; the LDAP variant for this
+  # role rides on the same broker — Keycloak federates LDAP and the
+  # broker reads the resulting Keycloak user attribute. The
+  # ldap.enabled flag here only affects the role's `services.<ldap>`
+  # toggles and is set per matrix variant.
+  enabled: false
+  shared: false
+oauth2:
+  enabled: true
+  shared: false
+  origin:
+    host: bluesky-broker
+    port: 8080
+  # ACL — the role serves THREE domains (web/api/view) via the same
+  # front-proxy oauth2 stack. Federation traffic to `api.bluesky.<DOMAIN>`
+  # MUST stay reachable without an OIDC redirect, otherwise other PDS
+  # instances and the AT Protocol relays cannot read account
+  # descriptors. The PDS exposes its public surface under `/xrpc/*`
+  # and `/.well-known/*`; both are whitelisted so they bypass the
+  # gate. The default `/` path is gated and routes through
+  # oauth2-proxy → bluesky-broker → social-app (the user-visible web
+  # UI lives at `web.bluesky.<DOMAIN>`).
+  acl:
+    whitelist:
+      - /xrpc/
+      - /.well-known/
+      - /robots.txt
+      - /oauth2/callback
+  allowed_groups:
+  - '{{ lookup(''rbac_group_path'', application_id=''web-app-bluesky'', role=''administrator'') }}'
+# noqa: shared
 web:
   enabled: true
   ports:
     local:
       http: 8031
+      oauth2: 16496
 view:
   enabled: false
   ports:
@@ -24,6 +66,13 @@ view:
 pds:
   image: ghcr.io/bluesky-social/pds
   version: latest
+broker:
+  # Login-broker sidecar that owns the OIDC → PDS app-password
+  # handoff and the AES-256-GCM-encrypted user attribute. The image
+  # is built from `files/login-broker/`.
+  name: bluesky-broker
+  image: bluesky-broker
+  port: 8080
 css:
   enabled: true
   shared: true
@@ -35,6 +84,12 @@ api:
     local:
       http: 8030
 bluesky:
+  ports:
+    local:
+      # oauth2-proxy listens here; the front-proxy routes the gated
+      # default `/` path through this port. Picked so it doesn't
+      # collide with the existing api/web/view bindings above.
+      oauth2: 16497
   run_after:
   - web-app-matomo
   - web-app-keycloak

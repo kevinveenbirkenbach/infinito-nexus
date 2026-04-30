@@ -1,0 +1,18 @@
+# Matrix-deploy variant overrides for this role (requirement 013
+# alpha-to-beta promotion). Both variants ride the same OIDC →
+# login-broker → social-app handoff (variant A+); the difference is
+# whether Keycloak's user storage is local (variant 0) or LDAP-
+# federated against svc-db-openldap (variant 1). This matches the
+# requirement-013 contract that 🛠️ glue paths MUST exercise both an
+# `oidc` and an `ldap` variant.
+# See docs/contributing/artefact/files/role/variants.md for the file format.
+
+# variant 0: OIDC variant (canonical default).
+- {}
+
+# variant 1: LDAP variant. Keep oauth2-proxy active (user-facing
+# entry point is unchanged) but flip the LDAP marker so Playwright's
+# LDAP_SERVICE_ENABLED gate fires.
+- services:
+    ldap:
+      enabled: true
