@@ -1,4 +1,5 @@
 const { test, expect } = require("@playwright/test");
+const { skipUnlessServiceEnabled } = require("./service-gating");
 
 test.use({ ignoreHTTPSErrors: true });
 
@@ -17,7 +18,24 @@ function normalizeBaseUrl(value) {
   return decodeDotenvQuotedValue(value || "").replace(/\/$/, "");
 }
 
+async function performOidcLogin(page, username, password) {
+  const usernameField = page.locator("input[name='username'], input#username").first();
+  const passwordField = page.locator("input[name='password'], input#password").first();
+  const signInButton = page
+    .locator("input#kc-login, button#kc-login, button[type='submit'], input[type='submit']")
+    .first();
+
+  await expect(usernameField).toBeVisible({ timeout: 60_000 });
+  await usernameField.fill(username);
+  await usernameField.press("Tab");
+  await passwordField.fill(password);
+  await signInButton.click();
+}
+
 const baseUrl = normalizeBaseUrl(process.env.LIBRETRANSLATE_BASE_URL || "");
+const oidcIssuerUrl = normalizeBaseUrl(process.env.OIDC_ISSUER_URL || "");
+const adminUsername = decodeDotenvQuotedValue(process.env.ADMIN_USERNAME);
+const adminPassword = decodeDotenvQuotedValue(process.env.ADMIN_PASSWORD);
 const canonicalDomain = decodeDotenvQuotedValue(process.env.CANONICAL_DOMAIN || "");
 
 test.beforeEach(async ({ page }) => {
@@ -26,27 +44,63 @@ test.beforeEach(async ({ page }) => {
   await page.context().clearCookies();
 });
 
-test("libretranslate UI is served under canonical domain", async ({ page }) => {
-  // LibreTranslate authenticates programmatic clients with API keys
-  // and decouples its in-app authorisation from any IdP. The OIDC
-  // path is via a sidecar oauth2-proxy on the UI subpath only;
-  // LDAP and RBAC are documented exceptions in README.md per
-  // requirement 013.
-  const response = await page.goto(`${baseUrl}/`);
-  expect(response, "Expected libretranslate response").toBeTruthy();
-  expect(response.status(), "Expected libretranslate status < 500").toBeLessThan(500);
+test("libretranslate /languages API stays reachable without auth", async ({ request }) => {
+  // The /languages endpoint is part of the API surface that
+  // LibreTranslate authenticates with API keys; per requirement
+  // 013 it MUST stay reachable even when the UI is OIDC-gated by
+  // the oauth2-proxy sidecar. The role's `services.oauth2.acl.whitelist`
+  // includes /languages, /translate, /detect for exactly this reason.
+  const response = await request.get(`${baseUrl}/languages`);
+  expect(response.status(), "Expected libretranslate /languages status < 400 without auth").toBeLessThan(400);
+  const contentType = response.headers()["content-type"] || "";
   expect(
-    response.url().includes(canonicalDomain),
-    `Expected canonical domain "${canonicalDomain}" to back the libretranslate URL`
+    contentType.includes("application/json"),
+    `Expected JSON content-type for /languages, got "${contentType}"`
   ).toBe(true);
 });
 
-test("libretranslate /languages API responds", async ({ request }) => {
-  // The /languages endpoint is anonymous in the upstream default
-  // image and returns the list of supported language pairs. It is
-  // the simplest "the API is alive" probe and MUST stay reachable
-  // even when the UI is OIDC-gated, per the LibreTranslate per-role
-  // notes in requirement 013.
-  const response = await request.get(`${baseUrl}/languages`);
-  expect(response.status(), "Expected libretranslate /languages status < 500").toBeLessThan(500);
+test("administrator: oauth2-proxy gates the LibreTranslate UI through Keycloak", async ({ page }) => {
+  skipUnlessServiceEnabled("oidc");
+  expect(oidcIssuerUrl, "OIDC_ISSUER_URL must be set when OIDC is enabled").toBeTruthy();
+  expect(adminUsername, "ADMIN_USERNAME must be set").toBeTruthy();
+  expect(adminPassword, "ADMIN_PASSWORD must be set").toBeTruthy();
+
+  // The whole `/` (UI) path is gated by oauth2-proxy; navigating to
+  // it triggers a redirect chain to oauth2-proxy and then to
+  // Keycloak's authorization endpoint.
+  const expectedOidcAuthUrl = `${oidcIssuerUrl}/protocol/openid-connect/auth`;
+  await page.goto(`${baseUrl}/`);
+
+  await expect
+    .poll(() => page.url(), {
+      timeout: 60_000,
+      message: `expected redirect to Keycloak OIDC auth (${expectedOidcAuthUrl})`
+    })
+    .toContain(expectedOidcAuthUrl);
+
+  await performOidcLogin(page, adminUsername, adminPassword);
+
+  await expect
+    .poll(() => page.url(), {
+      timeout: 60_000,
+      message: `expected redirect back to LibreTranslate at ${baseUrl}`
+    })
+    .toContain(canonicalDomain);
+
+  // After OIDC the UI MUST render. LibreTranslate's frontend exposes
+  // the source/target language selectors and the translate button on
+  // the landing page.
+  await expect(page.locator("body")).toContainText(/translate|source|target|language/i, { timeout: 60_000 });
+
+  // Logout via oauth2-proxy's sign-out endpoint and confirm the gate
+  // re-engages.
+  await page.goto(`${baseUrl}/oauth2/sign_out`, { waitUntil: "commit" }).catch(() => {});
+  await page.context().clearCookies();
+  await page.goto(`${baseUrl}/`);
+  await expect
+    .poll(() => page.url(), {
+      timeout: 60_000,
+      message: "expected the UI to redirect to Keycloak again after logout"
+    })
+    .toContain(expectedOidcAuthUrl);
 });

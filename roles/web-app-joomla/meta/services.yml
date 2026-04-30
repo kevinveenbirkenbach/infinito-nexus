@@ -1,9 +1,23 @@
 oidc:
-  enabled: true
-  shared: true
+  enabled: false
+  shared: false
 ldap:
   enabled: false
   shared: false
+# Joomla 6 ships no first-party OIDC adapter and the JED community
+# plugins lag the Joomla 6 release. The integrated OIDC login path is
+# therefore provided by a sidecar `web-app-oauth2-proxy` in front of
+# the Joomla web UI per requirement 013's per-role notes (the marker
+# is technically 🛠️ glue, not ✅ native). LDAP integration uses the
+# same oauth2-proxy with an LDAP backend.
+oauth2:
+  enabled: true
+  shared: false
+  origin:
+    host: joomla
+    port: 80
+  allowed_groups:
+  - '{{ lookup(''rbac_group_path'', application_id=''web-app-joomla'', role=''administrator'') }}'
 logout:
   enabled: true
   shared: true
@@ -32,6 +46,7 @@ joomla:
   ports:
     local:
       http: 8014
+      oauth2: 16495
   run_after:
   - web-app-matomo
   - web-app-keycloak

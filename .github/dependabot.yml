@@ -211,16 +211,16 @@ updates:
   #     - "dependencies"
   #     - "go"
 
-  # maven: no pom.xml found
-  # - package-ecosystem: "maven"
-  #   directories:
-  #     - "/"
-  #   schedule:
-  #     interval: "daily"
-  #     time: "00:00"
-  #   labels:
-  #     - "dependencies"
-  #     - "java"
+  # maven: bluesky Keycloak event-listener SPI bridge
+  - package-ecosystem: "maven"
+    directories:
+      - "**"
+    schedule:
+      interval: "daily"
+      time: "00:00"
+    labels:
+      - "dependencies"
+      - "java"
 
   # gradle: no build.gradle found
   # - package-ecosystem: "gradle"

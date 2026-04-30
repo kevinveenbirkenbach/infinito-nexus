@@ -56,9 +56,9 @@ jobs:
         # Disabled — no matching Go files found in the repository
         # - language: go
         #   build-mode: none
-        # Disabled — no matching Java/Kotlin files found in the repository
-        # - language: java-kotlin
-        #   build-mode: none
+        # bluesky Keycloak event-listener SPI bridge
+        - language: java-kotlin
+          build-mode: none
         # Disabled — no matching Rust files found in the repository
         # - language: rust
         #   build-mode: none
