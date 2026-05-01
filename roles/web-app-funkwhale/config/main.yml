@@ -2,11 +2,11 @@ compose:
   services:
     funkwhale:
       image:    "funkwhale/front"
-      version:  "2.0.1"
+      version:  "2.0.2"
       min_storage: "20GB"
     api:
       image:    "funkwhale/api"
-      version:  "2.0.1"
+      version:  "2.0.2"
     typesense:
       image:    "typesense/typesense"
       version:  "30.2"
