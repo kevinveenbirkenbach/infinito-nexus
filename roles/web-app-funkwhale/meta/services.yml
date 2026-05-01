@@ -1,6 +1,6 @@
 funkwhale:
   image: funkwhale/front
-  version: '2'
+  version: 2.0.2
   min_storage: 20GB
   ports:
     local:
@@ -12,7 +12,7 @@ funkwhale:
   lifecycle: beta
 api:
   image: funkwhale/api
-  version: '2'
+  version: 2.0.2
 typesense:
   image: typesense/typesense
   version: '30.2'
