@@ -1,3 +1,4 @@
+{% set container_port = 80 %}
 {% include 'roles/sys-svc-compose/templates/base.yml.j2' %}
 
   pihole:
@@ -17,13 +18,9 @@
     volumes:
       - pihole_data:/etc/pihole
       - pihole_dnsmasq:/etc/dnsmasq.d
-{% include 'roles/sys-svc-container/templates/healthcheck/curl.yml.j2' %}
+{% include 'roles/sys-svc-container/templates/healthcheck/tcp.yml.j2' %}
 {% include 'roles/sys-svc-container/templates/networks.yml.j2' %}
 
-networks:
-  default:
-    name: "{{ PIHOLE_NETWORK }}"
-    external: true
 {% include 'roles/sys-svc-compose/templates/networks.yml.j2' %}
 
 {{ applications | compose_volumes(
@@ -31,6 +28,7 @@ networks:
     database_volume=lookup('database', application_id, 'volume'),
     extra_volumes={
       'pihole_data':   {'name': PIHOLE_VOLUME_DATA},
-      'pihole_dnsmasq': {'name': PIHOLE_VOLUME_DNSMASQ}
+      'pihole_dnsmasq': {'name': PIHOLE_VOLUME_DNSMASQ},
+      'redis':         {}
     }
 ) }}

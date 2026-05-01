@@ -15,3 +15,6 @@ PIHOLE_TIMEZONE:          "{{ lookup('config', application_id, 'pihole.timezone'
 # OAuth2 enabled — disable Pi-hole native password when OAuth2 is active
 PIHOLE_OAUTH2_ENABLED:    "{{ lookup('config', application_id, 'compose.services.oauth2.enabled') | bool }}"
 PIHOLE_PASSWORD:          "{{ '' if PIHOLE_OAUTH2_ENABLED else lookup('password', application_id, 'admin') }}"
+
+# Playwright — disable wait check because oauth2-proxy returns 403 for unauthenticated requests
+TEST_E2E_PLAYWRIGHT_WAIT_ENABLED: false

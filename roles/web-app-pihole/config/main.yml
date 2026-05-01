@@ -1,5 +1,7 @@
 title:              "Pi-hole"
 server:
+  status_codes:
+    default:                      [200, 301, 302, 403]
   csp:
     flags: {}
     whitelist: {}
@@ -16,7 +18,7 @@ compose:
         host:           "pihole"
         port:           "80"
       allowed_groups:
-        - "web-app-pihole-administrators"
+        - "{{ [RBAC.GROUP.NAME, 'web-app-pihole-administrator'] | path_join }}"
     logout:
       enabled:          true
       shared:           true
@@ -57,18 +59,5 @@ compose:
     dnsmasq:            "pihole_dnsmasq"
   network:              "pihole"
 pihole:
-  # Upstream DNS servers (semicolon-separated)
-  # Options:
-  #   Cloudflare:         "1.1.1.1;1.0.0.1"
-  #   Google:             "8.8.8.8;8.8.4.4"
-  #   Quad9 (filtered):   "9.9.9.9;149.112.112.112"
-  #   Quad9 (unfiltered): "9.9.9.10;149.112.112.10"
-  #   OpenDNS:            "208.67.222.222;208.67.220.220"
-  #   Custom:             "<your-dns-ip>;<your-secondary-dns-ip>"
-  # Override in your inventory file:
-  #   applications:
-  #     web-app-pihole:
-  #       pihole:
-  #         upstream_dns: "9.9.9.9;149.112.112.112"
   upstream_dns:         "1.1.1.1;1.0.0.1"
   timezone:             "{{ HOST_TIMEZONE }}"
