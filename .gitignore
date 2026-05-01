@@ -21,6 +21,7 @@ job-logs.txt
 .claude/skills
 .claude/agents
 .claude/commands
+.claude/settings.local.json
 *.lock
 
 # Host shell / editor / tooling state accidentally surfaced inside this working copy
