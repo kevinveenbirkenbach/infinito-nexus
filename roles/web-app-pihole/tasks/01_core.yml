@@ -1,11 +1,10 @@
 - include_tasks: utils/once/flag.yml
 
-- name: "Setup container network for {{ application_id }}"
-  include_tasks: "{{ [playbook_dir, 'roles/sys-svc-compose/tasks/utils/network.yml'] | path_join }}"
-  vars:
-    docker_network_name:            "{{ PIHOLE_NETWORK }}"
-    docker_network_subnet:          "{{ networks.local[application_id].subnet }}"
-    docker_compose_flush_handlers:  false
+- name: "Remove stale oauth2-proxy config directory if it exists"
+  ansible.builtin.file:
+    path: "/opt/compose/{{ application_id }}/volumes/oauth2-proxy-keycloak.cfg"
+    state: absent
+  become: true
 
 - name: "Load docker, db and proxy for {{ application_id }}"
   include_role:
