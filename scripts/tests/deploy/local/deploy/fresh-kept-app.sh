@@ -105,10 +105,16 @@ echo ">>> Running entry.sh bootstrap inside container"
 	-- bash /opt/src/infinito/scripts/tests/deploy/local/utils/entry-bootstrap.sh
 
 echo ">>> Creating inventory for app '${APPS}'"
+# RUNTIME MUST be `dev` here: the host process running this script lives
+# OUTSIDE the development compose stack, so `detect_runtime()` falls back
+# to "host". Without an explicit override the matrix-init step would bake
+# `RUNTIME=host` into host_vars and the Playwright E2E gate
+# (RUNTIME in [dev, act, github]) would never fire — kept-deploys would
+# silently skip the test stage. Mirrors fresh-purged-app.sh.
 "${PYTHON}" -m cli.deploy.development init \
 	--apps "${APPS}" \
 	--inventory-dir "${INVENTORY_DIR}" \
-	--vars '{"ASYNC_ENABLED": false}'
+	--vars '{"ASYNC_ENABLED": false, "RUNTIME": "dev"}'
 
 deploy_cmd=(
 	"${PYTHON}" -m cli.deploy.development deploy

@@ -37,16 +37,13 @@
     hostname: bluesky-broker
     pull_policy: never
     restart: {{ DOCKER_RESTART_POLICY }}
+    ports:
+      - "{{ DOCKER_BIND_HOST }}:{{ BLUESKY_BROKER_PORT }}:8080"
     environment:
       BROKER_PORT: "8080"
       SOCIAL_APP_URL: "http://web:8100"
       PDS_URL: "{{ lookup('tls', application_id, 'protocols.web') }}://{{ BLUESKY_API_DOMAIN }}"
-      PDS_HANDLE_DOMAIN: "{{ DOMAIN_PRIMARY }}"
-      KC_ADMIN_BASE_URL: "{{ lookup('tls', 'web-app-keycloak', 'url.base') }}"
-      KC_ADMIN_REALM: "{{ OIDC.CLIENT.REALM }}"
-      KC_USER_REALM: "{{ OIDC.CLIENT.REALM }}"
-      KC_ADMIN_CLIENT_ID: "{{ BLUESKY_BROKER_KC_CLIENT_ID }}"
-      KC_ADMIN_CLIENT_SECRET: "{{ BLUESKY_KC_ADMIN_CLIENT_SECRET }}"
+      PDS_HANDLE_DOMAIN: "{{ BLUESKY_PDS_HANDLE_DOMAIN }}"
       BLUESKY_BRIDGE_ENCRYPTION_KEY: "{{ BLUESKY_BRIDGE_ENCRYPTION_KEY }}"
       INSECURE_TLS: "{{ MODE_DEBUG | string | lower }}"
     healthcheck:

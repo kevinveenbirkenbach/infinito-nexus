@@ -57,11 +57,6 @@ const CONFIG = {
   pdsUrl: requireEnv("PDS_URL"),
   pdsHandleDomain: requireEnv("PDS_HANDLE_DOMAIN"),
   pdsInviteCode: process.env.PDS_INVITE_CODE || "",
-  kcAdminBaseUrl: requireEnv("KC_ADMIN_BASE_URL"),
-  kcAdminRealm: requireEnv("KC_ADMIN_REALM"),
-  kcAdminClientId: requireEnv("KC_ADMIN_CLIENT_ID"),
-  kcAdminClientSecret: requireEnv("KC_ADMIN_CLIENT_SECRET"),
-  kcUserRealm: requireEnv("KC_USER_REALM"),
   encryptionKey: decodeKey(requireEnv("BLUESKY_BRIDGE_ENCRYPTION_KEY")),
   handoffCookieName: process.env.HANDOFF_COOKIE_NAME || "bsky_handoff_done",
   handoffCookieMaxAgeSec: parseInt(process.env.HANDOFF_COOKIE_MAX_AGE || "3300", 10),
@@ -155,67 +150,18 @@ function fetchJson(method, urlString, opts = {}) {
   });
 }
 
-// --- Keycloak Admin API client --------------------------------------
-
-let cachedAdminToken = null;
-let cachedAdminTokenExpiry = 0;
-
-async function getAdminToken() {
-  const now = Math.floor(Date.now() / 1000);
-  if (cachedAdminToken && cachedAdminTokenExpiry > now + 30) {
-    return cachedAdminToken;
-  }
-  const tokenUrl =
-    `${CONFIG.kcAdminBaseUrl}/realms/${encodeURIComponent(CONFIG.kcAdminRealm)}/protocol/openid-connect/token`;
-  const form = new URLSearchParams({
-    grant_type: "client_credentials",
-    client_id: CONFIG.kcAdminClientId,
-    client_secret: CONFIG.kcAdminClientSecret
-  }).toString();
-  const res = await fetchJson("POST", tokenUrl, {
-    headers: { "Content-Type": "application/x-www-form-urlencoded" },
-    body: form
-  });
-  if (res.status !== 200 || !res.body || !res.body.access_token) {
-    throw new Error(`Keycloak token request failed: status=${res.status} body=${res.raw}`);
-  }
-  cachedAdminToken = res.body.access_token;
-  cachedAdminTokenExpiry = now + parseInt(res.body.expires_in || "60", 10);
-  return cachedAdminToken;
-}
-
-async function findUser(username) {
-  const token = await getAdminToken();
-  const url =
-    `${CONFIG.kcAdminBaseUrl}/admin/realms/${encodeURIComponent(CONFIG.kcUserRealm)}` +
-    `/users?username=${encodeURIComponent(username)}&exact=true`;
-  const res = await fetchJson("GET", url, { headers: { Authorization: `Bearer ${token}` } });
-  if (res.status !== 200 || !Array.isArray(res.body)) {
-    throw new Error(`Keycloak findUser failed: status=${res.status}`);
-  }
-  return res.body[0] || null;
-}
-
-async function updateUser(userId, partial) {
-  const token = await getAdminToken();
-  const url = `${CONFIG.kcAdminBaseUrl}/admin/realms/${encodeURIComponent(CONFIG.kcUserRealm)}` +
-              `/users/${encodeURIComponent(userId)}`;
-  const res = await fetchJson("PUT", url, {
-    headers: { Authorization: `Bearer ${token}` },
-    body: partial
-  });
-  if (res.status !== 204 && res.status !== 200) {
-    throw new Error(`Keycloak updateUser failed: status=${res.status} body=${res.raw}`);
-  }
-}
-
 // --- PDS client -----------------------------------------------------
 
 function sanitiseHandle(username) {
-  if (!username) return "user";
+  if (!username) return "kc-user";
   const lower = username.toLowerCase();
   const mapped = lower.replace(/[^a-z0-9-]+/g, "-").replace(/^-+|-+$/g, "");
-  return mapped || "user";
+  // PDS reserves common service handles ("administrator", "admin", "api",
+  // "support", "www", "bsky", "atproto", etc.) and rejects createAccount
+  // with `HandleNotAvailable: Reserved handle`. Always prefix with `kc-`
+  // so Keycloak-derived handles cannot collide with that reserved list,
+  // independent of which usernames the realm carries.
+  return `kc-${mapped || "user"}`;
 }
 
 async function pdsCreateAccount({ handle, email, password }) {
@@ -242,25 +188,27 @@ async function pdsCreateSession({ handle, password }) {
 
 // --- High-level orchestration --------------------------------------
 
-const ATTR_APP_PASSWORD_ENC = "bluesky_app_password_enc";
-const ATTR_DID = "bluesky_did";
-const ATTR_HANDLE = "bluesky_handle";
-
-function pickAttr(user, name) {
-  if (!user || !user.attributes) return null;
-  const v = user.attributes[name];
-  if (Array.isArray(v) && v.length > 0) return v[0];
-  return null;
-}
+// Per-user PDS app-password / DID / handle cache, keyed by Keycloak
+// username. In-memory, AES-256-GCM-encrypted at rest.
+//
+// We deliberately do NOT write the encrypted blob into Keycloak user
+// attributes (the previous design): on a realm with LDAP federation
+// in WRITABLE mode the bluesky_* attribute write triggers an LDAP
+// schema-violating sync push and leaves the federated user in a
+// partially-synced state, which then breaks subsequent direct OIDC
+// logins for that user (every other realm-OIDC test in the matrix
+// would regress as a side-effect of running the broker once). The
+// broker is a single-instance sidecar so an in-memory map is enough;
+// on broker restart the user re-creates a PDS app-password on first
+// SSO visit. The previous app-password remains valid in PDS until
+// rotated explicitly — acceptable for this auto-provision flow.
+const sessionCache = new Map();
 
 async function ensurePdsSession({ kcUsername, kcEmail }) {
-  const kcUser = await findUser(kcUsername);
-  if (!kcUser) {
-    throw new Error(`Keycloak user not found by username=${kcUsername}`);
-  }
   const fullHandle = `${sanitiseHandle(kcUsername)}.${CONFIG.pdsHandleDomain}`;
-  let appPasswordEnc = pickAttr(kcUser, ATTR_APP_PASSWORD_ENC);
-  let did = pickAttr(kcUser, ATTR_DID);
+  const cached = sessionCache.get(kcUsername);
+  let appPasswordEnc = cached ? cached.appPasswordEnc : null;
+  let did = cached ? cached.did : null;
   if (!appPasswordEnc) {
     const synthesised = crypto.randomBytes(18).toString("base64url");
     const created = await pdsCreateAccount({
@@ -270,13 +218,7 @@ async function ensurePdsSession({ kcUsername, kcEmail }) {
     });
     did = created.did || did;
     appPasswordEnc = encrypt(synthesised);
-    await updateUser(kcUser.id, {
-      attributes: Object.assign({}, kcUser.attributes || {}, {
-        [ATTR_APP_PASSWORD_ENC]: [appPasswordEnc],
-        [ATTR_DID]: did ? [did] : [],
-        [ATTR_HANDLE]: [fullHandle]
-      })
-    });
+    sessionCache.set(kcUsername, { appPasswordEnc, did, handle: fullHandle });
   }
   const password = decrypt(appPasswordEnc);
   const session = await pdsCreateSession({ handle: fullHandle, password });

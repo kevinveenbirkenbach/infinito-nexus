@@ -4,5 +4,20 @@ logout:
 prometheus:
   enabled: true
   shared: true
+oidc:
+  enabled: false
+  shared: false
+ldap:
+  enabled: true
+  shared: false
 xmpp:
-  lifecycle: pre-alpha
+  image: ejabberd/ecs
+  version: latest
+  name: ejabberd
+  ports:
+    local:
+      http: 8082
+  run_after:
+  - web-app-keycloak
+  - svc-db-openldap
+  lifecycle: beta

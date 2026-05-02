@@ -48,7 +48,6 @@ oauth2:
       - /xrpc/
       - /.well-known/
       - /robots.txt
-      - /oauth2/callback
   allowed_groups:
   - '{{ lookup(''rbac_group_path'', application_id=''web-app-bluesky'', role=''administrator'') }}'
 # noqa: shared
@@ -73,6 +72,9 @@ broker:
   name: bluesky-broker
   image: bluesky-broker
   port: 8080
+  ports:
+    local:
+      http: 8072
 css:
   enabled: true
   shared: true

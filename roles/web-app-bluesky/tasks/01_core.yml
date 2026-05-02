@@ -61,12 +61,12 @@
     domain: "{{ BLUESKY_API_DOMAIN }}"
     http_port: "{{ BLUESKY_API_PORT }}"
 
-- name: "Include front proxy for {{ BLUESKY_WEB_DOMAIN }}:{{ BLUESKY_WEB_PORT }}"
+- name: "Include front proxy for {{ BLUESKY_WEB_DOMAIN }}:{{ BLUESKY_BROKER_PORT }} (broker is the upstream so the variant-A+ handoff fires for every authenticated request)"
   include_role:
     name: sys-stk-front-proxy
   vars:
     domain:                         "{{ BLUESKY_WEB_DOMAIN }}"
-    http_port:                      "{{ BLUESKY_WEB_PORT }}"
+    http_port:                      "{{ BLUESKY_BROKER_PORT }}"
     webserver_extra_configuration:  "{{ BLUESKY_FRONT_PROXY_CONTENT }}"
   when: BLUESKY_WEB_ENABLED | bool
 
@@ -83,10 +83,6 @@
 
 # 03_social_app already ran before sys-svc-compose (above) so that the
 # compose build handler finds the cloned context.
-
-- name: "Provision Keycloak service-account client for the broker (variant A+ per requirement 013)"
-  ansible.builtin.include_tasks: "05_keycloak_admin_client.yml"
-  when: BLUESKY_WEB_ENABLED | bool
 
 - name: "DNS for Bluesky"
   include_tasks: "04_dns.yml"
