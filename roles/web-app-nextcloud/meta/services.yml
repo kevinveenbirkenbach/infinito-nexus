@@ -110,7 +110,11 @@ nextcloud:
     mail:
       enabled: true
     metadata:
-      enabled: true
+      # Disabled: upstream "Metadata" app is not compatible with the currently
+      # pinned Nextcloud server version (occ app:enable returns "App 'Metadata'
+      # cannot be installed because it is not compatible with this version of
+      # the server."). Re-enable once a compatible release ships.
+      enabled: false
     news:
       enabled: true
     oidc_login:
