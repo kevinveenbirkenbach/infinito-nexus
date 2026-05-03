@@ -513,14 +513,16 @@ so they don't get lost between this requirement and the next one.
   without exposing it to the public internet, an IP-allowlist on
   the `?fallback=local` query would let the hatch live behind a
   VPN. Out of scope for 013.
-- **Bluesky Keycloak event-listener SPI.** The Java SPI source
-  under
-  [files/keycloak-bluesky-bridge/](../../roles/web-app-bluesky/files/keycloak-bluesky-bridge/)
-  is shaped to perform the same provisioning at Keycloak event
-  time (REGISTER / LOGIN), independently of the broker. Building
-  the JAR and registering the listener would let the broker
-  recover faster after a cold start. Build pipeline + realm
-  wiring is multi-day work and tracked here as a follow-up.
+- **Bluesky Keycloak event-listener SPI.** A Java SPI that performs
+  the PDS provisioning at Keycloak event time (REGISTER / LOGIN),
+  independently of the broker, would let the broker recover faster
+  after a cold start (no fresh `createAccount` on the next visit).
+  The earlier scaffold under `files/keycloak-bluesky-bridge/` was
+  removed when the broker switched to in-memory cache (its design
+  centred on Keycloak user-attribute storage which the new broker
+  no longer uses); a fresh design that writes to an external
+  secrets store (see above) is the better starting point. Out of
+  scope for 013.
 
 ## Acceptance ✅
 

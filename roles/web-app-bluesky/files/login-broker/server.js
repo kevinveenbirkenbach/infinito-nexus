@@ -57,6 +57,12 @@ const CONFIG = {
   pdsUrl: requireEnv("PDS_URL"),
   pdsHandleDomain: requireEnv("PDS_HANDLE_DOMAIN"),
   pdsInviteCode: process.env.PDS_INVITE_CODE || "",
+  // Optional: enables the broker to recover from `Handle already
+  // taken` (cross-variant deploys / broker restart with persistent
+  // PDS volume) by resetting the existing account's password via
+  // the PDS admin API. When unset, the broker still works for the
+  // first-deploy path but a recovery is impossible.
+  pdsAdminPassword: process.env.PDS_ADMIN_PASSWORD || "",
   encryptionKey: decodeKey(requireEnv("BLUESKY_BRIDGE_ENCRYPTION_KEY")),
   handoffCookieName: process.env.HANDOFF_COOKIE_NAME || "bsky_handoff_done",
   handoffCookieMaxAgeSec: parseInt(process.env.HANDOFF_COOKIE_MAX_AGE || "3300", 10),
@@ -172,7 +178,10 @@ async function pdsCreateAccount({ handle, email, password }) {
   }
   const res = await fetchJson("POST", url, { body });
   if (res.status < 200 || res.status >= 300) {
-    throw new Error(`PDS createAccount failed: status=${res.status} body=${res.raw}`);
+    const err = new Error(`PDS createAccount failed: status=${res.status} body=${res.raw}`);
+    err.pdsStatus = res.status;
+    err.pdsBody = res.body;
+    throw err;
   }
   return res.body;
 }
@@ -184,6 +193,36 @@ async function pdsCreateSession({ handle, password }) {
     throw new Error(`PDS createSession failed: status=${res.status} body=${res.raw}`);
   }
   return res.body;
+}
+
+async function pdsResolveHandle(handle) {
+  const url = `${CONFIG.pdsUrl}/xrpc/com.atproto.identity.resolveHandle?handle=${encodeURIComponent(handle)}`;
+  const res = await fetchJson("GET", url);
+  if (res.status !== 200 || !res.body || !res.body.did) {
+    throw new Error(`PDS resolveHandle failed: status=${res.status} body=${res.raw}`);
+  }
+  return res.body.did;
+}
+
+// PDS admin API uses HTTP Basic auth with `admin:<PDS_ADMIN_PASSWORD>`.
+// Used to recover from `Handle already taken` when the broker's
+// in-process cache has been lost (broker container restart, or
+// cross-variant deploy that shares the PDS data volume) but PDS
+// still has the account from a previous broker session. Resetting
+// the password lets us mint a fresh one we control.
+async function pdsAdminUpdatePassword(did, newPassword) {
+  if (!CONFIG.pdsAdminPassword) {
+    throw new Error("PDS_ADMIN_PASSWORD not configured — cannot recover from Handle already taken");
+  }
+  const url = `${CONFIG.pdsUrl}/xrpc/com.atproto.admin.updateAccountPassword`;
+  const auth = Buffer.from(`admin:${CONFIG.pdsAdminPassword}`).toString("base64");
+  const res = await fetchJson("POST", url, {
+    headers: { Authorization: `Basic ${auth}` },
+    body: { did, password: newPassword }
+  });
+  if (res.status < 200 || res.status >= 300) {
+    throw new Error(`PDS admin updateAccountPassword failed: status=${res.status} body=${res.raw}`);
+  }
 }
 
 // --- High-level orchestration --------------------------------------
@@ -211,12 +250,28 @@ async function ensurePdsSession({ kcUsername, kcEmail }) {
   let did = cached ? cached.did : null;
   if (!appPasswordEnc) {
     const synthesised = crypto.randomBytes(18).toString("base64url");
-    const created = await pdsCreateAccount({
-      handle: fullHandle,
-      email: kcEmail || `${kcUsername}@bridge.local`,
-      password: synthesised
-    });
-    did = created.did || did;
+    try {
+      const created = await pdsCreateAccount({
+        handle: fullHandle,
+        email: kcEmail || `${kcUsername}@bridge.local`,
+        password: synthesised
+      });
+      did = created.did || did;
+    } catch (err) {
+      // Recover from `Handle already taken` — happens when the broker's
+      // in-memory cache has been lost (container restart, cross-variant
+      // deploy that shares the PDS data volume) but the PDS still has
+      // the account from a previous broker session. Use the PDS admin
+      // API to reset the password to a fresh value we control, so the
+      // subsequent createSession works again.
+      const isHandleTaken =
+        err.pdsBody && err.pdsBody.error === "InvalidRequest" &&
+        typeof err.pdsBody.message === "string" &&
+        err.pdsBody.message.includes("Handle already taken");
+      if (!isHandleTaken) throw err;
+      did = await pdsResolveHandle(fullHandle);
+      await pdsAdminUpdatePassword(did, synthesised);
+    }
     appPasswordEnc = encrypt(synthesised);
     sessionCache.set(kcUsername, { appPasswordEnc, did, handle: fullHandle });
   }
