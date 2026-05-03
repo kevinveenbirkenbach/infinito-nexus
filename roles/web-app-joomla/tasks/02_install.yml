@@ -1,7 +1,12 @@
-# Wait until the Joomla core is copied into the volume
+# Wait until the Joomla core is copied into the volume.
+# `index.php` alone is not enough — the upstream image (joomla:5.x-php8.3-apache)
+# copies plugin manifests after the front-controller, and the CLI install crashes
+# on `simplexml_load_file(): failed to load /var/www/html/plugins/actionlog/joomla/joomla.xml`
+# if it runs before the plugin tarball has finished extracting. Waiting for that
+# specific manifest is the cheapest end-of-extract marker.
 - name: "Wait for Joomla files to exist"
   command:
-    argv: [ docker, exec, "{{ JOOMLA_CONTAINER }}", test, -f, /var/www/html/index.php ]
+    argv: [ docker, exec, "{{ JOOMLA_CONTAINER }}", test, -f, /var/www/html/plugins/actionlog/joomla/joomla.xml ]
   register: joomla_files
   changed_when: false
   retries: 60
