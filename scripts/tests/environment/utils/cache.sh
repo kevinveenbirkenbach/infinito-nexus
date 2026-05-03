@@ -194,7 +194,24 @@ probe_did_inner_build() {
 		return 0
 	fi
 
-	local network="${COMPOSE_NETWORK:-infinito-nexus_default}"
+	# Compose derives the network name from the project name, which
+	# defaults to the host CWD basename: `infinito-nexus` locally,
+	# `infinito-nexus-core` in the CI fork, something else again in
+	# Act-runner workspaces or worktrees. Discover the network the
+	# frontend container is actually on instead of hardcoding it, so
+	# the probe stays correct regardless of how the repo is named.
+	local network="${COMPOSE_NETWORK:-}"
+	if [[ -z "${network}" ]]; then
+		network="$(docker inspect -f \
+			'{{range $k,$_ := .NetworkSettings.Networks}}{{$k}}{{"\n"}}{{end}}' \
+			infinito-package-cache-frontend 2>/dev/null |
+			head -n1)"
+	fi
+	if [[ -z "${network}" ]]; then
+		echo "[FAIL] DiD probe: could not discover compose network for" \
+			"infinito-package-cache-frontend (container missing or not connected)" >&2
+		exit 1
+	fi
 	local before after delta tmpdir tag rc=0
 	before="$(docker logs infinito-package-cache-frontend 2>&1 | wc -l)"
 
