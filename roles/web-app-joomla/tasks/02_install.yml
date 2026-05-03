@@ -45,6 +45,14 @@
     # NOTE: argv[0] must be `bash`, not `sh`. On Debian/Ubuntu CI runners
     # `/bin/sh` is dash, which does not support `set -o pipefail` and aborts
     # with "sh: 1: set: Illegal option -o pipefail". See infinito-nexus/core#194.
+    #
+    # Secrets travel via `environment:` -> bash env vars rather than direct
+    # Jinja substitution into the script body. With direct substitution a
+    # password like `'$tr0ng€xampl3PW!` (admin default) lands inside `"…"`
+    # in the script and bash performs parameter expansion on `$tr0ng`,
+    # silently truncating the secret to `'€xampl3PW!`. Joomla then installs
+    # with the truncated password while Playwright (and the role's own
+    # password-reset task) try to use the full one — login fails.
     argv:
       - bash
       - -lc
@@ -56,14 +64,17 @@
           "--db-type={{ JOOMLA_DB_CONNECTOR }}" \
           "--db-host={{ lookup('database', application_id, 'host') }}" \
           "--db-user={{ lookup('database', application_id, 'username') }}" \
-          "--db-pass={{ lookup('database', application_id, 'password') }}" \
+          "--db-pass=${J_DB_PASSWORD}" \
           "--db-name={{ lookup('database', application_id, 'name') }}" \
           "--admin-user={{ JOOMLA_USER }}" \
           "--admin-username={{ JOOMLA_USER_NAME }}" \
-          "--admin-password={{ JOOMLA_USER_PASSWORD }}" \
+          "--admin-password=${J_ADMIN_PASSWORD}" \
           "--admin-email={{ JOOMLA_USER_EMAIL }}" \
           --no-interaction \
           "--site-name={{ JOOMLA_SITE_NAME }}"
+  environment:
+    J_DB_PASSWORD: "{{ lookup('database', application_id, 'password') }}"
+    J_ADMIN_PASSWORD: "{{ JOOMLA_USER_PASSWORD }}"
   register: j_install
   retries: 5
   delay: 5
