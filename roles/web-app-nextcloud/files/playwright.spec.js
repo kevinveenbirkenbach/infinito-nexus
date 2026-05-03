@@ -451,7 +451,16 @@ async function loginToStandaloneNextcloud(adminPage, username = loginUsername, p
 }
 
 async function logoutStandaloneNextcloud(adminPage) {
-  const userMenuTrigger = adminPage.locator("#user-menu button");
+  // `#user-menu button` is non-strict on Nextcloud 32+: the menu wrapper
+  // wraps both the trigger button (aria-label="Settings menu") AND the
+  // submenu's own buttons once it has been opened. Pin to the trigger via
+  // its aria-label (stable across templates) and fall back to "first inside
+  // #user-menu" only if the role lookup misses (e.g. localized aria-labels).
+  const userMenuTrigger = adminPage
+    .locator(
+      "#user-menu button[aria-label='Settings menu'], #user-menu > button, #user-menu button"
+    )
+    .first();
   const logoutLinkByName = adminPage.getByRole("link", { name: "Log out" });
   const logoutLinkByHref = adminPage.locator('a[href*="logout"]');
   const logoutConfirmButton = adminPage.getByRole("button", { name: "Logout" });
