@@ -1,0 +1,27 @@
+# 015 - OpenCloud and OpenTalk IAM integration
+
+## User Story
+
+As an administrator, I want new `web-app-opencloud` and `web-app-opentalk` roles that integrate with the platform's central Keycloak (OIDC) and OpenLDAP services in the same way as `web-app-nextcloud`, so that users authenticate once via SSO, are auto-provisioned from LDAP, and can move between Files (OpenCloud) and Video (OpenTalk) without separate accounts.
+
+## Acceptance Criteria
+
+- [ ] A new role `roles/web-app-opencloud` exists, follows the meta layout from [008-role-meta-layout.md](008-role-meta-layout.md), and deploys OpenCloud (oCIS) via `docker-compose` using the project's standard `web-app-*` patterns.
+- [ ] A new role `roles/web-app-opentalk` exists, follows the same meta layout, and deploys OpenTalk (controller + Janus/LiveKit signaling backend as required by upstream) via `docker-compose`.
+- [ ] Both roles register their service entry, network, and ports in `meta/services.yml`, `meta/main.yml`, and the per-role networks/ports model from [009-per-role-networks-and-ports.md](009-per-role-networks-and-ports.md), without colliding with existing roles.
+- [ ] Both roles expose a public hostname under the standard domain scheme (e.g. `cloud.{{ primary_domain }}` and `talk.{{ primary_domain }}`) terminated by the project's reverse proxy with a valid TLS certificate.
+- [ ] Both roles depend on `web-app-keycloak` via `meta/main.yml` `runafter`/dependencies and consume Keycloak as the OIDC provider; no local password login is exposed to end users when OIDC is enabled.
+- [ ] OpenCloud is configured as an OIDC client of Keycloak using the standard authorization-code + PKCE flow, with `iss`, `client_id`, `client_secret`, and `redirect_uri` rendered from role variables and the central Keycloak realm, mirroring the variable layout used by `web-app-nextcloud`.
+- [ ] OpenTalk is configured as an OIDC client of Keycloak with its own `client_id`/`client_secret`, using the OpenTalk controller's native OIDC support, and reuses the same realm/issuer as OpenCloud and Nextcloud.
+- [ ] Both OIDC clients map at least the claims `sub`, `preferred_username`, `email`, `name`, and `groups` from Keycloak, and the `groups` claim is used for role/permission mapping inside each application.
+- [ ] Both roles consume the central OpenLDAP service for user and group directory data, using the same bind DN, base DN, and search filters scheme as `roles/web-app-nextcloud/docs/LDAP.md`, configured via role variables (no hard-coded values).
+- [ ] LDAP-driven user provisioning is enabled in both apps so that any user that exists in OpenLDAP can log in via Keycloak and is automatically created in OpenCloud and OpenTalk on first login, with username equal to the LDAP `uid` (not the Keycloak-generated id), matching the federation guidance in [roles/web-app-nextcloud/docs/IAM.md](../../roles/web-app-nextcloud/docs/IAM.md).
+- [ ] Group membership in OpenLDAP is reflected in both apps: at minimum a configurable "admin" LDAP group grants administrative rights in OpenCloud and OpenTalk, and changes propagate on next login or scheduled sync.
+- [ ] OpenTalk is wired to OpenCloud as its file backend using the upstream-supported integration (share OpenCloud space/folder into a meeting, download attachments from a meeting into OpenCloud) so that authenticated OpenTalk users can attach OpenCloud files without re-authenticating.
+- [ ] OpenTalk is also reachable from inside OpenCloud as a meeting/call provider (link or app integration), so that a user in OpenCloud can start an OpenTalk meeting in one click and arrives authenticated via SSO.
+- [ ] Logging out from any one of Keycloak, OpenCloud, OpenTalk, or Nextcloud terminates the session in the others via OIDC back-channel or front-channel logout, consistent with the existing logout behavior of `web-app-nextcloud`.
+- [ ] Both roles ship role-local Playwright coverage analogous to `roles/web-app-nextcloud/files/playwright.spec.js`, gated per [006-playwright-service-gated-tests.md](006-playwright-service-gated-tests.md), that verifies: (a) OIDC login via Keycloak succeeds, (b) the logged-in username equals the LDAP `uid`, (c) admin-group LDAP users see admin UI, non-admin users do not, and (d) the OpenCloud↔OpenTalk cross-launch works while staying logged in.
+- [ ] Implementation and validation for both roles follow the local iteration loop from [Role Loop](../agents/action/iteration/role.md), starting with `make deploy-fresh-purged-apps APPS=web-app-opencloud,web-app-opentalk` for the baseline and continuing with `make deploy-reuse-kept-apps APPS=web-app-opencloud,web-app-opentalk` for follow-up iterations.
+- [ ] Both roles document their IAM wiring under `roles/web-app-opencloud/docs/IAM.md` and `roles/web-app-opentalk/docs/IAM.md`, mirroring the structure of [roles/web-app-nextcloud/docs/IAM.md](../../roles/web-app-nextcloud/docs/IAM.md) and [roles/web-app-nextcloud/docs/LDAP.md](../../roles/web-app-nextcloud/docs/LDAP.md), including verification commands runnable via `make exec`.
+- [ ] No secrets (OIDC client secrets, LDAP bind passwords) are committed in plain text; all are sourced from the existing Ansible Vault / credentials lookup mechanism used by `web-app-nextcloud`.
+- [ ] The implementing PR is cross-linked from this requirement file, and this file is cross-linked from the PR description, per [requirements.md](../contributing/requirements.md).
