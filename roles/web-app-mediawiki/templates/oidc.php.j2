@@ -15,8 +15,8 @@ if ( file_exists( $pa ) && file_exists( $oidc ) ) {
     wfLoadExtension( 'PluggableAuth' );
     wfLoadExtension( 'OpenIDConnect' );
 
-    $wgPluggableAuth_EnableAutoLogin = {{ MEDIAWIKI_OIDC_AUTOLOGIN | bool | ternary('true','false') }};
-    $wgPluggableAuth_EnableLocalLogin = {{ MEDIAWIKI_OIDC_LOCALLOGIN | bool | ternary('true','false') }};
+    $wgPluggableAuth_EnableAutoLogin = {{ MEDIAWIKI_OIDC_AUTOLOGIN | bool }};
+    $wgPluggableAuth_EnableLocalLogin = {{ MEDIAWIKI_OIDC_LOCALLOGIN | bool }};
     $wgPluggableAuth_ButtonLabel = '{{ MEDIAWIKI_OIDC_BUTTON_TEXT }}';
 
     $wgPluggableAuth_Config = [

@@ -1071,6 +1071,9 @@
     },
     {% include "scopes/rbac.json.j2" %},
     {% include "scopes/nextcloud.json.j2" %},
+    {% if KEYCLOAK_MOODLE_ENABLED | bool %}
+    {% include "scopes/moodle.json.j2" %},
+    {% endif %}
     {
       "name": "web-origins",
       "description": "OpenID Connect scope for add allowed web origins to the access token",

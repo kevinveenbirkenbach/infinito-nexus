@@ -13,13 +13,24 @@ matomo:
 email:
   enabled: true
   shared: true
+ldap:
+  enabled: true
+  shared: true
 mariadb:
   enabled: true
   shared: true
 moodle:
+  # Self-built image (no upstream Docker tag tracked). Tarball pinned
+  # to Moodle 4.5 LTS (security-supported until 2027-10).
+  # Moodle 5.x reorganises the codebase under public/* and is deferred
+  # to a follow-up requirement; staying on the 4.5 layout matches the
+  # role's existing OIDC/LDAP CLI invocations.
+  # Branch nomenclature: stable<MAJOR>0<MINOR> (e.g. 4.5 -> stable405).
   # nocheck: docker-version
-  version: '4.5'  # Latest LTS - Necessary for OIDC
-  image: bitnamilegacy/moodle
+  version: stable405
+  release: 4.5.11
+  image: php
+  app_version: '8.3-fpm'
   name: moodle
   min_storage: 10GB
   cpus: 1.0
@@ -33,6 +44,12 @@ moodle:
   run_after:
   - web-app-keycloak
   lifecycle: beta
+nginx:
+  image: nginx
+  version: 1.27-alpine
+  name: moodle-nginx
+cron:
+  name: moodle-cron
 css:
   enabled: false
   shared: true

@@ -69,4 +69,4 @@
           <property name="member">XWiki.{{ XWIKI_ADMIN_USER }}</property>
         </properties>
       </object>
-  when: XWIKI_LDAP_ENABLED | bool == false and XWIKI_OIDC_ENABLED | bool == false
+  when: not (XWIKI_LDAP_ENABLED | bool) and not (XWIKI_OIDC_ENABLED | bool)

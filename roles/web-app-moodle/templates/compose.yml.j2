@@ -1,18 +1,95 @@
 {% include 'roles/sys-svc-compose/templates/base.yml.j2' %}
 
   moodle:
-{% set container_port = 8080 %}
+{% set container_port = MOODLE_FPM_PORT %}
     container_name: {{ MOODLE_CONTAINER }}
-    {{ lookup('template', 'roles/sys-svc-container/templates/build.yml.j2') | indent(4) }}
+    pull_policy: never
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        MOODLE_BASE_IMAGE: "{{ MOODLE_IMAGE }}"
+        MOODLE_BASE_TAG: "{{ MOODLE_VERSION }}"
+        MOODLE_CODE_DIR: "{{ MOODLE_CODE_DIR }}"
+        MOODLE_DATA_DIR: "{{ MOODLE_DATA_DIR }}"
+        MOODLE_SOURCE_DIR: "{{ MOODLE_SOURCE_DIR }}"
+        MOODLE_RUNTIME_USER: "{{ MOODLE_RUNTIME_USER }}"
+        MOODLE_OIDC_ENABLED: "{{ MOODLE_OIDC_ENABLED | bool | ternary('1','0') }}"
+        MOODLE_OIDC_PLUGIN_RELPATH: "{{ MOODLE_OIDC_PLUGIN_RELPATH }}"
+        MOODLE_RELEASE: "{{ MOODLE_RELEASE }}"
+        MOODLE_TARBALL_URL: "{{ MOODLE_TARBALL_URL }}"
+        MOODLE_TARBALL_FILENAME: "{{ MOODLE_TARBALL_FILENAME }}"
+        MOODLE_VERSION_FILE: "{{ MOODLE_VERSION_FILE }}"
+        MOODLE_AUTH_SUBDIR: "{{ MOODLE_AUTH_SUBDIR }}"
     image: {{ MOODLE_IMAGE_CUSTOM }}
-    ports:
-      - {{ DOCKER_BIND_HOST }}:{{ lookup('config', application_id, 'services.moodle.ports.local.http') }}:{{ container_port }}
 {% include 'roles/sys-svc-container/templates/base.yml.j2' %}
     volumes:
-      - 'code:{{ BITNAMI_CODE_LINK }}'
-      - 'data:{{ BITNAMI_DATA_DIR }}'
-{% include 'roles/sys-svc-container/templates/healthcheck/tcp.yml.j2' %}
+      - 'code:{{ MOODLE_CODE_DIR }}'
+      - 'data:{{ MOODLE_DATA_DIR }}'
+      - {{ MOODLE_MSMTP_ABS }}:/etc/msmtprc:ro
+    # PHP-FPM speaks FastCGI on 9000, not HTTP, so the standard
+    # HTTP-on-TCP healthcheck does not apply. The probe combines:
+    # (1) a one-shot SMTP smoke-test via msmtp to the project mail-bot
+    #     (lockfile /tmp/email_sent suppresses repeats so the relay is
+    #      not flooded), gated on services.email.enabled — same pattern
+    #     as healthcheck/msmtp_curl.yml.j2; and
+    # (2) a bare TCP-connect to FPM on {{ MOODLE_FPM_PORT }} as the
+    #     canonical liveness signal.
+    # nginx in the sidecar speaks HTTP and is the front-proxy surface.
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - >
+          {% if (lookup('config', application_id, 'services.email.enabled', false) | bool) -%}
+          if [ ! -f /tmp/email_sent ]; then
+            echo 'Subject: testmessage from {{ lookup("domain", application_id) }}\n\nSUCCESSFUL' | msmtp -t {{ lookup('users', 'blackhole').email }} && touch /tmp/email_sent;
+          fi &&
+          {% endif -%}
+          bash -c '</dev/tcp/127.0.0.1/{{ MOODLE_FPM_PORT }}'
+      interval: 1m
+      timeout: 20s
+      retries: 5
+      start_period: 60s
 {% include 'roles/sys-svc-container/templates/depends_on/dmbs_excl.yml.j2' %}
+{% include 'roles/sys-svc-container/templates/networks.yml.j2' %}
+
+  nginx:
+    container_name: {{ MOODLE_NGINX_CONTAINER }}
+    image: {{ MOODLE_NGINX_IMAGE }}:{{ MOODLE_NGINX_VERSION }}
+    depends_on:
+      moodle:
+        condition: service_healthy
+    ports:
+      - {{ DOCKER_BIND_HOST }}:{{ lookup('config', application_id, 'services.moodle.ports.local.http') }}:{{ MOODLE_NGINX_PORT }}
+    volumes:
+      - 'code:{{ MOODLE_CODE_DIR }}:ro'
+      - './nginx.conf:/etc/nginx/conf.d/default.conf:ro'
+    restart: {{ DOCKER_RESTART_POLICY }}
+{% include 'roles/sys-svc-container/templates/networks.yml.j2' %}
+
+  cron:
+    container_name: {{ MOODLE_CRON_CONTAINER }}
+    image: {{ MOODLE_IMAGE_CUSTOM }}
+    pull_policy: never
+    depends_on:
+      moodle:
+        condition: service_healthy
+    volumes:
+      - 'code:{{ MOODLE_CODE_DIR }}'
+      - 'data:{{ MOODLE_DATA_DIR }}'
+      - {{ MOODLE_MSMTP_ABS }}:/etc/msmtprc:ro
+    env_file:
+      - .env/env
+    entrypoint: ["{{ MOODLE_ENTRYPOINT_PATH }}"]
+    command:
+      - bash
+      - -c
+      - |
+        while true; do
+          php {{ MOODLE_CLI_DIR }}/cron.php >/proc/1/fd/1 2>/proc/1/fd/2 || true
+          sleep 60
+        done
+    restart: {{ DOCKER_RESTART_POLICY }}
 {% include 'roles/sys-svc-container/templates/networks.yml.j2' %}
 
 {{ lookup('applications') | compose_volumes(
