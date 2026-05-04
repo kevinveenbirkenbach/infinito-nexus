@@ -1,6 +1,6 @@
 # `compose.yml` 🐳
 
-This page is the SPOT for rules that govern the top-level [compose.yml](../../../../compose.yml) and for the environment variables it consumes.
+This page documents the rules that govern the top-level [compose.yml](../../../../compose.yml) and the environment variables it consumes.
 For general documentation rules (links, writing, RFC 2119 keywords), see [documentation.md](../../documentation.md).
 For CI debugging workflows that use these variables, see [ci.md](../../actions/debugging/ci.md).
 
@@ -31,7 +31,7 @@ All variables consumed by [compose.yml](../../../../compose.yml). Variables with
 |--------------------------|-----------------|-------------------------------------------------------------------------|
 | `INFINITO_IMAGE`         | none (required) | Image reference used by the `infinito` service.                         |
 | `INFINITO_PULL_POLICY`   | `never`         | Compose `pull_policy`. Keep `never` for local builds, `always` for CI.  |
-| `INFINITO_DISTRO`        | `debian`        | Distro suffix appended to the `container_name`.                         |
+| `INFINITO_CONTAINER`     | none (required) | Used directly as `container_name`. Derived from `INFINITO_DISTRO` by [defaults.sh](../../../../scripts/meta/env/defaults.sh); compose.yml reads it strictly via `${INFINITO_CONTAINER:?...}`. |
 | `INFINITO_COMPILE`       | `1`             | Passed into the container; toggles in-container compilation steps.      |
 | `NIX_CONFIG`             | none            | Build-arg forwarded to the Dockerfile for Nix configuration.            |
 
@@ -56,6 +56,33 @@ Allowing swap masks OOM conditions that the real runner would hit.
 |---------------------------|--------------------|------------------------------------------------------------------|
 | `INFINITO_DOCKER_VOLUME`  | `docker`           | Named volume (or host path) backing the nested Docker directory. |
 | `INFINITO_DOCKER_MOUNT`   | `/var/lib/docker`  | Mount point inside the container for the nested Docker data.     |
+
+### Caches
+
+For activation, coverage, and operations of the `registry-cache`, `package-cache`, and `package-cache-frontend` services, see [cache.md](../../environment/cache.md).
+
+The env-var contracts each service expects strictly via `${VAR:?…}` (consumed in [compose.yml](../../../../compose.yml) and [compose/cache.override.yml](../../../../compose/cache.override.yml)):
+
+| Variable                                | Default          | Purpose                                                                                                              |
+|-----------------------------------------|------------------|----------------------------------------------------------------------------------------------------------------------|
+| `INFINITO_REGISTRY_CACHE_HOST_PATH`     | none (required)  | Host path bind-mounted into `registry-cache` for blob/manifest persistence. Default supplied by [registry.sh](../../../../scripts/meta/env/cache/registry.sh) (`/var/cache/infinito/core/cache/registry/mirror`). |
+| `INFINITO_REGISTRY_CACHE_CA_HOST_PATH`  | none (required)  | Host path holding the proxy MITM CA bundle. Mounted writable into `registry-cache`, read-only into `infinito`. Default `/var/cache/infinito/core/cache/registry/ca`. |
+| `INFINITO_REGISTRY_CACHE_MAX_SIZE`      | none (required)  | Maximum on-disk size. Default computed by [registry.sh](../../../../scripts/meta/env/cache/registry.sh) as half free disk at the cache path, min `1g`, fallback `2g`. |
+| `INFINITO_REGISTRY_CACHE_PROXY_CONF`    | `/dev/null`      | Bind source for the systemd drop-in inside `infinito`. Set to the real `proxy.conf` by the dev tooling under the `cache` profile. |
+| `INFINITO_PACKAGE_CACHE_HOST_PATH`      | none (required)  | Host path bind-mounted at `/nexus-data`. Default `/var/cache/infinito/core/cache/package/data`. |
+| `INFINITO_PACKAGE_CACHE_HEAP`           | none (required)  | JVM heap (`-Xms`/`-Xmx`). Default half free RAM, capped at `2g`, floor `1g`. |
+| `INFINITO_PACKAGE_CACHE_DIRECT_MEM`     | none (required)  | `MaxDirectMemorySize`. Default mirrors `INFINITO_PACKAGE_CACHE_HEAP`. |
+| `INFINITO_PACKAGE_CACHE_BLOBSTORE_MAX`  | none (required)  | Soft quota for the default blobstore. Default half free disk at the cache path, floor `2g`. |
+| `INFINITO_PACKAGE_CACHE_MAX_AGE_MIN`    | `129600` (= 90 days) | Cache freshness window in minutes, applied to every Nexus proxy repo (`contentMaxAge`/`metadataMaxAge`/negative-cache TTL). |
+| `INFINITO_PACKAGE_CACHE_ADMIN_PASSWORD` | none (required)  | Target value for the rotated Nexus admin password. Default is a stable per-host hash. |
+| `INFINITO_PACKAGE_CACHE_PORT`           | `8081`           | Host-side port mapped to Nexus REST/UI. Bound to `${BIND_IP}` only. |
+| `INFINITO_PACKAGE_CACHE_PIP_CONF`       | `/dev/null`      | Bind source for `/etc/pip.conf`. Set to `compose/package-cache/pip.conf` under `cache`. |
+| `INFINITO_PACKAGE_CACHE_NPMRC`          | `/dev/null`      | Bind source for `/root/.npmrc`. Set to `compose/package-cache/npmrc` under `cache`. |
+| `INFINITO_PACKAGE_CACHE_APT_LIST`       | `/dev/null`      | Bind source for `/etc/apt/sources.list.d/package-cache.list`. Set to `compose/package-cache/apt.list` under `cache`. |
+| `INFINITO_PACKAGE_CACHE_FRONTEND_CA_DIR`    | none (required) | Host directory for the frontend CA. Default `/var/cache/infinito/core/cache/package/frontend/ca`. |
+| `INFINITO_PACKAGE_CACHE_FRONTEND_CERTS_DIR` | none (required) | Host directory for per-hostname leaf certs. Default `/var/cache/infinito/core/cache/package/frontend/certs`. |
+| `INFINITO_PACKAGE_CACHE_FRONTEND_IP`        | none (required) | Static IPv4 address for the frontend on the compose default network. Default `172.30.0.4`. |
+| `INFINITO_PACKAGE_CACHE_FRONTEND_CA_FILE`   | `/dev/null`     | Bind source for `/opt/package-frontend-ca.crt` inside the runner. Set to `${INFINITO_PACKAGE_CACHE_FRONTEND_CA_DIR}/ca.crt` under `cache`. |
 
 ### Networking
 

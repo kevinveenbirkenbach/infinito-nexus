@@ -6,10 +6,11 @@ import shutil
 import subprocess
 from pathlib import Path
 
+from .common import cache_env_overrides, compose_file_args, resolve_distro
+from .profile import Profile
+
 
 def _repo_root_from_here() -> Path:
-    # Derive the repository root relative to this file.
-    # Adjust the number of parents if the project layout changes.
     return Path(__file__).resolve().parents[3]
 
 
@@ -20,6 +21,7 @@ CI_DOCKER_ROOT_STR = str(CI_DOCKER_ROOT)
 def _base_env(*, distro: str) -> dict[str, str]:
     env = dict(os.environ)
     env["INFINITO_DISTRO"] = distro
+    env.update(cache_env_overrides())
     return env
 
 
@@ -29,7 +31,9 @@ def _compose_run(*, repo_root: Path, distro: str, args: list[str]) -> None:
     if env_development.exists():
         cmd += ["--env-file", "env.development"]
 
-    cmd += ["--profile", "ci", *args]
+    cmd += compose_file_args()
+    cmd += Profile().args()
+    cmd += list(args)
     env = _base_env(distro=distro)
     env.setdefault("NIX_CONFIG", "")
     subprocess.run(cmd, cwd=repo_root, env=env, check=True, text=True)
@@ -74,15 +78,9 @@ def down_stack(*, repo_root: Path, distro: str) -> None:
 
 def add_parser(sub: argparse._SubParsersAction) -> None:
     p = sub.add_parser("down", help="Stop compose stack and remove volumes.")
-    p.add_argument(
-        "--distro",
-        default=os.environ.get("INFINITO_DISTRO", "arch"),
-        choices=["arch", "debian", "ubuntu", "fedora", "centos"],
-        help="Target distro (compose env INFINITO_DISTRO).",
-    )
     p.set_defaults(_handler=handler)
 
 
 def handler(args: argparse.Namespace) -> int:
-    down_stack(repo_root=_repo_root_from_here(), distro=args.distro)
+    down_stack(repo_root=_repo_root_from_here(), distro=resolve_distro())
     return 0

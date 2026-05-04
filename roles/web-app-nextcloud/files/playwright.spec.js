@@ -69,7 +69,7 @@ const nextcloudUsernameFieldPattern = /account name or email|username or email/i
 const nextcloudCredentialSubmitPattern = /sign in|log in/i;
 
 // Condition variables driving the login flavor. Ansible renders these from the
-// role's compose.services.{oidc,ldap}.enabled config so the spec never has to
+// role's services.{oidc,ldap}.enabled (meta/services.yml) so the spec never has to
 // sniff which login UI shape the deployment exposes:
 //   - OIDC + LDAP  -> "oidc_login"  (pulsejet/nextcloud-oidc-login,
 //                                    auto_redirect hands straight to Keycloak)
@@ -300,20 +300,25 @@ async function expectNextcloudSettingAbsent(page, unexpectedValue, label) {
 // ---------------------------------------------------------------------------
 
 function getNextcloudSocialLoginCandidates(target) {
+  // The third "alternative login" shape is `pulsejet/nextcloud-oidc-login`
+  // (the one this role actually deploys for the OIDC+LDAP flavor). It renders
+  // as `<a href="/apps/oidc_login/oidc" class="oidc-button">`. Match it
+  // explicitly so the test can click through even if `oidc_login_auto_redirect`
+  // does not bounce the request — which can race during cold first-deploys.
   return [
     {
       kind: "social-login",
       locator: target.locator(
-        'a[href*="/apps/sociallogin/"], a[href*="/custom_oidc/"], button[formaction*="/apps/sociallogin/"], button[formaction*="/custom_oidc/"]'
+        'a[href*="/apps/sociallogin/"], a[href*="/custom_oidc/"], a[href*="/apps/oidc_login/"], a.oidc-button, button[formaction*="/apps/sociallogin/"], button[formaction*="/custom_oidc/"]'
       )
     },
     {
       kind: "social-login",
-      locator: target.getByRole("link", { name: /log in with|sign in with|continue with/i })
+      locator: target.getByRole("link", { name: /log in with|sign in with|continue with|openid connect/i })
     },
     {
       kind: "social-login",
-      locator: target.getByRole("button", { name: /log in with|sign in with|continue with/i })
+      locator: target.getByRole("button", { name: /log in with|sign in with|continue with|openid connect/i })
     }
   ];
 }
@@ -394,9 +399,22 @@ async function loginToStandaloneNextcloud(adminPage, username = loginUsername, p
       break;
     case "oidc_login":
     default:
-      flavorCandidates = [...credentialCandidates, ...standaloneShellCandidates];
+      // Happy path: `oidc_login_auto_redirect=true` bounces /login straight to
+      // Keycloak, so the Keycloak credential form (`credentialCandidates`) or
+      // an already-authenticated NC shell appears. Race path: under cold
+      // first-deploy load the upstream `boot()` hook can lose its
+      // `header(Location:...)` (headers already sent by an earlier hook), and
+      // /login renders the NC login chrome with the password form hidden but
+      // the OIDC alt-login button visible. Treat that button as a valid entry
+      // point so the test still proceeds via an explicit click instead of
+      // timing out.
+      flavorCandidates = [
+        ...credentialCandidates,
+        ...socialLoginCandidates,
+        ...standaloneShellCandidates
+      ];
       timeoutMessage =
-        "Timed out waiting for the Keycloak login form or an already-authenticated Nextcloud shell";
+        "Timed out waiting for the Keycloak login form, the OIDC alt-login button, or an already-authenticated Nextcloud shell";
       break;
   }
 
@@ -451,7 +469,16 @@ async function loginToStandaloneNextcloud(adminPage, username = loginUsername, p
 }
 
 async function logoutStandaloneNextcloud(adminPage) {
-  const userMenuTrigger = adminPage.locator("#user-menu button");
+  // `#user-menu button` is non-strict on Nextcloud 32+: the menu wrapper
+  // wraps both the trigger button (aria-label="Settings menu") AND the
+  // submenu's own buttons once it has been opened. Pin to the trigger via
+  // its aria-label (stable across templates) and fall back to "first inside
+  // #user-menu" only if the role lookup misses (e.g. localized aria-labels).
+  const userMenuTrigger = adminPage
+    .locator(
+      "#user-menu button[aria-label='Settings menu'], #user-menu > button, #user-menu button"
+    )
+    .first();
   const logoutLinkByName = adminPage.getByRole("link", { name: "Log out" });
   const logoutLinkByHref = adminPage.locator('a[href*="logout"]');
   const logoutConfirmButton = adminPage.getByRole("button", { name: "Logout" });
@@ -512,29 +539,42 @@ const talkTestServerErrorPatterns = [
   /Testing server seems to be broken/i
 ];
 
-// Positive success markers emitted by the spreed admin UI. The HPB signaling
-// server and the recording backend both auto-run their reachability check on
-// mount (HTTPS/WebSocket handshake) and render "OK: Running version: X" once
-// it succeeds. TURN/STUN require WebRTC-level UDP connectivity from the
-// browser to the coturn host, which is not guaranteed from a Playwright
-// container in a separate docker network, so those are only covered by the
-// error-absence assertion below, not by a positive marker here. The
-// "OK: Running version:" pattern is expected to appear at least twice
-// (signaling + recording) on a fully configured stack.
-const talkTestServerRequiredSuccessPatterns = [
-  {
-    label: "HPB signaling and recording backend versions",
-    pattern: /OK:\s*Running version:\s*\S+[\s\S]*?OK:\s*Running version:\s*\S+/i
-  }
-];
+// Positive success marker emitted by the spreed admin UI. Both the HPB
+// signaling-server row (SignalingServer.vue) and the recording-backend row
+// (RecordingServer.vue) render their reachability result inline via
+// `<span class="test-connection">{{ connectionState }}</span>`, where
+// connectionState becomes `"OK: Running version: <version>"` once the
+// auto-mounted check (or our explicit Test-button click) succeeds.
+//
+// We require at least ONE successful row, not two: <RecordingServer> is
+// `v-if="server && checked"` AND its parent <RecordingServers> only renders
+// when `hasSignalingServers === true`, so the recording row can legitimately
+// be absent on a stack that does not yet have an HPB signaling row stored
+// (typical first-deploy ordering). Asserting two OK markers in that
+// situation would false-fail on a healthy install.
+const talkTestServerRequiredOkPattern = /OK:\s*Running version:\s*\S+/i;
 
 async function clickAllTalkTestServerButtonsAndVerify(page) {
-  // Spreed labels its signaling-server button "Test server" and the
-  // STUN/TURN entries "Test this server". Match both.
+  // Spreed renders the test result inside `<span class="test-connection">`
+  // and the explicit re-test button (icon-only NcButton with
+  // aria-label "Test this server") is `v-if="server && checked"` — i.e. it
+  // only appears AFTER the auto-mount `checkServerVersion()` call returns,
+  // and at that point the connectionState text is already in the span.
+  // Wait for the result span to exist before measuring buttons so we do not
+  // race the conditional render and silently click zero buttons.
+  const connectionSpans = page.locator("span.test-connection");
+  await connectionSpans
+    .first()
+    .waitFor({ state: "attached", timeout: 60_000 })
+    .catch(() => {
+      // Continue — the assertion below will surface the real diagnostic.
+    });
+
+  // Re-trigger the check by clicking every Test button we can find. Spreed's
+  // accessible name (English) is "Test this server" for both HPB signaling
+  // and recording rows; older releases used "Test server", so match both.
   const testButtons = page.getByRole("button", { name: /^test( this)? server$/i });
   const total = await testButtons.count();
-
-  const clicked = [];
   for (let i = 0; i < total; i += 1) {
     const button = testButtons.nth(i);
     if (!(await button.isVisible().catch(() => false))) {
@@ -542,36 +582,38 @@ async function clickAllTalkTestServerButtonsAndVerify(page) {
     }
     await button.scrollIntoViewIfNeeded().catch(() => {});
     await button.click({ timeout: 5_000 }).catch(() => {});
-    clicked.push(i);
   }
 
-  expect(
-    clicked.length,
-    "Expected at least one Talk 'Test server' / 'Test this server' button on the admin page"
-  ).toBeGreaterThan(0);
+  // Read the test-connection span texts directly instead of `document.body
+  // .innerText`. innerText can omit content inside collapsed admin panels
+  // and the explicit locator surfaces the exact element where spreed writes
+  // the result, so failure messages name the actual rendered string.
+  const readConnectionTexts = async () =>
+    connectionSpans.allInnerTexts().catch(() => []);
 
-  // Poll until every required success marker has rendered somewhere in the
-  // Talk admin panel. `page.evaluate(() => document.body.innerText)` is used
-  // instead of `page.locator("body").innerText()` because the latter triggers
-  // visibility checks that return empty on this admin layout.
-  const readBodyText = async () =>
-    page.evaluate(() => document.body ? document.body.innerText : "").catch(() => "");
+  await expect
+    .poll(readConnectionTexts, {
+      timeout: 60_000,
+      message:
+        "Expected at least one Talk admin row (.test-connection span) to render " +
+        "'OK: Running version: <ver>' after the auto-check / Test-button click. " +
+        "Empty array means the row was never rendered (HPB signaling server " +
+        "config missing); a 'Status: Checking connection' value means the " +
+        "auto-check is still pending; an 'Error:' value means HPB unreachable."
+    })
+    .toEqual(expect.arrayContaining([expect.stringMatching(talkTestServerRequiredOkPattern)]));
 
-  for (const { label, pattern } of talkTestServerRequiredSuccessPatterns) {
-    await expect
-      .poll(readBodyText, {
-        timeout: 30_000,
-        message: `Expected Talk admin page to report ${label} test success after clicking its Test button`
-      })
-      .toMatch(pattern);
-  }
-
-  const bodyText = await readBodyText();
-  for (const pattern of talkTestServerErrorPatterns) {
-    expect(
-      bodyText,
-      `Talk admin page reported an error after clicking the Test server buttons (pattern ${pattern})`
-    ).not.toMatch(pattern);
+  // Then assert NONE of the rendered rows reports a known spreed error.
+  // Iterate connection-span texts so the failure message points at the
+  // exact row that broke instead of dumping the whole admin chrome.
+  const texts = await readConnectionTexts();
+  for (const text of texts) {
+    for (const pattern of talkTestServerErrorPatterns) {
+      expect(
+        text,
+        `Talk admin row reported a connection error matching ${pattern}: ${text}`
+      ).not.toMatch(pattern);
+    }
   }
 }
 

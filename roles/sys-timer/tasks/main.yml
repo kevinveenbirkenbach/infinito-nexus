@@ -1,4 +1,4 @@
-# run_once_sys_timer: deactivated
+# nocheck: run-once
 
 - name: create {{ sys_timer_file }}
   template:

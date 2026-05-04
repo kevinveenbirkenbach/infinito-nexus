@@ -1,4 +1,4 @@
-# run_once_sys_front_inj_javascript: deactivated
+# nocheck: run-once
 
 - name: "Select JavaScript file path for '{{ application_id }}'"
   set_fact:

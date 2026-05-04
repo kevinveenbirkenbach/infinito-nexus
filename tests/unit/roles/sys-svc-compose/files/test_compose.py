@@ -1,6 +1,8 @@
+import os
 import unittest
 from pathlib import Path
 from importlib.util import spec_from_file_location, module_from_spec
+from unittest.mock import patch
 
 
 def load_script_module():
@@ -25,6 +27,16 @@ class TestInfinitoComposeWrapper(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         cls.script = load_script_module()
+
+    def setUp(self):
+        # Disable the wrapper's cache-override branch; tests use mocked is_file.
+        self._env_patch = patch.dict(
+            os.environ, {"INFINITO_PACKAGE_CACHE_FRONTEND_IP": ""}, clear=False
+        )
+        self._env_patch.start()
+
+    def tearDown(self):
+        self._env_patch.stop()
 
     def test_detect_env_file_priority(self):
         s = self.script
@@ -126,9 +138,7 @@ class TestInfinitoComposeWrapper(unittest.TestCase):
             s.Path.is_file = old_is_file  # type: ignore[assignment]
 
     def test_build_cmd_appends_extra_files_after_autodetected(self):
-        """
-        New behavior: -f/--file should NOT replace autodetection; it should be appended.
-        """
+        """-f/--file is appended after autodetection, not a replacement."""
         s = self.script
         base = Path("/proj")
 
@@ -190,10 +200,6 @@ class TestInfinitoComposeWrapper(unittest.TestCase):
             s.Path.is_file = old_is_file  # type: ignore[assignment]
             if old_resolve_files is not None:
                 s.resolve_files = old_resolve_files  # type: ignore[assignment]
-
-    # ---------------------------------------------------------------------
-    # Tests for optional --chdir / --project behavior in main()
-    # ---------------------------------------------------------------------
 
     def test_main_defaults_to_cwd_and_project_basename(self):
         s = self.script
