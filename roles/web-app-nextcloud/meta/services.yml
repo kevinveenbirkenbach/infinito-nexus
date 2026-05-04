@@ -39,7 +39,7 @@ mariadb:
 nextcloud:
   name: nextcloud
   image: nextcloud
-  version: production-fpm-alpine
+  version: 33-fpm-alpine
   min_storage: 20GB
   backup:
     no_stop_required: true
