@@ -20,17 +20,18 @@ mariadb:
   enabled: true
   shared: true
 moodle:
-  # Self-built image (no upstream Docker tag tracked). Tarball pinned
-  # to Moodle 4.5 LTS (security-supported until 2027-10).
-  # Moodle 5.x reorganises the codebase under public/* and is deferred
-  # to a follow-up requirement; staying on the 4.5 layout matches the
-  # role's existing OIDC/LDAP CLI invocations.
-  # Branch nomenclature: stable<MAJOR>0<MINOR> (e.g. 4.5 -> stable405).
-  # nocheck: docker-version
-  version: stable405
+  # Self-built image. The `image`+`version` pair is the PHP base the
+  # Dockerfile builds FROM (php:8.3-fpm) — this is also what GHCR
+  # image-mirror discovery picks up, so the base stays cached.
+  # The Moodle source itself is pinned via `branch` (Git branch on
+  # git.moodle.org, naming: stable<MAJOR>0<MINOR>, e.g. 4.5 -> stable405)
+  # and `release` (tarball version). 4.5 is LTS, security-supported
+  # until 2027-10; Moodle 5.x reorganises the code under public/* and
+  # is deferred to a follow-up requirement.
+  branch: stable405
   release: 4.5.11
   image: php
-  app_version: '8.3-fpm'
+  version: '8.3-fpm'
   name: moodle
   min_storage: 10GB
   cpus: 1.0

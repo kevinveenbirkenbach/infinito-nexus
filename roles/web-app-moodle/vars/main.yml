@@ -54,7 +54,7 @@ MOODLE_RUNTIME_USER_GROUP:      "{{ MOODLE_RUNTIME_USER }}:{{ MOODLE_RUNTIME_USE
 # Moodle source pinning. Exact-version tarball (NOT the floating
 # moodle-latest-<branch>.tgz, which ships a git-tree snapshot
 # missing built top-level dirs).
-MOODLE_BRANCH:                  "{{ lookup('config', application_id, 'services.moodle.version') }}"
+MOODLE_BRANCH:                  "{{ lookup('config', application_id, 'services.moodle.branch') }}"
 MOODLE_RELEASE:                 "{{ lookup('config', application_id, 'services.moodle.release') }}"
 MOODLE_TARBALL_FILENAME:        "moodle-{{ MOODLE_RELEASE }}.tgz"
 MOODLE_TARBALL_URL:             "https://download.moodle.org/download.php/direct/{{ MOODLE_BRANCH }}/{{ MOODLE_TARBALL_FILENAME }}"
@@ -68,7 +68,7 @@ MOODLE_MSMTP_ABS:               "{{ [ lookup('container', application_id, 'direc
 
 # Container image / build identity
 MOODLE_IMAGE:                   "{{ lookup('config', application_id, 'services.moodle.image') }}"
-MOODLE_VERSION:                 "{{ lookup('config', application_id, 'services.moodle.app_version') }}"
+MOODLE_VERSION:                 "{{ lookup('config', application_id, 'services.moodle.version') }}"
 MOODLE_IMAGE_CUSTOM:            "{{ entity_name }}_custom"
 MOODLE_CONTAINER:               "{{ lookup('config', application_id, 'services.moodle.name') }}"
 MOODLE_NGINX_IMAGE:             "{{ lookup('config', application_id, 'services.nginx.image') }}"
