@@ -11,6 +11,8 @@ from urllib.parse import quote, urlencode
 
 import yaml
 
+from utils.annotations.suppress import is_suppressed_at
+from utils.cache.files import read_text
 from utils.docker.image.discovery import iter_role_images
 from utils.docker.image.ref import (
     DOCKER_HUB_REGISTRIES,
@@ -19,13 +21,11 @@ from utils.docker.image.ref import (
 )
 
 _SEMVER_CORE = r"v?\d+(?:\.\d+){0,3}"
-_SEMVER_RE = re.compile(rf"^{_SEMVER_CORE}$")
 # Tags that extend a semver with a `-<flavor>` suffix, e.g. the Docker
 # Official image tag `5.4.5-php8.3-apache`. The flavor is treated as an
 # opaque discriminator: tags are only considered upgrade candidates for
 # each other when their flavor strings match.
 _VERSIONED_TAG_RE = re.compile(rf"^(?P<semver>{_SEMVER_CORE})(?P<flavor>-\S+)?$")
-_NOCHECK_TAG = "# nocheck: docker-version"
 _KEY_RE = re.compile(r"^(?P<indent>\s*)(?P<key>[A-Za-z0-9_-]+):(?P<rest>.*)$")
 _VERSION_VALUE_RE = re.compile(
     r"^(?P<prefix>\s*version\s*:\s*)(?P<quote>[\"']?)(?P<value>[^\"'#\s]+)(?P=quote)(?P<suffix>\s*(?:#.*)?)$"
@@ -190,20 +190,21 @@ def fetch_ghcr_tags(image: str) -> list[str]:
 
 
 def suppressed_services(config_path: Path) -> set[str]:
-    raw = config_path.read_text(encoding="utf-8")
+    """Return service names whose `version:` line is annotated with the
+    unified ``# nocheck: docker-version`` / ``# noqa: docker-version`` marker.
+
+    Post req-008 the file root of `meta/services.yml` IS the services map.
+    There is no `services.` wrapper to walk into.
+    """
+    raw = read_text(str(config_path))
     lines = raw.splitlines()
 
-    suppressed_lines: set[int] = set()
-    for index, line in enumerate(lines):
-        if not re.search(r"^\s+version\s*:", line):
-            continue
-        for prev_index in range(index - 1, -1, -1):
-            prev = lines[prev_index].strip()
-            if prev == _NOCHECK_TAG:
-                suppressed_lines.add(index)
-                break
-            if prev and not prev.startswith("#"):
-                break
+    suppressed_lines: set[int] = {
+        index
+        for index, line in enumerate(lines)
+        if re.search(r"^\s+version\s*:", line)
+        and is_suppressed_at(lines, index + 1, "docker-version", mode="line-above")
+    }
 
     if not suppressed_lines:
         return set()
@@ -213,23 +214,15 @@ def suppressed_services(config_path: Path) -> set[str]:
         return set()
 
     names: set[str] = set()
-    for key, value in root.value:
-        if key.value != "compose" or not isinstance(value, yaml.MappingNode):
+    for service_key, service_value in root.value:
+        if not isinstance(service_value, yaml.MappingNode):
             continue
-        for child_key, child_value in value.value:
-            if child_key.value != "services" or not isinstance(
-                child_value, yaml.MappingNode
+        for field_key, _field_value in service_value.value:
+            if (
+                field_key.value == "version"
+                and field_key.start_mark.line in suppressed_lines
             ):
-                continue
-            for service_key, service_value in child_value.value:
-                if not isinstance(service_value, yaml.MappingNode):
-                    continue
-                for field_key, _field_value in service_value.value:
-                    if (
-                        field_key.value == "version"
-                        and field_key.start_mark.line in suppressed_lines
-                    ):
-                        names.add(service_key.value)
+                names.add(service_key.value)
     return names
 
 
@@ -240,12 +233,12 @@ def collect_entries(repo_root: Path) -> list[DockerImageVersionEntry]:
     for ref in iter_role_images(repo_root):
         if not ref.role.startswith("web-"):
             continue
-        if ref.source_file != "config/main.yml":
+        if ref.source_file != "meta/services.yml":
             continue
         if not is_semver(ref.version):
             continue
 
-        config_path = roles_root / ref.role / "config" / "main.yml"
+        config_path = roles_root / ref.role / "meta" / "services.yml"
         if ref.service in suppressed_services(config_path):
             continue
 
@@ -296,11 +289,16 @@ def find_outdated_updates(repo_root: Path) -> list[DockerImageVersionUpdate]:
 
 
 def update_config_versions(config_path: Path, service_versions: dict[str, str]) -> bool:
+    """Rewrite each ``<service>.version:`` value in `meta/services.yml`.
+
+    The post-req-008 file root IS the services map (no `services.`
+    wrapper), so the walker tracks one nesting level: top-level service keys
+    and their immediate ``version:`` field.
+    """
     lines = config_path.read_text(encoding="utf-8").splitlines(keepends=True)
     changed = False
 
-    compose_indent: int | None = None
-    services_indent: int | None = None
+    services_indent: int = 0
     current_service: str | None = None
     current_service_indent: int | None = None
 
@@ -312,36 +310,7 @@ def update_config_versions(config_path: Path, service_versions: dict[str, str]) 
         indent = len(match.group("indent"))
         key = match.group("key")
 
-        if compose_indent is not None and indent <= compose_indent and key != "compose":
-            compose_indent = None
-            services_indent = None
-            current_service = None
-            current_service_indent = None
-
-        if compose_indent is None:
-            if key == "compose":
-                compose_indent = indent
-            continue
-
-        if (
-            services_indent is not None
-            and indent <= services_indent
-            and key != "services"
-        ):
-            services_indent = None
-            current_service = None
-            current_service_indent = None
-
-        if key == "services" and indent > compose_indent:
-            services_indent = indent
-            current_service = None
-            current_service_indent = None
-            continue
-
-        if services_indent is None:
-            continue
-
-        if indent == services_indent + 2:
+        if indent == services_indent:
             current_service = key
             current_service_indent = indent
             continue

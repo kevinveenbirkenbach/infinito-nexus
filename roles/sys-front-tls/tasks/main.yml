@@ -1,5 +1,5 @@
 ---
-# run_once_sys_front_tls: deactivated
+# nocheck: run-once
 
 # -----------------------------
 # Mode: letsencrypt

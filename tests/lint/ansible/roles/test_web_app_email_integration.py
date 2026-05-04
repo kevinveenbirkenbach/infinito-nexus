@@ -2,22 +2,25 @@ import re
 import unittest
 from pathlib import Path
 
-import yaml
-
 from utils.annotations.message import warning
+from utils.annotations.suppress import is_suppressed_at
+from utils.cache.files import read_text
+from utils.cache.yaml import load_yaml_any, load_yaml_str
 
 
 _ROLE_PREFIX = "web-app-"
 _MAILU_ROLE = "web-app-mailu"
 _EMAIL_LOOKUP_RE = re.compile(r"""lookup\(\s*['"]email['"]""")
 _SCAN_EXTENSIONS = {".yml", ".yaml", ".j2", ".py", ".sh", ".conf", ".env"}
+# Post-req-008 the email block is at the file root (top-level `email:`)
+# rather than nested under `compose.services.email:`. Match either shape so
+# this lint keeps working during the long tail of role migrations.
 _EMAIL_KEY_RE = re.compile(r"^(\s*)email:\s*(#.*)?$")
-_ANNOTATION_RE = re.compile(r"^\s*#\s*noqa:\s*email\b")
 
 _SILENCER_HINT = (
-    "Silence per role by adding under compose.services in config/main.yml "
-    "a '# noqa: email' comment directly above an 'email:' block with "
-    "'enabled: false' and 'shared: false'."
+    "Silence per role by adding to meta/services.yml a "
+    "'# noqa: email' (or '# nocheck: email') comment directly above an "
+    "'email:' block with 'enabled: false' and 'shared: false'."
 )
 
 
@@ -33,8 +36,8 @@ def _role_uses_email_lookup(role_path: Path) -> bool:
         if not path.is_file() or path.suffix not in _SCAN_EXTENSIONS:
             continue
         try:
-            text = path.read_text(encoding="utf-8", errors="ignore")
-        except OSError:
+            text = read_text(str(path))
+        except (OSError, UnicodeDecodeError):
             continue
         if _EMAIL_LOOKUP_RE.search(text):
             return True
@@ -42,55 +45,60 @@ def _role_uses_email_lookup(role_path: Path) -> bool:
 
 
 def _email_service_conf(config_path: Path) -> dict:
+    """Read ``services.email`` from the post-req-008 ``meta/services.yml``.
+
+    The file root IS the services map; there is no ``compose.services``
+    wrapper anymore.
+    """
     if not config_path.is_file():
         return {}
     try:
-        parsed = yaml.safe_load(config_path.read_text(encoding="utf-8")) or {}
-    except yaml.YAMLError:
+        parsed = load_yaml_any(str(config_path), default_if_missing={}) or {}
+    except Exception:
         return {}
-    svc = parsed.get("compose", {}).get("services", {}).get("email", {}) or {}
+    if not isinstance(parsed, dict):
+        return {}
+    svc = parsed.get("email", {}) or {}
     return svc if isinstance(svc, dict) else {}
 
 
 def _has_opt_out(config_path: Path) -> bool:
     """Opt-out requires all three:
 
-    1. compose.services.email.enabled is False
-    2. compose.services.email.shared is False
-    3. ``# noqa: email`` on the nearest non-empty line directly above the
-       ``email:`` key in the raw YAML source
+    1. services.email.enabled is False
+    2. services.email.shared is False
+    3. ``# noqa: email`` (or ``# nocheck: email``) on the nearest
+       non-empty line directly above the ``email:`` key in the raw
+       YAML source
     """
     if not config_path.is_file():
         return False
     try:
-        text = config_path.read_text(encoding="utf-8")
-    except OSError:
+        text = read_text(str(config_path))
+    except (OSError, UnicodeDecodeError):
         return False
 
     lines = text.splitlines()
-    annotated = False
-    for idx, line in enumerate(lines):
-        if not _EMAIL_KEY_RE.match(line):
-            continue
-        prev_idx = idx - 1
-        while prev_idx >= 0 and lines[prev_idx].strip() == "":
-            prev_idx -= 1
-        if prev_idx >= 0 and _ANNOTATION_RE.match(lines[prev_idx]):
-            annotated = True
-            break
+    annotated = any(
+        _EMAIL_KEY_RE.match(line)
+        and is_suppressed_at(lines, idx + 1, "email", mode="line-above")
+        for idx, line in enumerate(lines)
+    )
     if not annotated:
         return False
 
     try:
-        parsed = yaml.safe_load(text) or {}
-    except yaml.YAMLError:
+        parsed = load_yaml_str(text) or {}
+    except Exception:
         return False
-    email = parsed.get("compose", {}).get("services", {}).get("email", {}) or {}
+    if not isinstance(parsed, dict):
+        return False
+    email = parsed.get("email", {}) or {}
     return email.get("enabled") is False and email.get("shared") is False
 
 
 def _emit_missing_email_warning(root: Path, role_path: Path) -> None:
-    config_file = role_path / "config" / "main.yml"
+    config_file = role_path / "meta" / "services.yml"
     if config_file.is_file():
         relative = config_file.relative_to(root).as_posix()
     else:
@@ -107,7 +115,7 @@ class TestWebAppRolesIntegrateEmail(unittest.TestCase):
     """Two behaviours in a single sweep over roles/web-app-*:
 
     * Roles that call ``lookup('email', ...)`` **must** declare
-      ``compose.services.email`` with ``enabled: true`` AND ``shared: true``
+      ``services.email`` with ``enabled: true`` AND ``shared: true``
       in ``config/main.yml``. Missing declarations fail the test hard.
     * Roles that do **not** call ``lookup('email', ...)`` and have no
       explicit opt-out block emit a non-blocking warning annotation.
@@ -126,7 +134,7 @@ class TestWebAppRolesIntegrateEmail(unittest.TestCase):
                 continue
             if role_path.name == _MAILU_ROLE:
                 continue
-            config = role_path / "config" / "main.yml"
+            config = role_path / "meta" / "services.yml"
 
             if _role_uses_email_lookup(role_path):
                 svc = _email_service_conf(config)
@@ -143,7 +151,7 @@ class TestWebAppRolesIntegrateEmail(unittest.TestCase):
                     )
                     errors.append(
                         f"[{role_path.name}] {rel}: calls lookup('email', ...) "
-                        f"but compose.services.email is missing {', '.join(missing)}"
+                        f"but services.email is missing {', '.join(missing)}"
                     )
                 continue
 
@@ -154,7 +162,7 @@ class TestWebAppRolesIntegrateEmail(unittest.TestCase):
         if errors:
             self.fail(
                 "Roles that call lookup('email', ...) must declare "
-                "compose.services.email with enabled: true AND shared: true:\n\n"
+                "services.email with enabled: true AND shared: true:\n\n"
                 + "\n".join(errors)
             )
 
@@ -163,7 +171,7 @@ class TestOptOutDetection(unittest.TestCase):
     """Verify _has_opt_out semantics in isolation."""
 
     def _write(self, tmp_path: Path, text: str) -> Path:
-        config = tmp_path / "config" / "main.yml"
+        config = tmp_path / "meta" / "services.yml"
         config.parent.mkdir(parents=True, exist_ok=True)
         config.write_text(text, encoding="utf-8")
         return config
@@ -174,12 +182,7 @@ class TestOptOutDetection(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmp:
             cfg = self._write(
                 Path(tmp),
-                "compose:\n"
-                "  services:\n"
-                "    # noqa: email\n"
-                "    email:\n"
-                "      enabled: false\n"
-                "      shared: false\n",
+                "# noqa: email\nemail:\n  enabled: false\n  shared: false\n",
             )
             self.assertTrue(_has_opt_out(cfg))
 
@@ -189,11 +192,7 @@ class TestOptOutDetection(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmp:
             cfg = self._write(
                 Path(tmp),
-                "compose:\n"
-                "  services:\n"
-                "    email:\n"
-                "      enabled: false\n"
-                "      shared: false\n",
+                "email:\n  enabled: false\n  shared: false\n",
             )
             self.assertFalse(_has_opt_out(cfg))
 
@@ -203,12 +202,7 @@ class TestOptOutDetection(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmp:
             cfg = self._write(
                 Path(tmp),
-                "compose:\n"
-                "  services:\n"
-                "    # noqa: email\n"
-                "    email:\n"
-                "      enabled: true\n"
-                "      shared: false\n",
+                "# noqa: email\nemail:\n  enabled: true\n  shared: false\n",
             )
             self.assertFalse(_has_opt_out(cfg))
 
@@ -218,12 +212,7 @@ class TestOptOutDetection(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmp:
             cfg = self._write(
                 Path(tmp),
-                "compose:\n"
-                "  services:\n"
-                "    # noqa: email\n"
-                "    email:\n"
-                "      enabled: false\n"
-                "      shared: true\n",
+                "# noqa: email\nemail:\n  enabled: false\n  shared: true\n",
             )
             self.assertFalse(_has_opt_out(cfg))
 
@@ -233,13 +222,7 @@ class TestOptOutDetection(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmp:
             cfg = self._write(
                 Path(tmp),
-                "compose:\n"
-                "  services:\n"
-                "    # noqa: email\n"
-                "\n"
-                "    email:\n"
-                "      enabled: false\n"
-                "      shared: false\n",
+                "# noqa: email\n\nemail:\n  enabled: false\n  shared: false\n",
             )
             self.assertTrue(_has_opt_out(cfg))
 

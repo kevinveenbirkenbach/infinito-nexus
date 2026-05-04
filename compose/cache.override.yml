@@ -1,0 +1,132 @@
+# Layered on compose.yml by the dev tooling when the cache stack is
+# active. See docs/contributing/environment/cache.md.
+
+services:
+  registry-cache:
+    image: rpardini/docker-registry-proxy:0.6.5
+    container_name: infinito-registry-cache
+    environment:
+      ENABLE_MANIFEST_CACHE: "true"
+      AUTH_REGISTRIES: ""
+      CACHE_MAX_SIZE: "${INFINITO_REGISTRY_CACHE_MAX_SIZE:?Source scripts/meta/env/cache/registry.sh before running docker compose}"
+      # Avoid 502s on hosts with broken IPv6 outbound.
+      DISABLE_IPV6: "true"
+    volumes:
+      - type: bind
+        source: ${INFINITO_REGISTRY_CACHE_HOST_PATH:?Source scripts/meta/env/cache/registry.sh before running docker compose}
+        target: /docker_mirror_cache
+        bind:
+          create_host_path: true
+      - type: bind
+        source: ${INFINITO_REGISTRY_CACHE_CA_HOST_PATH:?Source scripts/meta/env/cache/registry.sh before running docker compose}
+        target: /ca
+        bind:
+          create_host_path: true
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - "wget -qO- http://127.0.0.1:3128/ca.crt >/dev/null 2>&1"
+      interval: 5s
+      timeout: 3s
+      retries: 30
+      start_period: 30s
+    restart: unless-stopped
+
+  package-cache:
+    image: sonatype/nexus3:3.91.1-ubi
+    container_name: infinito-package-cache
+    # Run as root: fresh bind-mount is root:root and Nexus aborts otherwise.
+    user: "0:0"
+    environment:
+      INSTALL4J_ADD_VM_PARAMS: "-Xms${INFINITO_PACKAGE_CACHE_HEAP:?Source scripts/meta/env/cache/package.sh before running docker compose} -Xmx${INFINITO_PACKAGE_CACHE_HEAP:?Source scripts/meta/env/cache/package.sh before running docker compose} -XX:MaxDirectMemorySize=${INFINITO_PACKAGE_CACHE_DIRECT_MEM:?Source scripts/meta/env/cache/package.sh before running docker compose}"
+      # Random-password mode leaves no readable secret for the bootstrap.
+      NEXUS_SECURITY_RANDOMPASSWORD: "false"
+    volumes:
+      - type: bind
+        source: ${INFINITO_PACKAGE_CACHE_HOST_PATH:?Source scripts/meta/env/cache/package.sh before running docker compose}
+        target: /nexus-data
+        bind:
+          create_host_path: true
+    ports:
+      - "${BIND_IP:-127.0.0.1}:${INFINITO_PACKAGE_CACHE_PORT:?Source scripts/meta/env/cache/package.sh before running docker compose}:8081"
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - "curl -fsS http://127.0.0.1:8081/service/rest/v1/status >/dev/null"
+      interval: 5s
+      timeout: 3s
+      retries: 60
+      start_period: 120s
+    restart: unless-stopped
+
+  package-cache-frontend:
+    image: nginx:1.27-alpine
+    container_name: infinito-package-cache-frontend
+    depends_on:
+      package-cache:
+        condition: service_healthy
+    volumes:
+      - type: bind
+        source: ${INFINITO_PACKAGE_CACHE_FRONTEND_CA_DIR:?Source scripts/meta/env/cache/package.sh before running docker compose}
+        target: /etc/nginx/ca
+        read_only: true
+        bind:
+          create_host_path: true
+      - type: bind
+        source: ${INFINITO_PACKAGE_CACHE_FRONTEND_CERTS_DIR:?Source scripts/meta/env/cache/package.sh before running docker compose}
+        target: /etc/nginx/certs
+        read_only: true
+        bind:
+          create_host_path: true
+      - ./compose/package-cache-frontend/upstreams.conf:/etc/nginx/conf.d/upstreams.conf:ro
+    networks:
+      default:
+        ipv4_address: ${INFINITO_PACKAGE_CACHE_FRONTEND_IP:?Source scripts/meta/env/cache/package.sh before running docker compose}
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - "wget -qO- --no-check-certificate https://127.0.0.1/ --header 'Host: pypi.org' >/dev/null 2>&1 || exit 0"
+      interval: 5s
+      timeout: 3s
+      retries: 30
+      start_period: 10s
+    restart: unless-stopped
+
+  infinito:
+    depends_on:
+      registry-cache:
+        condition: service_healthy
+        required: false
+      package-cache:
+        condition: service_healthy
+        required: false
+      package-cache-frontend:
+        condition: service_healthy
+        required: false
+    environment:
+      INFINITO_PACKAGE_CACHE_FRONTEND_IP: ${INFINITO_PACKAGE_CACHE_FRONTEND_IP:?Source scripts/meta/env/cache/package.sh before running docker compose}
+    extra_hosts:
+      - "pypi.org:${INFINITO_PACKAGE_CACHE_FRONTEND_IP:?Source scripts/meta/env/cache/package.sh before running docker compose}"
+      - "files.pythonhosted.org:${INFINITO_PACKAGE_CACHE_FRONTEND_IP:?Source scripts/meta/env/cache/package.sh before running docker compose}"
+      - "registry.npmjs.org:${INFINITO_PACKAGE_CACHE_FRONTEND_IP:?Source scripts/meta/env/cache/package.sh before running docker compose}"
+      - "rubygems.org:${INFINITO_PACKAGE_CACHE_FRONTEND_IP:?Source scripts/meta/env/cache/package.sh before running docker compose}"
+      - "index.rubygems.org:${INFINITO_PACKAGE_CACHE_FRONTEND_IP:?Source scripts/meta/env/cache/package.sh before running docker compose}"
+      - "repo.packagist.org:${INFINITO_PACKAGE_CACHE_FRONTEND_IP:?Source scripts/meta/env/cache/package.sh before running docker compose}"
+      - "proxy.golang.org:${INFINITO_PACKAGE_CACHE_FRONTEND_IP:?Source scripts/meta/env/cache/package.sh before running docker compose}"
+      - "dl-cdn.alpinelinux.org:${INFINITO_PACKAGE_CACHE_FRONTEND_IP:?Source scripts/meta/env/cache/package.sh before running docker compose}"
+      - "raw.githubusercontent.com:${INFINITO_PACKAGE_CACHE_FRONTEND_IP:?Source scripts/meta/env/cache/package.sh before running docker compose}"
+      - "codeload.github.com:${INFINITO_PACKAGE_CACHE_FRONTEND_IP:?Source scripts/meta/env/cache/package.sh before running docker compose}"
+    volumes:
+      - type: bind
+        source: ${INFINITO_REGISTRY_CACHE_CA_HOST_PATH:?Source scripts/meta/env/cache/registry.sh before running docker compose}
+        target: /opt/registry-cache-ca
+        read_only: true
+        bind:
+          create_host_path: true
+      - ${INFINITO_REGISTRY_CACHE_PROXY_CONF:?Source scripts/meta/env/cache/registry.sh before running docker compose}:/etc/systemd/system/docker.service.d/registry-cache-proxy.conf:ro
+      - ./scripts/docker/cache/registry-ca.sh:/usr/local/bin/registry-cache-ca.sh:ro
+      - ${INFINITO_PACKAGE_CACHE_PIP_CONF:?Source scripts/meta/env/cache/package.sh before running docker compose}:/etc/pip.conf:ro
+      - ${INFINITO_PACKAGE_CACHE_NPMRC:?Source scripts/meta/env/cache/package.sh before running docker compose}:/root/.npmrc:ro
+      - ${INFINITO_PACKAGE_CACHE_APT_LIST:?Source scripts/meta/env/cache/package.sh before running docker compose}:/etc/apt/sources.list.d/package-cache.list:ro
+      - ${INFINITO_PACKAGE_CACHE_FRONTEND_CA_FILE:?Source scripts/meta/env/cache/package.sh before running docker compose}:/opt/package-frontend-ca.crt:ro
+      - ./scripts/docker/cache/package-frontend-ca.sh:/usr/local/bin/package-frontend-ca.sh:ro

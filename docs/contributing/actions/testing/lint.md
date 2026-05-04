@@ -18,15 +18,9 @@ For refactoring guidance, see [Refactoring](../refactoring.md).
 
 ## Suppression Comments 🚫
 
-Some lint checks can be suppressed on a per-item basis using inline comments.
-You MUST use these only when the check genuinely does not apply.
-You MUST NOT use them to silence legitimate issues.
-For suppressions used by opt-in external checks, see [external.md](external.md).
-
-| Comment | Placement | Affected test | Effect |
-|---|---|---|---|
-| `# noqa: shared` | Line directly above `shared:` in `config/main.yml` | [test_service_shared_consistency.py](../../../../tests/lint/ansible/test_service_shared_consistency.py) | Skips shared-consistency validation for that service |
-| `# run_once_<key>: deactivated` | Inside the task file, on the task entry | [test_run_once_tags.py](../../../../tests/lint/ansible/test_run_once_tags.py) | Suppresses the run-once tag warning for that specific task key |
+Lint and external checks share a single per-item suppression syntax based on
+`# noqa` / `# nocheck` markers. The full grammar, position semantics, and the
+catalog of rule keys live at [suppression.md](suppression.md).
 
 ## Running Specific Lint Tests 🏃
 

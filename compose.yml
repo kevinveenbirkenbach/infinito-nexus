@@ -1,28 +1,23 @@
-# CI profile defaults: point containers to CoreDNS and set search domain
 x-ci-defaults: &ci_defaults
   dns:
     - ${DNS_IP}
   dns_opt:
     - ndots:1
 
+# Bare CI/runtime stack. Cache layers in via compose/cache.override.yml.
+
 services:
-  # ------------------------------------------------------------
-  # CoreDNS (CI only)
-  # ------------------------------------------------------------
   coredns:
     image: coredns/coredns:1.14.3
     container_name: infinito-coredns
     profiles: ["ci"]
     command: ["-conf", "/Corefile"]
     volumes:
-      - ./compose/Corefile:/Corefile:ro
+      - ./compose/coredns/Corefile:/Corefile:ro
     networks:
       default:
         ipv4_address: ${DNS_IP}
 
-  # ------------------------------------------------------------
-  # Infinito runner container (systemd-enabled for CI)
-  # ------------------------------------------------------------
   infinito:
     networks:
       default:
@@ -36,9 +31,9 @@ services:
     image: "${INFINITO_IMAGE}"
     pull_policy: "${INFINITO_PULL_POLICY:-never}"
     depends_on:
-      - coredns
+      coredns:
+        condition: service_started
 
-    # Run systemd as PID 1
     command:
       - /sbin/init
       - systemd.log_target=console
@@ -48,30 +43,20 @@ services:
 
     stop_signal: SIGRTMIN+3
 
-    # systemd inside docker needs access to the host cgroup namespace
+    # systemd needs the host cgroup namespace.
     privileged: true
-    # The following lines exist for documentation puporses;
-    # It could be that IPv6 behaves flaky in this case it may makes sense to deactivate IPv6
-    #sysctls:
-    #  net.ipv6.conf.all.disable_ipv6: 1
-    #  net.ipv6.conf.default.disable_ipv6: 1
-    #  net.ipv6.conf.lo.disable_ipv6: 1
     cgroup: host
     tmpfs:
       - /run
       - /run/lock
 
-    # Helpful for interactive debugging
     tty: true
     stdin_open: true
 
-    container_name: infinito_nexus_${INFINITO_DISTRO:-debian}
+    container_name: ${INFINITO_CONTAINER:?Source scripts/meta/env/defaults.sh before running docker compose}
     restart: "no"
     profiles: ["ci"]
-    # Resource caps for reproducing OOM/OOM-kill scenarios locally (e.g. issue #162
-    # web-app-peertube plugin install rc=137). Defaults of 0 map to "unlimited"
-    # in the Docker engine, so leaving these env vars unset behaves as if the
-    # keys were omitted.
+    # Defaults of 0 map to "unlimited" in dockerd.
     mem_limit: ${INFINITO_MEM_LIMIT:-0}
     memswap_limit: ${INFINITO_MEMSWAP_LIMIT:-0}
     cpus: ${INFINITO_CPUS:-0}
@@ -120,7 +105,6 @@ services:
       - "${BIND_IP:-127.0.0.1}:48087:48087"
 
 volumes:
-  # Fallback docker volume for local deploy, GitHub runner uses mount
   docker:
   infinito:
   letsencrypt:

@@ -1,8 +1,7 @@
 # External Tests 🌐
 
-This page is the SPOT for tests that depend on live third-party systems such as
-Docker Hub, GHCR, or other external services.
-Run external tests with `make test-external`.
+External tests depend on live third-party systems such as Docker Hub,
+GHCR, or other external services. Run them with `make test-external`.
 
 ## Goal 🎯
 
@@ -47,14 +46,9 @@ Run external tests with `make test-external`.
 
 ## Suppression Comments 🚫
 
-Some external checks support local inline suppressions for intentional
-exceptions. You MUST use these only when the check genuinely does not apply.
-
-| Comment | Placement | Affected test | Effect |
-|---|---|---|---|
-| `# nocheck: docker-version` | Line directly above `version:` in `config/main.yml` | [test_image_versions.py](../../../../tests/external/docker/test_image_versions.py) | Skips the live version-update warning for that image |
-| `# nocheck: url` | Anywhere on the line containing the URL | [test_urls_reachable.py](../../../../tests/external/repository/test_urls_reachable.py) | Skips probing that URL (use for CDN roots, API base URLs, and runtime config values that return 4xx without a path) |
-| `{# nocheck: url #}` | Anywhere on the line (Jinja2 templates) | [test_urls_reachable.py](../../../../tests/external/repository/test_urls_reachable.py) | Same as above for `.j2` files |
+Lint and external checks share a single per-item suppression syntax based on
+`# noqa` / `# nocheck` markers. The full grammar, position semantics, and the
+catalog of rule keys live at [suppression.md](suppression.md).
 
 ## Running 🏃
 

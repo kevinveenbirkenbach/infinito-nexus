@@ -81,10 +81,30 @@ test("dashboard to joomla: admin login, verify control panel, logout", async ({ 
   // 4. Verify the control panel rendered. Joomla 5 uses `body.com_cpanel` on
   //    the admin home; falling back to any administrator nav element covers
   //    future template tweaks without loosening the post-login assertion.
+  // The body class on Joomla 5.x admin uses `option-com_cpanel`; older
+  // releases used `com_cpanel`. Match both, and accept any `option-com_*`
+  // body class as a generic post-login signal so the assertion does not
+  // false-fail when Joomla's first-login redirects through `com_postinstall`.
   const controlPanelMarker = page
-    .locator("body.com_cpanel, #sidebarmenu, nav[aria-label='Main menu'], a[href*='option=com_cpanel']")
+    .locator("body.com_cpanel, body[class*='option-com_'], #sidebarmenu, nav[aria-label='Main menu'], a[href*='option=com_cpanel']")
     .first();
-  await controlPanelMarker.waitFor({ state: "visible", timeout: 60_000 });
+  // Race the success marker against Joomla's "Username and password do not
+  // match" error notification. Without this, a credentials problem makes the
+  // test hang for the full 120s timeout per retry; with it, we fail fast and
+  // the trace makes the root cause obvious.
+  const loginErrorAlert = page
+    .locator(".alert-warning, .alert-danger, joomla-alert, [role='alert']")
+    .filter({ hasText: /Username and password do not match|Login failed|invalid|incorrect/i })
+    .first();
+  await Promise.race([
+    controlPanelMarker.waitFor({ state: "visible", timeout: 120_000 }),
+    loginErrorAlert
+      .waitFor({ state: "visible", timeout: 120_000 })
+      .then(async () => {
+        const errorText = (await loginErrorAlert.textContent().catch(() => "")) || "(unknown)";
+        throw new Error(`Joomla rejected the admin login: ${errorText.trim()}`);
+      }),
+  ]);
 
   // 5. Log out via the universal logout endpoint.
   await joomlaLogout(page, expectedJoomlaBaseUrl);

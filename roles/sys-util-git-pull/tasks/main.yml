@@ -1,5 +1,5 @@
 ---
-# run_once_sys_util_git_pull: deactivated
+# nocheck: run-once
 - name: Run sys-util-git-pull helper (verbose)
   script: >-
     sys_util_git_pull.py

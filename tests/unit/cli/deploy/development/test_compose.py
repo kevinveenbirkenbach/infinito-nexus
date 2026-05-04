@@ -88,9 +88,18 @@ class TestComposeUpRetries(unittest.TestCase):
         self.assertEqual(compose.run.call_count, 1)
         sleep_mock.assert_not_called()
 
-    @patch.dict(os.environ, {"INFINITO_IMAGE": "test-image/arch"}, clear=False)
+    @patch.dict(
+        os.environ,
+        {
+            "INFINITO_IMAGE": "test-image/arch",
+            "GITHUB_ACTIONS": "true",
+            "RUNNING_ON_GITHUB": "true",
+            "CI": "true",
+        },
+        clear=False,
+    )
     @patch("subprocess.run", autospec=True)
-    def test_run_passes_ci_profile_flag_to_docker_compose(
+    def test_run_uses_only_ci_profile_on_github_runner(
         self, run_mock: MagicMock
     ) -> None:
         compose = self._compose()
@@ -110,12 +119,74 @@ class TestComposeUpRetries(unittest.TestCase):
         cmd = run_mock.call_args.args[0]
         env = run_mock.call_args.kwargs["env"]
 
+        # CI: only the ci profile fires; cache override is not layered in.
         self.assertEqual(
             cmd,
-            ["docker", "compose", "--profile", "ci", "ps", "-q", "infinito"],
+            [
+                "docker",
+                "compose",
+                "-f",
+                "compose.yml",
+                "--profile",
+                "ci",
+                "ps",
+                "-q",
+                "infinito",
+            ],
         )
         self.assertEqual(env["INFINITO_DISTRO"], "arch")
         self.assertNotIn("COMPOSE_PROFILES", env)
+        self.assertNotIn("INFINITO_REGISTRY_CACHE_PROXY_CONF", env)
+
+    @patch.dict(
+        os.environ,
+        {
+            "INFINITO_IMAGE": "test-image/arch",
+            "GITHUB_ACTIONS": "",
+            "RUNNING_ON_GITHUB": "",
+            "CI": "",
+            # Tests bypass BASH_ENV; set explicitly so cache_env_overrides() passes.
+            "INFINITO_PACKAGE_CACHE_FRONTEND_CA_DIR": "/var/cache/infinito/test/ca",
+        },
+        clear=False,
+    )
+    @patch("subprocess.run", autospec=True)
+    def test_run_activates_cache_profile_locally(self, run_mock: MagicMock) -> None:
+        compose = self._compose()
+
+        run_mock.return_value = subprocess.CompletedProcess(
+            ["docker", "compose"], 0, stdout="", stderr=""
+        )
+
+        compose.run(["ps", "-q", "infinito"], check=False, capture=True)
+
+        cmd = run_mock.call_args.args[0]
+        env = run_mock.call_args.kwargs["env"]
+
+        # Local: cache override is layered onto compose.yml; no --profile cache.
+        self.assertEqual(
+            cmd,
+            [
+                "docker",
+                "compose",
+                "-f",
+                "compose.yml",
+                "-f",
+                "compose/cache.override.yml",
+                "--profile",
+                "ci",
+                "ps",
+                "-q",
+                "infinito",
+            ],
+        )
+        self.assertEqual(
+            env["INFINITO_REGISTRY_CACHE_PROXY_CONF"],
+            "./compose/registry-cache/proxy.conf",
+        )
+        self.assertTrue(
+            env["INFINITO_PACKAGE_CACHE_FRONTEND_CA_FILE"].endswith("/ca.crt")
+        )
 
     @patch.dict(
         os.environ,
@@ -123,6 +194,10 @@ class TestComposeUpRetries(unittest.TestCase):
             "INFINITO_NO_BUILD": "0",
             "INFINITO_IMAGE": "infinito-debian",
             "INFINITO_PULL_POLICY": "never",
+            # CI-pinned so cache stays inactive; this test asserts build behaviour only.
+            "CI": "true",
+            "GITHUB_ACTIONS": "true",
+            "RUNNING_ON_GITHUB": "true",
         },
         clear=False,
     )
@@ -143,7 +218,13 @@ class TestComposeUpRetries(unittest.TestCase):
 
     @patch.dict(
         os.environ,
-        {"INFINITO_NO_BUILD": "1", "INFINITO_IMAGE": "test-image/arch"},
+        {
+            "INFINITO_NO_BUILD": "1",
+            "INFINITO_IMAGE": "test-image/arch",
+            "CI": "true",
+            "GITHUB_ACTIONS": "true",
+            "RUNNING_ON_GITHUB": "true",
+        },
         clear=False,
     )
     def test_up_skips_build_when_no_build_flag_is_enabled(self) -> None:
@@ -160,6 +241,52 @@ class TestComposeUpRetries(unittest.TestCase):
             delay_s=30,
         )
         compose.wait_for_healthy.assert_called_once_with()
+
+    @patch.dict(
+        os.environ,
+        {
+            "INFINITO_NO_BUILD": "0",
+            "INFINITO_IMAGE": "infinito-debian",
+            "INFINITO_PULL_POLICY": "never",
+            "CI": "",
+            "GITHUB_ACTIONS": "",
+            "RUNNING_ON_GITHUB": "",
+            # Tests bypass BASH_ENV; set explicitly so cache_env_overrides() passes.
+            "INFINITO_PACKAGE_CACHE_FRONTEND_CA_DIR": "/var/cache/infinito/test/ca",
+        },
+        clear=False,
+    )
+    def test_up_includes_cache_services_when_local(self) -> None:
+        compose = self._compose()
+        compose._render_coredns_corefile = MagicMock()
+        compose._compose_up_with_retries = MagicMock()
+        compose.wait_for_healthy = MagicMock()
+        compose._bootstrap_package_cache = MagicMock()
+        compose._generate_package_frontend_certs = MagicMock()
+        compose._install_package_frontend_ca_in_runner = MagicMock()
+
+        compose.up(run_entry_init=False)
+
+        # Cache services precede coredns + infinito so depends_on health gates resolve.
+        compose._compose_up_with_retries.assert_called_once_with(
+            [
+                "--env-file",
+                "env.ci",
+                "up",
+                "-d",
+                "registry-cache",
+                "package-cache",
+                "package-cache-frontend",
+                "coredns",
+                "infinito",
+            ],
+            attempts=6,
+            delay_s=30,
+        )
+        compose.wait_for_healthy.assert_called_once_with()
+        compose._bootstrap_package_cache.assert_called_once()
+        compose._generate_package_frontend_certs.assert_called_once()
+        compose._install_package_frontend_ca_in_runner.assert_called_once()
 
 
 if __name__ == "__main__":  # pragma: no cover
