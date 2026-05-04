@@ -300,20 +300,25 @@ async function expectNextcloudSettingAbsent(page, unexpectedValue, label) {
 // ---------------------------------------------------------------------------
 
 function getNextcloudSocialLoginCandidates(target) {
+  // The third "alternative login" shape is `pulsejet/nextcloud-oidc-login`
+  // (the one this role actually deploys for the OIDC+LDAP flavor). It renders
+  // as `<a href="/apps/oidc_login/oidc" class="oidc-button">`. Match it
+  // explicitly so the test can click through even if `oidc_login_auto_redirect`
+  // does not bounce the request — which can race during cold first-deploys.
   return [
     {
       kind: "social-login",
       locator: target.locator(
-        'a[href*="/apps/sociallogin/"], a[href*="/custom_oidc/"], button[formaction*="/apps/sociallogin/"], button[formaction*="/custom_oidc/"]'
+        'a[href*="/apps/sociallogin/"], a[href*="/custom_oidc/"], a[href*="/apps/oidc_login/"], a.oidc-button, button[formaction*="/apps/sociallogin/"], button[formaction*="/custom_oidc/"]'
       )
     },
     {
       kind: "social-login",
-      locator: target.getByRole("link", { name: /log in with|sign in with|continue with/i })
+      locator: target.getByRole("link", { name: /log in with|sign in with|continue with|openid connect/i })
     },
     {
       kind: "social-login",
-      locator: target.getByRole("button", { name: /log in with|sign in with|continue with/i })
+      locator: target.getByRole("button", { name: /log in with|sign in with|continue with|openid connect/i })
     }
   ];
 }
@@ -394,9 +399,22 @@ async function loginToStandaloneNextcloud(adminPage, username = loginUsername, p
       break;
     case "oidc_login":
     default:
-      flavorCandidates = [...credentialCandidates, ...standaloneShellCandidates];
+      // Happy path: `oidc_login_auto_redirect=true` bounces /login straight to
+      // Keycloak, so the Keycloak credential form (`credentialCandidates`) or
+      // an already-authenticated NC shell appears. Race path: under cold
+      // first-deploy load the upstream `boot()` hook can lose its
+      // `header(Location:...)` (headers already sent by an earlier hook), and
+      // /login renders the NC login chrome with the password form hidden but
+      // the OIDC alt-login button visible. Treat that button as a valid entry
+      // point so the test still proceeds via an explicit click instead of
+      // timing out.
+      flavorCandidates = [
+        ...credentialCandidates,
+        ...socialLoginCandidates,
+        ...standaloneShellCandidates
+      ];
       timeoutMessage =
-        "Timed out waiting for the Keycloak login form or an already-authenticated Nextcloud shell";
+        "Timed out waiting for the Keycloak login form, the OIDC alt-login button, or an already-authenticated Nextcloud shell";
       break;
   }
 
