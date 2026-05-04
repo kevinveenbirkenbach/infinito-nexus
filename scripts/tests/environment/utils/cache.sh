@@ -122,15 +122,40 @@ assert_caches_used() {
 	echo "[OK] both cache stacks observed activity (registry + package-cache, including '${expected_proxy:-N/A}')"
 }
 
+# Resolve the Fedora release number for the configured runtime image
+# by reading $VERSION_ID from /etc/os-release inside the image. We do
+# this dynamically because hardcoding `releases/<N>/...` rots the moment
+# the pinned Fedora release reaches EOL and dl.fedoraproject.org stops
+# serving it (the previous hardcode of 40 broke when Fedora 40 went EOL
+# in May 2025). Echoes the version on stdout, or empty on failure.
+_resolve_fedora_release() {
+	local image="${DEV_RUNTIME_IMAGE:-}"
+	[[ -z "${image}" ]] && return 0
+	# Override entrypoint to /bin/cat: Fedora's official container image
+	# defaults to bash, but pinning the entrypoint makes the call resilient
+	# against derivatives that ship a non-shell entrypoint. /etc/os-release
+	# is plain `KEY=VALUE`, awk lifts VERSION_ID with quotes stripped.
+	docker run --rm --entrypoint /bin/cat "${image}" /etc/os-release 2>/dev/null |
+		awk -F= '/^VERSION_ID=/ { gsub(/"/, "", $2); print $2; exit }'
+}
+
 # Map runtime image to a (proxy, upstream-path) pair that the active
 # probe can fetch through Nexus. The path picks a small, reliably-
 # available index file on the upstream so the probe stays cheap.
 _probe_target_for_runtime() {
 	local image="${DEV_RUNTIME_IMAGE:-}"
+	local fedora_ver
 	case "${image}" in
 	*debian*) echo "apt-debian dists/bookworm/Release" ;;
 	*ubuntu*) echo "apt-ubuntu dists/jammy/Release" ;;
-	*fedora*) echo "yum-fedora releases/40/Everything/x86_64/os/repodata/repomd.xml" ;;
+	*fedora*)
+		fedora_ver="$(_resolve_fedora_release)"
+		if [[ -z "${fedora_ver}" ]]; then
+			echo ""
+		else
+			echo "yum-fedora releases/${fedora_ver}/Everything/x86_64/os/repodata/repomd.xml"
+		fi
+		;;
 	*centos* | *rocky*) echo "yum-rocky 9/BaseOS/x86_64/os/repodata/repomd.xml" ;;
 	*) echo "" ;;
 	esac
@@ -194,7 +219,24 @@ probe_did_inner_build() {
 		return 0
 	fi
 
-	local network="${COMPOSE_NETWORK:-infinito-nexus_default}"
+	# Compose derives the network name from the project name, which
+	# defaults to the host CWD basename: `infinito-nexus` locally,
+	# `infinito-nexus-core` in the CI fork, something else again in
+	# Act-runner workspaces or worktrees. Discover the network the
+	# frontend container is actually on instead of hardcoding it, so
+	# the probe stays correct regardless of how the repo is named.
+	local network="${COMPOSE_NETWORK:-}"
+	if [[ -z "${network}" ]]; then
+		network="$(docker inspect -f \
+			'{{range $k,$_ := .NetworkSettings.Networks}}{{$k}}{{"\n"}}{{end}}' \
+			infinito-package-cache-frontend 2>/dev/null |
+			head -n1)"
+	fi
+	if [[ -z "${network}" ]]; then
+		echo "[FAIL] DiD probe: could not discover compose network for" \
+			"infinito-package-cache-frontend (container missing or not connected)" >&2
+		exit 1
+	fi
 	local before after delta tmpdir tag rc=0
 	before="$(docker logs infinito-package-cache-frontend 2>&1 | wc -l)"
 
