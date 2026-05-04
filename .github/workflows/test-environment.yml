@@ -63,6 +63,7 @@ jobs:
             -e GITHUB_REPOSITORY="${{ github.repository }}" \
             -e GITHUB_REPOSITORY_OWNER="${{ github.repository_owner }}" \
             -e GITHUB_SHA="${{ github.sha }}" \
+            -e DEV_RUNTIME_IMAGE \
             -e INFINITO_DISTRO=debian \
             -e INFINITO_IMAGE=infinito-debian \
             -e INFINITO_PULL_POLICY=never \

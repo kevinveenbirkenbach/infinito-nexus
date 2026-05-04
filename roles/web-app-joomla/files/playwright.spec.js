@@ -46,6 +46,13 @@ async function performKeycloakLogin(page, username, password) {
   await signInButton.click();
 }
 
+// Log out via the universal logout endpoint. Every app's nginx vhost intercepts
+// `location = /logout` and proxies it to web-svc-logout. Using `waitUntil: 'commit'`
+// avoids ERR_ABORTED from the multi-domain redirect chain.
+async function joomlaLogout(page, baseUrl) {
+  await page.goto(`${baseUrl.replace(/\/$/, "")}/logout`, { waitUntil: "commit" }).catch(() => {});
+}
+
 async function performJoomlaAdminFormLogin(page, baseUrl, username, password) {
   // Local Joomla form-login at /administrator?fallback=local. The
   // `?fallback=local` query short-circuits the plg_system_keycloak
@@ -153,8 +160,33 @@ test("LDAP: Joomla core LDAP plugin authenticates the administrator at /administ
     page.locator("button[type='submit'], input[type='submit']").first().click(),
   ]);
 
+  // Body class on Joomla 5.x admin is `option-com_cpanel`; older releases used
+  // `com_cpanel`. Match both, plus any `option-com_*` so first-login redirects
+  // through `com_postinstall` don't false-fail the post-login assertion.
   const controlPanelMarker = page
-    .locator("body.com_cpanel, #sidebarmenu, nav[aria-label='Main menu'], a[href*='option=com_cpanel']")
+    .locator("body.com_cpanel, body[class*='option-com_'], #sidebarmenu, nav[aria-label='Main menu'], a[href*='option=com_cpanel']")
     .first();
-  await controlPanelMarker.waitFor({ state: "visible", timeout: 60_000 });
+  // Race the success marker against Joomla's "Username and password do not
+  // match" error. Without it, bad credentials make the test hang for the full
+  // timeout per retry; with it, we fail fast with the actual error in the trace.
+  const loginErrorAlert = page
+    .locator(".alert-warning, .alert-danger, joomla-alert, [role='alert']")
+    .filter({ hasText: /Username and password do not match|Login failed|invalid|incorrect/i })
+    .first();
+  await Promise.race([
+    controlPanelMarker.waitFor({ state: "visible", timeout: 120_000 }),
+    loginErrorAlert
+      .waitFor({ state: "visible", timeout: 120_000 })
+      .then(async () => {
+        const errorText = (await loginErrorAlert.textContent().catch(() => "")) || "(unknown)";
+        throw new Error(`Joomla rejected the admin login: ${errorText.trim()}`);
+      }),
+  ]);
+
+  await joomlaLogout(page, expectedJoomlaBaseUrl);
+
+  // After logout, /administrator must render the login form again rather than
+  // the control panel.
+  await page.goto(`${expectedJoomlaBaseUrl}/administrator`, { waitUntil: "domcontentloaded" }).catch(() => {});
+  await expect(page.locator("input[name='username']")).toBeVisible({ timeout: 15_000 });
 });

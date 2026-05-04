@@ -1,5 +1,8 @@
 #!/usr/bin/env bash
-# Shared variables and helpers for the environment test suite.
+# Shared bootstrap, constants, and generic helpers for the environment
+# test suite. Sourcing this file loads the repository env modules and
+# configures git's safe.directory for the mounted workflow checkout.
+# Cache-specific helpers live in cache.sh.
 set -euo pipefail
 
 DASHBOARD_APP="web-app-dashboard"
@@ -10,8 +13,8 @@ MATOMO_URL="https://matomo.infinito.example"
 # These constants are part of the sourced interface consumed by sibling scripts.
 : "${DASHBOARD_APP}" "${MATOMO_APP}" "${DASHBOARD_URL}" "${MATOMO_URL}"
 
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-REPO_ROOT="$(cd "${SCRIPT_DIR}/../../.." && pwd)"
+UTILS_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+REPO_ROOT="$(cd "${UTILS_DIR}/../../../.." && pwd)"
 
 ensure_git_safe_directory() {
 	local git_probe=""
@@ -61,32 +64,6 @@ inspect() {
 	make exec CMD="cat ${INVENTORY_FILE}"
 	echo "Printing host_vars to verify per-host configuration."
 	make exec CMD="cat ${HOST_VARS_FILE}"
-}
-
-# Snapshot cache request counters. Outputs `<nexus_lines> <registry_hits>`.
-cache_snapshot() {
-	local nexus_lines registry_hits
-	nexus_lines="$(docker exec infinito-package-cache sh -c 'wc -l </nexus-data/log/request.log' 2>/dev/null | awk '{print $1}')"
-	registry_hits="$(docker logs infinito-registry-cache 2>&1 | grep -c '"upstream_cache_status":"HIT"' || true)"
-	printf '%s %s\n' "${nexus_lines:-0}" "${registry_hits:-0}"
-}
-
-# Assert that cache traffic grew between two snapshots.
-# Usage: assert_cache_used <before> <after>  (both as `<nexus> <registry>` pairs)
-assert_cache_used() {
-	local before="${1}" after="${2}"
-	local nexus_before registry_before nexus_after registry_after
-	read -r nexus_before registry_before <<<"${before}"
-	read -r nexus_after registry_after <<<"${after}"
-	local delta_nexus=$((nexus_after - nexus_before))
-	local delta_registry=$((registry_after - registry_before))
-	echo "[cache] nexus requests +${delta_nexus} (was ${nexus_before}, now ${nexus_after})"
-	echo "[cache] registry HITs   +${delta_registry} (was ${registry_before}, now ${registry_after})"
-	if [[ "${delta_nexus}" -le 0 && "${delta_registry}" -le 0 ]]; then
-		echo "[FAIL] no cache traffic observed during deploy" >&2
-		exit 1
-	fi
-	echo "[OK] cache observed activity during deploy"
 }
 
 # Check that a URL responds with the expected HTTP status code.

@@ -3,8 +3,10 @@
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-# shellcheck source=scripts/tests/environment/lib.sh
-source "${SCRIPT_DIR}/lib.sh"
+# shellcheck source=scripts/tests/environment/utils/common.sh
+source "${SCRIPT_DIR}/utils/common.sh"
+# shellcheck source=scripts/tests/environment/utils/cache.sh
+source "${SCRIPT_DIR}/utils/cache.sh"
 
 echo "Snapshotting cache counters before the deploy."
 CACHE_BEFORE="$(cache_snapshot)"
@@ -13,9 +15,15 @@ echo "Deploying dashboard with matomo disabled to verify SERVICES_DISABLED suppr
 make deploy-fresh-purged-apps APPS="${DASHBOARD_APP}" SERVICES_DISABLED="matomo"
 inspect
 
-echo "Verifying that the local caches saw deploy traffic."
+echo "Actively probing both caches to confirm pull-through works end-to-end."
+probe_caches
+
+echo "Probing the DiD inner-build cache path (frontend hijack + apt rewrite)."
+probe_did_inner_build
+
+echo "Verifying that BOTH local caches saw real pull-through traffic."
 CACHE_AFTER="$(cache_snapshot)"
-assert_cache_used "${CACHE_BEFORE}" "${CACHE_AFTER}"
+assert_caches_used "${CACHE_BEFORE}" "${CACHE_AFTER}"
 
 echo "Trusting the local CA certificate so HTTPS endpoints are reachable from the host."
 make trust-ca

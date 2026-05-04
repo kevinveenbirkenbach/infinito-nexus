@@ -3,8 +3,8 @@
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-# shellcheck source=scripts/tests/environment/lib.sh
-source "${SCRIPT_DIR}/lib.sh"
+# shellcheck source=scripts/tests/environment/utils/common.sh
+source "${SCRIPT_DIR}/utils/common.sh"
 
 echo "Redeploying matomo while keeping inventory and packages to validate state reuse."
 make deploy-reuse-kept-apps APPS="${MATOMO_APP}"

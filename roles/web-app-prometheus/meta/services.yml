@@ -43,7 +43,7 @@ prometheus:
   lifecycle: beta
 alertmanager:
   image: prom/alertmanager
-  version: v0.32.0
+  version: v0.32.1
   name: prometheus-alertmanager
   cpus: '0.25'
   mem_reservation: 64m

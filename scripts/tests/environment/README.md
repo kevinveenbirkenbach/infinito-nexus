@@ -20,7 +20,8 @@ The entry point is [00_orchestrator.sh](00_orchestrator.sh).
 | [08_deploy_performance.sh](08_deploy_performance.sh) | Deploys the full application set on performance hardware |
 | [09_deploy_reuse.sh](09_deploy_reuse.sh) | Redeploys reusing existing inventory and packages |
 | [10_teardown.sh](10_teardown.sh) | Shuts down the stack and reverses environment changes |
-| [lib.sh](lib.sh) | Shared variables and helper functions |
+| [utils/common.sh](utils/common.sh) | Shared bootstrap, constants, and generic helpers (HTTP assertion, inventory inspection) |
+| [utils/cache.sh](utils/cache.sh) | Cache-stack assertions and probes (registry-cache, package-cache, DiD inner-build) |
 
 ## Usage
 
