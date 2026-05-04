@@ -82,7 +82,7 @@ MOODLE_VOLUME_CODE:             "{{ lookup('config', application_id, 'volumes.co
 
 # Identity-integration toggles
 MOODLE_OIDC_ENABLED:            "{{ lookup('config', application_id, 'services.oidc.enabled') }}"
-MOODLE_LDAP_ENABLED:            "{{ lookup('config', application_id, 'services.ldap.enabled') | default(true) }}"
+MOODLE_LDAP_ENABLED:            "{{ lookup('config', application_id, 'services.ldap.enabled', true) }}"
 
 # OIDC scopes Moodle requests from Keycloak. The custom 'moodle' scope
 # (rendered by web-app-keycloak when this role is enabled) carries the
