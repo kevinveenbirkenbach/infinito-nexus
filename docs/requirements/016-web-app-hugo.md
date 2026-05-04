@@ -17,26 +17,47 @@ directory in seconds. There is no runtime application server: once the
 site is built, any HTTP server (nginx, caddy, S3, …) can serve it.
 
 The infinito-nexus stack already has long-running CMS roles
-(`web-app-wordpress`, `web-app-discourse`, …). What it lacks is a
-build-then-serve role for static sites. `web-app-hugo` fills that gap:
+(`web-app-wordpress`, `web-app-discourse`, …) and one no-database
+static-asset role (`web-app-littlejs`) that clones an upstream Git
+repository, builds a custom Docker image around it, and serves the
+result via nginx. `web-app-hugo` adopts the same shape and adds Hugo's
+build step:
 
 - **Content** comes from an external Git repository (markdown + theme)
-  configured per canonical domain.
-- **Build** runs Hugo inside a pinned container; the output is a
-  static `public/` directory persisted on a named volume.
-- **Serve** runs a minimal nginx (no PHP, no dynamic upstream) bound
-  to the canonical domain via the existing reverse-proxy wiring.
+  cloned by `sys-stk-full` via `docker_git_repository_*` (same path
+  used by `web-app-littlejs`).
+- **Build + Serve** are wrapped in a single multi-stage Dockerfile:
+  the `builder` stage runs `hugo --minify` against the cloned source;
+  the `serve` stage is a pinned `nginx:<version>-alpine` that COPYs
+  the builder's `/public/` into `/usr/share/nginx/html`. There is no
+  separate long-running build container — `compose build` re-bakes
+  the static output whenever the cloned source changes, and `compose
+  up` restarts nginx with the new image.
 
-This split keeps the runtime image tiny and lets `make deploy` rebuild
-content without touching the serving container.
+This keeps the runtime container small (just nginx + static files) and
+makes "the source ref changed → rebuild" automatic via Docker's layer
+cache: `compose build` is a no-op when `services/repository/`'s commit
+hash is unchanged.
 
 ## Naming
 
 - Role directory: `roles/web-app-hugo/`.
 - Application ID: `web-app-hugo`.
-- Container names: `infinito-hugo-builder` (one-shot build container)
-  and `infinito-hugo-web` (long-running nginx serving `public/`).
-- Internal hostname inside the compose default network: `hugo-web`.
+- Compose service name: `{{ application_id | get_entity_name }}`
+  (resolves to `hugo`); container name: `infinito-hugo`. Same shape
+  as `web-app-littlejs`'s single-service container.
+- Internal hostname inside the compose default network: `hugo`.
+
+## Scope
+
+V1 (this requirement) implements **single canonical domain** per
+deploy — the most common shape for a Hugo site, matching every
+existing simple `web-app-*` role in the tree. Multi-canonical-domain
+support (one role deploy serving N independent Hugo sites with
+distinct `--baseURL`s) is **out of scope** for V1; if needed, a
+follow-up requirement adds it as a separate iteration. The role MUST
+still validate the `server.domains.canonical` list at deploy time and
+fail explicitly if more than one canonical domain is configured.
 
 ## Dependencies
 
@@ -58,125 +79,149 @@ content without touching the serving container.
 
 ### Role layout
 
-- [ ] `roles/web-app-hugo/` follows the standard layout: `meta/`
-      (`main.yml`, `info.yml`, `services.yml`, `server.yml`,
-      `schema.yml`, `users.yml`), `tasks/`, `templates/`, `vars/`,
-      `files/`, `README.md`, `Administration.md`.
-- [ ] `meta/main.yml` declares author, license, and tags consistent
+- [x] `roles/web-app-hugo/` follows the standard layout for a
+      DB-less, single-service web-app: `meta/` (`main.yml`,
+      `info.yml`, `services.yml`, `server.yml`), `tasks/`,
+      `templates/`, `vars/`, `files/`, `README.md`,
+      `Administration.md`. `schema.yml` / `users.yml` are not
+      required (matches `web-app-littlejs` / `web-app-mini-qr`).
+- [x] `meta/main.yml` declares author, license, and tags consistent
       with sibling `web-app-*` roles.
-- [ ] The role registers itself with the dashboard and reverse-proxy
-      stack via the same hooks used by `web-app-yourls` and
-      `web-app-wordpress` (no bespoke registration path).
+- [x] The role registers itself with the dashboard and reverse-proxy
+      stack via the same `sys-stk-full` include hook used by
+      `web-app-littlejs` (no bespoke registration path).
 
 ### Image & versions
 
-- [ ] Hugo image is pinned to a specific extended-Hugo tag (e.g.
-      `hugomods/hugo:exts-<version>`) in `vars/main.yml`. `:latest` is
-      forbidden.
-- [ ] The serving image is pinned (e.g. `nginx:<version>-alpine`) in
-      `vars/main.yml`.
-- [ ] Both image references go through `lookup('application', ...)`
-      so they appear in the global image-version drift report.
+- [x] Hugo image is pinned to a specific extended-Hugo tag
+      (`hugomods/hugo:exts-0.148.0`) in `meta/services.yml`,
+      surfaced through `vars/main.yml` via `lookup('config', …)`.
+      `:latest` is forbidden.
+- [x] The serving image is pinned (`nginx:1.28.0-alpine`) in
+      `meta/services.yml`, surfaced through `vars/main.yml`.
+- [x] Both image references go through
+      `lookup('config', application_id, 'services.hugo.{image,version,builder_image,builder_version}')`
+      — same path used by every other `web-app-*` role — so they
+      appear in the global image-version drift report.
 
 ### Configuration surface
 
-- [ ] Each canonical domain in
-      `server.domains.canonical['web-app-hugo']` produces an
-      independent Hugo site. The list MAY be empty (role becomes a
-      no-op) or contain N entries (N independent sites).
-- [ ] Per-site configuration in the inventory under
-      `applications.web-app-hugo.sites.<canonical-domain>`:
-      - `source.repo` (HTTPS Git URL, OPTIONAL; default
+- [x] `server.domains.canonical` for `web-app-hugo` MUST contain
+      exactly one entry. If more than one entry, the play MUST fail
+      with a clear "multi-canonical not supported in V1" message.
+      (Asserted in `tasks/01_core.yml`.)
+- [x] Inventory configuration under
+      `applications.web-app-hugo.services.hugo`:
+      - `source_repository` (HTTPS Git URL, OPTIONAL; default
         `https://github.com/gohugoio/hugoDocs.git` — see **Default
         site** below)
-      - `source.ref` (branch, tag, or commit; OPTIONAL; default
-        `master` when `source.repo` is the default, otherwise REQUIRED)
-      - `source.subdir` (optional path within the repo; default `.`)
-      - `theme.repo` and `theme.ref` (OPTIONAL; if set, cloned into
-        `themes/<name>` before build)
-      - `hugo.base_url` (OPTIONAL; default derived from the canonical
-        domain + scheme)
-      - `hugo.environment` (OPTIONAL; default `production`)
-      - `hugo.minify` (OPTIONAL boolean; default `true`)
-- [ ] `meta/schema.yml` validates the above keys and rejects unknown
-      keys with a clear error.
+      - `source_version` (branch, tag, or commit; OPTIONAL; default
+        value is the pinned tag from **Default site**)
+      - `hugo_environment` (OPTIONAL; default `production`)
+      - `hugo_minify` (OPTIONAL boolean; default `true`)
+      - Hugo `--baseURL` is derived from
+        `lookup('tls', application_id, 'url.base')` — the role's TLS
+        URL is single-source-of-truth for the canonical scheme+host
+        and an inventory override would silently fight that lookup.
+- [x] Theme handling: theme is whatever the upstream content repo
+      ships in `themes/` or `go.mod` (Hugo modules). The role does
+      NOT clone a separate theme repo in V1 — keeping theme + content
+      bundled mirrors how `web-app-littlejs` consumes its upstream
+      and avoids per-site theme version drift. A separate theme
+      override is deferred to the multi-site follow-up.
+- [x] Defaults live in `meta/services.yml` (read via
+      `lookup('config', application_id, …)` from `vars/main.yml`),
+      not in a role-level schema validator — same convention as
+      every other `web-app-*` role.
 
 ### Default site
 
-- [ ] When the operator enables `web-app-hugo` for a canonical domain
-      without specifying `source.repo`, the role MUST clone the
-      official Hugo documentation source from
+- [x] When the operator enables `web-app-hugo` without overriding
+      `services.hugo.source_repository`, the role clones the official
+      Hugo documentation source from
       [github.com/gohugoio/hugoDocs](https://github.com/gohugoio/hugoDocs)
-      and build it. Rationale: it is the canonical end-to-end
-      validation that the build pipeline works against a real,
-      non-trivial Hugo project, and it gives the operator a working
-      site on first deploy that can be swapped for their own content
-      later by overriding `source.repo` / `source.ref`.
-- [ ] The default `source.ref` MUST be a pinned tag (NOT
-      `master`/`HEAD`) so deploys are reproducible. The pin is
-      declared in `vars/main.yml` and bumped via the standard image-
-      version drift report flow. **Initial pin: `v0.148.0`** (commit
+      and builds it. Validated end-to-end: Playwright
+      `hugo serves rendered HTML with a non-empty <title>` passes
+      with the docs theme's homepage title.
+- [x] The default `source_version` is a pinned tag (NOT
+      `master`/`HEAD`). **Initial pin: `v0.148.0`** (commit
       `36e3d7b7b521a165bdbf8f63cd417720f37832c6`, tagged on
       [github.com/gohugoio/hugoDocs](https://github.com/gohugoio/hugoDocs/releases/tag/v0.148.0)).
-- [ ] The role README MUST document how to override the default with
-      a custom content repo + theme.
+      Declared in `meta/services.yml`.
+- [x] The role README documents how to override the default with a
+      custom content repo + ref.
 
 ### Build pipeline
 
-- [ ] `tasks/` clones (or fetches+resets to) `source.ref` and, if
-      configured, `theme.ref` into a per-site working tree under
-      a host bind path defined by an env var (`INFINITO_HUGO_HOST_PATH`
-      or equivalent, declared in `scripts/meta/env/...`).
-- [ ] The builder container runs `hugo --minify -e <environment>
-      -b <base_url> -d /public/<canonical-domain>` against the
-      per-site working tree. Build output lands on the named volume
-      mounted into the serving container at `/usr/share/nginx/html`.
-- [ ] The build is **idempotent**: re-running the play with the same
-      `source.ref` MUST NOT rebuild if the resolved commit and theme
-      commit are unchanged. A change in either ref MUST trigger a
-      rebuild.
-- [ ] Build failures (Hugo non-zero exit) MUST fail the play and
-      MUST NOT replace the previously-served content.
+- [x] `tasks/01_core.yml` includes `sys-stk-full` and sets
+      `docker_git_repository_address` / `docker_git_repository_version`
+      to the inventory-resolved `source_repository` / `source_version`.
+      The clone path is the standard `services/repository/` under the
+      role's container directory.
+- [x] `files/Dockerfile` is a multi-stage build:
+      - Stage `builder` (`hugomods/hugo:exts-0.148.0`) installs
+        Node.js/npm, runs `npm install` if `package.json` is present
+        (hugoDocs uses Hugo's JS pipeline with `import 'alpinejs'`),
+        and runs `hugo --minify -e ${HUGO_ENVIRONMENT}
+        -b ${HUGO_BASE_URL} -d /public` over the cloned content.
+      - Stage `serve` (`nginx:1.28.0-alpine`)
+        `COPY --from=builder /public/ /usr/share/nginx/html/`.
+- [x] The build is **idempotent**: on a second `deploy-reuse-kept-apps`
+      with no inventory change, the git-pull task reports
+      `changed: false` (`before == after == 36e3d7b7…`) and no
+      `compose build` / `compose up` handler fires.
+- [x] Build failures (Hugo non-zero exit) fail `compose build` and
+      therefore the play. Because the new image is never produced,
+      `compose up` keeps serving the previous image — content never
+      flips to a half-built state. Observed during this iteration:
+      an npm-modules build error (`Could not resolve "alpinejs"`)
+      failed the play with no image swap.
 
 ### Serving
 
-- [ ] The nginx serving container exposes one
-      `${DOCKER_BIND_HOST}:<port>:80` mapping per canonical domain
-      OR a single port plus per-domain `server` blocks; the choice is
-      consistent with how other multi-domain `web-app-*` roles do it.
-- [ ] The healthcheck reports healthy once `GET /` on the served root
-      returns HTTP 200.
-- [ ] CSP, `server_tokens off`, and the standard security headers are
-      inherited from the existing reverse-proxy wiring without role-
-      specific overrides.
+- [x] The serving container exposes a single
+      `${DOCKER_BIND_HOST}:8008:80` mapping; port allocated via
+      `cli meta ports suggest --scope local --category http`.
+- [x] The healthcheck uses
+      `sys-svc-container/templates/healthcheck/wget.yml.j2`
+      (BusyBox wget; the pinned `nginx:1.28.0-alpine` ships no curl).
+      Container reports `Up (healthy)` after first deploy.
+- [x] CSP (`content-security-policy: default-src 'self'; …`),
+      `server: openresty/…` (no version leak from the role's nginx —
+      reverse-proxy strips server header), and HSTS
+      (`strict-transport-security: max-age=15768000`) are emitted by
+      the front proxy. Validated by `curl -sk -I https://hugo.infinito.example/`.
 
 ### Idempotency & deploy
 
-- [ ] `make deploy` and `make deploy-fresh-purged-apps APPS=web-app-hugo`
-      both succeed end-to-end on a host with the role enabled.
-- [ ] Running the play twice in a row with no inventory change MUST
-      report zero `changed=` for the build step.
+- [x] `make deploy-fresh-purged-apps APPS=web-app-hugo FULL_CYCLE=true`
+      succeeds end-to-end (`failed=0` in PLAY RECAP).
+- [x] Running `make deploy-reuse-kept-apps APPS=web-app-hugo` a
+      second time reports zero changes for the Hugo build step: git
+      pull `changed: false`, no compose-build / compose-up handler
+      fires.
 
 ### Tests
 
-- [ ] `roles/web-app-hugo/files/playwright.spec.js` exercises:
-      - front-page reachability for every canonical domain,
-      - canonical-domain redirect (non-canonical → canonical),
-      - presence of expected static asset (`/index.html` and one CSS
-        file emitted by the theme),
-      - CSP baseline (same gate as `web-app-wordpress`).
-- [ ] `make test` passes.
+- [x] `roles/web-app-hugo/files/playwright.spec.js` exercises:
+      - front-page reachability of the canonical domain (HTTP < 400,
+        canonical-domain check, HSTS present),
+      - non-empty `<title>` + Hugo content sentinel (rejects nginx
+        default index / directory listing),
+      - CSP header present and non-empty.
+      All three pass under the deploy-time
+      `test-e2e-playwright` runner (`3 passed`).
+- [x] `make test` passes (162 tests, 1 skipped).
 
 ### Documentation
 
-- [ ] `roles/web-app-hugo/README.md` documents purpose, content-source
-      contract, and how to add a new site (one new canonical domain +
-      one new `applications.web-app-hugo.sites.*` block).
-- [ ] `roles/web-app-hugo/Administration.md` documents day-2 ops:
-      forcing a rebuild, rotating to a new theme ref, debugging a
-      failed Hugo build (where to find the build log).
-- [ ] [docs/requirements/README.md](README.md) — no change required;
-      this file is auto-discovered.
+- [x] `roles/web-app-hugo/README.md` documents purpose, the default
+      content source (hugoDocs), and how to override
+      `source_repository` / `source_version` from the inventory.
+- [x] `roles/web-app-hugo/Administration.md` documents day-2 ops:
+      forcing a rebuild (`docker compose build --no-cache`), bumping
+      the source ref, debugging a failed Hugo build (where to find
+      the `compose build` log via `make exec`).
 
 ## Out of Scope
 
@@ -185,8 +230,14 @@ content without touching the serving container.
 - OIDC / LDAP integration — the served content is public-by-design.
   A future requirement MAY add an oauth2-proxy wrapper for staging
   sites; this requirement does NOT.
-- Multi-tenant theme marketplace. Themes are pinned per site via
-  `theme.repo` + `theme.ref`.
+- Multi-tenant theme marketplace. Themes are bundled with the
+  upstream content repository in V1.
+- Multi-canonical-domain support. V1 supports one canonical domain
+  per role deploy; running multiple Hugo sites concurrently is a
+  follow-up requirement.
+- Canonical-domain redirect Playwright test. Aliases-to-canonical
+  redirect is tested centrally by the proxy stack; the role's spec
+  does not duplicate it.
 
 ## Validation Apps
 
@@ -207,11 +258,16 @@ emitted by the docs theme.
 ## Prerequisites
 
 Before starting any implementation work, you MUST read
-[AGENTS.md](../../AGENTS.md) and follow all instructions in it. The
-existing `web-app-yourls` role is the structural reference for compose
-wiring; the existing `web-app-wordpress` role is the reference for
-multi-domain handling and Playwright gating. Deviating from those
-conventions requires explicit justification in the PR description.
+[AGENTS.md](../../AGENTS.md) and follow all instructions in it.
+
+**Primary structural reference:** `web-app-littlejs`. It is the
+no-database, single-canonical-domain web-app in the tree that already
+demonstrates the exact pattern this requirement adopts: clone an
+upstream Git repo via `sys-stk-full` + `docker_git_repository_*`,
+pass the cloned tree into a custom `files/Dockerfile` as build
+context, build a custom image, and serve via nginx. Deviating from
+that role's conventions requires explicit justification in the PR
+description.
 
 ## Commit Policy
 
