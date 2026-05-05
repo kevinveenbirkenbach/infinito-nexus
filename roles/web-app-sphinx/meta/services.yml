@@ -19,8 +19,12 @@ sphinx:
     local:
       http: 8036
   run_after:
-  - web-app-matomo
+    - web-app-matomo
   lifecycle: beta
+  cpus: '0.2'
+  mem_reservation: 128m
+  mem_limit: 256m
+  pids_limit: 256
 css:
   enabled: true
   shared: true

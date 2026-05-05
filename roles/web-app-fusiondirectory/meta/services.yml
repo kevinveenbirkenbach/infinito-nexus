@@ -4,10 +4,15 @@ fusiondirectory:
       oauth2: 16487
       http: 8038
   run_after:
-  - web-app-matomo
-  - web-app-keycloak
-  - web-app-mailu
+    - web-app-matomo
+    - web-app-keycloak
+    - web-app-mailu
   lifecycle: planned
+  min_storage: 5GB
+  cpus: '0.5'
+  mem_reservation: 256m
+  mem_limit: 1g
+  pids_limit: 512
 prometheus:
   enabled: true
   shared: true

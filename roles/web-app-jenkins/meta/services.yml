@@ -12,3 +12,8 @@ jenkins:
     local:
       http: 8070
   lifecycle: planned
+  min_storage: 10GB
+  cpus: '1.0'
+  mem_reservation: 1g
+  mem_limit: 2g
+  pids_limit: 1024

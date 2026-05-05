@@ -20,9 +20,13 @@ yourls:
       oauth2: 16484
       http: 8006
   run_after:
-  - web-app-matomo
-  - web-app-keycloak
+    - web-app-matomo
+    - web-app-keycloak
   lifecycle: beta
+  cpus: '0.2'
+  mem_reservation: 128m
+  mem_limit: 256m
+  pids_limit: 256
 oauth2:
   enabled: true
   shared: true
@@ -30,10 +34,10 @@ oauth2:
     host: application
     port: '80'
   allowed_groups:
-  - '{{ lookup(''rbac_group_path'', application_id=''web-app-yourls'', role=''administrator'') }}'
+    - '{{ lookup(''rbac_group_path'', application_id=''web-app-yourls'', role=''administrator'') }}'
   acl:
     blacklist:
-    - '{{ lookup(''config'', ''web-app-yourls'', ''server.locations.admin'') }}'
+      - '{{ lookup(''config'', ''web-app-yourls'', ''server.locations.admin'') }}'
 css:
   enabled: true
   shared: true

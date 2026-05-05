@@ -44,7 +44,7 @@ mastodon:
       websocket: 4001
       http: 8009
   run_after:
-  - web-app-keycloak
+    - web-app-keycloak
   lifecycle: beta
 streaming:
   image: ghcr.io/mastodon/mastodon-streaming
@@ -54,6 +54,7 @@ streaming:
   mem_reservation: 256m
   mem_limit: 512m
   pids_limit: 256
+  min_storage: 5GB
 sidekiq:
   cpus: '0.8'
   mem_reservation: 1g
