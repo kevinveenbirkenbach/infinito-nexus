@@ -169,7 +169,7 @@ Keycloak is part of the topology at all.
 
 - [ ] The Moodle source MUST be fetched at build time from the
       **floating** stable endpoint
-      `https://download.moodle.org/download.php/direct/stable<MAJOR><MINOR>/moodle-latest-<MAJOR><MINOR>.tgz`
+      `https://download.moodle.org/download.php/direct/stable<MAJOR><MINOR>/moodle-latest-<MAJOR><MINOR>.tgz` <!-- nocheck: url -->
       against the latest stable major.minor that Moodle officially
       publishes (e.g. `stable50/moodle-latest-50.tgz` for the 5.0
       stable line). The tarball is intentionally **floating**, NOT
@@ -200,7 +200,7 @@ Keycloak is part of the topology at all.
       `microsoft/moodle-auth_oidc` matching the Moodle major.minor
       (existing logic in
       [Dockerfile](../../roles/web-app-moodle/files/Dockerfile)
-      `curl https://api.github.com/repos/.../tags`). The selection
+      `curl https://api.github.com/repos/.../tags`). <!-- nocheck: url --> The selection
       logic stays, but its install path moves from
       `BITNAMI_OIDC_PLUGIN_DIR` to `<moodle_code>/auth/oidc/`.
 
