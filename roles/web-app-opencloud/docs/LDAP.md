@@ -1,10 +1,10 @@
-# LDAP integration
+# LDAP Integration 📒
 
-OpenCloud uses the central `svc-db-openldap` instance for user and group lookups. Configuration is rendered into the role's environment file at deploy time using the `LDAP` group_var dictionary; no values are hard-coded.
+OpenCloud uses the central `svc-db-openldap` instance for user and group lookups. Configuration is rendered into the role's environment file at deploy time using the `LDAP` group_var dictionary, so no LDAP value is hard-coded in the role.
 
-## Variable mapping
+## Variable Mapping 🗺️
 
-| OpenCloud env | Group var |
+| OpenCloud env | Group variable |
 |---|---|
 | `OC_LDAP_URI` | `LDAP.SERVER.URI` |
 | `OC_LDAP_BIND_DN` | `LDAP.DN.ADMINISTRATOR.DATA` |
@@ -15,12 +15,12 @@ OpenCloud uses the central `svc-db-openldap` instance for user and group lookups
 | `OC_LDAP_USER_SCHEMA_MAIL` | `LDAP.USER.ATTRIBUTES.MAIL` |
 | `OC_LDAP_USER_SCHEMA_DISPLAY_NAME` | `LDAP.USER.ATTRIBUTES.FULLNAME` |
 
-## Read-only mode
+## Read-only Mode 🔒
 
-`GRAPH_LDAP_SERVER_WRITE_ENABLED=false` — OpenCloud must not modify the directory; user lifecycle is owned by the LDAP/Keycloak side.
+`GRAPH_LDAP_SERVER_WRITE_ENABLED=false` keeps OpenCloud from modifying the directory. User lifecycle is owned by the LDAP and Keycloak side.
 
-## Inspect LDAP entries from inside the container
+## Inspect LDAP Entries 🩺
 
 ```bash
-make exec CMD="docker exec opencloud opencloud users list"
+make exec CMD="container exec opencloud opencloud users list"
 ```

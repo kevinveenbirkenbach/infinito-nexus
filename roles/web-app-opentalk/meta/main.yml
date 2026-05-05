@@ -1,6 +1,6 @@
 galaxy_info:
   author: Kevin Veen-Birkenbach
-  description: Sovereign open-source video conferencing powered by OpenTalk (Heinlein Group). Deploys controller + LiveKit media + web frontend, integrated with central Keycloak (OIDC) and OpenLDAP (via Keycloak user-search backend).
+  description: Meet face to face on your own terms. OpenTalk delivers sovereign open-source video conferencing with crisp audio, low-latency video, screen sharing, and breakout rooms, all secured by single sign-on. Start a meeting in seconds, invite anyone with a link, and pull files straight from your shared cloud space.
   license: Infinito.Nexus Community License (Non-Commercial)
   company: |
     Kevin Veen-Birkenbach

@@ -1,40 +1,36 @@
-# OpenTalk (web-app-opentalk)
+# OpenTalk
 
-Sovereign open-source video conferencing — Heinlein-Group OpenTalk stack with the upstream **controller** + **web-frontend** + **LiveKit** media server, integrated with the project's central Keycloak (OIDC) and OpenLDAP via the controller's `keycloak_webapi` user-search backend.
+## Description
 
-## Architecture
+[OpenTalk](https://opentalk.eu/) is a sovereign open-source video conferencing platform developed by the Heinlein Group. It combines a Rust controller, a LiveKit-based WebRTC media server, and a React web frontend.
 
-| Container | Image | Role |
-|---|---|---|
-| `application` | `registry.opencode.de/opentalk/controller` | REST API + signaling |
-| `frontend` | `registry.opencode.de/opentalk/web-frontend` | React UI served on `talk.{{ DOMAIN_PRIMARY }}` |
-| `livekit` | `livekit/livekit-server` | WebRTC SFU (network_mode: host for media UDP) |
-| Postgres | `svc-db-postgres` (shared) | controller persistence |
-| Redis | dedicated | controller pub/sub |
-| TURN | `web-svc-coturn` (shared, req 001) | STUN/TURN relay |
+## Overview
 
-## Hostname
+This role deploys the OpenTalk stack using Docker Compose and exposes the web frontend at `open.talk.{{ DOMAIN_PRIMARY }}` through the central reverse proxy. It runs the Rust controller, the LiveKit WebRTC media server, the React web frontend, a dedicated Redis, a dedicated MinIO bucket for controller assets, a RabbitMQ broker, and the OpenTalk recorder for meeting MP4 archives. The deployment integrates with the shared Keycloak realm via OIDC and reuses `svc-db-postgres` and `web-svc-coturn` for relational data and STUN/TURN. For identity wiring details see [IAM.md](docs/IAM.md) and [LDAP.md](docs/LDAP.md).
 
-- Canonical: `talk.{{ DOMAIN_PRIMARY }}`
+## Features
 
-## IAM
+- **Sovereign Video Conferencing:** Self-host meetings under your own domain without external SaaS dependency.
+- **WebRTC Media via LiveKit:** Real-time audio, video, and screen sharing through a high-performance SFU.
+- **Single Sign-On:** Frontend and controller share one Keycloak client and realm.
+- **Federated User Lookup:** Invitee search resolves through the Keycloak admin Web API, so any user federated from OpenLDAP into Keycloak becomes findable inside OpenTalk.
+- **OpenCloud File Integration:** Pick files from OpenCloud in a meeting without re-authenticating when `web-app-opencloud` is deployed alongside.
+- **Meeting Recordings:** A dedicated recorder consumes recording jobs from the RabbitMQ queue and stores MP4 archives in MinIO.
+- **Shared Infrastructure:** Reuses `svc-db-postgres` for relational data and `web-svc-coturn` for STUN and TURN.
 
-- OIDC issuer: shared Keycloak realm
-- Controller uses Keycloak admin Web API for user search (`api_base_url = .../admin/realms/<realm>`)
-- LDAP not directly accessed; OpenLDAP feeds Keycloak, Keycloak feeds OpenTalk
+## Developer Notes
 
-See [docs/IAM.md](docs/IAM.md) and [docs/LDAP.md](docs/LDAP.md).
+See [IAM.md](docs/IAM.md) for the OIDC and Keycloak admin Web API setup, and [LDAP.md](docs/LDAP.md) for the LDAP federation chain. Pending follow-up work is tracked in [TODO.md](TODO.md).
 
-## Cross-integration
+## Further Resources
 
-- OpenCloud is exposed to the frontend as the file-picker backend via `SHARED_FOLDER_OPENCLOUD_URL`.
+- [opentalk.eu](https://opentalk.eu/)
+- [OpenTalk documentation](https://docs.opentalk.eu/)
+- [OpenTalk setup template](https://gitlab.opencode.de/opentalk/ot-setup)
 
-## Out of scope (v1)
+## Credits
 
-- MinIO assets / recordings — controller config tolerates absence; recording features disabled.
-- RabbitMQ-driven mailer / recorder workers — not deployed; in-app email triggers fall through.
-
-## Documentation
-
-- Upstream docs: <https://docs.opentalk.eu/>
-- Setup repo: <https://gitlab.opencode.de/opentalk/ot-setup>
+Developed and maintained by **Kevin Veen-Birkenbach**.
+Learn more at [veen.world](https://www.veen.world).
+Part of the [Infinito.Nexus Project](https://s.infinito.nexus/code).
+Licensed under the [Infinito.Nexus Community License (Non-Commercial)](https://s.infinito.nexus/license).

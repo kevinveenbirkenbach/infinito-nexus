@@ -1,18 +1,18 @@
-# LDAP integration (transitive)
+# LDAP Integration (Transitive) 📒
 
-OpenTalk does **not** open LDAP connections itself. Instead it relies on Keycloak's LDAP federation (`svc-db-openldap` is mapped into the central Keycloak realm) and queries Keycloak's admin Web API for user lookups. This avoids dual-source-of-truth problems and keeps LDAP credentials away from the OpenTalk service account.
+OpenTalk does not open LDAP connections itself. It relies on Keycloak's LDAP federation (`svc-db-openldap` is mapped into the central Keycloak realm) and queries Keycloak's admin Web API for user lookups. This avoids dual-source-of-truth problems and keeps LDAP credentials away from the OpenTalk service account.
 
-## Chain
+## Chain 🔗
 
-1. `svc-db-openldap` is the directory of record (users + groups).
-2. Keycloak's `LDAP user federation` mirrors users into the realm (read-only).
-3. OpenTalk controller authenticates users via OIDC and resolves invitee searches via `https://<keycloak>/admin/realms/<realm>/users?search=…`.
+1. `svc-db-openldap` is the directory of record for users and groups.
+2. Keycloak's `LDAP user federation` mirrors users into the realm in read-only mode.
+3. OpenTalk authenticates users via OIDC and resolves invitee searches via `https://<keycloak>/admin/realms/<realm>/users?search=…`.
 
-## Why no direct OC_LDAP_ binding
+## Backend Choice ⚙️
 
-Upstream OpenTalk only ships `keycloak_webapi` and (legacy) `disabled` as `[user_search].backend` values. There is no native LDAP backend, so directly binding OpenTalk to OpenLDAP would require a custom backend not currently maintained.
+Upstream OpenTalk supports two `[user_search].backend` values: `keycloak_webapi` and `disabled`. There is no native LDAP backend, so binding OpenTalk directly to OpenLDAP would require a custom backend that is not currently maintained.
 
-## Inspect the Keycloak ↔ LDAP federation
+## Inspect The Keycloak ↔ LDAP Federation 🩺
 
 ```bash
 make exec CMD="container exec keycloak /opt/keycloak/bin/kcadm.sh get components -r {{ OIDC.CLIENT.REALM }} --query type=org.keycloak.storage.UserStorageProvider"
