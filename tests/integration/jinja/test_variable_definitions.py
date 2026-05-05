@@ -38,7 +38,7 @@ class TestVariableDefinitions(unittest.TestCase):
             os.path.join(self.project_root, "group_vars", "all", "*.yml"),
         ]
         for pat in patterns:
-            self.var_files.extend(glob(pat, recursive=True))
+            self.var_files.extend(glob(pat, recursive=True))  # noqa: project-walk
 
         # File extensions to scan for Jinja usage/inline definitions
         self.scan_extensions = {".yml", ".j2"}

@@ -29,7 +29,7 @@ class TestApplicationIdAndInvocability(unittest.TestCase):
         - Non-invokable roles must NOT have application_id (else fail).
         - If application_id exists but != folder name, warn and recommend aligning.
         """
-        for role_path in glob.glob(os.path.join(self.roles_dir, "*")):
+        for role_path in glob.glob(os.path.join(self.roles_dir, "*")):  # noqa: project-walk
             if not os.path.isdir(role_path):
                 continue
 

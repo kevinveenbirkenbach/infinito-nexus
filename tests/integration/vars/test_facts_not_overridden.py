@@ -1,9 +1,10 @@
+import os
 import unittest
 from pathlib import Path
 from typing import Any, Dict, Iterable, List, Optional, Set, Tuple
 
 
-from utils.cache.files import read_text
+from utils.cache.files import iter_project_files, read_text
 
 from utils.cache.yaml import load_yaml_all_str
 
@@ -153,31 +154,32 @@ def _find_task_files(repo_root: Path) -> List[Path]:
     All YAML files under:
       - roles/*/tasks/
       - tasks/
+    Routed through the cached project walk in `utils.cache.files`.
     """
+    roles_prefix = str((repo_root / "roles").resolve()) + os.sep
+    top_tasks_prefix = str((repo_root / "tasks").resolve()) + os.sep
+    role_tasks_segment = os.sep + "tasks" + os.sep
+
     task_files: List[Path] = []
-
-    roles_dir = repo_root / "roles"
-    if roles_dir.is_dir():
-        for role in roles_dir.iterdir():
-            tasks_dir = role / "tasks"
-            if tasks_dir.is_dir():
-                task_files.extend(sorted(tasks_dir.rglob("*.yml")))
-                task_files.extend(sorted(tasks_dir.rglob("*.yaml")))
-
-    top_tasks = repo_root / "tasks"
-    if top_tasks.is_dir():
-        task_files.extend(sorted(top_tasks.rglob("*.yml")))
-        task_files.extend(sorted(top_tasks.rglob("*.yaml")))
-
-    # De-dup
-    uniq: List[Path] = []
-    seen = set()
-    for p in task_files:
-        rp = str(p.resolve())
-        if rp not in seen:
-            uniq.append(p)
-            seen.add(rp)
-    return uniq
+    seen: set[str] = set()
+    for path_str in iter_project_files(extensions=(".yml", ".yaml")):
+        if path_str.startswith(roles_prefix):
+            # Only files under roles/<role>/tasks/...
+            rel_after_roles = path_str[len(roles_prefix) :]
+            if role_tasks_segment not in os.sep + rel_after_roles:
+                continue
+            # Confirm second segment is `tasks` (not `roles/foo/templates/...`).
+            parts = rel_after_roles.split(os.sep)
+            if len(parts) < 3 or parts[1] != "tasks":
+                continue
+        elif path_str.startswith(top_tasks_prefix):
+            pass
+        else:
+            continue
+        if path_str not in seen:
+            task_files.append(Path(path_str))
+            seen.add(path_str)
+    return sorted(task_files)
 
 
 class TestFactsAreNotOverriddenByVars(unittest.TestCase):

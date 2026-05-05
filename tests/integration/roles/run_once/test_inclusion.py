@@ -13,7 +13,7 @@ def find_role_task_yml_files(root_dir):
     """
     pattern_yml = os.path.join(root_dir, "roles", "*", "tasks", "*.yml")
     pattern_yaml = os.path.join(root_dir, "roles", "*", "tasks", "*.yaml")
-    return glob.glob(pattern_yml) + glob.glob(pattern_yaml)
+    return glob.glob(pattern_yml) + glob.glob(pattern_yaml)  # noqa: project-walk
 
 
 class RunOnceInclusionTest(unittest.TestCase):

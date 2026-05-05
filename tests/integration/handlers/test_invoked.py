@@ -237,14 +237,14 @@ class TestHandlersInvoked(unittest.TestCase):
         # Handlers: only main.yml/main.yaml define handlers.
         # Other files under handlers/ are typically include_tasks/import_tasks
         # and contain regular tasks, not handler definitions.
-        self.handler_files = glob.glob(
+        self.handler_files = glob.glob(  # noqa: project-walk
             os.path.join(self.roles_dir, "*/handlers/main.yml")
-        ) + glob.glob(os.path.join(self.roles_dir, "*/handlers/main.yaml"))
+        ) + glob.glob(os.path.join(self.roles_dir, "*/handlers/main.yaml"))  # noqa: project-walk
 
         # Tasks: recurse under tasks for both .yml and .yaml
-        self.task_files = glob.glob(
+        self.task_files = glob.glob(  # noqa: project-walk
             os.path.join(self.roles_dir, "*", "tasks", "**", "*.yml"), recursive=True
-        ) + glob.glob(
+        ) + glob.glob(  # noqa: project-walk
             os.path.join(self.roles_dir, "*", "tasks", "**", "*.yaml"), recursive=True
         )
 

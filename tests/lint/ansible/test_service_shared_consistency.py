@@ -1,10 +1,23 @@
+import os
 import unittest
-import glob
 from pathlib import Path
+from typing import Iterator
 
 from utils.annotations.suppress import line_has_rule
-from utils.cache.files import read_text
+from utils.cache.files import iter_project_files, read_text
 from utils.cache.yaml import load_yaml_any
+
+
+def _iter_role_meta_files(roles_dir: Path, meta_filename: str) -> Iterator[str]:
+    """Yield absolute paths of every ``roles/<role>/meta/<meta_filename>``
+    via the cached project walk so the result is reused across the
+    suite.
+    """
+    roles_prefix = str(roles_dir.resolve()) + os.sep
+    suffix = os.sep + "meta" + os.sep + meta_filename
+    for path in iter_project_files(extensions=(os.path.splitext(meta_filename)[1],)):
+        if path.startswith(roles_prefix) and path.endswith(suffix):
+            yield path
 
 
 class TestServiceSharedConsistency(unittest.TestCase):
@@ -57,10 +70,10 @@ class TestServiceSharedConsistency(unittest.TestCase):
 
     def test_service_shared_consistency(self):
         roles_dir = Path(__file__).resolve().parent.parent.parent.parent / "roles"
-        pattern = str(roles_dir / "*" / "meta" / "services.yml")
-        files = glob.glob(pattern)
+        files = sorted(_iter_role_meta_files(roles_dir, "services.yml"))
         self.assertTrue(
-            files, f"No config/main.yml files found with pattern: {pattern}"
+            files,
+            f"No roles/*/meta/services.yml files found under {roles_dir}",
         )
 
         errors = []

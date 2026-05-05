@@ -39,8 +39,8 @@ class TestSystemServiceIdMatchesRole(unittest.TestCase):
                     continue
 
                 candidates = []
-                candidates.extend(glob.glob(os.path.join(vars_dir, "main.yml")))
-                candidates.extend(glob.glob(os.path.join(vars_dir, "main.yaml")))
+                candidates.extend(glob.glob(os.path.join(vars_dir, "main.yml")))  # noqa: project-walk
+                candidates.extend(glob.glob(os.path.join(vars_dir, "main.yaml")))  # noqa: project-walk
                 if not candidates:
                     continue
 

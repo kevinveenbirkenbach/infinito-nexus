@@ -72,7 +72,7 @@ class StaticHandlerNamesTest(unittest.TestCase):
 
         violations = []
 
-        for handler_path in sorted(glob.glob(pattern)):
+        for handler_path in sorted(glob.glob(pattern)):  # noqa: project-walk
             # Load possibly multi-document YAML safely
             try:
                 docs = list(load_yaml_all(handler_path))

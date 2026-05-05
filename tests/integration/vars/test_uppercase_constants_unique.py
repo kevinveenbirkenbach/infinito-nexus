@@ -44,7 +44,7 @@ def _iter_yaml_files():
     ]
     seen = set()
     for pattern in patterns:
-        for path in glob.glob(pattern, recursive=True):
+        for path in glob.glob(pattern, recursive=True):  # noqa: project-walk
             norm = os.path.normpath(path)
             if norm not in seen and os.path.isfile(norm):
                 seen.add(norm)

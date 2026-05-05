@@ -1,6 +1,7 @@
 from __future__ import annotations
 
-import os
+
+from utils.cache.files import iter_project_files
 import re
 import subprocess
 import unittest
@@ -182,19 +183,10 @@ def git_ls_files(root: Path) -> List[Path]:
         rels = [p for p in out.decode("utf-8", errors="replace").split("\0") if p]
         return [root / p for p in rels]
     except Exception:
-        results: List[Path] = []
-        for r, dirs, files in os.walk(root):
-            pruned = []
-            for d in list(dirs):
-                rel = (Path(r) / d).relative_to(root).as_posix()
-                if any(fragment in f"/{rel}/" for fragment in WHITELIST_PATH_FRAGMENTS):
-                    pruned.append(d)
-            for d in pruned:
-                dirs.remove(d)
-
-            for f in files:
-                results.append(Path(r) / f)
-        return results
+        # `iter_project_files` already prunes the noisy dirs (.git,
+        # __pycache__, .venv, …); the WHITELIST_PATH_FRAGMENTS prune is
+        # applied per-file by the caller's `is_whitelisted` check.
+        return [Path(p) for p in iter_project_files()]
 
 
 def is_whitelisted(path: Path, root: Path) -> bool:

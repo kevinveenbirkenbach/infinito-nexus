@@ -9,7 +9,7 @@ class TestUniversalLogoutSetting(unittest.TestCase):
     ROLES_PATH = "roles/web-app-*/meta/services.yml"
 
     def test_logout_defined(self):
-        files = glob.glob(self.ROLES_PATH)
+        files = glob.glob(self.ROLES_PATH)  # noqa: project-walk
         self.assertGreater(
             len(files), 0, f"No role config files found under {self.ROLES_PATH}"
         )

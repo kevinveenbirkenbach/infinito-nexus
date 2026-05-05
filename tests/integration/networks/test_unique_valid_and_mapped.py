@@ -21,7 +21,7 @@ class TestNetworksUniqueValidAndMapped(unittest.TestCase):
         cls.roles_dir = os.path.join(cls.repo_root, "roles")
 
         cls.role_to_subnet: dict[str, ipaddress.IPv4Network] = {}
-        for role_path in sorted(glob.glob(os.path.join(cls.roles_dir, "*"))):
+        for role_path in sorted(glob.glob(os.path.join(cls.roles_dir, "*"))):  # noqa: project-walk
             if not os.path.isdir(role_path):
                 continue
             server_file = os.path.join(role_path, "meta", "server.yml")

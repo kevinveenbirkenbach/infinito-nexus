@@ -26,7 +26,7 @@ class CLIHelpIntegrationTest(unittest.TestCase):
           list[list[str]] command segments, e.g. ["deploy","container"]
         """
         commands = []
-        for root, dirnames, filenames in os.walk(self.cli_dir):
+        for root, dirnames, filenames in os.walk(self.cli_dir):  # noqa: project-walk
             # Prune __pycache__
             dirnames[:] = [d for d in dirnames if d != "__pycache__"]
 

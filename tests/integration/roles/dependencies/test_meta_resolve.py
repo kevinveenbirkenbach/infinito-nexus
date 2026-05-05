@@ -16,7 +16,7 @@ class TestRoleDependencies(unittest.TestCase):
 
         # Find all meta/main.yml files under roles/*/meta/main.yml
         pattern = os.path.join(roles_dir, "*", "meta", "main.yml")
-        meta_files = glob.glob(pattern)
+        meta_files = glob.glob(pattern)  # noqa: project-walk
         self.assertTrue(
             meta_files, f"No meta/main.yml files found with pattern {pattern}"
         )

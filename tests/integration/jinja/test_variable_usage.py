@@ -15,10 +15,10 @@ class TestTopLevelVariableUsage(unittest.TestCase):
             os.path.join(os.path.dirname(__file__), "../../../")
         )
         # Braces werden von glob nicht unterstützt – also einzeln sammeln:
-        self.roles_vars_paths = glob(
+        self.roles_vars_paths = glob(  # noqa: project-walk
             os.path.join(self.project_root, "roles/*/vars/main.yml")
-        ) + glob(os.path.join(self.project_root, "roles/*/defaults/main.yml"))
-        self.group_vars_paths = glob(
+        ) + glob(os.path.join(self.project_root, "roles/*/defaults/main.yml"))  # noqa: project-walk
+        self.group_vars_paths = glob(  # noqa: project-walk
             os.path.join(self.project_root, "group_vars/all/*.yml")
         )
         self.all_variable_files = self.roles_vars_paths + self.group_vars_paths

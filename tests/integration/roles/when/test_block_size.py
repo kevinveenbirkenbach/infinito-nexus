@@ -58,7 +58,7 @@ def _iter_yaml_files(root: Path) -> List[Path]:
         "__pycache__",
     }
     files: List[Path] = []
-    for p in root.rglob("*.yml"):
+    for p in root.rglob("*.yml"):  # noqa: project-walk
         if any(part in ignore_dirs for part in p.parts):
             continue
         files.append(p)

@@ -23,6 +23,7 @@ from pathlib import Path
 
 import yaml
 
+from utils.cache.files import iter_project_files
 from utils.cache.yaml import load_yaml_str
 
 
@@ -106,37 +107,39 @@ class TestNoLegacyPathReferences(unittest.TestCase):
 
     def test_no_legacy_path_strings(self):
         offenders: list[str] = []
-        for sub in self.SCAN_DIRS:
-            root = REPO_ROOT / sub
-            if not root.is_dir():
+        scan_set = set(self.SCAN_DIRS)
+        for path_str in iter_project_files():
+            path = Path(path_str)
+            try:
+                rel = path.relative_to(REPO_ROOT)
+            except ValueError:
                 continue
-            for path in root.rglob("*"):
-                if not path.is_file():
-                    continue
-                str_path = str(path)
-                if any(frag in str_path for frag in self.SKIP_FRAGMENTS):
-                    continue
-                if path in self.EXEMPT_FILES:
-                    continue
-                if path.suffix not in {
-                    ".py",
-                    ".yml",
-                    ".yaml",
-                    ".j2",
-                    ".jinja",
-                    ".jinja2",
-                }:
-                    continue
-                try:
-                    text = path.read_text(encoding="utf-8")
-                except (UnicodeDecodeError, PermissionError):
-                    continue
-                for token in self.LEGACY_TOKENS:
-                    if token in text:
-                        offenders.append(
-                            f"{path.relative_to(REPO_ROOT)} contains {token!r}"
-                        )
-                        break
+            if not rel.parts or rel.parts[0] not in scan_set:
+                continue
+            str_path = str(path)
+            if any(frag in str_path for frag in self.SKIP_FRAGMENTS):
+                continue
+            if path in self.EXEMPT_FILES:
+                continue
+            if path.suffix not in {
+                ".py",
+                ".yml",
+                ".yaml",
+                ".j2",
+                ".jinja",
+                ".jinja2",
+            }:
+                continue
+            try:
+                text = path.read_text(encoding="utf-8")
+            except (UnicodeDecodeError, PermissionError):
+                continue
+            for token in self.LEGACY_TOKENS:
+                if token in text:
+                    offenders.append(
+                        f"{path.relative_to(REPO_ROOT)} contains {token!r}"
+                    )
+                    break
         if offenders:
             self.fail(
                 "Legacy path tokens present (req-008 forbids these):\n"

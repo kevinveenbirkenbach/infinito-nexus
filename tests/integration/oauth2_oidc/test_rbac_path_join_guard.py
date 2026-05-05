@@ -57,7 +57,7 @@ def _is_allowed(rel_path):
 
 
 def _iter_text_files(root):
-    for dirpath, dirnames, filenames in os.walk(root):
+    for dirpath, dirnames, filenames in os.walk(root):  # noqa: project-walk
         dirnames[:] = [d for d in dirnames if d not in EXCLUDED_DIRS]
         for filename in filenames:
             if not (

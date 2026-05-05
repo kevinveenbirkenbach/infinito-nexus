@@ -21,7 +21,7 @@ class TestComposeRolesHaveLocalNetwork(unittest.TestCase):
     def test_every_compose_role_with_application_id_has_local_network(self):
         missing = []
 
-        for role_path in sorted(glob.glob(os.path.join(self.roles_dir, "*"))):
+        for role_path in sorted(glob.glob(os.path.join(self.roles_dir, "*"))):  # noqa: project-walk
             if not os.path.isdir(role_path):
                 continue
 

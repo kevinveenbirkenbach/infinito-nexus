@@ -31,7 +31,7 @@ class TestPrometheusServicePresence(unittest.TestCase):
         pattern = str(roles_dir / "*" / "meta" / "services.yml")
         return [
             p
-            for p in sorted(glob.glob(pattern))
+            for p in sorted(glob.glob(pattern))  # noqa: project-walk
             if (
                 Path(p).parts[-3].startswith(("web-app-", "web-svc-"))
                 and Path(p).parts[-3] != PROMETHEUS_APP_ID

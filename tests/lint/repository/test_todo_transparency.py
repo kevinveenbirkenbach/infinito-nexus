@@ -12,6 +12,8 @@ import re
 import subprocess
 import unittest
 from dataclasses import dataclass
+
+from utils.cache.files import iter_project_files
 from pathlib import Path
 from typing import List
 
@@ -93,7 +95,7 @@ def tracked_files(root: Path) -> List[Path]:
         rel_paths = [p for p in out.decode("utf-8", errors="replace").split("\0") if p]
         return [root / rel for rel in rel_paths]
     except Exception:
-        return [p for p in root.rglob("*") if p.is_file()]
+        return [Path(p) for p in iter_project_files()]
 
 
 def is_todo_file(path: Path) -> bool:

@@ -102,7 +102,7 @@ def _iter_all_tasks_files(repo_root: str) -> List[str]:
     ]
     files: List[str] = []
     for pat in patterns:
-        files.extend(glob.glob(pat, recursive=True))
+        files.extend(glob.glob(pat, recursive=True))  # noqa: project-walk
     # Deduplicate while keeping order
     seen = set()
     ordered: List[str] = []
@@ -197,7 +197,7 @@ class PureGuardedIncludeTest(unittest.TestCase):
         cls.pure_guarded_roles: Dict[str, Tuple[List[str], str]] = {}
 
         role_main_glob = os.path.join(cls.repo_root, "roles", "*", "tasks", "main.yml")
-        for main_path in glob.glob(role_main_glob):
+        for main_path in glob.glob(role_main_glob):  # noqa: project-walk
             role_name = os.path.basename(
                 os.path.dirname(os.path.dirname(main_path))
             )  # roles/<role>/tasks/main.yml

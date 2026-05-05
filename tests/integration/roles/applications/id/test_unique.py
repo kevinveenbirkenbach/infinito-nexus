@@ -17,7 +17,7 @@ def find_application_ids():
     )
     pattern = os.path.join(base_dir, "roles", "*", "vars", "main.yml")
 
-    for file_path in glob.glob(pattern):
+    for file_path in glob.glob(pattern):  # noqa: project-walk
         data = load_yaml_any(file_path) or {}
         app_id = data.get("application_id")
         if app_id is not None:

@@ -24,7 +24,7 @@ class TestSysRolesApplicationId(unittest.TestCase):
         cls.invokable_prefixes = set(get_invokable_paths(cat_file))
         # collect actual sys dirs
         pattern = os.path.join(cls.base_dir, "roles", "sys-*")
-        cls.actual_dirs = [d for d in glob.glob(pattern) if os.path.isdir(d)]
+        cls.actual_dirs = [d for d in glob.glob(pattern) if os.path.isdir(d)]  # noqa: project-walk
 
     def test_sys_roles_application_id(self):
         for role_dir in self.actual_dirs:

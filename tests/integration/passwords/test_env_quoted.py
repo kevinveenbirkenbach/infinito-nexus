@@ -67,7 +67,7 @@ def _is_jinja_control_line(line: str) -> bool:
 class TestEnvPasswordsQuotedAndFiltered(unittest.TestCase):
     def test_password_env_vars_are_dotenv_quoted_without_double_quoting(self):
         root = _repo_root_from_test_file()
-        env_templates = sorted(root.rglob("env.j2"))
+        env_templates = sorted(root.rglob("env.j2"))  # noqa: project-walk
 
         failures: List[str] = []
 

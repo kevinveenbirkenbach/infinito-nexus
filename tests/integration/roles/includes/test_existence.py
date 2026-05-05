@@ -4,7 +4,7 @@ import glob
 import yaml
 import re
 
-from utils.cache.files import read_text
+from utils.cache.files import iter_project_files, read_text
 
 from utils.cache.yaml import load_yaml_all_str
 
@@ -24,13 +24,9 @@ class TestIncludeImportExistence(unittest.TestCase):
         )
         self.roles_dir = os.path.join(self.project_root, "roles")
 
-        self.files_to_scan = []
-        for filepath in glob.glob(
-            os.path.join(self.project_root, "**", "*.yml"), recursive=True
-        ):
-            if "/.git/" in filepath or "/tests/" in filepath:
-                continue
-            self.files_to_scan.append(filepath)
+        self.files_to_scan = [
+            p for p in iter_project_files(extensions=(".yml",), exclude_tests=True)
+        ]
 
     @staticmethod
     def _collect_refs(data, directive_keys, value_key):
@@ -105,7 +101,7 @@ class TestIncludeImportExistence(unittest.TestCase):
                 pattern = re.sub(r"\{\{.*?\}\}", "*", role_name)
                 glob_path = os.path.join(self.roles_dir, pattern)
 
-                matches = [p for p in glob.glob(glob_path) if os.path.isdir(p)]
+                matches = [p for p in glob.glob(glob_path) if os.path.isdir(p)]  # noqa: project-walk
                 if not matches:
                     missing.append((file_path, role_name))
 
@@ -148,9 +144,9 @@ class TestIncludeImportExistence(unittest.TestCase):
                 tasks_dir_glob = os.path.join(self.project_root, "tasks", pattern_ref)
 
                 matches = []
-                matches += [p for p in glob.glob(local_glob) if os.path.isfile(p)]
-                matches += [p for p in glob.glob(global_glob) if os.path.isfile(p)]
-                matches += [p for p in glob.glob(tasks_dir_glob) if os.path.isfile(p)]
+                matches += [p for p in glob.glob(local_glob) if os.path.isfile(p)]  # noqa: project-walk
+                matches += [p for p in glob.glob(global_glob) if os.path.isfile(p)]  # noqa: project-walk
+                matches += [p for p in glob.glob(tasks_dir_glob) if os.path.isfile(p)]  # noqa: project-walk
 
                 if not matches:
                     missing.append((file_path, task_ref))

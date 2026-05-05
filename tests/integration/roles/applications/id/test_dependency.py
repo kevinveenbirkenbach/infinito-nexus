@@ -28,7 +28,7 @@ class TestDependencyApplicationId(unittest.TestCase):
             return data.get("application_id")
 
         # Iterate all roles
-        for role_path in glob.glob(os.path.join(roles_dir, "*")):
+        for role_path in glob.glob(os.path.join(roles_dir, "*")):  # noqa: project-walk
             if not os.path.isdir(role_path):
                 continue
 

@@ -34,12 +34,12 @@ class TestSysServiceRequiresSystemServiceId(unittest.TestCase):
             return
         patterns = ["*.yml", "*.yaml"]
         for pattern in patterns:
-            for path in glob.glob(os.path.join(tasks_dir, pattern)):
+            for path in glob.glob(os.path.join(tasks_dir, pattern)):  # noqa: project-walk
                 yield path
 
         # also scan nested includes like tasks/**/*.yml
         for pattern in patterns:
-            for path in glob.glob(
+            for path in glob.glob(  # noqa: project-walk
                 os.path.join(tasks_dir, "**", pattern), recursive=True
             ):
                 yield path
@@ -93,8 +93,8 @@ class TestSysServiceRequiresSystemServiceId(unittest.TestCase):
             return (False, "vars/ directory not found")
 
         candidates = []
-        candidates.extend(glob.glob(os.path.join(vars_dir, "main.yml")))
-        candidates.extend(glob.glob(os.path.join(vars_dir, "main.yaml")))
+        candidates.extend(glob.glob(os.path.join(vars_dir, "main.yml")))  # noqa: project-walk
+        candidates.extend(glob.glob(os.path.join(vars_dir, "main.yaml")))  # noqa: project-walk
         if not candidates:
             return (False, "vars/main.yml|yaml not found")
 

@@ -31,7 +31,7 @@ def roles_root(project_root: str) -> str:
 
 def iter_role_dirs(project_root: str) -> List[str]:
     root = roles_root(project_root)
-    return [d for d in glob.glob(os.path.join(root, "*")) if os.path.isdir(d)]
+    return [d for d in glob.glob(os.path.join(root, "*")) if os.path.isdir(d)]  # noqa: project-walk
 
 
 def role_name_from_dir(role_dir: str) -> str:
@@ -46,7 +46,7 @@ def path_if_exists(*parts) -> Optional[str]:
 def gather_yaml_files(base: str, patterns: List[str]) -> List[str]:
     files: List[str] = []
     for pat in patterns:
-        files.extend(glob.glob(os.path.join(base, pat), recursive=True))
+        files.extend(glob.glob(os.path.join(base, pat), recursive=True))  # noqa: project-walk
     return [f for f in files if os.path.isfile(f)]
 
 

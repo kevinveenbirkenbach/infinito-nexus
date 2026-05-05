@@ -20,7 +20,7 @@ def _scan_role(role_path: Path) -> tuple[bool, bool]:
     """Return (refs_mailu, refs_email_lookup) for all scannable files in *role_path*."""
     refs_mailu = False
     refs_email = False
-    for path in role_path.rglob("*"):
+    for path in role_path.rglob("*"):  # noqa: project-walk
         if not path.is_file() or path.suffix not in _SCAN_EXTENSIONS:
             continue
         try:

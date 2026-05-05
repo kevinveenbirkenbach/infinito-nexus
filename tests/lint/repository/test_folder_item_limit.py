@@ -20,6 +20,7 @@ from dataclasses import dataclass
 from pathlib import Path
 
 from utils.annotations.message import warning
+from utils.cache.files import iter_project_files
 
 MAX_ITEMS_PER_FOLDER = 12
 
@@ -74,13 +75,9 @@ def _tracked_paths(root: Path) -> list[Path]:
             stderr=subprocess.STDOUT,
         )
     except Exception:
-        return [
-            path
-            for path in root.rglob("*")
-            if path.is_file()
-            and ".git" not in path.parts
-            and "__pycache__" not in path.parts
-        ]
+        # `iter_project_files` already prunes `.git`, `__pycache__`,
+        # `.cache`, `.venv`, `node_modules`, etc.
+        return [Path(p) for p in iter_project_files()]
 
     rel_paths = [
         rel_path

@@ -21,7 +21,7 @@ class TestMetaRolesIntegration(unittest.TestCase):
 
         # Read all playbook YAML contents under tasks/stages
         cls.playbook_contents = {}
-        for path in STAGES_DIR.rglob("*.yml"):
+        for path in STAGES_DIR.rglob("*.yml"):  # noqa: project-walk
             cls.playbook_contents[path] = path.read_text(encoding="utf-8")
 
         # Regex for include_tasks line with {{ <loop_var> }}-roles.yml

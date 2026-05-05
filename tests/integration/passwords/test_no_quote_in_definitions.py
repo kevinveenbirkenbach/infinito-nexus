@@ -35,7 +35,7 @@ def _iter_roles_yml_files(repo_root: Path) -> Iterable[Path]:
     roles_dir = repo_root / "roles"
     if not roles_dir.is_dir():
         return []
-    return roles_dir.rglob("*.yml")
+    return roles_dir.rglob("*.yml")  # noqa: project-walk
 
 
 def _scan_file(path: Path) -> List[Finding]:

@@ -58,7 +58,7 @@ class RunOnceSchemaTest(unittest.TestCase):
         violations = []
 
         pattern = os.path.join(project_root, "roles", "*", "tasks", "main.yml")
-        for filepath in glob.glob(pattern):
+        for filepath in glob.glob(pattern):  # noqa: project-walk
             role_name = os.path.normpath(filepath).split(os.sep)[-3]
             expected_suffix = role_name.lower().replace("-", "_")
 
