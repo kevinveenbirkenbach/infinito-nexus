@@ -26,6 +26,8 @@ postgres:
   enabled: true
   shared: true
 mastodon:
+  shared: true
+  enabled: true
   image: ghcr.io/mastodon/mastodon
   version: latest
   min_storage: 15GB

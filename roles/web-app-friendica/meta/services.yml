@@ -1,4 +1,6 @@
 friendica:
+  shared: true
+  enabled: true
   image: friendica
   version: latest
   min_storage: 10GB

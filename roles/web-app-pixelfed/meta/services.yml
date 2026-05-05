@@ -24,6 +24,8 @@ mariadb:
   enabled: true
   shared: true
 pixelfed:
+  shared: true
+  enabled: true
   image: zknt/pixelfed
   version: latest
   name: pixelfed
