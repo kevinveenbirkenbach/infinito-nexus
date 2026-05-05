@@ -34,6 +34,8 @@ jobs:
 
     steps:
       - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
 
       - name: Resolve repository owner
         shell: bash
@@ -54,12 +56,19 @@ jobs:
         run: |
           set -euo pipefail
           make up
- 
+
+      - name: Resolve effective whitelist (diff vs origin/main)
+        id: resolve_wl
+        shell: bash
+        env:
+          INPUT_WHITELIST: ${{ inputs.whitelist }}
+        run: ./scripts/github/resolve_effective_whitelist.sh
+
       - name: Discover apps
         id: discover
         shell: bash
         env:
-          WHITELIST: ${{ inputs.whitelist }}
+          WHITELIST: ${{ steps.resolve_wl.outputs.whitelist }}
         run: ./scripts/github/output_apps.sh
 
   server:

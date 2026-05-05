@@ -1,5 +1,5 @@
 name: "⚡ CI: Manual"
-run-name: "Manual CI triggered: ${{ inputs.distros }}; ${{ inputs.whitelist != '' && inputs.whitelist || 'all apps' }}"
+run-name: "Manual CI triggered: ${{ inputs.distros }}; ${{ inputs.whitelist != '' && inputs.whitelist || 'diff-derived (origin/main)' }}"
 
 concurrency:
   group: global-ci-${{ github.repository }}-${{ github.ref_name }}
@@ -14,7 +14,7 @@ on:
         default: "debian"
         type: string
       whitelist:
-        description: "Optional space-separated whitelist of app ids. Example: 'web-app-matomo web-app-chess'"
+        description: "Empty: diff vs origin/main. '__ALL__': force full deploy. Else: explicit space-separated app ids."
         required: false
         default: ""
         type: string
