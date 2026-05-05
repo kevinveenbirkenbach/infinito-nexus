@@ -6,7 +6,7 @@ csp:
       unsafe-inline: true
   whitelist:
     font-src:
-    - "http://{{ lookup('domain', 'web-app-discourse') }}"
+    - "{{ lookup('tls', 'web-app-discourse', 'url.base') }}"
 domains:
   canonical:
   - forum.{{ DOMAIN_PRIMARY }}
