@@ -18,7 +18,7 @@ csp:
     style-src-elem:
     - https://cdn.jsdelivr.net
     frame-ancestors:
-    - auth.{{ DOMAIN_PRIMARY }}
+    - "{{ lookup('domain', 'web-app-keycloak') }}"
 networks:
   local:
     subnet: 192.168.103.176/28

@@ -1,5 +1,5 @@
 ---
-- name: "Remove stale nginx config for renamed domain chat.{{ DOMAIN_PRIMARY }}"
+- name: "Remove stale nginx config for renamed domain chat.{{ DOMAIN_PRIMARY }}"  # noqa: domain-spot
   ansible.builtin.file:
     path: "{{ [lookup('nginx', 'directories.configuration.servers'), 'https', 'chat.' ~ DOMAIN_PRIMARY ~ '.conf'] | path_join }}"
     state: absent

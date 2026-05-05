@@ -9,20 +9,17 @@ csp:
       unsafe-inline: true
   whitelist:
     script-src-elem:
-    - onlyoffice.{{ DOMAIN_PRIMARY }}
+    - "{{ lookup('domain', 'web-svc-onlyoffice') }}"
     font-src:
     - 'data:'
     connect-src:
-    - collabora.{{ DOMAIN_PRIMARY }}
-    - cloud.{{ DOMAIN_PRIMARY }}
-    - collabora.{{ DOMAIN_PRIMARY }}
-    - onlyoffice.{{ DOMAIN_PRIMARY }}
-    - cloud.{{ DOMAIN_PRIMARY }}
+    - "{{ lookup('domain', 'web-svc-collabora') }}"
+    - "{{ lookup('domain', 'web-app-nextcloud') }}"
+    - "{{ lookup('domain', 'web-svc-onlyoffice') }}"
     - '*'
     frame-src:
-    - collabora.{{ DOMAIN_PRIMARY }}
-    - onlyoffice.{{ DOMAIN_PRIMARY }}
-    - collabora.{{ DOMAIN_PRIMARY }}
+    - "{{ lookup('domain', 'web-svc-collabora') }}"
+    - "{{ lookup('domain', 'web-svc-onlyoffice') }}"
     - '*'
     worker-src:
     - 'blob:'
