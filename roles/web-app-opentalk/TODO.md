@@ -1,6 +1,5 @@
-# TODO — web-app-opentalk
+# web-app-opentalk TODO 📝
 
-- [ ] Browser-walk an end-to-end meeting flow: log in via Keycloak, create a meeting, join from a second browser, and verify media via LiveKit relay.
-- [ ] Add an nginx/openresty location for `/livekit` on `talk.{{ DOMAIN_PRIMARY }}` that upgrades to `wss://` and forwards to the LiveKit container's host port 7880 (currently the controller toml references `wss://talk.<DOMAIN>/livekit` but the front proxy does not route that path yet).
-- [ ] Add MinIO bucket policy hardening + dedicated service account (currently the controller uses MinIO root creds).
-- [ ] Optional: add the OpenTalk recorder (`registry.opencode.de/opentalk/recorder`) and RabbitMQ if room recordings are wanted.
+- [ ] Browser-walk an end-to-end meeting flow: log in via Keycloak, create a meeting, join from a second browser, and verify media flows over the LiveKit relay.
+- [ ] Browser-walk an end-to-end recording flow: start a meeting, kick off a recording, and verify the recorder uploads the resulting MP4 to MinIO.
+- [ ] Add MinIO bucket policy hardening and a dedicated service account (the controller currently uses MinIO root credentials).

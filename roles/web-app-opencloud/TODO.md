@@ -1,6 +1,5 @@
-# TODO — web-app-opencloud
+# web-app-opencloud TODO 📝
 
-- [ ] Browser-walk an end-to-end OIDC login (Keycloak → OpenCloud → autoprovisioned LDAP user lands on Files view).
-- [ ] Confirm `application_administrators` LDAP-group members get the OpenCloud admin role at runtime.
-- [ ] Surface OpenTalk in the OpenCloud sidebar (currently only `WEB_OPTION_OPENTALK_URL` is set; an upstream app/extension is required for a clickable launcher).
+- [ ] Promote individual users to OpenCloud admin via OCC after first login. The default driver assigns the standard `user` role to every auto-provisioned account; admin promotion is currently manual.
+- [ ] Surface an OpenTalk launcher in the OpenCloud sidebar. `WEB_OPTION_OPENTALK_URL` is set, but a clickable launcher needs an upstream OpenCloud Web app or extension.
 - [ ] Verify back-channel logout from Keycloak terminates the OpenCloud session in a real browser.

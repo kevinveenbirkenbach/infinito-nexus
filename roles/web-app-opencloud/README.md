@@ -1,25 +1,35 @@
-# OpenCloud (web-app-opencloud)
+# OpenCloud
 
-Sovereign self-hosted file sync, share, and collaboration platform — Heinlein-Group fork of OpenCloud (`opencloudeu/opencloud`), deployed as a single binary with all microservices except the built-in IDP.
+## Description
 
-## Highlights
+[OpenCloud](https://opencloud.eu/) is a sovereign self-hosted file sync, share, and collaboration platform maintained by the Heinlein Group. It is a fork of the OpenCloud Infinite Scale codebase and is published as the `opencloudeu/opencloud` container image.
 
-- Single-container OpenCloud single-binary deployment
-- External Keycloak as OIDC provider (`PROXY_AUTOPROVISION_ACCOUNTS=true`, role mapping via `groups` claim)
-- External OpenLDAP as authoritative user/group directory (`svc-db-openldap`)
-- Co-deployable with `web-app-nextcloud` (independent canonical hostnames)
-- Cross-integration with `web-app-opentalk` for in-meeting file attachments
+## Overview
 
-## Hostnames
+This role deploys OpenCloud using Docker Compose in single-binary mode and exposes it under `open.cloud.{{ DOMAIN_PRIMARY }}` through the central reverse proxy. It wires the deployment to the shared Keycloak realm via OIDC, sources users and groups from the central `svc-db-openldap` directory, and runs side by side with `web-app-nextcloud` so both file platforms can coexist on the same host. For identity wiring details see [IAM.md](docs/IAM.md) and [LDAP.md](docs/LDAP.md).
 
-- Canonical: `open.cloud.{{ DOMAIN_PRIMARY }}`
-- Coexists with `next.cloud.{{ DOMAIN_PRIMARY }}` (Nextcloud) without conflict.
+## Features
 
-## Identity & Access
+- **Sovereign File Sync and Share:** Self-host file sync, shares, and collaborative spaces under your own domain.
+- **Single Sign-On:** Users authenticate once via Keycloak and reuse the session across the platform.
+- **Central User Directory:** Users and groups are read from a shared OpenLDAP backend, so accounts stay consistent across apps.
+- **Auto-Provisioning:** New OIDC users are created on first login with username equal to the LDAP `uid`, and group claims drive role assignment.
+- **OpenTalk Cross-Launch:** Start a video meeting in OpenTalk from a file context without re-authenticating when `web-app-opentalk` is deployed alongside.
+- **Coexists with Nextcloud:** Runs in parallel with `web-app-nextcloud` on a distinct canonical hostname.
 
-See [docs/IAM.md](docs/IAM.md) and [docs/LDAP.md](docs/LDAP.md).
+## Developer Notes
 
-## Documentation
+See [IAM.md](docs/IAM.md) for OIDC discovery and verification commands, and [LDAP.md](docs/LDAP.md) for the directory binding and schema mapping. Open follow-up items are tracked in [TODO.md](TODO.md).
 
-- Upstream docs: <https://docs.opencloud.eu/>
-- Image: <https://hub.docker.com/r/opencloudeu/opencloud>
+## Further Resources
+
+- [opencloud.eu](https://opencloud.eu/)
+- [OpenCloud documentation](https://docs.opencloud.eu/)
+- [opencloudeu/opencloud on Docker Hub](https://hub.docker.com/r/opencloudeu/opencloud)
+
+## Credits
+
+Developed and maintained by **Kevin Veen-Birkenbach**.
+Learn more at [veen.world](https://www.veen.world).
+Part of the [Infinito.Nexus Project](https://s.infinito.nexus/code).
+Licensed under the [Infinito.Nexus Community License (Non-Commercial)](https://s.infinito.nexus/license).

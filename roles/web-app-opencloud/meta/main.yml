@@ -1,6 +1,6 @@
 galaxy_info:
   author: Kevin Veen-Birkenbach
-  description: Sovereign file sync, share, and collaboration powered by OpenCloud (Heinlein fork). Single-binary deployment integrated with central Keycloak (OIDC) and OpenLDAP (autoprovisioning), exposed under open.cloud.{{ DOMAIN_PRIMARY }}.
+  description: Take charge of your data with OpenCloud, the sovereign file-sync and collaboration suite. Sync, share, and co-edit documents from any device, organize teams in shared spaces, and keep everything under your own domain. Single sign-on, central directory, and seamless video meetings come built in.
   license: Infinito.Nexus Community License (Non-Commercial)
   company: |
     Kevin Veen-Birkenbach

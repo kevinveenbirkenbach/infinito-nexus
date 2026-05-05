@@ -1,23 +1,23 @@
-# Identity and Access Management
+# Identity and Access Management 🔐
 
-OpenCloud delegates authentication to the central Keycloak realm (OIDC) and consumes user/group data from the central OpenLDAP directory. Local password login is suppressed when `services.oidc.enabled: true` (the default), and accounts are auto-provisioned on first OIDC login.
+OpenCloud delegates authentication to the central Keycloak realm and consumes user and group data from the central OpenLDAP directory. Local password login is disabled when `services.oidc.enabled` is true (the default), and accounts are auto-provisioned on first OIDC login.
 
-## OIDC
+## OIDC 🪪
 
-- Issuer: `{{ OIDC.CLIENT.ISSUER_URL }}`
-- Client ID: shared `OIDC.CLIENT.ID` (single Keycloak client per realm covers every web-app)
-- Username claim: `preferred_username` → mapped to OpenCloud `username`
+- Issuer URL: `{{ OIDC.CLIENT.ISSUER_URL }}`
+- Client ID: shared `OIDC.CLIENT.ID` (one Keycloak client per realm covers every web app)
+- Username claim: `preferred_username`, mapped to OpenCloud `username`
 - Role claim: `groups` (Keycloak group memberships flow into OpenCloud roles)
-- Auto-provisioning: enabled (`PROXY_AUTOPROVISION_ACCOUNTS=true`)
-- Built-in IdP excluded: `OC_EXCLUDE_RUN_SERVICES=idp`
+- Auto-provisioning: enabled via `PROXY_AUTOPROVISION_ACCOUNTS=true`
+- Built-in IDP excluded via `OC_EXCLUDE_RUN_SERVICES=idp`
 
-### Verify OIDC discovery
+### Verify OIDC discovery 🩺
 
 ```bash
-make exec CMD="curl -fsS {{ OIDC.CLIENT.DISCOVERY_DOCUMENT }}"
+make exec CMD="container exec opencloud sh -c 'curl -fsS {{ OIDC.CLIENT.DISCOVERY_DOCUMENT }} | head -c 200'"
 ```
 
-## LDAP
+## LDAP 📒
 
 OpenCloud reads users from the central `svc-db-openldap` service.
 
@@ -28,14 +28,14 @@ OpenCloud reads users from the central `svc-db-openldap` service.
 - User filter: `(objectclass=inetOrgPerson)`
 - Group filter: `(objectclass=groupOfNames)`
 
-The `application_administrators` group (per requirement 004) gives OpenCloud admin rights when its members log in.
+Members of the `application_administrators` group (per requirement 004) gain OpenCloud admin rights when they log in.
 
-### Verify LDAP wiring
+### Verify LDAP wiring 🩺
 
 ```bash
-make exec CMD="docker exec opencloud opencloud config get ldap"
+make exec CMD="container exec opencloud opencloud config get ldap"
 ```
 
-## Federation note
+## Federation 🔗
 
-If a Keycloak user is not present in OpenLDAP, OpenCloud autoprovisions them on first login using the `preferred_username` claim. To guarantee stable usernames across Nextcloud, OpenCloud, and OpenTalk, all three apps share the same `OIDC.CLIENT.REALM` and the same `LDAP.DN.OU.USERS` source.
+If a Keycloak user is not present in OpenLDAP, OpenCloud auto-provisions the user on first login using the `preferred_username` claim. To keep usernames stable across Nextcloud, OpenCloud, and OpenTalk, all three apps share the same `OIDC.CLIENT.REALM` and the same `LDAP.DN.OU.USERS` source.

@@ -2,6 +2,11 @@ application_id:        "web-app-opentalk"
 entity_name:           "{{ application_id | get_entity_name }}"
 js_application_name:   "OpenTalk"
 
+# Inject the extra nginx location blocks (controller REST + signaling +
+# LiveKit websocket) into the front-proxy vhost so the SPA can reach the
+# controller and media server through the canonical hostname.
+webserver_extra_configuration: "{{ lookup('template', 'nginx/extra.conf.j2') }}"
+
 OPENTALK_CTRL_CONTAINER:    "{{ lookup('config', application_id, 'services.controller.name') }}"
 OPENTALK_CTRL_IMAGE:        "{{ lookup('config', application_id, 'services.controller.image') }}"
 OPENTALK_CTRL_VERSION:      "{{ lookup('config', application_id, 'services.controller.version') }}"
@@ -40,11 +45,38 @@ OPENTALK_MINIO_USER:      "{{ lookup('config', application_id, 'credentials.mini
 OPENTALK_MINIO_PASSWORD:  "{{ lookup('config', application_id, 'credentials.minio_root_password') }}"
 OPENTALK_MINIO_BUCKET:    "opentalk"
 
+# RabbitMQ broker that ferries recording task hand-offs between the
+# controller and the recorder service.
+OPENTALK_RABBIT_CONTAINER: "{{ lookup('config', application_id, 'services.rabbit.name') }}"
+OPENTALK_RABBIT_IMAGE:     "{{ lookup('config', application_id, 'services.rabbit.image') }}"
+OPENTALK_RABBIT_VERSION:   "{{ lookup('config', application_id, 'services.rabbit.version') }}"
+OPENTALK_RABBIT_QUEUE:     "opentalk_recorder"
+
+# Recorder turns a meeting room into an MP4 archive on demand. It
+# authenticates as a service account via its own confidential Keycloak
+# client and consumes recording jobs from the RabbitMQ queue above.
+OPENTALK_RECORDER_CONTAINER: "{{ lookup('config', application_id, 'services.recorder.name') }}"
+OPENTALK_RECORDER_IMAGE:     "{{ lookup('config', application_id, 'services.recorder.image') }}"
+OPENTALK_RECORDER_VERSION:   "{{ lookup('config', application_id, 'services.recorder.version') }}"
+OPENTALK_RECORDER_OIDC_CLIENT_ID:     "opentalk-recorder"
+OPENTALK_RECORDER_OIDC_CLIENT_SECRET: "{{ lookup('config', application_id, 'credentials.recorder_oidc_client_secret') }}"
+
 # Keycloak Admin API (controller user-search backend)
 OPENTALK_KEYCLOAK_BASE_URL: "{{ lookup('tls', 'web-app-keycloak', 'url.base') | regex_replace('/+$','') }}"
 OPENTALK_KEYCLOAK_REALM:    "{{ OIDC.CLIENT.REALM }}"
-OPENTALK_KEYCLOAK_CLIENT_ID:     "{{ OIDC.CLIENT.ID }}"
-OPENTALK_KEYCLOAK_CLIENT_SECRET: "{{ OIDC.CLIENT.SECRET }}"
+
+# The shared `infinito.nexus` Keycloak client is public so it cannot
+# introspect access tokens. The controller therefore uses its own dedicated
+# confidential client (`opentalk-controller`), provisioned by tasks/main.yml.
+# The frontend keeps the shared public client for the browser PKCE flow.
+OPENTALK_CTRL_OIDC_CLIENT_ID:     "opentalk-controller"
+OPENTALK_CTRL_OIDC_CLIENT_SECRET: "{{ lookup('config', application_id, 'credentials.controller_oidc_client_secret') }}"
+
+# The same confidential client is also reused for the Keycloak admin Web API
+# user-search backend; it has `serviceAccountsEnabled` and the `view-users`
+# realm-management role to look up users in the realm.
+OPENTALK_KEYCLOAK_CLIENT_ID:     "{{ OPENTALK_CTRL_OIDC_CLIENT_ID }}"
+OPENTALK_KEYCLOAK_CLIENT_SECRET: "{{ OPENTALK_CTRL_OIDC_CLIENT_SECRET }}"
 
 # Cross-link to OpenCloud (used by frontend env to expose file picker).
 # `tls` lookup raises when the role is not in scope, so gate the URL behind

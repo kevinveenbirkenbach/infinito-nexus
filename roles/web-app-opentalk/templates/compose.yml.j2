@@ -8,9 +8,10 @@
       - "{{ DOCKER_BIND_HOST }}:{{ OPENTALK_FRONTEND_HTTP_PORT }}:80"
     environment:
       CONTROLLER_HOST: "{{ OPENTALK_DOMAIN }}"
-      OIDC_AUTHORITY: "{{ OIDC.CLIENT.ISSUER_URL }}"
+      OIDC_ISSUER: "{{ OIDC.CLIENT.ISSUER_URL }}"
       OIDC_CLIENT_ID: "{{ OIDC.CLIENT.ID }}"
       INSECURE: "false"
+      BASE_URL: ""
 {% if OPENTALK_OPENCLOUD_ENABLED | bool %}
       SHARED_FOLDER_OPENCLOUD_URL: "{{ OPENTALK_OPENCLOUD_URL }}"
 {% endif %}
@@ -55,6 +56,36 @@
     volumes:
       - minio:/data
 {% include 'roles/sys-svc-container/templates/networks.yml.j2' %}
+    logging:
+      driver: journald
+
+  rabbit:
+    image: "{{ OPENTALK_RABBIT_IMAGE }}:{{ OPENTALK_RABBIT_VERSION }}"
+    container_name: {{ OPENTALK_RABBIT_CONTAINER }}
+    restart: {{ docker_restart_policy | default(DOCKER_RESTART_POLICY) }}
+    environment:
+      RABBITMQ_SERVER_ADDITIONAL_ERL_ARGS: "-rabbit consumer_timeout 30000"
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+{% include 'roles/sys-svc-container/templates/networks.yml.j2' %}
+    logging:
+      driver: journald
+
+  recorder:
+    image: "{{ OPENTALK_RECORDER_IMAGE }}:{{ OPENTALK_RECORDER_VERSION }}"
+    container_name: {{ OPENTALK_RECORDER_CONTAINER }}
+    restart: {{ docker_restart_policy | default(DOCKER_RESTART_POLICY) }}
+    volumes:
+      - "{{ [lookup('container', application_id, 'directories.volumes'), 'recorder.toml'] | path_join }}:/recorder/recorder.toml:ro"
+{% include 'roles/sys-svc-container/templates/networks.yml.j2' %}
+    depends_on:
+      rabbit:
+        condition: service_healthy
+      controller:
+        condition: service_started
     logging:
       driver: journald
 
