@@ -1,0 +1,21 @@
+credentials:
+  database_password:
+    description: Postgres password used by the OpenTalk controller for its dedicated database.
+    algorithm: alphanumeric
+    validation:
+      min_length: 24
+  livekit_api_secret:
+    description: Shared secret between OpenTalk controller and the LiveKit media server.
+    algorithm: alphanumeric
+    validation:
+      min_length: 32
+  minio_root_user:
+    description: MinIO root username used by the embedded asset/recording bucket.
+    algorithm: alphanumeric
+    validation:
+      min_length: 8
+  minio_root_password:
+    description: MinIO root password used by the embedded asset/recording bucket.
+    algorithm: alphanumeric
+    validation:
+      min_length: 16

@@ -1,0 +1,22 @@
+domains:
+  canonical:
+    - open.cloud.{{ DOMAIN_PRIMARY }}
+  aliases: []
+csp:
+  flags:
+    style-src-attr:
+      unsafe-inline: true
+    script-src-elem:
+      unsafe-inline: true
+    script-src-attr:
+      unsafe-inline: true
+  whitelist:
+    connect-src:
+      - talk.{{ DOMAIN_PRIMARY }}
+    frame-src:
+      - talk.{{ DOMAIN_PRIMARY }}
+    worker-src:
+      - 'blob:'
+networks:
+  local:
+    subnet: 192.168.105.48/28

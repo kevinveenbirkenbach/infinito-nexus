@@ -1,0 +1,70 @@
+{% include 'roles/sys-svc-compose/templates/base.yml.j2' %}
+
+  application:
+    image: "{{ OPENTALK_FRONTEND_IMAGE }}:{{ OPENTALK_FRONTEND_VERSION }}"
+    container_name: {{ OPENTALK_FRONTEND_CONTAINER }}
+{% include 'roles/sys-svc-container/templates/base.yml.j2' %}
+    ports:
+      - "{{ DOCKER_BIND_HOST }}:{{ OPENTALK_FRONTEND_HTTP_PORT }}:80"
+    environment:
+      CONTROLLER_HOST: "{{ OPENTALK_DOMAIN }}"
+      OIDC_AUTHORITY: "{{ OIDC.CLIENT.ISSUER_URL }}"
+      OIDC_CLIENT_ID: "{{ OIDC.CLIENT.ID }}"
+      INSECURE: "false"
+{% if OPENTALK_OPENCLOUD_ENABLED | bool %}
+      SHARED_FOLDER_OPENCLOUD_URL: "{{ OPENTALK_OPENCLOUD_URL }}"
+{% endif %}
+{% include 'roles/sys-svc-container/templates/networks.yml.j2' %}
+    depends_on:
+      controller:
+        condition: service_started
+
+  controller:
+    image: "{{ OPENTALK_CTRL_IMAGE }}:{{ OPENTALK_CTRL_VERSION }}"
+    container_name: {{ OPENTALK_CTRL_CONTAINER }}
+{% include 'roles/sys-svc-container/templates/base.yml.j2' %}
+    ports:
+      - "{{ DOCKER_BIND_HOST }}:{{ OPENTALK_CTRL_HTTP_PORT }}:11311"
+    volumes:
+      - "{{ [lookup('container', application_id, 'directories.volumes'), 'controller.toml'] | path_join }}:/controller/controller.toml:ro"
+      - data:/var/lib/opentalk
+{% include 'roles/sys-svc-container/templates/depends_on/dmbs_excl.yml.j2' %}
+{% include 'roles/sys-svc-container/templates/networks.yml.j2' %}
+
+  livekit:
+    image: "{{ OPENTALK_LIVEKIT_IMAGE }}:{{ OPENTALK_LIVEKIT_VERSION }}"
+    container_name: {{ OPENTALK_LIVEKIT_CONTAINER }}
+    restart: {{ docker_restart_policy | default(DOCKER_RESTART_POLICY) }}
+    network_mode: host
+    command:
+      - --config
+      - /etc/livekit/livekit.yaml
+    volumes:
+      - "{{ [lookup('container', application_id, 'directories.volumes'), 'livekit.yaml'] | path_join }}:/etc/livekit/livekit.yaml:ro"
+    logging:
+      driver: journald
+
+  minio:
+    image: "{{ OPENTALK_MINIO_IMAGE }}:{{ OPENTALK_MINIO_VERSION }}"
+    container_name: {{ OPENTALK_MINIO_CONTAINER }}
+    restart: {{ docker_restart_policy | default(DOCKER_RESTART_POLICY) }}
+    command: ["server", "/data"]
+    environment:
+      MINIO_ROOT_USER: "{{ OPENTALK_MINIO_USER }}"
+      MINIO_ROOT_PASSWORD: "{{ OPENTALK_MINIO_PASSWORD }}"
+    volumes:
+      - minio:/data
+{% include 'roles/sys-svc-container/templates/networks.yml.j2' %}
+    logging:
+      driver: journald
+
+{{ lookup('applications') | compose_volumes(
+    application_id,
+    database_volume=lookup('database', application_id, 'volume'),
+    extra_volumes={
+      'data':   {'name': OPENTALK_DATA_VOLUME},
+      'config': {'name': OPENTALK_CONFIG_VOLUME},
+      'minio':  {'name': lookup('config', application_id, 'volumes.minio')}
+    }
+) }}
+{% include 'roles/sys-svc-compose/templates/networks.yml.j2' %}
