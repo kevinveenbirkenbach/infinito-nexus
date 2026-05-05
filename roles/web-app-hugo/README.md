@@ -30,7 +30,7 @@ applications:
   web-app-hugo:
     services:
       hugo:
-        source_repository: https://github.com/your-org/your-hugo-site.git
+        source_repository: https://git.example.com/your-org/your-hugo-site.git
         source_version:    v1.0.0
 ```
 
