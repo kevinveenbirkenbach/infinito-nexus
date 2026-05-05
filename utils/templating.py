@@ -270,6 +270,67 @@ def _set_templar_var(templar: Any, name: str, value: Any) -> tuple[bool, Any]:
         return False, None
 
 
+def _templar_render_preserve_type(templar: Any, s: str, variables: dict) -> Any:
+    """
+    Type-preserving render for the case where the entire string is a
+    single Jinja expression. Unlike `_templar_render_best_effort` (which
+    forces ``str(rendered)``), this returns templar's native output —
+    so a list/dict-returning ``lookup(...)`` keeps its type.
+
+    Caller MUST pre-check the input shape; this function does no shape
+    detection itself. Returns ``None`` if templar is unavailable or
+    raises during render — caller is expected to fall back to the
+    string-coerced path in that case.
+    """
+    if templar is None:
+        return None
+
+    disable_changed_1, prev_disable_1 = _set_templar_var(
+        templar, "disable_lookups", False
+    )
+    disable_changed_2, prev_disable_2 = _set_templar_var(
+        templar, "_disable_lookups", False
+    )
+
+    prev_avail: Optional[Any] = None
+    if hasattr(templar, "available_variables"):
+        try:
+            prev_avail = templar.available_variables
+            merged_avail: dict = dict(prev_avail) if prev_avail else {}
+            if variables:
+                merged_avail.update(variables)
+            templar.available_variables = merged_avail
+        except Exception:
+            prev_avail = None
+
+    rendered: Any = None
+    try:
+        try:
+            rendered = templar.template(_trust_as_template(s), fail_on_undefined=True)
+        except TypeError:
+            rendered = templar.template(_trust_as_template(s))
+        except Exception:
+            rendered = None
+    finally:
+        if prev_avail is not None and hasattr(templar, "available_variables"):
+            try:
+                templar.available_variables = prev_avail
+            except Exception:
+                pass
+        if disable_changed_2:
+            try:
+                setattr(templar, "_disable_lookups", prev_disable_2)
+            except Exception:
+                pass
+        if disable_changed_1:
+            try:
+                setattr(templar, "disable_lookups", prev_disable_1)
+            except Exception:
+                pass
+
+    return rendered
+
+
 def _templar_render_best_effort(templar: Any, s: str, variables: dict) -> str:
     """
     Render with Ansible templar across versions.

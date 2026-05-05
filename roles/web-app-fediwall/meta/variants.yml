@@ -1,0 +1,93 @@
+# Matrix-deploy variant overrides for this role.
+#
+# Variant 0 — defaults from meta/services.yml. Single wall, polls all
+#   active Mastodon-API-compatible Fediverse siblings via the
+#   `fediwall_active` lookup. biber posts to mastodon AND friendica;
+#   both posts MUST surface on the default wall.
+#
+# Variant 1 — same sibling activation, but two explicitly configured
+#   walls in the fediwall override:
+#     - wall `default`   polls BOTH mastodon AND friendica → both
+#                        posts visible
+#     - wall `mastodon`  polls ONLY mastodon → friendica post MUST
+#                        NOT appear
+#   This proves the per-wall scoping isolation end-to-end.
+#
+# Sibling activation:
+#   The Mastodon and Friendica source roles are pulled in automatically
+#   by the variant-aware deploy planner via
+#   `services.<sibling>.enabled: true; shared: true` (Discourse pattern).
+#   This requires each sibling's primary entity to be marked
+#   `shared: true; enabled: true|false` in its own `meta/services.yml`,
+#   which is the case for `web-app-mastodon` and `web-app-friendica`.
+#   Pixelfed is intentionally NOT activated by either variant — the
+#   biber cross-Fediverse scenarios cover Mastodon and Friendica only.
+#
+# See docs/contributing/artefact/files/role/variants.md for the format.
+
+- services:
+    mastodon:
+      enabled: true
+      shared: true
+    friendica:
+      enabled: true
+      shared: true
+
+- services:
+    mastodon:
+      enabled: true
+      shared: true
+    friendica:
+      enabled: true
+      shared: true
+    fediwall:
+      # Variants replace lists wholesale (not deep-merged), so every
+      # wall.config field is restated here — no template fallbacks.
+      walls:
+        - slug: default
+          config:
+            servers:
+              - "{{ lookup('domain', 'web-app-mastodon') }}"
+              - "{{ lookup('domain', 'web-app-friendica') }}"
+            tags: []
+            accounts: []
+            loadPublic: true
+            loadFederated: false
+            loadTrends: false
+            languages: []
+            badWords: []
+            hideSensitive: true
+            hideBots: true
+            hideReplies: true
+            hideBoosts: false
+            limit: 20
+            interval: 10
+            title: Fediwall
+            theme: auto
+            showInfobar: true
+            showText: true
+            showMedia: true
+            playVideos: true
+        - slug: mastodon
+          config:
+            servers:
+              - "{{ lookup('domain', 'web-app-mastodon') }}"
+            tags: []
+            accounts: []
+            loadPublic: true
+            loadFederated: false
+            loadTrends: false
+            languages: []
+            badWords: []
+            hideSensitive: true
+            hideBots: true
+            hideReplies: true
+            hideBoosts: false
+            limit: 20
+            interval: 10
+            title: Mastodon
+            theme: auto
+            showInfobar: true
+            showText: true
+            showMedia: true
+            playVideos: true

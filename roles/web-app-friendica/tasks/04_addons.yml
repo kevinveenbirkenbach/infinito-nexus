@@ -69,21 +69,28 @@
     - "'not populated' not in (friendica_db_ready.stderr | default(''))"
 
 - name: Ensure Friendica addons are in sync
-  # `bin/console addon enable/disable` returns rc=0 even when it refuses to
-  # act ("Database isn't ready or populated yet") AND occasionally returns
-  # rc=0 on a fresh stack without registering the addon's hooks in the DB or
-  # writing the `addons.<name>` config entry. The end result is an addon
-  # that `list all` reports as enabled/disabled inconsistently and whose
-  # `_install` hooks (e.g. ldapauth's authenticate hook) are silently
-  # absent, so every LDAP login is rejected. Running the console command a
-  # second time inside the same container reliably registers the hooks, so
-  # we verify the effective state after each call against `addon list
-  # enabled` and retry the whole enable/verify cycle until it matches.
+  # `bin/console addon enable` is unreliable on a fresh stack: it returns
+  # rc=0 and the addon shows up in `addon list enabled`, but its `_install`
+  # hooks (e.g. ldapauth's `authenticate` hook) are silently NOT registered
+  # in Friendica's `hook` DB table, so every LDAP login is rejected at
+  # runtime. The only thing that reliably re-registers the hooks is a full
+  # `addon disable` followed by `addon enable` — even when the addon is
+  # ALREADY listed as enabled (the install hook only fires on the
+  # transition disabled→enabled). For the enabled case we therefore
+  # force-cycle disable+enable; for the disabled case a single disable
+  # call is enough. After the call we verify the effective state against
+  # `addon list enabled` and against the `hook` table to catch the
+  # "enabled but no hooks" failure mode that prompted this workaround.
   # Idempotent "Addon already enabled/disabled" errors are swallowed with
   # `|| true` — the subsequent verify step is authoritative.
   shell: |-
     cmd="{{ BIN_COMPOSE }} exec -T --user {{ FRIENDICA_USER }} --workdir {{ FRIENDICA_APPLICATION_DIR }} {{ FRIENDICA_SERVICE }} {{ FRIENDICA_APPLICATION_DIR }}/bin/console"
-    $cmd addon {{ 'enable' if item.enabled else 'disable' }} {{ item.name }} 2>&1 || true
+    if [[ "{{ 'true' if item.enabled else 'false' }}" == "true" ]]; then
+      $cmd addon disable {{ item.name }} 2>&1 || true
+      $cmd addon enable {{ item.name }} 2>&1 || true
+    else
+      $cmd addon disable {{ item.name }} 2>&1 || true
+    fi
     if $cmd addon list enabled | grep -qE '^\| +{{ item.name }} +\|$'; then
       is_enabled=1
     else

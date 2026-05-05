@@ -1,0 +1,65 @@
+logout:
+  enabled: false
+  shared: false
+dashboard:
+  enabled: true
+  shared: true
+matomo:
+  enabled: true
+  shared: true
+css:
+  enabled: true
+  shared: true
+# noqa: email
+email:
+  enabled: false
+  shared: false
+prometheus:
+  enabled: true
+  shared: true
+fediwall:
+  image: nginx
+  version: alpine
+  upstream:
+    version: "1.4.0"
+    tarball_url: "https://github.com/defnull/fediwall/releases/download/v1.4.0/fediwall-1.4.0.tgz"
+  fediverse_siblings:
+    - web-app-mastodon
+    - web-app-pixelfed
+    - web-app-friendica
+  walls:
+    - slug: default
+      config:
+        servers: "{{ lookup('fediwall_active', 'domains') }}"
+        tags: []
+        accounts: []
+        # `loadPublic: true` makes Fediwall poll each server's public
+        # timeline. Without one of `loadPublic`/`loadFederated` enabled
+        # (and no tags/accounts filter), the wall renders empty because
+        # there is nothing to fetch.
+        loadPublic: true
+        loadFederated: false
+        loadTrends: false
+        languages: []
+        badWords: []
+        hideSensitive: true
+        hideBots: true
+        hideReplies: true
+        hideBoosts: false
+        limit: 20
+        interval: 10
+        title: Fediwall
+        theme: auto
+        showInfobar: true
+        showText: true
+        showMedia: true
+        playVideos: true
+  ports:
+    local:
+      http: 8008
+  lifecycle: alpha
+  min_storage: 1GB
+  cpus: '0.2'
+  mem_reservation: 128m
+  mem_limit: 256m
+  pids_limit: 256
