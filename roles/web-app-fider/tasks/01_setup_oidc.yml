@@ -26,26 +26,13 @@
   when: (fider_tenant_count.stdout | trim | int) == 0
 
 - name: "Fider | Create admin user (bypass email verification)"
-  shell: |
-    container exec -i {{ lookup('database', application_id, 'container') }} \
-      psql -U {{ lookup('database', application_id, 'username') }} \
-           -d {{ lookup('database', application_id, 'name') }} \
-           -c "INSERT INTO users (name, email, created_at, tenant_id, role, status, avatar_type, avatar_bkey)
-               SELECT
-                 '{{ lookup('users', 'administrator').firstname }} {{ lookup('users', 'administrator').lastname }}',
-                 '{{ lookup('users', 'administrator').email }}',
-                 NOW(),
-                 (SELECT id FROM tenants LIMIT 1),
-                 3, 1, 2, ''
-               WHERE NOT EXISTS (
-                 SELECT 1 FROM users
-                 WHERE email = '{{ lookup('users', 'administrator').email }}'
-                   AND tenant_id = (SELECT id FROM tenants LIMIT 1)
-               );
-               UPDATE email_verifications
-                 SET verified_at = NOW(),
-                     user_id = (SELECT id FROM users WHERE email = '{{ lookup('users', 'administrator').email }}' AND tenant_id = (SELECT id FROM tenants LIMIT 1))
-               WHERE email = '{{ lookup('users', 'administrator').email }}' AND verified_at IS NULL;"
+  script: >-
+    create_admin_user.sh
+    "{{ lookup('database', application_id, 'container') }}"
+    "{{ lookup('database', application_id, 'username') }}"
+    "{{ lookup('database', application_id, 'name') }}"
+    "{{ lookup('users', 'administrator').firstname }} {{ lookup('users', 'administrator').lastname }}"
+    "{{ lookup('users', 'administrator').email }}"
   args:
     chdir: "{{ lookup('container', application_id, 'directories.instance') }}"
   changed_when: true
@@ -61,42 +48,17 @@
   changed_when: true
 
 - name: "Fider | Configure Keycloak as OIDC provider in database"
-  shell: |
-    container exec -i {{ lookup('database', application_id, 'container') }} \
-      psql -U {{ lookup('database', application_id, 'username') }} \
-           -d {{ lookup('database', application_id, 'name') }} \
-           -c "INSERT INTO oauth_providers (
-                 tenant_id, provider, display_name, status,
-                 client_id, client_secret,
-                 authorize_url, token_url, profile_url,
-                 scope,
-                 json_user_id_path, json_user_name_path, json_user_email_path,
-                 logo_bkey, is_trusted
-               ) VALUES (
-                 (SELECT id FROM tenants LIMIT 1),
-                 '_keycloak',
-                 '{{ SOFTWARE_NAME }} SSO',
-                 2,
-                 '{{ OIDC.CLIENT.ID }}',
-                 '{{ OIDC.CLIENT.SECRET }}',
-                 '{{ OIDC.CLIENT.AUTHORIZE_URL }}',
-                 '{{ OIDC.CLIENT.TOKEN_URL }}',
-                 '{{ OIDC.CLIENT.USER_INFO_URL }}',
-                 'openid profile email',
-                 'sub', 'name', 'email',
-                 '', true
-               )
-               ON CONFLICT (tenant_id, provider) DO UPDATE SET
-                 display_name       = EXCLUDED.display_name,
-                 status             = EXCLUDED.status,
-                 client_id          = EXCLUDED.client_id,
-                 client_secret      = EXCLUDED.client_secret,
-                 authorize_url      = EXCLUDED.authorize_url,
-                 token_url          = EXCLUDED.token_url,
-                 profile_url        = EXCLUDED.profile_url,
-                 scope              = EXCLUDED.scope,
-                 logo_bkey          = EXCLUDED.logo_bkey,
-                 is_trusted         = EXCLUDED.is_trusted;"
+  script: >-
+    configure_oidc_provider.sh
+    "{{ lookup('database', application_id, 'container') }}"
+    "{{ lookup('database', application_id, 'username') }}"
+    "{{ lookup('database', application_id, 'name') }}"
+    "{{ SOFTWARE_NAME }} SSO"
+    "{{ OIDC.CLIENT.ID }}"
+    "{{ OIDC.CLIENT.SECRET }}"
+    "{{ OIDC.CLIENT.AUTHORIZE_URL }}"
+    "{{ OIDC.CLIENT.TOKEN_URL }}"
+    "{{ OIDC.CLIENT.USER_INFO_URL }}"
   args:
     chdir: "{{ lookup('container', application_id, 'directories.instance') }}"
   changed_when: true

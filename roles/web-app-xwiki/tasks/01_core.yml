@@ -29,32 +29,16 @@
 
 - block:
     - name: "DEBUG | superadmin check + pw hash compare (condensed)"
-      shell: |
-        set -euo pipefail
-
-        echo "=== superadmin check ==="
-        echo "status={{ _super_check_ext.status }}"
-        echo "redirected={{ _super_check_ext.redirected | default('n/a') }}"
-        echo "url={{ _super_check_ext.url | default('n/a') }}"
-        echo "www_authenticate={{ _super_check_ext.www_authenticate | default(_super_check_ext.headers['www-authenticate'] | default('n/a')) }}"
-        echo "content_type={{ _super_check_ext.content_type | default(_super_check_ext.headers['content-type'] | default('n/a')) }}"
-        echo "content={{ (_super_check_ext.content | default(''))[:600] | replace('\n','\\n') }}"
-
-        echo "=== password hash compare ==="
-        echo -n "container_hash="
-        container exec "{{ XWIKI_CONTAINER }}" sh -lc '
-          cfg="/usr/local/tomcat/webapps/ROOT/WEB-INF/xwiki.cfg";
-          if [ ! -f "$cfg" ]; then
-            echo "<missing-xwiki.cfg>"
-            exit 0
-          fi
-          grep -E "^xwiki\.superadminpassword=" "$cfg" \
-            | sed "s/^xwiki\.superadminpassword=//" \
-            | sha256sum | awk "{print \$1}"
-        ' || true
-
-        echo -n "ansible_hash="
-        printf "%s" {{ XWIKI_SUPERADMIN_PASSWORD | quote }} | sha256sum | awk '{print $1}'
+      script: >-
+        debug_superadmin.sh
+        "{{ _super_check_ext.status }}"
+        "{{ _super_check_ext.redirected | default('n/a') }}"
+        "{{ _super_check_ext.url | default('n/a') }}"
+        "{{ _super_check_ext.www_authenticate | default(_super_check_ext.headers['www-authenticate'] | default('n/a')) }}"
+        "{{ _super_check_ext.content_type | default(_super_check_ext.headers['content-type'] | default('n/a')) }}"
+        "{{ (_super_check_ext.content | default(''))[:600] | replace('\n','\\n') }}"
+        "{{ XWIKI_CONTAINER }}"
+        "{{ XWIKI_SUPERADMIN_PASSWORD }}"
       register: _dbg_superadmin
       changed_when: false
       failed_when: false
