@@ -11,4 +11,6 @@ prometheus:
   enabled: true
   shared: true
 html:
+  shared: true
+  enabled: false
   lifecycle: beta
