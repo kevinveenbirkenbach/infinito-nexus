@@ -20,6 +20,9 @@ email:
 redis:
   enabled: true
   shared: true
+prometheus:
+  enabled: true
+  shared: true
 pihole:
   image: pihole/pihole
   version: latest
@@ -27,4 +30,6 @@ pihole:
     local:
       http: 8041
       oauth2: 16493
+  run_after:
+  - web-app-keycloak
   lifecycle: alpha
