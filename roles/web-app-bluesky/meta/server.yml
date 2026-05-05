@@ -10,7 +10,7 @@ domains:
 csp:
   whitelist:
     connect-src:
-    - api.bluesky.{{ DOMAIN_PRIMARY }}
+    - "{{ lookup('config', 'web-app-bluesky', 'server.domains.canonical.api') }}"
     - https://plc.directory
     - https://bsky.social
     - https://api.bsky.app
