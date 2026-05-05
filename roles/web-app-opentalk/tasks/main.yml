@@ -1,0 +1,46 @@
+---
+- name: "load docker, db and proxy for {{ application_id }}"
+  include_role:
+    name: sys-stk-full
+  vars:
+    docker_compose_flush_handlers: false
+
+- name: "Render OpenTalk controller config '{{ application_id }}'"
+  ansible.builtin.template:
+    src: controller.toml.j2
+    dest: "{{ [lookup('container', application_id, 'directories.volumes'), 'controller.toml'] | path_join }}"
+    mode: '0644'
+  notify:
+    - compose up
+
+- name: "Render LiveKit config '{{ application_id }}'"
+  ansible.builtin.template:
+    src: livekit.yaml.j2
+    dest: "{{ [lookup('container', application_id, 'directories.volumes'), 'livekit.yaml'] | path_join }}"
+    mode: '0644'
+  notify:
+    - compose up
+
+- name: "Flush handlers for '{{ application_id }}' so compose up sees rendered configs"
+  meta: flush_handlers
+
+- name: "Wait for MinIO to accept the configured root credentials"
+  ansible.builtin.shell: >
+    container exec {{ OPENTALK_MINIO_CONTAINER }}
+    mc alias set local http://127.0.0.1:9000
+    {{ OPENTALK_MINIO_USER | quote }}
+    {{ OPENTALK_MINIO_PASSWORD | quote }}
+  register: minio_ready
+  retries: 60
+  delay: 3
+  until: minio_ready.rc == 0
+  changed_when: false
+  no_log: "{{ MASK_CREDENTIALS_IN_LOGS | bool }}"
+
+- name: "Ensure OpenTalk MinIO bucket exists"
+  ansible.builtin.shell: >
+    container exec {{ OPENTALK_MINIO_CONTAINER }}
+    mc mb local/{{ OPENTALK_MINIO_BUCKET }}
+  register: minio_bucket
+  changed_when: "'Bucket created successfully' in (minio_bucket.stdout | default(''))"
+  failed_when: minio_bucket.rc != 0 and 'already own it' not in (minio_bucket.stderr | default(''))

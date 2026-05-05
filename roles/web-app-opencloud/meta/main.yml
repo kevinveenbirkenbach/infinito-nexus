@@ -1,0 +1,23 @@
+galaxy_info:
+  author: Kevin Veen-Birkenbach
+  description: Sovereign file sync, share, and collaboration powered by OpenCloud (Heinlein fork). Single-binary deployment integrated with central Keycloak (OIDC) and OpenLDAP (autoprovisioning), exposed under open.cloud.{{ DOMAIN_PRIMARY }}.
+  license: Infinito.Nexus Community License (Non-Commercial)
+  company: |
+    Kevin Veen-Birkenbach
+    Consulting & Coaching Solutions
+    https://www.veen.world
+  min_ansible_version: '2.9'
+  platforms:
+    - name: Linux
+      versions:
+        - all
+  galaxy_tags:
+    - opencloud
+    - docker
+    - oidc
+    - ldap
+    - cloud
+    - files
+    - collaboration
+    - web
+  issue_tracker_url: https://s.infinito.nexus/issues
