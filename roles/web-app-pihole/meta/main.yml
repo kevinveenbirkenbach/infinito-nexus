@@ -2,7 +2,6 @@ galaxy_info:
   author: Kevin Veen-Birkenbach
   description: Deploys Pi-hole — a network-wide DNS sinkhole for ad and tracker blocking with OAuth2/Keycloak authentication.
   license: Infinito.Nexus Community License (Non-Commercial)
-  license_url: https://s.infinito.nexus/license
   company: |
     Kevin Veen-Birkenbach
     Consulting & Coaching Solutions
@@ -16,12 +15,4 @@ galaxy_info:
   - self-hosted
   - pihole
   - oauth2
-  repository: https://s.infinito.nexus/code
-  issue_tracker_url: https://s.infinito.nexus/issues
-  documentation: https://s.infinito.nexus/code/
-  logo:
-    class: fa-solid fa-shield-halved
-  run_after:
-  - web-app-keycloak
-  lifecycle: alpha
 dependencies: []
