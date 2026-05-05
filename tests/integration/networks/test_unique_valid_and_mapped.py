@@ -9,7 +9,8 @@ import ipaddress
 import os
 import unittest
 
-import yaml
+
+from utils.cache.yaml import load_yaml_any
 
 
 class TestNetworksUniqueValidAndMapped(unittest.TestCase):
@@ -26,8 +27,7 @@ class TestNetworksUniqueValidAndMapped(unittest.TestCase):
             server_file = os.path.join(role_path, "meta", "server.yml")
             if not os.path.isfile(server_file):
                 continue
-            with open(server_file, "r", encoding="utf-8") as f:
-                server_data = yaml.safe_load(f) or {}
+            server_data = load_yaml_any(server_file) or {}
             networks = server_data.get("networks") or {}
             if not isinstance(networks, dict):
                 continue

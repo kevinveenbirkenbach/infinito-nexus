@@ -3,12 +3,14 @@ import unittest
 import yaml
 from pathlib import Path
 
+from utils.cache.yaml import load_yaml_any
+
 
 PROMETHEUS_APP_ID = "web-app-prometheus"
 
 
 def _load_config(file_path: str) -> dict:
-    return yaml.safe_load(Path(file_path).read_text(encoding="utf-8")) or {}
+    return load_yaml_any(Path(file_path)) or {}
 
 
 class TestPrometheusServicePresence(unittest.TestCase):

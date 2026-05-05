@@ -23,6 +23,8 @@ from pathlib import Path
 
 import yaml
 
+from utils.cache.yaml import load_yaml_str
+
 
 REPO_ROOT = Path(__file__).resolve().parents[3]
 ROLES_DIR = REPO_ROOT / "roles"
@@ -49,7 +51,7 @@ def _load_yaml(path: Path):
     text = path.read_text(encoding="utf-8")
     if not text.strip():
         return None
-    return yaml.safe_load(text)
+    return load_yaml_str(text)
 
 
 class TestNoLegacyRoleDirs(unittest.TestCase):
@@ -335,7 +337,7 @@ class TestNoComposeWrapperInVariants(unittest.TestCase):
                 continue
             text = variants_path.read_text(encoding="utf-8")
             try:
-                docs = yaml.safe_load(text)
+                docs = load_yaml_str(text)
             except yaml.YAMLError:
                 continue
             if not isinstance(docs, list):

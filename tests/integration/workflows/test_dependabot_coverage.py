@@ -5,7 +5,8 @@ import unittest
 from pathlib import Path
 from typing import Iterable
 
-import yaml
+
+from utils.cache.yaml import load_yaml_any
 
 REPO_ROOT = Path(__file__).resolve().parents[3]
 DEPENDABOT_PATH = REPO_ROOT / ".github" / "dependabot.yml"
@@ -119,8 +120,7 @@ def _dir_covers(dep_dir: str, file_rel_dir: str) -> bool:
 
 
 def _load_active_entries() -> list[dict]:
-    with open(DEPENDABOT_PATH) as fh:
-        data = yaml.safe_load(fh)
+    data = load_yaml_any(DEPENDABOT_PATH)
     return data.get("updates", [])
 
 

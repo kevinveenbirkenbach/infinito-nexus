@@ -1,7 +1,8 @@
 import unittest
 import os
 import glob
-import yaml
+
+from utils.cache.yaml import load_yaml_any
 
 
 class TestRoleDependencies(unittest.TestCase):
@@ -25,8 +26,7 @@ class TestRoleDependencies(unittest.TestCase):
             role_name = os.path.basename(role_dir)
             with self.subTest(role=role_name):
                 # Load the YAML metadata
-                with open(meta_file, "r") as f:
-                    meta = yaml.safe_load(f) or {}
+                meta = load_yaml_any(meta_file) or {}
 
                 # Extract dependencies list
                 dependencies = meta.get("dependencies", [])

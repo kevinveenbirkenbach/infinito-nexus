@@ -5,6 +5,8 @@ import unittest
 import yaml
 from typing import Any, Dict, Iterable, List, Set, Tuple, Optional
 
+from utils.cache.yaml import load_yaml_all
+
 
 # ---------- YAML helpers ----------
 
@@ -14,12 +16,11 @@ def load_yaml_documents(path: str) -> List[Any]:
     Load one or more YAML documents from a file and return them as a list.
     Raises AssertionError with a helpful message on parse errors.
     """
-    with open(path, "r", encoding="utf-8") as f:
-        try:
-            docs = list(yaml.safe_load_all(f))
-            return [d for d in docs if d is not None]
-        except yaml.YAMLError as e:
-            raise AssertionError(f"YAML parsing error in {path}: {e}")
+    try:
+        docs = list(load_yaml_all(path))
+        return [d for d in docs if d is not None]
+    except yaml.YAMLError as e:
+        raise AssertionError(f"YAML parsing error in {path}: {e}")
 
 
 def _iter_task_like_entries(node: Any) -> Iterable[Dict[str, Any]]:

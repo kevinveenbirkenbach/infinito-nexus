@@ -2,6 +2,8 @@ import unittest
 import yaml
 from pathlib import Path
 
+from utils.cache.yaml import load_yaml_any
+
 
 class TestDockerRoleServicesConfiguration(unittest.TestCase):
     def test_services_keys_and_templates(self):
@@ -21,9 +23,9 @@ class TestDockerRoleServicesConfiguration(unittest.TestCase):
                 continue  # No services manifest to check
 
             try:
-                services = yaml.safe_load(services_file.read_text("utf-8")) or {}
+                services = load_yaml_any(services_file) or {}
                 main_file = role_path / "vars" / "main.yml"
-                yaml.safe_load(main_file.read_text("utf-8")) or {}
+                load_yaml_any(main_file) or {}
             except yaml.YAMLError as e:
                 errors.append(f"{role_path.name}: YAML parse error: {e}")
                 continue

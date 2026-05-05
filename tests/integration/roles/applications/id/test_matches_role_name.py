@@ -1,11 +1,12 @@
 import os
 import glob
-import yaml
 import warnings
 import unittest
 
 # import your filters
 from plugins.filter.invokable_paths import get_invokable_paths, get_non_invokable_paths
+
+from utils.cache.yaml import load_yaml_any
 
 
 class TestApplicationIdAndInvocability(unittest.TestCase):
@@ -38,8 +39,7 @@ class TestApplicationIdAndInvocability(unittest.TestCase):
             # load vars/main.yml if it exists
             data = {}
             if os.path.exists(vars_main):
-                with open(vars_main, "r", encoding="utf-8") as f:
-                    data = yaml.safe_load(f) or {}
+                data = load_yaml_any(vars_main) or {}
 
             app_id = data.get("application_id")
 

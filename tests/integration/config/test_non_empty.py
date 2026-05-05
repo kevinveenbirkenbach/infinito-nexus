@@ -3,6 +3,8 @@ import glob
 import yaml
 import unittest
 
+from utils.cache.yaml import load_yaml_any
+
 
 def find_none_values(data, prefix=None):
     """
@@ -53,11 +55,10 @@ class TestConfigurationNoNone(unittest.TestCase):
 
         all_errors = []
         for filepath in files:
-            with open(filepath, "r") as f:
-                try:
-                    data = yaml.safe_load(f)
-                except yaml.YAMLError as e:
-                    self.fail(f"Failed to parse YAML in {filepath}: {e}")
+            try:
+                data = load_yaml_any(filepath)
+            except yaml.YAMLError as e:
+                self.fail(f"Failed to parse YAML in {filepath}: {e}")
             errors = find_none_values(data)
             for path, value in errors:
                 all_errors.append(f"{filepath}: Key '{path}' is None")

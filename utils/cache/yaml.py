@@ -17,8 +17,12 @@ CACHE SEMANTICS
   signature invalidates entries whenever the file is rewritten by an
   external process (e.g. Ansible's `copy:` module persisting tokens
   while the same Python process keeps running across many calls).
-- Cached value: the dict returned by `yaml.safe_load`. **The same dict
-  instance is returned to every caller**, so callers that mutate the
+- Cached value: the **list of documents** ``yaml.safe_load_all`` returns
+  for that file. Single-document YAML files cache as a 1-element list,
+  so a callsite that asks for the single doc (``load_yaml`` /
+  ``load_yaml_any``) and a callsite that asks for the multi-doc list
+  (``load_yaml_all``) share **the same parse**. The same list / dict
+  instances are returned to every caller, so callers that mutate the
   result MUST `copy.deepcopy()` it first. Treat the value as read-only.
 - Lifetime: process-wide. CLI tools that never rewrite their inputs see
   the same hit rate as before; long-lived Ansible processes pick up
@@ -28,13 +32,18 @@ CACHE SEMANTICS
 from __future__ import annotations
 
 from pathlib import Path
-from typing import Any, Dict, Mapping, Tuple
+from typing import Any, Dict, List, Mapping, Tuple
 
 import yaml
 
 
 _MISSING = object()
-_CACHE: Dict[Tuple[str, int, int], Any] = {}
+# One unified cache. Stores the raw document list parsed by
+# ``yaml.safe_load_all`` so single-doc and multi-doc consumers share
+# the same on-disk parse. Single-doc helpers (``load_yaml`` /
+# ``load_yaml_any``) unwrap ``docs[0]``; multi-doc (``load_yaml_all``)
+# returns the list as-is.
+_CACHE: Dict[Tuple[str, int, int], List[Any]] = {}
 
 
 def _path_key(path) -> str:
@@ -53,26 +62,14 @@ def _signature(p: Path) -> Tuple[str, int, int]:
     return (_path_key(p), st.st_mtime_ns, st.st_size)
 
 
-def _load_raw(path, *, default_if_missing: Any) -> Any:
-    """Cached parse without root-shape validation.
-
-    Returns whatever `yaml.safe_load` produces (dict, list, scalar,
-    None coerced to `{}` for empty files). Callers wrap this with
-    their own validation.
-
-    Cache invalidates when the file's mtime or size changes, so a write
-    by Ansible's `copy:` module is picked up on the next read in the
-    same Python process.
+def _load_docs(path) -> List[Any]:
+    """Return the cached list of YAML documents for *path*, parsing on
+    cache miss. The caller must already have verified that the file
+    exists; missing-file handling is the public helper's job (so the
+    synthetic ``default_if_missing`` value never enters the cache and a
+    later ``dump_yaml`` is picked up cleanly).
     """
     p = Path(path)
-    if not p.exists():
-        if default_if_missing is _MISSING:
-            raise FileNotFoundError(p)
-        # Do NOT cache the synthetic default: a later `dump_yaml` may
-        # create the file, and we want the next read to pick the real
-        # content up. Caching the empty default here would mask that.
-        return default_if_missing
-
     sig = _signature(p)
     if sig in _CACHE:
         return _CACHE[sig]
@@ -86,11 +83,38 @@ def _load_raw(path, *, default_if_missing: Any) -> Any:
 
     with p.open("r", encoding="utf-8") as f:
         # This module IS the cache; calling itself would recurse.
-        data = yaml.safe_load(f)  # noqa: direct-yaml
-    if data is None:
-        data = {}
-    _CACHE[sig] = data
-    return data
+        docs = list(yaml.safe_load_all(f))  # noqa: direct-yaml
+    _CACHE[sig] = docs
+    return docs
+
+
+def _load_raw(path, *, default_if_missing: Any) -> Any:
+    """Cached single-doc parse without root-shape validation.
+
+    Returns whatever the YAML root produces (dict, list, scalar, or
+    ``{}`` for empty files). Multi-document files raise ``ValueError``
+    so callers that expect a single doc fail loud, matching the legacy
+    ``yaml.safe_load(...)`` behaviour.
+    """
+    p = Path(path)
+    if not p.exists():
+        if default_if_missing is _MISSING:
+            raise FileNotFoundError(p)
+        # Do NOT cache the synthetic default: a later `dump_yaml` may
+        # create the file, and we want the next read to pick the real
+        # content up. Caching the empty default here would mask that.
+        return default_if_missing
+
+    docs = _load_docs(p)
+    if not docs:
+        return {}
+    if len(docs) > 1:
+        raise ValueError(
+            f"Expected a single YAML document in {path}, got {len(docs)}; "
+            "use load_yaml_all() for multi-document files."
+        )
+    data = docs[0]
+    return {} if data is None else data
 
 
 def load_yaml(path, *, default_if_missing: Any = _MISSING) -> Dict[str, Any]:
@@ -125,18 +149,20 @@ def load_yaml_any(path, *, default_if_missing: Any = _MISSING) -> Any:
     return _load_raw(path, default_if_missing=default_if_missing)
 
 
-def dump_yaml(path, data: Mapping[str, Any]) -> None:
+def dump_yaml(path, data: Any) -> None:
     """Write `data` to `path` as YAML and evict the cached entry.
 
-    The next `load_yaml(path)` will parse the just-written file (and
-    cache the result), which is what callers expect when a CLI tool
-    edits a file mid-run.
+    Accepts any safe-dumpable Python structure (dict, list of dicts,
+    scalar). The next `load_yaml*` call for `path` will parse the
+    just-written file and refill the cache, which is what callers
+    expect when a CLI tool or test fixture edits a file mid-run.
     """
     p = Path(path)
     p.parent.mkdir(parents=True, exist_ok=True)
+    payload = dict(data) if isinstance(data, Mapping) else data
     with p.open("w", encoding="utf-8") as f:
         yaml.safe_dump(  # noqa: direct-yaml — this module IS the cache.
-            dict(data), f, sort_keys=False, default_flow_style=False
+            payload, f, sort_keys=False, default_flow_style=False
         )
     _drop_path(p)
 
@@ -171,6 +197,33 @@ def load_yaml_str(text: str) -> Any:
     callers never have to ``import yaml`` directly.
     """
     return yaml.safe_load(text)  # noqa: direct-yaml — this module IS the cache.
+
+
+def load_yaml_all(path, *, default_if_missing: Any = _MISSING) -> list:
+    """Memoised multi-document YAML load.
+
+    Returns the list of documents from a multi-doc YAML file
+    (``--- ... --- ...``). Shares the unified per-path cache with
+    :func:`load_yaml_any` / :func:`load_yaml`, so loading a file as
+    multi-doc and then as single-doc (or vice versa) parses it exactly
+    once.
+    """
+    p = Path(path)
+    if not p.exists():
+        if default_if_missing is _MISSING:
+            raise FileNotFoundError(p)
+        return default_if_missing
+    return _load_docs(p)
+
+
+def load_yaml_all_str(text: str) -> list:
+    """Parse a multi-document YAML string into a list of documents.
+
+    No caching (the source is a string, not a path) — provided for
+    symmetry with :func:`load_yaml_str` so callers never need
+    ``import yaml`` for the parse.
+    """
+    return list(yaml.safe_load_all(text))  # noqa: direct-yaml — this module IS the cache.
 
 
 def _drop_path(path) -> None:

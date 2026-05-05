@@ -2,6 +2,8 @@ import yaml
 import unittest
 from pathlib import Path
 
+from utils.cache.yaml import load_yaml_any
+
 ROLES_DIR = Path(__file__).resolve().parent.parent.parent.parent / "roles"
 
 
@@ -16,8 +18,7 @@ class TestOauth2AclMutualExclusion(unittest.TestCase):
 
             # open the YAML file instead of passing the Path object
             try:
-                with open(vars_file) as f:
-                    data = yaml.safe_load(f) or {}
+                data = load_yaml_any(vars_file) or {}
             except yaml.YAMLError as e:
                 failures.append(f"{role_path.name}: failed to parse YAML ({e})")
                 continue

@@ -2,9 +2,10 @@ import unittest
 from pathlib import Path
 from typing import Any, Dict, Iterable, List, Optional, Set, Tuple
 
-import yaml
 
 from utils.cache.files import read_text
+
+from utils.cache.yaml import load_yaml_all_str
 
 
 def _safe_yaml_load_all(path: Path) -> List[Any]:
@@ -20,7 +21,7 @@ def _safe_yaml_load_all(path: Path) -> List[Any]:
     if not text.strip():
         return []
     try:
-        docs = list(yaml.safe_load_all(text))
+        docs = list(load_yaml_all_str(text))
         return [d for d in docs if d is not None]
     except Exception:
         # Some Ansible task files can contain Jinja that breaks YAML parsing;

@@ -2,14 +2,14 @@
 import os
 import glob
 import unittest
-import yaml
 
 from utils.cache.files import read_text
+from utils.cache.yaml import load_yaml_str
 
 
 def _safe_yaml_load(path):
     try:
-        doc = yaml.safe_load(read_text(path))
+        doc = load_yaml_str(read_text(path))
         # A tasks file can be a list (usual) or a dict (blocks, etc.)
         return doc
     except Exception as e:

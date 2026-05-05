@@ -4,7 +4,6 @@ from pathlib import Path
 from unittest.mock import patch
 from cli.create.inventory.host_vars import apply_vars_overrides_from_file
 
-import yaml
 from ruamel.yaml import YAML
 from ruamel.yaml.comments import CommentedMap
 
@@ -13,6 +12,8 @@ from cli.create.inventory.host_vars import (
     apply_vars_overrides,
     ensure_become_password,
 )
+
+from utils.cache.yaml import load_yaml_any, dump_yaml_str
 
 
 class TestHostVars(unittest.TestCase):
@@ -98,7 +99,7 @@ existing_key: foo
         with tempfile.TemporaryDirectory() as tmpdir:
             host_vars_file = Path(tmpdir) / "host_vars.yml"
             host_vars_file.write_text(
-                yaml.safe_dump(
+                dump_yaml_str(
                     {
                         "networks": {"internet": {"ip4": "1.2.3.4", "ip6": "::1"}},
                         "TLS_ENABLED": True,
@@ -117,7 +118,7 @@ existing_key: foo
                 """,
             )
 
-            data = yaml.safe_load(host_vars_file.read_text(encoding="utf-8"))
+            data = load_yaml_any(host_vars_file)
             self.assertEqual(data["networks"]["internet"]["ip4"], "10.0.0.10")
             self.assertEqual(data["networks"]["internet"]["ip6"], "::1")
             self.assertIs(data["TLS_ENABLED"], False)
@@ -191,7 +192,7 @@ def test_apply_vars_overrides_from_file_deep_merge_and_overwrite(self):
 
         host_vars_file = tmp / "host_vars.yml"
         host_vars_file.write_text(
-            yaml.safe_dump(
+            dump_yaml_str(
                 {
                     "networks": {"internet": {"ip4": "1.2.3.4", "ip6": "::1"}},
                     "TLS_ENABLED": True,
@@ -203,7 +204,7 @@ def test_apply_vars_overrides_from_file_deep_merge_and_overwrite(self):
 
         vars_file = tmp / "vars.yml"
         vars_file.write_text(
-            yaml.safe_dump(
+            dump_yaml_str(
                 {
                     "networks": {"internet": {"ip4": "10.0.0.10"}},
                     "TLS_ENABLED": False,
@@ -217,7 +218,7 @@ def test_apply_vars_overrides_from_file_deep_merge_and_overwrite(self):
             host_vars_file=host_vars_file, vars_file=vars_file
         )
 
-        data = yaml.safe_load(host_vars_file.read_text(encoding="utf-8"))
+        data = load_yaml_any(host_vars_file)
         self.assertEqual(data["networks"]["internet"]["ip4"], "10.0.0.10")
         self.assertEqual(data["networks"]["internet"]["ip6"], "::1")
         self.assertIs(data["TLS_ENABLED"], False)

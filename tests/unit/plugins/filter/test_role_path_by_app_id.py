@@ -1,7 +1,6 @@
 import os
 import tempfile
 import shutil
-import yaml
 import unittest
 
 from ansible.errors import AnsibleFilterError
@@ -9,6 +8,8 @@ from plugins.filter.role_path_by_app_id import (
     abs_role_path_by_application_id,
     rel_role_path_by_application_id,
 )
+
+from utils.cache.yaml import dump_yaml
 
 
 def write_vars_file(base_dir, role_name, app_id):
@@ -18,8 +19,7 @@ def write_vars_file(base_dir, role_name, app_id):
     role_vars_dir = os.path.join(base_dir, "roles", role_name, "vars")
     os.makedirs(role_vars_dir, exist_ok=True)
     file_path = os.path.join(role_vars_dir, "main.yml")
-    with open(file_path, "w") as f:
-        yaml.safe_dump({"application_id": app_id}, f)
+    dump_yaml(file_path, {"application_id": app_id})
     return file_path
 
 

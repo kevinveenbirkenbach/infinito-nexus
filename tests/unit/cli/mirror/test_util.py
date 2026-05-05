@@ -7,6 +7,8 @@ from unittest.mock import patch
 
 from utils.docker.image.discovery import iter_role_images
 
+from utils.cache.yaml import load_yaml_str
+
 
 def _make_fs(files: dict[str, str]) -> dict[Path, str]:
     return {Path(k): textwrap.dedent(v) for k, v in files.items()}
@@ -22,10 +24,9 @@ class TestIterRoleImagesVarsImages(unittest.TestCase):
             return [p for p in real_fs if p.match(pattern)]
 
         def fake_load(path: Path) -> dict:
-            import yaml
 
             content = real_fs.get(path, "")
-            return yaml.safe_load(content) or {}
+            return load_yaml_str(content) or {}
 
         with (
             patch.object(Path, "glob", fake_glob),

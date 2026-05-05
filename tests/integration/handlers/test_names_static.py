@@ -25,6 +25,8 @@ import glob
 import re
 import unittest
 
+from utils.cache.yaml import load_yaml_all
+
 try:
     import yaml  # PyYAML
 except ImportError as exc:
@@ -73,8 +75,7 @@ class StaticHandlerNamesTest(unittest.TestCase):
         for handler_path in sorted(glob.glob(pattern)):
             # Load possibly multi-document YAML safely
             try:
-                with open(handler_path, "r", encoding="utf-8") as f:
-                    docs = list(yaml.safe_load_all(f))
+                docs = list(load_yaml_all(handler_path))
             except FileNotFoundError:
                 continue
             except yaml.YAMLError as e:

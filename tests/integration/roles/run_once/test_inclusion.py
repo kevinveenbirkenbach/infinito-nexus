@@ -4,6 +4,8 @@ import unittest
 import glob
 import yaml
 
+from utils.cache.yaml import load_yaml_all
+
 
 def find_role_task_yml_files(root_dir):
     """
@@ -36,11 +38,10 @@ class RunOnceInclusionTest(unittest.TestCase):
         violations = []
 
         for filepath in find_role_task_yml_files(project_root):
-            with open(filepath, "r") as f:
-                try:
-                    docs = list(yaml.safe_load_all(f))
-                except yaml.YAMLError as e:
-                    self.fail(f"Failed to parse YAML file {filepath}: {e}")
+            try:
+                docs = list(load_yaml_all(filepath))
+            except yaml.YAMLError as e:
+                self.fail(f"Failed to parse YAML file {filepath}: {e}")
 
             for doc in docs:
                 # Determine tasks list

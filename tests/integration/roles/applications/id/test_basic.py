@@ -1,9 +1,10 @@
 import unittest
-import yaml
 import os
 import glob
 
 from plugins.filter.invokable_paths import get_invokable_paths
+
+from utils.cache.yaml import load_yaml_any
 
 
 class TestSysRolesApplicationId(unittest.TestCase):
@@ -36,8 +37,7 @@ class TestSysRolesApplicationId(unittest.TestCase):
                     os.path.isfile(vars_file),
                     f"Missing vars/main.yml for invokable role {prefix}",
                 )
-                with open(vars_file) as f:
-                    content = yaml.safe_load(f) or {}
+                content = load_yaml_any(vars_file) or {}
                 self.assertIn(
                     "application_id",
                     content,
@@ -47,8 +47,7 @@ class TestSysRolesApplicationId(unittest.TestCase):
                 # if exists, must not contain id
                 if not os.path.isfile(vars_file):
                     continue
-                with open(vars_file) as f:
-                    content = yaml.safe_load(f) or {}
+                content = load_yaml_any(vars_file) or {}
                 self.assertNotIn(
                     "application_id",
                     content,

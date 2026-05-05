@@ -1,8 +1,9 @@
 import re
 import unittest
-import yaml
 from pathlib import Path
 from collections import defaultdict
+
+from utils.cache.yaml import load_yaml_any
 
 # Directory containing group_vars/all/*.yml
 GROUPVARS_DIR = Path(__file__).resolve().parents[3] / "group_vars" / "all"
@@ -19,8 +20,7 @@ def load_all_yaml():
     """
     result = {}
     for yaml_path in GROUPVARS_DIR.glob("*.yml"):
-        with open(yaml_path, encoding="utf-8") as fh:
-            data = yaml.safe_load(fh) or {}
+        data = load_yaml_any(yaml_path) or {}
         for k, v in data.items():
             base = k
             for p in ("defaults_", "default_"):

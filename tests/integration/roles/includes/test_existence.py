@@ -6,6 +6,8 @@ import re
 
 from utils.cache.files import read_text
 
+from utils.cache.yaml import load_yaml_all_str
+
 
 class TestIncludeImportExistence(unittest.TestCase):
     """
@@ -75,7 +77,7 @@ class TestIncludeImportExistence(unittest.TestCase):
             except (OSError, UnicodeDecodeError):
                 continue
             try:
-                documents = list(yaml.safe_load_all(text))
+                documents = list(load_yaml_all_str(text))
             except yaml.YAMLError:
                 self.fail(f"Failed to parse YAML in {file_path}")
             for doc in documents:

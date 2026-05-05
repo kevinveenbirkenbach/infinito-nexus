@@ -21,8 +21,10 @@ import unittest
 import re
 from collections import defaultdict
 
+from utils.cache.yaml import load_yaml_all
+
 try:
-    import yaml
+    pass
 except Exception as e:  # pragma: no cover
     raise SystemExit(
         "PyYAML is required for this test. Install with: pip install pyyaml"
@@ -74,8 +76,7 @@ class TestUppercaseConstantVarsUnique(unittest.TestCase):
         yaml_files = list(_iter_yaml_files())
         for yml in yaml_files:
             try:
-                with open(yml, "r", encoding="utf-8") as f:
-                    docs = list(yaml.safe_load_all(f))
+                docs = list(load_yaml_all(yml))
             except Exception as e:
                 parse_errors.append(f"{yml}: {e}")
                 continue

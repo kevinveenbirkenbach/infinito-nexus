@@ -6,18 +6,19 @@ import unittest
 from pathlib import Path
 from unittest.mock import patch
 
-import yaml
 from ansible.errors import AnsibleError
 
 from plugins.lookup.users import LookupModule, _reset_cache_for_tests
 from utils.cache import base as runtime_data_base
+
+from utils.cache.yaml import dump_yaml_str
 
 
 def _write_users(base_dir: Path, role_name: str, users: dict) -> None:
     """Write meta/users.yml — file root IS the users map (req-008)."""
     users_path = base_dir / "roles" / role_name / "meta" / "users.yml"
     users_path.parent.mkdir(parents=True, exist_ok=True)
-    users_path.write_text(yaml.safe_dump(users), encoding="utf-8")
+    users_path.write_text(dump_yaml_str(users), encoding="utf-8")
 
 
 class TestUsersLookup(unittest.TestCase):
@@ -247,7 +248,7 @@ class TestUsersLookup(unittest.TestCase):
         secrets_dir = self._tmp / "var" / "lib" / "infinito" / "secrets"
         secrets_dir.mkdir(parents=True, exist_ok=True)
         (secrets_dir / "tokens.yml").write_text(
-            yaml.safe_dump(
+            dump_yaml_str(
                 {
                     "users": {
                         "alice": {
@@ -275,7 +276,7 @@ class TestUsersLookup(unittest.TestCase):
         default_tokens = self._tmp / "default" / "tokens.yml"
         default_tokens.parent.mkdir(parents=True, exist_ok=True)
         default_tokens.write_text(
-            yaml.safe_dump(
+            dump_yaml_str(
                 {
                     "users": {
                         "alice": {

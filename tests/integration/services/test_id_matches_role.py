@@ -2,7 +2,8 @@
 import os
 import glob
 import unittest
-import yaml
+
+from utils.cache.yaml import load_yaml_any
 
 
 class TestSystemServiceIdMatchesRole(unittest.TestCase):
@@ -18,8 +19,7 @@ class TestSystemServiceIdMatchesRole(unittest.TestCase):
         )
 
     def _load_yaml(self, path: str):
-        with open(path, "r", encoding="utf-8") as f:
-            return yaml.safe_load(f) or {}
+        return load_yaml_any(path) or {}
 
     def test_system_service_id_equals_role_name(self):
         role_dirs = [

@@ -26,6 +26,7 @@ from typing import List
 import yaml
 
 from utils.cache.files import read_text
+from utils.cache.yaml import load_yaml_str
 from utils.annotations.message import in_github_actions, warning
 from utils.entity_name_utils import get_entity_name
 
@@ -57,7 +58,7 @@ class MissingKeyFinding:
 
 def _load_yaml(path: Path) -> dict:
     try:
-        data = yaml.safe_load(read_text(str(path)))
+        data = load_yaml_str(read_text(str(path)))
     except yaml.YAMLError:
         return {}
     return data if isinstance(data, dict) else {}

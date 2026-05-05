@@ -1,6 +1,7 @@
 import os
 import unittest
-import yaml
+
+from utils.cache.yaml import load_yaml_any
 
 
 class TestRunAfterReferences(unittest.TestCase):
@@ -30,8 +31,7 @@ class TestRunAfterReferences(unittest.TestCase):
                 # skip roles without a meta/main.yml
                 continue
 
-            with open(meta_path, "r") as f:
-                data = yaml.safe_load(f) or {}
+            data = load_yaml_any(meta_path) or {}
 
             run_after = data.get("galaxy_info", {}).get("run_after", [])
             for dep in run_after:
