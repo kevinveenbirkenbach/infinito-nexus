@@ -30,7 +30,7 @@ prometheus:
   shared: true
 application:
   image: node
-  version: 20-bookworm
+  version: 25-bookworm
   name: web-app-postmarks
   repository: https://github.com/ckolderup/postmarks.git
   branch: main
