@@ -13,5 +13,5 @@ mariadb:
   pids_limit: 1024
   ports:
     local:
-      database: 3306
+      mariadb: 3306
   lifecycle: beta

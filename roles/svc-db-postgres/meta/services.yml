@@ -13,5 +13,5 @@ postgres:
   pids_limit: 1024
   ports:
     local:
-      database: 5432
+      postgres: 5432
   lifecycle: beta

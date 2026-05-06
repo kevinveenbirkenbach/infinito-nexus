@@ -337,6 +337,60 @@ class TestPortBandMembership(unittest.TestCase):
             )
 
 
+class TestPortBandsDisjoint(unittest.TestCase):
+    """PORT_BANDS within a single scope MUST be pairwise disjoint, otherwise
+    a port could legitimately belong to two categories at once and the
+    suggester / band-membership lint would silently route it to the
+    wrong category. Cross-scope overlaps (e.g. local.http=8001-8099 and
+    public.https=...) are intentional and not checked here."""
+
+    def test_no_overlapping_bands_in_same_scope(self):
+        from utils.meta.port_bands import load_port_bands
+
+        offenders: list[str] = []
+        for scope, scope_block in (load_port_bands() or {}).items():
+            if not isinstance(scope_block, dict):
+                continue
+            ranges: list[tuple[str, int, int]] = []
+            for category, entry in scope_block.items():
+                if not isinstance(entry, dict):
+                    continue
+                start = entry.get("start")
+                end = entry.get("end")
+                if not isinstance(start, int) or not isinstance(end, int):
+                    continue
+                if start > end:
+                    offenders.append(
+                        f"PORT_BANDS.{scope}.{category}: start ({start}) > end ({end})"
+                    )
+                    continue
+                ranges.append((category, start, end))
+
+            ranges.sort(key=lambda r: (r[1], r[2]))
+            for i in range(len(ranges)):
+                cat_a, start_a, end_a = ranges[i]
+                for j in range(i + 1, len(ranges)):
+                    cat_b, start_b, end_b = ranges[j]
+                    if start_b > end_a:
+                        break
+                    overlap_start = max(start_a, start_b)
+                    overlap_end = min(end_a, end_b)
+                    offenders.append(
+                        f"PORT_BANDS.{scope}.{cat_a}={start_a}-{end_a} overlaps "
+                        f"PORT_BANDS.{scope}.{cat_b}={start_b}-{end_b} on "
+                        f"{overlap_start}-{overlap_end}"
+                    )
+
+        if offenders:
+            self.fail(
+                "PORT_BANDS overlap detected (req-009):\n"
+                + "\n".join(f"  - {o}" for o in offenders)
+                + "\n\nFix: shrink one of the overlapping ranges in "
+                + "group_vars/all/08_networks.yml so each port belongs to "
+                + "at most one (scope, category) pair."
+            )
+
+
 class TestNoComposeWrapperInVariants(unittest.TestCase):
     """Per req-008 the file root of meta/services.yml IS the services map.
     Variant overrides in meta/variants.yml MUST follow the same shape: top

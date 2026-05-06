@@ -54,8 +54,11 @@ PORT_BANDS:
     oauth2:
       start: 16480
       end: 16519
-    database:
+    mariadb:
       start: 3306
+      end: 3306
+    postgres:
+      start: 5432
       end: 5432
     ldap:
       start: 389
