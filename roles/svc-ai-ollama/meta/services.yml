@@ -1,6 +1,6 @@
 ollama:
-  enabled: false
-  shared: true
+  enabled: "{{ 'svc-ai-ollama' in group_names }}"
+  shared: "{{ 'svc-ai-ollama' in group_names }}"
   backup:
     no_stop_required: true
   image: ollama/ollama

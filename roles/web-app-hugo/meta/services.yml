@@ -1,18 +1,17 @@
+# nocheck: dynamic-flag
 logout:
   enabled: false
   shared: false
 dashboard:
-  enabled: true
-  shared: true
+  enabled: "{{ 'web-app-dashboard' in group_names }}"
+  shared: "{{ 'web-app-dashboard' in group_names }}"
 matomo:
-  enabled: true
-  shared: true
+  enabled: "{{ 'web-app-matomo' in group_names }}"
+  shared: "{{ 'web-app-matomo' in group_names }}"
+# nocheck: dynamic-flag
 css:
   enabled: true
   shared: true
-javascript:
-  enabled: false
-  shared: false
 hugo:
   image: nginx
   version: 1.30.0-alpine
@@ -26,10 +25,6 @@ hugo:
     local:
       http: 8008
   lifecycle: alpha
-# noqa: email
-email:
-  enabled: false
-  shared: false
 prometheus:
-  enabled: true
-  shared: true
+  enabled: "{{ 'web-app-prometheus' in group_names }}"
+  shared: "{{ 'web-app-prometheus' in group_names }}"

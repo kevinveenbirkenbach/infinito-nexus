@@ -1,19 +1,21 @@
 oidc:
-  enabled: true
-  shared: true
+  enabled: "{{ 'web-app-keycloak' in group_names }}"
+  shared: "{{ 'web-app-keycloak' in group_names }}"
 logout:
-  enabled: true
-  shared: true
+  enabled: "{{ 'web-svc-logout' in group_names }}"
+  shared: "{{ 'web-svc-logout' in group_names }}"
+# nocheck: dynamic-flag
 ldap:
   enabled: false
+# nocheck: dynamic-flag
 dashboard:
   enabled: false
 matomo:
-  enabled: true
-  shared: true
+  enabled: "{{ 'web-app-matomo' in group_names }}"
+  shared: "{{ 'web-app-matomo' in group_names }}"
 email:
-  enabled: true
-  shared: true
+  enabled: "{{ 'web-app-mailu' in group_names }}"
+  shared: "{{ 'web-app-mailu' in group_names }}"
 bigbluebutton:
   repository: https://github.com/bigbluebutton/docker.git
   version: main
@@ -35,21 +37,24 @@ bigbluebutton:
   run_after:
   - web-app-keycloak
   lifecycle: beta
+# nocheck: dynamic-flag
 postgres:
   shared: false
   enabled: true
+# nocheck: dynamic-flag
 greenlight:
   enabled: true
   shared: false
 coturn:
-  shared: true
-  enabled: true
+  shared: "{{ 'web-svc-coturn' in group_names }}"
+  enabled: "{{ 'web-svc-coturn' in group_names }}"
 collabora:
-  shared: true
-  enabled: true
+  shared: "{{ 'web-svc-collabora' in group_names }}"
+  enabled: "{{ 'web-svc-collabora' in group_names }}"
+# nocheck: dynamic-flag
 css:
   enabled: true
   shared: true
 prometheus:
-  enabled: true
-  shared: true
+  enabled: "{{ 'web-app-prometheus' in group_names }}"
+  shared: "{{ 'web-app-prometheus' in group_names }}"

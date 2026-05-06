@@ -1,36 +1,18 @@
 logout:
-  enabled: true
-  shared: true
+  enabled: "{{ 'web-svc-logout' in group_names }}"
+  shared: "{{ 'web-svc-logout' in group_names }}"
 dashboard:
-  enabled: true
-  shared: true
+  enabled: "{{ 'web-app-dashboard' in group_names }}"
+  shared: "{{ 'web-app-dashboard' in group_names }}"
 matomo:
-  enabled: true
-  shared: true
+  enabled: "{{ 'web-app-matomo' in group_names }}"
+  shared: "{{ 'web-app-matomo' in group_names }}"
 email:
-  enabled: true
-  shared: true
-# noqa: shared
-oidc:
-  # The login-broker authenticates Keycloak users via the
-  # `web-app-oauth2-proxy` sidecar (X-Forwarded-User header),
-  # so the Bluesky role does NOT need a per-app native-OIDC client.
-  # The broker's OWN service-account client for the Keycloak Admin API
-  # is provisioned separately by `tasks/05_keycloak_admin_client.yml`
-  # and is independent of `services.oidc.enabled`.
-  enabled: false
-  shared: false
-ldap:
-  # PDS DID-based auth has no LDAP path; the LDAP variant for this
-  # role rides on the same broker — Keycloak federates LDAP and the
-  # broker reads the resulting Keycloak user attribute. The
-  # ldap.enabled flag here only affects the role's `services.<ldap>`
-  # toggles and is set per matrix variant.
-  enabled: false
-  shared: false
+  enabled: "{{ 'web-app-mailu' in group_names }}"
+  shared: "{{ 'web-app-mailu' in group_names }}"
 oauth2:
-  enabled: true
-  shared: true
+  enabled: "{{ 'web-app-keycloak' in group_names }}"
+  shared: "{{ 'web-app-keycloak' in group_names }}"
   origin:
     host: bluesky-broker
     port: 8080
@@ -51,12 +33,14 @@ oauth2:
   allowed_groups:
   - '{{ lookup(''rbac_group_path'', application_id=''web-app-bluesky'', role=''administrator'') }}'
 # noqa: shared
+# nocheck: dynamic-flag
 web:
   enabled: true
   ports:
     local:
       http: 8031
       oauth2: 16496
+# nocheck: dynamic-flag
 view:
   enabled: false
   ports:
@@ -75,12 +59,13 @@ broker:
   ports:
     local:
       http: 8076
+# nocheck: dynamic-flag
 css:
   enabled: true
   shared: true
 prometheus:
-  enabled: true
-  shared: true
+  enabled: "{{ 'web-app-prometheus' in group_names }}"
+  shared: "{{ 'web-app-prometheus' in group_names }}"
 api:
   ports:
     local:

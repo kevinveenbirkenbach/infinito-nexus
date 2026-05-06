@@ -1,6 +1,6 @@
 mariadb:
-  enabled: false
-  shared: true
+  enabled: "{{ 'svc-db-mariadb' in group_names }}"
+  shared: "{{ 'svc-db-mariadb' in group_names }}"
   version: latest
   image: mariadb
   name: mariadb

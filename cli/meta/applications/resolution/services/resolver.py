@@ -8,6 +8,7 @@ from utils.cache.yaml import load_yaml
 from .errors import ServicesResolutionError
 from utils.service_registry import (
     build_service_registry_from_roles_dir,
+    is_explicit_truth,
     resolve_service_dependency_roles_from_config,
 )
 
@@ -30,7 +31,9 @@ def _as_mapping(obj: object) -> dict:
 
 def _is_enabled_shared(svc: object) -> bool:
     svc = _as_mapping(svc)
-    return svc.get("enabled") is True and svc.get("shared") is True
+    return is_explicit_truth(svc.get("enabled")) and is_explicit_truth(
+        svc.get("shared")
+    )
 
 
 def _load_service_registry(roles_root: Path = _ROLES_ROOT) -> Dict[str, Any]:

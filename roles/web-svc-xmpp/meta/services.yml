@@ -1,15 +1,17 @@
+# nocheck: dynamic-flag
 logout:
   enabled: false
   shared: false
 prometheus:
-  enabled: true
-  shared: true
+  enabled: "{{ 'web-app-prometheus' in group_names }}"
+  shared: "{{ 'web-app-prometheus' in group_names }}"
+# nocheck: dynamic-flag
 oidc:
   enabled: false
   shared: false
 ldap:
-  enabled: true
-  shared: true
+  enabled: true  # nocheck: dynamic-flag
+  shared: "{{ 'svc-db-openldap' in group_names }}"
 xmpp:
   image: ejabberd/ecs
   version: latest

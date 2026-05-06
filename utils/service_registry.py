@@ -24,6 +24,27 @@ def _normalized_name(value: Any) -> str:
     return value.strip()
 
 
+def is_explicit_truth(value: Any) -> bool:
+    """A services.<key> flag (``enabled`` / ``shared``) is "true" if it
+    is the literal Python ``True`` OR a Jinja string of the form
+    ``"{{ '<role>' in group_names }}"`` — the dynamic form enforced by
+    ``tests/integration/roles/meta/test_services_dynamic_flags.py``.
+
+    Static-analysis callers (``ServicesResolver``,
+    ``resolve_service_dependency_roles_from_config``, lint tests) MUST
+    use this helper instead of comparing against ``True`` directly so
+    that the dynamic-flag form keeps resolving deps at tooling time.
+    The runtime path goes through ansible templating before reaching
+    these checks, where the Jinja has already been rendered to a real
+    boolean, so accepting the unrendered form is purely additive.
+    """
+    if value is True:
+        return True
+    if isinstance(value, str) and "in group_names" in value:
+        return True
+    return False
+
+
 def detect_service_channel(role_name: str) -> str:
     return "frontend" if role_name.startswith(("web-app-", "web-svc-")) else "backend"
 
@@ -115,6 +136,13 @@ def discover_role_services(
         return {}
 
     primary_id = provides or entity_name
+    raw_covers = primary_entry.get("covers")
+    covers: List[str] = (
+        [_normalized_name(item) for item in raw_covers if isinstance(item, str)]
+        if isinstance(raw_covers, list)
+        else []
+    )
+    covers = [c for c in covers if c]
     base_entry = {
         "role": role_name,
         "entity_name": entity_name,
@@ -124,6 +152,7 @@ def discover_role_services(
         "service_type": detect_service_channel(role_name),
         "shared": bool(primary_entry.get("shared", False)),
         "enabled": bool(primary_entry.get("enabled", False)),
+        "covers": covers,
     }
     if provides:
         base_entry["provides"] = provides
@@ -179,6 +208,54 @@ def build_role_to_primary_service_key(
     return result
 
 
+def build_role_to_covered_keys(
+    service_registry: Dict[str, Dict[str, Any]],
+) -> Dict[str, List[str]]:
+    """For each role, return ``[primary_key, *covers]`` — the set of
+    service keys whose presence in a consumer's ``services`` map counts
+    as an explicit declaration of a dep on that role. ``covers`` comes
+    from the primary entity's ``covers:`` list (e.g. ``web-app-keycloak``
+    covers ``oauth2`` because the per-app oauth2-proxy only makes sense
+    when the IdP is on the host)."""
+    result: Dict[str, List[str]] = {}
+    for service_key, entry in service_registry.items():
+        if "canonical" in entry:
+            continue
+        role_name = _normalized_name(entry.get("role"))
+        if not role_name:
+            continue
+        keys = [service_key]
+        for covered in entry.get("covers", []) or []:
+            covered_name = _normalized_name(covered)
+            if covered_name and covered_name not in keys:
+                keys.append(covered_name)
+        result[role_name] = keys
+    return result
+
+
+def build_covered_key_to_role(
+    service_registry: Dict[str, Dict[str, Any]],
+) -> Dict[str, str]:
+    """Inverse of :func:`build_role_to_covered_keys`: for each covered
+    service key (NOT including the primary), the role that covers it.
+    Use :func:`build_role_to_primary_service_key` for the primary
+    direction; this helper is intentionally limited to the
+    ``covers:`` extension so callers can distinguish "this role IS the
+    provider" from "this role covers this dep transitively"."""
+    result: Dict[str, str] = {}
+    for entry in service_registry.values():
+        if "canonical" in entry:
+            continue
+        role_name = _normalized_name(entry.get("role"))
+        if not role_name:
+            continue
+        for covered in entry.get("covers", []) or []:
+            covered_name = _normalized_name(covered)
+            if covered_name and covered_name not in result:
+                result[covered_name] = role_name
+    return result
+
+
 def canonical_service_key(
     service_registry: Dict[str, Dict[str, Any]],
     service_key: str,
@@ -209,7 +286,8 @@ def resolve_service_dependency_roles_from_config(
     for service_key, service_conf in services.items():
         service_conf = _as_mapping(service_conf)
         if not (
-            service_conf.get("enabled") is True and service_conf.get("shared") is True
+            is_explicit_truth(service_conf.get("enabled"))
+            and is_explicit_truth(service_conf.get("shared"))
         ):
             continue
 

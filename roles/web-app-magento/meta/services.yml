@@ -1,18 +1,15 @@
-oidc:
-  enabled: false
-  shared: false
 logout:
-  enabled: true
-  shared: true
+  enabled: "{{ 'web-svc-logout' in group_names }}"
+  shared: "{{ 'web-svc-logout' in group_names }}"
 dashboard:
-  enabled: true
-  shared: true
+  enabled: "{{ 'web-app-dashboard' in group_names }}"
+  shared: "{{ 'web-app-dashboard' in group_names }}"
 matomo:
-  enabled: true
-  shared: true
+  enabled: "{{ 'web-app-matomo' in group_names }}"
+  shared: "{{ 'web-app-matomo' in group_names }}"
 email:
-  enabled: true
-  shared: true
+  enabled: "{{ 'web-app-mailu' in group_names }}"
+  shared: "{{ 'web-app-mailu' in group_names }}"
 php:
   image: markoshust/magento-php
   version: 8.4-fpm
@@ -25,27 +22,31 @@ nginx:
   name: magento-nginx
   backup:
     no_stop_required: true
+# nocheck: dynamic-flag
 mariadb:
   shared: false
   enabled: true
   version: '11.4'
 # noqa: shared
+# nocheck: dynamic-flag
 redis:
   backup:
     disabled: true
   enabled: true
 # noqa: shared
+# nocheck: dynamic-flag
 search:
   enabled: true
   image: opensearchproject/opensearch
   version: latest
   name: magento-opensearch
+# nocheck: dynamic-flag
 css:
   enabled: true
   shared: true
 prometheus:
-  enabled: true
-  shared: true
+  enabled: "{{ 'web-app-prometheus' in group_names }}"
+  shared: "{{ 'web-app-prometheus' in group_names }}"
 magento:
   ports:
     local:

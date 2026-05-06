@@ -72,6 +72,7 @@ labels:
 | `run-once-suffix`   | same line           | [test_schema.py](../../../../tests/integration/roles/run_once/test_schema.py)                                                | Allows a single `when:` item to reference a `run_once_<other>` flag whose suffix differs from the current role.   |
 | `raw-docker`        | same or above; head (first 30 lines) | [test_no_raw_docker.py](../../../../tests/integration/docker/test_no_raw_docker.py)                       | Marks a single line or a whole file under `roles/` as legitimately calling `docker` / `docker compose` / `docker-compose` directly. The check is scoped to `roles/`; bootstrap scripts and CI workflows outside `roles/` are not scanned and need no marker. |
 | `hardcoded-dns-resolver` | same or above | [test_no_hardcoded_dns_resolvers.py](../../../../tests/lint/repository/test_no_hardcoded_dns_resolvers.py) | Marks a line that legitimately needs a literal IP from `NETWORK_PUBLIC_DNS_RESOLVERS` at the substitution point (CoreDNS `forward` directives that don't run through Jinja, host-bootstrap shell scripts, documentation examples). The variable in `group_vars/all/08_networks.yml` is the SPOT for these IPs everywhere else.   |
+| `dynamic-flag`      | same line (per-flag) OR comment block above key (whole block) | [test_services_dynamic_flags.py](../../../../tests/integration/roles/meta/test_services_dynamic_flags.py)                  | Marks a `roles/*/meta/services.yml` flag whose value legitimately stays literal. Per-flag (same line) is the typical shape for databases (`enabled: true` literal, `shared` still dynamic). Block-level (comment block above the service key) is for entries where both flags stay literal (e.g. `css`). |
 
 ## Examples 💡
 
@@ -157,6 +158,29 @@ that legitimately drives the engine directly:
 #!/usr/bin/env bash
 # nocheck: raw-docker. Runs from sys-svc-container's installer before the wrapper symlink lands.
 docker buildx build ...
+```
+
+`dynamic-flag`, two placements depending on scope:
+
+Per-flag (same line) — for databases where `enabled: true` reflects a
+static fact about the role's needs but `shared` still resolves
+dynamically:
+
+```yaml
+mariadb:
+  enabled: true  # nocheck: dynamic-flag
+  shared: "{{ 'svc-db-mariadb' in group_names }}"
+```
+
+Block-level (comment block above the service key) — for service
+entries whose both flags legitimately stay literal (e.g. `css`,
+`javascript`):
+
+```yaml
+# nocheck: dynamic-flag
+css:
+  enabled: true
+  shared: true
 ```
 
 `hardcoded-dns-resolver`, on the line that emits the literal IP, when

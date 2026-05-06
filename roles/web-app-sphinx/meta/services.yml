@@ -1,12 +1,13 @@
+# nocheck: dynamic-flag
 logout:
   enabled: false
   shared: false
 dashboard:
-  enabled: true
-  shared: true
+  enabled: "{{ 'web-app-dashboard' in group_names }}"
+  shared: "{{ 'web-app-dashboard' in group_names }}"
 matomo:
-  enabled: true
-  shared: true
+  enabled: "{{ 'web-app-matomo' in group_names }}"
+  shared: "{{ 'web-app-matomo' in group_names }}"
 sphinx:
   image: ghcr.io/kevinveenbirkenbach/infinito-sphinx
   version: latest
@@ -21,13 +22,15 @@ sphinx:
   run_after:
   - web-app-matomo
   lifecycle: beta
+# nocheck: dynamic-flag
 css:
   enabled: true
   shared: true
 # noqa: email
+# nocheck: dynamic-flag
 email:
   enabled: false
   shared: false
 prometheus:
-  enabled: true
-  shared: true
+  enabled: "{{ 'web-app-prometheus' in group_names }}"
+  shared: "{{ 'web-app-prometheus' in group_names }}"

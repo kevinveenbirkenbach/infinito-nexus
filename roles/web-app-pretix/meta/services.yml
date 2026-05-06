@@ -1,26 +1,27 @@
 oidc:
-  enabled: true
-  shared: true
+  enabled: "{{ 'web-app-keycloak' in group_names }}"
+  shared: "{{ 'web-app-keycloak' in group_names }}"
 logout:
-  enabled: true
-  shared: true
+  enabled: "{{ 'web-svc-logout' in group_names }}"
+  shared: "{{ 'web-svc-logout' in group_names }}"
 dashboard:
-  enabled: true
-  shared: true
+  enabled: "{{ 'web-app-dashboard' in group_names }}"
+  shared: "{{ 'web-app-dashboard' in group_names }}"
 matomo:
-  enabled: true
-  shared: true
+  enabled: "{{ 'web-app-matomo' in group_names }}"
+  shared: "{{ 'web-app-matomo' in group_names }}"
 email:
-  enabled: true
-  shared: true
+  enabled: "{{ 'web-app-mailu' in group_names }}"
+  shared: "{{ 'web-app-mailu' in group_names }}"
 # noqa: shared
+# nocheck: dynamic-flag
 redis:
   backup:
     disabled: true
   enabled: true
 postgres:
-  enabled: true
-  shared: true
+  enabled: true  # nocheck: dynamic-flag
+  shared: "{{ 'svc-db-postgres' in group_names }}"
 pretix:
   image: pretix/standalone
   version: stable
@@ -43,9 +44,10 @@ pretix:
   - web-app-keycloak
   - web-app-mailu
   lifecycle: beta
+# nocheck: dynamic-flag
 css:
   enabled: true
   shared: true
 prometheus:
-  enabled: true
-  shared: true
+  enabled: "{{ 'web-app-prometheus' in group_names }}"
+  shared: "{{ 'web-app-prometheus' in group_names }}"

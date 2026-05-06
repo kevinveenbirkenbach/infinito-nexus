@@ -1,11 +1,13 @@
 logout:
-  enabled: true
-  shared: true
+  enabled: "{{ 'web-svc-logout' in group_names }}"
+  shared: "{{ 'web-svc-logout' in group_names }}"
+# nocheck: dynamic-flag
 dashboard:
   enabled: false
 matomo:
-  enabled: true
-  shared: true
+  enabled: "{{ 'web-app-matomo' in group_names }}"
+  shared: "{{ 'web-app-matomo' in group_names }}"
+# nocheck: dynamic-flag
 css:
   enabled: true
   shared: true
@@ -17,10 +19,6 @@ oauth2-proxy:
   ports:
     inter: 4180
   lifecycle: pre-alpha
-# noqa: email
-email:
-  enabled: false
-  shared: false
 prometheus:
-  enabled: true
-  shared: true
+  enabled: "{{ 'web-app-prometheus' in group_names }}"
+  shared: "{{ 'web-app-prometheus' in group_names }}"

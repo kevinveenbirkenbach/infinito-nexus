@@ -6,6 +6,7 @@ from utils.annotations.message import warning
 from utils.annotations.suppress import is_suppressed_at
 from utils.cache.files import read_text
 from utils.cache.yaml import load_yaml_any, load_yaml_str
+from utils.service_registry import is_explicit_truth
 
 
 _ROLE_PREFIX = "web-app-"
@@ -139,9 +140,9 @@ class TestWebAppRolesIntegrateEmail(unittest.TestCase):
             if _role_uses_email_lookup(role_path):
                 svc = _email_service_conf(config)
                 missing: list[str] = []
-                if svc.get("enabled") is not True:
+                if not is_explicit_truth(svc.get("enabled")):
                     missing.append("enabled: true")
-                if svc.get("shared") is not True:
+                if not is_explicit_truth(svc.get("shared")):
                     missing.append("shared: true")
                 if missing:
                     rel = (

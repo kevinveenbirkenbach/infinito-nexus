@@ -1,6 +1,6 @@
 logout:
-  enabled: false
-  shared: true
+  enabled: "{{ 'web-svc-logout' in group_names }}"
+  shared: "{{ 'web-svc-logout' in group_names }}"
   image: ghcr.io/kevinveenbirkenbach/universal-logout
   version: latest
   name: logout
@@ -14,17 +14,19 @@ logout:
       http: 8048
   lifecycle: beta
 dashboard:
-  enabled: true
-  shared: true
+  enabled: "{{ 'web-app-dashboard' in group_names }}"
+  shared: "{{ 'web-app-dashboard' in group_names }}"
 matomo:
-  enabled: true
-  shared: true
+  enabled: "{{ 'web-app-matomo' in group_names }}"
+  shared: "{{ 'web-app-matomo' in group_names }}"
+# nocheck: dynamic-flag
 css:
   enabled: true
   shared: true
+# nocheck: dynamic-flag
 javascript:
   enabled: false
   shared: true
 prometheus:
-  enabled: true
-  shared: true
+  enabled: "{{ 'web-app-prometheus' in group_names }}"
+  shared: "{{ 'web-app-prometheus' in group_names }}"

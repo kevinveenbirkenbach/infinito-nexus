@@ -1,18 +1,15 @@
 oidc:
-  enabled: true
-  shared: true
-ldap:
-  enabled: false
-  shared: false
+  enabled: "{{ 'web-app-keycloak' in group_names }}"
+  shared: "{{ 'web-app-keycloak' in group_names }}"
 logout:
-  enabled: true
-  shared: true
+  enabled: "{{ 'web-svc-logout' in group_names }}"
+  shared: "{{ 'web-svc-logout' in group_names }}"
 dashboard:
-  enabled: true
-  shared: true
+  enabled: "{{ 'web-app-dashboard' in group_names }}"
+  shared: "{{ 'web-app-dashboard' in group_names }}"
 matomo:
-  enabled: true
-  shared: true
+  enabled: "{{ 'web-app-matomo' in group_names }}"
+  shared: "{{ 'web-app-matomo' in group_names }}"
 minio:
   backup:
     no_stop_required: false
@@ -28,22 +25,25 @@ minio:
   - web-app-keycloak
   - web-app-matomo
   lifecycle: beta
+# nocheck: dynamic-flag
 redis:
   backup:
     disabled: true
   enabled: false
+# nocheck: dynamic-flag
 css:
   enabled: true
   shared: true
+# nocheck: dynamic-flag
 javascript:
   enabled: false
   shared: true
 ollama:
-  enabled: true
-  shared: true
+  enabled: "{{ 'svc-ai-ollama' in group_names }}"
+  shared: "{{ 'svc-ai-ollama' in group_names }}"
 prometheus:
-  enabled: true
-  shared: true
+  enabled: "{{ 'web-app-prometheus' in group_names }}"
+  shared: "{{ 'web-app-prometheus' in group_names }}"
 api:
   ports:
     local:

@@ -3,6 +3,8 @@ import unittest
 import yaml
 from pathlib import Path
 
+from utils.service_registry import is_explicit_truth
+
 
 PROMETHEUS_APP_ID = "web-app-prometheus"
 
@@ -66,15 +68,17 @@ class TestPrometheusServicePresence(unittest.TestCase):
                 )
                 continue
 
-            if prom.get("enabled") is not True:
+            if not is_explicit_truth(prom.get("enabled")):
                 errors.append(
-                    f"{role_name}: services.prometheus.enabled must be true, "
+                    f"{role_name}: services.prometheus.enabled must be true "
+                    f"(literal or `\"{{{{ '<role>' in group_names }}}}\"`), "
                     f"got {prom.get('enabled')!r}"
                 )
 
-            if prom.get("shared") is not True:
+            if not is_explicit_truth(prom.get("shared")):
                 errors.append(
-                    f"{role_name}: services.prometheus.shared must be true, "
+                    f"{role_name}: services.prometheus.shared must be true "
+                    f"(literal or `\"{{{{ '<role>' in group_names }}}}\"`), "
                     f"got {prom.get('shared')!r}"
                 )
 

@@ -1,13 +1,17 @@
+# nocheck: dynamic-flag
 oauth2:
   enabled: false
+  # TODO Enable oauth2 for matomo
+# nocheck: dynamic-flag
 logout:
-  enabled: false
-  shared: false
+  enabled: "{{ 'web-svc-logout' in group_names }}"
+  shared:  "{{ 'web-svc-logout' in group_names }}"
+# nocheck: dynamic-flag
 dashboard:
   enabled: false
 matomo:
-  enabled: false
-  shared: true
+  enabled: "{{ 'web-app-matomo' in group_names }}"
+  shared: "{{ 'web-app-matomo' in group_names }}"
   image: matomo
   version: latest
   name: matomo
@@ -38,15 +42,17 @@ bootstrap:
   mem_limit: 1g
   pids_limit: 512
 mariadb:
-  enabled: true
-  shared: true
+  enabled: true  # nocheck: dynamic-flag
+  shared: "{{ 'svc-db-mariadb' in group_names }}"
+# nocheck: dynamic-flag
 redis:
   backup:
     disabled: true
   enabled: false
+# nocheck: dynamic-flag
 css:
   enabled: false
   shared: true
 prometheus:
-  enabled: true
-  shared: true
+  enabled: "{{ 'web-app-prometheus' in group_names }}"
+  shared: "{{ 'web-app-prometheus' in group_names }}"

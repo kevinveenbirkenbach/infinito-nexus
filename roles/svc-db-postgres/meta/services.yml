@@ -1,6 +1,6 @@
 postgres:
-  enabled: false
-  shared: true
+  enabled: "{{ 'svc-db-postgres' in group_names }}"
+  shared: "{{ 'svc-db-postgres' in group_names }}"
   image: postgis/postgis
   name: postgres
   version: 17-3.5

@@ -1,24 +1,27 @@
+# nocheck: dynamic-flag
 dashboard:
   enabled: false
 cdn:
-  enabled: false
-  shared: true
+  enabled: "{{ 'web-svc-cdn' in group_names }}"
+  shared: "{{ 'web-svc-cdn' in group_names }}"
   cpus: '0.2'
   mem_reservation: 128m
   mem_limit: 256m
   pids_limit: 128
   lifecycle: beta
 matomo:
-  enabled: true
-  shared: true
+  enabled: "{{ 'web-app-matomo' in group_names }}"
+  shared: "{{ 'web-app-matomo' in group_names }}"
+# nocheck: dynamic-flag
 css:
   enabled: false
   shared: true
   canonical: cdn
+# nocheck: dynamic-flag
 javascript:
   enabled: false
   shared: true
   canonical: cdn
 prometheus:
-  enabled: true
-  shared: true
+  enabled: "{{ 'web-app-prometheus' in group_names }}"
+  shared: "{{ 'web-app-prometheus' in group_names }}"

@@ -32,9 +32,11 @@ class TestUniversalLogoutSetting(unittest.TestCase):
                 )
             else:
                 val = logout["enabled"]
-                if not isinstance(val, bool):
+                is_dynamic = isinstance(val, str) and "in group_names" in val
+                if not isinstance(val, bool) and not is_dynamic:
                     errors.append(
-                        f"The 'services.logout.enabled' setting in '{file_path}' must be boolean true or false, "
+                        f"The 'services.logout.enabled' setting in '{file_path}' must be boolean true/false "
+                        f"or a Jinja `\"{{{{ '<role>' in group_names }}}}\"` expression, "
                         f"but found: {val} (type {type(val).__name__})"
                     )
 

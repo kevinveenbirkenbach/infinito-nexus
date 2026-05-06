@@ -1,31 +1,26 @@
-oidc:
-  enabled: false
-  shared: false
+# nocheck: dynamic-flag
 logout:
   enabled: false
   shared: false
 dashboard:
-  enabled: true
-  shared: true
+  enabled: "{{ 'web-app-dashboard' in group_names }}"
+  shared: "{{ 'web-app-dashboard' in group_names }}"
 matomo:
-  enabled: true
-  shared: true
+  enabled: "{{ 'web-app-matomo' in group_names }}"
+  shared: "{{ 'web-app-matomo' in group_names }}"
 application:
   image: python
   version: 3.14-bookworm
   name: web-app-bridgy-fed
   repository: https://github.com/snarfed/bridgy-fed.git
   branch: main
+# nocheck: dynamic-flag
 css:
   enabled: true
   shared: true
-# noqa: email
-email:
-  enabled: false
-  shared: false
 prometheus:
-  enabled: true
-  shared: true
+  enabled: "{{ 'web-app-prometheus' in group_names }}"
+  shared: "{{ 'web-app-prometheus' in group_names }}"
 bridgy-fed:
   ports:
     local:

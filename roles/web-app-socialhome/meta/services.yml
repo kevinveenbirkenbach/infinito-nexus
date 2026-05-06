@@ -1,7 +1,8 @@
 socialhome:
   lifecycle: pre-alpha
 prometheus:
-  enabled: true
-  shared: true
+  enabled: "{{ 'web-app-prometheus' in group_names }}"
+  shared: "{{ 'web-app-prometheus' in group_names }}"
+# nocheck: dynamic-flag
 logout:
   enabled: false

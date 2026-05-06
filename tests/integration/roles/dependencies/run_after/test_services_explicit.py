@@ -12,8 +12,11 @@ entry covers.
 Accepted shapes per ``run_after`` entry ``Y``:
 
 1. The consuming role declares ``services.<key>`` where ``<key>`` is
-   the primary service key for ``Y`` in the project-wide service
-   registry, with ``enabled: true`` AND ``shared: true``.
+   either the primary service key for ``Y`` in the project-wide
+   service registry, OR a key listed in ``Y``'s primary entity
+   ``covers:`` block (e.g. ``web-app-keycloak`` covers ``oauth2`` so
+   ``services.oauth2`` satisfies ``run_after: [web-app-keycloak]``).
+   The flag MUST be ``enabled: true`` AND ``shared: true``.
 2. Or the same entry, with ``enabled`` / ``shared`` set to a Jinja
    conditional containing ``in group_names`` (e.g.
    ``"{{ 'web-app-foo' in group_names }}"``). The Jinja form lets a
@@ -31,26 +34,14 @@ import yaml
 
 from utils.roles.meta_lookup import get_role_run_after
 from utils.service_registry import (
-    build_role_to_primary_service_key,
+    build_role_to_covered_keys,
     build_service_registry_from_roles_dir,
+    is_explicit_truth,
 )
 
 
 PROJECT_ROOT = Path(__file__).resolve().parents[5]
 ROLES_DIR = PROJECT_ROOT / "roles"
-
-
-# Service keys that transitively guarantee a run_after dep is co-deployed.
-# When the consumer lists ``dep`` in ``run_after``, either the registry's
-# primary service key for ``dep`` OR any of these equivalents counts as
-# an explicit declaration.
-#
-# Example: ``run_after: [web-app-keycloak]`` is satisfied by
-# ``services.oidc.enabled=true`` (direct) OR ``services.oauth2.enabled=true``
-# (oauth2-proxy itself depends on Keycloak).
-_TRANSITIVE_SERVICE_EQUIVALENTS: dict[str, set[str]] = {
-    "web-app-keycloak": {"oidc", "oauth2"},
-}
 
 
 def _load_services(role_dir: Path) -> dict:
@@ -64,20 +55,14 @@ def _load_services(role_dir: Path) -> dict:
     return data if isinstance(data, dict) else {}
 
 
-def _flag_is_explicit_truth(value) -> bool:
-    """Return True if a services flag (enabled/shared) is either the literal
-    boolean ``True`` or a Jinja string containing ``in group_names``."""
-    if value is True:
-        return True
-    if isinstance(value, str) and "in group_names" in value:
-        return True
-    return False
-
-
 class TestRunAfterServicesExplicit(unittest.TestCase):
     def test_run_after_entries_have_matching_service_flag(self):
         registry = build_service_registry_from_roles_dir(ROLES_DIR)
-        role_to_key = build_role_to_primary_service_key(registry)
+        # role -> [primary_key, *covers]. Each role's primary service
+        # key plus its declared ``covers:`` (e.g. ``web-app-keycloak``
+        # covers ``oauth2`` so a consumer's ``services.oauth2`` block
+        # also satisfies ``run_after: [web-app-keycloak]``).
+        role_to_candidate_keys = build_role_to_covered_keys(registry)
 
         offenders: list[str] = []
         for role_dir in sorted(p for p in ROLES_DIR.iterdir() if p.is_dir()):
@@ -92,15 +77,7 @@ class TestRunAfterServicesExplicit(unittest.TestCase):
             services = _load_services(role_dir)
 
             for dep in run_after:
-                primary_key = role_to_key.get(dep)
-                seen: set[str] = set()
-                candidate_keys: list[str] = []
-                for key in ([primary_key] if primary_key else []) + sorted(
-                    _TRANSITIVE_SERVICE_EQUIVALENTS.get(dep, set())
-                ):
-                    if key and key not in seen:
-                        seen.add(key)
-                        candidate_keys.append(key)
+                candidate_keys = list(role_to_candidate_keys.get(dep, []))
 
                 if not candidate_keys:
                     offenders.append(
@@ -119,9 +96,9 @@ class TestRunAfterServicesExplicit(unittest.TestCase):
                     if not isinstance(entry, dict):
                         near_misses.append(f"services.{key}: missing")
                         continue
-                    if _flag_is_explicit_truth(
-                        entry.get("enabled")
-                    ) and _flag_is_explicit_truth(entry.get("shared")):
+                    if is_explicit_truth(entry.get("enabled")) and is_explicit_truth(
+                        entry.get("shared")
+                    ):
                         matched = True
                         break
                     near_misses.append(

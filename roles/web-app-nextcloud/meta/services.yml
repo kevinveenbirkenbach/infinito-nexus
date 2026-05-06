@@ -1,26 +1,27 @@
 oidc:
-  enabled: true
-  shared: true
+  enabled: "{{ 'web-app-keycloak' in group_names }}"
+  shared: "{{ 'web-app-keycloak' in group_names }}"
   flavor: ''
 coturn:
-  enabled: true
-  shared: true
+  enabled: "{{ 'web-svc-coturn' in group_names }}"
+  shared: "{{ 'web-svc-coturn' in group_names }}"
 logout:
-  enabled: true
-  shared: true
+  enabled: "{{ 'web-svc-logout' in group_names }}"
+  shared: "{{ 'web-svc-logout' in group_names }}"
 ldap:
-  enabled: true
-  shared: true
+  enabled: true  # nocheck: dynamic-flag
+  shared: "{{ 'svc-db-openldap' in group_names }}"
 dashboard:
-  enabled: true
-  shared: true
+  enabled: "{{ 'web-app-dashboard' in group_names }}"
+  shared: "{{ 'web-app-dashboard' in group_names }}"
 matomo:
-  enabled: true
-  shared: true
+  enabled: "{{ 'web-app-matomo' in group_names }}"
+  shared: "{{ 'web-app-matomo' in group_names }}"
 email:
-  enabled: true
-  shared: true
+  enabled: "{{ 'web-app-mailu' in group_names }}"
+  shared: "{{ 'web-app-mailu' in group_names }}"
 # noqa: shared
+# nocheck: dynamic-flag
 redis:
   backup:
     disabled: true
@@ -30,8 +31,8 @@ redis:
   mem_limit: 8g
   pids_limit: 512
 mariadb:
-  enabled: true
-  shared: true
+  enabled: true  # nocheck: dynamic-flag
+  shared: "{{ 'svc-db-mariadb' in group_names }}"
   cpus: '0.75'
   mem_reservation: 512m
   mem_limit: 1.5g
@@ -192,6 +193,7 @@ cron:
   mem_reservation: 128m
   mem_limit: 512m
   pids_limit: 256
+# nocheck: dynamic-flag
 talk:
   enabled: '{{ lookup(''config'', ''web-app-nextcloud'', ''plugins.spreed.enabled'', False) }}'
   name: nextcloud-talk
@@ -218,11 +220,11 @@ whiteboard:
   mem_limit: 1g
   pids_limit: 1024
 onlyoffice:
-  enabled: true
-  shared: true
+  enabled: "{{ 'web-svc-onlyoffice' in group_names }}"
+  shared: "{{ 'web-svc-onlyoffice' in group_names }}"
 collabora:
-  enabled: false
-  shared: false
+  enabled: "{{ 'web-svc-collabora' in group_names }}"
+  shared: "{{ 'web-svc-collabora' in group_names }}"
 talk_recording:
   name: nextcloud-talk-recording
   image: nextcloud/aio-talk-recording
@@ -233,11 +235,13 @@ talk_recording:
   mem_reservation: 2g
   mem_limit: 6g
   pids_limit: 1024
+# nocheck: dynamic-flag
 css:
   enabled: false
   shared: true
+# nocheck: dynamic-flag
 hcaptcha:
   enabled: '{{ HCAPTCHA_ENABLED | bool }}'
 prometheus:
-  enabled: true
-  shared: true
+  enabled: "{{ 'web-app-prometheus' in group_names }}"
+  shared: "{{ 'web-app-prometheus' in group_names }}"

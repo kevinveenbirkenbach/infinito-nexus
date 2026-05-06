@@ -1,14 +1,15 @@
 logout:
-  enabled: true
-  shared: true
+  enabled: "{{ 'web-svc-logout' in group_names }}"
+  shared: "{{ 'web-svc-logout' in group_names }}"
+# nocheck: dynamic-flag
 dashboard:
   enabled: false
 matomo:
-  enabled: true
-  shared: true
+  enabled: "{{ 'web-app-matomo' in group_names }}"
+  shared: "{{ 'web-app-matomo' in group_names }}"
 mariadb:
-  enabled: true
-  shared: true
+  enabled: true  # nocheck: dynamic-flag
+  shared: "{{ 'svc-db-mariadb' in group_names }}"
 phpmyadmin:
   version: latest
   name: phpmyadmin
@@ -24,20 +25,22 @@ phpmyadmin:
   - web-app-keycloak
   lifecycle: beta
 oauth2:
-  enabled: true
-  shared: true
+  enabled: "{{ 'web-app-keycloak' in group_names }}"
+  shared: "{{ 'web-app-keycloak' in group_names }}"
   origin:
     port: '80'
     host: application
   allowed_groups:
   - '{{ lookup(''rbac_group_path'', application_id=''web-app-phpmyadmin'', role=''administrator'') }}'
+# nocheck: dynamic-flag
 css:
   enabled: false
   shared: true
 # noqa: email
+# nocheck: dynamic-flag
 email:
   enabled: false
   shared: false
 prometheus:
-  enabled: true
-  shared: true
+  enabled: "{{ 'web-app-prometheus' in group_names }}"
+  shared: "{{ 'web-app-prometheus' in group_names }}"

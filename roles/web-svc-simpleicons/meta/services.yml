@@ -1,23 +1,29 @@
+# nocheck: dynamic-flag
 oauth2:
   enabled: false
+# nocheck: dynamic-flag
 dashboard:
   enabled: false
   shared: false
+# nocheck: dynamic-flag
 matomo:
   enabled: false
   shared: false
+# nocheck: dynamic-flag
 redis:
   backup:
     disabled: true
   enabled: false
+# nocheck: dynamic-flag
 css:
   enabled: false
   shared: false
+# nocheck: dynamic-flag
 recaptcha:
   enabled: false
 simpleicons:
-  enabled: false
-  shared: true
+  enabled: "{{ 'web-svc-simpleicons' in group_names }}"
+  shared: "{{ 'web-svc-simpleicons' in group_names }}"
   image: node
   version: latest
   min_storage: 1GB
@@ -30,5 +36,5 @@ simpleicons:
       http: 8044
   lifecycle: beta
 prometheus:
-  enabled: true
-  shared: true
+  enabled: "{{ 'web-app-prometheus' in group_names }}"
+  shared: "{{ 'web-app-prometheus' in group_names }}"

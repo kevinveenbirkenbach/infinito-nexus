@@ -1,6 +1,6 @@
 openldap:
-  enabled: false
-  shared: true
+  enabled: "{{ 'svc-db-openldap' in group_names }}"
+  shared: "{{ 'svc-db-openldap' in group_names }}"
   provides: ldap
   image: debian
   version: bookworm-slim
