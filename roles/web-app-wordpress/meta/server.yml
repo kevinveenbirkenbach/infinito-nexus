@@ -15,7 +15,7 @@ csp:
     script-src-elem:
     - https://cdn.gtranslate.net
     - https://translate.google.com
-    - blog.{{ DOMAIN_PRIMARY }}
+    - "{{ lookup('domain', 'web-app-wordpress') }}"
     style-src-elem:
     - https://fonts.bunny.net
     frame-src:
