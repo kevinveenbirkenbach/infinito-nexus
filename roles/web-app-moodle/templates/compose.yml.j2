@@ -27,25 +27,11 @@
       - 'code:{{ MOODLE_CODE_DIR }}'
       - 'data:{{ MOODLE_DATA_DIR }}'
       - {{ MOODLE_MSMTP_ABS }}:/etc/msmtprc:ro
-    # PHP-FPM speaks FastCGI on 9000, not HTTP, so the standard
-    # HTTP-on-TCP healthcheck does not apply. The probe combines:
-    # (1) a one-shot SMTP smoke-test via msmtp to the project mail-bot
-    #     (lockfile /tmp/email_sent suppresses repeats so the relay is
-    #      not flooded), gated on services.email.enabled — same pattern
-    #     as healthcheck/msmtp_curl.yml.j2; and
-    # (2) a bare TCP-connect to FPM on {{ MOODLE_FPM_PORT }} as the
-    #     canonical liveness signal.
-    # nginx in the sidecar speaks HTTP and is the front-proxy surface.
+    # FPM speaks FastCGI, not HTTP — bare TCP probe instead of curl.
     healthcheck:
       test:
         - CMD-SHELL
-        - >
-          {% if (lookup('config', application_id, 'services.email.enabled', false) | bool) -%}
-          if [ ! -f /tmp/email_sent ]; then
-            echo 'Subject: testmessage from {{ lookup("domain", application_id) }}\n\nSUCCESSFUL' | msmtp -t {{ lookup('users', 'blackhole').email }} && touch /tmp/email_sent;
-          fi &&
-          {% endif -%}
-          bash -c '</dev/tcp/127.0.0.1/{{ MOODLE_FPM_PORT }}'
+        - bash -c '</dev/tcp/127.0.0.1/{{ MOODLE_FPM_PORT }}'
       interval: 1m
       timeout: 20s
       retries: 5
