@@ -7,4 +7,4 @@ csp:
   flags: {}
 networks:
   local:
-    subnet: 192.168.105.48/28
+    subnet: 192.168.105.96/28
