@@ -272,6 +272,10 @@ class TestHostBoundPortCollisions(unittest.TestCase):
             self.fail(
                 "Host-bound port collisions detected (req-009):\n"
                 + "\n".join(f"  - {c}" for c in clashes)
+                + "\n\nFix: pick a free port via "
+                + "`infinito meta ports suggest --scope <local|public> "
+                + "--category <http|oauth2|websocket|...> --count 1` "
+                + "and update the role's meta/services.yml."
             )
 
 
@@ -324,6 +328,12 @@ class TestPortBandMembership(unittest.TestCase):
             self.fail(
                 "PORT_BANDS membership / shape violation (req-009):\n"
                 + "\n".join(f"  - {o}" for o in offenders)
+                + "\n\nFix: pick an in-band port via "
+                + "`infinito meta ports suggest --scope <local|public> "
+                + "--category <http|oauth2|websocket|...> --count 1`. "
+                + "If the band itself is exhausted, extend "
+                + "`PORT_BANDS.<scope>.<category>.end` in "
+                + "group_vars/all/08_networks.yml."
             )
 
 

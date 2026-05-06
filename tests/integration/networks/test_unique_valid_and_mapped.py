@@ -56,7 +56,13 @@ class TestNetworksUniqueValidAndMapped(unittest.TestCase):
             else:
                 seen[net] = role
         if dupes:
-            self.fail("Duplicate subnets detected:\n" + "\n".join(dupes))
+            self.fail(
+                "Duplicate subnets detected:\n"
+                + "\n".join(dupes)
+                + "\n\nFix: pick a free subnet via "
+                + "`infinito meta networks suggest --clients <N> --count 1` "
+                + "and update the role's meta/server.yml.networks.local.subnet."
+            )
 
     def test_no_overlapping_subnets(self):
         items = list(self.role_to_subnet.items())
@@ -68,7 +74,13 @@ class TestNetworksUniqueValidAndMapped(unittest.TestCase):
                 if net1.overlaps(net2):
                     overlaps.append(f"'{name1}' ({net1}) overlaps '{name2}' ({net2})")
         if overlaps:
-            self.fail("Subnet overlaps detected:\n" + "\n".join(overlaps))
+            self.fail(
+                "Subnet overlaps detected:\n"
+                + "\n".join(overlaps)
+                + "\n\nFix: pick a free subnet via "
+                + "`infinito meta networks suggest --clients <N> --count 1` "
+                + "and update the role's meta/server.yml.networks.local.subnet."
+            )
 
 
 if __name__ == "__main__":
