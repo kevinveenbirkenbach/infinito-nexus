@@ -37,6 +37,6 @@ application:
 postmarks:
   ports:
     local:
-      http: 8071
+      http: 8075
       oauth2: 16494
   lifecycle: beta
