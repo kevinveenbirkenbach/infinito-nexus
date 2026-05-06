@@ -1,0 +1,121 @@
+# Self-built Moodle image. See docs/requirements/015-moodle-self-built.md.
+#
+# Static Dockerfile — all dynamic values flow in as build ARGs from
+# compose.yml.j2, which derives them from roles/web-app-moodle/vars/main.yml.
+# That vars file is the single source of truth for:
+#   - container paths    (MOODLE_CODE_DIR, MOODLE_DATA_DIR, MOODLE_SOURCE_DIR,
+#                         MOODLE_ENTRYPOINT_PATH)
+#   - build-asset names  (MOODLE_BUILD_DIR, MOODLE_BUILD_FILES.*)
+#
+# The COPY src paths and the ENTRYPOINT JSON-array literal in this
+# file MUST stay in sync with vars/main.yml because Docker does not
+# expand ARG/ENV inside JSON-form ENTRYPOINT and only resolves COPY
+# src against the build context. Treat the literals below as a
+# locked-in contract — when you add or rename a build asset, update
+# vars/main.yml first and propagate here.
+
+ARG MOODLE_BASE_IMAGE
+ARG MOODLE_BASE_TAG
+FROM ${MOODLE_BASE_IMAGE}:${MOODLE_BASE_TAG}
+
+ARG MOODLE_CODE_DIR
+ARG MOODLE_DATA_DIR
+ARG MOODLE_SOURCE_DIR
+ARG MOODLE_RUNTIME_USER
+ARG MOODLE_OIDC_ENABLED
+ARG MOODLE_OIDC_PLUGIN_RELPATH
+ARG MOODLE_RELEASE
+ARG MOODLE_TARBALL_URL
+ARG MOODLE_TARBALL_FILENAME
+ARG MOODLE_VERSION_FILE
+ARG MOODLE_AUTH_SUBDIR
+
+ENV MOODLE_CODE_DIR=${MOODLE_CODE_DIR} \
+    MOODLE_DATA_DIR=${MOODLE_DATA_DIR} \
+    MOODLE_SOURCE_DIR=${MOODLE_SOURCE_DIR} \
+    MOODLE_RUNTIME_USER=${MOODLE_RUNTIME_USER} \
+    MOODLE_OIDC_PLUGIN_RELPATH=${MOODLE_OIDC_PLUGIN_RELPATH} \
+    MOODLE_RELEASE=${MOODLE_RELEASE} \
+    MOODLE_TARBALL_URL=${MOODLE_TARBALL_URL} \
+    MOODLE_TARBALL_FILENAME=${MOODLE_TARBALL_FILENAME} \
+    MOODLE_VERSION_FILE=${MOODLE_VERSION_FILE} \
+    MOODLE_AUTH_SUBDIR=${MOODLE_AUTH_SUBDIR}
+
+# System packages required by Moodle's PHP extensions.
+# hadolint ignore=DL3008
+RUN apt-get update \
+ && DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
+      ca-certificates \
+      curl \
+      file \
+      gosu \
+      jq \
+      libfreetype6-dev \
+      libicu-dev \
+      libjpeg-dev \
+      libldap2-dev \
+      libonig-dev \
+      libpng-dev \
+      libpq-dev \
+      libwebp-dev \
+      libxml2-dev \
+      libxslt1-dev \
+      libzip-dev \
+      msmtp \
+      msmtp-mta \
+      unzip \
+ && rm -rf /var/lib/apt/lists/*
+
+# PHP extensions per Moodle's "Server requirements".
+RUN docker-php-ext-configure gd --with-freetype --with-jpeg --with-webp \
+ && docker-php-ext-configure intl \
+ && docker-php-ext-configure ldap \
+ && docker-php-ext-install -j"$(nproc)" \
+      exif \
+      gd \
+      intl \
+      ldap \
+      mysqli \
+      opcache \
+      pgsql \
+      pdo_mysql \
+      pdo_pgsql \
+      soap \
+      xsl \
+      zip
+
+# OPcache + PHP runtime tuning. The pool override keeps env vars
+# across FPM requests so config.php's getenv() calls work.
+COPY build/php-conf/opcache-recommended.ini /usr/local/etc/php/conf.d/opcache-recommended.ini
+COPY build/php-conf/moodle-runtime.ini      /usr/local/etc/php/conf.d/moodle-runtime.ini
+COPY build/php-conf/zz-moodle-pool.conf     /usr/local/etc/php-fpm.d/zz-moodle-pool.conf
+
+# Fetch + extract Moodle source into ${MOODLE_SOURCE_DIR}. The
+# entrypoint copies this into the persistent code volume on first
+# start; never touched afterwards.
+COPY build/install-moodle-source.sh /tmp/install-moodle-source.sh
+RUN bash /tmp/install-moodle-source.sh && rm /tmp/install-moodle-source.sh
+
+# Microsoft auth_oidc plugin pinned to the highest tag matching the
+# Moodle major.minor we are building. Script is always copied; only
+# executed when MOODLE_OIDC_ENABLED is truthy.
+COPY build/install-auth-oidc.sh /tmp/install-auth-oidc.sh
+RUN if [ "${MOODLE_OIDC_ENABLED}" = "1" ] || [ "${MOODLE_OIDC_ENABLED}" = "true" ]; then \
+      bash /tmp/install-auth-oidc.sh; \
+    fi \
+ && rm /tmp/install-auth-oidc.sh
+
+# Env-driven config.php placed inside the source tree so it ships
+# with the bootstrap copy on first container start.
+COPY build/config.php ${MOODLE_SOURCE_DIR}/config.php
+RUN chown ${MOODLE_RUNTIME_USER}:${MOODLE_RUNTIME_USER} ${MOODLE_SOURCE_DIR}/config.php \
+ && chmod 0640 ${MOODLE_SOURCE_DIR}/config.php
+
+# Entrypoint. Path is fixed by Docker convention (/usr/local/bin),
+# so the JSON-array ENTRYPOINT can use a literal — Docker does not
+# expand ARG/ENV in JSON form.
+COPY build/moodle-entrypoint.sh /usr/local/bin/moodle-entrypoint.sh
+RUN chmod 0755 /usr/local/bin/moodle-entrypoint.sh
+
+ENTRYPOINT ["/usr/local/bin/moodle-entrypoint.sh"]
+CMD ["php-fpm"]

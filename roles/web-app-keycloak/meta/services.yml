@@ -36,6 +36,7 @@ keycloak:
     emails_verified: true
   scopes:
     nextcloud: nextcloud
+    moodle: moodle
   accounts:
     bootstrap:
       username: administrator

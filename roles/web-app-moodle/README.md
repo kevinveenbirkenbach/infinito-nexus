@@ -17,10 +17,21 @@ This role deploys Moodle using Docker, automating the setup of both the Moodle a
 - **Secure Web Access:** Configured to work seamlessly behind an NGINX reverse proxy for enhanced security and performance.
 * **Single Sign-On (SSO) / OpenID Connect (OIDC):** Seamless integration with external identity providers for centralized authentication.
 
+## Image source
+
+This role builds its own Moodle image from upstream Moodle source on
+top of the official `php:8.3-fpm` base. The previous
+`bitnamilegacy/moodle` image is no longer used. Operators upgrading
+from the legacy image MUST start from a fresh deploy of
+`web-app-moodle`; volumes from the old role
+(`bitnami_moodle_*`) are NOT reused. See the migration spec in
+[015-moodle-self-built.md](../../docs/requirements/015-moodle-self-built.md).
+
 ## Further Resources
 
-- [Bitnami Moodle Container on GitHub](https://github.com/bitnami/containers/tree/main/bitnami/moodle)
 - [Moodle Official Website](https://moodle.org/)
+- [Moodle Developer Documentation — Docker images](https://moodledev.io/general/app/development/setup/docker-images)
+- [moodlehq/moodle-docker](https://github.com/moodlehq/moodle-docker) (extension list reference)
 
 ## Credits
 
