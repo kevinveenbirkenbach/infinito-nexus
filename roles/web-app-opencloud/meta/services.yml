@@ -1,0 +1,42 @@
+oidc:
+  enabled: true
+  shared: true
+  flavor: ''
+ldap:
+  enabled: true
+  shared: true
+logout:
+  enabled: true
+  shared: true
+dashboard:
+  enabled: true
+  shared: true
+matomo:
+  enabled: true
+  shared: true
+email:
+  enabled: true
+  shared: true
+opencloud:
+  name: opencloud
+  image: opencloudeu/opencloud
+  version: 4.0.6
+  min_storage: 20GB
+  backup:
+    no_stop_required: true
+  cpus: '2.0'
+  mem_reservation: 1g
+  mem_limit: 4g
+  pids_limit: 1024
+  ports:
+    local:
+      http: 8071
+  run_after:
+    - web-app-keycloak
+  lifecycle: alpha
+css:
+  enabled: false
+  shared: true
+prometheus:
+  enabled: true
+  shared: true
