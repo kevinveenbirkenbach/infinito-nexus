@@ -34,3 +34,12 @@ email_domains           =   "{{ DOMAIN_PRIMARY }}"
 
 session_store_type       = "redis"
 redis_connection_url     = "redis://redis:6379"
+
+# Identity headers — make oauth2-proxy export the authenticated
+# user's identity in the auth_request response so the gated upstream
+# (e.g. the Bluesky login-broker) can read X-Forwarded-User /
+# X-Forwarded-Email through the nginx auth_request_set bridge in
+# `following_directives.conf.j2`.
+set_xauthrequest         = true
+pass_user_headers        = true
+pass_access_token        = true
