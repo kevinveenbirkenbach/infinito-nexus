@@ -61,6 +61,24 @@ if [[ "${ID}" == "arch" || "${ID_LIKE:-}" =~ arch ]]; then
 elif [[ "${ID}" == "debian" || "${ID}" == "ubuntu" || "${ID_LIKE:-}" =~ debian ]]; then
   export DEBIAN_FRONTEND=noninteractive
   sanitize_docker_apt_sources "${ID}" 0
+
+  # Ubuntu 26.04 ships docker-compose-v2 in universe with no Conflicts:
+  # against Docker upstream's docker-compose-plugin; both place a binary
+  # at /usr/libexec/docker/cli-plugins/docker-compose and dpkg aborts
+  # if a later transaction pulls docker-compose-v2 as a recommended
+  # dep (e.g. via ansible). Pin it out of selection on Ubuntu only.
+  # TODO: drop this once Ubuntu adds the Conflicts: marker.
+  # Tracking: https://bugs.launchpad.net/ubuntu/+source/docker-compose-v2/+bug/2151249
+  if [[ "${ID}" == "ubuntu" ]]; then
+    mkdir -p /etc/apt/preferences.d
+    cat >/etc/apt/preferences.d/00-block-ubuntu-docker-compose-v2 <<'EOF'
+Package: docker-compose-v2
+Pin: release o=Ubuntu
+Pin-Priority: -1
+EOF
+    apt-get -y purge docker-compose-v2 >/dev/null 2>&1 || true
+  fi
+
   apt-get update
   apt-get install -y --no-install-recommends \
     ca-certificates \
