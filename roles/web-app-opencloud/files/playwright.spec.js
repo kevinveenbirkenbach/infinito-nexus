@@ -124,16 +124,10 @@ test("opencloud sso login (administrator) lands on files view", async ({ page })
   await ssoLoginAndAssertUsername(page, adminUsername, adminPassword);
 });
 
-test("opencloud sso login (biber) lands on files view", async ({ browser }) => {
+test("opencloud sso login (biber) lands on files view", async ({ page }) => {
   test.skip(!oidcEnabled, "OIDC not enabled for this deployment");
   expect(biberUsername, "BIBER_USERNAME must be set").toBeTruthy();
   expect(biberPassword, "BIBER_PASSWORD must be set").toBeTruthy();
 
-  const context = await browser.newContext({ ignoreHTTPSErrors: true });
-  const page = await context.newPage();
-  try {
-    await ssoLoginAndAssertUsername(page, biberUsername, biberPassword);
-  } finally {
-    await context.close();
-  }
+  await ssoLoginAndAssertUsername(page, biberUsername, biberPassword);
 });
