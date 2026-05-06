@@ -7,6 +7,7 @@ friendica:
     ldapauth: {}
   ports:
     local:
+      oauth2: 16501
       http: 8028
   run_after:
   - web-app-matomo
@@ -37,7 +38,8 @@ oauth2:
   origin:
     host: application
     port: '80'
-  enabled: false
+  enabled: true
+  shared: true
 css:
   enabled: false
   shared: true

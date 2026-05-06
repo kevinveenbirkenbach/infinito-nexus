@@ -95,9 +95,9 @@ class TestRunAfterServicesExplicit(unittest.TestCase):
                 primary_key = role_to_key.get(dep)
                 seen: set[str] = set()
                 candidate_keys: list[str] = []
-                for key in (
-                    [primary_key] if primary_key else []
-                ) + sorted(_TRANSITIVE_SERVICE_EQUIVALENTS.get(dep, set())):
+                for key in ([primary_key] if primary_key else []) + sorted(
+                    _TRANSITIVE_SERVICE_EQUIVALENTS.get(dep, set())
+                ):
                     if key and key not in seen:
                         seen.add(key)
                         candidate_keys.append(key)

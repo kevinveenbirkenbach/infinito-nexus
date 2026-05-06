@@ -21,7 +21,7 @@ oauth2:
   # only). Per requirement 013 the project uses `web-app-oauth2-proxy`
   # in front of the Baserow web UI as the universal glue path.
   enabled: true
-  shared: false
+  shared: true
   origin:
     host: application
     port: 80

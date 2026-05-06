@@ -4,6 +4,7 @@ funkwhale:
   min_storage: 20GB
   ports:
     local:
+      oauth2: 16502
       http: 8012
   run_after:
   - web-app-matomo
@@ -46,7 +47,8 @@ oauth2:
   acl:
     blacklist:
     - /login
-  enabled: false
+  enabled: true
+  shared: true
 css:
   enabled: false
   shared: true

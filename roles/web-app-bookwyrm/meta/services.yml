@@ -9,7 +9,7 @@ oauth2:
   # project uses `web-app-oauth2-proxy` in front of the BookWyrm web
   # UI as the universal glue path.
   enabled: true
-  shared: false
+  shared: true
   origin:
     host: application
     port: 8000

@@ -50,6 +50,4 @@ magento:
   ports:
     local:
       http: 8052
-  run_after:
-  - web-app-keycloak
   lifecycle: unsupported

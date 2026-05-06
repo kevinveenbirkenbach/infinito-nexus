@@ -1,4 +1,2 @@
 gnome-terminal:
-  run_after:
-  - desk-gnome
   lifecycle: pre-alpha

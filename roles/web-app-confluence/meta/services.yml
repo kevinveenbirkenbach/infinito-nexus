@@ -31,7 +31,6 @@ confluence:
       http: 8005
   run_after:
   - web-app-matomo
-  - web-app-keycloak
   - web-app-mailu
   lifecycle: unsupported
 css:

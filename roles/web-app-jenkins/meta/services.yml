@@ -12,7 +12,7 @@ prometheus:
   shared: true
 oidc:
   enabled: true
-  shared: false
+  shared: true
 ldap:
   enabled: false
   shared: false

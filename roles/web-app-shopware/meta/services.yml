@@ -33,7 +33,6 @@ shopware:
     local:
       http: 8060
   run_after:
-  - web-app-keycloak
   - web-app-mailu
   lifecycle: beta
 php:

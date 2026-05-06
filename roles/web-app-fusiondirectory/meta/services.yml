@@ -14,7 +14,7 @@ ldap:
   # FusionDirectory's storage backend IS LDAP; the LDAP marker stays
   # on for the project gating layer regardless of the matrix variant.
   enabled: true
-  shared: false
+  shared: true
 oauth2:
   # FusionDirectory has a first-party OIDC plugin (Composer-installed)
   # but the plugin's release cadence trails the Joomla/Composer
@@ -22,7 +22,7 @@ oauth2:
   # `web-app-oauth2-proxy` glue path in front of the FusionDirectory
   # web UI for the canonical OIDC variant.
   enabled: true
-  shared: false
+  shared: true
   origin:
     host: fusiondirectory
     port: 80
@@ -37,7 +37,6 @@ fusiondirectory:
       oauth2: 16487
       http: 8038
   run_after:
-  - web-app-matomo
   - web-app-keycloak
   - web-app-mailu
   - svc-db-openldap

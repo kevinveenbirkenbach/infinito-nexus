@@ -48,7 +48,6 @@ opentalk:
       http: 8073
   run_after:
     - web-app-keycloak
-    - web-app-opencloud
   lifecycle: alpha
 controller:
   name: opentalk-controller

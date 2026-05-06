@@ -63,7 +63,8 @@ oauth2:
   acl:
     blacklist:
     - /user/login
-  enabled: false
+  enabled: true
+  shared: true
 css:
   enabled: true
   shared: true

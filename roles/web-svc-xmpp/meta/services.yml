@@ -9,7 +9,7 @@ oidc:
   shared: false
 ldap:
   enabled: true
-  shared: false
+  shared: true
 xmpp:
   image: ejabberd/ecs
   version: latest
@@ -18,6 +18,5 @@ xmpp:
     local:
       http: 8082
   run_after:
-  - web-app-keycloak
   - svc-db-openldap
   lifecycle: beta

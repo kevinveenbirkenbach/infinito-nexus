@@ -30,7 +30,7 @@ ldap:
   shared: false
 oauth2:
   enabled: true
-  shared: false
+  shared: true
   origin:
     host: bluesky-broker
     port: 8080

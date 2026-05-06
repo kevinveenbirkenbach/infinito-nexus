@@ -18,7 +18,7 @@ ldap:
   shared: false
 oauth2:
   enabled: true
-  shared: false
+  shared: true
   origin:
     host: flowise
     port: 3000

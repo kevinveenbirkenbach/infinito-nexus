@@ -1,6 +1,6 @@
 oidc:
   enabled: true
-  shared: false
+  shared: true
   # Modus 3 per requirement 013: when `fallback_enabled` is true, the
   # local Joomla form-login at `/administrator?fallback=local` is
   # available as an emergency hatch (recommended default). Set to
