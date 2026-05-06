@@ -1,0 +1,58 @@
+# OpenTalk controller configuration.
+# Reference: https://docs.opentalk.eu/admin/controller/core/configuration/
+
+[frontend]
+base_url = "{{ OPENTALK_URL }}"
+
+[http]
+port = 11311
+
+[database]
+url = "postgres://{{ lookup('database', application_id, 'username') }}:{{ lookup('database', application_id, 'password') }}@{{ lookup('database', application_id, 'host') }}:{{ lookup('database', application_id, 'port') }}/{{ lookup('database', application_id, 'name') }}"
+max_connections = 100
+
+[oidc]
+authority = "{{ OIDC.CLIENT.ISSUER_URL }}"
+
+[oidc.frontend]
+client_id = "{{ OIDC.CLIENT.ID }}"
+
+[oidc.controller]
+client_id = "{{ OPENTALK_CTRL_OIDC_CLIENT_ID }}"
+client_secret = "{{ OPENTALK_CTRL_OIDC_CLIENT_SECRET }}"
+
+[user_search]
+backend = "keycloak_webapi"
+api_base_url = "{{ OPENTALK_KEYCLOAK_BASE_URL }}/admin/realms/{{ OPENTALK_KEYCLOAK_REALM }}"
+client_id = "{{ OPENTALK_KEYCLOAK_CLIENT_ID }}"
+client_secret = "{{ OPENTALK_KEYCLOAK_CLIENT_SECRET }}"
+users_find_behavior = "from_user_search_backend"
+
+[livekit]
+public_url = "wss://{{ OPENTALK_DOMAIN }}/livekit"
+service_url = "http://livekit:{{ OPENTALK_LIVEKIT_HTTP_PORT }}"
+api_key = "{{ OPENTALK_LIVEKIT_API_KEY }}"
+api_secret = "{{ OPENTALK_LIVEKIT_API_SECRET }}"
+
+[redis]
+url = "redis://redis:6379"
+
+[minio]
+uri = "http://minio:9000"
+bucket = "{{ OPENTALK_MINIO_BUCKET }}"
+access_key = "{{ OPENTALK_MINIO_USER }}"
+secret_key = "{{ OPENTALK_MINIO_PASSWORD }}"
+
+[rabbit_mq]
+url = "amqp://guest:guest@rabbit/%2F"
+mail_task_queue = "opentalk_mailer"
+recording_task_queue = "{{ OPENTALK_RABBIT_QUEUE }}"
+
+[turn]
+lifetime = 86400
+servers = [
+  { uris = [ "turn:{{ OPENTALK_TURN_HOST }}:{{ OPENTALK_TURN_PORT }}?transport=udp", "turn:{{ OPENTALK_TURN_HOST }}:{{ OPENTALK_TURN_PORT }}?transport=tcp" ], pre_shared_key = "{{ OPENTALK_TURN_SECRET }}" }
+]
+
+[stun]
+uris = [ "stun:{{ OPENTALK_TURN_HOST }}:{{ OPENTALK_TURN_PORT }}" ]

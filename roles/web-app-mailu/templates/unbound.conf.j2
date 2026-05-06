@@ -33,6 +33,7 @@ remote-control:
 # Enable by setting MAILU_UNBOUND_FORWARD_DNS: true in your inventory.
 forward-zone:
   name: "."
-  forward-addr: 1.1.1.1
-  forward-addr: 8.8.8.8
+{% for resolver in NETWORK_PUBLIC_DNS_RESOLVERS %}
+  forward-addr: {{ resolver }}
+{% endfor %}
 {% endif %}

@@ -37,7 +37,7 @@
 - name: "Verify that '{{ DISCOURSE_CONTAINER }}' is running"
   ansible.builtin.command:
     argv:
-      - docker
+      - container
       - ps
       - --filter
       - "name=^{{ DISCOURSE_CONTAINER }}$"

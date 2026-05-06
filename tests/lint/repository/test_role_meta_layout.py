@@ -28,12 +28,21 @@ REPO_ROOT = Path(__file__).resolve().parents[3]
 ROLES_DIR = REPO_ROOT / "roles"
 
 ALLOWED_LIFECYCLES = {
+    # Linear lifecycle axis. See
+    # docs/contributing/design/services/lifecycle.md for the criteria each
+    # value commits the role to.
     "planned",
     "pre-alpha",
     "alpha",
     "beta",
+    "rc",
     "stable",
+    "maintenance",
     "deprecated",
+    "eol",
+    # Off-axis tier for roles the project ships without a maintenance or
+    # test commitment (e.g. proprietary products, demo prototypes).
+    "unsupported",
 }
 
 # Roles whose `local.http` port is allowed to live outside the documented

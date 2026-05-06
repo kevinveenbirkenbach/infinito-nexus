@@ -3,10 +3,10 @@
 defaults
 logfile             ~/.msmtp.log
 timeout             {{ email.timeout }}
-syslog              {{ (MODE_DEBUG | bool) | ternary('on','off') }}
-auth                {{ email.auth | ternary('on','off')}}
-tls_starttls        {{ (email.start_tls | bool) | ternary('on','off') }}
-tls                 {{ (email.tls | bool ) | ternary('on','off') }}
+syslog              {{ MODE_DEBUG | on_off }}
+auth                {{ email.auth | on_off }}
+tls_starttls        {{ email.start_tls | on_off }}
+tls                 {{ email.tls | on_off }}
 tls_trust_file      {{ '/etc/pki/tls/certs/ca-bundle.crt' if (ansible_facts['os_family'] | lower == 'redhat') else '/etc/ssl/certs/ca-certificates.crt' }}
 tls_host_override   {{ email.host }}
 account             system_email_no_reply

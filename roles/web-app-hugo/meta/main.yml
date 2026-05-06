@@ -1,0 +1,22 @@
+galaxy_info:
+  author: Kevin Veen-Birkenbach
+  description: 'Hugo static-site host – clones an upstream Hugo content repository, builds the site with the extended Hugo binary at image-build time, and serves the rendered HTML/CSS/JS via nginx.
+
+    '
+  license: Infinito.Nexus Community License (Non-Commercial)
+  company: 'Kevin Veen-Birkenbach
+
+    Consulting & Coaching Solutions
+
+    https://www.veen.world
+
+    '
+  galaxy_tags:
+    - infinito
+    - docker
+    - webapp
+    - hugo
+    - static-site
+    - nginx
+  issue_tracker_url: https://s.infinito.nexus/issues
+dependencies: []

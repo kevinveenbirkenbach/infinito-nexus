@@ -11,8 +11,8 @@ csp:
       unsafe-inline: true
   whitelist:
     connect-src:
-    - odoo.erp.{{ DOMAIN_PRIMARY }}
-    - wss://odoo.erp.{{ DOMAIN_PRIMARY }}
+    - "{{ lookup('domain', 'web-app-odoo') }}"
+    - "wss://{{ lookup('domain', 'web-app-odoo') }}"
     frame-ancestors:
     - '{{ DOMAIN_PRIMARY }}'
     - '*.{{ DOMAIN_PRIMARY }}'

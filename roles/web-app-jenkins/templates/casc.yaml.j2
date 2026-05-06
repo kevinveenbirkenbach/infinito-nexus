@@ -1,0 +1,68 @@
+# Jenkins Configuration as Code (JCasC) — applied at startup via the
+# CASC_JENKINS_CONFIG env var. Per requirement 013 this file wires the
+# OIDC and LDAP authentication paths against `web-app-keycloak` and
+# `svc-db-openldap`, plus role-strategy authorisation that maps
+# Keycloak group / LDAP group memberships onto Jenkins authorities.
+
+jenkins:
+  systemMessage: "Managed by Infinito.Nexus."
+  numExecutors: 2
+  mode: NORMAL
+
+{% if lookup('config', application_id, 'services.oidc.enabled') | bool %}
+  securityRealm:
+    # The `oic-auth` plugin (>= 4.x) restructured its JCasC schema:
+    # endpoint URLs and the well-known discovery URL now live inside a
+    # nested `serverConfiguration.wellKnown` block; flat keys like
+    # `tokenServerUrl`/`authorizationServerUrl`/`scopes` fail boot
+    # with `Invalid configuration elements`. Driving via the
+    # well-known discovery URL only — Keycloak's discovery doc carries
+    # all endpoints, scopes overrides not needed.
+    oic:
+      clientId: "{{ OIDC.CLIENT.ID }}"
+      clientSecret: "{{ OIDC.CLIENT.SECRET }}"
+      serverConfiguration:
+        wellKnown:
+          wellKnownOpenIDConfigurationUrl: "{{ OIDC.CLIENT.DISCOVERY_DOCUMENT }}"
+      userNameField: "preferred_username"
+      groupsFieldName: "groups"
+      logoutFromOpenidProvider: true
+{% elif lookup('config', application_id, 'services.ldap.enabled') | bool %}
+  securityRealm:
+    ldap:
+      configurations:
+        - server: "ldap://{{ lookup('config', 'svc-db-openldap', 'services.openldap.name') }}:{{ lookup('config', 'svc-db-openldap', 'services.openldap.ports.local.ldap') }}"
+          rootDN: "{{ LDAP.DN.ROOT }}"
+          userSearchBase: "{{ LDAP.DN.OU.USERS }}"
+          userSearch: "uid={0}"
+          groupSearchBase: "{{ LDAP.DN.OU.GROUPS }}"
+          managerDN: "{{ LDAP.DN.ADMINISTRATOR.DATA }}"
+          managerPasswordSecret: "{{ LDAP.BIND_CREDENTIAL }}"
+{% else %}
+  securityRealm:
+    local:
+      allowsSignup: false
+      users:
+        - id: "{{ lookup('users', 'administrator').username }}"
+          password: "{{ lookup('users', 'administrator').password }}"
+{% endif %}
+
+  authorizationStrategy:
+    # The role-strategy plugin renamed `assignments` to `entries` and
+    # made each entry an explicit `{user|group}` typed object — the old
+    # bare-string list fails JCasC validation with
+    # `'assignments' is deprecated`. See
+    # https://plugins.jenkins.io/role-strategy/#configuration-as-code-support
+    roleBased:
+      roles:
+        global:
+          - name: "admin"
+            description: "Administrators"
+            permissions:
+              - "Overall/Administer"
+            entries:
+              - user: "{{ lookup('users', 'administrator').username }}"
+              - group: "authenticated"
+unclassified:
+  location:
+    url: "{{ lookup('tls', application_id, 'url.base') }}/"

@@ -52,4 +52,4 @@ magento:
       http: 8052
   run_after:
   - web-app-keycloak
-  lifecycle: planned
+  lifecycle: unsupported

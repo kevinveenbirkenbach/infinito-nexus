@@ -7,6 +7,23 @@ dashboard:
 matomo:
   enabled: true
   shared: true
+oidc:
+  # Flowise's first-party OIDC support (FLOWISE_AUTH_*) is paid-tier;
+  # the project uses the universal `web-app-oauth2-proxy` glue path
+  # in front of the Flowise web UI per requirement 013.
+  enabled: false
+  shared: false
+ldap:
+  enabled: false
+  shared: false
+oauth2:
+  enabled: true
+  shared: false
+  origin:
+    host: flowise
+    port: 3000
+  allowed_groups:
+  - '{{ lookup(''rbac_group_path'', application_id=''web-app-flowise'', role=''administrator'') }}'
 litellm:
   backup:
     no_stop_required: true
@@ -41,10 +58,12 @@ flowise:
   ports:
     local:
       http: 8056
+      oauth2: 16480
   run_after:
   - web-app-keycloak
   - web-app-matomo
-  lifecycle: alpha
+  - web-app-mailu
+  lifecycle: beta
 redis:
   backup:
     disabled: true

@@ -25,7 +25,7 @@ class TestPrometheusServicePresence(unittest.TestCase):
     """
 
     def _web_role_configs(self):
-        roles_dir = Path(__file__).resolve().parent.parent.parent / "roles"
+        roles_dir = Path(__file__).resolve().parent.parent.parent.parent / "roles"
         pattern = str(roles_dir / "*" / "meta" / "services.yml")
         return [
             p
@@ -86,7 +86,7 @@ class TestPrometheusServicePresence(unittest.TestCase):
 
     def test_prometheus_role_has_image_config(self):
         """web-app-prometheus must define image, version, and name for its service."""
-        roles_dir = Path(__file__).resolve().parent.parent.parent / "roles"
+        roles_dir = Path(__file__).resolve().parent.parent.parent.parent / "roles"
         config_path = roles_dir / PROMETHEUS_APP_ID / "meta" / "services.yml"
 
         self.assertTrue(config_path.exists(), f"Missing: {config_path}")
@@ -109,7 +109,7 @@ class TestPrometheusServicePresence(unittest.TestCase):
 
     def test_blackbox_exporter_image_is_pinned(self):
         """web-app-prometheus compose must use a pinned blackbox-exporter image, not :latest."""
-        roles_dir = Path(__file__).resolve().parent.parent.parent / "roles"
+        roles_dir = Path(__file__).resolve().parent.parent.parent.parent / "roles"
         compose_path = roles_dir / PROMETHEUS_APP_ID / "templates" / "compose.yml.j2"
         content = compose_path.read_text(encoding="utf-8")
         self.assertNotIn(
@@ -126,7 +126,7 @@ class TestPrometheusServicePresence(unittest.TestCase):
 
     def test_alert_rules_mounted_in_prometheus_container(self):
         """compose.yml.j2 must bind-mount the alert rules file into the Prometheus container."""
-        roles_dir = Path(__file__).resolve().parent.parent.parent / "roles"
+        roles_dir = Path(__file__).resolve().parent.parent.parent.parent / "roles"
         compose_path = roles_dir / PROMETHEUS_APP_ID / "templates" / "compose.yml.j2"
         content = compose_path.read_text(encoding="utf-8")
         self.assertIn(
@@ -152,7 +152,7 @@ class TestPrometheusNginxEndpoints(unittest.TestCase):
 
     def _basic_conf_path(self):
         return (
-            Path(__file__).resolve().parent.parent.parent
+            Path(__file__).resolve().parent.parent.parent.parent
             / "roles"
             / "sys-svc-proxy"
             / "templates"
@@ -162,7 +162,7 @@ class TestPrometheusNginxEndpoints(unittest.TestCase):
 
     def _location_conf_path(self):
         return (
-            Path(__file__).resolve().parent.parent.parent
+            Path(__file__).resolve().parent.parent.parent.parent
             / "roles"
             / "web-app-prometheus"
             / "templates"
@@ -172,7 +172,7 @@ class TestPrometheusNginxEndpoints(unittest.TestCase):
 
     def _metricz_conf_path(self):
         return (
-            Path(__file__).resolve().parent.parent.parent
+            Path(__file__).resolve().parent.parent.parent.parent
             / "roles"
             / "web-app-prometheus"
             / "files"
@@ -184,7 +184,7 @@ class TestPrometheusNginxEndpoints(unittest.TestCase):
         # Health-check locations live in web-app-prometheus/templates/nginx/healthz.conf.j2
         # — moved from sys-svc-proxy so all monitoring templates belong in one role (SRP).
         return (
-            Path(__file__).resolve().parent.parent.parent
+            Path(__file__).resolve().parent.parent.parent.parent
             / "roles"
             / "web-app-prometheus"
             / "templates"
@@ -226,7 +226,7 @@ class TestPrometheusNginxEndpoints(unittest.TestCase):
         # Moved from sys-svc-proxy to web-app-prometheus so all monitoring templates
         # are co-located in the monitoring role (SRP).
         return (
-            Path(__file__).resolve().parent.parent.parent
+            Path(__file__).resolve().parent.parent.parent.parent
             / "roles"
             / "web-app-prometheus"
             / "templates"
@@ -365,7 +365,7 @@ class TestPrometheusNginxEndpoints(unittest.TestCase):
         $app_id was moved from basic.conf.j2 into locations.conf.j2 so that it is set
         in a single place for all vhosts that include the prometheus monitoring block.
         """
-        roles_dir = Path(__file__).resolve().parent.parent.parent / "roles"
+        roles_dir = Path(__file__).resolve().parent.parent.parent.parent / "roles"
         locations_conf = (
             roles_dir / PROMETHEUS_APP_ID / "templates" / "nginx" / "locations.conf.j2"
         )
@@ -379,7 +379,7 @@ class TestPrometheusNginxEndpoints(unittest.TestCase):
 
     def test_alertmanager_templates_exist(self):
         """web-app-prometheus must have alertmanager.yml.j2 and alert_rules.yml.j2."""
-        roles_dir = Path(__file__).resolve().parent.parent.parent / "roles"
+        roles_dir = Path(__file__).resolve().parent.parent.parent.parent / "roles"
         for template in ("alertmanager.yml.j2", "alert_rules.yml.j2"):
             with self.subTest(template=template):
                 path = (
@@ -396,7 +396,7 @@ class TestPrometheusNginxEndpoints(unittest.TestCase):
 
     def test_alertmanager_supports_telegram(self):
         """alertmanager.yml.j2 must support Telegram notifications (task AC: communication channels)."""
-        roles_dir = Path(__file__).resolve().parent.parent.parent / "roles"
+        roles_dir = Path(__file__).resolve().parent.parent.parent.parent / "roles"
         content = (
             roles_dir
             / PROMETHEUS_APP_ID
@@ -413,7 +413,7 @@ class TestPrometheusNginxEndpoints(unittest.TestCase):
 
     def test_alertmanager_supports_mattermost(self):
         """alertmanager.yml.j2 must support Mattermost webhook notifications (task AC: communication channels)."""
-        roles_dir = Path(__file__).resolve().parent.parent.parent / "roles"
+        roles_dir = Path(__file__).resolve().parent.parent.parent.parent / "roles"
         content = (
             roles_dir
             / PROMETHEUS_APP_ID
@@ -438,7 +438,7 @@ class TestPrometheusNginxEndpoints(unittest.TestCase):
         Each app self-declares communication.channel: true in its own config (SPOT per app —
         no hardcoded list anywhere).
         """
-        roles_dir = Path(__file__).resolve().parent.parent.parent / "roles"
+        roles_dir = Path(__file__).resolve().parent.parent.parent.parent / "roles"
         content = (
             roles_dir
             / PROMETHEUS_APP_ID
@@ -479,7 +479,7 @@ class TestPrometheusNginxEndpoints(unittest.TestCase):
         Hardcoding insecure_skip_verify: false breaks all blackbox probes in
         development/staging environments that use self-signed TLS certificates.
         """
-        roles_dir = Path(__file__).resolve().parent.parent.parent / "roles"
+        roles_dir = Path(__file__).resolve().parent.parent.parent.parent / "roles"
         content = (
             roles_dir
             / PROMETHEUS_APP_ID
@@ -512,7 +512,7 @@ class TestDockerHealthCheck(unittest.TestCase):
         # live in web-app-prometheus/templates/nginx/prometheus.conf.j2 — monitoring
         # config belongs in the monitoring role, not in sys-svc-webserver-core (SRP).
         return (
-            Path(__file__).resolve().parent.parent.parent
+            Path(__file__).resolve().parent.parent.parent.parent
             / "roles"
             / "web-app-prometheus"
             / "templates"
@@ -522,7 +522,7 @@ class TestDockerHealthCheck(unittest.TestCase):
 
     def _basic_conf_path(self):
         return (
-            Path(__file__).resolve().parent.parent.parent
+            Path(__file__).resolve().parent.parent.parent.parent
             / "roles"
             / "sys-svc-proxy"
             / "templates"
@@ -534,7 +534,7 @@ class TestDockerHealthCheck(unittest.TestCase):
         # Health-check locations live in web-app-prometheus/templates/nginx/healthz.conf.j2
         # — moved from sys-svc-proxy so all monitoring templates belong in one role (SRP).
         return (
-            Path(__file__).resolve().parent.parent.parent
+            Path(__file__).resolve().parent.parent.parent.parent
             / "roles"
             / "web-app-prometheus"
             / "templates"
@@ -544,7 +544,7 @@ class TestDockerHealthCheck(unittest.TestCase):
 
     def _openresty_compose_path(self):
         return (
-            Path(__file__).resolve().parent.parent.parent
+            Path(__file__).resolve().parent.parent.parent.parent
             / "roles"
             / "svc-prx-openresty"
             / "templates"
@@ -594,7 +594,7 @@ class TestDockerHealthCheck(unittest.TestCase):
         # $container_name was moved from basic.conf.j2 into locations.conf.j2 so every
         # custom vhost template (synapse.conf.j2, etc.) gets it automatically.
         locations_path = (
-            Path(__file__).resolve().parent.parent.parent
+            Path(__file__).resolve().parent.parent.parent.parent
             / "roles"
             / "web-app-prometheus"
             / "templates"
@@ -642,7 +642,7 @@ class TestNativeAppMetrics(unittest.TestCase):
 
     def _prometheus_yml_path(self):
         return (
-            Path(__file__).resolve().parent.parent.parent
+            Path(__file__).resolve().parent.parent.parent.parent
             / "roles"
             / "web-app-prometheus"
             / "templates"
@@ -652,7 +652,7 @@ class TestNativeAppMetrics(unittest.TestCase):
 
     def _scrape_fragment_path(self, app_id: str) -> "Path":
         return (
-            Path(__file__).resolve().parent.parent.parent
+            Path(__file__).resolve().parent.parent.parent.parent
             / "roles"
             / app_id
             / "templates"
@@ -728,7 +728,7 @@ class TestNativeAppMetrics(unittest.TestCase):
         get a scrape job (otherwise all 70+ apps appear as DOWN targets in Prometheus).
         """
         plugin_path = (
-            Path(__file__).resolve().parent.parent.parent
+            Path(__file__).resolve().parent.parent.parent.parent
             / "plugins"
             / "lookup"
             / "native_metrics_apps.py"
@@ -743,7 +743,7 @@ class TestNativeAppMetrics(unittest.TestCase):
 
     def test_native_metrics_apps_have_enabled_flag_in_config(self):
         """Apps with native metrics support must have native_metrics.enabled in their config."""
-        roles_dir = Path(__file__).resolve().parent.parent.parent / "roles"
+        roles_dir = Path(__file__).resolve().parent.parent.parent.parent / "roles"
         for app_id in ("web-app-gitea", "web-app-mattermost", "web-app-matrix"):
             with self.subTest(app_id=app_id):
                 cfg = _load_config(str(roles_dir / app_id / "meta" / "services.yml"))

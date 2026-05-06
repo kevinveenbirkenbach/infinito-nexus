@@ -48,6 +48,12 @@ env:
   ## Required. Discourse will not work with a bare IP number.
   DISCOURSE_HOSTNAME: {{ lookup('domain',application_id) }}
 
+  ## Force HTTPS at boot time so asset precompilation bakes https:// URLs
+  ## into stylesheets/@font-face. Without this the rails-runner SiteSetting
+  ## update in `run:` lands AFTER assets are compiled, leaving http:// font
+  ## URLs that violate the CSP (font-src https://...).
+  DISCOURSE_FORCE_HTTPS: "{{ DISCOURSE_TLS_ENABLED | bool | string | lower }}"
+
   ## Uncomment if you want the container to be started with the same
   ## hostname (-h option) as specified above (default "$hostname-$config")
   #DOCKER_USE_HOSTNAME: true

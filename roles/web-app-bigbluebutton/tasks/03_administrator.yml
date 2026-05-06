@@ -16,7 +16,7 @@
 - name: "Ensure Greenlight admin (B64-safe, idempotent)"
   ansible.builtin.command:
     argv:
-      - docker
+      - container
       - compose
       - --env-file
       - "{{ lookup('container', application_id, 'files.env') }}"

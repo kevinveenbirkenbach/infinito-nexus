@@ -1,10 +1,15 @@
-# Injected by web-app-bluesky (same pattern as web-app-yourls)
-# Exposes a same-origin /config to avoid CORS when the social-app fetches config.
+# Injected by web-app-bluesky (same pattern as web-app-yourls).
+# Exposes a same-origin /config to avoid CORS when the social-app
+# fetches config. The `resolver` + variable form below is required so
+# nginx defers DNS for the public `ip.bsky.app` / `bsky.app`
+# upstreams to runtime — without it `nginx -t` refuses to start
+# because the openresty container can't resolve those hosts at
+# config-load time.
 location = /config {
-    proxy_pass {{ BLUESKY_CONFIG_UPSTREAM_URL }};
-    
-    {# Just extract hostname #}
+    resolver {{ NETWORK_PUBLIC_DNS_RESOLVERS | join(' ') }} ipv6={{ NETWORK_IPV6_ENABLED | on_off }} valid=300s;
     set $up_host "{{ BLUESKY_CONFIG_UPSTREAM_URL | regex_replace('^https?://', '') | regex_replace('/.*$', '') }}";
+    set $bluesky_config_upstream "{{ BLUESKY_CONFIG_UPSTREAM_URL }}";
+    proxy_pass $bluesky_config_upstream;
     proxy_set_header Host $up_host;
     proxy_http_version 1.1;
     proxy_set_header Connection "";
@@ -16,8 +21,10 @@ location = /config {
 }
 
 location = /ipcc {
-    proxy_pass https://bsky.app/ipcc;
+    resolver {{ NETWORK_PUBLIC_DNS_RESOLVERS | join(' ') }} ipv6={{ NETWORK_IPV6_ENABLED | on_off }} valid=300s;
     set $up_host "bsky.app";
+    set $bluesky_ipcc_upstream "https://bsky.app/ipcc";
+    proxy_pass $bluesky_ipcc_upstream;
     proxy_set_header Host $up_host;
     proxy_http_version 1.1;
     proxy_set_header Connection "";

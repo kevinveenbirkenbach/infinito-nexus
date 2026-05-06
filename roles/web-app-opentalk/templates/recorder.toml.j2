@@ -1,0 +1,14 @@
+# OpenTalk recorder configuration.
+# Reference: https://docs.opentalk.eu/admin/recorder/configuration/
+
+[auth]
+issuer = "{{ OIDC.CLIENT.ISSUER_URL }}"
+client_id = "{{ OPENTALK_RECORDER_OIDC_CLIENT_ID }}"
+client_secret = "{{ OPENTALK_RECORDER_OIDC_CLIENT_SECRET }}"
+
+[controller]
+domain = "{{ OPENTALK_DOMAIN }}"
+
+[rabbitmq]
+uri = "amqp://guest:guest@rabbit/%2F"
+queue = "{{ OPENTALK_RABBIT_QUEUE }}"

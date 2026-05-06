@@ -1,4 +1,37 @@
+logout:
+  enabled: true
+  shared: true
+prometheus:
+  enabled: true
+  shared: true
+email:
+  enabled: true
+  shared: true
+oidc:
+  enabled: false
+  shared: false
+ldap:
+  # FusionDirectory's storage backend IS LDAP; the LDAP marker stays
+  # on for the project gating layer regardless of the matrix variant.
+  enabled: true
+  shared: false
+oauth2:
+  # FusionDirectory has a first-party OIDC plugin (Composer-installed)
+  # but the plugin's release cadence trails the Joomla/Composer
+  # version it depends on. Per requirement 013 we use the universal
+  # `web-app-oauth2-proxy` glue path in front of the FusionDirectory
+  # web UI for the canonical OIDC variant.
+  enabled: true
+  shared: false
+  origin:
+    host: fusiondirectory
+    port: 80
+  allowed_groups:
+  - '{{ lookup(''rbac_group_path'', application_id=''web-app-fusiondirectory'', role=''administrator'') }}'
 fusiondirectory:
+  image: tiredofit/fusiondirectory
+  version: latest
+  name: fusiondirectory
   ports:
     local:
       oauth2: 16487
@@ -7,13 +40,8 @@ fusiondirectory:
   - web-app-matomo
   - web-app-keycloak
   - web-app-mailu
-  lifecycle: planned
-prometheus:
-  enabled: true
-  shared: true
-email:
-  enabled: true
-  shared: true
-logout:
+  - svc-db-openldap
+  lifecycle: beta
+css:
   enabled: true
   shared: true

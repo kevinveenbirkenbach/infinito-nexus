@@ -21,7 +21,7 @@ phpldapadmin:
   run_after:
   - web-app-matomo
   - web-app-keycloak
-  lifecycle: pre-alpha
+  lifecycle: unsupported
 oauth2:
   enabled: true
   shared: true

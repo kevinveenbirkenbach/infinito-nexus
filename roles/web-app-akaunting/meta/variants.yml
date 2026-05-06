@@ -1,0 +1,12 @@
+# Matrix-deploy variant overrides per requirement 013. Both auth-flow
+# variants ride the same `web-app-oauth2-proxy` sidecar in front of
+# the Akaunting web UI.
+
+# variant 0: OIDC variant (canonical default).
+- {}
+
+# variant 1: LDAP variant. Same oauth2-proxy gate, with the LDAP
+# marker enabled.
+- services:
+    ldap:
+      enabled: true

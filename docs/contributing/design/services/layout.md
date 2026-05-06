@@ -281,6 +281,11 @@ registration step. See `cli meta ports suggest` in
 
 ## `run_after` and `lifecycle` 🌱
 
+For the semantic meaning of each `lifecycle` value (and the criteria a
+role MUST satisfy to claim a given value) see
+[lifecycle.md](lifecycle.md). This section only covers the on-disk shape
+of the two fields.
+
 Both fields live on the role's **primary entity** in `meta/services.yml`,
 where `<primary_entity> = get_entity_name(role_name)`:
 

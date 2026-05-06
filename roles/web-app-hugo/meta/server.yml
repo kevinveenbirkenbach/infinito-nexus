@@ -1,0 +1,17 @@
+domains:
+  canonical:
+  - hugo.{{ DOMAIN_PRIMARY }}
+  aliases: []
+csp:
+  flags:
+    style-src-attr:
+      unsafe-inline: true
+    style-src-elem:
+      unsafe-inline: true
+    script-src-elem:
+      unsafe-inline: true
+    script-src-attr:
+      unsafe-inline: true
+networks:
+  local:
+    subnet: 192.168.102.240/28

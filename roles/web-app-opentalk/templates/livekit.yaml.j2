@@ -1,0 +1,11 @@
+port: {{ OPENTALK_LIVEKIT_HTTP_PORT }}
+log_level: info
+
+rtc:
+  tcp_port: {{ OPENTALK_LIVEKIT_TCP_PORT }}
+  port_range_start: {{ OPENTALK_LIVEKIT_RTC_START }}
+  port_range_end: {{ OPENTALK_LIVEKIT_RTC_END }}
+  use_external_ip: true
+
+keys:
+  {{ OPENTALK_LIVEKIT_API_KEY }}: "{{ OPENTALK_LIVEKIT_API_SECRET }}"

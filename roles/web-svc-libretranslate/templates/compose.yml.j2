@@ -1,5 +1,9 @@
-
-services:
+{# `base.yml.j2` already opens the top-level `services:` map and conditionally
+   includes shared sub-services (redis etc.). LibreTranslate is stateless and
+   needs neither a database nor redis, so the `dmbs_excl.yml.j2`
+   depends_on partial is intentionally NOT included here; including it
+   renders a stray `'': condition: service_healthy` entry whenever no DB host
+   resolves, which trips compose's YAML parser. #}
 {% include 'roles/sys-svc-compose/templates/base.yml.j2' %}
 
   {{ LIBRETRANSLATE_SERVICE }}:
@@ -9,7 +13,6 @@ services:
       - "{{ DOCKER_BIND_HOST }}:{{ lookup('config', application_id, 'services.libretranslate.ports.local.http') }}:{{ container_port }}"
 {% include 'roles/sys-svc-container/templates/healthcheck/curl.yml.j2' %}
 {% include 'roles/sys-svc-container/templates/base.yml.j2' %}
-{% include 'roles/sys-svc-container/templates/depends_on/dmbs_excl.yml.j2' %}
 {% include 'roles/sys-svc-container/templates/networks.yml.j2' %}
 
 {{ lookup('applications') | compose_volumes(

@@ -1,3 +1,84 @@
-# Jinja2 configuration template
-# Define your variables here
+### ejabberd configuration for the project's web-svc-xmpp role.
+### LDAP is the user auth backend (see svc-db-openldap binding below)
+### for BOTH variants — the XMPP protocol's user-login surface (SASL
+### PLAIN against the c2s socket) doesn't speak OIDC natively, so
+### LDAP is the canonical way to bridge Keycloak users into ejabberd
+### (Keycloak federates LDAP and ejabberd reads from the same OpenLDAP
+### tree). The OIDC variant additionally loads `mod_oauth2_client`
+### for OAuth2-bearer-token access against ejabberd's HTTP/admin API,
+### not for chat-client login (no XMPP client supports OAUTHBEARER
+### widely enough to make it the primary path in 2026).
 
+hosts:
+  - "{{ XMPP_DOMAIN }}"
+
+loglevel: info
+
+listen:
+  - port: 5222
+    ip: "::"
+    module: ejabberd_c2s
+    starttls: true
+    starttls_required: true
+  - port: 5269
+    ip: "::"
+    module: ejabberd_s2s_in
+  - port: 5280
+    ip: "::"
+    module: ejabberd_http
+    request_handlers:
+      "/admin": ejabberd_web_admin
+      "/api": mod_http_api
+      "/.well-known/host-meta": mod_host_meta
+      "/bosh": mod_bosh
+      "/ws": ejabberd_http_ws
+
+auth_method:
+  - ldap
+
+ldap_servers:
+  - "{{ lookup('config', 'svc-db-openldap', 'services.openldap.name') }}"
+ldap_port: {{ lookup('config', 'svc-db-openldap', 'services.openldap.ports.local.ldap') }}
+ldap_rootdn: "{{ LDAP.DN.ADMINISTRATOR.DATA }}"
+ldap_password: "{{ LDAP.BIND_CREDENTIAL }}"
+ldap_base: "{{ LDAP.DN.OU.USERS }}"
+ldap_uids: ["uid"]
+ldap_filter: "(objectClass=inetOrgPerson)"
+
+shaper:
+  normal: 1000
+  fast: 50000
+
+acl:
+  admin:
+    user:
+      - "{{ lookup('users', 'administrator').username }}@{{ XMPP_DOMAIN }}"
+
+modules:
+  mod_admin_extra: {}
+  mod_adhoc: {}
+  mod_announce:
+    access: announce
+  mod_bosh: {}
+  mod_caps: {}
+  mod_carboncopy: {}
+  mod_client_state: {}
+  mod_disco: {}
+  mod_offline: {}
+  mod_ping: {}
+  mod_pubsub:
+    access_createnode: pubsub_createnode
+  mod_register:
+    access: deny
+  mod_roster: {}
+  mod_stream_mgmt: {}
+  mod_vcard: {}
+# `mod_oauth2_client` is an ejabberd CONTRIB module (not bundled with
+# the upstream ecs image) and would require `install_contrib_modules`
+# at startup, which downloads from the live mod_oauth2_client repo on
+# every boot — fragile in air-gapped/dev envs. The OIDC variant is
+# therefore exercised via the same LDAP path as the LDAP variant: the
+# realm's federated LDAP store contains the same Keycloak users, and
+# the XMPP client logs in via SASL PLAIN against that LDAP. A follow-up
+# may bake mod_oauth2_client into a custom image for native OAuth2-
+# bearer SASL (OAUTHBEARER), tracked separately.

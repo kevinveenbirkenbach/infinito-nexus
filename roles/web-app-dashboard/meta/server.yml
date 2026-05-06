@@ -14,7 +14,7 @@ csp:
     connect-src:
     - https://ka-f.fontawesome.com
     - https://cdn.jsdelivr.net
-    - auth.{{ DOMAIN_PRIMARY }}
+    - "{{ lookup('domain', 'web-app-keycloak') }}"
     frame-src:
     - '*.{{ DOMAIN_PRIMARY }}'
   flags:

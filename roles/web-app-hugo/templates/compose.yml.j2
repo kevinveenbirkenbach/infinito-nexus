@@ -1,0 +1,20 @@
+---
+{% include 'roles/sys-svc-compose/templates/base.yml.j2' %}
+  {{ HUGO_SERVICE }}:
+    container_name: {{ HUGO_CONTAINER }}
+    {{ lookup('template', 'roles/sys-svc-container/templates/build.yml.j2') | indent(4) }}
+      args:
+        HUGO_BUILDER_IMAGE: "{{ HUGO_BUILDER_IMAGE }}"
+        HUGO_BUILDER_VERSION: "{{ HUGO_BUILDER_VERSION }}"
+        HUGO_NGINX_IMAGE: "{{ HUGO_NGINX_IMAGE }}"
+        HUGO_NGINX_VERSION: "{{ HUGO_NGINX_VERSION }}"
+        HUGO_BASE_URL: "{{ HUGO_BASE_URL }}"
+        HUGO_ENVIRONMENT: "{{ HUGO_ENVIRONMENT }}"
+        HUGO_MINIFY: "{{ HUGO_MINIFY | string | lower }}"
+    image: {{ HUGO_IMAGE_CUSTOM }}
+    ports:
+      - {{ DOCKER_BIND_HOST }}:{{ lookup('config', application_id, 'services.hugo.ports.local.http') }}:{{ container_port }}
+{% include 'roles/sys-svc-container/templates/base.yml.j2' %}
+{% include 'roles/sys-svc-container/templates/healthcheck/wget.yml.j2' %}
+
+{% include 'roles/sys-svc-compose/templates/networks.yml.j2' %}

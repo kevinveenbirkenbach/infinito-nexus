@@ -187,18 +187,22 @@
     domains: "{{ lookup('domains') }}"
 
 # Optional wait until app is ready (uses domain resolution).
-# Accept any 1xx/2xx/3xx response — anything below 400 means the service is up.
+# Accept any 1xx/2xx/3xx/4xx response. The intent is "the HTTP server
+# answered on the network". A 4xx is still proof of life; some apps
+# (e.g. bridgy-fed) legitimately serve 404 on `/` because the
+# canonical landing surface lives elsewhere. 5xx is the only signal
+# that the service is genuinely unhealthy.
 # follow_redirects:none ensures we check the app itself, not its redirect target.
 - name: Wait until application is ready (any non-error response)
   uri_retry:
     url: "{{ lookup('tls', application_id, 'url.base') }}"
-    status_code: "{{ range(100, 400) | list }}"
+    status_code: "{{ range(100, 500) | list }}"
     validate_certs: false
     follow_redirects: none
   register: _wait_result
   retries: "{{ TEST_E2E_PLAYWRIGHT_WAIT_RETRIES }}"
   delay: "{{ TEST_E2E_PLAYWRIGHT_WAIT_DELAY }}"
-  until: _wait_result.status is defined and _wait_result.status | int < 400
+  until: _wait_result.status is defined and _wait_result.status | int < 500
   when: TEST_E2E_PLAYWRIGHT_WAIT_ENABLED | bool
 
 - name: Ensure reports dir exists

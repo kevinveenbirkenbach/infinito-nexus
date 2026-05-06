@@ -18,20 +18,23 @@ RUN pip install --upgrade pip && \
     pip install --no-cache-dir -r requirements.txt
 
 # Create oauth_dropins static symlink (upstream expects this)
-RUN python - <<'PY'\n\
-import oauth_dropins, pathlib, os\n\
-target = pathlib.Path(oauth_dropins.__file__).parent / 'static'\n\
-link = pathlib.Path('/app/oauth_dropins_static')\n\
-try:\n\
-    if link.exists() or link.is_symlink():\n\
-        link.unlink()\n\
-    os.symlink(str(target), str(link))\n\
-except FileExistsError:\n\
-    pass\n\
-print('Symlinked oauth_dropins_static ->', target)\n\
+RUN python - <<'PY'
+import oauth_dropins, pathlib, os
+target = pathlib.Path(oauth_dropins.__file__).parent / 'static'
+link = pathlib.Path('/app/oauth_dropins_static')
+try:
+    if link.exists() or link.is_symlink():
+        link.unlink()
+    os.symlink(str(target), str(link))
+except FileExistsError:
+    pass
+print('Symlinked oauth_dropins_static ->', target)
 PY
 
-# Final stage
+# Final stage. Carry over the application directory AND the python
+# site-packages from the build stage so gunicorn / bridgy-fed deps
+# are present at runtime; otherwise the entrypoint exits with
+# `gunicorn: not found` and the container restarts forever.
 FROM ${PY_BASE}
 
 ARG CONTAINER_PORT
@@ -39,6 +42,10 @@ ENV PORT=${CONTAINER_PORT}
 
 WORKDIR /app
 COPY --from=build /app /app
+# Carry the entire /usr/local layer over (Python's site-packages and bin
+# scripts), so the python-version-specific path (python3.14, python3.12, …)
+# does not have to be hardcoded.
+COPY --from=build /usr/local /usr/local
 
 # Non-root good practice
 RUN useradd -r -m -d /nonroot appuser && chown -R appuser:appuser /app

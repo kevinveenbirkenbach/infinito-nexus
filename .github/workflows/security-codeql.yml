@@ -56,7 +56,10 @@ jobs:
         # Disabled — no matching Go files found in the repository
         # - language: go
         #   build-mode: none
-        # Disabled — no matching Java/Kotlin files found in the repository
+        # Disabled — the bluesky Keycloak event-listener SPI bridge
+        # scaffold (the only Java source in the repo) was removed; no
+        # matching Java/Kotlin files remain. Re-enable once a real
+        # Java component (e.g. a built Keycloak SPI) lands again.
         # - language: java-kotlin
         #   build-mode: none
         # Disabled — no matching Rust files found in the repository

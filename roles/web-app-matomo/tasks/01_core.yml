@@ -35,7 +35,7 @@
 - name: "Matomo install | Check whether Matomo is already installed (config.ini.php exists)"
   command:
     argv:
-      - docker
+      - container
       - exec
       - "{{ MATOMO_NAME }}"
       - sh

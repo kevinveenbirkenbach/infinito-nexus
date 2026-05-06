@@ -1,0 +1,9 @@
+credentials:
+  session_secret:
+    description: Secret used by express-session cookie signing.
+    algorithm: alphanumeric
+    validation: ^[A-Za-z0-9]{64}$
+  admin_key:
+    description: Postmarks admin API key for the Web UI write endpoints.
+    algorithm: alphanumeric
+    validation: ^[A-Za-z0-9]{32}$

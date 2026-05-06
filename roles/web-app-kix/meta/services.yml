@@ -44,8 +44,8 @@ kix:
   min_storage: 10GB
   ports:
     local:
-      http: 8071
-      oauth2: 16493
+      http: 8083
+      oauth2: 16500
   run_after:
   - web-app-keycloak
   lifecycle: pre-alpha
