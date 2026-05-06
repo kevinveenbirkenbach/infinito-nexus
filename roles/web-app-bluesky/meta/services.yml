@@ -74,7 +74,7 @@ broker:
   port: 8080
   ports:
     local:
-      http: 8072
+      http: 8076
 css:
   enabled: true
   shared: true
