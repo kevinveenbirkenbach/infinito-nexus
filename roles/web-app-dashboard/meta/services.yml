@@ -17,8 +17,8 @@ matomo:
   enabled: "{{ 'web-app-matomo' in group_names }}"
   shared: "{{ 'web-app-matomo' in group_names }}"
 dashboard:
-  enabled: "{{ 'web-app-dashboard' in group_names }}"
-  shared: "{{ 'web-app-dashboard' in group_names }}"
+  enabled: true
+  shared: true
   name: dashboard
   image: ghcr.io/kevinveenbirkenbach/port-ui
   version: 1.1.0

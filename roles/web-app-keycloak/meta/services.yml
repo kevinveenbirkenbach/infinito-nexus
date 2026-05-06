@@ -20,8 +20,8 @@ email:
   enabled: "{{ 'web-app-mailu' in group_names }}"
   shared: "{{ 'web-app-mailu' in group_names }}"
 keycloak:
-  enabled: "{{ 'web-app-keycloak' in group_names }}"
-  shared: "{{ 'web-app-keycloak' in group_names }}"
+  enabled: true
+  shared: true
   provides: oidc
   covers:
   - oauth2

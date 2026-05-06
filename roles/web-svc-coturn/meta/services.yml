@@ -2,8 +2,8 @@ matomo:
   enabled: "{{ 'web-app-matomo' in group_names }}"
   shared: "{{ 'web-app-matomo' in group_names }}"
 coturn:
-  enabled: "{{ 'web-svc-coturn' in group_names }}"
-  shared: "{{ 'web-svc-coturn' in group_names }}"
+  enabled: true
+  shared: true
   image: coturn/coturn
   version: latest
   min_storage: 1GB

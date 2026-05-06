@@ -70,6 +70,7 @@ import yaml
 
 from utils.annotations.suppress import line_has_rule
 from utils.cache.files import read_text
+from utils.entity_name_utils import get_entity_name
 from utils.service_registry import (
     build_covered_key_to_role,
     build_role_to_primary_service_key,
@@ -173,11 +174,19 @@ class TestServicesDynamicFlags(unittest.TestCase):
 
             block_exempt = _suppressed_top_level_keys(services_file)
             inline_exempt = _suppressed_inline_flags(services_file)
+            # The role's own primary entity is exempt: see
+            # ``test_services_no_self_reference.py``. Its ``enabled`` /
+            # ``shared`` MUST be literal ``true`` (the role's services.yml
+            # is only loaded when the role itself is in group_names, so a
+            # ``'<self>' in group_names`` Jinja would be tautological).
+            own_entity = get_entity_name(role_name)
 
             for service_key, entry in data.items():
                 if not isinstance(entry, dict):
                     continue
                 if service_key in block_exempt:
+                    continue
+                if service_key == own_entity:
                     continue
 
                 expected_role = covered_key_to_role.get(

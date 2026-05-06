@@ -13,8 +13,8 @@ matomo:
   enabled: "{{ 'web-app-matomo' in group_names }}"
   shared: "{{ 'web-app-matomo' in group_names }}"
 mailu:
-  enabled: "{{ 'web-app-mailu' in group_names }}"
-  shared: "{{ 'web-app-mailu' in group_names }}"
+  enabled: true
+  shared: true
   provides: email
   version: '2024.06'
   name: mailu

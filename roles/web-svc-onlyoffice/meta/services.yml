@@ -18,8 +18,8 @@ postgres:
   enabled: true  # nocheck: dynamic-flag
   shared: "{{ 'svc-db-postgres' in group_names }}"
 onlyoffice:
-  enabled: "{{ 'web-svc-onlyoffice' in group_names }}"
-  shared: "{{ 'web-svc-onlyoffice' in group_names }}"
+  enabled: true
+  shared: true
   image: onlyoffice/documentserver
   version: latest
   name: onlyoffice

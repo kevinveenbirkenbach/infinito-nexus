@@ -8,11 +8,42 @@
 # See docs/contributing/artefact/files/role/variants.md for the file format.
 
 # variant 0: OIDC variant (canonical default).
-- {}
 
-# variant 1: LDAP variant. Keep oauth2-proxy active (user-facing
-# entry point is unchanged) but flip the LDAP marker so Playwright's
-# LDAP_SERVICE_ENABLED gate fires.
 - services:
-    ldap:
+    dashboard:
       enabled: true
+      shared: true
+    email:
+      enabled: true
+      shared: true
+    logout:
+      enabled: true
+      shared: true
+    matomo:
+      enabled: true
+      shared: true
+    oauth2:
+      enabled: true
+      shared: true
+    prometheus:
+      enabled: true
+      shared: true
+- services:
+    dashboard:
+      enabled: false
+      shared: false
+    email:
+      enabled: false
+      shared: false
+    logout:
+      enabled: false
+      shared: false
+    matomo:
+      enabled: false
+      shared: false
+    oauth2:
+      enabled: false
+      shared: false
+    prometheus:
+      enabled: false
+      shared: false

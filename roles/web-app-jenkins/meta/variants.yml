@@ -4,12 +4,36 @@
 # `svc-db-openldap`.
 
 # variant 0: OIDC variant (canonical default).
-- {}
 
-# variant 1: LDAP variant. Disable OIDC and enable LDAP so Jenkins's
-# core LDAP plugin is the exercised auth path.
+- services:
+    dashboard:
+      enabled: true
+      shared: true
+    logout:
+      enabled: true
+      shared: true
+    matomo:
+      enabled: true
+      shared: true
+    oidc:
+      enabled: true
+      shared: true
+    prometheus:
+      enabled: true
+      shared: true
 - services:
     oidc:
       enabled: false
-    ldap:
-      enabled: true
+      shared: false
+    dashboard:
+      enabled: false
+      shared: false
+    logout:
+      enabled: false
+      shared: false
+    matomo:
+      enabled: false
+      shared: false
+    prometheus:
+      enabled: false
+      shared: false

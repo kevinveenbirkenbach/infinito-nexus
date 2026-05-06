@@ -1,6 +1,6 @@
 libretranslate:
-  enabled: "{{ 'web-svc-libretranslate' in group_names }}"
-  shared: "{{ 'web-svc-libretranslate' in group_names }}"
+  enabled: true
+  shared: true
   image: libretranslate/libretranslate
   version: latest
   min_storage: 5GB

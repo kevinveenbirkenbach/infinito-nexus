@@ -26,8 +26,8 @@ css:
   enabled: true
   shared: true
 prometheus:
-  enabled: "{{ 'web-app-prometheus' in group_names }}"
-  shared: "{{ 'web-app-prometheus' in group_names }}"
+  enabled: true
+  shared: true
   provides: prometheus
   image: prom/prometheus
   version: v3.11.3

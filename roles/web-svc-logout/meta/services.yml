@@ -1,6 +1,6 @@
 logout:
-  enabled: "{{ 'web-svc-logout' in group_names }}"
-  shared: "{{ 'web-svc-logout' in group_names }}"
+  enabled: true
+  shared: true
   image: ghcr.io/kevinveenbirkenbach/universal-logout
   version: latest
   name: logout

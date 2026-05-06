@@ -7,11 +7,16 @@
 
 # variant 0: OIDC variant (canonical default; ejabberd LDAP backend
 # stays on, OIDC marker is on so Playwright runs the OIDC scenario).
-- services:
-    oidc:
-      enabled: true
 
-# variant 1: LDAP variant. OIDC marker off, LDAP backend stays on.
 - services:
     ldap:
+      shared: true
+    prometheus:
       enabled: true
+      shared: true
+- services:
+    ldap:
+      shared: false
+    prometheus:
+      enabled: false
+      shared: false

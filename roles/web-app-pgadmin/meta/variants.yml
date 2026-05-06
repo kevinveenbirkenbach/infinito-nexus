@@ -1,0 +1,44 @@
+# Matrix-deploy variant overrides for web-app-pgadmin.
+# See docs/contributing/artefact/files/role/variants.md for the file format.
+
+# variant pinning every dynamic services.yml flag to true so the
+# matrix exercises the in-group_names branch of web-app-pgadmin.
+- services:
+    dashboard:
+      enabled: true
+      shared: true
+    logout:
+      enabled: true
+      shared: true
+    matomo:
+      enabled: true
+      shared: true
+    oauth2:
+      enabled: true
+      shared: true
+    postgres:
+      shared: true
+    prometheus:
+      enabled: true
+      shared: true
+
+# variant pinning every dynamic services.yml flag to false so the
+# matrix also exercises the out-of-group_names branch.
+- services:
+    dashboard:
+      enabled: false
+      shared: false
+    logout:
+      enabled: false
+      shared: false
+    matomo:
+      enabled: false
+      shared: false
+    oauth2:
+      enabled: false
+      shared: false
+    postgres:
+      shared: false
+    prometheus:
+      enabled: false
+      shared: false

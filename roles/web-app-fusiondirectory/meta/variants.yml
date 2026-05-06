@@ -5,10 +5,40 @@
 # variant 0.
 
 # variant 0: OIDC variant (canonical default; oauth2-proxy gate).
-- {}
 
-# variant 1: LDAP variant. Same oauth2-proxy gate, LDAP marker stays
-# on, exercises Playwright's LDAP scenario.
+- services:
+    dashboard:
+      enabled: true
+      shared: true
+    email:
+      enabled: true
+      shared: true
+    ldap:
+      shared: true
+    logout:
+      enabled: true
+      shared: true
+    oauth2:
+      enabled: true
+      shared: true
+    prometheus:
+      enabled: true
+      shared: true
 - services:
     ldap:
-      enabled: true
+      shared: false
+    dashboard:
+      enabled: false
+      shared: false
+    email:
+      enabled: false
+      shared: false
+    logout:
+      enabled: false
+      shared: false
+    oauth2:
+      enabled: false
+      shared: false
+    prometheus:
+      enabled: false
+      shared: false

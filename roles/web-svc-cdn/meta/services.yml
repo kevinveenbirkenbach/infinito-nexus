@@ -2,8 +2,8 @@
 dashboard:
   enabled: false
 cdn:
-  enabled: "{{ 'web-svc-cdn' in group_names }}"
-  shared: "{{ 'web-svc-cdn' in group_names }}"
+  enabled: true
+  shared: true
   cpus: '0.2'
   mem_reservation: 128m
   mem_limit: 256m

@@ -14,8 +14,8 @@ redis:
     disabled: true
   enabled: false
 collabora:
-  enabled: "{{ 'web-svc-collabora' in group_names }}"
-  shared: "{{ 'web-svc-collabora' in group_names }}"
+  enabled: true
+  shared: true
   image: collabora/code
   version: latest
   name: collabora

@@ -3,5 +3,42 @@
 
 # variant 0: development credentials so the Playwright admin
 # scenario can sign in without an out-of-band password handoff.
+
 - credentials:
-    administrator_password: "'$tr0ng€xampl3PW!"
+    administrator_password: "'$tr0ng\u20ACxampl3PW!"
+  services:
+    dashboard:
+      enabled: true
+      shared: true
+    ldap:
+      shared: true
+    logout:
+      enabled: true
+      shared: true
+    matomo:
+      enabled: true
+      shared: true
+    oauth2:
+      enabled: true
+      shared: true
+    prometheus:
+      enabled: true
+      shared: true
+- services:
+    dashboard:
+      enabled: false
+      shared: false
+    ldap:
+      shared: false
+    logout:
+      enabled: false
+      shared: false
+    matomo:
+      enabled: false
+      shared: false
+    oauth2:
+      enabled: false
+      shared: false
+    prometheus:
+      enabled: false
+      shared: false

@@ -9,9 +9,8 @@
 # variant 0: shrink the official ollama image to alpine/ollama and
 # keep the model preload list empty so GitHub Actions runners can
 # complete the deploy within their disk and time budget.
+
 - services:
     ollama:
       preload_models: []
-      # Smaller image suitable for CI runners.
-      # See https://hub.docker.com/r/alpine/ollama
-      image: "alpine/ollama"
+      image: alpine/ollama
