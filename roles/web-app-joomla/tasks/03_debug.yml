@@ -1,7 +1,7 @@
 - name: "Toggle Joomla debug flags safely (configuration.php)"
   command:
     argv:
-      - docker
+      - container
       - exec
       - -e
       - "J_MODE_DEBUG={{ MODE_DEBUG | bool | ternary('1','0') }}"

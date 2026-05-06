@@ -37,6 +37,23 @@ The role follows Infinito.Nexus conventions:
 - Health checks via HTTP
 - Network and dependency handling via shared system roles
 
+## Single sign-on
+
+OIDC is wired in via a sidecar `web-app-oauth2-proxy` that fronts
+the human-facing web UI only. The programmatic API endpoints
+(`/translate`, `/detect`, …) MUST stay reachable with API-key auth
+even when the UI is gated, so the OIDC gate is restricted to the UI
+subpath; otherwise machine clients break.
+
+LDAP is not feasible: LibreTranslate authenticates programmatic
+clients with API keys, and LDAP cannot map onto that model. RBAC is
+also not feasible because authorisation in LibreTranslate is
+API-key-tier only and decoupled from any IDP. The OIDC gate
+protects the UI but does not grant differential authorisation
+inside the app. These LDAP and RBAC exceptions are documented per
+[lifecycle.md](../../docs/contributing/design/services/lifecycle.md)
+and [requirement 013](../../docs/requirements/013-alpha-to-beta-promotion.md).
+
 ## Configuration
 
 All configuration is handled via `meta/services.yml` (services map at file root) and `meta/server.yml` (server block at file root).

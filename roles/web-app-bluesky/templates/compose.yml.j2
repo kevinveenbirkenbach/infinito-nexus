@@ -27,6 +27,43 @@
       - "{{ DOCKER_BIND_HOST }}:{{ BLUESKY_WEB_PORT }}:{{ container_port }}"
 {% include 'roles/sys-svc-container/templates/healthcheck/tcp.yml.j2' %}
 {% include 'roles/sys-svc-container/templates/networks.yml.j2' %}
+
+  bluesky-broker:
+    build:
+      context: "{{ BLUESKY_BROKER_BUILD_CONTEXT }}"
+      dockerfile: Dockerfile
+    image: {{ BLUESKY_BROKER_IMAGE }}
+    container_name: {{ BLUESKY_BROKER_CONTAINER }}
+    hostname: bluesky-broker
+    pull_policy: never
+    restart: {{ DOCKER_RESTART_POLICY }}
+    ports:
+      - "{{ DOCKER_BIND_HOST }}:{{ BLUESKY_BROKER_PORT }}:8080"
+    environment:
+      BROKER_PORT: "8080"
+      SOCIAL_APP_URL: "http://web:8100"
+      PDS_URL: "{{ lookup('tls', application_id, 'protocols.web') }}://{{ BLUESKY_API_DOMAIN }}"
+      PDS_HANDLE_DOMAIN: "{{ BLUESKY_PDS_HANDLE_DOMAIN }}"
+      # Same admin password the PDS itself uses (env.j2 sets
+      # PDS_ADMIN_PASSWORD on the pds container). The broker reuses it
+      # to recover from `Handle already taken` via the PDS admin
+      # `updateAccountPassword` API when its in-memory cache has been
+      # lost but the PDS still holds the account from a previous
+      # broker session (cross-variant deploy / broker container
+      # restart with persistent pds_data volume).
+      # `$` doubled to `$$` because docker compose interpolates the
+      # `environment:` map at parse time and would otherwise eat any
+      # `$word` substring in the password (silently truncating it
+      # to whatever survives interpolation; PDS rejects with 401).
+      PDS_ADMIN_PASSWORD: "{{ BLUESKY_ADMIN_PASSWORD | replace('$', '$$') }}"
+      BLUESKY_BRIDGE_ENCRYPTION_KEY: "{{ BLUESKY_BRIDGE_ENCRYPTION_KEY }}"
+      INSECURE_TLS: "{{ MODE_DEBUG | string | lower }}"
+    healthcheck:
+      test: ["CMD", "wget", "-q", "-O-", "http://127.0.0.1:8080/healthz"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+{% include 'roles/sys-svc-container/templates/networks.yml.j2' %}
 {% endif %}
 
 {{ lookup('applications') | compose_volumes(

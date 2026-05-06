@@ -7,3 +7,12 @@ credentials:
     description: PLC rotation key in hex format (32 bytes)
     algorithm: sha256
     validation: ^[a-f0-9]{64}$
+  bridge_encryption_key:
+    description: |-
+      AES-256-GCM symmetric key used by the login-broker to encrypt
+      the per-user Bluesky app-password held in the broker's
+      in-memory cache (see files/login-broker/server.js,
+      `sessionCache`). Format: `base64:<44-char-base64-of-32-random-bytes>`.
+      The broker strips the `base64:` prefix at startup.
+    algorithm: base64_prefixed_32
+    validation: ^base64:[A-Za-z0-9+/]{43}=$

@@ -1,0 +1,17 @@
+# Matrix-deploy variant overrides per requirement 013. The LDAP
+# variant is the canonical XMPP path because most clients only
+# support SCRAM-SHA-256 over a real password store; the OIDC
+# variant exists only to satisfy the auth-flow-variants
+# requirement and runs the same ejabberd config with the OIDC
+# marker raised.
+
+# variant 0: OIDC variant (canonical default; ejabberd LDAP backend
+# stays on, OIDC marker is on so Playwright runs the OIDC scenario).
+- services:
+    oidc:
+      enabled: true
+
+# variant 1: LDAP variant. OIDC marker off, LDAP backend stays on.
+- services:
+    ldap:
+      enabled: true

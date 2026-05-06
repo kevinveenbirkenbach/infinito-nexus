@@ -1,0 +1,11 @@
+{
+  "name": "infinito-bluesky-login-broker",
+  "version": "1.0.0",
+  "description": "OIDC → Bluesky-PDS app-password broker. Auto-provisions a PDS account on first visit, stores the AES-256-GCM-encrypted app-password as a Keycloak user attribute, and hands off a valid Bluesky session to the social-app web client without ever exposing the password to the browser. Per requirement 013 web-app-bluesky per-role notes (variant A+).",
+  "license": "MIT",
+  "private": true,
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  }
+}
