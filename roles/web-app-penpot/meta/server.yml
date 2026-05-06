@@ -1,0 +1,18 @@
+csp:
+  flags:
+    script-src:
+      unsafe-eval: true
+    script-src-elem:
+      unsafe-inline: true
+      unsafe-eval: true
+    script-src-attr:
+      unsafe-inline: true
+      unsafe-eval: true
+    style-src-attr:
+      unsafe-inline: true
+networks:
+  local:
+    subnet: 192.168.105.80/28
+domains:
+  canonical:
+    - penpot.design.{{ DOMAIN_PRIMARY }}
