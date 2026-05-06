@@ -1,0 +1,100 @@
+// @ts-check
+const { test, expect } = require("@playwright/test");
+
+test.use({ ignoreHTTPSErrors: true });
+
+function decodeDotenvQuotedValue(value) {
+  if (typeof value !== "string" || value.length < 2) return value;
+  if (!(value.startsWith('"') && value.endsWith('"'))) return value;
+  const encoded = value.slice(1, -1);
+  try { return JSON.parse(`"${encoded}"`).replace(/\$\$/g, "$"); }
+  catch { return encoded.replace(/\$\$/g, "$"); }
+}
+
+const oidcIssuerUrl = decodeDotenvQuotedValue(process.env.OIDC_ISSUER_URL);
+const piholeBaseUrl = decodeDotenvQuotedValue(process.env.PIHOLE_BASE_URL);
+const adminUsername = decodeDotenvQuotedValue(process.env.ADMIN_USERNAME);
+const adminPassword = decodeDotenvQuotedValue(process.env.ADMIN_PASSWORD);
+const biberUsername = decodeDotenvQuotedValue(process.env.BIBER_USERNAME);
+const biberPassword = decodeDotenvQuotedValue(process.env.BIBER_PASSWORD);
+
+test.beforeEach(() => {
+  expect(oidcIssuerUrl, "OIDC_ISSUER_URL must be set").toBeTruthy();
+  expect(piholeBaseUrl, "PIHOLE_BASE_URL must be set").toBeTruthy();
+  expect(adminUsername, "ADMIN_USERNAME must be set").toBeTruthy();
+  expect(adminPassword, "ADMIN_PASSWORD must be set").toBeTruthy();
+  expect(biberUsername, "BIBER_USERNAME must be set").toBeTruthy();
+  expect(biberPassword, "BIBER_PASSWORD must be set").toBeTruthy();
+});
+
+async function performOidcLogin(page, username, password) {
+  await page.getByRole("textbox", { name: /username|email/i }).waitFor({ state: "visible", timeout: 60_000 });
+  await page.getByRole("textbox", { name: /username|email/i }).fill(username);
+  await page.getByRole("textbox", { name: /username|email/i }).press("Tab");
+  await page.getByRole("textbox", { name: "Password" }).fill(password);
+  await page.getByRole("button", { name: /sign in/i }).click();
+}
+
+// Scenario I: Pi-hole is protected — unauthenticated access redirects to Keycloak
+test("pihole is protected by oauth2 proxy", async ({ page }) => {
+  const expectedOidcAuthUrl = `${oidcIssuerUrl.replace(/\/$/, "")}/protocol/openid-connect/auth`;
+
+  await page.goto(`${piholeBaseUrl.replace(/\/$/, "")}/`);
+
+  await expect
+    .poll(() => page.url(), {
+      timeout: 30_000,
+      message: "Expected redirect to Keycloak OIDC auth"
+    })
+    .toContain(expectedOidcAuthUrl);
+});
+
+// Scenario II: Admin can log in via SSO and reach Pi-hole (not Keycloak)
+test("admin can log in via sso and access pihole", async ({ page }) => {
+  const expectedOidcAuthUrl   = `${oidcIssuerUrl.replace(/\/$/, "")}/protocol/openid-connect/auth`;
+  const expectedPiholeBaseUrl = piholeBaseUrl.replace(/\/$/, "");
+
+  await page.goto(`${expectedPiholeBaseUrl}/`);
+
+  await expect
+    .poll(() => page.url(), { timeout: 30_000 })
+    .toContain(expectedOidcAuthUrl);
+
+  await performOidcLogin(page, adminUsername, adminPassword);
+
+  await page.waitForLoadState("networkidle", { timeout: 60_000 }).catch(() => {});
+
+  // Verify we are no longer on Keycloak
+  expect(page.url()).not.toContain(expectedOidcAuthUrl);
+
+  // Verify page loaded successfully
+  await expect(page.locator("body")).toBeVisible();
+});
+
+// Scenario III: Biber (non-admin) is denied access
+test("biber is denied access to pihole", async ({ page }) => {
+  const expectedOidcAuthUrl   = `${oidcIssuerUrl.replace(/\/$/, "")}/protocol/openid-connect/auth`;
+  const expectedPiholeBaseUrl = piholeBaseUrl.replace(/\/$/, "");
+
+  await page.goto(`${expectedPiholeBaseUrl}/`);
+
+  await expect
+    .poll(() => page.url(), { timeout: 30_000 })
+    .toContain(expectedOidcAuthUrl);
+
+  await performOidcLogin(page, biberUsername, biberPassword);
+
+  await page.waitForLoadState("networkidle", { timeout: 30_000 }).catch(() => {});
+
+  const bodyText = await page.locator("body").textContent({ timeout: 15_000 }).catch(() => "");
+  const currentUrl = page.url();
+
+  expect(
+    bodyText.includes("403") ||
+    bodyText.toLowerCase().includes("forbidden") ||
+    bodyText.toLowerCase().includes("access denied") ||
+    bodyText.toLowerCase().includes("you do not have permission") ||
+    currentUrl.includes(expectedOidcAuthUrl),
+    `Expected biber to be denied. URL: ${currentUrl}`
+  ).toBeTruthy();
+});
