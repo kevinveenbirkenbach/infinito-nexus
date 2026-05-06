@@ -204,6 +204,39 @@
           "user.model.attribute": [ "uidNumber" ]
         }
       }
+      {# ── Moodle profile-field LDAP mappers (only when Moodle is enabled). ── #}
+      {# Per docs/requirements/015-moodle-self-built.md §"Profile-field mapping". #}
+      {% if KEYCLOAK_MOODLE_ENABLED | bool %}
+      {% set _moodle_ldap_pairs = [
+        ['middleName',         'initials'],
+        ['nickname',           'displayName'],
+        ['phoneNumberAlt',     'mobile'],
+        ['street',             'street'],
+        ['locality',           'l'],
+        ['country',            'c'],
+        ['institution',        'o'],
+        ['department',         'ou'],
+        ['description',        'description'],
+        ['idNumber',           'employeeNumber'],
+        ['website',            'labeledURI'],
+        ['zoneinfo',           'infinitoTimezone'],
+        ['namePhoneticGiven',  'infinitoNamePhoneticGiven'],
+        ['namePhoneticFamily', 'infinitoNamePhoneticFamily']
+      ] %}
+      {% for kc_attr, ldap_attr in _moodle_ldap_pairs %},
+      {
+        "name": {{ ('moodle:' ~ kc_attr) | to_json }},
+        "providerId": "user-attribute-ldap-mapper",
+        "subComponents": {},
+        "config": {
+          "ldap.attribute": [ {{ ldap_attr | to_json }} ],
+          "is.mandatory.in.ldap": [ "false" ],
+          "always.read.value.from.ldap": [ "true" ],
+          "read.only": [ "false" ],
+          "user.model.attribute": [ {{ kc_attr | to_json }} ]
+        }
+      }{% endfor %}
+      {% endif %}
       {% if keycloak_map_ldap_realm_roles | default(false) %},
       {# ---------------------- LDAP -> Realm Roles (optional) -- #}
       {

@@ -10,3 +10,6 @@
 
 - name: "Include openssh-lpk Schema"
   include_tasks: schemas/openssh_lpk.yml
+
+- name: "Include Moodle Schema"
+  include_tasks: schemas/moodle.yml

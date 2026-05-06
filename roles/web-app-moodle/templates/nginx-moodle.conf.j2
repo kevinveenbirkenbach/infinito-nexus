@@ -1,0 +1,43 @@
+# Moodle nginx vhost. Mounted into the nginx sidecar at
+# /etc/nginx/conf.d/default.conf. Implements Moodle's official
+# nginx recipe (https://docs.moodle.org/en/Nginx).
+
+server {
+    listen {{ MOODLE_NGINX_PORT }};
+    listen [::]:{{ MOODLE_NGINX_PORT }};
+
+    server_name _;
+    root {{ MOODLE_CODE_DIR }};
+    index index.php;
+
+    client_max_body_size 256M;
+
+    # Moodle 4.5+ recipe: try files, then fall back to PHP.
+    location / {
+        try_files $uri $uri/ /index.php?$query_string;
+    }
+
+    location ~ [^/]\.php(/|$) {
+        fastcgi_split_path_info  ^(.+\.php)(/.+)$;
+        fastcgi_index            index.php;
+        fastcgi_pass             {{ MOODLE_CONTAINER }}:{{ MOODLE_FPM_PORT }};
+        include                  fastcgi_params;
+        fastcgi_param SCRIPT_FILENAME   $document_root$fastcgi_script_name;
+        fastcgi_param PATH_INFO         $fastcgi_path_info;
+        fastcgi_param HTTP_PROXY        "";
+        fastcgi_read_timeout            300;
+    }
+
+    # Deny direct access to Moodle data dir if it ever leaks under root.
+    location ^~ /moodledata/ {
+        deny all;
+        return 404;
+    }
+
+    # Static asset cache.
+    location ~* \.(css|js|gif|jpe?g|png|webp|svg|ico|woff2?|ttf)$ {
+        expires 1d;
+        add_header Cache-Control "public";
+        try_files $uri =404;
+    }
+}

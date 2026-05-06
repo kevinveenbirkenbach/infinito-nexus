@@ -1,0 +1,11 @@
+# Identity-integration variants per docs/requirements/015-moodle-self-built.md.
+# variant 0 (default): auth_oidc + auth_ldap sync-only (hybrid)
+# variant 1: auth_ldap only (no OIDC)
+
+# variant 0: hybrid (OIDC SSO + LDAP cron sync)
+- {}
+
+# variant 1: LDAP-only (auth_oidc disabled)
+- services:
+    oidc:
+      enabled: false

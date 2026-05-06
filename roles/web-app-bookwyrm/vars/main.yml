@@ -60,6 +60,6 @@ EMAIL_PORT:                     "{{ BOOKWYRM_EMAIL.port }}"
 EMAIL_HOST_USER:                "{{ BOOKWYRM_EMAIL.username }}"
 EMAIL_HOST_PASSWORD:            "{{ BOOKWYRM_EMAIL.password }}"
 # TLS/SSL: If TLS is true then TLS, else SSL
-EMAIL_USE_TLS:                  "{{ BOOKWYRM_EMAIL.tls | ternary('true','false') }}"
-EMAIL_USE_SSL:                  "{{ BOOKWYRM_EMAIL.tls | ternary('false','true') }}"
+EMAIL_USE_TLS:                  "{{ BOOKWYRM_EMAIL.tls | bool | string | lower }}"
+EMAIL_USE_SSL:                  "{{ (not (BOOKWYRM_EMAIL.tls | bool)) | string | lower }}"
 EMAIL_DEFAULT_FROM:             "BookWyrm <{{ BOOKWYRM_EMAIL['from'] }}>"

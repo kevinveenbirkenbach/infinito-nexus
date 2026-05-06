@@ -1,0 +1,42 @@
+{
+  "name": "{{ lookup('config', application_id, 'services.keycloak.scopes.moodle') }}",
+  "description": "Custom OIDC claims consumed by Moodle's auth_oidc plugin (req-015).",
+  "protocol": "openid-connect",
+  "attributes": {
+    "include.in.token.scope": "true",
+    "display.on.consent.screen": "true",
+    "gui.order": "",
+    "consent.screen.text": ""
+  },
+  "protocolMappers": [
+    {%- set _custom_claims = [
+      ['name_phonetic_given',  'namePhoneticGiven'],
+      ['name_phonetic_family', 'namePhoneticFamily'],
+      ['phone_number_alt',     'phoneNumberAlt'],
+      ['institution',          'institution'],
+      ['department',           'department'],
+      ['description',          'description'],
+      ['id_number',            'idNumber']
+    ] %}
+    {%- for claim_name, user_attr in _custom_claims %}
+    {
+      "name": {{ ('moodle:' ~ claim_name) | to_json }},
+      "protocol": "openid-connect",
+      "protocolMapper": "oidc-usermodel-attribute-mapper",
+      "consentRequired": false,
+      "config": {
+        "aggregate.attrs": "false",
+        "introspection.token.claim": "true",
+        "multivalued": "false",
+        "userinfo.token.claim": "true",
+        "user.attribute": {{ user_attr | to_json }},
+        "id.token.claim": "true",
+        "lightweight.claim": "false",
+        "access.token.claim": "true",
+        "claim.name": {{ claim_name | to_json }},
+        "jsonType.label": "String"
+      }
+    }{{ "," if not loop.last else "" }}
+    {%- endfor %}
+  ]
+}
