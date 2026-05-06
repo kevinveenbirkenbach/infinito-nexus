@@ -23,7 +23,7 @@ with the following value:
 
 ✅ **Verify the DNS record** before continuing:  
 ```sh
-dig TXT _acme-challenge.DOMAIN_PRIMARY @8.8.8.8
+dig TXT _acme-challenge.DOMAIN_PRIMARY @8.8.8.8  # noqa: hardcoded-dns-resolver
 ```
 
 ### **3️⃣ Complete the Certificate Request ✅**

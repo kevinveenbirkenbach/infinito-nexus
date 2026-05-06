@@ -17,7 +17,7 @@ if [[ -z "${UPSTREAM_DNS}" ]]; then
 	UPSTREAM_DNS=$(ip route show default 2>/dev/null | awk '/default via/{print $3; exit}' || true)
 fi
 if [[ -z "${UPSTREAM_DNS}" ]]; then
-	UPSTREAM_DNS="8.8.8.8"
+	UPSTREAM_DNS="8.8.8.8" # noqa: hardcoded-dns-resolver
 fi
 
 echo ">>> WSL2 DNS setup — upstream gateway: ${UPSTREAM_DNS}"

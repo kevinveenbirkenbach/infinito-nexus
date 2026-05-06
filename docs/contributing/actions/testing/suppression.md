@@ -71,6 +71,7 @@ labels:
 | `run-once`          | anywhere            | [test_run_once_tags.py](../../../../tests/lint/ansible/test_run_once_tags.py), [test_schema.py](../../../../tests/integration/roles/run_once/test_schema.py) | Marks a role's `tasks/main.yml` as intentionally re-runnable; skips both the run-once tag check and the suffix check. |
 | `run-once-suffix`   | same line           | [test_schema.py](../../../../tests/integration/roles/run_once/test_schema.py)                                                | Allows a single `when:` item to reference a `run_once_<other>` flag whose suffix differs from the current role.   |
 | `raw-docker`        | same or above; head (first 30 lines) | [test_no_raw_docker.py](../../../../tests/integration/docker/test_no_raw_docker.py)                       | Marks a single line or a whole file under `roles/` as legitimately calling `docker` / `docker compose` / `docker-compose` directly. The check is scoped to `roles/`; bootstrap scripts and CI workflows outside `roles/` are not scanned and need no marker. |
+| `hardcoded-dns-resolver` | same or above | [test_no_hardcoded_dns_resolvers.py](../../../../tests/lint/repository/test_no_hardcoded_dns_resolvers.py) | Marks a line that legitimately needs a literal IP from `NETWORK_PUBLIC_DNS_RESOLVERS` at the substitution point (CoreDNS `forward` directives that don't run through Jinja, host-bootstrap shell scripts, documentation examples). The variable in `group_vars/all/08_networks.yml` is the SPOT for these IPs everywhere else.   |
 
 ## Examples 💡
 
@@ -156,6 +157,14 @@ that legitimately drives the engine directly:
 #!/usr/bin/env bash
 # nocheck: raw-docker. Runs from sys-svc-container's installer before the wrapper symlink lands.
 docker buildx build ...
+```
+
+`hardcoded-dns-resolver`, on the line that emits the literal IP, when
+the substitution point cannot consume `NETWORK_PUBLIC_DNS_RESOLVERS`
+(e.g. a CoreDNS `forward` directive in a non-Jinja template):
+
+```text
+forward . 1.1.1.1 8.8.8.8  # noqa: hardcoded-dns-resolver
 ```
 
 ## Adding a new rule 🆕
