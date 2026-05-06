@@ -1,0 +1,23 @@
+galaxy_info:
+  author: Kevin Veen-Birkenbach
+  description: Take charge of your data with OpenCloud, the sovereign file-sync and collaboration suite. Sync, share, and co-edit documents from any device, organize teams in shared spaces, and keep everything under your own domain. Single sign-on, central directory, and seamless video meetings come built in.
+  license: Infinito.Nexus Community License (Non-Commercial)
+  company: |
+    Kevin Veen-Birkenbach
+    Consulting & Coaching Solutions
+    https://www.veen.world
+  min_ansible_version: '2.9'
+  platforms:
+    - name: Linux
+      versions:
+        - all
+  galaxy_tags:
+    - opencloud
+    - docker
+    - oidc
+    - ldap
+    - cloud
+    - files
+    - collaboration
+    - web
+  issue_tracker_url: https://s.infinito.nexus/issues

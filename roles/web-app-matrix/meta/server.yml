@@ -11,7 +11,7 @@ csp:
     connect-src:
     - '*'
     script-src-elem:
-    - element.{{ DOMAIN_PRIMARY }}
+    - "{{ lookup('config', 'web-app-matrix', 'server.domains.canonical.element') }}"
     - https://cdn.jsdelivr.net
 domains:
   canonical:
