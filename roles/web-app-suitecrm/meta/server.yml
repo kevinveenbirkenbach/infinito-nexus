@@ -3,7 +3,7 @@ csp:
     script-src-attr:
       unsafe-eval: true
   whitelist:
-    manifest-src: auth.{{ DOMAIN_PRIMARY }}
+    manifest-src: "{{ lookup('domain', 'web-app-keycloak') }}"
 domains:
   aliases: []
   canonical:

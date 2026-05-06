@@ -1,0 +1,26 @@
+credentials:
+  administrator_password:
+    description: Initial OpenCloud IDM admin password (used only when IDM service is included; harmless when external Keycloak handles auth).
+    algorithm: bcrypt
+    validation:
+      min_length: 12
+  machine_auth_api_key:
+    description: Internal API key used by OpenCloud microservices (PROXY/GRAPH/etc.) for service-to-service auth.
+    algorithm: alphanumeric
+    validation:
+      min_length: 32
+  storage_system_jwt_secret:
+    description: JWT secret used between proxy/storage services inside OpenCloud.
+    algorithm: alphanumeric
+    validation:
+      min_length: 32
+  jwt_secret:
+    description: Global OpenCloud JWT secret.
+    algorithm: alphanumeric
+    validation:
+      min_length: 32
+  transfer_secret:
+    description: Secret used for upload/transfer tokens.
+    algorithm: alphanumeric
+    validation:
+      min_length: 32

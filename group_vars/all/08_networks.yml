@@ -78,4 +78,4 @@ PORT_BANDS:
       end: 636
     relay:
       start: 20000
-      end: 59999
+      end: 65535

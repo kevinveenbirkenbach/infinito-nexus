@@ -7,7 +7,7 @@ csp:
       unsafe-inline: true
 domains:
   canonical:
-  - meet.{{ DOMAIN_PRIMARY }}
+  - bbb.talk.{{ DOMAIN_PRIMARY }}
   aliases: []
 networks:
   local:
