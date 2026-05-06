@@ -1,19 +1,40 @@
 logout:
   enabled: true
   shared: true
+dashboard:
+  enabled: true
+  shared: true
 matomo:
   enabled: true
   shared: true
 prometheus:
   enabled: true
   shared: true
+oidc:
+  enabled: true
+  shared: false
+ldap:
+  enabled: false
+  shared: false
+oauth2:
+  enabled: false
+  shared: false
 jenkins:
+  image: jenkins/jenkins
+  version: lts
+  name: jenkins
   ports:
     local:
       http: 8070
-  lifecycle: planned
+  run_after:
+    - web-app-keycloak
+    - web-app-matomo
+  lifecycle: beta
   min_storage: 10GB
   cpus: '1.0'
   mem_reservation: 1g
   mem_limit: 2g
   pids_limit: 1024
+css:
+  enabled: true
+  shared: true

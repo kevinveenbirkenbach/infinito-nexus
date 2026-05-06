@@ -13,6 +13,23 @@ email:
 mariadb:
   enabled: true
   shared: true
+oidc:
+  enabled: false
+  shared: false
+ldap:
+  enabled: false
+  shared: false
+oauth2:
+  # Akaunting has no first-party OIDC adapter for the free edition.
+  # Per requirement 013 the project uses `web-app-oauth2-proxy` in
+  # front of the Akaunting web UI as the universal glue path.
+  enabled: true
+  shared: false
+  origin:
+    host: application
+    port: 80
+  allowed_groups:
+  - '{{ lookup(''rbac_group_path'', application_id=''web-app-akaunting'', role=''administrator'') }}'
 akaunting:
   backup:
     no_stop_required: true
@@ -27,11 +44,12 @@ akaunting:
   ports:
     local:
       http: 8025
+      oauth2: 16499
   run_after:
     - web-app-matomo
     - web-app-keycloak
     - web-app-mailu
-  lifecycle: alpha
+  lifecycle: beta
   cpus: '0.5'
   mem_reservation: 256m
   mem_limit: 1g

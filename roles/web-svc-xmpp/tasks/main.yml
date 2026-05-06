@@ -1,0 +1,15 @@
+- name: "load docker, db and proxy for {{ application_id }}"
+  include_role:
+    name: sys-stk-full
+
+# Render must happen AFTER sys-stk-full has materialised the compose
+# instance directory (sys-svc-compose creates `/opt/compose/xmpp/`).
+# Rendering before that fails with `Destination directory
+# /opt/compose/xmpp does not exist`.
+- name: "Render ejabberd configuration"
+  template:
+    src: configuration.yml.j2
+    dest: "{{ XMPP_CONFIG_FILE }}"
+    mode: "0644"
+  notify:
+    - compose up

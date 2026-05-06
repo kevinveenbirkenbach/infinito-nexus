@@ -1,0 +1,13 @@
+{
+  "name": "infinito-nexus/joomla-keycloak-plugin",
+  "description": "Native OIDC SSO against Keycloak for Joomla 6 (plg_system_keycloak).",
+  "license": "GPL-2.0-or-later",
+  "require": {
+    "php": ">=8.1",
+    "jumbojett/openid-connect-php": "^1.0"
+  },
+  "config": {
+    "vendor-dir": "vendor",
+    "optimize-autoloader": true
+  }
+}

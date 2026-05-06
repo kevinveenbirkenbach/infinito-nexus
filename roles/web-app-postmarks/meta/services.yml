@@ -1,7 +1,52 @@
-postmarks:
-  lifecycle: pre-alpha
+oidc:
+  enabled: false
+  shared: false
+oauth2:
+  enabled: true
+  shared: false
+  origin:
+    host: application
+    port: 3000
+  allowed_groups:
+  - '{{ lookup(''rbac_group_path'', application_id=''web-app-postmarks'', role=''administrator'') }}'
+logout:
+  enabled: false
+  shared: false
+dashboard:
+  enabled: true
+  shared: true
+matomo:
+  enabled: true
+  shared: true
+css:
+  enabled: true
+  shared: true
+# noqa: email
+email:
+  enabled: false
+  shared: false
 prometheus:
   enabled: true
   shared: true
-logout:
-  enabled: false
+application:
+  image: node
+  version: 20-bookworm
+  name: web-app-postmarks
+  repository: https://github.com/ckolderup/postmarks.git
+  branch: main
+  min_storage: 1GB
+  cpus: '0.5'
+  mem_reservation: 256m
+  mem_limit: 1g
+  pids_limit: 512
+postmarks:
+  ports:
+    local:
+      http: 8075
+      oauth2: 16494
+  lifecycle: beta
+  min_storage: 1GB
+  cpus: '0.5'
+  mem_reservation: 256m
+  mem_limit: 1g
+  pids_limit: 512

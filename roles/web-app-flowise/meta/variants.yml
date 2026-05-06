@@ -1,0 +1,16 @@
+# Matrix-deploy variant overrides for this role (requirement 013
+# alpha-to-beta promotion). Both auth-flow variants ride the same
+# `web-app-oauth2-proxy` sidecar in front of the Flowise web UI;
+# variant 0 is the canonical OIDC variant (Keycloak with local user
+# storage), variant 1 flips the LDAP marker so the underlying
+# Keycloak user storage is federated from `svc-db-openldap`.
+# See docs/contributing/artefact/files/role/variants.md for the file format.
+
+# variant 0: OIDC variant (canonical default).
+- {}
+
+# variant 1: LDAP variant. Same oauth2-proxy gate, with the LDAP
+# marker enabled.
+- services:
+    ldap:
+      enabled: true

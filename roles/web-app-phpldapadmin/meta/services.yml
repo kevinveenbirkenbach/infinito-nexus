@@ -21,7 +21,7 @@ phpldapadmin:
   run_after:
     - web-app-matomo
     - web-app-keycloak
-  lifecycle: pre-alpha
+  lifecycle: unsupported
   cpus: '0.2'
   mem_reservation: 128m
   mem_limit: 256m

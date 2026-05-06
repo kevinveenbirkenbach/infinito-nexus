@@ -1,0 +1,14 @@
+# Matrix-deploy variant overrides per requirement 013. The LDAP
+# marker stays on across both variants because LDAP IS the storage
+# backend; variant 1 is essentially equivalent on FusionDirectory's
+# side, the change is in how Keycloak federates user storage in
+# variant 0.
+
+# variant 0: OIDC variant (canonical default; oauth2-proxy gate).
+- {}
+
+# variant 1: LDAP variant. Same oauth2-proxy gate, LDAP marker stays
+# on, exercises Playwright's LDAP scenario.
+- services:
+    ldap:
+      enabled: true

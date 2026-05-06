@@ -29,6 +29,15 @@
 # See docs/contributing/design/services/layout.md for the full per-role meta
 # layout.
 NETWORK_IPV6_ENABLED: false
+# Public DNS resolvers used wherever a role needs to look up external
+# hostnames at runtime (nginx `resolver` directives in front-proxy
+# vhosts, unbound `forward-addr` in the mail stack, etc.). Single
+# SPOT — roles MUST template this list rather than hard-coding
+# `1.1.1.1` / `8.8.8.8` etc. The IPv6 toggle in any rendered nginx
+# `resolver` directive comes from `NETWORK_IPV6_ENABLED` above.
+NETWORK_PUBLIC_DNS_RESOLVERS:
+  - 1.1.1.1
+  - 8.8.8.8
 defaults_networks:
   internet:
     ip4: '{{ lookup(''env'', ''IP4'') | default(''127.0.0.1'', true) }}'

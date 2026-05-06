@@ -1,6 +1,9 @@
 oidc:
   enabled: true
   shared: true
+ldap:
+  enabled: false
+  shared: false
 logout:
   enabled: true
   shared: true
@@ -24,7 +27,7 @@ minio:
   run_after:
     - web-app-keycloak
     - web-app-matomo
-  lifecycle: pre-alpha
+  lifecycle: beta
 redis:
   backup:
     disabled: true

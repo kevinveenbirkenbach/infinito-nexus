@@ -1,0 +1,40 @@
+logout:
+  enabled: false
+  shared: false
+dashboard:
+  enabled: true
+  shared: true
+matomo:
+  enabled: true
+  shared: true
+css:
+  enabled: true
+  shared: true
+javascript:
+  enabled: false
+  shared: false
+hugo:
+  image: nginx
+  version: 1.30.0-alpine
+  builder_image: hugomods/hugo
+  builder_version: exts-0.148.0
+  source_repository: https://github.com/gohugoio/hugoDocs.git
+  source_version: v0.148.0
+  hugo_environment: production
+  hugo_minify: true
+  ports:
+    local:
+      http: 8008
+  lifecycle: alpha
+  min_storage: 1GB
+  cpus: '0.2'
+  mem_reservation: 128m
+  mem_limit: 256m
+  pids_limit: 256
+# noqa: email
+email:
+  enabled: false
+  shared: false
+prometheus:
+  enabled: true
+  shared: true

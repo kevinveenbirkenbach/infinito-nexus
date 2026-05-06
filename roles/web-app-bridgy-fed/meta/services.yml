@@ -35,7 +35,7 @@ bridgy-fed:
   ports:
     local:
       http: 8053
-  lifecycle: planned
+  lifecycle: beta
   min_storage: 1GB
   cpus: '0.2'
   mem_reservation: 128m
