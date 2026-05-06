@@ -6,10 +6,9 @@ oauth2:
     port: 3000
   allowed_groups:
   - '{{ lookup(''rbac_group_path'', application_id=''web-app-postmarks'', role=''administrator'') }}'
-# nocheck: dynamic-flag
 logout:
-  enabled: false
-  shared: false
+  enabled: "{{ 'web-svc-logout' in group_names }}"
+  shared: "{{ 'web-svc-logout' in group_names }}"
 dashboard:
   enabled: "{{ 'web-app-dashboard' in group_names }}"
   shared: "{{ 'web-app-dashboard' in group_names }}"

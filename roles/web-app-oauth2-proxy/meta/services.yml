@@ -2,8 +2,10 @@ logout:
   enabled: "{{ 'web-svc-logout' in group_names }}"
   shared: "{{ 'web-svc-logout' in group_names }}"
 # nocheck: dynamic-flag
+# noqa: dashboard
 dashboard:
   enabled: false
+  shared: false
 matomo:
   enabled: "{{ 'web-app-matomo' in group_names }}"
   shared: "{{ 'web-app-matomo' in group_names }}"

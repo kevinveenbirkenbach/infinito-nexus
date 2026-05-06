@@ -1,5 +1,16 @@
 # nocheck: dynamic-flag
+# noqa: logout
 logout:
+  enabled: false
+  shared: false
+# nocheck: dynamic-flag
+# noqa: oidc
+oidc:
+  enabled: false
+  shared: false
+# nocheck: dynamic-flag
+# noqa: oauth2
+oauth2:
   enabled: false
   shared: false
 dashboard:

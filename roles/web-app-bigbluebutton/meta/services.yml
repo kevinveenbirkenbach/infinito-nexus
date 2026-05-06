@@ -8,8 +8,10 @@ logout:
 ldap:
   enabled: false
 # nocheck: dynamic-flag
+# noqa: dashboard
 dashboard:
   enabled: false
+  shared: false
 matomo:
   enabled: "{{ 'web-app-matomo' in group_names }}"
   shared: "{{ 'web-app-matomo' in group_names }}"

@@ -1,6 +1,16 @@
 logout:
   enabled: "{{ 'web-svc-logout' in group_names }}"
   shared: "{{ 'web-svc-logout' in group_names }}"
+# nocheck: dynamic-flag
+# noqa: oidc
+oidc:
+  enabled: false
+  shared: false
+# nocheck: dynamic-flag
+# noqa: oauth2
+oauth2:
+  enabled: false
+  shared: false
 dashboard:
   enabled: "{{ 'web-app-dashboard' in group_names }}"
   shared: "{{ 'web-app-dashboard' in group_names }}"
