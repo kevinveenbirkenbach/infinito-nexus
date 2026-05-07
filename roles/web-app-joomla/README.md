@@ -23,6 +23,15 @@ For the OIDC plugin source and its environment contract see [README.md](./files/
 
 See [README.md](./files/joomla-oidc-plugin/README.md) for the OIDC plugin's manifest, services provider, runtime environment, and route map.
 
+## End-to-end tests
+
+The Playwright spec at [files/playwright.spec.js](./files/playwright.spec.js) currently exercises the **administrator** path only: Keycloak SSO into the admin backend plus the local form-login emergency hatch (`?fallback=local`). The non-admin RBAC path via the canonical `biber` user is not yet covered.
+
+Closing that gap is tracked in [docs/requirements/017-playwright-biber-rbac-coverage.md](../../docs/requirements/017-playwright-biber-rbac-coverage.md). Until the requirement is closed:
+
+- the role's [templates/playwright.env.j2](./templates/playwright.env.j2) MUST NOT carry stale `BIBER_USERNAME` / `BIBER_PASSWORD` keys (the lint at [tests/lint/ansible/roles/test_playwright_env_keys_used.py](../../tests/lint/ansible/roles/test_playwright_env_keys_used.py) enforces this);
+- the admin scenarios stay gated on `oidc` (and on `ldap` for the LDAP-variant scenarios) per [006](../../docs/requirements/006-playwright-service-gated-tests.md), so a deploy with `SERVICES_DISABLED=oidc` reports the SSO scenario as `skipped`, never `failed`.
+
 ## Further Resources
 
 - [Joomla Official Website](https://www.joomla.org/)
