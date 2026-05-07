@@ -5,19 +5,8 @@ import sys
 from collections.abc import Iterable
 from pathlib import Path
 
+from cli import PROJECT_ROOT
 from utils.roles.meta_lookup import get_role_lifecycle
-
-
-def _repo_root() -> Path:
-    """
-    Determine repository root by locating the 'cli/' directory.
-    This makes the tool independent from the current working directory.
-    """
-    p = Path(__file__).resolve()
-    for parent in p.parents:
-        if (parent / "cli").is_dir():
-            return parent
-    raise RuntimeError("Failed to locate repository root (missing 'cli/' directory).")
 
 
 def _iter_role_dirs(roles_dir: Path) -> Iterable[tuple[str, Path]]:
@@ -65,7 +54,7 @@ def filter_roles(
 
 
 def build_parser() -> argparse.ArgumentParser:
-    default_roles_dir = _repo_root() / "roles"
+    default_roles_dir = PROJECT_ROOT / "roles"
 
     p = argparse.ArgumentParser(
         prog="infinito meta roles lifecycle_filter",

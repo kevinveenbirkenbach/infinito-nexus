@@ -33,18 +33,13 @@ from utils.cache.files import (
 )
 from utils.cache.yaml import load_yaml_any
 
+from . import PROJECT_ROOT
+
 # Rule key consumed by this lint via `nocheck`-keyword suppression
 # markers. A `same-or-above` placement on the var declaration line
 # skips the var from the unused-var check. See
 # docs/contributing/actions/testing/suppression.md.
 SUPPRESS_RULE: str = "unused-var"
-
-
-def _repo_root() -> Path:
-    for candidate in Path(__file__).resolve().parents:
-        if (candidate / "pyproject.toml").is_file():
-            return candidate
-    raise AssertionError("Repository root not found from test path.")
 
 
 _TOP_LEVEL_KEY_RE = re.compile(r"^([A-Za-z_][A-Za-z0-9_]*)\s*:")
@@ -237,7 +232,7 @@ def _build_usage_indices(repo_root: Path) -> tuple[set[str], set[str]]:
 class TestRoleAndGroupVarsUsed(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        cls.repo_root = _repo_root()
+        cls.repo_root = PROJECT_ROOT
         cls.jinja_idents, cls.ansible_expr_idents = _build_usage_indices(cls.repo_root)
 
     def test_role_and_group_vars_referenced(self):

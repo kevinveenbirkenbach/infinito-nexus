@@ -14,8 +14,8 @@ from unittest.mock import patch
 from . import PROJECT_ROOT
 
 
-def _repo_root() -> Path:
-    """Repository root resolution.
+def _resolved_repo_root() -> Path:
+    """Repository root resolution for the script-under-test path.
 
     The ``INFINITO_REPO_ROOT`` env var still wins when explicitly set
     (used by some CI fixtures); otherwise the canonical ``PROJECT_ROOT``
@@ -27,7 +27,7 @@ def _repo_root() -> Path:
     return PROJECT_ROOT
 
 
-SCRIPT_PATH = _repo_root() / "roles/sys-ctl-cln-bkps/files/script.py"
+SCRIPT_PATH = _resolved_repo_root() / "roles/sys-ctl-cln-bkps/files/script.py"
 
 
 def _fake_psutil(percent: int) -> ModuleType:
@@ -50,7 +50,7 @@ class TestSysCtlClnBkpsScript(unittest.TestCase):
         """
         if not SCRIPT_PATH.is_file():
             raise FileNotFoundError(
-                f"script.py not found at expected path: {SCRIPT_PATH} (repo_root={_repo_root()})"
+                f"script.py not found at expected path: {SCRIPT_PATH} (repo_root={_resolved_repo_root()})"
             )
 
         fake_psutil = _fake_psutil(disk_percent)

@@ -141,11 +141,11 @@ class TestInGroupDepsCli(unittest.TestCase):
             ({"web-svc-legal": {}}, ["web-svc-legal"]),
         )
         self.assertEqual(
-            mock_resolver.call_args.kwargs["project_root"], mod._project_root()
+            mock_resolver.call_args.kwargs["project_root"], str(mod.PROJECT_ROOT)
         )
         self.assertEqual(
             mock_resolver.call_args.kwargs["roles_dir"],
-            str(Path(mod._project_root()) / "roles"),
+            str(Path(mod.PROJECT_ROOT) / "roles"),
         )
 
 

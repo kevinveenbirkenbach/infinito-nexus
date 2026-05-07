@@ -7,10 +7,13 @@ Three rules are enforced:
 
    * a top-level assignment that climbs ``parents[N]`` from
      ``__file__`` into a ``*_ROOT``-style variable,
+   * a bare ``Path(__file__).…parents`` chain (no ``[N]`` index)
+     used to iterate upward in search of the root,
    * any chain of ``..`` segments (string literals or ``os.pardir``
      references) used to walk up to the root,
-   * a function such as ``repo_root()`` / ``project_root()`` that
-     searches upward for ``pyproject.toml``.
+   * a function such as ``repo_root()`` / ``project_root()`` (or
+     their underscore-prefixed ``_repo_root`` / ``_project_root``
+     siblings) that searches upward for ``pyproject.toml``.
 
    The single legitimate definition site is the package's own
    ``__init__.py``. Consumers MUST import ``PROJECT_ROOT`` from there
@@ -70,6 +73,20 @@ _FORBIDDEN_PATTERNS: tuple[tuple[str, re.Pattern[str], str], ...] = (
         "stripped",
     ),
     (
+        # Catches the bare ``Path(__file__).resolve().parents`` chain
+        # (no ``[N]`` index) used in ``for candidate in
+        # Path(__file__).resolve().parents`` upward-search loops.
+        # The indexed ``parents[N]`` form is already covered above; the
+        # un-indexed form is the iterator hand-roll that the
+        # ``def repo_root()`` helpers below typically wrap.
+        "`Path(__file__).…parents` upward iteration",
+        re.compile(
+            r"Path\(\s*__file__\s*\)(?:\s*\.\s*[A-Za-z_]\w*\([^)]*\))*"
+            r"\s*\.\s*parents\b(?!\s*\[)"
+        ),
+        "stripped",
+    ),
+    (
         "`os.pardir` reference",
         re.compile(r"\bos\.pardir\b"),
         "stripped",
@@ -86,8 +103,12 @@ _FORBIDDEN_PATTERNS: tuple[tuple[str, re.Pattern[str], str], ...] = (
         "no_docs",
     ),
     (
+        # Underscore-prefixed variants (``_repo_root`` / ``_project_root``)
+        # are caught alongside the public names — the leading underscore
+        # only marks the helper as private, the upward-walk it performs
+        # is the same drift this lint is built to forbid.
         "function searching upward for pyproject.toml",
-        re.compile(r"^\s*def\s+(?:repo_root|project_root)\s*\("),
+        re.compile(r"^\s*def\s+_*(?:repo_root|project_root)\s*\("),
         "stripped",
     ),
 )

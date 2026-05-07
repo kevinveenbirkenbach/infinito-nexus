@@ -18,6 +18,8 @@ from typing import NamedTuple
 
 from utils.cache.files import iter_project_files, read_text
 
+from . import PROJECT_ROOT
+
 # Matches markdown inline links: [text](target) and image links ![alt](target).
 _MD_LINK_RE = re.compile(r"!?\[[^\]]*\]\(([^)]+)\)")
 
@@ -41,13 +43,6 @@ class BrokenLink(NamedTuple):
     line: int
     target: str
     resolved: Path
-
-
-def _repo_root() -> Path:
-    for candidate in Path(__file__).resolve().parents:
-        if (candidate / "pyproject.toml").is_file():
-            return candidate
-    raise AssertionError("Repository root not found from test path.")
 
 
 def _tracked_md_files(root: Path) -> list[Path]:
@@ -160,7 +155,7 @@ class TestMarkdownLinks(unittest.TestCase):
     """Every file-system link in a tracked markdown file must resolve to a real path."""
 
     def test_markdown_relative_links_resolve(self) -> None:
-        root = _repo_root()
+        root = PROJECT_ROOT
         md_files = _tracked_md_files(root)
         self.assertTrue(md_files, "No tracked .md files found.")
 

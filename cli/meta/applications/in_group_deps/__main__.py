@@ -19,10 +19,6 @@ __all__ = [
 ]
 
 
-def _project_root() -> str:
-    return str(PROJECT_ROOT)
-
-
 def find_role_dirs_by_app_id(app_ids: list[str], roles_dir: str) -> list[str]:
     """
     Map application_ids to role directory names based on vars/main.yml in each role.
@@ -100,7 +96,7 @@ def main() -> int:
         )
         return 1
 
-    project_root = _project_root()
+    project_root = str(PROJECT_ROOT)
     roles_dir = str(Path(project_root) / "roles")
 
     group_dirs = find_role_dirs_by_app_id(args.groups, roles_dir)

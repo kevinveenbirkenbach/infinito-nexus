@@ -28,11 +28,6 @@ from utils.cache.files import iter_project_files, read_text
 
 from . import PROJECT_ROOT
 
-
-def _repo_root() -> Path:
-    return PROJECT_ROOT
-
-
 _KEY_LHS_RE = re.compile(r"^([A-Z_][A-Z0-9_]*)\s*=")
 
 # Keys whose suffix marks them as dynamically consumed by a shared
@@ -103,7 +98,7 @@ def _read_js_sources(directory: Path) -> list[str]:
 
 class TestPlaywrightEnvKeysUsed(unittest.TestCase):
     def test_env_keys_referenced_in_specs(self):
-        root = _repo_root()
+        root = PROJECT_ROOT
         roles_dir = root / "roles"
         shared_helpers_dir = roles_dir / "test-e2e-playwright" / "files"
         shared_sources: list[str] = (
