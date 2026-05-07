@@ -26,13 +26,18 @@
   when: (fider_tenant_count.stdout | trim | int) == 0
 
 - name: "Fider | Create admin user (bypass email verification)"
-  script: >-
-    create_admin_user.sh
-    "{{ lookup('database', application_id, 'container') }}"
-    "{{ lookup('database', application_id, 'username') }}"
-    "{{ lookup('database', application_id, 'name') }}"
-    "{{ lookup('users', 'administrator').firstname }} {{ lookup('users', 'administrator').lastname }}"
-    "{{ lookup('users', 'administrator').email }}"
+  # SQL ships in `files/create_admin_user.sql`; pipe via stdin so psql's
+  # lexer expands the `:'var'` substitutions (`-c "..."` forwards the
+  # colon-prefix verbatim and the server rejects it).
+  ansible.builtin.shell:
+    cmd: |
+      container exec -i {{ lookup('database', application_id, 'container') | quote }} \
+        psql -U {{ lookup('database', application_id, 'username') | quote }} \
+             -d {{ lookup('database', application_id, 'name') | quote }} \
+             -v ON_ERROR_STOP=1 \
+             -v full_name={{ ((lookup('users', 'administrator').firstname ~ ' ' ~ lookup('users', 'administrator').lastname)) | quote }} \
+             -v email={{ lookup('users', 'administrator').email | quote }}
+    stdin: "{{ lookup('file', 'create_admin_user.sql') }}"
   args:
     chdir: "{{ lookup('container', application_id, 'directories.instance') }}"
   changed_when: true
@@ -48,17 +53,21 @@
   changed_when: true
 
 - name: "Fider | Configure Keycloak as OIDC provider in database"
-  script: >-
-    configure_oidc_provider.sh
-    "{{ lookup('database', application_id, 'container') }}"
-    "{{ lookup('database', application_id, 'username') }}"
-    "{{ lookup('database', application_id, 'name') }}"
-    "{{ SOFTWARE_NAME }} SSO"
-    "{{ OIDC.CLIENT.ID }}"
-    "{{ OIDC.CLIENT.SECRET }}"
-    "{{ OIDC.CLIENT.AUTHORIZE_URL }}"
-    "{{ OIDC.CLIENT.TOKEN_URL }}"
-    "{{ OIDC.CLIENT.USER_INFO_URL }}"
+  # SQL ships in `files/configure_oidc_provider.sql`; same stdin/-v pattern
+  # as the admin-user task above so psql's lexer expands `:'var'` refs.
+  ansible.builtin.shell:
+    cmd: |
+      container exec -i {{ lookup('database', application_id, 'container') | quote }} \
+        psql -U {{ lookup('database', application_id, 'username') | quote }} \
+             -d {{ lookup('database', application_id, 'name') | quote }} \
+             -v ON_ERROR_STOP=1 \
+             -v display_name={{ (SOFTWARE_NAME ~ ' SSO') | quote }} \
+             -v client_id={{ OIDC.CLIENT.ID | quote }} \
+             -v client_secret={{ OIDC.CLIENT.SECRET | quote }} \
+             -v authorize_url={{ OIDC.CLIENT.AUTHORIZE_URL | quote }} \
+             -v token_url={{ OIDC.CLIENT.TOKEN_URL | quote }} \
+             -v profile_url={{ OIDC.CLIENT.USER_INFO_URL | quote }}
+    stdin: "{{ lookup('file', 'configure_oidc_provider.sql') }}"
   args:
     chdir: "{{ lookup('container', application_id, 'directories.instance') }}"
   changed_when: true
