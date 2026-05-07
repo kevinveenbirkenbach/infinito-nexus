@@ -79,9 +79,13 @@ exclude = [
 # - `RSE`  (flake8-raise)       — `raise X()` style
 # - `ICN`  (flake8-import-conventions) — standard import aliases (`numpy as np`)
 # - `DTZ`  (flake8-datetimez)   — tz-naive `datetime.now()` / `utcnow()` bugs
+# - `TID`  (flake8-tidy-imports) — banned modules / banned relative imports
+# - `LOG`  (flake8-logging)     — `logging` module misuse
+# - `G`    (flake8-logging-format) — f-strings inside `logging.x()` calls (defeats lazy-format)
 select = [
     "E", "F", "I", "B", "UP", "RUF", "SIM", "C4", "PERF", "RET", "PIE",
     "T10", "PGH", "EXE", "RSE", "ICN", "DTZ",
+    "TID", "LOG", "G",
 ]
 
 # `ruff format` (run via `make autoformat`) reflows whatever it can.

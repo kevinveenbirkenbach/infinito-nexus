@@ -8,6 +8,8 @@ import os
 import shutil
 import sys
 
+logger = logging.getLogger(__name__)
+
 try:
     from ruamel.yaml import YAML
     from ruamel.yaml.comments import CommentedMap
@@ -18,7 +20,7 @@ except Exception:
     _HAVE_RUAMEL = False
 
 if not _HAVE_RUAMEL:
-    logging.error(
+    logger.error(
         "ruamel.yaml is required to preserve comments/quotes. "
         "Install with: pip install ruamel.yaml"
     )

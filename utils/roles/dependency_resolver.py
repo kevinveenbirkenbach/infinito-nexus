@@ -4,6 +4,8 @@ import os
 import re
 from collections.abc import Iterable
 
+logger = logging.getLogger(__name__)
+
 
 class RoleDependencyResolver:
     _RE_PURE_JINJA = re.compile(r"\s*\{\{\s*[^}]+\s*\}\}\s*$")
@@ -240,7 +242,7 @@ class RoleDependencyResolver:
                         if isinstance(r, str) and r.strip():
                             deps.add(r.strip())
         except Exception:
-            logging.exception(f"Failed to parse dependencies from {meta_main}")
+            logger.exception("Failed to parse dependencies from %s", meta_main)
         return deps
 
     def _extract_meta_run_after(self, role_path: str) -> set[str]:
@@ -253,8 +255,8 @@ class RoleDependencyResolver:
         try:
             entries = get_role_run_after(role_path)
         except Exception:
-            logging.exception(
-                f"Failed to parse run_after from {role_path}/meta/services.yml"
+            logger.exception(
+                "Failed to parse run_after from %s/meta/services.yml", role_path
             )
             return set()
         return {dep for dep in entries if dep}

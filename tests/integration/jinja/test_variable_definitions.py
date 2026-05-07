@@ -10,6 +10,7 @@ import yaml
 from utils.cache.files import iter_project_files_with_content
 
 logging.basicConfig(level=logging.WARNING)
+logger = logging.getLogger(__name__)
 
 
 class TestVariableDefinitions(unittest.TestCase):
@@ -100,7 +101,7 @@ class TestVariableDefinitions(unittest.TestCase):
                 if isinstance(data, dict):
                     self.defined.update(data.keys())
             except (OSError, yaml.YAMLError) as exc:
-                logging.debug(
+                logger.debug(
                     "Skipping variable file %s while collecting definitions: %s",
                     vf,
                     exc,
@@ -134,7 +135,7 @@ class TestVariableDefinitions(unittest.TestCase):
                                         k for k in data if isinstance(k, str)
                                     )
                             except yaml.YAMLError as exc:
-                                logging.debug(
+                                logger.debug(
                                     "Skipping inline set_fact mapping in %s: %s",
                                     path,
                                     exc,
@@ -204,7 +205,7 @@ class TestVariableDefinitions(unittest.TestCase):
                         self.defined.add(m_reg.group(1))
 
             except Exception:
-                logging.warning(f"Failed to parse file: {path}", exc_info=True)
+                logger.warning("Failed to parse file: %s", path, exc_info=True)
 
     def test_all_used_vars_are_defined(self):
         """

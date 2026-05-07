@@ -10,8 +10,8 @@ from cli.create.inventory.services_disabler import (
     find_provider_roles,
     parse_services_disabled,
 )
+from cli.meta.runtime import detect_runtime
 
-from ...meta.runtime import detect_runtime
 from .common import make_compose
 from .inventory import (
     DevInventorySpec,

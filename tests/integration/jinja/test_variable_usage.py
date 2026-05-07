@@ -8,6 +8,8 @@ import yaml
 
 from utils.cache.files import iter_project_files_with_content, read_text
 
+logger = logging.getLogger(__name__)
+
 
 class TestTopLevelVariableUsage(unittest.TestCase):
     def setUp(self):
@@ -45,7 +47,7 @@ class TestTopLevelVariableUsage(unittest.TestCase):
         try:
             data = yaml.safe_load(read_text(file_path))
         except yaml.YAMLError as e:
-            logging.warning("Failed to parse YAML file '%s': %s", file_path, e)
+            logger.warning("Failed to parse YAML file '%s': %s", file_path, e)
             return []
         if isinstance(data, dict):
             return list(data.keys())
