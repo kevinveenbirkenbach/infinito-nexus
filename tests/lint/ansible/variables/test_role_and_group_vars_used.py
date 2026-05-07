@@ -30,9 +30,9 @@ from utils.cache.files import iter_project_files_with_content, read_text
 from utils.cache.yaml import load_yaml_any
 
 
-# Rule key consumed by this lint via `# noqa` / `# nocheck` markers.
-# A `same-or-above` placement on the var declaration line skips the
-# var from the unused-var check. See
+# Rule key consumed by this lint via `nocheck`-keyword suppression
+# markers. A `same-or-above` placement on the var declaration line
+# skips the var from the unused-var check. See
 # docs/contributing/actions/testing/suppression.md.
 SUPPRESS_RULE: str = "unused-var"
 
