@@ -24,7 +24,9 @@
     prometheus:
       enabled: true
       shared: true
-- services:
+- credentials:
+    administrator_password: "'$tr0ng\u20ACxampl3PW!"
+  services:
     dashboard:
       enabled: false
       shared: false
