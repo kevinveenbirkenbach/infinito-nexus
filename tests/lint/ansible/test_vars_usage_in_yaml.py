@@ -2,9 +2,9 @@ import unittest
 from pathlib import Path
 import re
 from typing import Any, Iterable, Set, List, Dict, Tuple
-import yaml
 
 from utils.cache.files import iter_project_files, read_text
+from utils.cache.yaml import load_yaml_all_str
 
 
 def repo_root() -> Path:
@@ -55,7 +55,7 @@ class TestVarsPassedAreUsed(unittest.TestCase):
 
     def _load_yaml_documents(self, path: Path) -> List[Any]:
         try:
-            return list(yaml.safe_load_all(read_text(str(path)))) or []
+            return load_yaml_all_str(read_text(str(path))) or []
         except Exception:
             # File may contain heavy templating or anchors; skip structural parse
             return []

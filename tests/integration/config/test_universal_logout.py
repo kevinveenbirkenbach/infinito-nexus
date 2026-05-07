@@ -2,12 +2,14 @@ import unittest
 import glob
 import yaml
 
+from utils.cache.yaml import load_yaml_any
+
 
 class TestUniversalLogoutSetting(unittest.TestCase):
     ROLES_PATH = "roles/web-app-*/meta/services.yml"
 
     def test_logout_defined(self):
-        files = glob.glob(self.ROLES_PATH)
+        files = glob.glob(self.ROLES_PATH)  # noqa: project-walk
         self.assertGreater(
             len(files), 0, f"No role config files found under {self.ROLES_PATH}"
         )
@@ -15,12 +17,11 @@ class TestUniversalLogoutSetting(unittest.TestCase):
         errors = []
 
         for file_path in files:
-            with open(file_path, "r", encoding="utf-8") as f:
-                try:
-                    data = yaml.safe_load(f)
-                except yaml.YAMLError as e:
-                    errors.append(f"YAML parse error in '{file_path}': {e}")
-                    continue
+            try:
+                data = load_yaml_any(file_path)
+            except yaml.YAMLError as e:
+                errors.append(f"YAML parse error in '{file_path}': {e}")
+                continue
 
             services = data if isinstance(data, dict) else {}
             logout = services.get("logout", {}) or {}

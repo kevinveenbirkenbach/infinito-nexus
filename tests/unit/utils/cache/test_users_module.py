@@ -17,11 +17,12 @@ import unittest
 from collections import OrderedDict
 from pathlib import Path
 
-import yaml
 
 from utils.cache import _reset_cache_for_tests
 from utils.cache import base as cache_base
 from utils.cache import users as cache_users
+
+from utils.cache.yaml import dump_yaml_str
 
 
 def _write(path: Path, content: str) -> None:
@@ -224,7 +225,7 @@ class TestLoadStoreUsers(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmp:
             path = Path(tmp) / "tokens.yml"
             path.write_text(
-                yaml.safe_dump({"users": {"alice": {"tokens": {"x": "y"}}}}),
+                dump_yaml_str({"users": {"alice": {"tokens": {"x": "y"}}}}),
                 encoding="utf-8",
             )
             result = cache_users._load_store_users(path)

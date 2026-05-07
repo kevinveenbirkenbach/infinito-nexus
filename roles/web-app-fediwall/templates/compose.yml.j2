@@ -1,0 +1,16 @@
+{% include 'roles/sys-svc-compose/templates/base.yml.j2' %}
+  {{ FEDIWALL_SERVICE }}:
+    container_name: "{{ FEDIWALL_CONTAINER }}"
+    {{ lookup('template', 'roles/sys-svc-container/templates/build.yml.j2') | indent(4) }}
+      args:
+        FEDIWALL_IMAGE:         "{{ FEDIWALL_IMAGE }}"
+        FEDIWALL_VERSION:       "{{ FEDIWALL_VERSION }}"
+        FEDIWALL_DIST_DIR_REL:  "{{ FEDIWALL_DIST_DIR_REL }}"
+    image: "{{ FEDIWALL_IMAGE_CUSTOM }}"
+    ports:
+      - "{{ DOCKER_BIND_HOST }}:{{ lookup('config', application_id, 'services.' ~ entity_name ~ '.ports.local.http') }}:{{ container_port }}"
+{% include 'roles/sys-svc-container/templates/healthcheck/curl.yml.j2' %}
+{% include 'roles/sys-svc-container/templates/base.yml.j2' %}
+{% include 'roles/sys-svc-container/templates/networks.yml.j2' %}
+
+{% include 'roles/sys-svc-compose/templates/networks.yml.j2' %}

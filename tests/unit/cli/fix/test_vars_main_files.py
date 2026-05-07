@@ -2,10 +2,11 @@ import os
 import shutil
 import tempfile
 import unittest
-import yaml
 
 # Adjust this import to match the real path in your project
 from cli.fix.vars_main_files import run, ROLES_DIR
+
+from utils.cache.yaml import dump_yaml, load_yaml_any
 
 
 class TestEnsureVarsMain(unittest.TestCase):
@@ -40,8 +41,7 @@ class TestEnsureVarsMain(unittest.TestCase):
         role_path = os.path.join(self.roles_dir, name)
         os.makedirs(os.path.join(role_path, "vars"))
         if vars_content is not None:
-            with open(os.path.join(role_path, "vars", "main.yml"), "w") as f:
-                yaml.safe_dump(vars_content, f)
+            dump_yaml(os.path.join(role_path, "vars", "main.yml"), vars_content)
         return role_path
 
     def test_creates_missing_vars_main(self):
@@ -57,8 +57,7 @@ class TestEnsureVarsMain(unittest.TestCase):
         vm = os.path.join(role, "vars", "main.yml")
         self.assertTrue(os.path.exists(vm))
 
-        with open(vm) as f:
-            data = yaml.safe_load(f)
+        data = load_yaml_any(vm)
         # Expect application_id: 'foobar'
         self.assertEqual(data.get("application_id"), "foobar")
 
@@ -70,8 +69,7 @@ class TestEnsureVarsMain(unittest.TestCase):
         run(prefix="desk-", preview=False, overwrite=True)
 
         path = os.path.join(role, "vars", "main.yml")
-        with open(path) as f:
-            data = yaml.safe_load(f)
+        data = load_yaml_any(path)
 
         # application_id must be corrected...
         self.assertEqual(data.get("application_id"), "baz")

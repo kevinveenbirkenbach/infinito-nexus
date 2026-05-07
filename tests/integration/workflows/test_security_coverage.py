@@ -3,9 +3,10 @@ import os
 import unittest
 from pathlib import Path
 
-import yaml
 
 from utils.cache.files import iter_project_files
+
+from utils.cache.yaml import load_yaml_any
 
 REPO_ROOT = Path(__file__).resolve().parents[3]
 SECURITY_WORKFLOW_PATH = REPO_ROOT / ".github" / "workflows" / "security-codeql.yml"
@@ -41,8 +42,7 @@ CODEQL_PATH_INDICATORS: dict[str, list[str]] = {
 
 
 def _load_active_languages() -> set[str]:
-    with open(SECURITY_WORKFLOW_PATH) as fh:
-        data = yaml.safe_load(fh)
+    data = load_yaml_any(SECURITY_WORKFLOW_PATH)
 
     include = data["jobs"]["analyze"]["strategy"]["matrix"]["include"]
     return {

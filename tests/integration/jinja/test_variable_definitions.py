@@ -9,6 +9,8 @@ from utils.cache.files import iter_project_files_with_content
 
 import logging
 
+from utils.cache.yaml import load_yaml_any, load_yaml_str
+
 logging.basicConfig(level=logging.WARNING)
 
 
@@ -36,7 +38,7 @@ class TestVariableDefinitions(unittest.TestCase):
             os.path.join(self.project_root, "group_vars", "all", "*.yml"),
         ]
         for pat in patterns:
-            self.var_files.extend(glob(pat, recursive=True))
+            self.var_files.extend(glob(pat, recursive=True))  # noqa: project-walk
 
         # File extensions to scan for Jinja usage/inline definitions
         self.scan_extensions = {".yml", ".j2"}
@@ -95,8 +97,7 @@ class TestVariableDefinitions(unittest.TestCase):
         # 1) Keys from var files (top-level dict keys)
         for vf in self.var_files:
             try:
-                with open(vf, "r", encoding="utf-8") as f:
-                    data = yaml.safe_load(f)
+                data = load_yaml_any(vf)
                 if isinstance(data, dict):
                     self.defined.update(data.keys())
             except (OSError, yaml.YAMLError) as exc:
@@ -128,7 +129,7 @@ class TestVariableDefinitions(unittest.TestCase):
                         if inline_map:
                             # Inline mapping: set_fact: { a: 1, b: 2 }
                             try:
-                                data = yaml.safe_load(inline_map)
+                                data = load_yaml_str(inline_map)
                                 if isinstance(data, dict):
                                     self.defined.update(
                                         k for k in data.keys() if isinstance(k, str)

@@ -1,12 +1,12 @@
 import unittest
 import os
-import yaml
+
+from utils.cache.yaml import load_yaml_any
 
 
 def load_yaml_file(file_path):
     """Load a YAML file and return its content."""
-    with open(file_path, "r") as file:
-        return yaml.safe_load(file) or {}
+    return load_yaml_any(file_path) or {}
 
 
 def get_meta_info(role_path):

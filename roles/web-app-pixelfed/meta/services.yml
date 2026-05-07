@@ -24,6 +24,8 @@ mariadb:
   enabled: true
   shared: true
 pixelfed:
+  shared: true
+  enabled: true
   image: zknt/pixelfed
   version: latest
   name: pixelfed
@@ -38,14 +40,16 @@ pixelfed:
     local:
       http: 8010
   run_after:
-  - web-app-keycloak
+    - web-app-keycloak
   lifecycle: beta
+  pids_limit: 512
 worker:
   name: pixelfed_worker
   cpus: 1.0
   mem_reservation: 0.75g
   mem_limit: 1g
   pids_limit: 512
+  min_storage: 5GB
 css:
   enabled: false
   shared: true

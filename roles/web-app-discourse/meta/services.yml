@@ -52,6 +52,10 @@ discourse:
     local:
       http: 8020
   lifecycle: beta
+  cpus: '1.0'
+  mem_reservation: 1g
+  mem_limit: 2g
+  pids_limit: 1024
 css:
   enabled: true
   shared: true

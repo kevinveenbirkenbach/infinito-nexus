@@ -34,9 +34,19 @@ application:
   name: web-app-postmarks
   repository: https://github.com/ckolderup/postmarks.git
   branch: main
+  min_storage: 1GB
+  cpus: '0.5'
+  mem_reservation: 256m
+  mem_limit: 1g
+  pids_limit: 512
 postmarks:
   ports:
     local:
       http: 8075
       oauth2: 16494
   lifecycle: beta
+  min_storage: 1GB
+  cpus: '0.5'
+  mem_reservation: 256m
+  mem_limit: 1g
+  pids_limit: 512

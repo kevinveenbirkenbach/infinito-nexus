@@ -28,6 +28,8 @@ import unittest
 
 from utils.cache.files import iter_project_files, read_text
 
+from utils.cache.yaml import load_yaml_all_str
+
 try:
     import yaml  # PyYAML
 except Exception:
@@ -88,7 +90,7 @@ def parse_yaml_documents(text: str):
     if yaml is None:
         return None
     try:
-        return list(yaml.load_all(text, Loader=TolerantLoader))
+        return list(load_yaml_all_str(text))
     except Exception:
         return None
 

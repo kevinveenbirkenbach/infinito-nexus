@@ -3,12 +3,13 @@ import re
 import unittest
 from pathlib import Path
 
-import yaml  # requires PyYAML
 from plugins.filter.get_role import get_role
 from utils.applications.config import get, ConfigEntryNotSetError
 from utils.cache.applications import get_application_defaults
 from utils.cache.users import get_user_defaults
 from utils.cache.files import iter_project_files_with_content
+
+from utils.cache.yaml import load_yaml_str
 
 
 def _role_id_from_path(file_path: Path) -> str | None:
@@ -146,7 +147,7 @@ class TestGetAppConfPaths(unittest.TestCase):
                 cls.role_for_app[app_id] = role
                 schema_file = root / "roles" / role / "meta" / "schema.yml"
                 with schema_file.open(encoding="utf-8") as sf:
-                    schema = yaml.safe_load(sf) or {}
+                    schema = load_yaml_str(sf) or {}
                 cls.role_schemas[app_id] = schema
             except Exception:
                 # skip apps without schema or role

@@ -13,6 +13,8 @@ from utils.service_registry import (
     resolve_service_dependency_roles_from_config,
 )
 
+from utils.cache.yaml import dump_yaml_str
+
 
 class TestServiceRegistryDiscovery(unittest.TestCase):
     """Per req-008, the materialised application payload exposes services
@@ -113,7 +115,6 @@ class TestServiceRegistryOrdering(unittest.TestCase):
         *,
         run_after: list[str] | None = None,
     ) -> None:
-        import yaml
 
         role_dir = root / role
         meta_dir = role_dir / "meta"
@@ -128,7 +129,7 @@ class TestServiceRegistryOrdering(unittest.TestCase):
             services[primary_entity] = primary
 
         meta_dir.joinpath("services.yml").write_text(
-            yaml.safe_dump(services, sort_keys=False),
+            dump_yaml_str(services),
             encoding="utf-8",
         )
         # meta/main.yml MUST NOT carry run_after anymore (req-010).

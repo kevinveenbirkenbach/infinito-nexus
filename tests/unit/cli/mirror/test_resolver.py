@@ -4,8 +4,7 @@ import io
 import unittest
 from unittest.mock import patch
 
-import yaml
-
+from utils.cache.yaml import load_yaml_str
 import cli.mirror.resolver.__main__ as resolver_main
 from cli.mirror.model import ImageRef
 
@@ -35,7 +34,7 @@ class TestResolverOutputFormat(unittest.TestCase):
             result = resolver_main.main()
 
         self.assertEqual(result, 0)
-        return yaml.safe_load(buf.getvalue()) or {}
+        return load_yaml_str(buf.getvalue()) or {}
 
     def test_compose_images_go_to_applications_key(self) -> None:
         image = ImageRef(

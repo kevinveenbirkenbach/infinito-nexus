@@ -1,0 +1,23 @@
+galaxy_info:
+  author: Kevin Veen-Birkenbach
+  description: 'Fediwall – self-hosted media wall that follows hashtags or accounts on Mastodon-compatible Fediverse servers and shows the most recent public posts in a screen-filling masonry grid.
+
+    '
+  license: Infinito.Nexus Community License (Non-Commercial)
+  min_ansible_version: '2.9'
+  company: 'Kevin Veen-Birkenbach
+
+    Consulting & Coaching Solutions
+
+    https://www.veen.world
+
+    '
+  galaxy_tags:
+    - infinito
+    - fediverse
+    - mastodon
+    - wall
+    - dashboard
+    - webapp
+  issue_tracker_url: https://github.com/defnull/fediwall/issues
+dependencies: []

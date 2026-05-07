@@ -2,12 +2,7 @@ import unittest
 from pathlib import Path
 from typing import Any, Dict, Iterable, List, Tuple
 
-try:
-    import yaml  # PyYAML
-except ImportError as e:
-    raise SystemExit(
-        "PyYAML is required to run this test. Install with: pip install pyyaml"
-    ) from e
+from utils.cache.yaml import load_yaml_all_str
 
 
 THRESHOLD = 3  # fail if the same when-condition occurs on more than this many tasks
@@ -104,7 +99,7 @@ def _load_yaml_documents(path: Path) -> List[Any]:
       should be fixed in the repo.
     """
     text = path.read_text(encoding="utf-8")
-    return list(yaml.safe_load_all(text))  # may return [None] if empty
+    return list(load_yaml_all_str(text))  # may return [None] if empty
 
 
 def _collect_when_counts(yaml_docs: List[Any]) -> Dict[str, List[Tuple[str, str]]]:

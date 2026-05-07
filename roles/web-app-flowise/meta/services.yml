@@ -34,6 +34,7 @@ litellm:
   mem_reservation: 0.5g
   mem_limit: 1g
   pids_limit: 1024
+  min_storage: 1GB
 qdrant:
   backup:
     no_stop_required: true
@@ -44,6 +45,7 @@ qdrant:
   mem_reservation: 2g
   mem_limit: 4g
   pids_limit: 2048
+  min_storage: 1GB
 flowise:
   backup:
     no_stop_required: false
@@ -60,9 +62,9 @@ flowise:
       http: 8056
       oauth2: 16480
   run_after:
-  - web-app-keycloak
-  - web-app-matomo
-  - web-app-mailu
+    - web-app-keycloak
+    - web-app-matomo
+    - web-app-mailu
   lifecycle: beta
 redis:
   backup:

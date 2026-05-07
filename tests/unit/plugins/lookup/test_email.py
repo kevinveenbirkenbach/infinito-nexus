@@ -6,18 +6,19 @@ import unittest
 from pathlib import Path
 from unittest.mock import patch
 
-import yaml
 from ansible.errors import AnsibleError
 
 from plugins.lookup.email import LookupModule
 from utils.cache import _reset_cache_for_tests
 from utils.cache import users as cache_users
 
+from utils.cache.yaml import dump_yaml_str
+
 
 def _write_role_config(base_dir: Path, role_name: str, payload: dict) -> None:
     config_path = base_dir / "roles" / role_name / "meta" / "services.yml"
     config_path.parent.mkdir(parents=True, exist_ok=True)
-    config_path.write_text(yaml.safe_dump(payload), encoding="utf-8")
+    config_path.write_text(dump_yaml_str(payload), encoding="utf-8")
 
 
 class TestEmailLookup(unittest.TestCase):

@@ -27,9 +27,14 @@ jenkins:
     local:
       http: 8070
   run_after:
-  - web-app-keycloak
-  - web-app-matomo
+    - web-app-keycloak
+    - web-app-matomo
   lifecycle: beta
+  min_storage: 10GB
+  cpus: '1.0'
+  mem_reservation: 1g
+  mem_limit: 2g
+  pids_limit: 1024
 css:
   enabled: true
   shared: true

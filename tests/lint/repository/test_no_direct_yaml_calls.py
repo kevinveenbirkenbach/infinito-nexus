@@ -1,6 +1,6 @@
-"""Lint guard: production .py files MUST route YAML reads/writes through
-``utils.cache.yaml`` instead of calling ``yaml.safe_load`` /
-``yaml.safe_dump`` (and friends) directly.
+"""Lint guard: every .py file (production AND tests) MUST route YAML
+reads/writes through ``utils.cache.yaml`` instead of calling
+``yaml.safe_load`` / ``yaml.safe_dump`` (and friends) directly.
 
 Background
 ==========
@@ -11,7 +11,9 @@ parses is significant, and divergent loaders can return subtly different
 shapes (one swallowing parse errors, another raising; one returning a
 fresh dict, another a shared cached one). Routing every load through
 ``utils.cache.yaml`` keeps the process-wide cache shared and the loader
-semantics consistent.
+semantics consistent — including across the lint/integration/unit
+test suites which can re-parse the same role-meta files dozens of times
+during a single ``make test`` run.
 
 Allowed
 =======
@@ -20,18 +22,21 @@ Allowed
 * ``tasks/utils/migrate_meta_layout.py``: migration script that
   operates pre-migration on raw on-disk YAML; predates the cache by
   design.
-* ``tests/``: test fixtures may legitimately write synthetic YAML to
-  tempdirs and read it back. NOT scanned.
+* Tests that legitimately need raw YAML access (e.g. writing synthetic
+  YAML to a tempdir and reading it back to validate parser behaviour)
+  MUST opt out per call with ``# noqa: direct-yaml`` rather than
+  silently bypassing the cache.
 
 Detection
 =========
 AST-walks every ``.py`` file under the production trees (``utils/``,
 ``cli/``, ``plugins/``, ``filter_plugins/``, ``lookup_plugins/``,
-``roles/``, ``scripts/``, ``tasks/``) and flags any call to
-``yaml.safe_load`` / ``yaml.safe_load_all`` / ``yaml.safe_dump`` /
-``yaml.load`` / ``yaml.dump`` / ``yaml.dump_all``. Aliased imports are
-tracked: ``import yaml as Y`` ⇒ ``Y.safe_load(...)`` is flagged;
-``from yaml import safe_load`` ⇒ bare ``safe_load(...)`` is flagged.
+``roles/``, ``scripts/``, ``tasks/``) AND under ``tests/`` and flags
+any call to ``yaml.safe_load`` / ``yaml.safe_load_all`` /
+``yaml.safe_dump`` / ``yaml.load`` / ``yaml.dump`` / ``yaml.dump_all``.
+Aliased imports are tracked: ``import yaml as Y`` ⇒ ``Y.safe_load(...)``
+is flagged; ``from yaml import safe_load`` ⇒ bare ``safe_load(...)`` is
+flagged.
 
 Plain attribute access without a call (``yaml.YAMLError`` for exception
 typing, ``yaml.YAMLObject`` for class hierarchies) is NOT flagged. Only
@@ -87,6 +92,7 @@ _SCAN_DIRS: frozenset[str] = frozenset(
         "roles",
         "scripts",
         "tasks",
+        "tests",
     }
 )
 
@@ -159,7 +165,7 @@ def _file_offenders(path: Path) -> list[str]:
 def _scan_paths() -> list[Path]:
     """Iterate every production .py file via the shared file-walk cache."""
     out: list[Path] = []
-    for s in iter_project_files(extensions=(".py",), exclude_tests=True):
+    for s in iter_project_files(extensions=(".py",), exclude_tests=False):
         p = Path(s)
         try:
             rel = p.relative_to(PROJECT_ROOT)
@@ -172,9 +178,9 @@ def _scan_paths() -> list[Path]:
 
 
 class TestNoDirectYamlCalls(unittest.TestCase):
-    """Production .py files MUST go through utils.cache.yaml."""
+    """Every .py file (production AND tests) MUST go through utils.cache.yaml."""
 
-    def test_no_direct_yaml_calls_in_production_code(self) -> None:
+    def test_no_direct_yaml_calls(self) -> None:
         offenders: dict[Path, list[str]] = {}
         for path in _scan_paths():
             issues = _file_offenders(path)
@@ -186,7 +192,7 @@ class TestNoDirectYamlCalls(unittest.TestCase):
 
         rel = lambda p: p.relative_to(PROJECT_ROOT)  # noqa: E731
         lines = [
-            f"{len(offenders)} production .py file(s) call yaml.safe_load / "
+            f"{len(offenders)} .py file(s) call yaml.safe_load / "
             f"yaml.safe_dump (or aliases) directly instead of routing through "
             f"utils.cache.yaml.{{load_yaml, load_yaml_any, dump_yaml}}:",
         ]

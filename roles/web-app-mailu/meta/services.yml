@@ -24,8 +24,12 @@ mailu:
     local:
       http: 8007
   run_after:
-  - web-app-matomo
+    - web-app-matomo
   lifecycle: beta
+  cpus: '1.0'
+  mem_reservation: 1g
+  mem_limit: 2g
+  pids_limit: 1024
 # noqa: shared
 redis:
   backup:

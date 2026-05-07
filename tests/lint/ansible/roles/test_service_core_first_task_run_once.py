@@ -3,6 +3,7 @@ from pathlib import Path
 import yaml
 
 from utils.cache.files import read_text
+from utils.cache.yaml import load_yaml_str
 from utils.service_registry import build_service_registry_from_roles_dir
 
 
@@ -93,7 +94,7 @@ class TestServiceCoreFirstTaskRunOnce(unittest.TestCase):
                 continue  # covered by test_01_core_exists
 
             try:
-                tasks = yaml.safe_load(read_text(str(path)))
+                tasks = load_yaml_str(read_text(str(path)))
             except yaml.YAMLError as e:
                 self.fail(f"Failed to parse {path}: {e}")
 
@@ -123,7 +124,7 @@ class TestServiceCoreFirstTaskRunOnce(unittest.TestCase):
                 continue
 
             try:
-                tasks = yaml.safe_load(read_text(str(main_path)))
+                tasks = load_yaml_str(read_text(str(main_path)))
             except yaml.YAMLError as e:
                 self.fail(f"Failed to parse {main_path}: {e}")
 

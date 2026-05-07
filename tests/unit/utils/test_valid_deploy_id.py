@@ -3,9 +3,10 @@ from __future__ import annotations
 import os
 import tempfile
 import unittest
-import yaml
 
 from utils.valid_deploy_id import ValidDeployId
+
+from utils.cache.yaml import dump_yaml
 
 
 class TestValidDeployId(unittest.TestCase):
@@ -33,8 +34,7 @@ class TestValidDeployId(unittest.TestCase):
     def _write_yaml_inventory(self, data) -> str:
         fd, path = tempfile.mkstemp(suffix=".yml")
         os.close(fd)
-        with open(path, "w", encoding="utf-8") as f:
-            yaml.safe_dump(data, f)
+        dump_yaml(path, data)
         return path
 
     def test_valid_in_roles_and_ini_inventory(self) -> None:

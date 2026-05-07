@@ -9,9 +9,13 @@ pgadmin:
       oauth2: 16485
       http: 8016
   run_after:
-  - web-app-matomo
-  - web-app-keycloak
+    - web-app-matomo
+    - web-app-keycloak
   lifecycle: beta
+  cpus: '0.2'
+  mem_reservation: 128m
+  mem_limit: 256m
+  pids_limit: 256
 logout:
   enabled: true
   shared: true
@@ -31,7 +35,7 @@ oauth2:
     host: application
     port: '80'
   allowed_groups:
-  - '{{ lookup(''rbac_group_path'', application_id=''web-app-pgadmin'', role=''administrator'') }}'
+    - '{{ lookup(''rbac_group_path'', application_id=''web-app-pgadmin'', role=''administrator'') }}'
 css:
   enabled: true
   shared: true

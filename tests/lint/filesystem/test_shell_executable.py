@@ -16,7 +16,7 @@ class TestShellScriptsExecutable(unittest.TestCase):
     def test_all_shell_scripts_under_scripts_are_executable(self):
         missing_executable_bit: list[str] = []
 
-        for path in sorted(self.scripts_root.rglob("*.sh")):
+        for path in sorted(self.scripts_root.rglob("*.sh")):  # noqa: project-walk
             if not path.is_file():
                 continue
 

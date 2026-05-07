@@ -2,10 +2,11 @@
 
 from __future__ import annotations
 
-import os
 import subprocess
 import unittest
 from pathlib import Path
+
+from utils.cache.files import iter_project_files
 
 
 class TestPythonShebangs(unittest.TestCase):
@@ -27,12 +28,7 @@ class TestPythonShebangs(unittest.TestCase):
             ]
             return [self.repo_root / p for p in rel_paths]
         except Exception:
-            files: list[Path] = []
-            for root, dirs, names in os.walk(self.repo_root):
-                dirs[:] = [d for d in dirs if d != ".git"]
-                for name in names:
-                    files.append(Path(root) / name)
-            return files
+            return [Path(p) for p in iter_project_files()]
 
     @staticmethod
     def _first_line(path: Path) -> str:

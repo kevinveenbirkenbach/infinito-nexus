@@ -6,11 +6,12 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Iterable, List
 
-from utils.cache.files import read_text
+from utils.cache.files import iter_project_files, read_text
 
 
 PROJECT_ROOT = Path(__file__).resolve().parents[3]
 SCAN_DIRS = ("roles", "tasks", "group_vars")
+_SCAN_PREFIXES = tuple(f"{d}/" for d in SCAN_DIRS)
 SCAN_SUFFIXES = (".yml", ".yaml", ".j2")
 
 # Match the start of a `lookup('config', ...)` / `lookup("config", ...)` call.
@@ -33,13 +34,10 @@ class Finding:
 
 
 def _iter_target_files(repo_root: Path) -> Iterable[Path]:
-    for sub in SCAN_DIRS:
-        base = repo_root / sub
-        if not base.is_dir():
-            continue
-        for path in base.rglob("*"):
-            if path.is_file() and path.suffix in SCAN_SUFFIXES:
-                yield path
+    for abs_path in iter_project_files(extensions=SCAN_SUFFIXES):
+        rel = Path(abs_path).relative_to(repo_root).as_posix()
+        if any(rel.startswith(p) for p in _SCAN_PREFIXES):
+            yield Path(abs_path)
 
 
 def _walk_lookup_call(line: str, lookup_match_start: int) -> tuple[int, int]:

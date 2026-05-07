@@ -19,7 +19,6 @@ outside this repository's control. All other ``4xx`` codes fail the test.
 from __future__ import annotations
 
 import concurrent.futures
-import fnmatch
 import ipaddress
 import re
 import subprocess
@@ -33,6 +32,7 @@ import requests
 
 from utils.annotations.message import error, warning
 from utils.annotations.suppress import is_suppressed_at
+from utils.cache.files import iter_non_ignored_files
 
 _REPO_ROOT = Path(__file__).resolve().parents[3]
 _URL_RE = re.compile(r"https?://[^\s<>'\"`\]]+")
@@ -90,13 +90,6 @@ class ProbeOutcome(NamedTuple):
     detail: str
 
 
-class IgnoreRule(NamedTuple):
-    base_dir: Path
-    pattern: str
-    negated: bool
-    directory_only: bool
-
-
 def _repo_files(root: Path) -> list[Path]:
     """Return git-tracked and untracked-but-not-ignored files."""
     try:
@@ -120,81 +113,11 @@ def _repo_files(root: Path) -> list[Path]:
     return sorted((root / rel for rel in rel_paths if (root / rel).is_file()))
 
 
-def _load_ignore_rules(root: Path) -> list[IgnoreRule]:
-    """Load simple .gitignore rules for fallback scans without .git metadata."""
-    rules: list[IgnoreRule] = []
-    for ignore_file in sorted(root.rglob(".gitignore")):
-        base_dir = ignore_file.parent
-        try:
-            lines = ignore_file.read_text(
-                encoding="utf-8", errors="replace"
-            ).splitlines()
-        except OSError:
-            continue
-        for raw_line in lines:
-            line = raw_line.strip()
-            if not line or line.startswith("#"):
-                continue
-            negated = line.startswith("!")
-            if negated:
-                line = line[1:]
-            directory_only = line.endswith("/")
-            pattern = line.rstrip("/")
-            if not pattern:
-                continue
-            rules.append(
-                IgnoreRule(
-                    base_dir=base_dir,
-                    pattern=pattern,
-                    negated=negated,
-                    directory_only=directory_only,
-                )
-            )
-    return rules
-
-
-def _match_ignore_rule(rule: IgnoreRule, path: Path) -> bool:
-    """Best-effort matcher for the project's current .gitignore patterns."""
-    try:
-        rel_to_base = path.relative_to(rule.base_dir).as_posix()
-    except ValueError:
-        return False
-
-    parts = [part for part in rel_to_base.split("/") if part]
-    if not parts:
-        return False
-
-    pattern = rule.pattern.lstrip("/")
-    if rule.directory_only:
-        if "/" in pattern:
-            return rel_to_base == pattern or rel_to_base.startswith(f"{pattern}/")
-        return any(fnmatch.fnmatchcase(part, pattern) for part in parts[:-1])
-
-    if "/" in pattern:
-        return fnmatch.fnmatchcase(rel_to_base, pattern)
-    return any(fnmatch.fnmatchcase(part, pattern) for part in parts)
-
-
-def _is_ignored(path: Path, rules: list[IgnoreRule]) -> bool:
-    """Return True when *path* matches the loaded fallback .gitignore rules."""
-    ignored = False
-    for rule in rules:
-        if _match_ignore_rule(rule, path):
-            ignored = not rule.negated
-    return ignored
-
-
 def _repo_files_without_git_metadata(root: Path) -> list[Path]:
-    """Fallback scan for environments where the checkout omits .git metadata."""
-    rules = _load_ignore_rules(root)
-    files: list[Path] = []
-    for path in root.rglob("*"):
-        if ".git" in path.parts or not path.is_file():
-            continue
-        if _is_ignored(path, rules):
-            continue
-        files.append(path)
-    return sorted(files)
+    """Fallback scan for environments where the checkout omits .git metadata.
+    Routes through `utils.cache.files.iter_non_ignored_files` so the walk
+    + .gitignore matching are shared with every other lint test."""
+    return sorted(Path(p) for p in iter_non_ignored_files(root=str(root)))
 
 
 def _is_probably_text_file(path: Path) -> bool:

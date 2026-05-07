@@ -7,7 +7,7 @@ oauth2:
     host: application
     port: '9090'
   allowed_groups:
-  - '{{ lookup(''rbac_group_path'', application_id=''web-app-prometheus'', role=''administrator'') }}'
+    - '{{ lookup(''rbac_group_path'', application_id=''web-app-prometheus'', role=''administrator'') }}'
 logout:
   enabled: true
   shared: true
@@ -39,8 +39,9 @@ prometheus:
       oauth2: 16492
       http: 8066
   run_after:
-  - web-app-keycloak
+    - web-app-keycloak
   lifecycle: beta
+  min_storage: 5GB
 alertmanager:
   image: prom/alertmanager
   version: v0.32.1
@@ -49,6 +50,7 @@ alertmanager:
   mem_reservation: 64m
   mem_limit: 128m
   pids_limit: 64
+  min_storage: 1GB
 blackbox-exporter:
   image: prom/blackbox-exporter
   version: v0.28.0
@@ -57,6 +59,7 @@ blackbox-exporter:
   mem_reservation: 32m
   mem_limit: 64m
   pids_limit: 64
+  min_storage: 1GB
 cadvisor:
   image: gcr.io/cadvisor/cadvisor
   version: v0.52.1
@@ -65,6 +68,7 @@ cadvisor:
   mem_reservation: 64m
   mem_limit: 256m
   pids_limit: 64
+  min_storage: 1GB
 node-exporter:
   image: prom/node-exporter
   version: v1.11.1
@@ -73,3 +77,4 @@ node-exporter:
   mem_reservation: 32m
   mem_limit: 128m
   pids_limit: 64
+  min_storage: 1GB

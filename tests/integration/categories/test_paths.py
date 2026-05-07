@@ -1,6 +1,7 @@
 import os
 import unittest
-import yaml
+
+from utils.cache.yaml import load_yaml_any
 
 
 class TestCategoryPaths(unittest.TestCase):
@@ -12,8 +13,7 @@ class TestCategoryPaths(unittest.TestCase):
                 os.path.dirname(__file__), "..", "..", "..", "roles", "categories.yml"
             )
         )
-        with open(file_path, "r") as f:
-            data = yaml.safe_load(f)
+        data = load_yaml_any(file_path)
         cls.roles_def = data["roles"]
 
         # List of actual directories under roles/

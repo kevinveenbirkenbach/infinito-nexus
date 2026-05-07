@@ -7,9 +7,9 @@ from pathlib import Path
 from unittest import TestCase, main
 from unittest.mock import patch
 
-import yaml
-
 import utils.invokable as inv
+
+from utils.cache.yaml import dump_yaml
 
 
 class TestInvokable(TestCase):
@@ -21,25 +21,18 @@ class TestInvokable(TestCase):
 
         # This structure triggers the YAML fallback in _get_invokable_paths()
         # because it expects "categories", but we will patch _get_invokable_paths() anyway
-        with self.categories_file.open("w", encoding="utf-8") as f:
-            yaml.safe_dump(
-                {
-                    "categories": [
-                        {"invokable_paths": ["web-app", "update", "util-desk"]}
-                    ]
-                },
-                f,
-            )
+        dump_yaml(
+            self.categories_file,
+            {"categories": [{"invokable_paths": ["web-app", "update", "util-desk"]}]},
+        )
 
         def mk_role(name: str, application_id: str | None = None) -> None:
             rd = self.roles_dir / name
             (rd / "vars").mkdir(parents=True, exist_ok=True)
             if application_id is not None:
-                with (rd / "vars" / "main.yml").open("w", encoding="utf-8") as f:
-                    yaml.safe_dump({"application_id": application_id}, f)
+                dump_yaml(rd / "vars" / "main.yml", {"application_id": application_id})
             else:
-                with (rd / "vars" / "main.yml").open("w", encoding="utf-8") as f:
-                    yaml.safe_dump({}, f)
+                dump_yaml(rd / "vars" / "main.yml", {})
 
         mk_role("web-app-nextcloud", "web-app-nextcloud")
         mk_role("web-app-matomo", "matomo-app")
@@ -88,8 +81,7 @@ class TestInvokable(TestCase):
         # Ensure exclude regex is honored
         rd = self.roles_dir / "web-app-oauth2-proxy"
         (rd / "vars").mkdir(parents=True, exist_ok=True)
-        with (rd / "vars" / "main.yml").open("w", encoding="utf-8") as f:
-            yaml.safe_dump({}, f)
+        dump_yaml(rd / "vars" / "main.yml", {})
 
         with patch.object(inv, "_repo_root", return_value=self.tmp):
             with patch.object(

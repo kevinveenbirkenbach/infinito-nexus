@@ -1,9 +1,10 @@
 import unittest
 from pathlib import Path
 
-import yaml
 
 from plugins.lookup.service import LookupModule
+
+from utils.cache.yaml import load_yaml_any
 
 
 class TestServiceTransitiveDependencies(unittest.TestCase):
@@ -23,7 +24,7 @@ class TestServiceTransitiveDependencies(unittest.TestCase):
 
     def _load_yaml(self, *parts):
         path = self.repo_root.joinpath(*parts)
-        return yaml.safe_load(path.read_text(encoding="utf-8")) or {}
+        return load_yaml_any(path) or {}
 
     def test_dashboard_needs_file_transitively_via_asset_service(self):
         result = LookupModule().run(

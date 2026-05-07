@@ -1,6 +1,7 @@
 import os
 import unittest
-import yaml
+
+from utils.cache.yaml import load_yaml_any
 
 
 class TestCategoriesInvokableExclusion(unittest.TestCase):
@@ -15,8 +16,7 @@ class TestCategoriesInvokableExclusion(unittest.TestCase):
             os.path.join(base_dir, "..", "..", "..", "roles", "categories.yml")
         )
 
-        with open(yaml_path, "r", encoding="utf-8") as f:
-            data = yaml.safe_load(f)
+        data = load_yaml_any(yaml_path)
 
         violations = []
 

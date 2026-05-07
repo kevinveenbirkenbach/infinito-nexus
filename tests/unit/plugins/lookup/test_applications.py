@@ -5,16 +5,17 @@ import tempfile
 import unittest
 from pathlib import Path
 
-import yaml
 from ansible.errors import AnsibleError
 
 from plugins.lookup.applications import LookupModule, _reset_cache_for_tests
+
+from utils.cache.yaml import dump_yaml_str
 
 
 def _write_config(base_dir: Path, application_id: str, config: dict) -> None:
     config_path = base_dir / "roles" / application_id / "meta" / "services.yml"
     config_path.parent.mkdir(parents=True, exist_ok=True)
-    config_path.write_text(yaml.safe_dump(config), encoding="utf-8")
+    config_path.write_text(dump_yaml_str(config), encoding="utf-8")
 
 
 class TestApplicationsLookup(unittest.TestCase):

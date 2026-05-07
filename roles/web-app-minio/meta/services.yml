@@ -25,8 +25,8 @@ minio:
   mem_limit: 4g
   pids_limit: 2048
   run_after:
-  - web-app-keycloak
-  - web-app-matomo
+    - web-app-keycloak
+    - web-app-matomo
   lifecycle: beta
 redis:
   backup:
@@ -48,7 +48,17 @@ api:
   ports:
     local:
       http: 8057
+  min_storage: 5GB
+  cpus: '0.5'
+  mem_reservation: 256m
+  mem_limit: 1g
+  pids_limit: 512
 console:
   ports:
     local:
       http: 8058
+  min_storage: 1GB
+  cpus: '0.2'
+  mem_reservation: 128m
+  mem_limit: 256m
+  pids_limit: 256

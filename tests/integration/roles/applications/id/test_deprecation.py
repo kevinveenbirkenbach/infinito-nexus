@@ -1,6 +1,7 @@
 import os
 import unittest
-import yaml
+
+from utils.cache.yaml import load_yaml_any
 
 # Dynamically determine the path to the roles directory
 ROLES_DIR = os.path.abspath(
@@ -21,12 +22,11 @@ class TestApplicationIdDeprecation(unittest.TestCase):
             vars_main_yml = os.path.join(role_path, "vars", "main.yml")
             if not os.path.isfile(vars_main_yml):
                 continue
-            with open(vars_main_yml, "r", encoding="utf-8") as f:
-                try:
-                    data = yaml.safe_load(f)
-                except Exception as e:
-                    errors.append(f"Could not parse {vars_main_yml}: {e}")
-                    continue
+            try:
+                data = load_yaml_any(vars_main_yml)
+            except Exception as e:
+                errors.append(f"Could not parse {vars_main_yml}: {e}")
+                continue
             if not isinstance(data, dict):
                 continue
             app_id = data.get("application_id")

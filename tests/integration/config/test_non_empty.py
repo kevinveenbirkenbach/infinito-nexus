@@ -1,7 +1,9 @@
 import os
-import glob
 import yaml
 import unittest
+
+from utils.cache.files import iter_project_files
+from utils.cache.yaml import load_yaml_any
 
 
 def find_none_values(data, prefix=None):
@@ -38,26 +40,32 @@ class TestConfigurationNoNone(unittest.TestCase):
         # volumes.yml). The legacy roles/*/config/main.yml file no longer
         # exists. Recurse into every meta/*.yml file and assert no key
         # resolves to a YAML null.
-        roles_root = os.path.join(
-            os.path.dirname(__file__),
-            os.pardir,
-            os.pardir,
-            os.pardir,
-            "roles",
+        roles_root = os.path.abspath(
+            os.path.join(
+                os.path.dirname(__file__),
+                os.pardir,
+                os.pardir,
+                os.pardir,
+                "roles",
+            )
         )
-        pattern = os.path.join(roles_root, "*", "meta", "*.yml")
-        files = glob.glob(pattern)
-        self.assertTrue(
-            files, f"No roles/*/meta/*.yml files found with pattern: {pattern}"
-        )
+        roles_prefix = roles_root + os.sep
+        meta_segment = os.sep + "meta" + os.sep
+        files = [
+            p
+            for p in iter_project_files(extensions=(".yml",))
+            if p.startswith(roles_prefix)
+            and meta_segment in p[len(roles_prefix) :]
+            and p[len(roles_prefix) :].count(os.sep) == 2  # roles/<role>/meta/<file>
+        ]
+        self.assertTrue(files, f"No roles/*/meta/*.yml files found under {roles_root}")
 
         all_errors = []
         for filepath in files:
-            with open(filepath, "r") as f:
-                try:
-                    data = yaml.safe_load(f)
-                except yaml.YAMLError as e:
-                    self.fail(f"Failed to parse YAML in {filepath}: {e}")
+            try:
+                data = load_yaml_any(filepath)
+            except yaml.YAMLError as e:
+                self.fail(f"Failed to parse YAML in {filepath}: {e}")
             errors = find_none_values(data)
             for path, value in errors:
                 all_errors.append(f"{filepath}: Key '{path}' is None")

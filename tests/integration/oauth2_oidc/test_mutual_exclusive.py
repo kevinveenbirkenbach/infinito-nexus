@@ -3,6 +3,8 @@ from pathlib import Path
 
 import yaml
 
+from utils.cache.yaml import load_yaml_str
+
 
 ROLES_DIR = Path(__file__).resolve().parent.parent.parent.parent / "roles"
 
@@ -18,7 +20,7 @@ class TestOidcOauth2MutualExclusion(unittest.TestCase):
 
             try:
                 with config_file.open("r", encoding="utf-8") as handle:
-                    data = yaml.safe_load(handle) or {}
+                    data = load_yaml_str(handle) or {}
             except yaml.YAMLError as error:
                 failures.append(f"{config_file}: failed to parse YAML ({error})")
                 continue

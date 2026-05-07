@@ -293,11 +293,7 @@
     login_password: "{{ postgres_login_password_string }}"
     login_host: "{{ POSTGRES_LOCAL_HOST }}"
     login_port: "{{ POSTGRES_PORT }}"
-    query: |
-      GRANT USAGE ON SCHEMA public TO "{{ database_username }}";
-      GRANT CREATE ON SCHEMA public TO "{{ database_username }}";
-      ALTER DEFAULT PRIVILEGES IN SCHEMA public
-        GRANT ALL PRIVILEGES ON TABLES TO "{{ database_username }}";
+    query: "{{ lookup('template', 'sql/grant_schema_privileges.sql.j2') }}"
   register: postgresql_result
   until: postgresql_result is succeeded
   retries: "{{ POSTGRES_RETRIES }}"

@@ -2,8 +2,9 @@ import os
 import tempfile
 import shutil
 import unittest
-import yaml
 from plugins.lookup.application_gid import LookupModule
+
+from utils.cache.yaml import dump_yaml
 
 
 class TestApplicationGidLookup(unittest.TestCase):
@@ -26,8 +27,10 @@ class TestApplicationGidLookup(unittest.TestCase):
         for application_id in self.application_ids:
             role_path = os.path.join(self.roles_dir, application_id, "meta")
             os.makedirs(role_path)
-            with open(os.path.join(role_path, "services.yml"), "w") as f:
-                yaml.dump({application_id: {"title": application_id}}, f)
+            dump_yaml(
+                os.path.join(role_path, "services.yml"),
+                {application_id: {"title": application_id}},
+            )
 
         self.lookup = LookupModule()
 

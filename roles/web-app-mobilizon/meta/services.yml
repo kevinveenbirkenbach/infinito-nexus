@@ -26,10 +26,14 @@ mobilizon:
     local:
       http: 8043
   run_after:
-  - web-app-matomo
-  - web-app-keycloak
-  - web-app-mailu
+    - web-app-matomo
+    - web-app-keycloak
+    - web-app-mailu
   lifecycle: beta
+  cpus: '0.2'
+  mem_reservation: 128m
+  mem_limit: 256m
+  pids_limit: 256
 css:
   enabled: true
   shared: true

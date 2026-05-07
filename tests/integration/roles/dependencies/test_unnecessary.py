@@ -2,18 +2,18 @@
 import os
 import re
 import glob
-import yaml
 import unittest
 from typing import Dict, Set, List, Optional
 
 from utils.cache.files import read_text as _read_text_cached
+from utils.cache.yaml import load_yaml_str
 
 # ---------------- Utilities ----------------
 
 
 def safe_load_yaml(path: str):
     try:
-        return yaml.safe_load(_read_text_cached(path)) or {}
+        return load_yaml_str(_read_text_cached(path)) or {}
     except Exception:
         return {}
 
@@ -31,7 +31,7 @@ def roles_root(project_root: str) -> str:
 
 def iter_role_dirs(project_root: str) -> List[str]:
     root = roles_root(project_root)
-    return [d for d in glob.glob(os.path.join(root, "*")) if os.path.isdir(d)]
+    return [d for d in glob.glob(os.path.join(root, "*")) if os.path.isdir(d)]  # noqa: project-walk
 
 
 def role_name_from_dir(role_dir: str) -> str:
@@ -46,7 +46,7 @@ def path_if_exists(*parts) -> Optional[str]:
 def gather_yaml_files(base: str, patterns: List[str]) -> List[str]:
     files: List[str] = []
     for pat in patterns:
-        files.extend(glob.glob(os.path.join(base, pat), recursive=True))
+        files.extend(glob.glob(os.path.join(base, pat), recursive=True))  # noqa: project-walk
     return [f for f in files if os.path.isfile(f)]
 
 

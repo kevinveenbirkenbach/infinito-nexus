@@ -6,6 +6,8 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Iterable, Set
 
+from utils.cache.files import iter_project_files, read_text
+
 
 @dataclass(frozen=True)
 class Finding:
@@ -24,10 +26,13 @@ def _repo_root() -> Path:
 
 
 def _iter_target_files(repo_root: Path) -> Iterable[Path]:
-    target = repo_root / "cli" / "deploy"
-    if not target.is_dir():
-        return []
-    return sorted(target.rglob("*.py"))
+    prefix = repo_root / "cli" / "deploy"
+    paths = [
+        Path(p)
+        for p in iter_project_files(extensions=(".py",))
+        if Path(p).is_relative_to(prefix)
+    ]
+    return sorted(paths)
 
 
 def _const_str(node: ast.AST) -> str | None:
@@ -100,7 +105,10 @@ def _is_sh_lc_command(node: ast.AST) -> bool:
 
 
 def _scan_file(path: Path) -> list[Finding]:
-    text = path.read_text(encoding="utf-8", errors="replace")
+    try:
+        text = read_text(str(path))
+    except UnicodeDecodeError:
+        return []
     tree = ast.parse(text, filename=path.as_posix())
     lines = text.splitlines()
     pipefail_vars = _collect_pipefail_vars(tree)

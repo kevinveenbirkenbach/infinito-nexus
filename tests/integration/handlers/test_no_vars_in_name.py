@@ -1,6 +1,7 @@
 import unittest
-import yaml
 from pathlib import Path
+
+from utils.cache.yaml import load_yaml_all_str
 
 
 class HandlerNameIntegrationTest(unittest.TestCase):
@@ -16,7 +17,7 @@ class HandlerNameIntegrationTest(unittest.TestCase):
             with self.subTest(handler_file=str(handler_file)):
                 content = handler_file.read_text(encoding="utf-8")
                 # Load all documents in the YAML file
-                documents = list(yaml.safe_load_all(content))
+                documents = list(load_yaml_all_str(content))
                 for index, doc in enumerate(documents):
                     if not isinstance(doc, dict):
                         continue

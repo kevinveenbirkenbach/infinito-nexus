@@ -5,7 +5,9 @@ import unittest
 from pathlib import Path
 from typing import Iterable
 
-import yaml
+
+from utils.cache.files import iter_non_ignored_files
+from utils.cache.yaml import load_yaml_any
 
 REPO_ROOT = Path(__file__).resolve().parents[3]
 DEPENDABOT_PATH = REPO_ROOT / ".github" / "dependabot.yml"
@@ -119,8 +121,7 @@ def _dir_covers(dep_dir: str, file_rel_dir: str) -> bool:
 
 
 def _load_active_entries() -> list[dict]:
-    with open(DEPENDABOT_PATH) as fh:
-        data = yaml.safe_load(fh)
+    data = load_yaml_any(DEPENDABOT_PATH)
     return data.get("updates", [])
 
 
@@ -197,30 +198,15 @@ def _is_gitignored(rel_file: str, filename: str, patterns: Iterable[str]) -> boo
 
 
 def _walk_fallback() -> list[str]:
-    patterns = _load_gitignore_patterns()
+    """Last-resort walk when `git ls-files` fails. Routes through the
+    cached project walk + .gitignore matcher in `utils.cache.files`."""
     files: list[str] = []
-    for root, dirs, filenames in os.walk(REPO_ROOT):
-        rel_root = os.path.relpath(root, REPO_ROOT)
-        top_segment = "" if rel_root == "." else rel_root.split(os.sep, 1)[0]
-
-        dirs[:] = [
-            d
-            for d in dirs
-            if d not in SKIP_DIRS
-            and not (d.startswith(".") and d not in SCANNED_HIDDEN_DIRS)
-            and not _is_gitignored(
-                d if rel_root == "." else os.path.join(rel_root, d), d, patterns
-            )
-        ]
-
-        if top_segment in SKIP_DIRS:
+    for path in iter_non_ignored_files(exclude_dirs=tuple(SKIP_DIRS)):
+        rel = os.path.relpath(path, REPO_ROOT)
+        top_segment = rel.split(os.sep, 1)[0] if os.sep in rel else ""
+        if top_segment.startswith(".") and top_segment not in SCANNED_HIDDEN_DIRS:
             continue
-
-        for filename in filenames:
-            rel_file = filename if rel_root == "." else os.path.join(rel_root, filename)
-            if _is_gitignored(rel_file, filename, patterns):
-                continue
-            files.append(rel_file)
+        files.append(rel)
     return files
 
 

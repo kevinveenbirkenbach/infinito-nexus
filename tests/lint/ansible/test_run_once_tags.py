@@ -4,7 +4,7 @@ import unittest
 from collections import defaultdict
 
 from utils.annotations.suppress import is_suppressed_anywhere
-from utils.cache.files import read_text
+from utils.cache.files import iter_project_files, read_text
 
 PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "../../../"))
 ROLES_DIR = os.path.join(PROJECT_ROOT, "roles")
@@ -22,49 +22,45 @@ def find_role_includes(roles_dir):
     and yield (filepath, line_number, role_name) for each literal import_role/include_role
     usage. Dynamic includes using Jinja variables (e.g. {{ ... }}) are ignored.
     """
-    for dirpath, _, filenames in os.walk(roles_dir):
-        for fname in filenames:
-            if not fname.endswith((".yml", ".yaml")):
+    roles_prefix = os.path.abspath(roles_dir) + os.sep
+    root_tasks_prefix = os.path.abspath(os.path.join(roles_dir, "..", "tasks")) + os.sep
+    for fpath in iter_project_files(extensions=(".yml", ".yaml")):
+        if not fpath.startswith(roles_prefix):
+            continue
+        # Skip any files under the root-level tasks/ directory
+        if fpath.startswith(root_tasks_prefix):
+            continue
+        try:
+            lines = read_text(fpath).splitlines(keepends=True)
+        except (IOError, OSError, UnicodeDecodeError):
+            continue
+
+        for idx, line in enumerate(lines):
+            if "import_role" not in line and "include_role" not in line:
                 continue
 
-            fpath = os.path.join(dirpath, fname)
-            # Skip any files under the root-level tasks/ directory
-            if os.path.abspath(fpath).startswith(
-                os.path.abspath(os.path.join(roles_dir, "..", "tasks")) + os.sep
-            ):
-                continue
-
-            try:
-                lines = read_text(fpath).splitlines(keepends=True)
-            except (IOError, OSError, UnicodeDecodeError):
-                continue
-
-            for idx, line in enumerate(lines):
-                if "import_role" not in line and "include_role" not in line:
+            base_indent = len(line) - len(line.lstrip())
+            # Look ahead up to 5 lines for the associated `name:` entry
+            for nxt in lines[idx + 1 : idx + 6]:
+                indent = len(nxt) - len(nxt.lstrip())
+                # Only consider more-indented lines (the block under import/include)
+                if indent <= base_indent:
+                    continue
+                m = re.match(r'\s*name:\s*[\'"]?([A-Za-z0-9_\-]+)[\'"]?', nxt)
+                if not m:
                     continue
 
-                base_indent = len(line) - len(line.lstrip())
-                # Look ahead up to 5 lines for the associated `name:` entry
-                for nxt in lines[idx + 1 : idx + 6]:
-                    indent = len(nxt) - len(nxt.lstrip())
-                    # Only consider more-indented lines (the block under import/include)
-                    if indent <= base_indent:
-                        continue
-                    m = re.match(r'\s*name:\s*[\'"]?([A-Za-z0-9_\-]+)[\'"]?', nxt)
-                    if not m:
-                        continue
-
-                    role_name = m.group(1)
-                    # Ignore the generic "user" role include
-                    if role_name == "user":
-                        break
-
-                    # Skip any dynamic includes using Jinja syntax
-                    if "{{" in nxt or "}}" in nxt:
-                        break
-
-                    yield fpath, idx + 1, role_name
+                role_name = m.group(1)
+                # Ignore the generic "user" role include
+                if role_name == "user":
                     break
+
+                # Skip any dynamic includes using Jinja syntax
+                if "{{" in nxt or "}}" in nxt:
+                    break
+
+                yield fpath, idx + 1, role_name
+                break
 
 
 def check_run_once_tag(content, role_name):

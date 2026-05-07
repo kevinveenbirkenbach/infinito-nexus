@@ -28,7 +28,7 @@ def tracked_files(root: Path) -> list[Path]:
     except Exception:
         return [
             path
-            for path in root.rglob("*")
+            for path in root.rglob("*")  # noqa: project-walk
             if path.is_file()
             and ".git" not in path.parts
             and "__pycache__" not in path.parts

@@ -20,9 +20,14 @@ littlejs:
     local:
       http: 8063
   run_after:
-  - web-app-matomo
+    - web-app-matomo
   lifecycle: alpha
 # noqa: email
+  min_storage: 5GB
+  cpus: '0.5'
+  mem_reservation: 256m
+  mem_limit: 1g
+  pids_limit: 512
 email:
   enabled: false
   shared: false
