@@ -1,23 +1,43 @@
 # @See https://raw.githubusercontent.com/snipe/snipe-it/master/app/Models/Setting.php
 ---
 
-- name: Configure Snipe-IT LDAP
-  ansible.builtin.script: ldap.sh
-  args:
+- name: "snipe-it: wait until settings table is seeded"
+  ansible.builtin.shell:
+    cmd: "{{ BIN_COMPOSE }} exec -T {{ SNIPE_IT_SERVICE }} php"
+    stdin: "{{ lookup('file', 'wait_settings.php') }}"
     chdir: "{{ lookup('container', application_id, 'directories.instance') }}"
-  environment:
-    SNIPE_IT_SERVICE: "{{ SNIPE_IT_SERVICE }}"
-    APP_KEY: "{{ SNIPE_IT_APP_KEY }}"
-    LDAP_SERVER_URI: "{{ LDAP.SERVER.URI }}"
-    LDAP_SERVER_PORT: "{{ LDAP.SERVER.PORT }}"
-    LDAP_BIND_DN: "{{ LDAP.DN.ADMINISTRATOR.DATA }}"
-    LDAP_BIND_PASSWORD_B64: "{{ LDAP.BIND_CREDENTIAL | b64encode }}"
-    LDAP_BASEDN: "{{ LDAP.DN.OU.USERS }}"
-    LDAP_FILTER_USERS_ALL: "{{ SNIPE_IT_LDAP_FILTER_FRAGMENT }}"
-    LDAP_USER_ID_ATTR: "{{ LDAP.USER.ATTRIBUTES.ID }}"
-    LDAP_USER_FIRSTNAME_ATTR: "{{ SNIPE_IT_LDAP_USER_FIRSTNAME }}"
-    LDAP_USER_SURNAME_ATTR: "{{ LDAP.USER.ATTRIBUTES.SURNAME }}"
-    LDAP_USER_MAIL_ATTR: "{{ LDAP.USER.ATTRIBUTES.MAIL }}"
-    LDAP_AUTH_FILTER_QUERY: "{{ SNIPE_IT_LDAP_AUTH_FILTER_QUERY }}"
-    OIDC_RESET_URL: "{{ OIDC.CLIENT.RESET_CREDENTIALS }}"
+  register: snipe_settings_ready
+  retries: 60
+  delay: 5
+  until: snipe_settings_ready.rc == 0
+  changed_when: false
+  failed_when: snipe_settings_ready.rc != 0
+
+- name: "snipe-it: apply LDAP configuration via Setting model"
+  ansible.builtin.shell:
+    cmd: >-
+      {{ BIN_COMPOSE }} exec -T
+      -e APP_KEY={{ SNIPE_IT_APP_KEY | quote }}
+      -e LDAP_SERVER_URI={{ LDAP.SERVER.URI | quote }}
+      -e LDAP_SERVER_PORT={{ LDAP.SERVER.PORT | quote }}
+      -e LDAP_BIND_DN={{ LDAP.DN.ADMINISTRATOR.DATA | quote }}
+      -e LDAP_BIND_PASSWORD_B64={{ LDAP.BIND_CREDENTIAL | b64encode | quote }}
+      -e LDAP_BASEDN={{ LDAP.DN.OU.USERS | quote }}
+      -e LDAP_FILTER_USERS_ALL={{ SNIPE_IT_LDAP_FILTER_FRAGMENT | quote }}
+      -e LDAP_USER_ID_ATTR={{ LDAP.USER.ATTRIBUTES.ID | quote }}
+      -e LDAP_USER_FIRSTNAME_ATTR={{ SNIPE_IT_LDAP_USER_FIRSTNAME | quote }}
+      -e LDAP_USER_SURNAME_ATTR={{ LDAP.USER.ATTRIBUTES.SURNAME | quote }}
+      -e LDAP_USER_MAIL_ATTR={{ LDAP.USER.ATTRIBUTES.MAIL | quote }}
+      -e LDAP_AUTH_FILTER_QUERY={{ SNIPE_IT_LDAP_AUTH_FILTER_QUERY | quote }}
+      -e OIDC_RESET_URL={{ OIDC.CLIENT.RESET_CREDENTIALS | quote }}
+      {{ SNIPE_IT_SERVICE }} php
+    stdin: "{{ lookup('file', 'apply_ldap_config.php') }}"
+    chdir: "{{ lookup('container', application_id, 'directories.instance') }}"
+  changed_when: true
   no_log: "{{ MASK_CREDENTIALS_IN_LOGS | bool }}"
+
+- name: "snipe-it: clear Laravel caches"
+  ansible.builtin.shell:
+    cmd: "{{ BIN_COMPOSE }} exec -T {{ SNIPE_IT_SERVICE }} php artisan optimize:clear"
+    chdir: "{{ lookup('container', application_id, 'directories.instance') }}"
+  changed_when: true

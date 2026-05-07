@@ -36,13 +36,13 @@
   no_log: "{{ MASK_CREDENTIALS_IN_LOGS | bool }}"
 
 - name: Ensure siteUrl matches canonical domain
-  ansible.builtin.script: >
-    set_siteurl.sh
-    {{ BIN_COMPOSE | quote }}
-    {{ ESPOCRM_USER | quote }}
-    {{ ESPOCRM_SERVICE | quote }}
-    {{ ESPOCRM_URL | quote }}
-  args:
+  ansible.builtin.shell:
+    cmd: >-
+      {{ BIN_COMPOSE }} exec -T
+      -e ESPOCRM_URL={{ ESPOCRM_URL | quote }}
+      --user {{ ESPOCRM_USER }}
+      {{ ESPOCRM_SERVICE }} php
+    stdin: "{{ lookup('file', 'set_siteurl.php') }}"
     chdir: "{{ lookup('container', application_id, 'directories.instance') }}"
   register: siteurl_set
   changed_when: "'CHANGED' in siteurl_set.stdout"
