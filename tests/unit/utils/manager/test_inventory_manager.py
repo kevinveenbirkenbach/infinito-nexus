@@ -329,9 +329,7 @@ class TestInventoryManager(TestCase):
                 )
                 inv = mgr.apply_schema()
                 creds = inv["applications"]["app_test"]["credentials"]
-                self.assertEqual(
-                    creds["oauth2_proxy_cookie_secret"], "dynamic-secret"
-                )
+                self.assertEqual(creds["oauth2_proxy_cookie_secret"], "dynamic-secret")
 
     def test_oauth2_disabled_skips_cookie_secret(self):
         with tempfile.TemporaryDirectory() as tmpdir:
