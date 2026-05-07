@@ -11,6 +11,7 @@
       enabled: true
       shared: true
     ldap:
+      enabled: true
       shared: true
     logout:
       enabled: true
@@ -35,6 +36,7 @@
       enabled: false
       shared: false
     ldap:
+      enabled: true
       shared: false
     logout:
       enabled: false
