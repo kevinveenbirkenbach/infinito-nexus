@@ -26,8 +26,9 @@
       enabled: true
       shared: true
 
-# variant pinning every dynamic services.yml flag to false so the
-# matrix also exercises the out-of-group_names branch.
+# LDAP-only variant (req 018): pin ldap.enabled true with
+# oidc.enabled false so the spec exercises the LDAP-bind login path
+# in isolation from OIDC.
 - services:
     dashboard:
       enabled: false
@@ -37,6 +38,32 @@
       shared: false
     ldap:
       enabled: true
+      shared: true
+    logout:
+      enabled: false
+      shared: false
+    matomo:
+      enabled: false
+      shared: false
+    oidc:
+      enabled: false
+      shared: false
+    prometheus:
+      enabled: false
+      shared: false
+
+# Baseline-only variant: pin every dynamic flag false so the matrix
+# also exercises the out-of-group_names branch and satisfies the
+# false-pinning requirement of test_variants_coverage.
+- services:
+    dashboard:
+      enabled: false
+      shared: false
+    email:
+      enabled: false
+      shared: false
+    ldap:
+      enabled: false
       shared: false
     logout:
       enabled: false
