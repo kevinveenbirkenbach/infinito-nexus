@@ -30,7 +30,7 @@ from utils.cache.yaml import load_yaml_any
 from utils.entity_name_utils import get_entity_name
 
 
-PROJECT_ROOT = Path(__file__).resolve().parents[4]
+PROJECT_ROOT = Path(__file__).resolve().parents[5]
 ROLES_DIR = PROJECT_ROOT / "roles"
 
 

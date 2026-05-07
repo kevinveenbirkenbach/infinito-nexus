@@ -30,8 +30,7 @@ from __future__ import annotations
 import unittest
 from pathlib import Path
 
-import yaml
-
+from utils.cache.yaml import load_yaml_any
 from utils.roles.meta_lookup import get_role_run_after
 from utils.service_registry import (
     build_role_to_covered_keys,
@@ -40,7 +39,7 @@ from utils.service_registry import (
 )
 
 
-PROJECT_ROOT = Path(__file__).resolve().parents[5]
+PROJECT_ROOT = Path(__file__).resolve().parents[6]
 ROLES_DIR = PROJECT_ROOT / "roles"
 
 
@@ -48,10 +47,7 @@ def _load_services(role_dir: Path) -> dict:
     services_file = role_dir / "meta" / "services.yml"
     if not services_file.is_file():
         return {}
-    text = services_file.read_text(encoding="utf-8")
-    if not text.strip():
-        return {}
-    data = yaml.safe_load(text)
+    data = load_yaml_any(services_file, default_if_missing={})
     return data if isinstance(data, dict) else {}
 
 

@@ -66,10 +66,9 @@ from __future__ import annotations
 import unittest
 from pathlib import Path
 
-import yaml
-
 from utils.annotations.suppress import line_has_rule
 from utils.cache.files import read_text
+from utils.cache.yaml import load_yaml_any
 from utils.entity_name_utils import get_entity_name
 from utils.service_registry import (
     build_covered_key_to_role,
@@ -78,7 +77,7 @@ from utils.service_registry import (
 )
 
 
-PROJECT_ROOT = Path(__file__).resolve().parents[4]
+PROJECT_ROOT = Path(__file__).resolve().parents[5]
 ROLES_DIR = PROJECT_ROOT / "roles"
 
 _RULE = "dynamic-flag"
@@ -165,8 +164,8 @@ class TestServicesDynamicFlags(unittest.TestCase):
             if not services_file.is_file():
                 continue
             try:
-                data = yaml.safe_load(read_text(str(services_file))) or {}
-            except yaml.YAMLError as exc:
+                data = load_yaml_any(services_file, default_if_missing={}) or {}
+            except Exception as exc:
                 offenders.append(f"{role_name}: YAML parse error: {exc}")
                 continue
             if not isinstance(data, dict):

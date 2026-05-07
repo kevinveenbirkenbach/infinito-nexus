@@ -1,6 +1,7 @@
 import os
 import unittest
-import yaml
+
+from utils.cache.yaml import load_yaml_any
 
 
 class TestSelfDependency(unittest.TestCase):
@@ -12,7 +13,7 @@ class TestSelfDependency(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         here = os.path.abspath(os.path.dirname(__file__))
-        repo_root = os.path.abspath(os.path.join(here, "..", "..", "..", "..", ".."))
+        repo_root = os.path.abspath(os.path.join(here, "..", "..", "..", "..", "..", ".."))
         cls.roles_dir = os.path.join(repo_root, "roles")
 
     def test_no_self_in_run_after(self):
@@ -22,8 +23,7 @@ class TestSelfDependency(unittest.TestCase):
             if not os.path.isdir(role_path) or not os.path.isfile(meta_file):
                 continue
 
-            with open(meta_file, "r") as f:
-                data = yaml.safe_load(f) or {}
+            data = load_yaml_any(meta_file, default_if_missing={}) or {}
 
             run_after = data.get("galaxy_info", {}).get("run_after", [])
             if entry in run_after:

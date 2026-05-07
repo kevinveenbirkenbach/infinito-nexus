@@ -125,6 +125,46 @@ def load_yaml_any(path, *, default_if_missing: Any = _MISSING) -> Any:
     return _load_raw(path, default_if_missing=default_if_missing)
 
 
+_CACHE_ALL: Dict[Tuple[str, int, int], Tuple[Any, ...]] = {}
+
+
+def load_yaml_all(path, *, default_if_missing: Any = _MISSING) -> Tuple[Any, ...]:
+    """Memoised multi-document YAML load.
+
+    Returns a tuple of every document parsed by ``yaml.safe_load_all``
+    in declaration order. Use this for files that legitimately carry
+    several `---`-separated YAML documents.
+
+    Cache semantics mirror :func:`load_yaml_any`:
+    cache key is ``(resolved-path, mtime_ns, size)``; cached value is
+    the same tuple instance for every caller, so callers MUST treat
+    the returned value as read-only.
+
+    Empty / missing files behave like ``load_yaml_any`` — when
+    ``default_if_missing`` is provided it is returned wrapped in a
+    one-tuple iff truthy, otherwise an empty tuple.
+    """
+    p = Path(path)
+    if not p.exists():
+        if default_if_missing is _MISSING:
+            raise FileNotFoundError(p)
+        return (default_if_missing,) if default_if_missing else ()
+
+    sig = _signature(p)
+    if sig in _CACHE_ALL:
+        return _CACHE_ALL[sig]
+
+    path_str = sig[0]
+    for stale_key in [k for k in _CACHE_ALL if k[0] == path_str and k != sig]:
+        _CACHE_ALL.pop(stale_key, None)
+
+    with p.open("r", encoding="utf-8") as f:
+        # This module IS the cache; calling itself would recurse.
+        docs = tuple(yaml.safe_load_all(f))  # noqa: direct-yaml
+    _CACHE_ALL[sig] = docs
+    return docs
+
+
 def dump_yaml(path, data: Mapping[str, Any]) -> None:
     """Write `data` to `path` as YAML and evict the cached entry.
 
@@ -174,10 +214,12 @@ def load_yaml_str(text: str) -> Any:
 
 
 def _drop_path(path) -> None:
-    """Drop every cache entry that matches `path` (any mtime/size)."""
+    """Drop every cache entry (single- and multi-doc) for `path`."""
     path_str = _path_key(path)
     for stale_key in [k for k in _CACHE if k[0] == path_str]:
         _CACHE.pop(stale_key, None)
+    for stale_key in [k for k in _CACHE_ALL if k[0] == path_str]:
+        _CACHE_ALL.pop(stale_key, None)
 
 
 def invalidate(path) -> None:
@@ -201,6 +243,7 @@ def _reset() -> None:
     orchestrates calls to all of them.
     """
     _CACHE.clear()
+    _CACHE_ALL.clear()
 
 
 # Backwards-compatible alias for in-tree callers that may still reference

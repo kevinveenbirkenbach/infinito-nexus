@@ -2,18 +2,18 @@
 import os
 import re
 import glob
-import yaml
 import unittest
 from typing import Dict, Set, List, Optional
 
 from utils.cache.files import read_text as _read_text_cached
+from utils.cache.yaml import load_yaml_any
 
 # ---------------- Utilities ----------------
 
 
 def safe_load_yaml(path: str):
     try:
-        return yaml.safe_load(_read_text_cached(path)) or {}
+        return load_yaml_any(path, default_if_missing={}) or {}
     except Exception:
         return {}
 
@@ -208,7 +208,7 @@ class TestUnnecessaryRoleDependencies(unittest.TestCase):
     def setUp(self):
         # project root = two levels up from this test file
         self.project_root = os.path.abspath(
-            os.path.join(os.path.dirname(__file__), "..", "..", "..", "..")
+            os.path.join(os.path.dirname(__file__), "..", "..", "..", "..", "..")
         )
         self.roles = iter_role_dirs(self.project_root)
 

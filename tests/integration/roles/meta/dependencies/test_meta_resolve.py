@@ -1,7 +1,8 @@
 import unittest
 import os
 import glob
-import yaml
+
+from utils.cache.yaml import load_yaml_any
 
 
 class TestRoleDependencies(unittest.TestCase):
@@ -9,7 +10,7 @@ class TestRoleDependencies(unittest.TestCase):
         # Determine the path to the roles directory relative to this test file
         tests_dir = os.path.dirname(__file__)
         project_root = os.path.abspath(
-            os.path.join(tests_dir, os.pardir, os.pardir, os.pardir, os.pardir)
+            os.path.join(tests_dir, os.pardir, os.pardir, os.pardir, os.pardir, os.pardir)
         )
         roles_dir = os.path.join(project_root, "roles")
 
@@ -24,9 +25,8 @@ class TestRoleDependencies(unittest.TestCase):
             role_dir = os.path.dirname(os.path.dirname(meta_file))
             role_name = os.path.basename(role_dir)
             with self.subTest(role=role_name):
-                # Load the YAML metadata
-                with open(meta_file, "r") as f:
-                    meta = yaml.safe_load(f) or {}
+                # Load the YAML metadata via the cached helper.
+                meta = load_yaml_any(meta_file, default_if_missing={}) or {}
 
                 # Extract dependencies list
                 dependencies = meta.get("dependencies", [])

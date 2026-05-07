@@ -1,6 +1,7 @@
 import os
 import unittest
-import yaml
+
+from utils.cache.yaml import load_yaml_any
 
 
 class TestRunAfterReferences(unittest.TestCase):
@@ -13,7 +14,7 @@ class TestRunAfterReferences(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         here = os.path.abspath(os.path.dirname(__file__))
-        repo_root = os.path.abspath(os.path.join(here, "..", "..", "..", "..", ".."))
+        repo_root = os.path.abspath(os.path.join(here, "..", "..", "..", "..", "..", ".."))
         cls.roles_dir = os.path.join(repo_root, "roles")
         # collect all role names (folder names) in roles/
         cls.existing_roles = {
@@ -30,8 +31,7 @@ class TestRunAfterReferences(unittest.TestCase):
                 # skip roles without a meta/main.yml
                 continue
 
-            with open(meta_path, "r") as f:
-                data = yaml.safe_load(f) or {}
+            data = load_yaml_any(meta_path, default_if_missing={}) or {}
 
             run_after = data.get("galaxy_info", {}).get("run_after", [])
             for dep in run_after:

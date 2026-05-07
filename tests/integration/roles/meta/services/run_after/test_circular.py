@@ -15,7 +15,7 @@ class TestCircularDependencies(unittest.TestCase):
     def setUpClass(cls):
         # Determine the path to the repo root and the roles directory
         here = os.path.abspath(os.path.dirname(__file__))
-        repo_root = os.path.abspath(os.path.join(here, "..", "..", "..", "..", ".."))
+        repo_root = os.path.abspath(os.path.join(here, "..", "..", "..", "..", "..", ".."))
         cls.roles_dir = os.path.join(repo_root, "roles")
 
     def test_no_circular_dependencies(self):
