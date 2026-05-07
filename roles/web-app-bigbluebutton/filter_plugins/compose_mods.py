@@ -110,8 +110,7 @@ def compose_mods(yml_text, docker_repository_path, env_file):
         )
 
         yml_text = dump_yaml_str(data)
-    except Exception:
-        # leave the original yml_text as-is if parsing fails
+    except Exception:  # noqa: S110  best-effort filter — leave the original yml_text untouched if parsing fails
         pass
 
     return yml_text

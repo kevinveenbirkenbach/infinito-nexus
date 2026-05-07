@@ -32,7 +32,8 @@ def print_used_disc_space(backup_dir):
 
 def is_directory_used_by_another_process(directory_path):
     command = "lsof " + directory_path
-    process = subprocess.Popen(
+    # directory_path comes from Ansible-templated config (host-trusted), not user input.
+    process = subprocess.Popen(  # noqa: S602
         [command], stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True
     )
     process.communicate()

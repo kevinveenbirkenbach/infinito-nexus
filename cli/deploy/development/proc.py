@@ -46,8 +46,10 @@ def run_streaming(
         bufsize=1,  # line buffered (best effort)
     )
 
-    assert p.stdout is not None
-    assert p.stderr is not None
+    # Type-narrowing asserts so the type checker sees the streams as
+    # non-None below (PIPE was passed); these never fire at runtime.
+    assert p.stdout is not None  # noqa: S101
+    assert p.stderr is not None  # noqa: S101
 
     t_out = threading.Thread(
         target=_drain_stream,

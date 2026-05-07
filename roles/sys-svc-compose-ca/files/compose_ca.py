@@ -462,8 +462,10 @@ def render_override(
       Docker Compose interpolates $VARS in YAML strings on the host.
       We escape any $ in the command argv with $$ so container-side expansion works.
     """
-    ca_container = "/tmp/infinito/ca/root-ca.crt"
-    wrapper_container = "/tmp/infinito/bin/with-ca-trust.sh"
+    # Container-internal CA-injection paths bind-mounted from the host.
+    # Not user-controllable; well-known by the role's compose template.
+    ca_container = "/tmp/infinito/ca/root-ca.crt"  # noqa: S108
+    wrapper_container = "/tmp/infinito/bin/with-ca-trust.sh"  # noqa: S108
 
     out_services: dict[str, Any] = {}
     sh_cache: dict[str, bool] = {}

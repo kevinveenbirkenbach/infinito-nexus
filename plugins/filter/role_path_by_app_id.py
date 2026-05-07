@@ -19,7 +19,7 @@ def abs_role_path_by_application_id(application_id):
     for filepath in glob.glob(pattern):
         try:
             data = load_yaml_any(filepath, default_if_missing={}) or {}
-        except Exception:
+        except Exception:  # noqa: S112  best-effort iteration over role files; skip malformed input
             continue
         if not isinstance(data, dict):
             continue
@@ -55,7 +55,7 @@ def rel_role_path_by_application_id(application_id):
     for filepath in glob.glob(pattern):
         try:
             data = load_yaml_any(filepath, default_if_missing={}) or {}
-        except Exception:
+        except Exception:  # noqa: S112  best-effort iteration over role files; skip malformed input
             continue
         if not isinstance(data, dict):
             continue

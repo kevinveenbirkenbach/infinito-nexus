@@ -186,8 +186,10 @@ def main() -> int:
     if args.debug:
         print(">>> " + " ".join(shlex.quote(x) for x in cmd), file=sys.stderr)
 
-    # execvp preserves signal handling under systemd.
-    os.execvp(cmd[0], cmd)
+    # execvp preserves signal handling under systemd. The argv list is
+    # built from this script's own argv plus `--env-file` / `--profile`
+    # additions; no shell parses it.
+    os.execvp(cmd[0], cmd)  # noqa: S606
     return 0
 
 

@@ -63,7 +63,12 @@ class ValueGenerator:
         if algorithm == "sha256":
             return hashlib.sha256(secrets.token_bytes(32)).hexdigest()
         if algorithm == "sha1":
-            return hashlib.sha1(secrets.token_bytes(20)).hexdigest()
+            # SHA-1 is selected by the caller for legacy app compatibility;
+            # the input is fresh random bytes, not security-sensitive data.
+            return hashlib.sha1(
+                secrets.token_bytes(20),
+                usedforsecurity=False,
+            ).hexdigest()
         if algorithm == "strong_password":
             return self.generate_strong_password(32)
         if algorithm == "bcrypt":

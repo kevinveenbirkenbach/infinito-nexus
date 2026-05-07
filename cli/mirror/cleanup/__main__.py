@@ -25,7 +25,10 @@ from collections.abc import Iterator
 
 
 def _gh_request(method: str, url: str, token: str) -> dict | list | None:
-    req = urllib.request.Request(
+    # All call sites build URLs from `https://api.github.com/…` literals
+    # plus a project-controlled `namespace`/`package` segment, so no
+    # arbitrary scheme can slip in.
+    req = urllib.request.Request(  # noqa: S310
         url,
         headers={
             "Authorization": f"Bearer {token}",
@@ -34,7 +37,7 @@ def _gh_request(method: str, url: str, token: str) -> dict | list | None:
         },
         method=method,
     )
-    with urllib.request.urlopen(req) as resp:
+    with urllib.request.urlopen(req) as resp:  # noqa: S310
         body = resp.read()
         return json.loads(body) if body else None
 

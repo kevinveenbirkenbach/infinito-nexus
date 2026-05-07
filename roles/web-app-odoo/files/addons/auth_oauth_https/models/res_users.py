@@ -65,7 +65,7 @@ class ResUsersOAuthConfigurableUid(models.Model):
             [("oauth_uid", "=", oauth_uid), ("oauth_provider_id", "=", provider)]
         )
         if oauth_user:
-            assert len(oauth_user) == 1
+            assert len(oauth_user) == 1  # noqa: S101  mirrors upstream Odoo invariant; oauth_uid is unique per provider
             oauth_user.write({"oauth_access_token": params["access_token"]})
             return oauth_user.login
         if self.env.context.get("no_user_creation"):

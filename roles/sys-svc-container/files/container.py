@@ -336,8 +336,10 @@ def container_run(argv: list[str], debug: bool, with_ca: bool) -> int:
     image = image_and_args[0]
     user_args = image_and_args[1:]
 
-    ca_container = "/tmp/infinito/ca/root-ca.crt"
-    wrapper_container = "/tmp/infinito/bin/with-ca-trust.sh"
+    # Container-internal CA-injection paths bind-mounted from the host.
+    # Not user-controllable; matched on the host side by sys-svc-compose-ca.
+    ca_container = "/tmp/infinito/ca/root-ca.crt"  # noqa: S108
+    wrapper_container = "/tmp/infinito/bin/with-ca-trust.sh"  # noqa: S108
 
     inject_opts: list[str] = [
         "-v",
@@ -397,7 +399,9 @@ def container_run(argv: list[str], debug: bool, with_ca: bool) -> int:
     if debug:
         print(">>> " + " ".join(shlex.quote(x) for x in final_cmd), file=sys.stderr)
 
-    os.execvp(final_cmd[0], final_cmd)
+    # List-form exec: no shell parses the argv. CMD comes from this
+    # script's own argv (the wrapper), not from external user input.
+    os.execvp(final_cmd[0], final_cmd)  # noqa: S606
     return 0
 
 

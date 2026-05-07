@@ -343,7 +343,7 @@ def get_user_defaults(
             definitions,
             primary_domain="{{ DOMAIN_PRIMARY }}",
             start_id=1001,
-            become_pwd="{{ 42 | strong_password }}",
+            become_pwd="{{ 42 | strong_password }}",  # noqa: S106  Jinja expression rendered to a password at runtime, not a literal credential
         )
         cached = {key: built[key] for key in sorted(built)}
         _USERS_DEFAULTS_CACHE[key] = cached

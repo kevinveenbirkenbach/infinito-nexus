@@ -101,7 +101,11 @@ def _fingerprint_mapping(obj: Any) -> str:
         import hashlib
 
         data = repr(sorted(obj.items())) if isinstance(obj, Mapping) else repr(obj)
-        digest = hashlib.md5(data.encode("utf-8", errors="replace")).hexdigest()
+        # md5 used as a fast non-cryptographic fingerprint for cache keying.
+        digest = hashlib.md5(
+            data.encode("utf-8", errors="replace"),
+            usedforsecurity=False,
+        ).hexdigest()
     except Exception:
         digest = f"id:{obj_id}"
     _FINGERPRINT_BY_ID[obj_id] = digest

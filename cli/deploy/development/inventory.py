@@ -80,7 +80,7 @@ def _build_services_overrides_for_round(
             continue
         try:
             base_services = load_yaml_any(services_path) or {}
-        except Exception:
+        except Exception:  # noqa: S112  best-effort iteration over role files; skip malformed input
             continue
         if not isinstance(base_services, Mapping):
             continue

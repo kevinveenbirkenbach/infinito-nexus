@@ -21,7 +21,7 @@ def get_all_application_ids(roles_dir="roles"):
     for filepath in glob.glob(pattern):
         try:
             data = load_yaml_any(filepath, default_if_missing={})
-        except Exception:
+        except Exception:  # noqa: S112  best-effort iteration over role files; skip malformed input
             continue
 
         if isinstance(data, dict) and "application_id" in data:

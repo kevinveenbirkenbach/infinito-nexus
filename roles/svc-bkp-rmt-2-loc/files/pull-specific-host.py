@@ -141,7 +141,8 @@ def pull_backups(hostname: str, backups_dir: str) -> None:
                     max_retries = 12
 
             last_retry_start = int(time.time())
-            rsync_exit_code = os.system(rsync_command)
+            # rsync_command is built from Ansible-templated config (host-trusted), not user input.
+            rsync_exit_code = os.system(rsync_command)  # noqa: S605
 
             if rsync_exit_code == 0:
                 break

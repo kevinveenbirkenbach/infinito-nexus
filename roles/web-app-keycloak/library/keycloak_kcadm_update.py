@@ -101,7 +101,10 @@ result:
 
 def run_kcadm(module, cmd, ignore_rc=False):
     """Run a shell command for kcadm."""
-    rc = subprocess.run(
+    # `cmd` comes from this Ansible module's own argv plus inventory
+    # overrides (host-trusted), and shell features (pipes, &&) are
+    # required by the kcadm-wrapper invocations the module composes.
+    rc = subprocess.run(  # noqa: S602
         cmd,
         shell=True,
         check=not ignore_rc,

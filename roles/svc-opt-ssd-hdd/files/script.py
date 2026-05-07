@@ -8,7 +8,11 @@ import time
 def run_command(command):
     """Run a shell command and return its output"""
     print(command)
-    output = subprocess.check_output(command, shell=True).decode("utf-8").strip()
+    # All call sites pass static commands or strings built from
+    # Ansible-templated config (host-trusted); not user input.
+    output = (
+        subprocess.check_output(command, shell=True).decode("utf-8").strip()  # noqa: S602
+    )
     print(output)
     return output
 

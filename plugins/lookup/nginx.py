@@ -125,8 +125,9 @@ class LookupModule(LookupBase):
         data_cdn_dir = _ensure_trailing_slash(_join(www_dir, "public_cdn"))
         data_global_dir = _ensure_trailing_slash(_join(www_dir, "global"))
 
-        cache_general_dir = "/tmp/cache_nginx_general/"
-        cache_image_dir = "/tmp/cache_nginx_image/"
+        # Container-internal nginx cache paths; not user-controllable.
+        cache_general_dir = "/tmp/cache_nginx_general/"  # noqa: S108
+        cache_image_dir = "/tmp/cache_nginx_image/"  # noqa: S108
 
         ensure: list[dict[str, str]] = [
             _dir_spec(nginx_dir, "0755"),

@@ -33,7 +33,7 @@ def find_role_dirs_by_app_id(app_ids: list[str], roles_dir: str) -> list[str]:
             continue
         try:
             data = load_yaml(vars_file)
-        except Exception:
+        except Exception:  # noqa: S112  best-effort iteration over role files; skip malformed input
             continue
         app_id = data.get("application_id")
         if isinstance(app_id, str) and app_id:

@@ -31,7 +31,9 @@ import time
 
 def bash(command: str) -> list[str]:
     print(command)
-    process = subprocess.Popen(
+    # `command` is composed in this script from Ansible-templated input
+    # (host-trusted); shell features (pipes, &&) are required.
+    process = subprocess.Popen(  # noqa: S602
         [command], stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True
     )
     out, err = process.communicate()
@@ -108,7 +110,8 @@ def wait_while_manipulation_running(
     while True:
         any_active = False
         for svc in services:
-            res = subprocess.run(f"systemctl is-active --quiet {svc}", shell=True)
+            # `svc` is a project-defined unit name from the role's vars, not user input.
+            res = subprocess.run(f"systemctl is-active --quiet {svc}", shell=True)  # noqa: S602
             if res.returncode == 0:
                 any_active = True
                 break

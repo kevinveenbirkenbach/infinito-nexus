@@ -82,10 +82,12 @@ exclude = [
 # - `TID`  (flake8-tidy-imports) — banned modules / banned relative imports
 # - `LOG`  (flake8-logging)     — `logging` module misuse
 # - `G`    (flake8-logging-format) — f-strings inside `logging.x()` calls (defeats lazy-format)
+# - `S`    (flake8-bandit)      — security (hardcoded creds, weak hashes, subprocess(shell=True), …)
 select = [
     "E", "F", "I", "B", "UP", "RUF", "SIM", "C4", "PERF", "RET", "PIE",
     "T10", "PGH", "EXE", "RSE", "ICN", "DTZ",
     "TID", "LOG", "G",
+    "S",
 ]
 
 # `ruff format` (run via `make autoformat`) reflows whatever it can.
@@ -97,4 +99,27 @@ select = [
 # exist to catch homoglyph attacks, not English typography. The project
 # uses em/en-dashes deliberately and `ℹ` as a UI-hint glyph in CLI help
 # output; flagging those is noise.
-ignore = ["E501", "RUF001", "RUF002", "RUF003"]
+ignore = [
+    "E501",
+    "RUF001", "RUF002", "RUF003",
+    # S603 (subprocess call without `shell=False`) and S607 (start
+    # process with partial path) are over-eager for a project whose
+    # CLI invokes `make` / `git` / `docker` / `ansible-playbook` from
+    # PATH using list-form args. The list-form already prevents shell
+    # injection (Python's `subprocess` does not parse argv[0] as a
+    # shell command), and resolving every binary's absolute path in
+    # the source would couple the code to the host filesystem layout.
+    # The genuinely dangerous shell-injection patterns (`shell=True`)
+    # are still caught by S602/S605.
+    "S603", "S607",
+]
+
+[tool.ruff.lint.per-file-ignores]
+# Test code legitimately uses patterns flake8-bandit flags as security
+# concerns in production code:
+# - S101 (`assert`)             is the unittest idiom.
+# - S102 (`exec`)               is used to load script-under-test by file path.
+# - S105/S106 (hardcoded passwords) appear in fixtures / dummy creds.
+# - S108 (hardcoded /tmp paths) appears in tempdir fixtures.
+# - S110/S112 (try/except pass/continue) appear in cleanup helpers.
+"tests/**" = ["S101", "S102", "S105", "S106", "S108", "S110", "S112"]

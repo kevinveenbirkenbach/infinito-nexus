@@ -36,7 +36,7 @@ def _first_non_flag_token(argv: list[str]) -> str | None:
         token = argv[i]
 
         # Skip flags and their args
-        if token == "--log":
+        if token == "--log":  # noqa: S105  `token` is a CLI argv element, not a credential
             # Skip '--log' and its argument if present
             i += 2
             continue
