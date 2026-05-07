@@ -3,7 +3,7 @@ application_id:     "web-app-snipe-it"
 entity_name:        "{{ application_id | get_entity_name }}"
 
 # Database
-database_password:  "{{ lookup('config', application_id, 'credentials.database_password') }}"
+database_password:  "{{ lookup('config', application_id, 'credentials.database_password') }}"  # nocheck: lookup-config-path
 
 # Snipe-IT specific
 SNIPE_IT_URL:       "{{ lookup('tls', application_id, 'url.base') }}"
