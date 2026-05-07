@@ -1,4 +1,4 @@
-"""Strict per-role check for `lookup('config', <var>, 'literal.path')`.
+"""Strict per-role check for `lookup('config', application_id, 'literal.path')`.
 
 When a role file (under `roles/<role>/...`) calls
 `lookup('config', application_id, 'a.b.c')`, the path must resolve
@@ -8,10 +8,14 @@ role, which is all :mod:`test_variable_paths` guarantees.
 `roles/<role>/vars/main.yml`), so the file-path-derived role is the
 correct lookup context.
 
-The classifier owns two rules: variable-app + complete literal path,
-AND the file must live in a role that declares ``application_id`` in
-``vars/main.yml`` (otherwise the runtime-inherited app id is
-ambiguous from a static-analysis standpoint).
+The classifier is intentionally narrow: the app argument MUST be the
+literal identifier ``application_id``. Other variables like
+``_BBB_COTURN_ROLE`` or ``oauth2_proxy_application_id`` explicitly
+point at a different role at runtime and are out of scope for this
+check (the runtime target is unknown to a static scan). Such calls
+land in :mod:`test_variable_paths` instead, which only requires that
+the path resolve *somewhere*. The file must additionally live in a
+role that declares ``application_id`` in ``vars/main.yml``.
 
 Mirrors the resolution logic of `plugins/lookup/config.py`:
 - `users.<canonical>.<sub>`: requires the role's `meta/users.yml` to
@@ -38,8 +42,12 @@ def _build_role_local_paths(
     for m in matches:
         if m.kind != "literal":
             continue
-        if m.app_literal is not None:
-            continue  # variable app argument only
+        # Only the literal `application_id` variable maps to "this role
+        # reads its own config". Anything else (e.g. `_BBB_COTURN_ROLE`,
+        # `oauth2_proxy_application_id`) explicitly targets a different
+        # role at runtime and is intentionally out of scope here.
+        if m.app_arg != "application_id":
+            continue
         if m.path_arg.endswith("."):
             continue
         role_id = role_id_from_path(m.file)
