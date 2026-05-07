@@ -25,8 +25,16 @@ import unittest
 from pathlib import Path
 from typing import Dict, Iterable, List, Set, Tuple
 
+from utils.annotations.suppress import is_suppressed_at
 from utils.cache.files import iter_project_files_with_content, read_text
 from utils.cache.yaml import load_yaml_any
+
+
+# Rule key consumed by this lint via `# noqa` / `# nocheck` markers.
+# A `same-or-above` placement on the var declaration line skips the
+# var from the unused-var check. See
+# docs/contributing/actions/testing/suppression.md.
+SUPPRESS_RULE: str = "unused-var"
 
 
 def _repo_root() -> Path:
@@ -89,11 +97,16 @@ def _iter_definition_files(repo_root: Path) -> Iterable[Path]:
 
 def _collect_top_level_keys(file: Path) -> List[Tuple[str, int]]:
     """Return ``[(name, lineno), …]`` for every top-level mapping key
-    in *file*. Keys are filtered to valid Ansible variable names.
+    in *file*, dropping any whose declaration line carries the
+    ``unused-var`` suppression marker.
 
     YAML loading goes through the project's cached `load_yaml_any`;
     line numbers are best-effort via raw-text scan since `yaml.safe_load`
-    discards them."""
+    discards them. The same raw-text scan feeds the suppression check,
+    so a `# nocheck: unused-var` on the declaration line — or on the
+    immediately preceding non-empty line — exempts the var from the
+    lint without bypassing other checks.
+    """
     data = load_yaml_any(file, default_if_missing={})
     if not isinstance(data, dict):
         return []
@@ -104,9 +117,9 @@ def _collect_top_level_keys(file: Path) -> List[Tuple[str, int]]:
     if not declared:
         return []
 
+    raw_lines = read_text(str(file)).splitlines()
     line_for_key: Dict[str, int] = {}
-    raw = read_text(str(file))
-    for i, line in enumerate(raw.splitlines(), start=1):
+    for i, line in enumerate(raw_lines, start=1):
         if line[:1].isspace():  # only true top-level (no indent)
             continue
         m = _TOP_LEVEL_KEY_RE.match(line)
@@ -116,7 +129,15 @@ def _collect_top_level_keys(file: Path) -> List[Tuple[str, int]]:
         if k in declared and k not in line_for_key:
             line_for_key[k] = i
 
-    return sorted(((k, line_for_key.get(k, 0)) for k in declared), key=lambda t: t[1])
+    out: List[Tuple[str, int]] = []
+    for k in declared:
+        lineno = line_for_key.get(k, 0)
+        if lineno > 0 and is_suppressed_at(
+            raw_lines, lineno, SUPPRESS_RULE, mode="same-or-above"
+        ):
+            continue
+        out.append((k, lineno))
+    return sorted(out, key=lambda t: t[1])
 
 
 _BLOCK_RE = re.compile(r"{{(?:(?!}}).)*?}}|{%(?:(?!%}).)*?%}", re.DOTALL)
@@ -131,9 +152,41 @@ def _scan_jinja_block_idents(text: str, sink: Set[str]) -> None:
             sink.add(m.group(1))
 
 
+# Ansible task-level keys that carry bare Jinja expressions (no
+# `{{ … }}` wrapper). The Jinja-block scan cannot see these, so the
+# parsed-structure walker has to harvest identifiers from them
+# explicitly. List keyed by Ansible's documented "conditional"
+# directives — extending this set is how additional false-positive
+# classes get fixed (e.g. `failed_when`/`changed_when` were missing
+# initially and produced false-positive "unused" reports for
+# error-message constants only referenced from those keys).
+_ANSIBLE_EXPR_KEYS: frozenset[str] = frozenset(
+    {
+        "when",
+        "loop",
+        "failed_when",
+        "changed_when",
+        "until",
+    }
+)
+
+
+def _harvest_idents_from_value(value, sink: Set[str]) -> None:
+    """Pull identifiers from a value that is either a single
+    expression string or a list of expression strings (Ansible accepts
+    both shapes for `when:` / `failed_when:` / `changed_when:` /
+    `until:`)."""
+    items = value if isinstance(value, list) else [value]
+    for item in items:
+        if isinstance(item, str):
+            for m in _IDENT_RE.finditer(item):
+                sink.add(m.group(1))
+
+
 def _scan_ansible_expr_idents(node, sink: Set[str]) -> None:
-    """Walk a parsed YAML structure and harvest identifiers from
-    Ansible expression-bearing keys (`when:` / `loop:` / `with_*:`).
+    """Walk a parsed YAML structure and harvest identifiers from every
+    Ansible expression-bearing key (`when:` / `loop:` / `with_*:` /
+    `failed_when:` / `changed_when:` / `until:`).
 
     These keys are bare expression strings (not wrapped in `{{ … }}`),
     so the Jinja-block scan would miss them; we have to walk the
@@ -141,20 +194,11 @@ def _scan_ansible_expr_idents(node, sink: Set[str]) -> None:
     """
     if isinstance(node, dict):
         for k, v in node.items():
-            if k == "when":
-                items = v if isinstance(v, list) else [v]
-                for item in items:
-                    if isinstance(item, str):
-                        for m in _IDENT_RE.finditer(item):
-                            sink.add(m.group(1))
-            elif k == "loop":
-                if isinstance(v, str):
-                    for m in _IDENT_RE.finditer(v):
-                        sink.add(m.group(1))
+            if k in _ANSIBLE_EXPR_KEYS:
+                _harvest_idents_from_value(v, sink)
             elif isinstance(k, str) and k.startswith("with_"):
                 if isinstance(v, str):
-                    for m in _IDENT_RE.finditer(v):
-                        sink.add(m.group(1))
+                    _harvest_idents_from_value(v, sink)
             _scan_ansible_expr_idents(v, sink)
     elif isinstance(node, list):
         for item in node:
