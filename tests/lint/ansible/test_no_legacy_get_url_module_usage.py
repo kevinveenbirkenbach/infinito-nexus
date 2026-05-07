@@ -15,7 +15,6 @@ LEGACY_GET_URL_MODULE_PATTERN = re.compile(
 
 
 class TestNoLegacyGetUrlModuleUsage(unittest.TestCase):
-
     def test_no_legacy_get_url_module_call_is_used(self):
         """
         Enforce migration from legacy get_url module calls to get_url_retry.

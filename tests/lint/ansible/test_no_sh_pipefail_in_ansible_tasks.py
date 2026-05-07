@@ -115,7 +115,6 @@ def _scan_doc(rel_path: str, doc: Any, findings: list[tuple[str, str]]) -> None:
 
 
 class TestNoShPipefailInAnsibleTasks(unittest.TestCase):
-
     def test_ansible_tasks_stay_on_bash(self) -> None:
         """
         Ansible `shell`/`command` tasks MUST stay on bash.

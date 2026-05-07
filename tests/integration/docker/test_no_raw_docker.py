@@ -36,9 +36,8 @@ Use the unified marker grammar (rule key ``raw-docker``) documented at
   excludes the whole file. Reserve this for places where the wrapper
   is genuinely unavailable (CI workflow files on hosted runners,
   bootstrap scripts that install the wrapper itself).
-* Per-line: ``# noqa: raw-docker`` (or ``# nocheck: raw-docker``) on
-  the offending line or the line directly above suppresses that single
-  finding.
+* Per-line: ``# nocheck: raw-docker`` on the offending line or the
+  line directly above suppresses that single finding.
 
 File enumeration and content reading both go through
 ``utils.cache.files``, so:

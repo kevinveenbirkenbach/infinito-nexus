@@ -26,7 +26,7 @@ mailu:
   run_after:
   - web-app-matomo
   lifecycle: beta
-# noqa: shared
+# nocheck: shared
 # nocheck: dynamic-flag
 redis:
   backup:

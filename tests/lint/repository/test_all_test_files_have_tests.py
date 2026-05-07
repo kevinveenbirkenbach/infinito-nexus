@@ -2,23 +2,16 @@
 import ast
 import os
 import unittest
-from pathlib import Path
 from typing import List
 
 from utils.cache.files import read_text
 
-
-def repo_root() -> Path:
-    for candidate in Path(__file__).resolve().parents:
-        if (candidate / "pyproject.toml").is_file():
-            return candidate
-    raise AssertionError("Repository root not found from test path.")
+from . import PROJECT_ROOT
 
 
 class TestTestFilesContainUnittestTests(unittest.TestCase):
     def setUp(self) -> None:
-        self.repo_root = repo_root()
-        self.tests_dir = self.repo_root / "tests"
+        self.tests_dir = PROJECT_ROOT / "tests"
         self.assertTrue(
             self.tests_dir.is_dir(),
             f"'tests' directory not found at: {self.tests_dir}",
@@ -101,7 +94,7 @@ class TestTestFilesContainUnittestTests(unittest.TestCase):
         offenders = []
         for path in test_files:
             # Avoid self-check loops if you name this file test_*.py (it should not be)
-            rel = os.path.relpath(path, str(self.repo_root))
+            rel = os.path.relpath(path, str(PROJECT_ROOT))
             if not self._file_contains_runnable_unittest_test(path):
                 offenders.append(rel)
 

@@ -28,6 +28,8 @@ import unittest
 
 from utils.cache.files import iter_project_files, read_text
 
+from . import PROJECT_ROOT
+
 try:
     import yaml  # PyYAML
 except Exception:
@@ -39,12 +41,6 @@ RUN_ONCE_USAGE_RE = re.compile(r"\brun_once_([A-Za-z0-9_]+)\b")
 
 # Task files that "define" a run-once flag for a role
 RUN_ONCE_TASK_FILES = ("utils/once/flag.yml",)
-
-
-def project_root():
-    return os.path.abspath(
-        os.path.join(os.path.dirname(__file__), "..", "..", "..", "..")
-    )
 
 
 def roles_root(root: str) -> str:
@@ -183,7 +179,7 @@ def role_defines_suffix_in_doc(doc, role_suffix: str) -> bool:
 
 class RunOnceGlobalUsageFastTest(unittest.TestCase):
     def test_run_once_used_anywhere_requires_exact_definition(self):
-        root = project_root()
+        root = str(PROJECT_ROOT)
         rroot = roles_root(root)
 
         # Discover roles and their suffixes

@@ -37,16 +37,21 @@ Plain attribute access without a call (``yaml.YAMLError`` for exception
 typing, ``yaml.YAMLObject`` for class hierarchies) is NOT flagged. Only
 call expressions are.
 
-Per-line opt-out: add ``# noqa: direct-yaml`` (or
-``# nocheck: direct-yaml``; case-insensitive) on the line of the
-call, the line that opens the multi-line call, OR anywhere on the
-same physical line in the source file. The lint then skips that
-specific call while still flagging any other direct yaml calls in the
-same file. Use this for legitimate exceptions (custom Loader/Dumper
-subclasses, runtime-deployed scripts that lack the project's
-``utils/`` package on PYTHONPATH, etc.). Keep the exemption next to
-the code it covers, not in this lint's allow-list. The marker grammar
-is documented at ``docs/contributing/actions/testing/suppression.md``.
+Per-line opt-out: add ``# nocheck: direct-yaml`` (case-insensitive)
+on the line of the call, the line that opens the multi-line call,
+OR anywhere on the same physical line in the source file. The lint
+then skips that specific call while still flagging any other direct
+yaml calls in the same file. Use this for legitimate exceptions
+(custom Loader/Dumper subclasses, runtime-deployed scripts that lack
+the project's ``utils/`` package on PYTHONPATH, etc.). Keep the
+exemption next to the code it covers, not in this lint's allow-list.
+
+Note: the canonical project marker for ``noqa|nocheck`` rules accepts
+both keywords, but ``direct-yaml`` MUST use ``nocheck``. ``# noqa: …``
+is parsed by ruff as a flake8 directive and triggers
+``invalid-noqa-code`` warnings for non-flake8 rule keys; ``nocheck``
+is the project-specific synonym ruff ignores. The marker grammar is
+documented at ``docs/contributing/actions/testing/suppression.md``.
 
 Caching
 =======
@@ -57,11 +62,23 @@ multiple lint tests scanning the same source pay one read.
 from __future__ import annotations
 
 import ast
+import re
 import unittest
 from pathlib import Path
 
-from utils.annotations.suppress import suppressed_line_numbers
 from utils.cache.files import PROJECT_ROOT, iter_project_files, read_text
+
+
+# `direct-yaml` opts out only via ``nocheck:`` markers. We deliberately
+# do NOT accept the generic ``noqa:`` form here: ruff parses that form
+# as a flake8 directive and warns about non-flake8 codes like
+# ``direct-yaml``. ``nocheck`` is the project-specific synonym ruff
+# ignores. This regex mirrors the ``nocheck`` half of
+# ``utils.annotations.suppress._KEYWORD_RE``.
+_NOCHECK_RE = re.compile(
+    r"nocheck\s*:\s*([a-z0-9][a-z0-9\-]*(?:\s*,\s*[a-z0-9][a-z0-9\-]*)*)",
+    re.IGNORECASE,
+)
 
 
 _FORBIDDEN_FUNCTIONS: frozenset[str] = frozenset(
@@ -124,12 +141,18 @@ def _file_offenders(path: Path) -> list[str]:
 
     # The marker may appear on the call's own line OR, for multi-line
     # calls, on any line spanned by the call expression.
-    noqa_lines = suppressed_line_numbers(src.splitlines(), "direct-yaml")
+    nocheck_lines: set[int] = set()
+    for idx, line in enumerate(src.splitlines(), start=1):
+        for match in _NOCHECK_RE.finditer(line):
+            rules = {r.strip().lower() for r in match.group(1).split(",")}
+            if "direct-yaml" in rules:
+                nocheck_lines.add(idx)
+                break
 
-    def _is_noqa(node: ast.Call) -> bool:
+    def _is_suppressed(node: ast.Call) -> bool:
         start = node.lineno
         end = getattr(node, "end_lineno", node.lineno)
-        return any(line in noqa_lines for line in range(start, end + 1))
+        return any(line in nocheck_lines for line in range(start, end + 1))
 
     offenders: list[str] = []
     for node in ast.walk(tree):
@@ -142,14 +165,14 @@ def _file_offenders(path: Path) -> list[str]:
                 and func.value.id in yaml_module_aliases
                 and func.attr in _FORBIDDEN_FUNCTIONS
             ):
-                if _is_noqa(node):
+                if _is_suppressed(node):
                     continue
                 offenders.append(
                     f"line {node.lineno}: {func.value.id}.{func.attr}(...)"
                 )
         elif isinstance(func, ast.Name):
             if func.id in direct_function_aliases:
-                if _is_noqa(node):
+                if _is_suppressed(node):
                     continue
                 actual = direct_function_aliases[func.id]
                 offenders.append(f"line {node.lineno}: {func.id}(...) [yaml.{actual}]")

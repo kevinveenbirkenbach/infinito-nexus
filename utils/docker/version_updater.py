@@ -191,7 +191,7 @@ def fetch_ghcr_tags(image: str) -> list[str]:
 
 def suppressed_services(config_path: Path) -> set[str]:
     """Return service names whose `version:` line is annotated with the
-    unified ``# nocheck: docker-version`` / ``# noqa: docker-version`` marker.
+    unified ``# nocheck: docker-version`` marker.
 
     Post req-008 the file root of `meta/services.yml` IS the services map.
     There is no `services.` wrapper to walk into.

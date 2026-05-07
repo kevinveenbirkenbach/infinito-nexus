@@ -3,12 +3,7 @@ from pathlib import Path
 
 from utils.annotations.message import warning
 
-
-def repo_root() -> Path:
-    for candidate in Path(__file__).resolve().parents:
-        if (candidate / "pyproject.toml").is_file():
-            return candidate
-    raise AssertionError("Repository root not found from test path.")
+from . import PROJECT_ROOT
 
 
 def _emit_missing_playwright_spec_warning(repo_root: Path, role_path: Path) -> None:
@@ -24,7 +19,7 @@ class TestWebAppRolesHavePlaywrightSpec(unittest.TestCase):
         Check all roles/web-app-* for files/playwright.spec.js.
         Missing specs are reported as warnings but do not fail the test.
         """
-        root = repo_root()
+        root = PROJECT_ROOT
         roles_dir = root / "roles"
         self.assertTrue(
             roles_dir.is_dir(), f"'roles' directory not found at: {roles_dir}"

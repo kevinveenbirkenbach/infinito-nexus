@@ -1,13 +1,13 @@
 import fnmatch
 import os
 import unittest
-from pathlib import Path
 
 import yaml
 
 from utils.cache.files import iter_project_files
 
 from . import PROJECT_ROOT
+
 SECURITY_WORKFLOW_PATH = PROJECT_ROOT / ".github" / "workflows" / "security-codeql.yml"
 
 # Hidden directories that are the only ones worth scanning (the cached walker

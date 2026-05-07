@@ -25,6 +25,8 @@ from typing import Any, Mapping, Optional
 # so it stays at module scope.
 from plugins.filter.merge_with_defaults import merge_with_defaults  # noqa: F401  re-exported
 
+from . import PROJECT_ROOT, ROLES_DIR  # noqa: F401
+
 
 try:
     from ansible.parsing.vault import EncryptedString as _AnsibleEncryptedString
@@ -53,8 +55,6 @@ def _decrypt_ansible_encrypted_strings(value: Any) -> Any:
         return tuple(_decrypt_ansible_encrypted_strings(v) for v in value)
     return value
 
-
-from . import PROJECT_ROOT, ROLES_DIR  # noqa: F401
 
 DEFAULT_TOKENS_FILE = Path("/var/lib/infinito/secrets/tokens.yml")
 

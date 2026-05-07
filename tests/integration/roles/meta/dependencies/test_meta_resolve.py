@@ -10,7 +10,9 @@ class TestRoleDependencies(unittest.TestCase):
         # Determine the path to the roles directory relative to this test file
         tests_dir = os.path.dirname(__file__)
         project_root = os.path.abspath(
-            os.path.join(tests_dir, os.pardir, os.pardir, os.pardir, os.pardir, os.pardir)
+            os.path.join(
+                tests_dir, os.pardir, os.pardir, os.pardir, os.pardir, os.pardir
+            )
         )
         roles_dir = os.path.join(project_root, "roles")
 

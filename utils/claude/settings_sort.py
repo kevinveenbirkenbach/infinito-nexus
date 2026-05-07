@@ -16,9 +16,9 @@ from __future__ import annotations
 
 import json
 import sys
-from pathlib import Path
 
 from . import PROJECT_ROOT
+
 SETTINGS_PATH = PROJECT_ROOT / ".claude" / "settings.json"
 
 SORTED_ARRAYS: list[tuple[str, ...]] = [

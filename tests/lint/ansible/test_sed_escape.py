@@ -22,6 +22,7 @@ from typing import Iterable, List, Optional, Tuple
 
 
 from . import PROJECT_ROOT
+
 TASK_FILES_GLOB = "roles/*/tasks/**/*.yml"
 
 

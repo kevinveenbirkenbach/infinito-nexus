@@ -5,9 +5,9 @@ from __future__ import annotations
 import argparse
 import json
 import sys
-from pathlib import Path
 
 from . import PROJECT_ROOT
+
 sys.path.insert(0, str(PROJECT_ROOT))
 
 from utils.invokable import list_invokables_by_type  # noqa: E402

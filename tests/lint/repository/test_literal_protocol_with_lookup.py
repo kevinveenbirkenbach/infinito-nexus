@@ -20,8 +20,8 @@ different flavor, or the role is moved behind a different proxy.
 
 Allowed
 =======
-* Per-line opt-out via ``# noqa: literal-protocol-lookup``
-  (or ``# nocheck: literal-protocol-lookup``; case-insensitive). Use this
+* Per-line opt-out via ``# nocheck: literal-protocol-lookup``
+  (case-insensitive). Use this
   for legitimate internal cases where the protocol is genuinely fixed —
   Docker-network upstreams that always speak plaintext (``http://<container>:<port>``),
   loopback URLs in CI fixtures, and similar.

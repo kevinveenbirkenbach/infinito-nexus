@@ -13,12 +13,12 @@ def load(path: Path) -> Any:
     text = path.read_text(encoding="utf-8")
     if not text.strip():
         return None
-    return yaml.safe_load(text)  # noqa: direct-yaml — once-off migration script
+    return yaml.safe_load(text)  # nocheck: direct-yaml — once-off migration script
 
 
 def dump(path: Path, data: Any) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
-    text = yaml.safe_dump(  # noqa: direct-yaml — once-off migration script
+    text = yaml.safe_dump(  # nocheck: direct-yaml — once-off migration script
         data if data is not None else {},
         sort_keys=False,
         default_flow_style=False,

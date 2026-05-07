@@ -6,12 +6,7 @@ from typing import Any, Iterable, Set, List, Dict, Tuple
 from utils.cache.files import iter_project_files, read_text
 from utils.cache.yaml import load_yaml_all
 
-
-def repo_root() -> Path:
-    for candidate in Path(__file__).resolve().parents:
-        if (candidate / "pyproject.toml").is_file():
-            return candidate
-    raise AssertionError("Repository root not found from test path.")
+from . import PROJECT_ROOT
 
 
 class TestVarsPassedAreUsed(unittest.TestCase):
@@ -34,7 +29,6 @@ class TestVarsPassedAreUsed(unittest.TestCase):
       i.e. treat `var_name(` as a function/macro call, not a variable usage.
     """
 
-    PROJECT_ROOT = repo_root()
     YAML_EXTENSIONS = {".yml", ".yaml"}
     JINJA_EXTENSIONS = {".j2"}
 
@@ -238,7 +232,7 @@ class TestVarsPassedAreUsed(unittest.TestCase):
                 )
                 if locs:
                     for path, lineno in locs:
-                        rel = path.relative_to(self.PROJECT_ROOT)
+                        rel = path.relative_to(PROJECT_ROOT)
                         lines.append(f"    • {rel}:{lineno}")
                 else:
                     lines.append("    • (location unknown)")

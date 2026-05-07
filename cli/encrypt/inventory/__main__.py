@@ -75,7 +75,7 @@ def main():
     # subclass emits !vault literal blocks; the cached dump_yaml writes
     # plain YAML which is the wrong output here.
     with open(args.inventory_file, "w", encoding="utf-8") as f:
-        yaml.dump(  # noqa: direct-yaml
+        yaml.dump(  # nocheck: direct-yaml
             updated_inventory, f, sort_keys=False, Dumper=SafeDumper
         )
 

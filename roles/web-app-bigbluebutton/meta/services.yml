@@ -8,7 +8,7 @@ logout:
 ldap:
   enabled: false
 # nocheck: dynamic-flag
-# noqa: dashboard
+# nocheck: dashboard
 dashboard:
   enabled: false
   shared: false

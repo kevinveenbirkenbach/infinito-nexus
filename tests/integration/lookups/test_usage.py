@@ -34,6 +34,7 @@ from utils.cache.files import iter_project_files, read_text
 
 
 from . import PROJECT_ROOT
+
 LOOKUP_PLUGINS_DIR = PROJECT_ROOT / "plugins" / "lookup"
 
 # Extensions we consider capable of invoking a lookup.

@@ -32,7 +32,7 @@ oauth2:
       - /robots.txt
   allowed_groups:
   - '{{ lookup(''rbac_group_path'', application_id=''web-app-bluesky'', role=''administrator'') }}'
-# noqa: shared
+# nocheck: shared
 # nocheck: dynamic-flag
 web:
   enabled: true

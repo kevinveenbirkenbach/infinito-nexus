@@ -14,7 +14,9 @@ class TestRunAfterReferences(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         here = os.path.abspath(os.path.dirname(__file__))
-        repo_root = os.path.abspath(os.path.join(here, "..", "..", "..", "..", "..", ".."))
+        repo_root = os.path.abspath(
+            os.path.join(here, "..", "..", "..", "..", "..", "..")
+        )
         cls.roles_dir = os.path.join(repo_root, "roles")
         # collect all role names (folder names) in roles/
         cls.existing_roles = {

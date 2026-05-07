@@ -24,13 +24,13 @@ applies only to the role's own primary entity.
 from __future__ import annotations
 
 import unittest
-from pathlib import Path
 
 from utils.cache.yaml import load_yaml_any
 from utils.entity_name_utils import get_entity_name
 
 
 from . import PROJECT_ROOT
+
 ROLES_DIR = PROJECT_ROOT / "roles"
 
 

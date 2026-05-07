@@ -4,12 +4,7 @@ import unittest
 
 from utils.cache.files import iter_project_files
 
-
-def repo_root() -> Path:
-    for candidate in Path(__file__).resolve().parents:
-        if (candidate / "pyproject.toml").is_file():
-            return candidate
-    raise AssertionError("Repository root not found from test path.")
+from . import PROJECT_ROOT
 
 
 class TestTestFileNaming(unittest.TestCase):
@@ -35,8 +30,7 @@ class TestTestFileNaming(unittest.TestCase):
     """
 
     def test_all_python_files_use_test_prefix(self):
-        root = repo_root()
-        tests_root = root / "tests"
+        tests_root = PROJECT_ROOT / "tests"
         tests_prefix = str(tests_root) + os.sep
         utils_prefix = str(tests_root / "utils") + os.sep
 

@@ -17,19 +17,18 @@ Accepted comment prefixes:
 * ``{# … #}`` (Jinja2)
 * ``<!-- … -->`` (HTML, Markdown)
 
-``noqa`` and ``nocheck`` are synonyms (case-insensitive). The
-convention is:
-
-* ``noqa`` for code-level lints (analogous to flake8/ruff).
-* ``nocheck`` for repo-content checks (URLs, image versions, file
-  size, run-once schema).
-
-Both work for any rule; the catalog page documents the convention but
-neither test enforces which keyword is used.
+``noqa`` and ``nocheck`` are accepted as synonyms (case-insensitive)
+by this parser. By repo convention every project rule from
+``docs/contributing/actions/testing/suppression.md`` MUST use
+``nocheck:`` because ``# noqa: <code>`` is also parsed by ruff as a
+flake8 directive and triggers ``invalid-noqa-code`` warnings on every
+project-specific rule key. ``noqa:`` is reserved for real flake8 / ruff
+codes (``E402``, ``F401``, …). The ``direct-yaml`` lint enforces the
+convention by hard-rejecting the ``noqa:`` form.
 
 Multiple rules may be combined on one comment, comma-separated:
 
-    # noqa: shared, email
+    # nocheck: shared, email
     # nocheck: url, docker-version
 
 Position semantics are per-rule and listed in the catalog page. This

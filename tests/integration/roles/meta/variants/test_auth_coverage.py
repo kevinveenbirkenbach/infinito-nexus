@@ -39,6 +39,7 @@ from utils.cache.yaml import load_yaml_any
 
 
 from . import PROJECT_ROOT
+
 ROLES_DIR = PROJECT_ROOT / "roles"
 
 _AUTH_KEYS: Tuple[str, ...] = ("oidc", "oauth2")
@@ -79,9 +80,7 @@ def _variant_overrides_for(variant: dict, service_key: str, flag: str) -> object
     return entry[flag]
 
 
-def _has_pair_polarity(
-    variants: List[dict], service_key: str, polarity: bool
-) -> bool:
+def _has_pair_polarity(variants: List[dict], service_key: str, polarity: bool) -> bool:
     """True iff some variant pins ``services.<key>.enabled`` AND
     ``services.<key>.shared`` to literal *polarity* in the same entry."""
     for variant in variants:
@@ -100,8 +99,7 @@ def _has_ldap_only_variant(variants: List[dict], auth_keys: List[str]) -> bool:
         if _variant_overrides_for(variant, _LDAP_KEY, "enabled") is not True:
             continue
         if all(
-            _variant_overrides_for(variant, ak, "enabled") is False
-            for ak in auth_keys
+            _variant_overrides_for(variant, ak, "enabled") is False for ak in auth_keys
         ):
             return True
     return False

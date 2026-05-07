@@ -39,6 +39,7 @@ from utils.cache.yaml import load_yaml_any
 
 
 from . import PROJECT_ROOT
+
 ROLES_DIR = PROJECT_ROOT / "roles"
 
 

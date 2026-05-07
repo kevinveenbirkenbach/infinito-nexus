@@ -6,13 +6,13 @@ helpers and the lint test consult this module so the bands stay in one place.
 
 from __future__ import annotations
 
-from pathlib import Path
 from typing import Dict, Optional, Tuple
 
 from utils.cache.yaml import load_yaml_any
 
 
 from . import PROJECT_ROOT
+
 NETWORKS_FILE = PROJECT_ROOT / "group_vars" / "all" / "08_networks.yml"
 
 

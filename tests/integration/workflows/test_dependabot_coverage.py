@@ -2,12 +2,12 @@ import fnmatch
 import os
 import subprocess
 import unittest
-from pathlib import Path
 from typing import Iterable
 
 import yaml
 
 from . import PROJECT_ROOT
+
 DEPENDABOT_PATH = PROJECT_ROOT / ".github" / "dependabot.yml"
 
 # Directories skipped when walking the repository

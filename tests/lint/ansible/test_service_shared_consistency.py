@@ -16,8 +16,8 @@ class TestServiceSharedConsistency(unittest.TestCase):
       When a service has ``enabled: true`` it MUST also declare
       ``shared: true``.  If the requirement does not apply (e.g. the
       service is inherently role-local), mark the service key with a
-      ``# noqa: shared`` (or ``# nocheck: shared``) comment directly
-      above it. Stacked comments are supported as long as no blank line
+      ``# nocheck: shared`` comment directly above it. Stacked comments
+      are supported as long as no blank line
       breaks the comment block above the key. See
       ``docs/contributing/actions/testing/suppression.md``.
 
@@ -93,7 +93,7 @@ class TestServiceSharedConsistency(unittest.TestCase):
                         errors.append(
                             f"{role_name}: services.{svc_name} has enabled=true "
                             f"but is missing shared=true. "
-                            f"Add 'shared: true' or place a '# noqa: shared' "
+                            f"Add 'shared: true' or place a '# nocheck: shared' "
                             f"comment on the line directly above '{svc_name}:' to mark "
                             f"the intentional exception. ({file_path})"
                         )

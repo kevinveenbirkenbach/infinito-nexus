@@ -8,11 +8,11 @@ flow with one of the two project-wide SSO paths:
   activated.
 
 If ``services.oidc`` carries an explicit opt-out marker
-(``# noqa: oidc`` or ``# nocheck: oidc`` directly above the key,
+(``# nocheck: oidc`` directly above the key,
 paired with ``enabled: false`` and ``shared: false``), then
 ``services.oauth2`` MUST be activated to fill the gap. Roles that
 legitimately have no login flow at all (static-content sites, etc.)
-opt out of BOTH by carrying both ``# noqa: oidc`` AND ``# noqa: oauth2``
+opt out of BOTH by carrying both ``# nocheck: oidc`` AND ``# nocheck: oauth2``
 markers.
 
 The provider roles themselves (``web-app-keycloak``,
@@ -23,7 +23,6 @@ from __future__ import annotations
 
 import re
 import unittest
-from pathlib import Path
 
 from utils.annotations.suppress import is_suppressed_at
 from utils.cache.files import read_text
@@ -139,7 +138,7 @@ class TestWebAppSsoIntegration(unittest.TestCase):
                 f"Set one of them to ``enabled: true`` + ``shared: true`` "
                 f"(literal or dynamic ``\"{{{{ '<role>' in group_names }}}}\"``), "
                 f"OR if oidc is intentionally not used, opt it out with a "
-                f"``# noqa: oidc`` (or ``# nocheck: oidc``) comment directly "
+                f"``# nocheck: oidc`` comment directly "
                 f"above ``oidc:`` paired with ``enabled: false`` + "
                 f"``shared: false`` AND activate ``services.oauth2``. "
                 f"For roles with no login flow at all, opt out BOTH "

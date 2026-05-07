@@ -1,19 +1,10 @@
 import unittest
-from pathlib import Path
 import yaml
 
 from utils.cache.files import read_text
 from utils.service_registry import build_service_registry_from_roles_dir
 
-
-def repo_root() -> Path:
-    for candidate in Path(__file__).resolve().parents:
-        if (candidate / "pyproject.toml").is_file():
-            return candidate
-    raise AssertionError("Repository root not found from test path.")
-
-
-PROJECT_ROOT = repo_root()
+from . import PROJECT_ROOT
 
 RUN_ONCE_TASK = {"include_tasks": "utils/once/flag.yml"}
 

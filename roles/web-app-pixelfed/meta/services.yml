@@ -13,7 +13,7 @@ matomo:
 email:
   enabled: "{{ 'web-app-mailu' in group_names }}"
   shared: "{{ 'web-app-mailu' in group_names }}"
-# noqa: shared
+# nocheck: shared
 # nocheck: dynamic-flag
 redis:
   backup:

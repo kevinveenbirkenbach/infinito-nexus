@@ -11,7 +11,7 @@ class YamlHandler:
         text = path.read_text()
         # Custom Loader subclass wraps !vault scalars; the path-keyed
         # cache cannot preserve that wrapping, so go direct here.
-        data = yaml.load(text, Loader=SafeLoader) or {}  # noqa: direct-yaml
+        data = yaml.load(text, Loader=SafeLoader) or {}  # nocheck: direct-yaml
         return YamlHandler.wrap_existing_vaults(data)
 
     @staticmethod

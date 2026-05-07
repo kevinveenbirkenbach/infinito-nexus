@@ -8,7 +8,7 @@ dashboard:
 matomo:
   enabled: "{{ 'web-app-matomo' in group_names }}"
   shared: "{{ 'web-app-matomo' in group_names }}"
-# noqa: shared
+# nocheck: shared
 # nocheck: dynamic-flag
 redis:
   backup:

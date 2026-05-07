@@ -86,7 +86,7 @@ def _load_raw(path, *, default_if_missing: Any) -> Any:
 
     with p.open("r", encoding="utf-8") as f:
         # This module IS the cache; calling itself would recurse.
-        data = yaml.safe_load(f)  # noqa: direct-yaml
+        data = yaml.safe_load(f)  # nocheck: direct-yaml
     if data is None:
         data = {}
     _CACHE[sig] = data
@@ -160,7 +160,7 @@ def load_yaml_all(path, *, default_if_missing: Any = _MISSING) -> Tuple[Any, ...
 
     with p.open("r", encoding="utf-8") as f:
         # This module IS the cache; calling itself would recurse.
-        docs = tuple(yaml.safe_load_all(f))  # noqa: direct-yaml
+        docs = tuple(yaml.safe_load_all(f))  # nocheck: direct-yaml
     _CACHE_ALL[sig] = docs
     return docs
 
@@ -175,7 +175,7 @@ def dump_yaml(path, data: Mapping[str, Any]) -> None:
     p = Path(path)
     p.parent.mkdir(parents=True, exist_ok=True)
     with p.open("w", encoding="utf-8") as f:
-        yaml.safe_dump(  # noqa: direct-yaml — this module IS the cache.
+        yaml.safe_dump(  # nocheck: direct-yaml — this module IS the cache.
             dict(data), f, sort_keys=False, default_flow_style=False
         )
     _drop_path(p)
@@ -196,7 +196,7 @@ def dump_yaml_str(
     ``yaml.safe_dump`` — keeping every YAML touchpoint in
     ``utils.cache.yaml``.
     """
-    return yaml.safe_dump(  # noqa: direct-yaml — this module IS the cache.
+    return yaml.safe_dump(  # nocheck: direct-yaml — this module IS the cache.
         data, sort_keys=sort_keys, default_flow_style=default_flow_style
     )
 
@@ -210,7 +210,7 @@ def load_yaml_str(text: str) -> Any:
     the helper exists for symmetry with :func:`dump_yaml_str` so
     callers never have to ``import yaml`` directly.
     """
-    return yaml.safe_load(text)  # noqa: direct-yaml — this module IS the cache.
+    return yaml.safe_load(text)  # nocheck: direct-yaml — this module IS the cache.
 
 
 def _drop_path(path) -> None:

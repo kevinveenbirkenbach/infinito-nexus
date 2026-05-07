@@ -21,7 +21,7 @@ email:
 postgres:
   enabled: true  # nocheck: dynamic-flag
   shared: "{{ 'svc-db-postgres' in group_names }}"
-# noqa: shared
+# nocheck: shared
 # nocheck: dynamic-flag
 redis:
   backup:
@@ -45,7 +45,7 @@ bookwyrm:
   - web-app-keycloak
   - web-app-mailu
   lifecycle: beta
-# noqa: shared
+# nocheck: shared
 # nocheck: dynamic-flag
 worker:
   enabled: true

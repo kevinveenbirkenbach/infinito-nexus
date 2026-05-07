@@ -32,6 +32,7 @@ from utils.cache.yaml import load_yaml_any
 
 
 from . import PROJECT_ROOT
+
 ROLES_DIR = PROJECT_ROOT / "roles"
 
 
@@ -81,8 +82,7 @@ class TestVariantsServicesMatch(unittest.TestCase):
         if offenders:
             self.fail(
                 "variants.yml references services not declared in "
-                "services.yml:\n"
-                + "\n".join(f"  - {o}" for o in offenders)
+                "services.yml:\n" + "\n".join(f"  - {o}" for o in offenders)
             )
 
 

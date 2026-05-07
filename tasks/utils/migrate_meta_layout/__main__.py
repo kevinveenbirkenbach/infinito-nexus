@@ -6,6 +6,7 @@ import sys
 from pathlib import Path
 
 from . import PROJECT_ROOT
+
 ROLES_DIR = PROJECT_ROOT / "roles"
 NETWORKS_FILE = PROJECT_ROOT / "group_vars" / "all" / "08_networks.yml"
 PORTS_FILE = PROJECT_ROOT / "group_vars" / "all" / "09_ports.yml"

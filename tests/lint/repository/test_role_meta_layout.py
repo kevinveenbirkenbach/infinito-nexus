@@ -25,6 +25,7 @@ import yaml
 
 
 from . import PROJECT_ROOT
+
 ROLES_DIR = PROJECT_ROOT / "roles"
 
 ALLOWED_LIFECYCLES = {

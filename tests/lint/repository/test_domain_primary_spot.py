@@ -25,8 +25,8 @@ Allowed
   (``.{{ DOMAIN_PRIMARY }}`` and ``*.{{ DOMAIN_PRIMARY }}``) used for
   wildcard certs, oauth2-proxy whitelists, iframe origin checks, etc.
 * ``README.md`` (documentation may mention example hostnames).
-* Per-line opt-out: add ``# noqa: domain-spot`` (or
-  ``# nocheck: domain-spot``; case-insensitive) on the offending line.
+* Per-line opt-out: add ``# nocheck: domain-spot`` (case-insensitive)
+  on the offending line.
 
 Detection
 =========

@@ -1,15 +1,15 @@
 # nocheck: dynamic-flag
-# noqa: logout
+# nocheck: logout
 logout:
   enabled: false
   shared: false
 # nocheck: dynamic-flag
-# noqa: oidc
+# nocheck: oidc
 oidc:
   enabled: false
   shared: false
 # nocheck: dynamic-flag
-# noqa: oauth2
+# nocheck: oauth2
 oauth2:
   enabled: false
   shared: false
@@ -37,7 +37,7 @@ sphinx:
 css:
   enabled: true
   shared: true
-# noqa: email
+# nocheck: email
 # nocheck: dynamic-flag
 email:
   enabled: false

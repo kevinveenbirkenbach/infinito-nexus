@@ -3,7 +3,7 @@
 templates MUST consume the variable so a single edit in
 ``group_vars/all/08_networks.yml`` propagates everywhere.
 
-Per-line opt-out via ``# noqa: hardcoded-dns-resolver`` (or
+Per-line opt-out via ``# nocheck: hardcoded-dns-resolver`` (or
 ``# nocheck: hardcoded-dns-resolver``) is allowed for files where the
 literal IP is genuinely required at the substitution point — CoreDNS
 ``forward`` directives that don't run through Jinja, host-bootstrap
@@ -109,7 +109,7 @@ class TestNoHardcodedDnsResolvers(unittest.TestCase):
                 "`NETWORK_PUBLIC_DNS_RESOLVERS` from "
                 "`group_vars/all/08_networks.yml` and iterate over it, "
                 "or annotate the line with "
-                "`# noqa: hardcoded-dns-resolver` if the literal IP is "
+                "`# nocheck: hardcoded-dns-resolver` if the literal IP is "
                 "genuinely required at that substitution point:\n"
                 + "\n".join(f"  - {o}" for o in offenders)
             )

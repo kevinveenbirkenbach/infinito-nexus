@@ -3,7 +3,7 @@
 Scans git-tracked and untracked-but-not-ignored text files for literal
 ``http://`` and ``https://`` URLs. Placeholder/template URLs and reserved
 local/example hosts are skipped. Per-line suppression uses the unified
-``# nocheck: url`` / ``# noqa: url`` marker. See
+``# nocheck: url`` marker. See
 ``docs/contributing/actions/testing/suppression.md``.
 
 This is an external test because it performs live HTTP requests against the

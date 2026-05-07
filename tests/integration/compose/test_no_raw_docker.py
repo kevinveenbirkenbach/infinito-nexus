@@ -8,6 +8,8 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import List, Sequence, Tuple
 
+from . import PROJECT_ROOT
+
 
 @dataclass(frozen=True)
 class Finding:
@@ -165,14 +167,6 @@ RULES: Tuple[Tuple[str, re.Pattern, str], ...] = (
 )
 
 
-def repo_root() -> Path:
-    here = Path(__file__).resolve()
-    for p in [here, *here.parents]:
-        if (p / ".git").exists():
-            return p
-    return Path.cwd().resolve()
-
-
 def git_ls_files(root: Path) -> List[Path]:
     try:
         out = subprocess.check_output(
@@ -275,7 +269,7 @@ def format_findings(findings: Sequence[Finding]) -> str:
 
 class TestNoRawDockerCommands(unittest.TestCase):
     def test_no_raw_docker_commands_in_repo(self) -> None:
-        root = repo_root()
+        root = PROJECT_ROOT
         files = git_ls_files(root)
 
         findings: List[Finding] = []

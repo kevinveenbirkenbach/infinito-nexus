@@ -8,6 +8,8 @@ from utils.cache.files import read_text
 from utils.cache.yaml import load_yaml_any, load_yaml_str
 from utils.service_registry import is_explicit_truth
 
+from . import PROJECT_ROOT
+
 
 _ROLE_PREFIX = "web-app-"
 _MAILU_ROLE = "web-app-mailu"
@@ -20,16 +22,9 @@ _EMAIL_KEY_RE = re.compile(r"^(\s*)email:\s*(#.*)?$")
 
 _SILENCER_HINT = (
     "Silence per role by adding to meta/services.yml a "
-    "'# noqa: email' (or '# nocheck: email') comment directly above an "
+    "'# nocheck: email' comment directly above an "
     "'email:' block with 'enabled: false' and 'shared: false'."
 )
-
-
-def repo_root() -> Path:
-    for candidate in Path(__file__).resolve().parents:
-        if (candidate / "pyproject.toml").is_file():
-            return candidate
-    raise AssertionError("Repository root not found from test path.")
 
 
 def _role_uses_email_lookup(role_path: Path) -> bool:
@@ -68,9 +63,8 @@ def _has_opt_out(config_path: Path) -> bool:
 
     1. services.email.enabled is False
     2. services.email.shared is False
-    3. ``# noqa: email`` (or ``# nocheck: email``) on the nearest
-       non-empty line directly above the ``email:`` key in the raw
-       YAML source
+    3. ``# nocheck: email`` on the nearest non-empty line directly
+       above the ``email:`` key in the raw YAML source
     """
     if not config_path.is_file():
         return False
@@ -123,7 +117,7 @@ class TestWebAppRolesIntegrateEmail(unittest.TestCase):
     """
 
     def test_web_app_roles_email(self):
-        root = repo_root()
+        root = PROJECT_ROOT
         roles_dir = root / "roles"
         self.assertTrue(
             roles_dir.is_dir(), f"'roles' directory not found at: {roles_dir}"
@@ -183,7 +177,7 @@ class TestOptOutDetection(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmp:
             cfg = self._write(
                 Path(tmp),
-                "# noqa: email\nemail:\n  enabled: false\n  shared: false\n",
+                "# nocheck: email\nemail:\n  enabled: false\n  shared: false\n",
             )
             self.assertTrue(_has_opt_out(cfg))
 
@@ -203,7 +197,7 @@ class TestOptOutDetection(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmp:
             cfg = self._write(
                 Path(tmp),
-                "# noqa: email\nemail:\n  enabled: true\n  shared: false\n",
+                "# nocheck: email\nemail:\n  enabled: true\n  shared: false\n",
             )
             self.assertFalse(_has_opt_out(cfg))
 
@@ -213,7 +207,7 @@ class TestOptOutDetection(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmp:
             cfg = self._write(
                 Path(tmp),
-                "# noqa: email\nemail:\n  enabled: false\n  shared: true\n",
+                "# nocheck: email\nemail:\n  enabled: false\n  shared: true\n",
             )
             self.assertFalse(_has_opt_out(cfg))
 
@@ -223,7 +217,7 @@ class TestOptOutDetection(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmp:
             cfg = self._write(
                 Path(tmp),
-                "# noqa: email\n\nemail:\n  enabled: false\n  shared: false\n",
+                "# nocheck: email\n\nemail:\n  enabled: false\n  shared: false\n",
             )
             self.assertTrue(_has_opt_out(cfg))
 

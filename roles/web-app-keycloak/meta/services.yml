@@ -1,5 +1,5 @@
 # nocheck: dynamic-flag
-# noqa: logout
+# nocheck: logout
 logout:
   enabled: false
   shared: false

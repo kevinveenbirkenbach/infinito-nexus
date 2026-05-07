@@ -10,12 +10,12 @@ dashboard:
   enabled: "{{ 'web-app-dashboard' in group_names }}"
   shared: "{{ 'web-app-dashboard' in group_names }}"
 # nocheck: dynamic-flag
-# noqa: oidc
+# nocheck: oidc
 oidc:
   enabled: false
   shared: false
 # nocheck: dynamic-flag
-# noqa: oauth2
+# nocheck: oauth2
 oauth2:
   enabled: false
   shared: false

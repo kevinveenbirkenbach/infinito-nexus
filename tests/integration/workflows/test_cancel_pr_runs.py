@@ -8,6 +8,7 @@ from pathlib import Path
 
 
 from . import PROJECT_ROOT
+
 SCRIPT_PATH = PROJECT_ROOT / "scripts" / "github" / "cancel_pull_request_runs.sh"
 EMPTY_RUNS_JSON = '{"workflow_runs":[]}\n'
 

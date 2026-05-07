@@ -36,9 +36,9 @@ NETWORK_IPV6_ENABLED: false
 # IPs. The IPv6 toggle in any rendered nginx `resolver` directive
 # comes from `NETWORK_IPV6_ENABLED` above.
 NETWORK_PUBLIC_DNS_RESOLVERS:
-  - 1.1.1.1  # noqa: hardcoded-dns-resolver
-  - 8.8.8.8  # noqa: hardcoded-dns-resolver
-  - 1.0.0.1  # noqa: hardcoded-dns-resolver
+  - 1.1.1.1  # nocheck: hardcoded-dns-resolver
+  - 8.8.8.8  # nocheck: hardcoded-dns-resolver
+  - 1.0.0.1  # nocheck: hardcoded-dns-resolver
 defaults_networks:
   internet:
     ip4: '{{ lookup(''env'', ''IP4'') | default(''127.0.0.1'', true) }}'

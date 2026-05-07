@@ -11,7 +11,6 @@ from __future__ import annotations
 
 import time
 import unittest
-from pathlib import Path
 
 from ansible.parsing.dataloader import DataLoader
 from ansible.template import Templar
@@ -31,6 +30,7 @@ from plugins.lookup.domains import (
 
 
 from . import PROJECT_ROOT
+
 ROLES_DIR = PROJECT_ROOT / "roles"
 
 

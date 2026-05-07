@@ -9,7 +9,7 @@ from pathlib import Path
 from typing import List, Optional
 
 # `utils.cache.yaml` is unavailable here: this file is copy-deployed.
-import yaml  # noqa: direct-yaml,E402
+import yaml  # noqa: E402
 
 
 def detect_env_file(project_dir: Path) -> Optional[Path]:
@@ -63,7 +63,7 @@ def generate_cache_override(project_dir: Path, base_compose: Path) -> Optional[P
         return None
 
     with open(base_compose) as f:
-        doc = yaml.safe_load(f)  # noqa: direct-yaml
+        doc = yaml.safe_load(f)  # nocheck: direct-yaml
 
     services = (doc or {}).get("services") or {}
     services_with_build = sorted(
@@ -84,7 +84,7 @@ def generate_cache_override(project_dir: Path, base_compose: Path) -> Optional[P
 
     out = project_dir / "compose.cache.override.yml"
     with open(out, "w") as f:
-        yaml.safe_dump(override_doc, f, sort_keys=True)  # noqa: direct-yaml
+        yaml.safe_dump(override_doc, f, sort_keys=True)  # nocheck: direct-yaml
     return out
 
 

@@ -14,7 +14,7 @@ Per-file opt-out
 ----------------
 
 A file may opt out of this cap by including a unified
-``# nocheck: file-size`` (or ``# noqa: file-size``) marker inside the
+``# nocheck: file-size`` marker inside the
 first :data:`SCAN_LINES` lines, typically the module docstring or a
 comment at the top. The opt-out is intentionally visible at the top of
 the file so the cost of carrying long modules is not silently buried.

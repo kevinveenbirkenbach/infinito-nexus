@@ -14,10 +14,10 @@ A suppression marker is a comment carrying one or more rule keys:
 
 Rules:
 
-- `noqa` and `nocheck` are synonyms. By convention, use `noqa` for code-level lints (analogous to flake8 / ruff) and `nocheck` for repository-content checks (URLs, image versions, file size, run-once schema). Either keyword works for any rule; the test does not enforce which one is used.
+- `noqa` and `nocheck` are accepted as synonyms by the parser, but by repo convention every project rule MUST use `nocheck:`. Reason: `# noqa: <code>` is also parsed by ruff as a flake8 directive, and ruff warns on non-flake8 rule keys (every key in this catalog is project-specific, so the warning fires on every marker). `nocheck:` is the project-specific keyword ruff ignores. Reserve `noqa:` for real flake8 / ruff codes (`E402`, `F401`, …). The convention is enforced by [test_noqa_only_ruff_codes.py](../../../../tests/lint/repository/test_noqa_only_ruff_codes.py), which fails any `# noqa: <code>` whose codes don't match the ruff/flake8 shape `[A-Z]+\d+`.
 - The keyword is matched **case-insensitively**.
 - `<rule>` is a kebab-case identifier from the catalog below.
-- Multiple rules MAY be combined on one comment, comma-separated: `# noqa: shared, email`.
+- Multiple rules MAY be combined on one comment, comma-separated: `# nocheck: shared, email`.
 
 Accepted comment prefixes (so the marker fits any file format that the test scans):
 
@@ -47,13 +47,13 @@ The placement rule is per check. The catalog column "Position" uses these labels
 | ------------------- | ------------------- | ---------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------- |
 | `url`               | same or above       | [test_urls_reachable.py](../../../../tests/external/repository/test_urls_reachable.py)                                       | Skips probing the literal HTTP(S) URL. Use for CDN roots and API base URLs that return 4xx without a path.       |
 | `docker-version`    | line above          | [test_image_versions.py](../../../../tests/external/docker/test_image_versions.py)                                           | Skips the live version-update warning for that image's `version:` key.                                          |
-| `direct-yaml`       | same line / span    | [test_no_direct_yaml_calls.py](../../../../tests/lint/repository/test_no_direct_yaml_calls.py)                               | Allows the marked `yaml.safe_load` / `safe_dump` call to bypass `utils.cache.yaml`.                              |
+| `direct-yaml`       | same line / span    | [test_no_direct_yaml_calls.py](../../../../tests/lint/repository/test_no_direct_yaml_calls.py)                               | Allows the marked `yaml.safe_load` / `safe_dump` call to bypass `utils.cache.yaml`. This rule's checker hard-rejects `noqa:` and accepts only `nocheck:` (ruff parses `noqa:` as flake8 and warns on non-flake8 codes). |
 | `shared`            | comment block above | [test_service_shared_consistency.py](../../../../tests/lint/ansible/test_service_shared_consistency.py)                     | Marks a service whose `enabled: true` legitimately does not require `shared: true`.                              |
 | `email`             | line above          | [test_email.py](../../../../tests/lint/ansible/roles/web-app/integration/test_email.py)                 | Suppresses the missing-email-integration warning when paired with `enabled: false` and `shared: false`.          |
 | `logout`            | line above          | [test_logout_dashboard.py](../../../../tests/lint/ansible/roles/web-app/integration/test_logout_dashboard.py) | Opts a `web-app-*` role out of the universal-logout integration. Marker MUST be on the line directly above `logout:`, paired with `enabled: false` and `shared: false`. |
 | `dashboard`         | line above          | [test_logout_dashboard.py](../../../../tests/lint/ansible/roles/web-app/integration/test_logout_dashboard.py) | Opts a `web-app-*` role out of the dashboard tile integration. Same shape as `logout`.                            |
 | `oidc`              | line above          | [test_sso.py](../../../../tests/lint/ansible/roles/web-app/integration/test_sso.py)                     | Opts the role's native OIDC path out (so that `oauth2` must take over, OR — if `oauth2` is also opted out — the role legitimately has no login flow). Same shape as `email`. |
-| `oauth2`            | line above          | [test_sso.py](../../../../tests/lint/ansible/roles/web-app/integration/test_sso.py)                     | Opts the role's oauth2-proxy path out. In combination with `# noqa: oidc` it declares "this role has no login flow at all". Same shape as `email`. |
+| `oauth2`            | line above          | [test_sso.py](../../../../tests/lint/ansible/roles/web-app/integration/test_sso.py)                     | Opts the role's oauth2-proxy path out. In combination with `# nocheck: oidc` it declares "this role has no login flow at all". Same shape as `email`. |
 | `file-size`         | head (first 30 lines) | [test_python_file_size.py](../../../../tests/lint/repository/test_python_file_size.py)                                     | Opts the entire `.py` file out of the 500-line cap.                                                              |
 | `run-once`          | anywhere            | [test_run_once_tags.py](../../../../tests/lint/ansible/test_run_once_tags.py), [test_schema.py](../../../../tests/integration/roles/run_once/test_schema.py) | Marks a role's `tasks/main.yml` as intentionally re-runnable; skips both the run-once tag check and the suffix check. |
 | `run-once-suffix`   | same line           | [test_schema.py](../../../../tests/integration/roles/run_once/test_schema.py)                                                | Allows a single `when:` item to reference a `run_once_<other>` flag whose suffix differs from the current role.   |
@@ -63,6 +63,8 @@ The placement rule is per check. The catalog column "Position" uses these labels
 | `lookup-config-path`| same or above       | [tests/integration/lookups/config/](../../../../tests/integration/lookups/config/) (literal / variable / wildcard / role-local) | Skips a single `lookup('config', …)` call from every path-validation pass. Use when the call legitimately resolves at runtime against state that is NOT visible to the static scan, typically a self-referential role like `web-app-oauth2-proxy` reading `services.oauth2.*` keys that other roles publish but its own `meta/services.yml` does not. Note: the role-local pass already ignores any call whose app argument is NOT the literal `application_id` (e.g. `_BBB_COTURN_ROLE`, `oauth2_proxy_application_id`), so cross-role lookups need no marker for that pass. Mark a call only when the literal / variable / wildcard pass complains. |
 | `unused-var`        | same or above       | [tests/lint/ansible/variables/test_role_and_group_vars_used.py](../../../../tests/lint/ansible/variables/test_role_and_group_vars_used.py) | Exempts a top-level key in `roles/<role>/{vars,defaults}/main.yml` or `group_vars/**/*.yml` from the "must be referenced in some `.yml` / `.yaml` / `.j2`" check. Use when the var is consumed somewhere the lint cannot see (Python plugin code, an external tool reading the rendered Ansible inventory, `set_fact` chains driven by computed names, etc.). Do NOT use to silence a legitimately dead var; prune the declaration instead. |
 | `project-root-import`| same or above      | [tests/lint/repository/test_project_root_import.py](../../../../tests/lint/repository/test_project_root_import.py) | Permits a local `PROJECT_ROOT` / `parents[N]` / `os.pardir` chain on the marked line. Reserved for two cases: a `__main__.py` bootstrap shim that prepends the repo root to `sys.path` before any package import resolves, and a standalone script under `roles/<role>/files/` that has no package container to import from. The marker MUST carry an inline comment that explains why the local computation is unavoidable. |
+| `domain-spot`       | same or above       | [tests/lint/repository/test_domain_primary_spot.py](../../../../tests/lint/repository/test_domain_primary_spot.py) | Marks a line that legitimately uses a `<word>.{{ DOMAIN_PRIMARY }}` host literal outside the SPOT (`roles/<role>/meta/server.yml` / `meta/variants.yml`). Use only for legacy domain cleanups (e.g. removing stale nginx config for a renamed host) where the canonical SPOT cannot represent the historical name. |
+| `literal-protocol-lookup`| same or above  | [tests/lint/repository/test_literal_protocol_with_lookup.py](../../../../tests/lint/repository/test_literal_protocol_with_lookup.py) | Allows a hardcoded `http://` / `https://` literal next to a `lookup(...)` call. Reserved for legitimate internal cases where the protocol is genuinely fixed: Docker-network upstreams that always speak plaintext (`http://<container>:<port>`), loopback URLs in CI fixtures, and similar. Production-facing URLs MUST go through `lookup('tls', …, 'protocols.web')`. |
 
 ## Examples 💡
 
@@ -85,17 +87,17 @@ service_x:
   version: "4.5"
 ```
 
-`direct-yaml`, anywhere on the call's physical line or on any line spanned by the multi-line call:
+`direct-yaml`, anywhere on the call's physical line or on any line spanned by the multi-line call. This rule MUST use `nocheck:` (not `noqa:`): ruff parses `# noqa: <code>` as a flake8 directive and warns about non-flake8 codes like `direct-yaml`.
 
 ```python
-data = yaml.safe_load(text)  # noqa: direct-yaml
+data = yaml.safe_load(text)  # nocheck: direct-yaml
 ```
 
 `shared`, somewhere in the comment block immediately above a service key:
 
 ```yaml
 # This service is inherently role-local.
-# noqa: shared
+# nocheck: shared
 my_local_service:
   enabled: true
 ```
@@ -103,7 +105,7 @@ my_local_service:
 `email`, directly above the `email:` block, paired with both flags false:
 
 ```yaml
-# noqa: email
+# nocheck: email
 email:
   enabled: false
   shared: false
@@ -128,14 +130,14 @@ email:
 
 ```yaml
 when:
-  - run_once_svc_db_openldap is not defined   # noqa: run-once-suffix
+  - run_once_svc_db_openldap is not defined   # nocheck: run-once-suffix
 ```
 
 `raw-docker`, per-line on a single role-task line that legitimately calls `docker` directly (e.g. a bootstrap step that runs before the `container` wrapper is on the path):
 
 ```yaml
 - name: "Bootstrap engine before the wrapper exists"
-  ansible.builtin.command: docker info  # noqa: raw-docker
+  ansible.builtin.command: docker info  # nocheck: raw-docker
 ```
 
 `raw-docker`, file-level at the top of a role's bundled shell script that legitimately drives the engine directly:
@@ -198,7 +200,7 @@ upstreams = {{ lookup('config', application_id, 'services.oauth2.origin.host') }
 `hardcoded-dns-resolver`, on the line that emits the literal IP, when the substitution point cannot consume `NETWORK_PUBLIC_DNS_RESOLVERS` (e.g. a CoreDNS `forward` directive in a non-Jinja template):
 
 ```text
-forward . 1.1.1.1 8.8.8.8  # noqa: hardcoded-dns-resolver
+forward . 1.1.1.1 8.8.8.8  # nocheck: hardcoded-dns-resolver
 ```
 
 ## Adding a new rule 🆕

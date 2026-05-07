@@ -19,7 +19,7 @@ matomo:
 css:
   enabled: true
   shared: true
-# noqa: email
+# nocheck: email
 # nocheck: dynamic-flag
 email:
   enabled: false

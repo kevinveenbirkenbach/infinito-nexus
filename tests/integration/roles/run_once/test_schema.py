@@ -17,8 +17,8 @@ class RunOnceSchemaTest(unittest.TestCase):
 
     Exception (per-when item):
       If the *same line* that contains the run_once_ condition also
-      carries a ``# noqa: run-once-suffix`` (or ``# nocheck: run-once-suffix``)
-      marker, that specific condition is ignored by this test.
+      carries a ``# nocheck: run-once-suffix`` marker, that specific
+      condition is ignored by this test.
 
     Only block-level 'when' conditions in main.yml are considered. The
     unified suppression-marker grammar is documented at

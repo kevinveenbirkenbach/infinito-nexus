@@ -22,6 +22,7 @@ from pathlib import Path
 from cli.deploy.development.common import DEV_INVENTORY_VARS_FILE
 
 from . import PROJECT_ROOT
+
 INVENTORY_ENV_SH = PROJECT_ROOT / "scripts" / "meta" / "env" / "inventory.sh"
 
 

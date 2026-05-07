@@ -5,10 +5,10 @@ from __future__ import annotations
 import argparse
 import json
 import sys
-from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple
 
 from . import PROJECT_ROOT
+
 sys.path.insert(0, str(PROJECT_ROOT))
 
 from humanfriendly import format_size, parse_size  # noqa: E402

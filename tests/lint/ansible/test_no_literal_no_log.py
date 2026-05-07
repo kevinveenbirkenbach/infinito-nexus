@@ -10,6 +10,7 @@ from utils.cache.files import read_text
 
 
 from . import PROJECT_ROOT
+
 SCAN_DIRS = ("roles", "tasks", "playbooks")
 
 _LITERAL_TRUE_RE = re.compile(

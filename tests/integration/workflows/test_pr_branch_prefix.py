@@ -1,10 +1,10 @@
 import os
 import subprocess
 import unittest
-from pathlib import Path
 
 
 from . import PROJECT_ROOT
+
 SCRIPT_PATH = PROJECT_ROOT / "scripts" / "meta" / "resolve" / "pr" / "branch_prefix.sh"
 
 
