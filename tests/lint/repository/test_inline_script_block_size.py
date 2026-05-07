@@ -64,11 +64,17 @@ SCAN_DIRS = ("roles", "tasks", "playbooks", ".github")
 MAX_LINES = 12
 
 # Ansible task keys that take a script body, plus GitHub Actions' `run`.
-_BLOCK_KEYS = ("shell", "command", "script", "raw", "run")
+# Both bare (`shell:`) and FQCN (`ansible.builtin.shell:`, `ansible.legacy.shell:`,
+# `ansible.windows.win_shell:`) forms are matched — they are interchangeable in
+# Ansible and must be linted identically.
 _BLOCK_KEY_RE = re.compile(
     r"""^(?P<indent>[ \t]*)             # leading indent (captured)
         (?:-\s+)?                        # optional YAML list dash
-        (?P<key>shell|command|script|raw|run)
+        (?P<key>
+            (?:ansible\.(?:builtin|legacy)\.)?(?:shell|command|script|raw)
+          | (?:ansible\.windows\.)?win_shell
+          | run
+        )
         \s*:\s*
         (?P<style>\|[+-]?)               # LITERAL block scalar only
         \s*

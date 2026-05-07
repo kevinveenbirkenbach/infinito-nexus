@@ -28,77 +28,12 @@
 # See docs/requirements/005-wordpress-multisite-rbac.md.
 
 - name: "Migration 005: purge stale pre-005 nested RBAC entries"
-  ansible.builtin.shell: |
-    set -o pipefail
-    ROLES_BASE="{{ LDAP.DN.OU.ROLES }}"
-
-    # Any direct child of ou=roles that is an organizationalUnit is an
-    # early-005 app OU container; everything under it must go too.
-    STALE_OUS=$(container exec {{ OPENLDAP_CONTAINER }} ldapsearch -LLL -x \
-      -H ldap://127.0.0.1:389 \
-      -D "{{ OPENLDAP_BIND_DN }}" \
-      -w "{{ OPENLDAP_BIND_PW }}" \
-      -b "${ROLES_BASE}" \
-      -s one \
-      "(objectClass=organizationalUnit)" \
-      dn 2>/dev/null | awk '/^dn: /{sub(/^dn: /,""); print}')
-
-    REMOVED=0
-    while IFS= read -r app_ou; do
-      [[ -z "${app_ou}" ]] && continue
-      # Delete children first (longest DN first so leaves go before parents).
-      CHILDREN=$(container exec {{ OPENLDAP_CONTAINER }} ldapsearch -LLL -x \
-        -H ldap://127.0.0.1:389 \
-        -D "{{ OPENLDAP_BIND_DN }}" \
-        -w "{{ OPENLDAP_BIND_PW }}" \
-        -b "${app_ou}" \
-        -s sub \
-        "(objectClass=*)" \
-        dn 2>/dev/null | awk '/^dn: /{sub(/^dn: /,""); print}' | grep -v "^${app_ou}\$" || true)
-      echo "${CHILDREN}" | awk '{print length, $0}' | sort -k1,1nr | awk '{$1=""; sub(/^ /,""); print}' | while IFS= read -r child; do
-        [[ -z "${child}" ]] && continue
-        container exec {{ OPENLDAP_CONTAINER }} ldapdelete -x \
-          -H ldap://127.0.0.1:389 \
-          -D "{{ OPENLDAP_BIND_DN }}" \
-          -w "{{ OPENLDAP_BIND_PW }}" \
-          "${child}" 2>/dev/null || true
-      done
-      container exec {{ OPENLDAP_CONTAINER }} ldapdelete -x \
-        -H ldap://127.0.0.1:389 \
-        -D "{{ OPENLDAP_BIND_DN }}" \
-        -w "{{ OPENLDAP_BIND_PW }}" \
-        "${app_ou}" 2>/dev/null || true
-      REMOVED=$((REMOVED+1))
-    done <<< "${STALE_OUS}"
-
-    # Any DN-nested groupOfNames with a cn=..,cn=..,ou=roles pattern is an
-    # early-005 leftover (the final layout has no DN nesting).
-    STALE_NESTED=$(container exec {{ OPENLDAP_CONTAINER }} ldapsearch -LLL -x \
-      -H ldap://127.0.0.1:389 \
-      -D "{{ OPENLDAP_BIND_DN }}" \
-      -w "{{ OPENLDAP_BIND_PW }}" \
-      -b "${ROLES_BASE}" \
-      -s sub \
-      "(objectClass=groupOfNames)" \
-      dn 2>/dev/null | awk '/^dn: /{sub(/^dn: /,""); print}' | grep -E "^cn=[^,]+,cn=" || true)
-
-    echo "${STALE_NESTED}" | awk '{print length, $0}' | sort -k1,1nr | awk '{$1=""; sub(/^ /,""); print}' | while IFS= read -r nested; do
-      [[ -z "${nested}" ]] && continue
-      container exec {{ OPENLDAP_CONTAINER }} ldapdelete -x \
-        -H ldap://127.0.0.1:389 \
-        -D "{{ OPENLDAP_BIND_DN }}" \
-        -w "{{ OPENLDAP_BIND_PW }}" \
-        "${nested}" 2>/dev/null || true
-      REMOVED=$((REMOVED+1))
-    done
-
-    if [[ "${REMOVED}" -gt 0 ]]; then
-      echo "MIGRATION_005_PURGED:${REMOVED}"
-    else
-      echo "MIGRATION_005_NO_STALE"
-    fi
-  args:
-    executable: /bin/bash
+  ansible.builtin.script: >
+    migrate_005_purge_stale.sh
+    {{ OPENLDAP_CONTAINER | quote }}
+    {{ LDAP.DN.OU.ROLES | quote }}
+    {{ OPENLDAP_BIND_DN | quote }}
+    {{ OPENLDAP_BIND_PW | quote }}
   register: openldap_migration_005
   changed_when: "'MIGRATION_005_PURGED' in (openldap_migration_005.stdout | default(''))"
   failed_when: false
