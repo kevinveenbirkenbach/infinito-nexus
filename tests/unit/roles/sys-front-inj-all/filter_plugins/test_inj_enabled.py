@@ -20,7 +20,7 @@ AppConfigKeyError = mu_mod.AppConfigKeyError
 # Load inj_enabled filter plugin from file
 spec = importlib.util.spec_from_file_location("inj_enabled", str(PLUGIN_PATH))
 inj_mod = importlib.util.module_from_spec(spec)
-spec.loader.exec_module(inj_mod)  # type: ignore
+spec.loader.exec_module(inj_mod)
 FilterModule = inj_mod.FilterModule
 
 

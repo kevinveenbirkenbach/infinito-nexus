@@ -26,7 +26,7 @@ def _value_generator_cls() -> type[object]:
     if str(utils_path) not in sys.path:
         sys.path.insert(0, str(utils_path))
 
-    from manager.value_generator import ValueGenerator  # type: ignore
+    from manager.value_generator import ValueGenerator
 
     return ValueGenerator
 

@@ -38,7 +38,8 @@ def main():
     print(f"previous versions path: {previous_version_path}")
 
     current_version_path = os.path.join(
-        versions_path, datetime.datetime.now().strftime("%Y%m%d%H%M%S")
+        versions_path,
+        datetime.datetime.now(tz=datetime.UTC).strftime("%Y%m%d%H%M%S"),
     )
     print(f"current versions path: {current_version_path}")
 

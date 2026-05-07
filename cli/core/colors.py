@@ -1,13 +1,13 @@
 from __future__ import annotations
 
 
-class Style:  # type: ignore
+class Style:
     RESET_ALL = "\033[0m"
     BRIGHT = "\033[1m"
     DIM = "\033[2m"
 
 
-class Fore:  # type: ignore
+class Fore:
     BLACK = "\033[30m"
     RED = "\033[31m"
     GREEN = "\033[32m"

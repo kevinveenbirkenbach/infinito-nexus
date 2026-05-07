@@ -31,7 +31,7 @@ def run_ansible_playbook(
     ansible_args: list[str] | None = None,
 ) -> None:
     """Run ansible-playbook with the given parameters and execution modes."""
-    start_time = datetime.datetime.now()
+    start_time = datetime.datetime.now(tz=datetime.UTC)
     print(f"\n▶️ Script started at: {start_time.isoformat()}\n")
 
     # ---------------------------------------------------------
@@ -127,6 +127,6 @@ def run_ansible_playbook(
         )
         sys.exit(result.returncode)
 
-    end_time = datetime.datetime.now()
+    end_time = datetime.datetime.now(tz=datetime.UTC)
     print(f"\n✅ Script ended at: {end_time.isoformat()}\n")
     print(f"⏱️ Total execution time: {end_time - start_time}\n")

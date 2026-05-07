@@ -6,7 +6,7 @@ from unittest.mock import patch
 import plugins.filter.node_autosize as na
 
 try:
-    from ansible.errors import AnsibleFilterError  # type: ignore
+    from ansible.errors import AnsibleFilterError
 except Exception:
     AnsibleFilterError = Exception
 

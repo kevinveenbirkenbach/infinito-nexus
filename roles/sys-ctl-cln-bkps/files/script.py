@@ -194,7 +194,7 @@ itteration_counter = 1
 while isSmallerThenMaximumBackupSize(maximum_backup_size_percent, backup_dir):
     print(f"Delete Iteration: {itteration_counter}")
     if not check_time_left(start_time, time_limit):
-        raise TimeLimitExceededException()
+        raise TimeLimitExceededException
 
     average_version_directories = average_version_directories_per_application(
         backup_dir

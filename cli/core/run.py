@@ -5,7 +5,7 @@ import os
 import pty
 import subprocess
 from dataclasses import dataclass
-from datetime import datetime
+from datetime import UTC, datetime
 from pathlib import Path
 from typing import TextIO
 
@@ -31,7 +31,7 @@ def open_log_file(log_dir: Path) -> tuple[TextIO, Path]:
     with contextlib.suppress(Exception):
         os.chmod(log_dir, 0o700)
 
-    timestamp = datetime.now().strftime("%Y%m%dT%H%M%S")
+    timestamp = datetime.now(tz=UTC).strftime("%Y%m%dT%H%M%S")
     log_file_path = log_dir / f"{timestamp}.log"
     fd = os.open(str(log_file_path), os.O_WRONLY | os.O_CREAT | os.O_APPEND, 0o600)
     return os.fdopen(fd, "a", encoding="utf-8"), log_file_path
@@ -57,7 +57,7 @@ def run_command_once(
             with os.fdopen(master_fd) as master:
                 try:
                     for line in master:
-                        ts = datetime.now().strftime("%Y-%m-%dT%H:%M:%S")
+                        ts = datetime.now(tz=UTC).strftime("%Y-%m-%dT%H:%M:%S")
                         log_file.write(f"{ts} {line}")
                         log_file.flush()
                         print(line, end="")

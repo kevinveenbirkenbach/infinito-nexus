@@ -37,7 +37,7 @@ class TestDomainTools(unittest.TestCase):
         with self.assertRaises(AnsibleFilterError):
             to_zone("localhost")  # no TLD part
         with self.assertRaises(AnsibleFilterError):
-            to_zone(None)  # type: ignore
+            to_zone(None)
 
     def test_filtermodule_exports(self):
         fm = FilterModule()

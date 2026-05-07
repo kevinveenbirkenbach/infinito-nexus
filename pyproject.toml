@@ -73,7 +73,16 @@ exclude = [
 # - `PERF` (perflint)           — avoid try/except in hot loops, etc.
 # - `RET`  (flake8-return)      — unneeded `else` after `return`, redundant assigns
 # - `PIE`  (flake8-pie)         — small wins (no-op `pass`, redundant `dict()` calls)
-select = ["E", "F", "I", "B", "UP", "RUF", "SIM", "C4", "PERF", "RET", "PIE"]
+# - `T10`  (flake8-debugger)    — committed `breakpoint()` / `pdb` calls
+# - `PGH`  (pygrep-hooks)       — blanket `# noqa` / `# type: ignore` without code
+# - `EXE`  (flake8-executable)  — shebang/executable-bit consistency
+# - `RSE`  (flake8-raise)       — `raise X()` style
+# - `ICN`  (flake8-import-conventions) — standard import aliases (`numpy as np`)
+# - `DTZ`  (flake8-datetimez)   — tz-naive `datetime.now()` / `utcnow()` bugs
+select = [
+    "E", "F", "I", "B", "UP", "RUF", "SIM", "C4", "PERF", "RET", "PIE",
+    "T10", "PGH", "EXE", "RSE", "ICN", "DTZ",
+]
 
 # `ruff format` (run via `make autoformat`) reflows whatever it can.
 # E501 leftovers are content the formatter can't break (long string

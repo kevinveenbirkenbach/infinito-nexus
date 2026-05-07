@@ -3,7 +3,7 @@
 
 import os
 import subprocess
-from datetime import datetime
+from datetime import UTC, datetime
 
 
 class CertUtils:
@@ -47,10 +47,14 @@ class CertUtils:
                     na = line.split("=", 1)[1].strip()
 
             def _parse(openssl_dt):
-                # OpenSSL format example: "Oct 10 12:34:56 2025 GMT"
-                return int(
-                    datetime.strptime(openssl_dt, "%b %d %H:%M:%S %Y %Z").timestamp()
+                # OpenSSL format example: "Oct 10 12:34:56 2025 GMT".
+                # ``%Z`` parses the literal "GMT" but produces a naive
+                # datetime; openssl always emits GMT, so we anchor the
+                # parsed value to UTC explicitly to make it tz-aware.
+                naive = datetime.strptime(  # noqa: DTZ007  %Z parses GMT abbrev; openssl always emits UTC, anchored below
+                    openssl_dt, "%b %d %H:%M:%S %Y %Z"
                 )
+                return int(naive.replace(tzinfo=UTC).timestamp())
 
             return (_parse(nb) if nb else None, _parse(na) if na else None)
         except Exception:

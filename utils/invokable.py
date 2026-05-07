@@ -68,7 +68,7 @@ def _role_lifecycle(role_dir: Path) -> str:
 
 
 def _get_invokable_paths() -> list[str]:
-    from plugins.filter.invokable_paths import get_invokable_paths  # type: ignore
+    from plugins.filter.invokable_paths import get_invokable_paths
 
     paths = get_invokable_paths(str(_categories_file()))
     if not paths:

@@ -106,7 +106,7 @@ class ResUsersOAuthConfigurableUid(models.Model):
                 validation.get("email"),
                 create_values,
             )
-            raise AccessDenied() from None
+            raise AccessDenied from None
 
     @api.model
     def _auth_oauth_validate(self, provider, access_token):

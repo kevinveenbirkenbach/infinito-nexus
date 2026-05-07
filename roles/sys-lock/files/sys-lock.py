@@ -2,7 +2,7 @@
 import argparse
 import subprocess
 import time
-from datetime import datetime
+from datetime import UTC, datetime
 
 # Global variable definition
 BREAK_TIME_SECONDS = 5
@@ -67,7 +67,7 @@ def wait_for_all_services_to_stop(filtered_services, max_attempts, attempt):
                     f"Maximum attempts ({max_attempts}) reached. Exiting."
                 )
             print(
-                f"{datetime.now().isoformat()}#{attempt}/{max_attempts}: Waiting for {BREAK_TIME_SECONDS} seconds for {service} to stop..."
+                f"{datetime.now(tz=UTC).isoformat()}#{attempt}/{max_attempts}: Waiting for {BREAK_TIME_SECONDS} seconds for {service} to stop..."
             )
             time.sleep(BREAK_TIME_SECONDS)
     return attempt

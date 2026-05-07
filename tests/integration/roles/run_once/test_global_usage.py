@@ -59,7 +59,7 @@ def read_text_safe(path: str):
 
 
 # ---------- YAML loader that tolerates unknown tags (!vault etc.) ----------
-class TolerantLoader(yaml.SafeLoader):  # type: ignore
+class TolerantLoader(yaml.SafeLoader):
     pass
 
 

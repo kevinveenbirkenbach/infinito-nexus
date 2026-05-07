@@ -1,7 +1,7 @@
 import unittest
 
 import reserved_users
-from ansible.errors import AnsibleFilterError  # type: ignore
+from ansible.errors import AnsibleFilterError
 from reserved_users import non_reserved_users, reserved_usernames
 
 

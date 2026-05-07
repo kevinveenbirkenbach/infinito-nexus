@@ -21,7 +21,7 @@ try:
     import tomllib  # Python 3.11+
 except Exception:
     try:
-        import tomli as tomllib  # type: ignore
+        import tomli as tomllib
     except Exception as exc:
         raise AnsibleError(
             "version lookup requires 'tomllib' (Python 3.11+) "

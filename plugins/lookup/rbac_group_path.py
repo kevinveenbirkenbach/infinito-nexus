@@ -40,7 +40,7 @@ from ansible.plugins.lookup import LookupBase
 try:
     from ansible.utils.display import Display
 except Exception:  # pragma: no cover
-    Display = None  # type: ignore
+    Display = None
 
 
 _IMPLICIT_ADMIN_ROLE = "administrator"
