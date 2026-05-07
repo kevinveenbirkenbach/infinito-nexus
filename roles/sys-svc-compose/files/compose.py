@@ -61,7 +61,7 @@ def generate_cache_override(project_dir: Path, base_compose: Path) -> Path | Non
     if not cache_ip or not base_compose.is_file():
         return None
 
-    with open(base_compose) as f:
+    with Path(base_compose).open() as f:
         doc = yaml.safe_load(f)  # nocheck: direct-yaml
 
     services = (doc or {}).get("services") or {}
@@ -82,7 +82,7 @@ def generate_cache_override(project_dir: Path, base_compose: Path) -> Path | Non
     }
 
     out = project_dir / "compose.cache.override.yml"
-    with open(out, "w") as f:
+    with Path(out).open("w") as f:
         yaml.safe_dump(override_doc, f, sort_keys=True)  # nocheck: direct-yaml
     return out
 

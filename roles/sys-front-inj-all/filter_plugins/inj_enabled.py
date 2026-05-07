@@ -1,11 +1,13 @@
-import os
 import sys
+from pathlib import Path
 
 from utils.applications.config import get
 
 # Allow imports from utils (same trick as your config filter)
-_BASE_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", ".."))
-_MODULE_UTILS_DIR = os.path.join(_BASE_DIR, "utils")
+_BASE_DIR = str(
+    Path(str(Path(str(Path(__file__).parent)) / ".." / ".." / "..")).resolve()
+)
+_MODULE_UTILS_DIR = str(Path(_BASE_DIR) / "utils")
 for _p in (_BASE_DIR, _MODULE_UTILS_DIR):
     if _p not in sys.path:
         sys.path.insert(0, _p)

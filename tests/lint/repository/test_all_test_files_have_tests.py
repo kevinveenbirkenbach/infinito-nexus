@@ -2,6 +2,7 @@
 import ast
 import os
 import unittest
+from pathlib import Path
 
 from utils.cache.files import read_text
 
@@ -20,7 +21,7 @@ class TestTestFilesContainUnittestTests(unittest.TestCase):
         out: list[str] = []
         for root, _dirs, files in os.walk(self.tests_dir):
             out.extend(
-                os.path.join(root, fn)
+                str(Path(root) / fn)
                 for fn in files
                 if fn.startswith("test_") and fn.endswith(".py")
             )

@@ -1,11 +1,22 @@
 import os
 import unittest
+from pathlib import Path
 
 import yaml
 
 # Dynamically determine the path to the roles directory
-ROLES_DIR = os.path.abspath(
-    os.path.join(os.path.dirname(__file__), "..", "..", "..", "..", "..", "roles")
+ROLES_DIR = str(
+    Path(
+        str(
+            Path(str(Path(__file__).parent))
+            / ".."
+            / ".."
+            / ".."
+            / ".."
+            / ".."
+            / "roles"
+        )
+    ).resolve()
 )
 
 
@@ -18,11 +29,11 @@ class TestApplicationIdDeprecation(unittest.TestCase):
         errors = []
 
         for role in os.listdir(ROLES_DIR):
-            role_path = os.path.join(ROLES_DIR, role)
-            vars_main_yml = os.path.join(role_path, "vars", "main.yml")
-            if not os.path.isfile(vars_main_yml):
+            role_path = str(Path(ROLES_DIR) / role)
+            vars_main_yml = str(Path(role_path) / "vars" / "main.yml")
+            if not Path(vars_main_yml).is_file():
                 continue
-            with open(vars_main_yml, encoding="utf-8") as f:
+            with Path(vars_main_yml).open(encoding="utf-8") as f:
                 try:
                     data = yaml.safe_load(f)
                 except Exception as e:

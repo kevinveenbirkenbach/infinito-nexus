@@ -4,7 +4,6 @@ from __future__ import annotations
 
 import contextlib
 import importlib.util
-import os
 import tempfile
 import unittest
 from pathlib import Path
@@ -108,7 +107,7 @@ class TestFileHasContentModule(unittest.TestCase):
         missing = "/tmp/this-file-should-not-exist-ansible-test-12345"
         # Already-absent is the state this test requires; either way we proceed.
         with contextlib.suppress(FileNotFoundError):
-            os.remove(missing)
+            Path(missing).unlink()
 
         payload = self._run_expect_fail(missing)
 

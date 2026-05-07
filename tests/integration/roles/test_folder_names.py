@@ -2,6 +2,7 @@
 
 import os
 import unittest
+from pathlib import Path
 
 
 class TestRolesFolderNames(unittest.TestCase):
@@ -11,8 +12,10 @@ class TestRolesFolderNames(unittest.TestCase):
         ignoring the '__pycache__' folder.
         """
         # Determine the absolute path to the 'roles' directory
-        roles_dir = os.path.abspath(
-            os.path.join(os.path.dirname(__file__), "..", "..", "..", "roles")
+        roles_dir = str(
+            Path(
+                str(Path(str(Path(__file__).parent)) / ".." / ".." / ".." / "roles")
+            ).resolve()
         )
 
         # List all entries in the roles directory
@@ -28,8 +31,8 @@ class TestRolesFolderNames(unittest.TestCase):
             # Skip the '__pycache__' directory
             if name == "__pycache__":
                 continue
-            path = os.path.join(roles_dir, name)
-            if os.path.isdir(path) and "_" in name:
+            path = str(Path(roles_dir) / name)
+            if Path(path).is_dir() and "_" in name:
                 invalid.append(name)
 
         # Fail the test if any invalid folder names are found

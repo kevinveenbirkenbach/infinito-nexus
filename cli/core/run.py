@@ -29,7 +29,7 @@ def open_log_file(log_dir: Path) -> tuple[TextIO, Path]:
 
     # Best-effort permission hardening (ignore failures on non-POSIX / special FS).
     with contextlib.suppress(Exception):
-        os.chmod(log_dir, 0o700)
+        log_dir.chmod(0o700)
 
     timestamp = datetime.now(tz=UTC).strftime("%Y%m%dT%H%M%S")
     log_file_path = log_dir / f"{timestamp}.log"

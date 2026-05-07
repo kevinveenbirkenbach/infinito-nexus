@@ -296,7 +296,7 @@ def main() -> int:
     # -------------------------------------------------------------------------
 
     # 1) Load existing inventory with ruamel (round-trip)
-    with open(args.inventory_file, encoding="utf-8") as f:
+    with Path(args.inventory_file).open(encoding="utf-8") as f:
         data = yaml_rt.load(f)  # CommentedMap or None
     if data is None:
         data = CommentedMap()
@@ -395,7 +395,7 @@ def main() -> int:
                     creds[key] = to_vault_block(manager.vault_handler, ov_val, key)
 
     # 6) Write back with ruamel (preserve formatting & comments)
-    with open(args.inventory_file, "w", encoding="utf-8") as f:
+    with Path(args.inventory_file).open("w", encoding="utf-8") as f:
         yaml_rt.dump(data, f)
 
     print(

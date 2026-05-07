@@ -6,6 +6,7 @@ and returns the role folder name whose application_id matches the provided value
 """
 
 import os
+from pathlib import Path
 
 from ansible.errors import AnsibleFilterError
 
@@ -21,13 +22,13 @@ def get_role(application_id, roles_path="roles"):
     :return: The name of the matching role directory.
     :raises AnsibleFilterError: If vars file is unreadable or no match is found.
     """
-    if not os.path.isdir(roles_path):
+    if not Path(roles_path).is_dir():
         raise AnsibleFilterError(f"Roles path not found: {roles_path}")
 
     for role in os.listdir(roles_path):
-        role_dir = os.path.join(roles_path, role)
-        vars_file = os.path.join(role_dir, "vars", "main.yml")
-        if os.path.isfile(vars_file):
+        role_dir = str(Path(roles_path) / role)
+        vars_file = str(Path(role_dir) / "vars" / "main.yml")
+        if Path(vars_file).is_file():
             try:
                 data = load_yaml_any(vars_file, default_if_missing={}) or {}
             except Exception as e:

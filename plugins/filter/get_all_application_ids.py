@@ -2,7 +2,7 @@
 # filter_plugins/get_all_application_ids.py
 
 import glob
-import os
+from pathlib import Path
 
 from utils.cache.yaml import load_yaml_any
 
@@ -15,7 +15,7 @@ def get_all_application_ids(roles_dir="roles"):
     :param roles_dir: Base directory for Ansible roles (default: 'roles')
     :return: Sorted list of unique application_id strings
     """
-    pattern = os.path.join(roles_dir, "*", "vars", "main.yml")
+    pattern = str(Path(roles_dir) / "*" / "vars" / "main.yml")
     app_ids = []
 
     for filepath in glob.glob(pattern):

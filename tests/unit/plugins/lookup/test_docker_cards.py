@@ -1,8 +1,8 @@
-import os
 import shutil
 import sys
 import tempfile
 import unittest
+from pathlib import Path
 from unittest.mock import patch
 
 from ansible.errors import AnsibleError
@@ -11,8 +11,9 @@ from jinja2 import Environment, StrictUndefined, select_autoescape
 # Adjust the PYTHONPATH to include the lookup_plugins folder from the web-app-dashboard role.
 sys.path.insert(
     0,
-    os.path.join(
-        os.path.dirname(__file__), "../../../../roles/web-app-dashboard/lookup_plugins"
+    str(
+        Path(str(Path(__file__).parent))
+        / "../../../../roles/web-app-dashboard/lookup_plugins"
     ),
 )
 
@@ -130,36 +131,36 @@ class TestDockerCardsLookup(unittest.TestCase):
 
         # Create a sample role "web-app-dashboard" under that directory.
         self.role_name = "web-app-dashboard"
-        self.role_dir = os.path.join(self.test_roles_dir, self.role_name)
-        os.makedirs(os.path.join(self.role_dir, "meta"))
-        os.makedirs(os.path.join(self.role_dir, "vars"))
+        self.role_dir = str(Path(self.test_roles_dir) / self.role_name)
+        Path(str(Path(self.role_dir) / "meta")).mkdir(parents=True)
+        Path(str(Path(self.role_dir) / "vars")).mkdir(parents=True)
 
-        vars_main = os.path.join(self.role_dir, "vars", "main.yml")
-        with open(vars_main, "w", encoding="utf-8") as f:
+        vars_main = str(Path(self.role_dir) / "vars" / "main.yml")
+        with Path(vars_main).open("w", encoding="utf-8") as f:
             f.write("application_id: portfolio\n")
 
         # Create a sample README.md with a H1 line for the title.
-        readme_path = os.path.join(self.role_dir, "README.md")
-        with open(readme_path, "w", encoding="utf-8") as f:
+        readme_path = str(Path(self.role_dir) / "README.md")
+        with Path(readme_path).open("w", encoding="utf-8") as f:
             f.write("# Portfolio Application\nThis is a sample portfolio role.")
 
         # Create a sample meta/main.yml in the meta folder. Per req-011
         # the icon class lives in meta/info.yml (file-root convention),
         # not under galaxy_info.
-        meta_main_path = os.path.join(self.role_dir, "meta", "main.yml")
+        meta_main_path = str(Path(self.role_dir) / "meta" / "main.yml")
         meta_yaml = """
 galaxy_info:
   description: "A role for deploying a portfolio application."
 """
-        with open(meta_main_path, "w", encoding="utf-8") as f:
+        with Path(meta_main_path).open("w", encoding="utf-8") as f:
             f.write(meta_yaml)
 
-        meta_info_path = os.path.join(self.role_dir, "meta", "info.yml")
+        meta_info_path = str(Path(self.role_dir) / "meta" / "info.yml")
         info_yaml = """
 logo:
   class: fa-solid fa-briefcase
 """
-        with open(meta_info_path, "w", encoding="utf-8") as f:
+        with Path(meta_info_path).open("w", encoding="utf-8") as f:
             f.write(info_yaml)
 
         # Patch tls lookup loader with a deterministic stub

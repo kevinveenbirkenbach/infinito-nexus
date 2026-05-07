@@ -1,7 +1,7 @@
 import glob
-import os
 import re
 import unittest
+from pathlib import Path
 
 import yaml
 
@@ -10,8 +10,8 @@ def find_role_task_yml_files(root_dir):
     """
     Find all .yml or .yaml files under roles/*/tasks directories from project root.
     """
-    pattern_yml = os.path.join(root_dir, "roles", "*", "tasks", "*.yml")
-    pattern_yaml = os.path.join(root_dir, "roles", "*", "tasks", "*.yaml")
+    pattern_yml = str(Path(root_dir) / "roles" / "*" / "tasks" / "*.yml")
+    pattern_yaml = str(Path(root_dir) / "roles" / "*" / "tasks" / "*.yaml")
     return glob.glob(pattern_yml) + glob.glob(pattern_yaml)
 
 
@@ -31,13 +31,15 @@ class RunOnceInclusionTest(unittest.TestCase):
 
     def test_run_once_blocks(self):
         # tests/integration/roles/run_once -> tests/integration/roles -> tests/integration -> tests -> project root
-        project_root = os.path.abspath(
-            os.path.join(os.path.dirname(__file__), "..", "..", "..", "..")
+        project_root = str(
+            Path(
+                str(Path(str(Path(__file__).parent)) / ".." / ".." / ".." / "..")
+            ).resolve()
         )
         violations = []
 
         for filepath in find_role_task_yml_files(project_root):
-            with open(filepath) as f:
+            with Path(filepath).open() as f:
                 try:
                     docs = list(yaml.safe_load_all(f))
                 except yaml.YAMLError as e:

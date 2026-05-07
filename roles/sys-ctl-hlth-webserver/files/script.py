@@ -9,6 +9,7 @@ import argparse
 import json
 import os
 import sys
+from pathlib import Path
 
 import requests
 
@@ -55,7 +56,7 @@ def main(argv=None) -> int:
     verify = True
     ca_trust_cert_host = os.environ.get("CA_TRUST_CERT_HOST", "").strip()
     if ca_trust_cert_host:
-        if not os.path.isfile(ca_trust_cert_host):
+        if not Path(ca_trust_cert_host).is_file():
             print(
                 f"CA_TRUST_CERT_HOST points to a missing certificate: {ca_trust_cert_host}"
             )

@@ -2,6 +2,7 @@ import os
 import shutil
 import tempfile
 import unittest
+from pathlib import Path
 
 import yaml
 from ansible.errors import AnsibleFilterError
@@ -16,10 +17,10 @@ def write_vars_file(base_dir, role_name, app_id):
     """
     Helper to create roles/<role_name>/vars/main.yml with application_id
     """
-    role_vars_dir = os.path.join(base_dir, "roles", role_name, "vars")
-    os.makedirs(role_vars_dir, exist_ok=True)
-    file_path = os.path.join(role_vars_dir, "main.yml")
-    with open(file_path, "w") as f:
+    role_vars_dir = str(Path(base_dir) / "roles" / role_name / "vars")
+    Path(role_vars_dir).mkdir(parents=True, exist_ok=True)
+    file_path = str(Path(role_vars_dir) / "main.yml")
+    with Path(file_path).open("w") as f:
         yaml.safe_dump({"application_id": app_id}, f)
     return file_path
 
@@ -28,7 +29,7 @@ class TestRolePathByApplicationId(unittest.TestCase):
     def setUp(self):
         # Create temporary directory for each test and switch cwd
         self.tmp_dir = tempfile.mkdtemp()
-        self.prev_cwd = os.getcwd()
+        self.prev_cwd = str(Path.cwd())
         os.chdir(self.tmp_dir)
 
     def tearDown(self):
@@ -40,7 +41,7 @@ class TestRolePathByApplicationId(unittest.TestCase):
         write_vars_file(self.tmp_dir, "role_one", "app123")
         write_vars_file(self.tmp_dir, "role_two", "other_id")
         result = abs_role_path_by_application_id("app123")
-        expected = os.path.abspath(os.path.join(self.tmp_dir, "roles", "role_one"))
+        expected = str(Path(str(Path(self.tmp_dir) / "roles" / "role_one")).resolve())
         self.assertEqual(result, expected)
 
     def test_rel_single_match(self):
@@ -48,7 +49,7 @@ class TestRolePathByApplicationId(unittest.TestCase):
         write_vars_file(self.tmp_dir, "role_two", "other_id")
         result = rel_role_path_by_application_id("app123")
         expected = os.path.relpath(
-            os.path.join(self.tmp_dir, "roles", "role_one"), self.tmp_dir
+            str(Path(self.tmp_dir) / "roles" / "role_one"), self.tmp_dir
         )
         self.assertEqual(result, expected)
 

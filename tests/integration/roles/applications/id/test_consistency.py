@@ -1,4 +1,5 @@
 import unittest
+from pathlib import Path
 
 import yaml
 
@@ -33,7 +34,7 @@ class TestApplicationIdConsistency(unittest.TestCase):
                 failed_roles.append((role_name, "vars/main.yml missing"))
                 continue
 
-            with open(vars_file) as f:
+            with Path(vars_file).open() as f:
                 try:
                     vars_data = yaml.safe_load(f) or {}
                 except yaml.YAMLError as e:

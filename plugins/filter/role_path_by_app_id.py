@@ -1,5 +1,6 @@
 import glob
 import os
+from pathlib import Path
 
 from ansible.errors import AnsibleFilterError
 
@@ -12,8 +13,8 @@ def abs_role_path_by_application_id(application_id):
     the absolute path of the role that matches. Raises an error if
     zero or more than one match is found.
     """
-    base_dir = os.getcwd()
-    pattern = os.path.join(base_dir, "roles", "*", "vars", "main.yml")
+    base_dir = str(Path.cwd())
+    pattern = str(Path(base_dir) / "roles" / "*" / "vars" / "main.yml")
     matches = []
 
     for filepath in glob.glob(pattern):
@@ -25,8 +26,8 @@ def abs_role_path_by_application_id(application_id):
             continue
 
         if data.get("application_id") == application_id:
-            role_dir = os.path.dirname(os.path.dirname(filepath))
-            abs_path = os.path.abspath(role_dir)
+            role_dir = str(Path(str(Path(filepath).parent)).parent)
+            abs_path = str(Path(role_dir).resolve())
             matches.append(abs_path)
 
     if len(matches) > 1:
@@ -48,8 +49,8 @@ def rel_role_path_by_application_id(application_id):
     the relative path (from the project root) of the role that matches.
     Raises an error if zero or more than one match is found.
     """
-    base_dir = os.getcwd()
-    pattern = os.path.join(base_dir, "roles", "*", "vars", "main.yml")
+    base_dir = str(Path.cwd())
+    pattern = str(Path(base_dir) / "roles" / "*" / "vars" / "main.yml")
     matches = []
 
     for filepath in glob.glob(pattern):
@@ -61,7 +62,7 @@ def rel_role_path_by_application_id(application_id):
             continue
 
         if data.get("application_id") == application_id:
-            role_dir = os.path.dirname(os.path.dirname(filepath))
+            role_dir = str(Path(str(Path(filepath).parent)).parent)
             rel_path = os.path.relpath(role_dir, base_dir)
             matches.append(rel_path)
 

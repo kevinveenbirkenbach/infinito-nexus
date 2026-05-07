@@ -3,6 +3,7 @@ import os
 import shutil
 import subprocess
 import time
+from pathlib import Path
 
 import psutil
 
@@ -74,11 +75,9 @@ def deleteVersion(version_path, backup_dir):
 def count_total_application_directories(backup_dir):
     total_app_directories = 0
     for host_backup_directory_name in os.listdir(backup_dir):
-        host_backup_directory_path = os.path.join(
-            backup_dir, host_backup_directory_name
-        )
+        host_backup_directory_path = str(Path(backup_dir) / host_backup_directory_name)
         total_app_directories += sum(
-            os.path.isdir(os.path.join(host_backup_directory_path, d))
+            Path(str(Path(host_backup_directory_path) / d)).is_dir()
             for d in os.listdir(host_backup_directory_path)
         )
     return total_app_directories
@@ -87,15 +86,13 @@ def count_total_application_directories(backup_dir):
 def count_total_version_folders(backup_dir):
     total_version_folders = 0
     for host_backup_directory_name in os.listdir(backup_dir):
-        host_backup_directory_path = os.path.join(
-            backup_dir, host_backup_directory_name
-        )
+        host_backup_directory_path = str(Path(backup_dir) / host_backup_directory_name)
         for application_directory in os.listdir(host_backup_directory_path):
-            versions_directory = os.path.join(
-                host_backup_directory_path, application_directory
+            versions_directory = str(
+                Path(host_backup_directory_path) / application_directory
             )
             total_version_folders += sum(
-                os.path.isdir(os.path.join(versions_directory, d))
+                Path(str(Path(versions_directory) / d)).is_dir()
                 for d in os.listdir(versions_directory)
             )
     return total_version_folders
@@ -128,14 +125,12 @@ def getAmountOfIteration(versions, average_version_directories_per_application):
 def deleteIteration(backup_dir, average_version_directories_per_application):
     for host_backup_directory_name in os.listdir(backup_dir):
         print(f"Iterating over host: {host_backup_directory_name}")
-        host_backup_directory_path = os.path.join(
-            backup_dir, host_backup_directory_name
-        )
+        host_backup_directory_path = str(Path(backup_dir) / host_backup_directory_name)
         for application_directory in os.listdir(host_backup_directory_path):
             print(f"Iterating over backup application: {application_directory}")
             # The directory which contains all backup versions of the application
             versions_directory = (
-                os.path.join(host_backup_directory_path, application_directory) + "/"
+                str(Path(host_backup_directory_path) / application_directory) + "/"
             )
 
             versions = os.listdir(versions_directory)
@@ -146,7 +141,7 @@ def deleteIteration(backup_dir, average_version_directories_per_application):
             ):
                 print_used_disc_space(backup_dir)
                 version = versions[version_iteration]
-                version_path = os.path.join(versions_directory, version)
+                version_path = str(Path(versions_directory) / version)
                 if isDirectoryDeletable(version, versions, version_path):
                     deleteVersion(version_path, backup_dir)
                 version_iteration += 1

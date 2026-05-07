@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
 import argparse
-import os
 import re
 import sys
+from pathlib import Path
 
-PROJECT_ROOT = os.path.dirname(
-    os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(__file__))))
-)
+from . import PROJECT_ROOT as _PROJECT_ROOT_PATH
+
+PROJECT_ROOT = str(_PROJECT_ROOT_PATH)
 
 INCLUDE_RE = re.compile(r"^(\s*)\{%\s*include\s*['\"]([^'\"]+)['\"]\s*%\}")
 
@@ -24,12 +24,12 @@ def expand_includes(rel_path, seen=None):
         raise RuntimeError(f"Circular include detected: {rp}")
     seen.add(rp)
 
-    abs_path = os.path.join(PROJECT_ROOT, rp)
-    if not os.path.isfile(abs_path):
+    abs_path = str(Path(PROJECT_ROOT) / rp)
+    if not Path(abs_path).is_file():
         raise FileNotFoundError(f"Template not found: {rp}")
 
     output_lines = []
-    with open(abs_path, encoding="utf-8") as f:
+    with Path(abs_path).open(encoding="utf-8") as f:
         for line in f:
             m = INCLUDE_RE.match(line)
             if not m:
@@ -64,7 +64,7 @@ def main():
         lines = expand_includes(args.template)
         text = "\n".join(lines)
         if args.out:
-            with open(args.out, "w", encoding="utf-8") as f:
+            with Path(args.out).open("w", encoding="utf-8") as f:
                 f.write(text + "\n")
         else:
             print(text)

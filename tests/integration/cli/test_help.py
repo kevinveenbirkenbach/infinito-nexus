@@ -2,16 +2,17 @@ import os
 import subprocess
 import sys
 import unittest
+from pathlib import Path
 
 
 class CLIHelpIntegrationTest(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        cls.project_root = os.path.abspath(
-            os.path.join(os.path.dirname(__file__), "..", "..", "..")
+        cls.project_root = str(
+            Path(str(Path(str(Path(__file__).parent)) / ".." / ".." / "..")).resolve()
         )
-        cls.cli_dir = os.path.join(cls.project_root, "cli")
-        cls.main_py = os.path.join(cls.cli_dir, "__main__.py")
+        cls.cli_dir = str(Path(cls.project_root) / "cli")
+        cls.main_py = str(Path(cls.cli_dir) / "__main__.py")
         cls.python = sys.executable
 
     def _discover_command_dirs(self):
@@ -38,8 +39,7 @@ class CLIHelpIntegrationTest(unittest.TestCase):
                 # cli/__main__.py is the dispatcher, not a command
                 continue
 
-            segments = rel_dir.split(os.sep)
-            commands.append(segments)
+            commands.append(list(Path(rel_dir).parts))
 
         # stable order for test output
         commands.sort(key=lambda s: "/".join(s))

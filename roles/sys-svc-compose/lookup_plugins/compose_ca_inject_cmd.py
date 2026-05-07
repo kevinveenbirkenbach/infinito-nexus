@@ -1,7 +1,6 @@
 # roles/sys-svc-compose/lookup_plugins/compose_ca_inject_cmd.py
 from __future__ import annotations
 
-import os
 from pathlib import Path
 from typing import Any
 
@@ -128,7 +127,7 @@ class LookupModule(LookupBase):
                 "compose_ca_inject_cmd: resolved files.compose_ca_override is empty"
             )
 
-        out_basename = os.path.basename(out_file)
+        out_basename = Path(out_file).name
         if not out_basename:
             raise AnsibleError(
                 "compose_ca_inject_cmd: output basename resolved to empty"

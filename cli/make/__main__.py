@@ -5,9 +5,9 @@ Invokes `make` commands in the project root directory.
 """
 
 import argparse
-import os
 import subprocess
 import sys
+from pathlib import Path
 
 
 def main():
@@ -30,8 +30,8 @@ def main():
     repo_root = str(PROJECT_ROOT)
 
     # Check for Makefile
-    makefile_path = os.path.join(repo_root, "Makefile")
-    if not os.path.isfile(makefile_path):
+    makefile_path = str(Path(repo_root) / "Makefile")
+    if not Path(makefile_path).is_file():
         print(f"Error: Makefile not found in {repo_root}", file=sys.stderr)
         sys.exit(1)
 

@@ -4,8 +4,8 @@ own local subnet under ``meta/server.yml.networks.local.subnet``."""
 from __future__ import annotations
 
 import glob
-import os
 import unittest
+from pathlib import Path
 
 import yaml
 
@@ -13,36 +13,36 @@ import yaml
 class TestComposeRolesHaveLocalNetwork(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        base_dir = os.path.dirname(__file__)
-        cls.repo_root = os.path.abspath(os.path.join(base_dir, "..", "..", ".."))
-        cls.roles_dir = os.path.join(cls.repo_root, "roles")
+        base_dir = str(Path(__file__).parent)
+        cls.repo_root = str(Path(str(Path(base_dir) / ".." / ".." / "..")).resolve())
+        cls.roles_dir = str(Path(cls.repo_root) / "roles")
 
     def test_every_compose_role_with_application_id_has_local_network(self):
         missing = []
 
-        for role_path in sorted(glob.glob(os.path.join(self.roles_dir, "*"))):
-            if not os.path.isdir(role_path):
+        for role_path in sorted(glob.glob(str(Path(self.roles_dir) / "*"))):
+            if not Path(role_path).is_dir():
                 continue
 
-            role_name = os.path.basename(role_path)
-            compose_template = os.path.join(role_path, "templates", "compose.yml.j2")
-            if not os.path.isfile(compose_template):
+            role_name = Path(role_path).name
+            compose_template = str(Path(role_path) / "templates" / "compose.yml.j2")
+            if not Path(compose_template).is_file():
                 continue
 
-            vars_file = os.path.join(role_path, "vars", "main.yml")
-            if not os.path.isfile(vars_file):
+            vars_file = str(Path(role_path) / "vars" / "main.yml")
+            if not Path(vars_file).is_file():
                 continue
 
-            with open(vars_file, encoding="utf-8") as f:
+            with Path(vars_file).open(encoding="utf-8") as f:
                 vars_data = yaml.safe_load(f) or {}
             application_id = vars_data.get("application_id")
             if not application_id:
                 continue
 
-            server_file = os.path.join(role_path, "meta", "server.yml")
+            server_file = str(Path(role_path) / "meta" / "server.yml")
             subnet = None
-            if os.path.isfile(server_file):
-                with open(server_file, encoding="utf-8") as f:
+            if Path(server_file).is_file():
+                with Path(server_file).open(encoding="utf-8") as f:
                     server_data = yaml.safe_load(f) or {}
                 networks = server_data.get("networks") or {}
                 local = networks.get("local") if isinstance(networks, dict) else None

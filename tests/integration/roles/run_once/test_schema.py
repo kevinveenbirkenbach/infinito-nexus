@@ -1,7 +1,7 @@
 import glob
-import os
 import re
 import unittest
+from pathlib import Path
 
 from utils.annotations.suppress import is_suppressed_anywhere, line_has_rule
 from utils.cache.files import read_text
@@ -52,14 +52,16 @@ class RunOnceSchemaTest(unittest.TestCase):
         )
 
     def test_run_once_suffix_matches_role(self):
-        project_root = os.path.abspath(
-            os.path.join(os.path.dirname(__file__), "..", "..", "..", "..")
+        project_root = str(
+            Path(
+                str(Path(str(Path(__file__).parent)) / ".." / ".." / ".." / "..")
+            ).resolve()
         )
         violations = []
 
-        pattern = os.path.join(project_root, "roles", "*", "tasks", "main.yml")
+        pattern = str(Path(project_root) / "roles" / "*" / "tasks" / "main.yml")
         for filepath in glob.glob(pattern):
-            role_name = os.path.normpath(filepath).split(os.sep)[-3]
+            role_name = Path(filepath).parts[-3]
             expected_suffix = role_name.lower().replace("-", "_")
 
             try:

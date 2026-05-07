@@ -1,7 +1,7 @@
 import glob
-import os
 import unittest
 import warnings
+from pathlib import Path
 
 import yaml
 
@@ -13,9 +13,11 @@ class TestApplicationIdAndInvocability(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         # locate roles dir (two levels up)
-        base_dir = os.path.dirname(__file__)
-        cls.roles_dir = os.path.abspath(
-            os.path.join(base_dir, "..", "..", "..", "..", "..", "roles")
+        base_dir = str(Path(__file__).parent)
+        cls.roles_dir = str(
+            Path(
+                str(Path(base_dir) / ".." / ".." / ".." / ".." / ".." / "roles")
+            ).resolve()
         )
 
         # get lists of invokable and non-invokable role *names*
@@ -29,17 +31,17 @@ class TestApplicationIdAndInvocability(unittest.TestCase):
         - Non-invokable roles must NOT have application_id (else fail).
         - If application_id exists but != folder name, warn and recommend aligning.
         """
-        for role_path in glob.glob(os.path.join(self.roles_dir, "*")):
-            if not os.path.isdir(role_path):
+        for role_path in glob.glob(str(Path(self.roles_dir) / "*")):
+            if not Path(role_path).is_dir():
                 continue
 
-            role_name = os.path.basename(role_path)
-            vars_main = os.path.join(role_path, "vars", "main.yml")
+            role_name = Path(role_path).name
+            vars_main = str(Path(role_path) / "vars" / "main.yml")
 
             # load vars/main.yml if it exists
             data = {}
-            if os.path.exists(vars_main):
-                with open(vars_main, encoding="utf-8") as f:
+            if Path(vars_main).exists():
+                with Path(vars_main).open(encoding="utf-8") as f:
                     data = yaml.safe_load(f) or {}
 
             app_id = data.get("application_id")

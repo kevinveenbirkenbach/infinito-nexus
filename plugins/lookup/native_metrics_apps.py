@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import os
 from pathlib import Path
 from typing import Any
 
@@ -69,7 +68,7 @@ class LookupModule(LookupBase):
 
     def _find_roles_dir(self) -> Path:
         candidates = [
-            Path(os.getcwd()) / "roles",
+            Path(str(Path.cwd())) / "roles",
             Path(__file__).resolve().parent.parent.parent / "roles",
         ]
         for candidate in candidates:

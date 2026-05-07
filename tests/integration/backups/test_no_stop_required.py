@@ -1,5 +1,6 @@
 import os
 import unittest
+from pathlib import Path
 
 import yaml
 
@@ -7,8 +8,8 @@ import yaml
 class TestNoStopRequiredIntegrity(unittest.TestCase):
     def setUp(self):
         # Path to the roles directory
-        self.roles_dir = os.path.abspath(
-            os.path.join(os.path.dirname(__file__), "../../../roles")
+        self.roles_dir = str(
+            Path(str(Path(str(Path(__file__).parent)) / "../../../roles")).resolve()
         )
 
     def test_backup_no_stop_required_consistency(self):
@@ -18,13 +19,13 @@ class TestNoStopRequiredIntegrity(unittest.TestCase):
           - the containing service dict has an `image` entry at the same level
         """
         for role in os.listdir(self.roles_dir):
-            docker_config_path = os.path.join(
-                self.roles_dir, role, "meta", "services.yml"
+            docker_config_path = str(
+                Path(self.roles_dir) / role / "meta" / "services.yml"
             )
-            if not os.path.isfile(docker_config_path):
+            if not Path(docker_config_path).is_file():
                 continue
 
-            with open(docker_config_path) as f:
+            with Path(docker_config_path).open() as f:
                 try:
                     # Ensure config is at least an empty dict if YAML is empty or null
                     config = yaml.safe_load(f) or {}

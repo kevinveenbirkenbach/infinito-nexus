@@ -1,6 +1,6 @@
 import glob
-import os
 import unittest
+from pathlib import Path
 
 import yaml
 
@@ -42,7 +42,7 @@ class TestConfigurationNoNone(unittest.TestCase):
         # exists. Recurse into every meta/*.yml file and assert no key
         # resolves to a YAML null.
         roles_root = str(PROJECT_ROOT / "roles")
-        pattern = os.path.join(roles_root, "*", "meta", "*.yml")
+        pattern = str(Path(roles_root) / "*" / "meta" / "*.yml")
         files = glob.glob(pattern)
         self.assertTrue(
             files, f"No roles/*/meta/*.yml files found with pattern: {pattern}"
@@ -50,7 +50,7 @@ class TestConfigurationNoNone(unittest.TestCase):
 
         all_errors = []
         for filepath in files:
-            with open(filepath) as f:
+            with Path(filepath).open() as f:
                 try:
                     data = yaml.safe_load(f)
                 except yaml.YAMLError as e:

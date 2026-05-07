@@ -3,6 +3,7 @@ import glob
 import os
 import re
 import unittest
+from pathlib import Path
 
 from utils.cache.files import read_text as _read_text_cached
 from utils.cache.yaml import load_yaml_any
@@ -25,28 +26,28 @@ def read_text(path: str) -> str:
 
 
 def roles_root(project_root: str) -> str:
-    return os.path.join(project_root, "roles")
+    return str(Path(project_root) / "roles")
 
 
 def iter_role_dirs(project_root: str) -> list[str]:
     root = roles_root(project_root)
-    return [d for d in glob.glob(os.path.join(root, "*")) if os.path.isdir(d)]
+    return [d for d in glob.glob(str(Path(root) / "*")) if Path(d).is_dir()]
 
 
 def role_name_from_dir(role_dir: str) -> str:
-    return os.path.basename(role_dir.rstrip(os.sep))
+    return Path(role_dir.rstrip(os.sep)).name
 
 
 def path_if_exists(*parts) -> str | None:
-    p = os.path.join(*parts)
-    return p if os.path.exists(p) else None
+    p = str(Path(*parts))
+    return p if Path(p).exists() else None
 
 
 def gather_yaml_files(base: str, patterns: list[str]) -> list[str]:
     files: list[str] = []
     for pat in patterns:
-        files.extend(glob.glob(os.path.join(base, pat), recursive=True))
-    return [f for f in files if os.path.isfile(f)]
+        files.extend(glob.glob(str(Path(base) / pat), recursive=True))
+    return [f for f in files if Path(f).is_file()]
 
 
 # ---------------- Providers: vars & handlers ----------------
@@ -76,9 +77,7 @@ def collect_role_defined_vars(role_dir: str) -> set[str]:
             provided |= flatten_keys(data)
 
     # set_fact keys
-    task_files = gather_yaml_files(
-        os.path.join(role_dir, "tasks"), ["**/*.yml", "*.yml"]
-    )
+    task_files = gather_yaml_files(str(Path(role_dir) / "tasks"), ["**/*.yml", "*.yml"])
     for tf in task_files:
         data = safe_load_yaml(tf)
         if isinstance(data, list):
@@ -205,8 +204,10 @@ class TestUnnecessaryRoleDependencies(unittest.TestCase):
 
     def setUp(self):
         # project root = two levels up from this test file
-        self.project_root = os.path.abspath(
-            os.path.join(os.path.dirname(__file__), "..", "..", "..", "..", "..")
+        self.project_root = str(
+            Path(
+                str(Path(str(Path(__file__).parent)) / ".." / ".." / ".." / ".." / "..")
+            ).resolve()
         )
         self.roles = iter_role_dirs(self.project_root)
 
@@ -249,7 +250,7 @@ class TestUnnecessaryRoleDependencies(unittest.TestCase):
             defaults_texts = [(p, read_text(p)) for p in defaults_files]
 
             task_files = gather_yaml_files(
-                os.path.join(consumer_dir, "tasks"), ["**/*.yml", "*.yml"]
+                str(Path(consumer_dir) / "tasks"), ["**/*.yml", "*.yml"]
             )
             task_texts = [(p, read_text(p)) for p in task_files]
 

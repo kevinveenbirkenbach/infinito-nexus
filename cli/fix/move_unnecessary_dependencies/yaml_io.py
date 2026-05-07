@@ -7,6 +7,7 @@ import logging
 import os
 import shutil
 import sys
+from pathlib import Path
 
 logger = logging.getLogger(__name__)
 
@@ -32,13 +33,13 @@ yaml_rt.width = 10**9
 
 
 def backup(path: str) -> None:
-    if os.path.exists(path):
+    if Path(path).exists():
         shutil.copy2(path, path + ".bak")
 
 
 def read_text(path: str) -> str:
     try:
-        with open(path, encoding="utf-8") as f:
+        with Path(path).open(encoding="utf-8") as f:
             return f.read()
     except Exception:
         return ""
@@ -46,7 +47,7 @@ def read_text(path: str) -> str:
 
 def load_yaml_rt(path: str):
     try:
-        with open(path, encoding="utf-8") as f:
+        with Path(path).open(encoding="utf-8") as f:
             data = yaml_rt.load(f)
         return data if data is not None else CommentedMap()
     except FileNotFoundError:
@@ -58,7 +59,7 @@ def load_yaml_rt(path: str):
 
 def dump_yaml_rt(data, path: str) -> None:
     backup(path)
-    with open(path, "w", encoding="utf-8") as f:
+    with Path(path).open("w", encoding="utf-8") as f:
         yaml_rt.dump(data, f)
 
 
@@ -68,28 +69,28 @@ def sq(value: str):
 
 
 def roles_root(project_root: str) -> str:
-    return os.path.join(project_root, "roles")
+    return str(Path(project_root) / "roles")
 
 
 def iter_role_dirs(project_root: str) -> list[str]:
     return [
         d
-        for d in glob.glob(os.path.join(roles_root(project_root), "*"))
-        if os.path.isdir(d)
+        for d in glob.glob(str(Path(roles_root(project_root)) / "*"))
+        if Path(d).is_dir()
     ]
 
 
 def role_name_from_dir(role_dir: str) -> str:
-    return os.path.basename(role_dir.rstrip(os.sep))
+    return Path(role_dir.rstrip(os.sep)).name
 
 
 def path_if_exists(*parts: str) -> str | None:
-    p = os.path.join(*parts)
-    return p if os.path.exists(p) else None
+    p = str(Path(*parts))
+    return p if Path(p).exists() else None
 
 
 def gather_yaml_files(base: str, patterns: list[str]) -> list[str]:
     files: list[str] = []
     for pat in patterns:
-        files.extend(glob.glob(os.path.join(base, pat), recursive=True))
-    return [f for f in files if os.path.isfile(f)]
+        files.extend(glob.glob(str(Path(base) / pat), recursive=True))
+    return [f for f in files if Path(f).is_file()]

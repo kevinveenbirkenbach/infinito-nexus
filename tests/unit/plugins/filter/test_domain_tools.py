@@ -1,10 +1,10 @@
-import os
 import sys
 import unittest
+from pathlib import Path
 
 # Make project root importable so "plugins.filter.domain_tools" works no matter where tests run from
-THIS_DIR = os.path.dirname(os.path.abspath(__file__))
-PROJECT_ROOT = os.path.abspath(os.path.join(THIS_DIR, "..", "..", "..", ".."))
+THIS_DIR = str(Path(str(Path(__file__).resolve())).parent)
+PROJECT_ROOT = str(Path(str(Path(THIS_DIR) / ".." / ".." / ".." / "..")).resolve())
 if PROJECT_ROOT not in sys.path:
     sys.path.insert(0, PROJECT_ROOT)
 

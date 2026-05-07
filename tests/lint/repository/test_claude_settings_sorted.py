@@ -1,5 +1,6 @@
 import json
 import unittest
+from pathlib import Path
 
 from . import PROJECT_ROOT
 
@@ -21,7 +22,7 @@ class TestClaudeSettingsSorted(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls) -> None:
-        with open(SETTINGS_PATH) as fh:
+        with Path(SETTINGS_PATH).open() as fh:
             cls.settings = json.load(fh)
 
     def test_arrays_are_ascending(self) -> None:

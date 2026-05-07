@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import os
 import unittest
 from pathlib import Path
 
@@ -25,7 +24,7 @@ class TestTestFilesLocation(unittest.TestCase):
 
         offenders: list[str] = []
         for path_str in iter_project_files(extensions=(".py",)):
-            if os.path.basename(path_str).startswith("test_") is False:
+            if Path(path_str).name.startswith("test_") is False:
                 continue
             rel = Path(path_str).relative_to(root).as_posix()
             if rel == "tests" or rel.startswith("tests/"):

@@ -3,6 +3,7 @@ import logging
 import os
 import re
 from collections.abc import Iterable
+from pathlib import Path
 
 logger = logging.getLogger(__name__)
 
@@ -64,8 +65,8 @@ class RoleDependencyResolver:
         resolve_dependencies: bool = True,
         resolve_run_after: bool = False,
     ) -> set[str]:
-        role_path = os.path.join(self.roles_dir, role_name)
-        if not os.path.isdir(role_path):
+        role_path = str(Path(self.roles_dir) / role_name)
+        if not Path(role_path).is_dir():
             return set()
 
         deps: set[str] = set()
@@ -88,11 +89,11 @@ class RoleDependencyResolver:
     # -------------------------- scanning helpers --------------------------
 
     def _scan_tasks(self, role_path: str) -> tuple[set[str], set[str]]:
-        tasks_dir = os.path.join(role_path, "tasks")
+        tasks_dir = str(Path(role_path) / "tasks")
         include_roles: set[str] = set()
         import_roles: set[str] = set()
 
-        if not os.path.isdir(tasks_dir):
+        if not Path(tasks_dir).is_dir():
             return include_roles, import_roles
 
         all_roles = self._list_role_dirs(self.roles_dir)
@@ -100,7 +101,7 @@ class RoleDependencyResolver:
         candidates = []
         for root, _, files in os.walk(tasks_dir):
             candidates.extend(
-                os.path.join(root, f) for f in files if f.endswith((".yml", ".yaml"))
+                str(Path(root) / f) for f in files if f.endswith((".yml", ".yaml"))
             )
 
         from utils.cache.yaml import load_yaml_any
@@ -225,8 +226,8 @@ class RoleDependencyResolver:
 
     def _extract_meta_dependencies(self, role_path: str) -> set[str]:
         deps: set[str] = set()
-        meta_main = os.path.join(role_path, "meta", "main.yml")
-        if not os.path.isfile(meta_main):
+        meta_main = str(Path(role_path) / "meta" / "main.yml")
+        if not Path(meta_main).is_file():
             return deps
         try:
             from utils.cache.yaml import load_yaml_any
@@ -265,9 +266,7 @@ class RoleDependencyResolver:
 
     def _list_role_dirs(self, roles_dir: str) -> list[str]:
         return [
-            d
-            for d in os.listdir(roles_dir)
-            if os.path.isdir(os.path.join(roles_dir, d))
+            d for d in os.listdir(roles_dir) if Path(str(Path(roles_dir) / d)).is_dir()
         ]
 
     @classmethod

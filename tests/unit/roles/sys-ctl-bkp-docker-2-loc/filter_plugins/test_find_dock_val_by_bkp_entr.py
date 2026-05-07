@@ -1,13 +1,15 @@
 import importlib.util
-import os
 import unittest
+from pathlib import Path
 
-TEST_DIR = os.path.dirname(__file__)
-PLUGIN_PATH = os.path.abspath(
-    os.path.join(
-        TEST_DIR,
-        "../../../../../roles/sys-ctl-bkp-docker-2-loc/filter_plugins/find_dock_val_by_bkp_entr.py",
-    )
+TEST_DIR = str(Path(__file__).parent)
+PLUGIN_PATH = str(
+    Path(
+        str(
+            Path(TEST_DIR)
+            / "../../../../../roles/sys-ctl-bkp-docker-2-loc/filter_plugins/find_dock_val_by_bkp_entr.py"
+        )
+    ).resolve()
 )
 
 spec = importlib.util.spec_from_file_location("find_dock_val_by_bkp_entr", PLUGIN_PATH)

@@ -7,6 +7,7 @@ import subprocess
 import sys
 import time
 from dataclasses import dataclass
+from pathlib import Path
 
 
 @dataclass
@@ -112,7 +113,7 @@ def git(dest: str, verbose: bool, *args: str, retries: int = 5) -> RunResult:
 
 
 def ensure_dir(dest: str, verbose: bool) -> None:
-    os.makedirs(dest, exist_ok=True)
+    Path(dest).mkdir(parents=True, exist_ok=True)
     log(f"ensure directory exists: {dest}", verbose)
 
 
@@ -124,7 +125,7 @@ def is_dir_empty(path: str) -> bool:
 
 
 def is_git_repo(dest: str) -> bool:
-    return os.path.isdir(os.path.join(dest, ".git"))
+    return Path(str(Path(dest) / ".git")).is_dir()
 
 
 def remote_exists(dest: str, remote: str, verbose: bool) -> bool:

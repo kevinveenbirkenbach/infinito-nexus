@@ -62,7 +62,7 @@ class TestConfigLookup(unittest.TestCase):
         _reset_cache_for_tests()
 
         # Create a temp working directory in /tmp and chdir into it
-        self._cwd = os.getcwd()
+        self._cwd = str(Path.cwd())
         self._tmpdir = tempfile.TemporaryDirectory()
         self._tmp = Path(self._tmpdir.name)
         os.chdir(self._tmp)

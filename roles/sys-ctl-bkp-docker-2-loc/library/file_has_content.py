@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-import os
+from pathlib import Path
 
 from ansible.module_utils.basic import AnsibleModule
 
@@ -64,17 +64,17 @@ def run_module() -> None:
         "size": 0,
     }
 
-    if not os.path.exists(path):
+    if not Path(path).exists():
         module.fail_json(msg=f"File does not exist: {path}", **result)
 
-    if not os.path.isfile(path):
+    if not Path(path).is_file():
         module.fail_json(msg=f"Path exists but is not a file: {path}", **result)
 
     result["exists"] = True
-    result["size"] = os.path.getsize(path)
+    result["size"] = Path(path).stat().st_size
 
     try:
-        with open(path, encoding="utf-8", errors="ignore") as f:
+        with Path(path).open(encoding="utf-8", errors="ignore") as f:
             content = f.read().strip()
             result["has_content"] = bool(content)
     except Exception as exc:

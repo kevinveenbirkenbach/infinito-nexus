@@ -1,11 +1,12 @@
 import os
 import unittest
+from pathlib import Path
 
 from utils.cache.files import iter_project_files_with_content
 
 
 class TestUnittestImports(unittest.TestCase):
-    TEST_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
+    TEST_ROOT = str(Path(str(Path(str(Path(__file__).parent)) / ".." / "..")).resolve())
 
     def test_all_test_files_import_unittest(self):
         missing = []
@@ -14,7 +15,7 @@ class TestUnittestImports(unittest.TestCase):
         for filepath, content in iter_project_files_with_content(extensions=(".py",)):
             if not filepath.startswith(tests_prefix):
                 continue
-            filename = os.path.basename(filepath)
+            filename = Path(filepath).name
             # only consider test files named like "test_*.py"
             if not filename.startswith("test_"):
                 continue
@@ -24,7 +25,7 @@ class TestUnittestImports(unittest.TestCase):
                 "import unittest" not in content
                 and "from unittest import" not in content
             ):
-                rel_path = os.path.relpath(filepath, os.getcwd())
+                rel_path = os.path.relpath(filepath, str(Path.cwd()))
                 missing.append(rel_path)
 
         if missing:

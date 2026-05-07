@@ -76,7 +76,7 @@ def main():
     # 2) Save the updated inventory to file. The custom SafeDumper
     # subclass emits !vault literal blocks; the cached dump_yaml writes
     # plain YAML which is the wrong output here.
-    with open(args.inventory_file, "w", encoding="utf-8") as f:
+    with Path(args.inventory_file).open("w", encoding="utf-8") as f:
         yaml.dump(  # nocheck: direct-yaml
             updated_inventory, f, sort_keys=False, Dumper=SafeDumper
         )

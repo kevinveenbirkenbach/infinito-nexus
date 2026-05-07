@@ -1,6 +1,6 @@
 import glob
-import os
 import re
+from pathlib import Path
 
 from ansible.errors import AnsibleError
 from ansible.plugins.loader import lookup_loader
@@ -51,19 +51,19 @@ class LookupModule(LookupBase):
         )
 
         # Search for all roles starting with "web-app-"
-        pattern = os.path.join(roles_dir, "web-app-*")
+        pattern = str(Path(roles_dir) / "web-app-*")
         for role_path in glob.glob(pattern):
             role_dir = role_path.rstrip("/")
-            role_basename = os.path.basename(role_dir)
+            role_basename = Path(role_dir).name
 
             # Skip roles not starting with "web-app-"
             if not role_basename.startswith("web-app-"):  # Ensure prefix
                 continue
 
             # Load application_id from role's vars/main.yml (cached parse).
-            vars_path = os.path.join(role_dir, "vars", "main.yml")
+            vars_path = str(Path(role_dir) / "vars" / "main.yml")
             try:
-                if not os.path.isfile(vars_path):
+                if not Path(vars_path).is_file():
                     raise AnsibleError(
                         f"Vars file not found for role '{role_basename}': {vars_path}"
                     )
@@ -88,12 +88,12 @@ class LookupModule(LookupBase):
             # meta/main.yml carries Galaxy-spec fields (description, galaxy_tags);
             # meta/info.yml is the project-internal store for descriptive
             # role-level metadata (logo, display) per req-011.
-            readme_path = os.path.join(role_dir, "README.md")
-            meta_path = os.path.join(role_dir, "meta", "main.yml")
-            info_path = os.path.join(role_dir, "meta", "info.yml")
+            readme_path = str(Path(role_dir) / "README.md")
+            meta_path = str(Path(role_dir) / "meta" / "main.yml")
+            info_path = str(Path(role_dir) / "meta" / "info.yml")
 
             # Skip role if required files are missing
-            if not os.path.exists(readme_path) or not os.path.exists(meta_path):
+            if not Path(readme_path).exists() or not Path(meta_path).exists():
                 continue
 
             # Extract title from first H1 line in README.md (cached read).
@@ -120,7 +120,7 @@ class LookupModule(LookupBase):
             # Extract project-internal descriptive metadata from meta/info.yml.
             # File-root convention: the file's content IS applications.<role>.info.
             info_data: dict = {}
-            if os.path.isfile(info_path):
+            if Path(info_path).is_file():
                 try:
                     loaded = load_yaml_any(info_path, default_if_missing={}) or {}
                     info_data = loaded if isinstance(loaded, dict) else {}

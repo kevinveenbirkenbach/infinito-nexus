@@ -1,5 +1,6 @@
 import os
 import unittest
+from pathlib import Path
 
 from utils.cache.yaml import load_yaml_any
 
@@ -13,23 +14,23 @@ class TestRunAfterReferences(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
-        here = os.path.abspath(os.path.dirname(__file__))
-        repo_root = os.path.abspath(
-            os.path.join(here, "..", "..", "..", "..", "..", "..")
+        here = str(Path(str(Path(__file__).parent)).resolve())
+        repo_root = str(
+            Path(str(Path(here) / ".." / ".." / ".." / ".." / ".." / "..")).resolve()
         )
-        cls.roles_dir = os.path.join(repo_root, "roles")
+        cls.roles_dir = str(Path(repo_root) / "roles")
         # collect all role names (folder names) in roles/
         cls.existing_roles = {
             name
             for name in os.listdir(cls.roles_dir)
-            if os.path.isdir(os.path.join(cls.roles_dir, name))
+            if Path(str(Path(cls.roles_dir) / name)).is_dir()
         }
 
     def test_run_after_points_to_existing_roles(self):
         errors = []
         for role in sorted(self.existing_roles):
-            meta_path = os.path.join(self.roles_dir, role, "meta", "main.yml")
-            if not os.path.isfile(meta_path):
+            meta_path = str(Path(self.roles_dir) / role / "meta" / "main.yml")
+            if not Path(meta_path).is_file():
                 # skip roles without a meta/main.yml
                 continue
 

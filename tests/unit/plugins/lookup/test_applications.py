@@ -20,7 +20,7 @@ def _write_config(base_dir: Path, application_id: str, config: dict) -> None:
 class TestApplicationsLookup(unittest.TestCase):
     def setUp(self) -> None:
         self.lookup = LookupModule()
-        self._cwd = os.getcwd()
+        self._cwd = str(Path.cwd())
         self._tmpdir = tempfile.TemporaryDirectory()
         self._tmp = Path(self._tmpdir.name)
         os.chdir(self._tmp)

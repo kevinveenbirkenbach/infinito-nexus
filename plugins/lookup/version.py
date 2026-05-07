@@ -13,6 +13,7 @@ Resolution order:
 from __future__ import annotations
 
 import os
+from pathlib import Path
 
 from ansible.errors import AnsibleError
 from ansible.plugins.lookup import LookupBase
@@ -42,16 +43,16 @@ class LookupModule(LookupBase):
     def run(self, terms, variables=None, **kwargs):
         # Intentionally ignore terms/kwargs — no parameters supported
 
-        plugin_dir = os.path.dirname(os.path.abspath(__file__))
+        plugin_dir = str(Path(str(Path(__file__).resolve())).parent)
         pyproject_path = os.path.normpath(
-            os.path.join(plugin_dir, "..", "..", "pyproject.toml")
+            str(Path(plugin_dir) / ".." / ".." / "pyproject.toml")
         )
 
-        if not os.path.exists(pyproject_path):
+        if not Path(pyproject_path).exists():
             raise AnsibleError(f"version lookup: file not found: {pyproject_path}")
 
         try:
-            with open(pyproject_path, "rb") as f:
+            with Path(pyproject_path).open("rb") as f:
                 data = tomllib.load(f)
         except Exception as exc:
             raise AnsibleError(

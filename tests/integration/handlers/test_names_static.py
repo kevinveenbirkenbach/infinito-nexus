@@ -20,9 +20,9 @@ This test scans: roles/*/handlers/main.yml
 """
 
 import glob
-import os
 import re
 import unittest
+from pathlib import Path
 
 try:
     import yaml  # PyYAML
@@ -62,17 +62,17 @@ class StaticHandlerNamesTest(unittest.TestCase):
     """
 
     def test_no_templated_names_in_handlers(self):
-        project_root = os.path.abspath(
-            os.path.join(os.path.dirname(__file__), "..", "..", "..")
+        project_root = str(
+            Path(str(Path(str(Path(__file__).parent)) / ".." / ".." / "..")).resolve()
         )
-        pattern = os.path.join(project_root, "roles", "*", "handlers", "main.yml")
+        pattern = str(Path(project_root) / "roles" / "*" / "handlers" / "main.yml")
 
         violations = []
 
         for handler_path in sorted(glob.glob(pattern)):
             # Load possibly multi-document YAML safely
             try:
-                with open(handler_path, encoding="utf-8") as f:
+                with Path(handler_path).open(encoding="utf-8") as f:
                     docs = list(yaml.safe_load_all(f))
             except FileNotFoundError:
                 continue

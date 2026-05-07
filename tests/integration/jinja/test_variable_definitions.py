@@ -1,9 +1,9 @@
 import logging
-import os
 import re
 import sys
 import unittest
 from glob import glob
+from pathlib import Path
 
 import yaml
 
@@ -25,16 +25,16 @@ class TestVariableDefinitions(unittest.TestCase):
 
     def setUp(self):
         # Project root = repo root (tests/integration/<cluster>/.. -> ../../../)
-        self.project_root = os.path.abspath(
-            os.path.join(os.path.dirname(__file__), "../../../")
+        self.project_root = str(
+            Path(str(Path(str(Path(__file__).parent)) / "../../../")).resolve()
         )
 
         # Collect all variable definition files: roles/*/{vars,defaults}/**/*.yml and group_vars/all/*.yml
         self.var_files = []
         patterns = [
-            os.path.join(self.project_root, "roles", "*", "vars", "**", "*.yml"),
-            os.path.join(self.project_root, "roles", "*", "defaults", "**", "*.yml"),
-            os.path.join(self.project_root, "group_vars", "all", "*.yml"),
+            str(Path(self.project_root) / "roles" / "*" / "vars" / "**" / "*.yml"),
+            str(Path(self.project_root) / "roles" / "*" / "defaults" / "**" / "*.yml"),
+            str(Path(self.project_root) / "group_vars" / "all" / "*.yml"),
         ]
         for pat in patterns:
             self.var_files.extend(glob(pat, recursive=True))
@@ -96,7 +96,7 @@ class TestVariableDefinitions(unittest.TestCase):
         # 1) Keys from var files (top-level dict keys)
         for vf in self.var_files:
             try:
-                with open(vf, encoding="utf-8") as f:
+                with Path(vf).open(encoding="utf-8") as f:
                     data = yaml.safe_load(f)
                 if isinstance(data, dict):
                     self.defined.update(data.keys())

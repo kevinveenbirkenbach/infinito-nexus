@@ -1,7 +1,7 @@
 import glob
-import os
 import re
 import unittest
+from pathlib import Path
 
 import yaml
 
@@ -20,11 +20,11 @@ class TestIncludeImportExistence(unittest.TestCase):
 
     def setUp(self):
         self.project_root = str(PROJECT_ROOT)
-        self.roles_dir = os.path.join(self.project_root, "roles")
+        self.roles_dir = str(Path(self.project_root) / "roles")
 
         self.files_to_scan = []
         for filepath in glob.glob(
-            os.path.join(self.project_root, "**", "*.yml"), recursive=True
+            str(Path(self.project_root) / "**" / "*.yml"), recursive=True
         ):
             if "/.git/" in filepath or "/tests/" in filepath:
                 continue
@@ -103,9 +103,9 @@ class TestIncludeImportExistence(unittest.TestCase):
                     )
 
                 pattern = re.sub(r"\{\{.*?\}\}", "*", role_name)
-                glob_path = os.path.join(self.roles_dir, pattern)
+                glob_path = str(Path(self.roles_dir) / pattern)
 
-                matches = [p for p in glob.glob(glob_path) if os.path.isdir(p)]
+                matches = [p for p in glob.glob(glob_path) if Path(p).is_dir()]
                 if not matches:
                     missing.append((file_path, role_name))
 
@@ -118,16 +118,16 @@ class TestIncludeImportExistence(unittest.TestCase):
     def test_include_import_tasks_exist(self):
         missing = []
         for file_path, doc in self._iter_docs():
-            file_dir = os.path.dirname(file_path)
+            file_dir = str(Path(file_path).parent)
 
             role_name = None
             role_path_dir = None
             if self.roles_dir in file_dir:
-                parts = file_dir.split(os.sep)
+                parts = list(Path(file_dir).parts)
                 idx = parts.index("roles")
                 if idx + 1 < len(parts):
                     role_name = parts[idx + 1]
-                    role_path_dir = os.path.join(self.roles_dir, role_name)
+                    role_path_dir = str(Path(self.roles_dir) / role_name)
 
             for task_ref in self._collect_refs(
                 doc, ("include_tasks", "import_tasks"), "file"
@@ -140,17 +140,17 @@ class TestIncludeImportExistence(unittest.TestCase):
                         "{{ playbook_dir }}", self.project_root
                     )
                 pattern_ref = re.sub(r"\{\{.*?\}\}", "*", pattern_ref)
-                if not os.path.splitext(pattern_ref)[1]:
+                if not Path(pattern_ref).suffix:
                     pattern_ref += ".yml"
 
-                local_glob = os.path.join(file_dir, pattern_ref)
-                global_glob = os.path.join(self.project_root, pattern_ref)
-                tasks_dir_glob = os.path.join(self.project_root, "tasks", pattern_ref)
+                local_glob = str(Path(file_dir) / pattern_ref)
+                global_glob = str(Path(self.project_root) / pattern_ref)
+                tasks_dir_glob = str(Path(self.project_root) / "tasks" / pattern_ref)
 
                 matches = []
-                matches += [p for p in glob.glob(local_glob) if os.path.isfile(p)]
-                matches += [p for p in glob.glob(global_glob) if os.path.isfile(p)]
-                matches += [p for p in glob.glob(tasks_dir_glob) if os.path.isfile(p)]
+                matches += [p for p in glob.glob(local_glob) if Path(p).is_file()]
+                matches += [p for p in glob.glob(global_glob) if Path(p).is_file()]
+                matches += [p for p in glob.glob(tasks_dir_glob) if Path(p).is_file()]
 
                 if not matches:
                     missing.append((file_path, task_ref))

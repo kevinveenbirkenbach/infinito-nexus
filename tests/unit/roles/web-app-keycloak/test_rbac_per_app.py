@@ -1,13 +1,15 @@
 import importlib.util
-import os
 import unittest
+from pathlib import Path
 
-current_dir = os.path.dirname(__file__)
-plugin_path = os.path.abspath(
-    os.path.join(
-        current_dir,
-        "../../../../roles/web-app-keycloak/filter_plugins/rbac_per_app.py",
-    )
+current_dir = str(Path(__file__).parent)
+plugin_path = str(
+    Path(
+        str(
+            Path(current_dir)
+            / "../../../../roles/web-app-keycloak/filter_plugins/rbac_per_app.py"
+        )
+    ).resolve()
 )
 spec = importlib.util.spec_from_file_location("rbac_per_app", plugin_path)
 mod = importlib.util.module_from_spec(spec)

@@ -1,9 +1,9 @@
-import os
 import subprocess
 import sys
 import tempfile
 import unittest
 import unittest.mock
+from pathlib import Path
 
 import yaml
 
@@ -47,16 +47,16 @@ class TestCreateCredentials(unittest.TestCase):
     def test_main_overrides_and_file_writing(self):
         # Setup temporary files for role-path vars and inventory
         with tempfile.TemporaryDirectory() as tmpdir:
-            role_path = os.path.join(tmpdir, "role")
-            os.makedirs(os.path.join(role_path, "meta"))
-            os.makedirs(os.path.join(role_path, "vars"))
+            role_path = str(Path(tmpdir) / "role")
+            Path(str(Path(role_path) / "meta")).mkdir(parents=True)
+            Path(str(Path(role_path) / "vars")).mkdir(parents=True)
             # Create vars/main.yml with application_id
             main_vars = {"application_id": "app_test"}
-            with open(os.path.join(role_path, "vars", "main.yml"), "w") as f:
+            with Path(str(Path(role_path) / "vars" / "main.yml")).open("w") as f:
                 yaml.dump(main_vars, f)
             # Create config/main.yml with features disabled
             config = {"features": {"central_database": False}}
-            with open(os.path.join(role_path, "meta", "services.yml"), "w") as f:
+            with Path(str(Path(role_path) / "meta" / "services.yml")).open("w") as f:
                 yaml.dump(config, f)
             # Create schema.yml defining plain credential
             schema = {
@@ -68,14 +68,14 @@ class TestCreateCredentials(unittest.TestCase):
                     }
                 }
             }
-            with open(os.path.join(role_path, "meta", "schema.yml"), "w") as f:
+            with Path(str(Path(role_path) / "meta" / "schema.yml")).open("w") as f:
                 yaml.dump(schema, f)
             # Prepare inventory file
-            inventory_file = os.path.join(tmpdir, "inventory.yml")
-            with open(inventory_file, "w") as f:
+            inventory_file = str(Path(tmpdir) / "inventory.yml")
+            with Path(inventory_file).open("w") as f:
                 yaml.dump({}, f)
-            vault_pw_file = os.path.join(tmpdir, "pw.txt")
-            with open(vault_pw_file, "w") as f:
+            vault_pw_file = str(Path(tmpdir) / "pw.txt")
+            with Path(vault_pw_file).open("w") as f:
                 f.write("pw")
 
             # Simulate ansible-vault encrypt_string output for api_key
@@ -100,7 +100,7 @@ class TestCreateCredentials(unittest.TestCase):
                 # Should complete without error
                 main()
                 # Verify inventory file updated with vaulted api_key
-                with open(inventory_file) as f:
+                with Path(inventory_file).open() as f:
                     data = yaml.safe_load(f)
                 creds = data["applications"]["app_test"]["credentials"]
                 self.assertIn("api_key", creds)
@@ -116,18 +116,18 @@ class TestCreateCredentials(unittest.TestCase):
         should be set to "" and *not* encrypted (no ansible-vault calls).
         """
         with tempfile.TemporaryDirectory() as tmpdir:
-            role_path = os.path.join(tmpdir, "role")
-            os.makedirs(os.path.join(role_path, "meta"))
-            os.makedirs(os.path.join(role_path, "vars"))
+            role_path = str(Path(tmpdir) / "role")
+            Path(str(Path(role_path) / "meta")).mkdir(parents=True)
+            Path(str(Path(role_path) / "vars")).mkdir(parents=True)
 
             # vars/main.yml with application_id
             main_vars = {"application_id": "app_empty_plain"}
-            with open(os.path.join(role_path, "vars", "main.yml"), "w") as f:
+            with Path(str(Path(role_path) / "vars" / "main.yml")).open("w") as f:
                 yaml.dump(main_vars, f)
 
             # config/main.yml
             config = {"features": {"central_database": False}}
-            with open(os.path.join(role_path, "meta", "services.yml"), "w") as f:
+            with Path(str(Path(role_path) / "meta" / "services.yml")).open("w") as f:
                 yaml.dump(config, f)
 
             # schema/main.yml: plain credential *without* overrides
@@ -140,17 +140,17 @@ class TestCreateCredentials(unittest.TestCase):
                     }
                 }
             }
-            with open(os.path.join(role_path, "meta", "schema.yml"), "w") as f:
+            with Path(str(Path(role_path) / "meta" / "schema.yml")).open("w") as f:
                 yaml.dump(schema, f)
 
             # Empty inventory file
-            inventory_file = os.path.join(tmpdir, "inventory.yml")
-            with open(inventory_file, "w") as f:
+            inventory_file = str(Path(tmpdir) / "inventory.yml")
+            with Path(inventory_file).open("w") as f:
                 yaml.dump({}, f)
 
             # Vault password file
-            vault_pw_file = os.path.join(tmpdir, "pw.txt")
-            with open(vault_pw_file, "w") as f:
+            vault_pw_file = str(Path(tmpdir) / "pw.txt")
+            with Path(vault_pw_file).open("w") as f:
                 f.write("pw")
 
             # Ensure ansible-vault is *not* called at all in this scenario
@@ -172,7 +172,7 @@ class TestCreateCredentials(unittest.TestCase):
                 ]
                 main()
 
-            with open(inventory_file) as f:
+            with Path(inventory_file).open() as f:
                 data = yaml.safe_load(f)
             creds = data["applications"]["app_empty_plain"]["credentials"]
             # api_key should exist and be an empty string, not a vault block

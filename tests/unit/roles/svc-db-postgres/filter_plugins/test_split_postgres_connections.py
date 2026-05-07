@@ -1,9 +1,9 @@
 import importlib.util
-import os
 import shutil
 import tempfile
 import textwrap
 import unittest
+from pathlib import Path
 from types import ModuleType
 
 from ansible.errors import AnsibleFilterError
@@ -14,14 +14,14 @@ def load_filter_module(repo_root: str) -> ModuleType:
     Load the filter plugin from:
       roles/svc-db-postgres/filter_plugins/split_postgres_connections.py
     """
-    plugin_path = os.path.join(
-        repo_root,
-        "roles",
-        "svc-db-postgres",
-        "filter_plugins",
-        "split_postgres_connections.py",
+    plugin_path = str(
+        Path(repo_root)
+        / "roles"
+        / "svc-db-postgres"
+        / "filter_plugins"
+        / "split_postgres_connections.py"
     )
-    if not os.path.isfile(plugin_path):
+    if not Path(plugin_path).is_file():
         raise FileNotFoundError(f"Filter plugin not found at {plugin_path}")
     spec = importlib.util.spec_from_file_location(
         "split_postgres_connections_plugin", plugin_path
@@ -36,12 +36,12 @@ def write_role_vars(repo_root: str, role_name: str, database_type: str | None):
     """
     Create a minimal role with optional vars/main.yml containing database_type.
     """
-    role_dir = os.path.join(repo_root, "roles", role_name)
-    vars_dir = os.path.join(role_dir, "vars")
-    os.makedirs(role_dir, exist_ok=True)
+    role_dir = str(Path(repo_root) / "roles" / role_name)
+    vars_dir = str(Path(role_dir) / "vars")
+    Path(role_dir).mkdir(parents=True, exist_ok=True)
     if database_type is not None:
-        os.makedirs(vars_dir, exist_ok=True)
-        with open(os.path.join(vars_dir, "main.yml"), "w", encoding="utf-8") as f:
+        Path(vars_dir).mkdir(parents=True, exist_ok=True)
+        with Path(str(Path(vars_dir) / "main.yml")).open("w", encoding="utf-8") as f:
             f.write(
                 textwrap.dedent(f"""\
                 # auto-generated for test
@@ -54,8 +54,8 @@ class SplitPostgresConnectionsTests(unittest.TestCase):
     def setUp(self):
         # Create an isolated temporary repository layout
         self.repo = tempfile.mkdtemp(prefix="repo_")
-        self.roles_dir = os.path.join(self.repo, "roles")
-        os.makedirs(self.roles_dir, exist_ok=True)
+        self.roles_dir = str(Path(self.repo) / "roles")
+        Path(self.roles_dir).mkdir(parents=True, exist_ok=True)
 
         # Create roles:
         # - app_a (postgres)
@@ -69,22 +69,22 @@ class SplitPostgresConnectionsTests(unittest.TestCase):
 
         # Copy the real plugin into this temp repo structure, preserving your path layout.
         # (Adjust src_plugin_path if your test runner runs from a different CWD.)
-        src_plugin_path = os.path.join(
-            os.getcwd(),
-            "roles",
-            "svc-db-postgres",
-            "filter_plugins",
-            "split_postgres_connections.py",
+        src_plugin_path = str(
+            Path(str(Path.cwd()))
+            / "roles"
+            / "svc-db-postgres"
+            / "filter_plugins"
+            / "split_postgres_connections.py"
         )
-        if not os.path.isfile(src_plugin_path):
+        if not Path(src_plugin_path).is_file():
             self.skipTest(f"Source plugin not found at {src_plugin_path}")
-        dst_plugin_dir = os.path.join(
-            self.repo, "roles", "svc-db-postgres", "filter_plugins"
+        dst_plugin_dir = str(
+            Path(self.repo) / "roles" / "svc-db-postgres" / "filter_plugins"
         )
-        os.makedirs(dst_plugin_dir, exist_ok=True)
+        Path(dst_plugin_dir).mkdir(parents=True, exist_ok=True)
         shutil.copy2(
             src_plugin_path,
-            os.path.join(dst_plugin_dir, "split_postgres_connections.py"),
+            str(Path(dst_plugin_dir) / "split_postgres_connections.py"),
         )
 
         self.mod = load_filter_module(self.repo)

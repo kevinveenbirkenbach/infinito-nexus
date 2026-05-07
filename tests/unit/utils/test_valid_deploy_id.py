@@ -3,6 +3,7 @@ from __future__ import annotations
 import os
 import tempfile
 import unittest
+from pathlib import Path
 
 import yaml
 
@@ -27,14 +28,14 @@ class TestValidDeployId(unittest.TestCase):
     def _write_ini_inventory(self, content: str) -> str:
         fd, path = tempfile.mkstemp(suffix=".ini")
         os.close(fd)
-        with open(path, "w", encoding="utf-8") as f:
+        with Path(path).open("w", encoding="utf-8") as f:
             f.write(content)
         return path
 
     def _write_yaml_inventory(self, data) -> str:
         fd, path = tempfile.mkstemp(suffix=".yml")
         os.close(fd)
-        with open(path, "w", encoding="utf-8") as f:
+        with Path(path).open("w", encoding="utf-8") as f:
             yaml.safe_dump(data, f)
         return path
 

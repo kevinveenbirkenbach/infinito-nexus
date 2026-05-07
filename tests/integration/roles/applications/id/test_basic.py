@@ -1,6 +1,6 @@
 import glob
-import os
 import unittest
+from pathlib import Path
 
 import yaml
 
@@ -17,27 +17,29 @@ class TestSysRolesApplicationId(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
-        cls.base_dir = os.path.abspath(
-            os.path.join(os.path.dirname(__file__), "..", "..", "..", "..", "..")
+        cls.base_dir = str(
+            Path(
+                str(Path(str(Path(__file__).parent)) / ".." / ".." / ".." / ".." / "..")
+            ).resolve()
         )
-        cat_file = os.path.join(cls.base_dir, "roles", "categories.yml")
+        cat_file = str(Path(cls.base_dir) / "roles" / "categories.yml")
         cls.invokable_prefixes = set(get_invokable_paths(cat_file))
         # collect actual sys dirs
-        pattern = os.path.join(cls.base_dir, "roles", "sys-*")
-        cls.actual_dirs = [d for d in glob.glob(pattern) if os.path.isdir(d)]
+        pattern = str(Path(cls.base_dir) / "roles" / "sys-*")
+        cls.actual_dirs = [d for d in glob.glob(pattern) if Path(d).is_dir()]
 
     def test_sys_roles_application_id(self):
         for role_dir in self.actual_dirs:
-            name = os.path.basename(role_dir)
+            name = Path(role_dir).name
             prefix = f"sys-{name[len('sys-') :] if name.startswith('sys-') else name}"
-            vars_file = os.path.join(role_dir, "vars", "main.yml")
+            vars_file = str(Path(role_dir) / "vars" / "main.yml")
             if prefix in self.invokable_prefixes:
                 # must exist with id
                 self.assertTrue(
-                    os.path.isfile(vars_file),
+                    Path(vars_file).is_file(),
                     f"Missing vars/main.yml for invokable role {prefix}",
                 )
-                with open(vars_file) as f:
+                with Path(vars_file).open() as f:
                     content = yaml.safe_load(f) or {}
                 self.assertIn(
                     "application_id",
@@ -46,9 +48,9 @@ class TestSysRolesApplicationId(unittest.TestCase):
                 )
             else:
                 # if exists, must not contain id
-                if not os.path.isfile(vars_file):
+                if not Path(vars_file).is_file():
                     continue
-                with open(vars_file) as f:
+                with Path(vars_file).open() as f:
                     content = yaml.safe_load(f) or {}
                 self.assertNotIn(
                     "application_id",

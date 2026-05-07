@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import datetime
-import os
 import subprocess
 import sys
 from pathlib import Path
@@ -73,7 +72,7 @@ def run_ansible_playbook(
         print("\n🔍 Validating inventory before deployment...\n")
         try:
             run(
-                [sys.executable, inventory_validator_path, os.path.dirname(inventory)],
+                [sys.executable, inventory_validator_path, str(Path(inventory).parent)],
                 cwd=repo_root,
                 check=True,
             )

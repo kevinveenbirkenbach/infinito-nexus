@@ -1,5 +1,6 @@
 import os
 import unittest
+from pathlib import Path
 
 from utils.cache.yaml import load_yaml_any
 
@@ -12,17 +13,17 @@ class TestSelfDependency(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
-        here = os.path.abspath(os.path.dirname(__file__))
-        repo_root = os.path.abspath(
-            os.path.join(here, "..", "..", "..", "..", "..", "..")
+        here = str(Path(str(Path(__file__).parent)).resolve())
+        repo_root = str(
+            Path(str(Path(here) / ".." / ".." / ".." / ".." / ".." / "..")).resolve()
         )
-        cls.roles_dir = os.path.join(repo_root, "roles")
+        cls.roles_dir = str(Path(repo_root) / "roles")
 
     def test_no_self_in_run_after(self):
         for entry in os.listdir(self.roles_dir):
-            role_path = os.path.join(self.roles_dir, entry)
-            meta_file = os.path.join(role_path, "meta", "main.yml")
-            if not os.path.isdir(role_path) or not os.path.isfile(meta_file):
+            role_path = str(Path(self.roles_dir) / entry)
+            meta_file = str(Path(role_path) / "meta" / "main.yml")
+            if not Path(role_path).is_dir() or not Path(meta_file).is_file():
                 continue
 
             data = load_yaml_any(meta_file, default_if_missing={}) or {}

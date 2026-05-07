@@ -1,12 +1,14 @@
-import os
 import sys
 import unittest
+from pathlib import Path
 
 # Allow import from project plugins/filter directory
 sys.path.insert(
     0,
-    os.path.abspath(
-        os.path.join(os.path.dirname(__file__), "../../../../plugins/filter")
+    str(
+        Path(
+            str(Path(str(Path(__file__).parent)) / "../../../../plugins/filter")
+        ).resolve()
     ),
 )
 

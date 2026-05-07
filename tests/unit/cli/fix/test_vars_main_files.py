@@ -1,7 +1,7 @@
-import os
 import shutil
 import tempfile
 import unittest
+from pathlib import Path
 
 import yaml
 
@@ -13,8 +13,8 @@ class TestEnsureVarsMain(unittest.TestCase):
     def setUp(self):
         # create a temporary directory to act as our roles dir
         self.tmpdir = tempfile.mkdtemp()
-        self.roles_dir = os.path.join(self.tmpdir, "roles")
-        os.mkdir(self.roles_dir)
+        self.roles_dir = str(Path(self.tmpdir) / "roles")
+        Path(self.roles_dir).mkdir()
 
         # Monkey-patch the module's ROLES_DIR to point here
         self._orig_roles_dir = ROLES_DIR
@@ -34,10 +34,10 @@ class TestEnsureVarsMain(unittest.TestCase):
         Create a role under self.roles_dir/name
         If vars_content is given, writes that to vars/main.yml
         """
-        role_path = os.path.join(self.roles_dir, name)
-        os.makedirs(os.path.join(role_path, "vars"))
+        role_path = str(Path(self.roles_dir) / name)
+        Path(str(Path(role_path) / "vars")).mkdir(parents=True)
         if vars_content is not None:
-            with open(os.path.join(role_path, "vars", "main.yml"), "w") as f:
+            with Path(str(Path(role_path) / "vars" / "main.yml")).open("w") as f:
                 yaml.safe_dump(vars_content, f)
         return role_path
 
@@ -45,16 +45,16 @@ class TestEnsureVarsMain(unittest.TestCase):
         # Create a role with no vars/main.yml
         role = self._make_role("desk-foobar")
         # Ensure no file exists yet
-        self.assertFalse(os.path.exists(os.path.join(role, "vars", "main.yml")))
+        self.assertFalse(Path(str(Path(role) / "vars" / "main.yml")).exists())
 
         # Run with overwrite=False, preview=False
         run(prefix="desk-", preview=False, overwrite=False)
 
         # Now file must exist
-        vm = os.path.join(role, "vars", "main.yml")
-        self.assertTrue(os.path.exists(vm))
+        vm = str(Path(role) / "vars" / "main.yml")
+        self.assertTrue(Path(vm).exists())
 
-        with open(vm) as f:
+        with Path(vm).open() as f:
             data = yaml.safe_load(f)
         # Expect application_id: 'foobar'
         self.assertEqual(data.get("application_id"), "foobar")
@@ -66,8 +66,8 @@ class TestEnsureVarsMain(unittest.TestCase):
 
         run(prefix="desk-", preview=False, overwrite=True)
 
-        path = os.path.join(role, "vars", "main.yml")
-        with open(path) as f:
+        path = str(Path(role) / "vars" / "main.yml")
+        with Path(path).open() as f:
             data = yaml.safe_load(f)
 
         # application_id must be corrected...
@@ -79,10 +79,10 @@ class TestEnsureVarsMain(unittest.TestCase):
     def test_preview_mode_does_not_write(self):
         # Create a role directory but with no vars/main.yml
         role = self._make_role("desk-preview")
-        vm = os.path.join(role, "vars", "main.yml")
+        vm = str(Path(role) / "vars" / "main.yml")
         # Run in preview => no file creation
         run(prefix="desk-", preview=True, overwrite=False)
-        self.assertFalse(os.path.exists(vm))
+        self.assertFalse(Path(vm).exists())
 
 
 if __name__ == "__main__":

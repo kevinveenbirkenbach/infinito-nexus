@@ -1,8 +1,8 @@
 import logging
-import os
 import re
 import unittest
 from glob import glob
+from pathlib import Path
 
 import yaml
 
@@ -13,15 +13,15 @@ logger = logging.getLogger(__name__)
 
 class TestTopLevelVariableUsage(unittest.TestCase):
     def setUp(self):
-        self.project_root = os.path.abspath(
-            os.path.join(os.path.dirname(__file__), "../../../")
+        self.project_root = str(
+            Path(str(Path(str(Path(__file__).parent)) / "../../../")).resolve()
         )
         # Braces werden von glob nicht unterstützt – also einzeln sammeln:
         self.roles_vars_paths = glob(
-            os.path.join(self.project_root, "roles/*/vars/main.yml")
-        ) + glob(os.path.join(self.project_root, "roles/*/defaults/main.yml"))
+            str(Path(self.project_root) / "roles/*/vars/main.yml")
+        ) + glob(str(Path(self.project_root) / "roles/*/defaults/main.yml"))
         self.group_vars_paths = glob(
-            os.path.join(self.project_root, "group_vars/all/*.yml")
+            str(Path(self.project_root) / "group_vars/all/*.yml")
         )
         self.all_variable_files = self.roles_vars_paths + self.group_vars_paths
         self.valid_extensions = (

@@ -1,11 +1,11 @@
-import os
 import shutil
 import sys
 import tempfile
 import unittest
+from pathlib import Path
 from textwrap import dedent
 
-PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "../../.."))
+PROJECT_ROOT = str(Path(str(Path(str(Path(__file__).parent)) / "../../..")).resolve())
 if PROJECT_ROOT not in sys.path:
     sys.path.insert(0, PROJECT_ROOT)
 
@@ -13,16 +13,16 @@ from utils.roles.dependency_resolver import RoleDependencyResolver  # noqa: E402
 
 
 def write(path: str, content: str):
-    os.makedirs(os.path.dirname(path), exist_ok=True)
-    with open(path, "w", encoding="utf-8") as f:
+    Path(str(Path(path).parent)).mkdir(parents=True, exist_ok=True)
+    with Path(path).open("w", encoding="utf-8") as f:
         f.write(dedent(content).lstrip())
 
 
 def make_role(roles_dir: str, name: str):
-    path = os.path.join(roles_dir, name)
-    os.makedirs(path, exist_ok=True)
-    os.makedirs(os.path.join(path, "tasks"), exist_ok=True)
-    os.makedirs(os.path.join(path, "meta"), exist_ok=True)
+    path = str(Path(roles_dir) / name)
+    Path(path).mkdir(parents=True, exist_ok=True)
+    Path(str(Path(path) / "tasks")).mkdir(parents=True, exist_ok=True)
+    Path(str(Path(path) / "meta")).mkdir(parents=True, exist_ok=True)
     return path
 
 
@@ -47,7 +47,7 @@ class TestRoleDependencyResolver(unittest.TestCase):
         make_role(self.roles_dir, "C")
 
         write(
-            os.path.join(self.roles_dir, "A", "tasks", "main.yml"),
+            str(Path(self.roles_dir) / "A" / "tasks" / "main.yml"),
             """
             - name: include B
               include_role:
@@ -73,7 +73,7 @@ class TestRoleDependencyResolver(unittest.TestCase):
             make_role(self.roles_dir, rn)
 
         write(
-            os.path.join(self.roles_dir, "A", "tasks", "main.yml"),
+            str(Path(self.roles_dir) / "A" / "tasks" / "main.yml"),
             """
             - name: loop over strings → D, E
               include_role:
@@ -104,7 +104,7 @@ class TestRoleDependencyResolver(unittest.TestCase):
             make_role(self.roles_dir, rn)
 
         write(
-            os.path.join(self.roles_dir, "A", "tasks", "main.yml"),
+            str(Path(self.roles_dir) / "A" / "tasks" / "main.yml"),
             """
             - name: pure var ignored
               include_role:
@@ -129,7 +129,7 @@ class TestRoleDependencyResolver(unittest.TestCase):
         make_role(self.roles_dir, "I")
 
         write(
-            os.path.join(self.roles_dir, "A", "meta", "main.yml"),
+            str(Path(self.roles_dir) / "A" / "meta" / "main.yml"),
             """
             ---
             dependencies:
@@ -154,7 +154,7 @@ class TestRoleDependencyResolver(unittest.TestCase):
         # meta/services.yml.<primary_entity>.run_after; for "A" the entity
         # name equals the role name.
         write(
-            os.path.join(self.roles_dir, "A", "meta", "services.yml"),
+            str(Path(self.roles_dir) / "A" / "meta" / "services.yml"),
             """
             ---
             A:
@@ -164,7 +164,7 @@ class TestRoleDependencyResolver(unittest.TestCase):
             """,
         )
         write(
-            os.path.join(self.roles_dir, "A", "meta", "main.yml"),
+            str(Path(self.roles_dir) / "A" / "meta" / "main.yml"),
             """
             ---
             dependencies: []
@@ -174,7 +174,7 @@ class TestRoleDependencyResolver(unittest.TestCase):
         r = RoleDependencyResolver(self.roles_dir)
 
         # Direkter Helper
-        ra = r._extract_meta_run_after(os.path.join(self.roles_dir, "A"))
+        ra = r._extract_meta_run_after(str(Path(self.roles_dir) / "A"))
         self.assertEqual(ra, {"J", "K"})
 
         # Transitiv – off by default
@@ -198,14 +198,14 @@ class TestRoleDependencyResolver(unittest.TestCase):
         make_role(self.roles_dir, "B")
 
         write(
-            os.path.join(self.roles_dir, "A", "tasks", "main.yml"),
+            str(Path(self.roles_dir) / "A" / "tasks" / "main.yml"),
             """
             - include_role:
                 name: B
             """,
         )
         write(
-            os.path.join(self.roles_dir, "B", "tasks", "main.yml"),
+            str(Path(self.roles_dir) / "B" / "tasks" / "main.yml"),
             """
             - import_role:
                 name: A
@@ -231,14 +231,14 @@ class TestRoleDependencyResolver(unittest.TestCase):
             make_role(self.roles_dir, rn)
 
         write(
-            os.path.join(self.roles_dir, "ROOT", "tasks", "main.yml"),
+            str(Path(self.roles_dir) / "ROOT" / "tasks" / "main.yml"),
             """
             - include_role: { name: C1 }
             - import_role:  { name: C2 }
             """,
         )
         write(
-            os.path.join(self.roles_dir, "ROOT", "meta", "main.yml"),
+            str(Path(self.roles_dir) / "ROOT" / "meta" / "main.yml"),
             """
             ---
             dependencies:
@@ -249,7 +249,7 @@ class TestRoleDependencyResolver(unittest.TestCase):
         # Per req-010 run_after lives at
         # meta/services.yml.<primary_entity>.run_after.
         write(
-            os.path.join(self.roles_dir, "ROOT", "meta", "services.yml"),
+            str(Path(self.roles_dir) / "ROOT" / "meta" / "services.yml"),
             """
             ---
             ROOT:

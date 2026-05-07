@@ -17,9 +17,10 @@ Exceptions allowed by this guard:
 import os
 import re
 import unittest
+from pathlib import Path
 
-HERE = os.path.dirname(os.path.abspath(__file__))
-PROJECT_ROOT = os.path.abspath(os.path.join(HERE, "..", "..", "..", ".."))
+HERE = str(Path(str(Path(__file__).resolve())).parent)
+PROJECT_ROOT = str(Path(str(Path(HERE) / ".." / ".." / ".." / "..")).resolve())
 
 PATH_JOIN_PATTERN = re.compile(
     r"\[\s*RBAC\.GROUP\.NAME\s*,\s*.+?\]\s*\|\s*path_join",
@@ -62,7 +63,7 @@ def _iter_text_files(root):
         for filename in filenames:
             if not (filename.endswith((".yml", ".yaml", ".j2", ".py"))):
                 continue
-            yield os.path.join(dirpath, filename)
+            yield str(Path(dirpath) / filename)
 
 
 class TestRbacPathJoinIsForbidden(unittest.TestCase):
@@ -73,7 +74,7 @@ class TestRbacPathJoinIsForbidden(unittest.TestCase):
             if _is_allowed(rel):
                 continue
             try:
-                with open(path, encoding="utf-8") as f:
+                with Path(path).open(encoding="utf-8") as f:
                     content = f.read()
             except (OSError, UnicodeDecodeError):
                 continue

@@ -45,12 +45,13 @@ between callers and `meta/rbac.yml`.
 import os
 import re
 import unittest
+from pathlib import Path
 
 import yaml
 
-HERE = os.path.dirname(os.path.abspath(__file__))
-PROJECT_ROOT = os.path.abspath(os.path.join(HERE, "..", "..", "..", ".."))
-ROLES_DIR = os.path.join(PROJECT_ROOT, "roles")
+HERE = str(Path(str(Path(__file__).resolve())).parent)
+PROJECT_ROOT = str(Path(str(Path(HERE) / ".." / ".." / ".." / "..")).resolve())
+ROLES_DIR = str(Path(PROJECT_ROOT) / "roles")
 
 IMPLICIT_ADMIN_ROLE = "administrator"
 
@@ -89,7 +90,7 @@ EXCLUDED_RELATIVE_PATHS = frozenset(
 
 def _read_text(path):
     try:
-        with open(path, encoding="utf-8") as f:
+        with Path(path).open(encoding="utf-8") as f:
             return f.read()
     except (OSError, UnicodeDecodeError):
         return None
@@ -107,14 +108,14 @@ def _role_application_id(role_dir):
     on a top-level key. Some roles split vars into multiple files, so we
     scan every file under vars/ and return the first hit.
     """
-    vars_dir = os.path.join(role_dir, "vars")
-    if not os.path.isdir(vars_dir):
+    vars_dir = str(Path(role_dir) / "vars")
+    if not Path(vars_dir).is_dir():
         return None
     pattern = re.compile(r"""^application_id:\s*["']?([^"'\s#]+)["']?\s*$""", re.M)
     for entry in sorted(os.listdir(vars_dir)):
         if not entry.endswith((".yml", ".yaml")):
             continue
-        text = _read_text(os.path.join(vars_dir, entry))
+        text = _read_text(str(Path(vars_dir) / entry))
         if not text:
             continue
         match = pattern.search(text)
@@ -127,12 +128,12 @@ def _declared_roles(application_id):
     """Roles declared in `roles/<application_id>/meta/rbac.yml` plus the
     implicit `administrator`. Returns None if the role directory does not
     exist (caller treats that as a separate kind of failure)."""
-    role_dir = os.path.join(ROLES_DIR, application_id)
-    if not os.path.isdir(role_dir):
+    role_dir = str(Path(ROLES_DIR) / application_id)
+    if not Path(role_dir).is_dir():
         return None
     declared = {IMPLICIT_ADMIN_ROLE}
-    rbac_yml = os.path.join(role_dir, "meta", "rbac.yml")
-    if os.path.isfile(rbac_yml):
+    rbac_yml = str(Path(role_dir) / "meta" / "rbac.yml")
+    if Path(rbac_yml).is_file():
         text = _read_text(rbac_yml) or ""
         try:
             data = yaml.safe_load(text) or {}
@@ -151,8 +152,8 @@ def _enclosing_role_dir(file_path):
     head = rel.split(os.sep, 1)[0]
     if not head or head.startswith(".."):
         return None
-    candidate = os.path.join(ROLES_DIR, head)
-    return candidate if os.path.isdir(candidate) else None
+    candidate = str(Path(ROLES_DIR) / head)
+    return candidate if Path(candidate).is_dir() else None
 
 
 def _iter_callsites():
@@ -164,7 +165,7 @@ def _iter_callsites():
         for filename in filenames:
             if not filename.endswith(SCAN_EXTENSIONS):
                 continue
-            abs_path = os.path.join(dirpath, filename)
+            abs_path = str(Path(dirpath) / filename)
             rel_path = os.path.relpath(abs_path, PROJECT_ROOT)
             if rel_path in EXCLUDED_RELATIVE_PATHS:
                 continue

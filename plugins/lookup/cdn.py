@@ -23,6 +23,7 @@
 from __future__ import annotations
 
 import os
+from pathlib import Path
 from typing import Any
 
 from ansible.errors import AnsibleError
@@ -33,28 +34,28 @@ from utils.tls_common import as_str
 
 
 def _cdn_paths(cdn_root: str, application_id: str, version: str) -> dict:
-    cdn_root = os.path.abspath(cdn_root)
+    cdn_root = str(Path(cdn_root).resolve())
     return {
         "root": cdn_root,
         "shared": {
-            "root": os.path.join(cdn_root, "_shared"),
-            "css": os.path.join(cdn_root, "_shared", "css"),
-            "js": os.path.join(cdn_root, "_shared", "js"),
-            "img": os.path.join(cdn_root, "_shared", "img"),
-            "fonts": os.path.join(cdn_root, "_shared", "fonts"),
+            "root": str(Path(cdn_root) / "_shared"),
+            "css": str(Path(cdn_root) / "_shared" / "css"),
+            "js": str(Path(cdn_root) / "_shared" / "js"),
+            "img": str(Path(cdn_root) / "_shared" / "img"),
+            "fonts": str(Path(cdn_root) / "_shared" / "fonts"),
         },
-        "vendor": os.path.join(cdn_root, "vendor"),
+        "vendor": str(Path(cdn_root) / "vendor"),
         "role": {
             "id": application_id,
-            "root": os.path.join(cdn_root, "roles", application_id),
+            "root": str(Path(cdn_root) / "roles" / application_id),
             "version": version,
             "release": {
-                "root": os.path.join(cdn_root, "roles", application_id, version),
-                "css": os.path.join(cdn_root, "roles", application_id, version, "css"),
-                "js": os.path.join(cdn_root, "roles", application_id, version, "js"),
-                "img": os.path.join(cdn_root, "roles", application_id, version, "img"),
-                "fonts": os.path.join(
-                    cdn_root, "roles", application_id, version, "fonts"
+                "root": str(Path(cdn_root) / "roles" / application_id / version),
+                "css": str(Path(cdn_root) / "roles" / application_id / version / "css"),
+                "js": str(Path(cdn_root) / "roles" / application_id / version / "js"),
+                "img": str(Path(cdn_root) / "roles" / application_id / version / "img"),
+                "fonts": str(
+                    Path(cdn_root) / "roles" / application_id / version / "fonts"
                 ),
             },
         },
@@ -67,8 +68,8 @@ def _to_url_tree(obj: Any, cdn_root: str, base_url: str) -> Any:
     if isinstance(obj, list):
         return [_to_url_tree(v, cdn_root, base_url) for v in obj]
     if isinstance(obj, str):
-        norm_root = os.path.abspath(cdn_root)
-        norm_val = os.path.abspath(obj)
+        norm_root = str(Path(cdn_root).resolve())
+        norm_val = str(Path(obj).resolve())
         if norm_val.startswith(norm_root):
             rel = os.path.relpath(norm_val, norm_root)
             rel_url = ("" if rel == "." else rel).replace(os.sep, "/")

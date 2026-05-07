@@ -1,6 +1,6 @@
 import glob
-import os
 import unittest
+from pathlib import Path
 from typing import Any
 
 try:
@@ -14,13 +14,13 @@ except ImportError:  # pragma: no cover
 
 def _find_repo_root_containing(relative: str, max_depth: int = 8) -> str:
     """Walk upwards from this file to find the repo root that contains `relative`."""
-    here = os.path.abspath(os.path.dirname(__file__))
+    here = str(Path(str(Path(__file__).parent)).resolve())
     cur = here
     for _ in range(max_depth):
-        candidate = os.path.join(cur, relative)
-        if os.path.exists(candidate):
+        candidate = str(Path(cur) / relative)
+        if Path(candidate).exists():
             return cur
-        parent = os.path.dirname(cur)
+        parent = str(Path(cur).parent)
         if parent == cur:
             break
         cur = parent
@@ -33,7 +33,7 @@ def _load_yaml_file(path: str) -> list[dict[str, Any]]:
     Returns a list of top-level task dicts. If the file is empty, returns [].
     Supports multi-doc YAML.
     """
-    with open(path, encoding="utf-8") as f:
+    with Path(path).open(encoding="utf-8") as f:
         content = f.read()
     docs = list(yaml.safe_load_all(content)) or []
     tasks: list[dict[str, Any]] = []
@@ -100,8 +100,8 @@ def _iter_all_tasks_files(repo_root: str) -> list[str]:
     Return all tasks/*.yml|*.yaml files in the project (recursively).
     """
     patterns = [
-        os.path.join(repo_root, "**", "tasks", "*.yml"),
-        os.path.join(repo_root, "**", "tasks", "*.yaml"),
+        str(Path(repo_root) / "**" / "tasks" / "*.yml"),
+        str(Path(repo_root) / "**" / "tasks" / "*.yaml"),
     ]
     files: list[str] = []
     for pat in patterns:
@@ -158,22 +158,22 @@ def _resolve_include_tasks_path(include_value: str, including_file: str) -> str 
 
     # Absolute path?
     candidates: list[str] = []
-    if os.path.isabs(include_value):
+    if Path(include_value).is_absolute():
         candidates.append(include_value)
     else:
-        base = os.path.dirname(including_file)
-        candidates.append(os.path.join(base, include_value))
+        base = str(Path(including_file).parent)
+        candidates.append(str(Path(base) / include_value))
 
     final_candidates: list[str] = []
     for c in candidates:
         final_candidates.append(c)
-        root, ext = os.path.splitext(c)
-        if ext == "":
-            final_candidates.append(root + ".yml")
-            final_candidates.append(root + ".yaml")
+        candidate_path = Path(c)
+        if not candidate_path.suffix:
+            final_candidates.append(c + ".yml")
+            final_candidates.append(c + ".yaml")
 
     for c in final_candidates:
-        if os.path.isfile(c):
+        if Path(c).is_file():
             return c
 
     return None
@@ -197,11 +197,11 @@ class PureGuardedIncludeTest(unittest.TestCase):
         # Map pure guarded roles: role_name -> (guards, main_path)
         cls.pure_guarded_roles: dict[str, tuple[list[str], str]] = {}
 
-        role_main_glob = os.path.join(cls.repo_root, "roles", "*", "tasks", "main.yml")
+        role_main_glob = str(Path(cls.repo_root) / "roles" / "*" / "tasks" / "main.yml")
         for main_path in glob.glob(role_main_glob):
-            role_name = os.path.basename(
-                os.path.dirname(os.path.dirname(main_path))
-            )  # roles/<role>/tasks/main.yml
+            role_name = Path(
+                str(Path(str(Path(main_path).parent)).parent)
+            ).name  # roles/<role>/tasks/main.yml
             try:
                 tasks = _load_yaml_file(main_path)
                 guards, pure = _is_pure_guarded_tasks_file(tasks)

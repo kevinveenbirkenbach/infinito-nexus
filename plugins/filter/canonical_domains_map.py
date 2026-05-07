@@ -1,5 +1,5 @@
-import os
 from collections.abc import Iterable
+from pathlib import Path
 
 from ansible.errors import AnsibleFilterError
 
@@ -36,8 +36,8 @@ class FilterModule:
         seed_keys = set(seed) if seed is not None else app_keys
 
         if recursive:
-            roles_base_dir = roles_base_dir or os.path.join(os.getcwd(), "roles")
-            if not os.path.isdir(roles_base_dir):
+            roles_base_dir = roles_base_dir or str(Path(str(Path.cwd())) / "roles")
+            if not Path(roles_base_dir).is_dir():
                 raise AnsibleFilterError(
                     f"roles_base_dir '{roles_base_dir}' not found or not a directory."
                 )

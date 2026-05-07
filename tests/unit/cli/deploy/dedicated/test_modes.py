@@ -1,8 +1,8 @@
 from __future__ import annotations
 
-import os
 import tempfile
 import unittest
+from pathlib import Path
 
 from cli.deploy.dedicated import modes
 
@@ -43,7 +43,7 @@ OTHER_KEY: true      # should be ignored (no MODE_ prefix)
         try:
             parsed = modes.load_modes_from_yaml(path)
         finally:
-            os.unlink(path)
+            Path(path).unlink()
 
         self.assertEqual(len(parsed), 3)
         by_name = {m["name"]: m for m in parsed}
@@ -72,7 +72,7 @@ MODE_FOO: true
         try:
             parsed = modes.load_modes_from_yaml(path)
         finally:
-            os.unlink(path)
+            Path(path).unlink()
 
         self.assertEqual(len(parsed), 1)
         self.assertEqual(parsed[0]["name"], "MODE_FOO")

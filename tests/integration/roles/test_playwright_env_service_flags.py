@@ -12,11 +12,12 @@ execute Jinja; the deploy-time rendering is the authoritative check.
 import os
 import re
 import unittest
+from pathlib import Path
 
-HERE = os.path.dirname(os.path.abspath(__file__))
-PROJECT_ROOT = os.path.abspath(os.path.join(HERE, "..", "..", ".."))
+HERE = str(Path(str(Path(__file__).resolve())).parent)
+PROJECT_ROOT = str(Path(str(Path(HERE) / ".." / ".." / "..")).resolve())
 
-ROLES_DIR = os.path.join(PROJECT_ROOT, "roles")
+ROLES_DIR = str(Path(PROJECT_ROOT) / "roles")
 
 SERVICE_FLAG_LINE = re.compile(
     r"^([A-Z][A-Z0-9_]+)_SERVICE_ENABLED\s*=\s*(.*)$",
@@ -26,8 +27,8 @@ SERVICE_FLAG_LINE = re.compile(
 
 def _iter_env_templates():
     for role in sorted(os.listdir(ROLES_DIR)):
-        tmpl = os.path.join(ROLES_DIR, role, "templates", "playwright.env.j2")
-        if os.path.isfile(tmpl):
+        tmpl = str(Path(ROLES_DIR) / role / "templates" / "playwright.env.j2")
+        if Path(tmpl).is_file():
             yield role, tmpl
 
 
@@ -35,7 +36,7 @@ class TestPlaywrightEnvServiceFlags(unittest.TestCase):
     def test_every_flag_renders_strict_true_or_false(self):
         offenders = []
         for role, path in _iter_env_templates():
-            with open(path, encoding="utf-8") as f:
+            with Path(path).open(encoding="utf-8") as f:
                 content = f.read()
             for match in SERVICE_FLAG_LINE.finditer(content):
                 rhs = match.group(2).strip()

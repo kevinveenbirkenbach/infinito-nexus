@@ -1,16 +1,18 @@
 import unittest
+from pathlib import Path
 
 # Import the filter module directly (adjust path as needed)
 try:
     from plugins.filter.docker_service_enabled import FilterModule
 except ModuleNotFoundError:
-    import os
     import sys
 
     sys.path.insert(
         0,
-        os.path.abspath(
-            os.path.join(os.path.dirname(__file__), "../../../../plugins/filter")
+        str(
+            Path(
+                str(Path(str(Path(__file__).parent)) / "../../../../plugins/filter")
+            ).resolve()
         ),
     )
     from docker_service_enabled import FilterModule

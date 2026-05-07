@@ -108,7 +108,7 @@ def main() -> None:
 
     summary_file = os.environ.get("GITHUB_STEP_SUMMARY")
     if summary_file:
-        with open(summary_file, "a") as f:
+        with Path(summary_file).open("a") as f:
             f.write(markdown + "\n")
     else:
         print(markdown)

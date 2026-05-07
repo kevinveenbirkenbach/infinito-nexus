@@ -1,5 +1,6 @@
 import os
 import unittest
+from pathlib import Path
 
 from utils.cache.yaml import load_yaml_any
 
@@ -11,8 +12,8 @@ def load_yaml_file(file_path):
 
 def get_meta_info(role_path):
     """Extract dependencies from the meta/main.yml of a role."""
-    meta_file = os.path.join(role_path, "meta", "main.yml")
-    if not os.path.isfile(meta_file):
+    meta_file = str(Path(role_path) / "meta" / "main.yml")
+    if not Path(meta_file).is_file():
         return []
     meta_data = load_yaml_file(meta_file)
     return meta_data.get("dependencies", [])
@@ -23,7 +24,7 @@ def resolve_dependencies(roles_dir):
     visited = set()  # Tracks roles that have been processed
 
     def visit(role_path, stack):
-        role_name = os.path.basename(role_path)
+        role_name = Path(role_path).name
 
         # Check for circular dependencies (if role is already in the current stack)
         if role_name in stack:
@@ -42,7 +43,7 @@ def resolve_dependencies(roles_dir):
         # Get dependencies and resolve them
         dependencies = get_meta_info(role_path)
         for dep in dependencies:
-            dep_path = os.path.join(roles_dir, dep)
+            dep_path = str(Path(roles_dir) / dep)
             visit(dep_path, stack)  # Recurse into dependencies
 
         stack.pop()  # Remove the current role from the stack
@@ -50,8 +51,8 @@ def resolve_dependencies(roles_dir):
         return None
 
     for role_name in os.listdir(roles_dir):
-        role_path = os.path.join(roles_dir, role_name)
-        if os.path.isdir(role_path):
+        role_path = str(Path(roles_dir) / role_name)
+        if Path(role_path).is_dir():
             try:
                 visit(role_path, [])  # Start recursion from this role
             except ValueError as e:

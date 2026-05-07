@@ -6,6 +6,7 @@ from __future__ import annotations
 import argparse
 import os
 import sys
+from pathlib import Path
 
 from utils.applications.in_group_deps import applications_if_group_and_all_deps
 from utils.cache.yaml import dump_yaml_str, load_yaml
@@ -17,8 +18,8 @@ __all__ = [
 
 
 def _project_root() -> str:
-    script_dir = os.path.dirname(__file__)
-    return os.path.abspath(os.path.join(script_dir, "..", "..", "..", ".."))
+    script_dir = str(Path(__file__).parent)
+    return str(Path(str(Path(script_dir) / ".." / ".." / ".." / "..")).resolve())
 
 
 def find_role_dirs_by_app_id(app_ids: list[str], roles_dir: str) -> list[str]:
@@ -27,9 +28,9 @@ def find_role_dirs_by_app_id(app_ids: list[str], roles_dir: str) -> list[str]:
     """
     mapping: dict[str, str] = {}
     for role in os.listdir(roles_dir):
-        role_path = os.path.join(roles_dir, role)
-        vars_file = os.path.join(role_path, "vars", "main.yml")
-        if not os.path.isfile(vars_file):
+        role_path = str(Path(roles_dir) / role)
+        vars_file = str(Path(role_path) / "vars" / "main.yml")
+        if not Path(vars_file).is_file():
             continue
         try:
             data = load_yaml(vars_file)
@@ -44,7 +45,7 @@ def find_role_dirs_by_app_id(app_ids: list[str], roles_dir: str) -> list[str]:
         if group_id in mapping:
             dirs.append(mapping[group_id])
             continue
-        if os.path.isdir(os.path.join(roles_dir, group_id)):
+        if Path(str(Path(roles_dir) / group_id)).is_dir():
             dirs.append(group_id)
     return dirs
 
@@ -99,7 +100,7 @@ def main() -> int:
         return 1
 
     project_root = _project_root()
-    roles_dir = os.path.join(project_root, "roles")
+    roles_dir = str(Path(project_root) / "roles")
 
     group_dirs = find_role_dirs_by_app_id(args.groups, roles_dir)
     if not group_dirs:

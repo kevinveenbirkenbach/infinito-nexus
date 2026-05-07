@@ -1,6 +1,6 @@
 import glob
-import os
 import unittest
+from pathlib import Path
 
 from utils.cache.yaml import load_yaml_any
 
@@ -9,18 +9,18 @@ from . import PROJECT_ROOT
 
 class TestRoleDependencies(unittest.TestCase):
     def test_dependencies_exist(self):
-        roles_dir = os.path.join(str(PROJECT_ROOT), "roles")
+        roles_dir = str(Path(str(PROJECT_ROOT)) / "roles")
 
         # Find all meta/main.yml files under roles/*/meta/main.yml
-        pattern = os.path.join(roles_dir, "*", "meta", "main.yml")
+        pattern = str(Path(roles_dir) / "*" / "meta" / "main.yml")
         meta_files = glob.glob(pattern)
         self.assertTrue(
             meta_files, f"No meta/main.yml files found with pattern {pattern}"
         )
 
         for meta_file in meta_files:
-            role_dir = os.path.dirname(os.path.dirname(meta_file))
-            role_name = os.path.basename(role_dir)
+            role_dir = str(Path(str(Path(meta_file).parent)).parent)
+            role_name = Path(role_dir).name
             with self.subTest(role=role_name):
                 # Load the YAML metadata via the cached helper.
                 meta = load_yaml_any(meta_file, default_if_missing={}) or {}
@@ -44,10 +44,10 @@ class TestRoleDependencies(unittest.TestCase):
                             f"Invalid dependency format {dep!r} in role '{role_name}'"
                         )
 
-                    dep_path = os.path.join(roles_dir, dep_name)
+                    dep_path = str(Path(roles_dir) / dep_name)
                     # Assert that the dependency role directory exists
                     self.assertTrue(
-                        os.path.isdir(dep_path),
+                        Path(dep_path).is_dir(),
                         f"Role '{role_name}' declares dependency '{dep_name}' but '{dep_path}' does not exist",
                     )
 

@@ -1,4 +1,5 @@
 import os
+from pathlib import Path
 
 
 def compute_application_gid(application_id, roles_dir="roles", base_gid=10000):
@@ -16,7 +17,7 @@ def compute_application_gid(application_id, roles_dir="roles", base_gid=10000):
 
     Raises ``ValueError`` (not ``AnsibleError``) for portability.
     """
-    if not os.path.isdir(roles_dir):
+    if not Path(roles_dir).is_dir():
         raise ValueError(f"Roles directory '{roles_dir}' not found")
 
     # Per req-008, an "application role" is identified by the presence of
@@ -34,12 +35,12 @@ def compute_application_gid(application_id, roles_dir="roles", base_gid=10000):
     }
     discovered: set[str] = set()
     for entry in os.listdir(roles_dir):
-        role_dir = os.path.join(roles_dir, entry)
-        meta_dir = os.path.join(role_dir, "meta")
-        if not os.path.isdir(meta_dir):
+        role_dir = str(Path(roles_dir) / entry)
+        meta_dir = str(Path(role_dir) / "meta")
+        if not Path(meta_dir).is_dir():
             continue
         for marker in application_marker_files:
-            if os.path.isfile(os.path.join(meta_dir, marker)):
+            if Path(str(Path(meta_dir) / marker)).is_file():
                 discovered.add(entry)
                 break
     sorted_ids = sorted(discovered)

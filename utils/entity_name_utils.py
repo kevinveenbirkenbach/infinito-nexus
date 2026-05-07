@@ -1,4 +1,4 @@
-import os
+from pathlib import Path
 
 from utils.cache.yaml import load_yaml
 
@@ -26,13 +26,13 @@ def get_entity_name(role_name):
     longest matching category path from categories.yml.
     """
     possible_locations = [
-        os.path.join(os.getcwd(), "roles", "categories.yml"),
-        os.path.join(os.path.dirname(__file__), "..", "roles", "categories.yml"),
+        str(Path(str(Path.cwd())) / "roles" / "categories.yml"),
+        str(Path(str(Path(__file__).parent)) / ".." / "roles" / "categories.yml"),
         "roles/categories.yml",
     ]
     categories_file = None
     for loc in possible_locations:
-        if os.path.exists(loc):
+        if Path(loc).exists():
             categories_file = loc
             break
     if not categories_file:

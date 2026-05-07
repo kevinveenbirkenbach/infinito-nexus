@@ -1,8 +1,8 @@
-import os
 import re
 import shutil
 import tempfile
 import unittest
+from pathlib import Path
 
 import yaml
 
@@ -24,8 +24,8 @@ class TestValidateHostKeys(unittest.TestCase):
         for group, hosts in groups.items():
             # hosts is a list of hostnames
             content["all"]["children"][group] = {"hosts": dict.fromkeys(hosts)}
-        path = os.path.join(self.test_dir, "devices.yml")
-        with open(path, "w", encoding="utf-8") as f:
+        path = str(Path(self.test_dir) / "devices.yml")
+        with Path(path).open("w", encoding="utf-8") as f:
             yaml.safe_dump(content, f)
         return path
 

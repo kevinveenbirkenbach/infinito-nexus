@@ -2,6 +2,7 @@
 import glob
 import os
 import unittest
+from pathlib import Path
 
 import yaml
 
@@ -19,28 +20,28 @@ def _safe_yaml_load(path):
 class TestSysServiceRequiresSystemServiceId(unittest.TestCase):
     def setUp(self):
         # Repo root = three levels up from this file: tests/integration/<cluster>/<this_file>.py
-        self.repo_root = os.path.abspath(
-            os.path.join(os.path.dirname(__file__), "..", "..", "..")
+        self.repo_root = str(
+            Path(str(Path(str(Path(__file__).parent)) / ".." / ".." / "..")).resolve()
         )
-        self.roles_dir = os.path.join(self.repo_root, "roles")
+        self.roles_dir = str(Path(self.repo_root) / "roles")
         self.assertTrue(
-            os.path.isdir(self.roles_dir),
+            Path(self.roles_dir).is_dir(),
             f"'roles' directory not found at: {self.roles_dir}",
         )
 
     def _iter_task_files(self, role_dir):
-        tasks_dir = os.path.join(role_dir, "tasks")
-        if not os.path.isdir(tasks_dir):
+        tasks_dir = str(Path(role_dir) / "tasks")
+        if not Path(tasks_dir).is_dir():
             return
         patterns = ["*.yml", "*.yaml"]
         for pattern in patterns:
-            for path in glob.glob(os.path.join(tasks_dir, pattern)):
+            for path in glob.glob(str(Path(tasks_dir) / pattern)):
                 yield path
 
         # also scan nested includes like tasks/**/*.yml
         for pattern in patterns:
             for path in glob.glob(
-                os.path.join(tasks_dir, "**", pattern), recursive=True
+                str(Path(tasks_dir) / "**" / pattern), recursive=True
             ):
                 yield path
 
@@ -88,13 +89,13 @@ class TestSysServiceRequiresSystemServiceId(unittest.TestCase):
         return False
 
     def _vars_has_system_service_id(self, role_dir):
-        vars_dir = os.path.join(role_dir, "vars")
-        if not os.path.isdir(vars_dir):
+        vars_dir = str(Path(role_dir) / "vars")
+        if not Path(vars_dir).is_dir():
             return (False, "vars/ directory not found")
 
         candidates = []
-        candidates.extend(glob.glob(os.path.join(vars_dir, "main.yml")))
-        candidates.extend(glob.glob(os.path.join(vars_dir, "main.yaml")))
+        candidates.extend(glob.glob(str(Path(vars_dir) / "main.yml")))
+        candidates.extend(glob.glob(str(Path(vars_dir) / "main.yaml")))
         if not candidates:
             return (False, "vars/main.yml|yaml not found")
 
@@ -122,8 +123,8 @@ class TestSysServiceRequiresSystemServiceId(unittest.TestCase):
 
     def test_roles_including_sys_service_define_system_service_id(self):
         for role in os.listdir(self.roles_dir):
-            role_dir = os.path.join(self.roles_dir, role)
-            if not os.path.isdir(role_dir):
+            role_dir = str(Path(self.roles_dir) / role)
+            if not Path(role_dir).is_dir():
                 continue
 
             for task_file in self._iter_task_files(role_dir):

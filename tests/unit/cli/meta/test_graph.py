@@ -1,7 +1,7 @@
-import os
 import shutil
 import tempfile
 import unittest
+from pathlib import Path
 
 import yaml
 
@@ -12,12 +12,12 @@ class TestGraphLogic(unittest.TestCase):
     def setUp(self):
         self.temp_dir = tempfile.mkdtemp()
         self.role_name = "role_a"
-        self.role_path = os.path.join(self.temp_dir, self.role_name)
-        os.makedirs(os.path.join(self.role_path, "meta"))
-        os.makedirs(os.path.join(self.role_path, "tasks"))
+        self.role_path = str(Path(self.temp_dir) / self.role_name)
+        Path(str(Path(self.role_path) / "meta")).mkdir(parents=True)
+        Path(str(Path(self.role_path) / "tasks")).mkdir(parents=True)
 
         # Write meta/main.yml
-        with open(os.path.join(self.role_path, "meta", "main.yml"), "w") as f:
+        with Path(str(Path(self.role_path) / "meta" / "main.yml")).open("w") as f:
             yaml.dump(
                 {
                     "galaxy_info": {"author": "tester", "run_after": []},
@@ -27,7 +27,7 @@ class TestGraphLogic(unittest.TestCase):
             )
 
         # Write tasks/main.yml
-        with open(os.path.join(self.role_path, "tasks", "main.yml"), "w") as f:
+        with Path(str(Path(self.role_path) / "tasks" / "main.yml")).open("w") as f:
             yaml.dump(
                 [
                     {"include_role": "some_other_role"},

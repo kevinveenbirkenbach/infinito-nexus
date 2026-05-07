@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-import os
+from pathlib import Path
 from typing import Any
 
 from ansible.errors import AnsibleError
@@ -39,7 +39,7 @@ class LookupModule(LookupBase):
 
         roles_dir_arg = kwargs.get("roles_dir")
         project_root = self._get_project_root()
-        roles_dir = roles_dir_arg or os.path.join(project_root, "roles")
+        roles_dir = roles_dir_arg or str(Path(project_root) / "roles")
 
         group_names = vars_.get("group_names", []) or []
         resolved_roles_dir = _resolve_roles_dir(roles_dir=roles_dir_arg)
@@ -79,12 +79,12 @@ class LookupModule(LookupBase):
     # ------------------------------------------------------------------
 
     def _get_project_root(self) -> str:
-        plugin_dir = os.path.dirname(__file__)
-        return os.path.abspath(os.path.join(plugin_dir, "..", ".."))
+        plugin_dir = str(Path(__file__).parent)
+        return str(Path(str(Path(plugin_dir) / ".." / "..")).resolve())
 
     def _meta_deps(self, role: str, roles_dir: str) -> list[str]:
-        meta_file = os.path.join(roles_dir, role, "meta", "main.yml")
-        if not os.path.isfile(meta_file):
+        meta_file = str(Path(roles_dir) / role / "meta" / "main.yml")
+        if not Path(meta_file).is_file():
             return []
         try:
             meta = load_yaml_any(meta_file, default_if_missing={}) or {}

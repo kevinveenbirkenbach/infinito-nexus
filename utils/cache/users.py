@@ -56,7 +56,7 @@ def _compute_reserved_usernames(roles_dir: Path) -> list[str]:
 
 
 def _load_user_defs(roles_dir: Path) -> OrderedDict[str, dict[str, Any]]:
-    pattern = os.path.join(str(roles_dir), "*/meta/users.yml")
+    pattern = str(Path(str(roles_dir)) / "*/meta/users.yml")
     files = sorted(glob.glob(pattern))
     merged: OrderedDict[str, dict[str, Any]] = OrderedDict()
 

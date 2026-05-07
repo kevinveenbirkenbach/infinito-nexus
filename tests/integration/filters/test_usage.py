@@ -2,10 +2,11 @@ import ast
 import os
 import re
 import unittest
+from pathlib import Path
 
 from utils.cache.files import iter_project_files, read_text
 
-PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "../../../"))
+PROJECT_ROOT = str(Path(str(Path(str(Path(__file__).parent)) / "../../../")).resolve())
 
 SEARCH_EXTS = (".yml", ".yaml", ".j2", ".jinja2", ".tmpl", ".py")
 
@@ -16,7 +17,7 @@ def _iter_files(*, py_only: bool = False):
 
 
 def _is_filter_plugins_dir(path: str) -> bool:
-    parts = os.path.normpath(path).split(os.sep)
+    parts = Path(path).parts
     return "filter_plugins" in parts or ("plugins" in parts and "filter" in parts)
 
 

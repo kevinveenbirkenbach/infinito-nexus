@@ -73,7 +73,7 @@ def render_templates(src_dir: Path, dst_dir: Path, context: dict) -> None:
         target = dst_dir / rel
         target.mkdir(parents=True, exist_ok=True)
         for fn in files:
-            tpl = env.get_template(os.path.join(rel, fn))
+            tpl = env.get_template(str(Path(rel) / fn))
             rendered = tpl.render(**context)
             out = fn[:-3] if fn.endswith(".j2") else fn
             dst_file = target / out

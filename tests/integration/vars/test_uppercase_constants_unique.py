@@ -20,6 +20,7 @@ import os
 import re
 import unittest
 from collections import defaultdict
+from pathlib import Path
 
 try:
     import yaml
@@ -35,16 +36,16 @@ UPPER_CONST_RE = re.compile(r"^[A-Z0-9_]+$")
 def _iter_yaml_files():
     """Yield all YAML file paths in the intended scope."""
     patterns = [
-        os.path.join("group_vars", "**", "*.yml"),
-        os.path.join("roles", "*", "vars", "*.yml"),
-        os.path.join("roles", "*", "defaults", "*.yml"),
-        os.path.join("roles", "*", "defauls", "*.yml"),  # intentionally included
+        str(Path("group_vars") / "**" / "*.yml"),
+        str(Path("roles") / "*" / "vars" / "*.yml"),
+        str(Path("roles") / "*" / "defaults" / "*.yml"),
+        str(Path("roles") / "*" / "defauls" / "*.yml"),  # intentionally included
     ]
     seen = set()
     for pattern in patterns:
         for path in glob.glob(pattern, recursive=True):
             norm = os.path.normpath(path)
-            if norm not in seen and os.path.isfile(norm):
+            if norm not in seen and Path(norm).is_file():
                 seen.add(norm)
                 yield norm
 
@@ -74,7 +75,7 @@ class TestUppercaseConstantVarsUnique(unittest.TestCase):
         yaml_files = list(_iter_yaml_files())
         for yml in yaml_files:
             try:
-                with open(yml, encoding="utf-8") as f:
+                with Path(yml).open(encoding="utf-8") as f:
                     docs = list(yaml.safe_load_all(f))
             except Exception as e:
                 parse_errors.append(f"{yml}: {e}")

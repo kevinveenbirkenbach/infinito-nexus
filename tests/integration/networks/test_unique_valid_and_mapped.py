@@ -6,8 +6,8 @@ from __future__ import annotations
 
 import glob
 import ipaddress
-import os
 import unittest
+from pathlib import Path
 
 import yaml
 
@@ -15,18 +15,18 @@ import yaml
 class TestNetworksUniqueValidAndMapped(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        base_dir = os.path.dirname(__file__)
-        cls.repo_root = os.path.abspath(os.path.join(base_dir, "..", "..", ".."))
-        cls.roles_dir = os.path.join(cls.repo_root, "roles")
+        base_dir = str(Path(__file__).parent)
+        cls.repo_root = str(Path(str(Path(base_dir) / ".." / ".." / "..")).resolve())
+        cls.roles_dir = str(Path(cls.repo_root) / "roles")
 
         cls.role_to_subnet: dict[str, ipaddress.IPv4Network] = {}
-        for role_path in sorted(glob.glob(os.path.join(cls.roles_dir, "*"))):
-            if not os.path.isdir(role_path):
+        for role_path in sorted(glob.glob(str(Path(cls.roles_dir) / "*"))):
+            if not Path(role_path).is_dir():
                 continue
-            server_file = os.path.join(role_path, "meta", "server.yml")
-            if not os.path.isfile(server_file):
+            server_file = str(Path(role_path) / "meta" / "server.yml")
+            if not Path(server_file).is_file():
                 continue
-            with open(server_file, encoding="utf-8") as f:
+            with Path(server_file).open(encoding="utf-8") as f:
                 server_data = yaml.safe_load(f) or {}
             networks = server_data.get("networks") or {}
             if not isinstance(networks, dict):
@@ -38,12 +38,12 @@ class TestNetworksUniqueValidAndMapped(unittest.TestCase):
             if not isinstance(subnet, str):
                 continue
             try:
-                cls.role_to_subnet[os.path.basename(role_path)] = ipaddress.IPv4Network(
+                cls.role_to_subnet[Path(role_path).name] = ipaddress.IPv4Network(
                     subnet.strip()
                 )
             except (ValueError, ipaddress.AddressValueError) as exc:
                 raise AssertionError(
-                    f"Invalid subnet for role '{os.path.basename(role_path)}': "
+                    f"Invalid subnet for role '{Path(role_path).name}': "
                     f"{subnet!r} ({exc})"
                 ) from exc
 

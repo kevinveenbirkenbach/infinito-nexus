@@ -17,7 +17,7 @@ class TestOauth2AclMutualExclusion(unittest.TestCase):
 
             # open the YAML file instead of passing the Path object
             try:
-                with open(vars_file) as f:
+                with Path(vars_file).open() as f:
                     data = yaml.safe_load(f) or {}
             except yaml.YAMLError as e:
                 failures.append(f"{role_path.name}: failed to parse YAML ({e})")

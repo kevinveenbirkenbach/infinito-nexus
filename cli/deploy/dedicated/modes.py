@@ -1,8 +1,8 @@
 from __future__ import annotations
 
 import argparse
-import os
 import re
+from pathlib import Path
 from typing import Any
 
 MODE_LINE_RE = re.compile(
@@ -29,12 +29,12 @@ def load_modes_from_yaml(modes_yaml_path: str) -> list[dict[str, Any]]:
       MODE_BAR: false  # comment
       MODE_BAZ: null   # comment
     """
-    if not os.path.exists(modes_yaml_path):
+    if not Path(modes_yaml_path).exists():
         raise FileNotFoundError(f"Modes file not found: {modes_yaml_path}")
 
     modes: list[dict[str, Any]] = []
 
-    with open(modes_yaml_path, encoding="utf-8") as fh:
+    with Path(modes_yaml_path).open(encoding="utf-8") as fh:
         for raw in fh:
             line = raw.rstrip()
             if not line or line.lstrip().startswith("#"):

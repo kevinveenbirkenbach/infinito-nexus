@@ -25,7 +25,7 @@ class TestDomainsStructure(unittest.TestCase):
 
             for vars_file in vars_dir.glob("*.yml"):
                 try:
-                    with open(vars_file) as f:
+                    with Path(vars_file).open() as f:
                         data = yaml.safe_load(f) or {}
                 except yaml.YAMLError as e:
                     failed_roles.append(

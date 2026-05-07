@@ -1,16 +1,18 @@
-import os
 import sys
 import unittest
+from pathlib import Path
 
 import yaml
 
 sys.path.insert(
     0,
-    os.path.abspath(
-        os.path.join(
-            os.path.dirname(__file__),
-            "../../../../../roles/web-app-bigbluebutton/filter_plugins",
-        )
+    str(
+        Path(
+            str(
+                Path(str(Path(__file__).parent))
+                / "../../../../../roles/web-app-bigbluebutton/filter_plugins"
+            )
+        ).resolve()
     ),
 )
 

@@ -2,6 +2,7 @@
 import glob
 import os
 import unittest
+from pathlib import Path
 
 import yaml
 
@@ -9,24 +10,24 @@ import yaml
 class TestSystemServiceIdMatchesRole(unittest.TestCase):
     def setUp(self):
         # Repo root = three levels up from this file: tests/integration/<cluster>/<this_file>.py
-        self.repo_root = os.path.abspath(
-            os.path.join(os.path.dirname(__file__), "..", "..", "..")
+        self.repo_root = str(
+            Path(str(Path(str(Path(__file__).parent)) / ".." / ".." / "..")).resolve()
         )
-        self.roles_dir = os.path.join(self.repo_root, "roles")
+        self.roles_dir = str(Path(self.repo_root) / "roles")
         self.assertTrue(
-            os.path.isdir(self.roles_dir),
+            Path(self.roles_dir).is_dir(),
             f"'roles' directory not found at: {self.roles_dir}",
         )
 
     def _load_yaml(self, path: str):
-        with open(path, encoding="utf-8") as f:
+        with Path(path).open(encoding="utf-8") as f:
             return yaml.safe_load(f) or {}
 
     def test_system_service_id_equals_role_name(self):
         role_dirs = [
             d
             for d in os.listdir(self.roles_dir)
-            if os.path.isdir(os.path.join(self.roles_dir, d))
+            if Path(str(Path(self.roles_dir) / d)).is_dir()
         ]
 
         self.assertGreater(
@@ -35,13 +36,13 @@ class TestSystemServiceIdMatchesRole(unittest.TestCase):
 
         for role in sorted(role_dirs):
             with self.subTest(role=role):
-                vars_dir = os.path.join(self.roles_dir, role, "vars")
-                if not os.path.isdir(vars_dir):
+                vars_dir = str(Path(self.roles_dir) / role / "vars")
+                if not Path(vars_dir).is_dir():
                     continue
 
                 candidates = []
-                candidates.extend(glob.glob(os.path.join(vars_dir, "main.yml")))
-                candidates.extend(glob.glob(os.path.join(vars_dir, "main.yaml")))
+                candidates.extend(glob.glob(str(Path(vars_dir) / "main.yml")))
+                candidates.extend(glob.glob(str(Path(vars_dir) / "main.yaml")))
                 if not candidates:
                     continue
 

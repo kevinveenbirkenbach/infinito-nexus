@@ -23,7 +23,7 @@ def _write_users(base_dir: Path, role_name: str, users: dict) -> None:
 class TestUsersLookup(unittest.TestCase):
     def setUp(self) -> None:
         self.lookup = LookupModule()
-        self._cwd = os.getcwd()
+        self._cwd = str(Path.cwd())
         self._tmpdir = tempfile.TemporaryDirectory()
         self._tmp = Path(self._tmpdir.name)
         os.chdir(self._tmp)

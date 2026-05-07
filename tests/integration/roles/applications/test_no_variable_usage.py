@@ -1,6 +1,7 @@
 import os
 import re
 import unittest
+from pathlib import Path
 
 
 class TestNoApplicationsVariableUsage(unittest.TestCase):
@@ -14,8 +15,17 @@ class TestNoApplicationsVariableUsage(unittest.TestCase):
     )
 
     def test_no_applications_variable_usage(self):
-        roles_dir = os.path.abspath(
-            os.path.join(os.path.dirname(__file__), "..", "..", "..", "..", "roles")
+        roles_dir = str(
+            Path(
+                str(
+                    Path(str(Path(__file__).parent))
+                    / ".."
+                    / ".."
+                    / ".."
+                    / ".."
+                    / "roles"
+                )
+            ).resolve()
         )
         found = []
 
@@ -25,12 +35,12 @@ class TestNoApplicationsVariableUsage(unittest.TestCase):
             for file in files:
                 if file.endswith(".pyc"):
                     continue
-                file_path = os.path.join(root, file)
+                file_path = str(Path(root) / file)
                 # Skip this test file itself (so it can contain the pattern in docstrings)
-                if os.path.abspath(file_path) == os.path.abspath(__file__):
+                if str(Path(file_path).resolve()) == str(Path(__file__).resolve()):
                     continue
                 try:
-                    with open(file_path, encoding="utf-8") as f:
+                    with Path(file_path).open(encoding="utf-8") as f:
                         for lineno, line in enumerate(f, 1):
                             match = self.APPLICATIONS_VARIABLE_PATTERN.search(line)
                             if match:

@@ -83,11 +83,13 @@ exclude = [
 # - `LOG`  (flake8-logging)     — `logging` module misuse
 # - `G`    (flake8-logging-format) — f-strings inside `logging.x()` calls (defeats lazy-format)
 # - `S`    (flake8-bandit)      — security (hardcoded creds, weak hashes, subprocess(shell=True), …)
+# - `PTH`  (flake8-use-pathlib) — modernise `os.path.*` calls to `pathlib.Path`
 select = [
     "E", "F", "I", "B", "UP", "RUF", "SIM", "C4", "PERF", "RET", "PIE",
     "T10", "PGH", "EXE", "RSE", "ICN", "DTZ",
     "TID", "LOG", "G",
     "S",
+    "PTH",
 ]
 
 # `ruff format` (run via `make autoformat`) reflows whatever it can.
@@ -112,6 +114,15 @@ ignore = [
     # The genuinely dangerous shell-injection patterns (`shell=True`)
     # are still caught by S602/S605.
     "S603", "S607",
+    # PTH207 (`glob.glob` → `Path.glob`/`rglob`) and PTH208
+    # (`os.listdir` → `Path.iterdir`) change the return shape:
+    # `list[str]` → iterator of `Path`. Every call site needs per-site
+    # review of how the result is consumed (string-path arithmetic,
+    # `.startswith` / `.endswith` checks, plain string comparisons,
+    # downstream APIs that require `str`). That work belongs to a
+    # separate "iter-modernisation" follow-up commit, not this
+    # use-pathlib pass.
+    "PTH207", "PTH208",
 ]
 
 [tool.ruff.lint.per-file-ignores]
@@ -123,3 +134,14 @@ ignore = [
 # - S108 (hardcoded /tmp paths) appears in tempdir fixtures.
 # - S110/S112 (try/except pass/continue) appear in cleanup helpers.
 "tests/**" = ["S101", "S102", "S105", "S106", "S108", "S110", "S112"]
+
+# Standalone scripts under ``roles/*/files/`` and ``utils/cert_utils.py``
+# are exercised by test fixtures that monkey-patch the legacy ``os.*``
+# surface (``os.makedirs``, ``os.stat`` with non-pathlib kwargs,
+# ``patch.object(sut, "os")`` replacements). Converting these call
+# sites to ``pathlib.Path`` would require rewriting every coupled
+# test in lockstep — out of scope for the use-pathlib pass.
+"roles/svc-bkp-rmt-2-loc/files/pull-specific-host.py" = ["PTH"]
+"roles/sys-ctl-rpr-container-hard/files/script.py" = ["PTH"]
+"roles/sys-ctl-rpr-container-soft/files/script.py" = ["PTH"]
+"utils/cert_utils.py" = ["PTH"]

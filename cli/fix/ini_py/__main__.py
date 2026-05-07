@@ -7,6 +7,7 @@ folder relative to the project root.
 
 import argparse
 import os
+from pathlib import Path
 
 
 def create_init_files(root_folder):
@@ -15,9 +16,9 @@ def create_init_files(root_folder):
     in each directory if it doesn't already exist.
     """
     for dirpath, _dirnames, _filenames in os.walk(root_folder):
-        init_file = os.path.join(dirpath, "__init__.py")
-        if not os.path.exists(init_file):
-            open(init_file, "w").close()
+        init_file = str(Path(dirpath) / "__init__.py")
+        if not Path(init_file).exists():
+            Path(init_file).open("w").close()
             print(f"Created: {init_file}")
         else:
             print(f"Skipped (already exists): {init_file}")
@@ -33,9 +34,9 @@ def main():
     args = parser.parse_args()
 
     # Determine the absolute path based on the current working directory
-    root_folder = os.path.abspath(args.folder)
+    root_folder = str(Path(args.folder).resolve())
 
-    if not os.path.isdir(root_folder):
+    if not Path(root_folder).is_dir():
         print(
             f"Error: The folder '{args.folder}' does not exist or is not a directory."
         )

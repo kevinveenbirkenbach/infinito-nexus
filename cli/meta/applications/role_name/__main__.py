@@ -11,6 +11,7 @@ roles directory is located at the project root, relative to this script's locati
 import argparse
 import os
 import sys
+from pathlib import Path
 
 from utils.cache.yaml import load_yaml
 
@@ -26,13 +27,13 @@ def get_role(application_id, roles_path):
     :return: The name of the matching role directory.
     :raises RuntimeError: If no match is found or if an error occurs while reading files.
     """
-    if not os.path.isdir(roles_path):
+    if not Path(roles_path).is_dir():
         raise RuntimeError(f"Roles path not found: {roles_path}")
 
     for role in sorted(os.listdir(roles_path)):
-        role_dir = os.path.join(roles_path, role)
-        vars_file = os.path.join(role_dir, "vars", "main.yml")
-        if os.path.isfile(vars_file):
+        role_dir = str(Path(roles_path) / role)
+        vars_file = str(Path(role_dir) / "vars" / "main.yml")
+        if Path(vars_file).is_file():
             try:
                 data = load_yaml(vars_file)
             except Exception as e:

@@ -2,6 +2,7 @@ import os
 import shutil
 import tempfile
 import unittest
+from pathlib import Path
 
 from utils.applications.config import (
     AppConfigKeyError,
@@ -13,15 +14,17 @@ from utils.applications.config import (
 class TestGetAppConf(unittest.TestCase):
     def setUp(self):
         # Isolate working directory so that schema files can be discovered
-        self._cwd = os.getcwd()
+        self._cwd = str(Path.cwd())
         self.tmpdir = tempfile.mkdtemp(prefix="cfgutilstest_")
         os.chdir(self.tmpdir)
 
         # Minimal schema structure (post req-008):
         # roles/web-app-demo/meta/schema.yml
-        os.makedirs(os.path.join("roles", "web-app-demo", "meta"), exist_ok=True)
-        with open(
-            os.path.join("roles", "web-app-demo", "meta", "schema.yml"), "w"
+        Path(str(Path("roles") / "web-app-demo" / "meta")).mkdir(
+            parents=True, exist_ok=True
+        )
+        with Path(str(Path("roles") / "web-app-demo" / "meta" / "schema.yml")).open(
+            "w"
         ) as f:
             f.write(
                 # Defines 'features.defined_but_unset' in schema (without a value in applications),

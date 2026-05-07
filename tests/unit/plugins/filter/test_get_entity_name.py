@@ -3,6 +3,7 @@ import shutil
 import sys
 import tempfile
 import unittest
+from pathlib import Path
 
 import yaml
 
@@ -11,9 +12,9 @@ class TestGetEntityNameFilter(unittest.TestCase):
     def setUp(self):
         # Create a temporary directory for roles and categories.yml
         self.temp_dir = tempfile.mkdtemp()
-        self.roles_dir = os.path.join(self.temp_dir, "roles")
-        os.makedirs(self.roles_dir)
-        self.categories_file = os.path.join(self.roles_dir, "categories.yml")
+        self.roles_dir = str(Path(self.temp_dir) / "roles")
+        Path(self.roles_dir).mkdir(parents=True)
+        self.categories_file = str(Path(self.roles_dir) / "categories.yml")
 
         # Minimal categories.yml for tests
         categories = {
@@ -36,16 +37,16 @@ class TestGetEntityNameFilter(unittest.TestCase):
                 "svc": {"db": {"title": "Databases", "invokable": True}},
             }
         }
-        with open(self.categories_file, "w", encoding="utf-8") as f:
+        with Path(self.categories_file).open("w", encoding="utf-8") as f:
             yaml.safe_dump(categories, f, default_flow_style=False)
 
         # Patch working directory so plugin finds the test categories.yml
-        self._cwd = os.getcwd()
+        self._cwd = str(Path.cwd())
         os.chdir(self.temp_dir)
 
         # Make sure plugins/filter directory is on sys.path
-        plugin_path = os.path.join(self._cwd, "plugins", "filter")
-        if plugin_path not in sys.path and os.path.isdir(plugin_path):
+        plugin_path = str(Path(self._cwd) / "plugins" / "filter")
+        if plugin_path not in sys.path and Path(plugin_path).is_dir():
             sys.path.insert(0, plugin_path)
         # Import plugin fresh each time
         global get_entity_name

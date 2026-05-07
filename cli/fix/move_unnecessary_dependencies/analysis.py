@@ -2,8 +2,8 @@
 
 from __future__ import annotations
 
-import os
 import re
+from pathlib import Path
 
 from .yaml_io import (
     gather_yaml_files,
@@ -35,9 +35,7 @@ def collect_role_defined_vars(role_dir: str) -> set[str]:
         if p:
             provided |= flatten_keys(load_yaml_rt(p))
 
-    task_files = gather_yaml_files(
-        os.path.join(role_dir, "tasks"), ["**/*.yml", "*.yml"]
-    )
+    task_files = gather_yaml_files(str(Path(role_dir) / "tasks"), ["**/*.yml", "*.yml"])
     for tf in task_files:
         data = load_yaml_rt(tf)
         if not isinstance(data, list):
@@ -150,7 +148,7 @@ def dependency_is_unnecessary(
             return False
 
     task_files = gather_yaml_files(
-        os.path.join(consumer_dir, "tasks"), ["**/*.yml", "*.yml"]
+        str(Path(consumer_dir) / "tasks"), ["**/*.yml", "*.yml"]
     )
     for p in task_files:
         text = read_text(p)

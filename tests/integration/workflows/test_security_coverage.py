@@ -1,6 +1,7 @@
 import fnmatch
 import os
 import unittest
+from pathlib import Path
 
 import yaml
 
@@ -41,7 +42,7 @@ CODEQL_PATH_INDICATORS: dict[str, list[str]] = {
 
 
 def _load_active_languages() -> set[str]:
-    with open(SECURITY_WORKFLOW_PATH) as fh:
+    with Path(SECURITY_WORKFLOW_PATH).open() as fh:
         data = yaml.safe_load(fh)
 
     include = data["jobs"]["analyze"]["strategy"]["matrix"]["include"]
@@ -80,7 +81,7 @@ class TestSecurityWorkflowCoverage(unittest.TestCase):
             top = rel_file.split(os.sep, 1)[0]
             if top.startswith(".") and top not in SCANNED_HIDDEN_DIRS:
                 continue
-            filename = os.path.basename(rel_file)
+            filename = Path(rel_file).name
             detected_languages.update(_matching_languages(rel_file, filename))
 
         active_languages = _load_active_languages()

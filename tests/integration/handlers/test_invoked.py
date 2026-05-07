@@ -1,8 +1,8 @@
 import glob
-import os
 import re
 import unittest
 from collections.abc import Iterable
+from pathlib import Path
 from typing import Any
 
 import yaml
@@ -15,7 +15,7 @@ def load_yaml_documents(path: str) -> list[Any]:
     Load one or more YAML documents from a file and return them as a list.
     Raises AssertionError with a helpful message on parse errors.
     """
-    with open(path, encoding="utf-8") as f:
+    with Path(path).open(encoding="utf-8") as f:
         try:
             docs = list(yaml.safe_load_all(f))
             return [d for d in docs if d is not None]
@@ -231,21 +231,23 @@ class TestHandlersInvoked(unittest.TestCase):
     """
 
     def setUp(self):
-        repo_root = os.path.abspath(os.path.join(os.path.dirname(__file__), "../../.."))
-        self.roles_dir = os.path.join(repo_root, "roles")
+        repo_root = str(
+            Path(str(Path(str(Path(__file__).parent)) / "../../..")).resolve()
+        )
+        self.roles_dir = str(Path(repo_root) / "roles")
 
         # Handlers: only main.yml/main.yaml define handlers.
         # Other files under handlers/ are typically include_tasks/import_tasks
         # and contain regular tasks, not handler definitions.
         self.handler_files = glob.glob(
-            os.path.join(self.roles_dir, "*/handlers/main.yml")
-        ) + glob.glob(os.path.join(self.roles_dir, "*/handlers/main.yaml"))
+            str(Path(self.roles_dir) / "*/handlers/main.yml")
+        ) + glob.glob(str(Path(self.roles_dir) / "*/handlers/main.yaml"))
 
         # Tasks: recurse under tasks for both .yml and .yaml
         self.task_files = glob.glob(
-            os.path.join(self.roles_dir, "*", "tasks", "**", "*.yml"), recursive=True
+            str(Path(self.roles_dir) / "*" / "tasks" / "**" / "*.yml"), recursive=True
         ) + glob.glob(
-            os.path.join(self.roles_dir, "*", "tasks", "**", "*.yaml"), recursive=True
+            str(Path(self.roles_dir) / "*" / "tasks" / "**" / "*.yaml"), recursive=True
         )
 
     def test_all_handlers_have_a_notifier_and_all_notifies_have_a_handler(self):

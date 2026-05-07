@@ -20,7 +20,7 @@
 
 from __future__ import annotations
 
-import os
+from pathlib import Path
 from typing import Any
 
 from ansible.errors import AnsibleError
@@ -34,7 +34,7 @@ from utils.tls_common import as_str, want_get
 
 def _join(*parts: Any) -> str:
     cleaned = [str(p).strip() for p in parts if str(p).strip()]
-    return os.path.join(*cleaned) if cleaned else ""
+    return str(Path(*cleaned)) if cleaned else ""
 
 
 def _ensure_trailing_slash(p: str) -> str:

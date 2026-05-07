@@ -1,7 +1,7 @@
 import importlib
-import os
 import tempfile
 import unittest
+from pathlib import Path
 
 
 class TestVersionLookup(unittest.TestCase):
@@ -39,17 +39,17 @@ class TestVersionLookup(unittest.TestCase):
         original_file = getattr(plugin_mod, "__file__", None)
 
         with tempfile.TemporaryDirectory() as tmp:
-            lookup_dir = os.path.join(tmp, "plugins", "lookup")
-            os.makedirs(lookup_dir, exist_ok=True)
+            lookup_dir = str(Path(tmp) / "plugins" / "lookup")
+            Path(lookup_dir).mkdir(parents=True, exist_ok=True)
 
             # Place pyproject.toml at repo root (tmp) if requested
             if pyproject_content is not None:
-                pyproject_path = os.path.join(tmp, "pyproject.toml")
-                with open(pyproject_path, "w", encoding="utf-8") as f:
+                pyproject_path = str(Path(tmp) / "pyproject.toml")
+                with Path(pyproject_path).open("w", encoding="utf-8") as f:
                     f.write(pyproject_content)
 
             # Patch module __file__ so the plugin resolves ../../pyproject.toml from here
-            plugin_mod.__file__ = os.path.join(lookup_dir, "version.py")
+            plugin_mod.__file__ = str(Path(lookup_dir) / "version.py")
 
             try:
                 plugin = self.LookupModule()

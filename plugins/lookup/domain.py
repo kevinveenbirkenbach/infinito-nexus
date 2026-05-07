@@ -1,8 +1,8 @@
 # lookup_plugins/domain.py
 from __future__ import annotations
 
-import os
 import sys
+from pathlib import Path
 from typing import Any
 
 from ansible.errors import AnsibleError
@@ -42,8 +42,8 @@ class LookupModule(LookupBase):
             templar=getattr(self, "_templar", None),
         )
 
-        plugin_dir = os.path.dirname(os.path.abspath(__file__))
-        project_root = os.path.abspath(os.path.join(plugin_dir, "..", ".."))
+        plugin_dir = str(Path(str(Path(__file__).resolve())).parent)
+        project_root = str(Path(str(Path(plugin_dir) / ".." / "..")).resolve())
         if project_root not in sys.path:
             sys.path.append(project_root)
 

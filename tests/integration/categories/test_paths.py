@@ -1,5 +1,6 @@
 import os
 import unittest
+from pathlib import Path
 
 import yaml
 
@@ -8,18 +9,27 @@ class TestCategoryPaths(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         # Load categories.yml
-        file_path = os.path.abspath(
-            os.path.join(
-                os.path.dirname(__file__), "..", "..", "..", "roles", "categories.yml"
-            )
+        file_path = str(
+            Path(
+                str(
+                    Path(str(Path(__file__).parent))
+                    / ".."
+                    / ".."
+                    / ".."
+                    / "roles"
+                    / "categories.yml"
+                )
+            ).resolve()
         )
-        with open(file_path) as f:
+        with Path(file_path).open() as f:
             data = yaml.safe_load(f)
         cls.roles_def = data["roles"]
 
         # List of actual directories under roles/
-        roles_dir = os.path.abspath(
-            os.path.join(os.path.dirname(__file__), "..", "..", "..", "roles")
+        roles_dir = str(
+            Path(
+                str(Path(str(Path(__file__).parent)) / ".." / ".." / ".." / "roles")
+            ).resolve()
         )
         cls.existing_dirs = os.listdir(roles_dir)
 

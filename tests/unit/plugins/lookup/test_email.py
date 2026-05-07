@@ -24,7 +24,7 @@ class TestEmailLookup(unittest.TestCase):
     def setUp(self) -> None:
         self.lookup = LookupModule()
         self.lookup._templar = None
-        self._cwd = os.getcwd()
+        self._cwd = str(Path.cwd())
         self._tmpdir = tempfile.TemporaryDirectory()
         self._tmp = Path(self._tmpdir.name)
         (self._tmp / "roles").mkdir(parents=True, exist_ok=True)

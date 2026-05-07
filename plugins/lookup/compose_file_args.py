@@ -25,7 +25,7 @@
 
 from __future__ import annotations
 
-import os
+from pathlib import Path
 from typing import Any
 
 from ansible.errors import AnsibleError
@@ -104,10 +104,10 @@ def _role_provides_override(*, application_id: str, templar: Any) -> bool:
             "compose_file_args: abs_role_path_by_application_id resolved to empty"
         )
 
-    c1 = os.path.join(role_base, "templates", "compose.override.yml.j2")
-    c2 = os.path.join(role_base, "files", "compose.override.yml")
+    c1 = str(Path(role_base) / "templates" / "compose.override.yml.j2")
+    c2 = str(Path(role_base) / "files" / "compose.override.yml")
 
-    return os.path.isfile(c1) or os.path.isfile(c2)
+    return Path(c1).is_file() or Path(c2).is_file()
 
 
 class LookupModule(LookupBase):

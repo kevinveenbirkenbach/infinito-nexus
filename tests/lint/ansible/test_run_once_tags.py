@@ -2,18 +2,19 @@ import os
 import re
 import unittest
 from collections import defaultdict
+from pathlib import Path
 
 from utils.annotations.suppress import is_suppressed_anywhere
 from utils.cache.files import read_text
 
-PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "../../../"))
-ROLES_DIR = os.path.join(PROJECT_ROOT, "roles")
-ROOT_TASKS_DIR = os.path.join(PROJECT_ROOT, "tasks")
+PROJECT_ROOT = str(Path(str(Path(str(Path(__file__).parent)) / "../../../")).resolve())
+ROLES_DIR = str(Path(PROJECT_ROOT) / "roles")
+ROOT_TASKS_DIR = str(Path(PROJECT_ROOT) / "tasks")
 
 
 def is_under_root_tasks(fpath):
-    abs_path = os.path.abspath(fpath)
-    return abs_path.startswith(os.path.abspath(ROOT_TASKS_DIR) + os.sep)
+    abs_path = str(Path(fpath).resolve())
+    return abs_path.startswith(str(Path(ROOT_TASKS_DIR).resolve()) + os.sep)
 
 
 def find_role_includes(roles_dir):
@@ -27,10 +28,10 @@ def find_role_includes(roles_dir):
             if not fname.endswith((".yml", ".yaml")):
                 continue
 
-            fpath = os.path.join(dirpath, fname)
+            fpath = str(Path(dirpath) / fname)
             # Skip any files under the root-level tasks/ directory
-            if os.path.abspath(fpath).startswith(
-                os.path.abspath(os.path.join(roles_dir, "..", "tasks")) + os.sep
+            if str(Path(fpath).resolve()).startswith(
+                str(Path(str(Path(roles_dir) / ".." / "tasks")).resolve()) + os.sep
             ):
                 continue
 
@@ -90,7 +91,7 @@ class TestRunOnceTag(unittest.TestCase):
         for key, usages in role_to_locations.items():
             # Only check the role's own tasks/main.yml instead of the includer file
             _, line, role_name = usages[0]
-            role_tasks = os.path.join(ROLES_DIR, role_name, "tasks", "main.yml")
+            role_tasks = str(Path(ROLES_DIR) / role_name / "tasks" / "main.yml")
             try:
                 content = read_text(role_tasks)
             except (FileNotFoundError, OSError):

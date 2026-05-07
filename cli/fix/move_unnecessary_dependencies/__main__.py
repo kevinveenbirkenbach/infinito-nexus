@@ -28,8 +28,8 @@ to ``ruamel.yaml`` via :mod:`.yaml_io`. Modified files get a
 from __future__ import annotations
 
 import argparse
-import os
 import sys
+from pathlib import Path
 
 from .analysis import (
     collect_role_defined_vars,
@@ -90,11 +90,11 @@ def process_role(
         return False
 
     update_meta_remove_deps(
-        os.path.join(role_dir, "meta", "main.yml"), moved, dry_run=dry_run
+        str(Path(role_dir) / "meta" / "main.yml"), moved, dry_run=dry_run
     )
 
-    target_tasks = path_if_exists(role_dir, "tasks/01_core.yml") or os.path.join(
-        role_dir, "tasks", "main.yml"
+    target_tasks = path_if_exists(role_dir, "tasks/01_core.yml") or str(
+        Path(role_dir) / "tasks" / "main.yml"
     )
     prepend_tasks(
         target_tasks,
@@ -113,7 +113,9 @@ def main() -> None:
     )
     parser.add_argument(
         "--project-root",
-        default=os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..")),
+        default=str(
+            Path(__file__).resolve().parents[3]
+        ),  # nocheck: project-root-import  CLI default arg
         help="Path to project root (default: two levels up from this script).",
     )
     parser.add_argument(

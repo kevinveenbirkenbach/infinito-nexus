@@ -24,6 +24,7 @@ Implementation details:
 import os
 import re
 import unittest
+from pathlib import Path
 
 from utils.cache.files import iter_project_files, read_text
 
@@ -43,7 +44,7 @@ RUN_ONCE_TASK_FILES = ("utils/once/flag.yml",)
 
 
 def roles_root(root: str) -> str:
-    return os.path.join(root, "roles")
+    return str(Path(root) / "roles")
 
 
 def walk_yaml_files(root: str):
@@ -186,16 +187,16 @@ class RunOnceGlobalUsageFastTest(unittest.TestCase):
         role_tasks_roots: dict[str, str] = {}
         known_suffixes: set[str] = set()
 
-        if os.path.isdir(rroot):
+        if Path(rroot).is_dir():
             for entry in os.listdir(rroot):
-                main_yml = os.path.join(rroot, entry, "tasks", "main.yml")
-                if os.path.isfile(main_yml):
+                main_yml = str(Path(rroot) / entry / "tasks" / "main.yml")
+                if Path(main_yml).is_file():
                     roles.append(entry)
                     suffix = entry.replace("-", "_")
                     suffix_for_role[entry] = suffix
                     known_suffixes.add(suffix)
                     role_tasks_roots[entry] = (
-                        os.path.join(rroot, entry, "tasks") + os.sep
+                        str(Path(rroot) / entry / "tasks") + os.sep
                     )
 
         # Collections built in one pass
@@ -275,7 +276,7 @@ class RunOnceGlobalUsageFastTest(unittest.TestCase):
                 and suffix not in role_defined_suffixes[role]
             ):
                 offenders.append(
-                    (role, f"run_once_{suffix}", os.path.join(rroot, role, "tasks"))
+                    (role, f"run_once_{suffix}", str(Path(rroot) / role / "tasks"))
                 )
 
         if offenders:

@@ -1,5 +1,6 @@
 import os
 import re
+from pathlib import Path
 
 import certifi
 import requests
@@ -10,7 +11,7 @@ def get_requests_verify():
     """Return a CA bundle path for outbound HTTPS verification."""
     for env_var in ("REQUESTS_CA_BUNDLE", "SSL_CERT_FILE", "CA_TRUST_CERT_HOST"):
         candidate = os.environ.get(env_var, "").strip()
-        if candidate and os.path.isfile(candidate):
+        if candidate and Path(candidate).is_file():
             return candidate
     return certifi.where()
 

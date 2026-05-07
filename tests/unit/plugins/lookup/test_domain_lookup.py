@@ -1,7 +1,7 @@
 # tests/unit/plugins/lookup/test_domain_lookup.py
-import os
 import sys
 import unittest
+from pathlib import Path
 from unittest.mock import patch
 
 from ansible.errors import AnsibleError
@@ -9,8 +9,8 @@ from ansible.errors import AnsibleError
 
 def _ensure_repo_root_on_syspath():
     # tests/unit/plugins/lookup/test_domain_lookup.py -> repo_root
-    here = os.path.dirname(os.path.abspath(__file__))
-    repo_root = os.path.abspath(os.path.join(here, "..", "..", "..", ".."))
+    here = str(Path(str(Path(__file__).resolve())).parent)
+    repo_root = str(Path(str(Path(here) / ".." / ".." / ".." / "..")).resolve())
     if repo_root not in sys.path:
         sys.path.insert(0, repo_root)
 

@@ -1,6 +1,6 @@
 import importlib.util
-import os
 import unittest
+from pathlib import Path
 from unittest.mock import patch
 
 
@@ -16,18 +16,20 @@ class TestWebHealthExpectationsFilter(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         # Compute repo root from this test file location
-        here = os.path.abspath(os.path.dirname(__file__))
+        here = str(Path(str(Path(__file__).parent)).resolve())
         # tests/unit/roles/sys-ctl-hlth-webserver/filter_plugins/ -> repo root is 5 levels up
-        cls.ROOT = os.path.abspath(os.path.join(here, "..", "..", "..", "..", ".."))
-
-        cls.module_path = os.path.join(
-            cls.ROOT,
-            "roles",
-            "sys-ctl-hlth-webserver",
-            "filter_plugins",
-            "web_health_expectations.py",
+        cls.ROOT = str(
+            Path(str(Path(here) / ".." / ".." / ".." / ".." / "..")).resolve()
         )
-        if not os.path.isfile(cls.module_path):
+
+        cls.module_path = str(
+            Path(cls.ROOT)
+            / "roles"
+            / "sys-ctl-hlth-webserver"
+            / "filter_plugins"
+            / "web_health_expectations.py"
+        )
+        if not Path(cls.module_path).is_file():
             raise FileNotFoundError(
                 f"Cannot find web_health_expectations.py at {cls.module_path}"
             )

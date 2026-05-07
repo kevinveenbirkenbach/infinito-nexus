@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-import os
+from pathlib import Path
 
 from ruamel.yaml.comments import CommentedSeq
 
@@ -44,7 +44,7 @@ def build_include_block_yaml(consumer_role: str, moved_deps: list[str]) -> list[
 
 
 def prepend_tasks(tasks_path: str, new_tasks, dry_run: bool) -> None:
-    if os.path.exists(tasks_path):
+    if Path(tasks_path).exists():
         existing = load_yaml_rt(tasks_path)
         if isinstance(existing, list):
             combined = CommentedSeq()
@@ -60,7 +60,7 @@ def prepend_tasks(tasks_path: str, new_tasks, dry_run: bool) -> None:
         else:
             combined = new_tasks
     else:
-        os.makedirs(os.path.dirname(tasks_path), exist_ok=True)
+        Path(str(Path(tasks_path).parent)).mkdir(parents=True, exist_ok=True)
         combined = new_tasks
 
     if dry_run:
@@ -75,7 +75,7 @@ def prepend_tasks(tasks_path: str, new_tasks, dry_run: bool) -> None:
 
 def update_meta_remove_deps(meta_path: str, remove: list[str], dry_run: bool) -> bool:
     """Drop given entries from meta.dependencies, preserving everything else."""
-    if not os.path.exists(meta_path):
+    if not Path(meta_path).exists():
         return False
     doc = load_yaml_rt(meta_path)
     deps = doc.get("dependencies")

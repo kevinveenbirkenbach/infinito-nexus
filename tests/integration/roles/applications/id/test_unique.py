@@ -1,6 +1,6 @@
 import glob
-import os
 import unittest
+from pathlib import Path
 
 import yaml
 
@@ -12,13 +12,15 @@ def find_application_ids():
     """
     ids = {}
     # Wenn der Test unter tests/integration liegt, gehen wir zwei Ebenen hoch zum Projekt-Root
-    base_dir = os.path.abspath(
-        os.path.join(os.path.dirname(__file__), "..", "..", "..", "..", "..")
+    base_dir = str(
+        Path(
+            str(Path(str(Path(__file__).parent)) / ".." / ".." / ".." / ".." / "..")
+        ).resolve()
     )
-    pattern = os.path.join(base_dir, "roles", "*", "vars", "main.yml")
+    pattern = str(Path(base_dir) / "roles" / "*" / "vars" / "main.yml")
 
     for file_path in glob.glob(pattern):
-        with open(file_path) as f:
+        with Path(file_path).open() as f:
             data = yaml.safe_load(f) or {}
         app_id = data.get("application_id")
         if app_id is not None:

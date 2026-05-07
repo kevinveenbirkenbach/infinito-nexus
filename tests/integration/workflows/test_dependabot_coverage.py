@@ -3,6 +3,7 @@ import os
 import subprocess
 import unittest
 from collections.abc import Iterable
+from pathlib import Path
 
 import yaml
 
@@ -119,7 +120,7 @@ def _dir_covers(dep_dir: str, file_rel_dir: str) -> bool:
 
 
 def _load_active_entries() -> list[dict]:
-    with open(DEPENDABOT_PATH) as fh:
+    with Path(DEPENDABOT_PATH).open() as fh:
         data = yaml.safe_load(fh)
     return data.get("updates", [])
 
@@ -209,7 +210,7 @@ def _walk_fallback() -> list[str]:
             if d not in SKIP_DIRS
             and not (d.startswith(".") and d not in SCANNED_HIDDEN_DIRS)
             and not _is_gitignored(
-                d if rel_root == "." else os.path.join(rel_root, d), d, patterns
+                d if rel_root == "." else str(Path(rel_root) / d), d, patterns
             )
         ]
 
@@ -217,7 +218,7 @@ def _walk_fallback() -> list[str]:
             continue
 
         for filename in filenames:
-            rel_file = filename if rel_root == "." else os.path.join(rel_root, filename)
+            rel_file = filename if rel_root == "." else str(Path(rel_root) / filename)
             if _is_gitignored(rel_file, filename, patterns):
                 continue
             files.append(rel_file)
@@ -253,8 +254,8 @@ class TestDependabotCoverage(unittest.TestCase):
             if not rel_file:
                 continue
 
-            filename = os.path.basename(rel_file)
-            rel_dir = os.path.dirname(rel_file)
+            filename = Path(rel_file).name
+            rel_dir = str(Path(rel_file).parent)
 
             top_segment = rel_file.split("/", 1)[0]
             if top_segment in SKIP_DIRS:

@@ -1,5 +1,5 @@
-import os
 import unittest
+from pathlib import Path
 
 import yaml
 
@@ -11,12 +11,14 @@ class TestCategoriesInvokableExclusion(unittest.TestCase):
         none of its descendants may be invokable.
         """
         # locate roles/categories.yml
-        base_dir = os.path.dirname(__file__)
-        yaml_path = os.path.abspath(
-            os.path.join(base_dir, "..", "..", "..", "roles", "categories.yml")
+        base_dir = str(Path(__file__).parent)
+        yaml_path = str(
+            Path(
+                str(Path(base_dir) / ".." / ".." / ".." / "roles" / "categories.yml")
+            ).resolve()
         )
 
-        with open(yaml_path, encoding="utf-8") as f:
+        with Path(yaml_path).open(encoding="utf-8") as f:
             data = yaml.safe_load(f)
 
         violations = []

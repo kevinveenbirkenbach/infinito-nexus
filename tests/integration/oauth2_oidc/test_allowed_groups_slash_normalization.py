@@ -26,18 +26,18 @@ slash, in which case this normalisation becomes a no-op anchor), this test
 trips so the operator gets a fast signal.
 """
 
-import os
 import re
 import unittest
+from pathlib import Path
 
-HERE = os.path.dirname(os.path.abspath(__file__))
-PROJECT_ROOT = os.path.abspath(os.path.join(HERE, "..", "..", ".."))
-TEMPLATE_PATH = os.path.join(
-    PROJECT_ROOT,
-    "roles",
-    "web-app-oauth2-proxy",
-    "templates",
-    "oauth2-proxy-keycloak.cfg.j2",
+HERE = str(Path(str(Path(__file__).resolve())).parent)
+PROJECT_ROOT = str(Path(str(Path(HERE) / ".." / ".." / "..")).resolve())
+TEMPLATE_PATH = str(
+    Path(PROJECT_ROOT)
+    / "roles"
+    / "web-app-oauth2-proxy"
+    / "templates"
+    / "oauth2-proxy-keycloak.cfg.j2"
 )
 
 # Match an `allowed_groups = ...` line whose value pipeline includes the
@@ -54,7 +54,7 @@ ALLOWED_GROUPS_NORMALISED = re.compile(
 
 class TestAllowedGroupsSlashNormalization(unittest.TestCase):
     def test_template_normalises_allowed_groups_with_leading_slash(self):
-        with open(TEMPLATE_PATH, encoding="utf-8") as f:
+        with Path(TEMPLATE_PATH).open(encoding="utf-8") as f:
             content = f.read()
 
         self.assertRegex(

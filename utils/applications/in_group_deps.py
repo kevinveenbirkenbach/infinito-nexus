@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import os
 from collections.abc import Callable
 from pathlib import Path
 from typing import Any
@@ -16,8 +15,8 @@ MetaDepsResolver = Callable[[str, str], list[str]]
 
 
 def load_service_registry(project_root: str) -> dict[str, Any]:
-    roles_dir = os.path.join(project_root, "roles")
-    if not os.path.isdir(roles_dir):
+    roles_dir = str(Path(project_root) / "roles")
+    if not Path(roles_dir).is_dir():
         return {}
     try:
         return build_service_registry_from_roles_dir(Path(roles_dir))
@@ -26,8 +25,8 @@ def load_service_registry(project_root: str) -> dict[str, Any]:
 
 
 def meta_deps_from_disk(role: str, roles_dir: str) -> list[str]:
-    meta_file = os.path.join(roles_dir, role, "meta", "main.yml")
-    if not os.path.isfile(meta_file):
+    meta_file = str(Path(roles_dir) / role / "meta" / "main.yml")
+    if not Path(meta_file).is_file():
         return []
 
     try:
@@ -108,7 +107,7 @@ def applications_if_group_and_all_deps(
         raise ValueError("'project_root' or 'roles_dir' must be provided")
 
     if roles_dir is None:
-        roles_dir = os.path.join(project_root, "roles")
+        roles_dir = str(Path(project_root) / "roles")
 
     if service_registry is None:
         if project_root is None:

@@ -1,6 +1,6 @@
-import os
 import re
 from collections.abc import Mapping
+from pathlib import Path
 
 from ansible.errors import AnsibleFilterError, AnsibleUndefinedVariable
 
@@ -36,10 +36,10 @@ def get(
     skip_missing_app=False,
 ):
     # Path to the schema file for this application
-    schema_path = os.path.join("roles", application_id, "meta", "schema.yml")
+    schema_path = str(Path("roles") / application_id / "meta" / "schema.yml")
 
     def schema_defines(path):
-        if not os.path.isfile(schema_path):
+        if not Path(schema_path).is_file():
             return False
         schema = load_yaml_any(schema_path, default_if_missing={}) or {}
         node = schema

@@ -1,6 +1,6 @@
 import glob
-import os
 import unittest
+from pathlib import Path
 
 import yaml
 
@@ -12,33 +12,35 @@ class TestDependencyApplicationId(unittest.TestCase):
         if both A and B have vars/main.yml with application_id defined,
         then application_id must equal the role's folder name for both.
         """
-        base_dir = os.path.dirname(__file__)
-        roles_dir = os.path.abspath(
-            os.path.join(base_dir, "..", "..", "..", "..", "..", "roles")
+        base_dir = str(Path(__file__).parent)
+        roles_dir = str(
+            Path(
+                str(Path(base_dir) / ".." / ".." / ".." / ".." / ".." / "roles")
+            ).resolve()
         )
 
         violations = []
 
         # Helper to load application_id if present
         def load_app_id(role_path):
-            vars_file = os.path.join(role_path, "vars", "main.yml")
-            if not os.path.isfile(vars_file):
+            vars_file = str(Path(role_path) / "vars" / "main.yml")
+            if not Path(vars_file).is_file():
                 return None
-            with open(vars_file, encoding="utf-8") as f:
+            with Path(vars_file).open(encoding="utf-8") as f:
                 data = yaml.safe_load(f) or {}
             return data.get("application_id")
 
         # Iterate all roles
-        for role_path in glob.glob(os.path.join(roles_dir, "*")):
-            if not os.path.isdir(role_path):
+        for role_path in glob.glob(str(Path(roles_dir) / "*")):
+            if not Path(role_path).is_dir():
                 continue
 
-            role_name = os.path.basename(role_path)
-            meta_file = os.path.join(role_path, "meta", "main.yml")
-            if not os.path.isfile(meta_file):
+            role_name = Path(role_path).name
+            meta_file = str(Path(role_path) / "meta" / "main.yml")
+            if not Path(meta_file).is_file():
                 continue
 
-            with open(meta_file, encoding="utf-8") as f:
+            with Path(meta_file).open(encoding="utf-8") as f:
                 meta = yaml.safe_load(f) or {}
 
             deps = meta.get("dependencies", [])
@@ -56,8 +58,8 @@ class TestDependencyApplicationId(unittest.TestCase):
             # load application_id for this role once
             app_id_role = load_app_id(role_path)
             for dep_name in dep_names:
-                dep_path = os.path.join(roles_dir, dep_name)
-                if not os.path.isdir(dep_path):
+                dep_path = str(Path(roles_dir) / dep_name)
+                if not Path(dep_path).is_dir():
                     continue
 
                 app_id_dep = load_app_id(dep_path)

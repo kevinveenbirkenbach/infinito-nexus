@@ -1,4 +1,3 @@
-import os
 import shutil
 import subprocess
 import sys
@@ -8,10 +7,13 @@ from pathlib import Path
 
 import yaml
 
-SCRIPT_PATH = os.path.abspath(
-    os.path.join(
-        os.path.dirname(__file__), "../../../../cli/validate/inventory/__main__.py"
-    )
+SCRIPT_PATH = str(
+    Path(
+        str(
+            Path(str(Path(__file__).parent))
+            / "../../../../cli/validate/inventory/__main__.py"
+        )
+    ).resolve()
 )
 
 

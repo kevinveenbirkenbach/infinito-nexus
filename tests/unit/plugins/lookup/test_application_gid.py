@@ -1,7 +1,7 @@
-import os
 import shutil
 import tempfile
 import unittest
+from pathlib import Path
 
 import yaml
 
@@ -12,8 +12,8 @@ class TestApplicationGidLookup(unittest.TestCase):
     def setUp(self):
         # Create a temporary roles directory
         self.temp_dir = tempfile.mkdtemp()
-        self.roles_dir = os.path.join(self.temp_dir, "roles")
-        os.mkdir(self.roles_dir)
+        self.roles_dir = str(Path(self.temp_dir) / "roles")
+        Path(self.roles_dir).mkdir()
 
         # Define mock application_ids (role directory names are the canonical ids)
         self.application_ids = [
@@ -26,9 +26,9 @@ class TestApplicationGidLookup(unittest.TestCase):
         # Per req-008 an "application role" is identified by the presence of
         # at least one of the project-owned `meta/<topic>.yml` files.
         for application_id in self.application_ids:
-            role_path = os.path.join(self.roles_dir, application_id, "meta")
-            os.makedirs(role_path)
-            with open(os.path.join(role_path, "services.yml"), "w") as f:
+            role_path = str(Path(self.roles_dir) / application_id / "meta")
+            Path(role_path).mkdir(parents=True)
+            with Path(str(Path(role_path) / "services.yml")).open("w") as f:
                 yaml.dump({application_id: {"title": application_id}}, f)
 
         self.lookup = LookupModule()
