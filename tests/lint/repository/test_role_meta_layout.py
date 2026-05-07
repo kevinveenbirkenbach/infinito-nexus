@@ -23,7 +23,7 @@ from pathlib import Path
 
 import yaml
 
-from utils.cache.files import iter_project_files
+from utils.cache.files import iter_project_files, read_text
 from utils.cache.yaml import load_yaml_str
 
 
@@ -58,7 +58,10 @@ LEGACY_PORT_ALLOWLIST = {
 def _load_yaml(path: Path):
     if not path.is_file():
         return None
-    text = path.read_text(encoding="utf-8")
+    try:
+        text = read_text(str(path))
+    except UnicodeDecodeError:
+        return None
     if not text.strip():
         return None
     return load_yaml_str(text)
@@ -140,7 +143,7 @@ class TestNoLegacyPathReferences(unittest.TestCase):
             }:
                 continue
             try:
-                text = path.read_text(encoding="utf-8")
+                text = read_text(str(path))
             except (UnicodeDecodeError, PermissionError):
                 continue
             for token in self.LEGACY_TOKENS:
@@ -347,7 +350,10 @@ class TestNoComposeWrapperInVariants(unittest.TestCase):
             variants_path = role_dir / "meta" / "variants.yml"
             if not variants_path.is_file():
                 continue
-            text = variants_path.read_text(encoding="utf-8")
+            try:
+                text = read_text(str(variants_path))
+            except UnicodeDecodeError:
+                continue
             try:
                 docs = load_yaml_str(text)
             except yaml.YAMLError:

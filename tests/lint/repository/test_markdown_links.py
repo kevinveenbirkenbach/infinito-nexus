@@ -15,7 +15,7 @@ import subprocess
 import unittest
 from pathlib import Path
 
-from utils.cache.files import iter_project_files
+from utils.cache.files import iter_project_files, read_text
 from typing import List, NamedTuple
 
 
@@ -97,8 +97,8 @@ def _extract_links(file: Path) -> List[tuple[int, str]]:
     """
     results: list[tuple[int, str]] = []
     try:
-        lines = file.read_text(encoding="utf-8", errors="replace").splitlines()
-    except OSError:
+        lines = read_text(str(file)).splitlines()
+    except (OSError, UnicodeDecodeError):
         return results
 
     in_fence = False

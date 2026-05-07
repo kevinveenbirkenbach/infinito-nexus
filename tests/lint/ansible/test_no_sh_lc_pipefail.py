@@ -6,7 +6,7 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Iterable, Set
 
-from utils.cache.files import iter_project_files
+from utils.cache.files import iter_project_files, read_text
 
 
 @dataclass(frozen=True)
@@ -105,7 +105,10 @@ def _is_sh_lc_command(node: ast.AST) -> bool:
 
 
 def _scan_file(path: Path) -> list[Finding]:
-    text = path.read_text(encoding="utf-8", errors="replace")
+    try:
+        text = read_text(str(path))
+    except UnicodeDecodeError:
+        return []
     tree = ast.parse(text, filename=path.as_posix())
     lines = text.splitlines()
     pipefail_vars = _collect_pipefail_vars(tree)

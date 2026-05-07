@@ -33,7 +33,7 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Iterable, List
 
-from utils.cache.files import iter_project_files
+from utils.cache.files import iter_project_files, read_text
 from utils.cache.yaml import load_yaml_any
 
 
@@ -182,8 +182,8 @@ def _scan_file(path: Path) -> List[Finding]:
     if data is None:
         return findings
     try:
-        text = path.read_text(encoding="utf-8", errors="replace")
-    except OSError:
+        text = read_text(str(path))
+    except (OSError, UnicodeDecodeError):
         return findings
     for _key_path, value in _walk_scalars(data):
         if "\n" not in value:

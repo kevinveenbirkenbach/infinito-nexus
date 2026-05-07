@@ -74,6 +74,7 @@ labels:
 | `email`             | line above          | [test_web_app_email_integration.py](../../../../tests/lint/ansible/roles/test_web_app_email_integration.py)                 | Suppresses the missing-email-integration warning when paired with `enabled: false` and `shared: false`.          |
 | `file-size`         | head (first 30 lines) | [test_python_file_size.py](../../../../tests/lint/repository/test_python_file_size.py)                                     | Opts the entire `.py` file out of the 500-line cap.                                                              |
 | `project-walk`      | same line / span    | [test_no_raw_project_walk.py](../../../../tests/lint/repository/test_no_raw_project_walk.py)                               | Allows a raw `Path.rglob`, `os.walk`, or `glob.glob` call when the walk is intentionally outside the cached project-tree helper contract. |
+| `cache-read`        | same line / span    | [test_no_uncached_file_reads.py](../../../../tests/lint/repository/test_no_uncached_file_reads.py)                           | Allows a raw `Path.read_text` / `Path.read_bytes` call in a `tests/lint/` test when the read is intentionally outside the LRU-cached `utils.cache.files.read_text` contract. |
 | `run-once`          | anywhere            | [test_run_once_tags.py](../../../../tests/lint/ansible/test_run_once_tags.py), [test_schema.py](../../../../tests/integration/roles/run_once/test_schema.py) | Marks a role's `tasks/main.yml` as intentionally re-runnable; skips both the run-once tag check and the suffix check. |
 | `run-once-suffix`   | same line           | [test_schema.py](../../../../tests/integration/roles/run_once/test_schema.py)                                                | Allows a single `when:` item to reference a `run_once_<other>` flag whose suffix differs from the current role.   |
 | `raw-docker`        | same or above; head (first 30 lines) | [test_no_raw_docker.py](../../../../tests/integration/docker/test_no_raw_docker.py)                       | Marks a single line or a whole file under `roles/` as legitimately calling `docker` / `docker compose` / `docker-compose` directly. The check is scoped to `roles/`; bootstrap scripts and CI workflows outside `roles/` are not scanned and need no marker. |
@@ -142,6 +143,20 @@ Use `project-walk` only for scans that genuinely do not fit
 `utils.cache.files.iter_project_files`, such as temporary directories,
 `.git` metadata, or a deliberately tiny fixed path probe. Broad scans of the
 repository tree SHOULD use the cached helpers instead.
+
+`cache-read`, on the raw read call or on any line spanned by the call:
+
+```python
+text = tmp_path.read_text()  # noqa: cache-read  (synthetic fixture written above)
+```
+
+Use `cache-read` only when the file legitimately does not belong to the
+project-tree LRU cache — e.g. a tempdir written and read inside the same
+test, a file outside the repository root, or an in-memory `io.StringIO`-
+backed `Path`. Reads of project files (under `roles/`, `tasks/`,
+`docs/`, `tests/`, etc.) MUST go through
+`utils.cache.files.read_text` so the LRU cache is shared across the
+pytest session.
 
 `run-once`, at the top of a role's `tasks/main.yml`:
 

@@ -13,7 +13,7 @@ import subprocess
 import unittest
 from dataclasses import dataclass
 
-from utils.cache.files import iter_project_files
+from utils.cache.files import iter_project_files, read_text
 from pathlib import Path
 from typing import List
 
@@ -115,8 +115,8 @@ def finding_sort_key(item: TodoFinding) -> tuple[str, int, str]:
 def scan_todo_file(path: Path) -> List[TodoFinding]:
     findings: List[TodoFinding] = []
     try:
-        lines = path.read_text(encoding="utf-8", errors="replace").splitlines()
-    except OSError:
+        lines = read_text(str(path)).splitlines()
+    except (OSError, UnicodeDecodeError):
         return findings
 
     for line_no, line in enumerate(lines, start=1):
@@ -145,8 +145,8 @@ def scan_todo_file(path: Path) -> List[TodoFinding]:
 def scan_inline_markers(path: Path) -> List[TodoFinding]:
     findings: List[TodoFinding] = []
     try:
-        lines = path.read_text(encoding="utf-8", errors="replace").splitlines()
-    except OSError:
+        lines = read_text(str(path)).splitlines()
+    except (OSError, UnicodeDecodeError):
         return findings
 
     for line_no, line in enumerate(lines, start=1):
