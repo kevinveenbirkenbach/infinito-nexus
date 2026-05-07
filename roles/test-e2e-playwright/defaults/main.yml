@@ -12,10 +12,8 @@ TEST_E2E_PLAYWRIGHT_STAGE_BASE_DIR:    "/tmp/test-e2e-playwright"
 # Where to store per-role reports/artifacts (host dir)
 TEST_E2E_PLAYWRIGHT_REPORTS_BASE_DIR:  "/var/lib/infinito/logs/test-e2e-playwright"
 
-# Optional Playwright image override. If empty, derive the default image from
-# files/package.json and TEST_E2E_PLAYWRIGHT_IMAGE_DISTRO.
+# Optional Playwright image override.
 TEST_E2E_PLAYWRIGHT_IMAGE:             ""
-TEST_E2E_PLAYWRIGHT_IMAGE_DISTRO:      "noble"
 
 # Command executed inside the Playwright container
 TEST_E2E_PLAYWRIGHT_COMMAND:           "npm install --no-fund --no-audit && npx playwright test"
