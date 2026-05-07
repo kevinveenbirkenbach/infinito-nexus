@@ -43,7 +43,7 @@ rather than role by role.
   an authenticated path AND whose `meta/services.yml` declares
   `oidc.enabled` OR `ldap.enabled` (literally or via the dynamic
   `"{{ '<role>' in group_names }}"` form per
-  [test_services_dynamic_flags.py](../../tests/integration/roles/meta/test_services_dynamic_flags.py))
+  [test_dynamic_flags.py](../../tests/integration/roles/meta/services/test_dynamic_flags.py))
   MUST include at least one `biber`-driven scenario.
 - [ ] The biber scenario MUST gate on the same service flags that the
   matching admin scenario uses (typically `oidc`, `ldap`, or both),

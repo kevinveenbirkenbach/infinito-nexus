@@ -44,7 +44,7 @@ consistently across the role tree is what this requirement tracks.
 - [ ] Any role whose `meta/services.yml` declares `ldap.enabled` (literal
   `true` or the dynamic `"{{ 'svc-db-openldap' in group_names }}"`
   form per
-  [test_services_dynamic_flags.py](../../tests/integration/roles/meta/test_services_dynamic_flags.py))
+  [test_dynamic_flags.py](../../tests/integration/roles/meta/services/test_dynamic_flags.py))
   AND ships an authenticated Playwright spec MUST include at least one
   scenario that drives the role's **LDAP-bind login path** end-to-end.
   The test MUST NOT route through Keycloak: it MUST hit whatever
