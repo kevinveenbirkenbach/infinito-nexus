@@ -92,6 +92,57 @@ def _is_init_file(path: Path) -> bool:
     return path.name == "__init__.py"
 
 
+def _strip_strings_and_comments(text: str) -> str:
+    """Return *text* with every string literal and `#` comment replaced
+    by whitespace that preserves line numbers and column offsets.
+
+    The forbidden patterns must only fire on real code, never on
+    documentation that mentions the patterns by name (the catalog
+    rule definitions in this very file, the dictionary docstring of
+    `utils/cache/__init__.py`, etc.).
+    """
+    out: List[str] = []
+    i = 0
+    n = len(text)
+    while i < n:
+        ch = text[i]
+        if text[i : i + 3] in ('"""', "'''"):
+            quote = text[i : i + 3]
+            end = text.find(quote, i + 3)
+            if end == -1:
+                out.append("\n" * text[i:].count("\n"))
+                break
+            block = text[i : end + 3]
+            out.append("".join("\n" if c == "\n" else " " for c in block))
+            i = end + 3
+            continue
+        if ch in ('"', "'"):
+            quote = ch
+            j = i + 1
+            while j < n and text[j] != quote:
+                if text[j] == "\\" and j + 1 < n:
+                    j += 2
+                    continue
+                if text[j] == "\n":
+                    break
+                j += 1
+            block = text[i : j + 1]
+            out.append("".join("\n" if c == "\n" else " " for c in block))
+            i = j + 1
+            continue
+        if ch == "#":
+            j = text.find("\n", i)
+            if j == -1:
+                out.append(" " * (n - i))
+                break
+            out.append(" " * (j - i))
+            i = j
+            continue
+        out.append(ch)
+        i += 1
+    return "".join(out)
+
+
 def _scan_file(path: Path) -> List[str]:
     """Return human-readable failure descriptions for *path*.
 
@@ -105,12 +156,13 @@ def _scan_file(path: Path) -> List[str]:
     except Exception:
         return []
 
-    lines = text.splitlines()
+    raw_lines = text.splitlines()
+    code_lines = _strip_strings_and_comments(text).splitlines()
     failures: List[str] = []
 
     is_init = _is_init_file(path)
 
-    for lineno, line in enumerate(lines, start=1):
+    for lineno, line in enumerate(code_lines, start=1):
         for label, pattern in _FORBIDDEN_PATTERNS:
             if not pattern.search(line):
                 continue
@@ -121,7 +173,7 @@ def _scan_file(path: Path) -> List[str]:
             # __init__.py, because there is no reason to use them there.
             if is_init and _INIT_PROJECT_ROOT_RE.match(line):
                 continue
-            if is_suppressed_at(lines, lineno, SUPPRESS_RULE, mode="same-or-above"):
+            if is_suppressed_at(raw_lines, lineno, SUPPRESS_RULE, mode="same-or-above"):
                 continue
             failures.append(f"{path}:{lineno}: {label}")
 
