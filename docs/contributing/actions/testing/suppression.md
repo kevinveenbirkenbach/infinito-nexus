@@ -1,10 +1,8 @@
 # Suppression Markers 🚫
 
-The unified `# noqa` / `# nocheck` syntax that suppresses individual
-checks across the infinito-nexus test suite.
+The unified `# noqa` / `# nocheck` syntax that suppresses individual checks across the infinito-nexus test suite.
 
-You MUST use these markers only when the check genuinely does not apply.
-You MUST NOT use them to silence legitimate issues.
+You MUST use these markers only when the check genuinely does not apply. You MUST NOT use them to silence legitimate issues.
 
 ## Grammar 📐
 
@@ -16,17 +14,12 @@ A suppression marker is a comment carrying one or more rule keys:
 
 Rules:
 
-- `noqa` and `nocheck` are synonyms. By convention, use `noqa` for code-level
-  lints (analogous to flake8 / ruff) and `nocheck` for repository-content
-  checks (URLs, image versions, file size, run-once schema). Either keyword
-  works for any rule; the test does not enforce which one is used.
+- `noqa` and `nocheck` are synonyms. By convention, use `noqa` for code-level lints (analogous to flake8 / ruff) and `nocheck` for repository-content checks (URLs, image versions, file size, run-once schema). Either keyword works for any rule; the test does not enforce which one is used.
 - The keyword is matched **case-insensitively**.
 - `<rule>` is a kebab-case identifier from the catalog below.
-- Multiple rules MAY be combined on one comment, comma-separated:
-  `# noqa: shared, email`.
+- Multiple rules MAY be combined on one comment, comma-separated: `# noqa: shared, email`.
 
-Accepted comment prefixes (so the marker fits any file format that the test
-scans):
+Accepted comment prefixes (so the marker fits any file format that the test scans):
 
 | Prefix       | Use in                                  |
 | ------------ | --------------------------------------- |
@@ -39,24 +32,14 @@ Implementation: [utils/annotations/suppress.py](../../../../utils/annotations/su
 
 ## Position semantics 📍
 
-The placement rule is per check. The catalog column "Position" uses these
-labels:
+The placement rule is per check. The catalog column "Position" uses these labels:
 
-- **same line**: the marker MUST be on the same line as the construct
-  it suppresses.
-- **line above**: the marker MUST be on the immediately preceding
-  non-empty line. Blank lines between the marker and the construct
-  break the association.
+- **same line**: the marker MUST be on the same line as the construct it suppresses.
+- **line above**: the marker MUST be on the immediately preceding non-empty line. Blank lines between the marker and the construct break the association.
 - **same or above**: either of the above is accepted.
-- **comment block above**: the marker may sit on any line in a
-  contiguous comment block above the construct (no blank line between
-  marker and construct).
-- **head (first 30 lines)**: the marker MAY appear anywhere in the
-  first 30 lines of the file. Used for file-level opt-outs that should
-  stay visible at the top of the file.
-- **anywhere**: the marker may appear on any line of the file. Used
-  for whole-file opt-outs whose semantics legitimately apply to the
-  entire file.
+- **comment block above**: the marker may sit on any line in a contiguous comment block above the construct (no blank line between marker and construct).
+- **head (first 30 lines)**: the marker MAY appear anywhere in the first 30 lines of the file. Used for file-level opt-outs that should stay visible at the top of the file.
+- **anywhere**: the marker may appear on any line of the file. Used for whole-file opt-outs whose semantics legitimately apply to the entire file.
 
 ## Catalog 📚
 
@@ -77,8 +60,9 @@ labels:
 | `raw-docker`        | same or above; head (first 30 lines) | [test_no_raw_docker.py](../../../../tests/integration/docker/test_no_raw_docker.py)                       | Marks a single line or a whole file under `roles/` as legitimately calling `docker` / `docker compose` / `docker-compose` directly. The check is scoped to `roles/`; bootstrap scripts and CI workflows outside `roles/` are not scanned and need no marker. |
 | `hardcoded-dns-resolver` | same or above | [test_no_hardcoded_dns_resolvers.py](../../../../tests/lint/repository/test_no_hardcoded_dns_resolvers.py) | Marks a line that legitimately needs a literal IP from `NETWORK_PUBLIC_DNS_RESOLVERS` at the substitution point (CoreDNS `forward` directives that don't run through Jinja, host-bootstrap shell scripts, documentation examples). The variable in `group_vars/all/08_networks.yml` is the SPOT for these IPs everywhere else.   |
 | `dynamic-flag`      | same line (per-flag) OR comment block above key (whole block) | [test_services_dynamic_flags.py](../../../../tests/integration/roles/meta/test_services_dynamic_flags.py)                  | Marks a `roles/*/meta/services.yml` flag whose value legitimately stays literal. Per-flag (same line) is the typical shape for databases (`enabled: true` literal, `shared` still dynamic). Block-level (comment block above the service key) is for entries where both flags stay literal (e.g. `css`). |
-| `lookup-config-path`| same or above       | [tests/integration/lookups/config/](../../../../tests/integration/lookups/config/) (literal / variable / wildcard / role-local) | Skips a single `lookup('config', …)` call from every path-validation pass. Use when the call legitimately resolves at runtime against state that is NOT visible to the static scan — typically a self-referential role like `web-app-oauth2-proxy` reading `services.oauth2.*` keys that other roles publish but its own `meta/services.yml` does not. Note: the role-local pass already ignores any call whose app argument is NOT the literal `application_id` (e.g. `_BBB_COTURN_ROLE`, `oauth2_proxy_application_id`), so cross-role lookups need no marker for that pass — only mark them if the literal / variable / wildcard pass complains. |
-| `unused-var`        | same or above       | [tests/lint/ansible/variables/test_role_and_group_vars_used.py](../../../../tests/lint/ansible/variables/test_role_and_group_vars_used.py) | Exempts a top-level key in `roles/<role>/{vars,defaults}/main.yml` or `group_vars/**/*.yml` from the "must be referenced in some `.yml` / `.yaml` / `.j2`" check. Use when the var is consumed somewhere the lint cannot see (Python plugin code, an external tool reading the rendered Ansible inventory, `set_fact` chains driven by computed names, etc.). Do NOT use to silence a legitimately dead var — prune the declaration instead. |
+| `lookup-config-path`| same or above       | [tests/integration/lookups/config/](../../../../tests/integration/lookups/config/) (literal / variable / wildcard / role-local) | Skips a single `lookup('config', …)` call from every path-validation pass. Use when the call legitimately resolves at runtime against state that is NOT visible to the static scan, typically a self-referential role like `web-app-oauth2-proxy` reading `services.oauth2.*` keys that other roles publish but its own `meta/services.yml` does not. Note: the role-local pass already ignores any call whose app argument is NOT the literal `application_id` (e.g. `_BBB_COTURN_ROLE`, `oauth2_proxy_application_id`), so cross-role lookups need no marker for that pass. Mark a call only when the literal / variable / wildcard pass complains. |
+| `unused-var`        | same or above       | [tests/lint/ansible/variables/test_role_and_group_vars_used.py](../../../../tests/lint/ansible/variables/test_role_and_group_vars_used.py) | Exempts a top-level key in `roles/<role>/{vars,defaults}/main.yml` or `group_vars/**/*.yml` from the "must be referenced in some `.yml` / `.yaml` / `.j2`" check. Use when the var is consumed somewhere the lint cannot see (Python plugin code, an external tool reading the rendered Ansible inventory, `set_fact` chains driven by computed names, etc.). Do NOT use to silence a legitimately dead var; prune the declaration instead. |
+| `project-root-import`| same or above      | [tests/lint/repository/test_project_root_import.py](../../../../tests/lint/repository/test_project_root_import.py) | Permits a local `PROJECT_ROOT` / `parents[N]` / `os.pardir` chain on the marked line. Reserved for two cases: a `__main__.py` bootstrap shim that prepends the repo root to `sys.path` before any package import resolves, and a standalone script under `roles/<role>/files/` that has no package container to import from. The marker MUST carry an inline comment that explains why the local computation is unavoidable. |
 
 ## Examples 💡
 
@@ -101,8 +85,7 @@ service_x:
   version: "4.5"
 ```
 
-`direct-yaml`, anywhere on the call's physical line or on any line
-spanned by the multi-line call:
+`direct-yaml`, anywhere on the call's physical line or on any line spanned by the multi-line call:
 
 ```python
 data = yaml.safe_load(text)  # noqa: direct-yaml
@@ -148,17 +131,14 @@ when:
   - run_once_svc_db_openldap is not defined   # noqa: run-once-suffix
 ```
 
-`raw-docker`, per-line on a single role-task line that legitimately calls
-`docker` directly (e.g. a bootstrap step that runs before the `container`
-wrapper is on the path):
+`raw-docker`, per-line on a single role-task line that legitimately calls `docker` directly (e.g. a bootstrap step that runs before the `container` wrapper is on the path):
 
 ```yaml
 - name: "Bootstrap engine before the wrapper exists"
   ansible.builtin.command: docker info  # noqa: raw-docker
 ```
 
-`raw-docker`, file-level at the top of a role's bundled shell script
-that legitimately drives the engine directly:
+`raw-docker`, file-level at the top of a role's bundled shell script that legitimately drives the engine directly:
 
 ```sh
 #!/usr/bin/env bash
@@ -168,9 +148,7 @@ docker buildx build ...
 
 `dynamic-flag`, two placements depending on scope:
 
-Per-flag (same line) — for databases where `enabled: true` reflects a
-static fact about the role's needs but `shared` still resolves
-dynamically:
+Per-flag (same line), for databases where `enabled: true` reflects a static fact about the role's needs but `shared` still resolves dynamically:
 
 ```yaml
 mariadb:
@@ -178,9 +156,7 @@ mariadb:
   shared: "{{ 'svc-db-mariadb' in group_names }}"
 ```
 
-Block-level (comment block above the service key) — for service
-entries whose both flags legitimately stay literal (e.g. `css`,
-`javascript`):
+Block-level (comment block above the service key), for service entries whose both flags legitimately stay literal (e.g. `css`, `javascript`):
 
 ```yaml
 # nocheck: dynamic-flag
@@ -189,9 +165,15 @@ css:
   shared: true
 ```
 
-`unused-var`, on the var declaration line (or directly above it),
-when the var is consumed by Python plugin code or another non-YAML/Jinja
-surface that the static scan cannot reach:
+`project-root-import`, on the line that locally derives the repo root inside a `__main__.py` `sys.path` bootstrap (the marker line MUST explain why the local computation runs before any package import resolves), or inside a standalone script that has no package container to import from:
+
+```python
+PROJECT_ROOT = Path(__file__).resolve().parents[1]  # nocheck: project-root-import, sys.path bootstrap before package imports resolve
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+```
+
+`unused-var`, on the var declaration line (or directly above it), when the var is consumed by Python plugin code or another non-YAML/Jinja surface that the static scan cannot reach:
 
 ```yaml
 # nocheck: unused-var  # consumed by plugins/filter/<role>_render.py
@@ -202,11 +184,7 @@ ROLE_TEMPLATE_PATH: "templates/<role>/render.j2"
 ROLE_TEMPLATE_PATH: "templates/<role>/render.j2"  # nocheck: unused-var  # consumed by plugins/filter/<role>_render.py
 ```
 
-`lookup-config-path`, on the line carrying a `lookup('config', …)`
-call (or directly above it) when the path legitimately resolves
-against runtime-only state that the static scan cannot see — for
-example a self-referential role that consumes the `services.<self>.*`
-keys other roles publish about it:
+`lookup-config-path`, on the line carrying a `lookup('config', …)` call (or directly above it) when the path legitimately resolves against runtime-only state that the static scan cannot see, for example a self-referential role that consumes the `services.<self>.*` keys other roles publish about it:
 
 ```jinja
 # nocheck: lookup-config-path
@@ -217,9 +195,7 @@ upstreams = {{ lookup('config', application_id, 'services.oauth2.origin.host') }
 upstreams = {{ lookup('config', application_id, 'services.oauth2.origin.host') }}  {# nocheck: lookup-config-path #}
 ```
 
-`hardcoded-dns-resolver`, on the line that emits the literal IP, when
-the substitution point cannot consume `NETWORK_PUBLIC_DNS_RESOLVERS`
-(e.g. a CoreDNS `forward` directive in a non-Jinja template):
+`hardcoded-dns-resolver`, on the line that emits the literal IP, when the substitution point cannot consume `NETWORK_PUBLIC_DNS_RESOLVERS` (e.g. a CoreDNS `forward` directive in a non-Jinja template):
 
 ```text
 forward . 1.1.1.1 8.8.8.8  # noqa: hardcoded-dns-resolver
@@ -229,8 +205,5 @@ forward . 1.1.1.1 8.8.8.8  # noqa: hardcoded-dns-resolver
 
 1. Pick a kebab-case `<rule>` identifier.
 2. Decide which position semantic from the list above fits the check.
-3. Use the `is_suppressed_at` / `is_suppressed_in_head` /
-   `is_suppressed_anywhere` helpers from
-   [utils/annotations/suppress.py](../../../../utils/annotations/suppress.py)
-   in your test. Do NOT roll a new regex.
+3. Use the `is_suppressed_at` / `is_suppressed_in_head` / `is_suppressed_anywhere` helpers from [utils/annotations/suppress.py](../../../../utils/annotations/suppress.py) in your test. Do NOT roll a new regex.
 4. Add the rule to the catalog table on this page.
