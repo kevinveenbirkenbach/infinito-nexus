@@ -36,7 +36,7 @@ def must(name: str) -> str:
 
 
 def run(cmd: list[str], cwd: str) -> subprocess.CompletedProcess[str]:
-    return subprocess.run(cmd, cwd=cwd, text=True, capture_output=True)
+    return subprocess.run(cmd, cwd=cwd, text=True, capture_output=True, check=False)
 
 
 def main() -> int:

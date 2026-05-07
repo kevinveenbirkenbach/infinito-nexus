@@ -36,6 +36,7 @@ def run(cmd: list[str], *, cwd: Path, env: dict[str, str]) -> tuple[int, str, st
         env=env,
         text=True,
         capture_output=True,
+        check=False,
     )
     return p.returncode, (p.stdout or ""), (p.stderr or "")
 

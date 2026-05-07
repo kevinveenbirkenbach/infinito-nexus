@@ -7,7 +7,7 @@ from ansible.module_utils.basic import AnsibleModule
 
 
 def run(cmd: list[str]) -> str:
-    p = subprocess.run(cmd, capture_output=True, text=True)
+    p = subprocess.run(cmd, capture_output=True, text=True, check=False)
     if p.returncode != 0:
         raise RuntimeError(p.stderr.strip())
     return (p.stdout or "").strip()

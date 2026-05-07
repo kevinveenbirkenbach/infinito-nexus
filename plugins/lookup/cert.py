@@ -62,12 +62,12 @@ def _require_current_play_domains_all_strict(variables: dict) -> list[str]:
         )
 
     cleaned: list[str] = []
-    for item in value:
-        if not isinstance(item, str):
+    for raw_item in value:
+        if not isinstance(raw_item, str):
             raise AnsibleError(
                 "cert(strict): CURRENT_PLAY_DOMAINS_ALL must contain only strings."
             )
-        item = item.strip()
+        item = raw_item.strip()
         if not item:
             raise AnsibleError(
                 "cert(strict): CURRENT_PLAY_DOMAINS_ALL must not contain empty strings."

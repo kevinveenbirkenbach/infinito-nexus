@@ -95,7 +95,6 @@ class Compose:
         for i in range(1, int(attempts) + 1):
             try:
                 self.run(args, check=True)
-                return
             except Exception as exc:
                 last_exc = exc
 
@@ -107,6 +106,8 @@ class Compose:
                     f">>> Retrying in {int(delay_s)}s..."
                 )
                 time.sleep(int(delay_s))
+            else:
+                return
 
         if last_exc is not None:
             raise last_exc

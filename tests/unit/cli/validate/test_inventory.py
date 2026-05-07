@@ -53,6 +53,7 @@ class TestValidateInventory(unittest.TestCase):
             capture_output=True,
             encoding="utf-8",
             cwd=self.temp_dir,
+            check=False,
         )
         if result.returncode != expected_code:
             print("STDOUT:", result.stdout)

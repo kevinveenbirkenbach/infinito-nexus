@@ -281,8 +281,8 @@ def resolve_service_dependency_roles_from_config(
 ) -> list[str]:
     services = _as_mapping(config.get("services"))
     includes: list[str] = []
-    for service_key, service_conf in services.items():
-        service_conf = _as_mapping(service_conf)
+    for service_key, raw_service_conf in services.items():
+        service_conf = _as_mapping(raw_service_conf)
         if not (
             is_explicit_truth(service_conf.get("enabled"))
             and is_explicit_truth(service_conf.get("shared"))

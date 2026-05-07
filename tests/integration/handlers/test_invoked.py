@@ -126,8 +126,8 @@ def collect_handler_groups(handler_file: str) -> list[set[str]]:
 
         # listen aliases (string or list)
         if "listen" in entry:
-            for item in as_str_list(entry["listen"]):
-                item = item.strip()
+            for raw_item in as_str_list(entry["listen"]):
+                item = raw_item.strip()
                 if item:
                     names.add(item)
 

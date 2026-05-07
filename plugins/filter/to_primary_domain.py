@@ -26,10 +26,8 @@ class FilterModule:
             raise AnsibleFilterError("Input to to_primary_domain must be a string")
         try:
             res = tld.get_fld(domain, fix_protocol=True)
-            if not res:
-                raise AnsibleFilterError(
-                    f"Could not extract primary domain from: {domain}"
-                )
-            return res
         except (TldDomainNotFound, TldBadUrl) as exc:
             raise AnsibleFilterError(str(exc)) from exc
+        if not res:
+            raise AnsibleFilterError(f"Could not extract primary domain from: {domain}")
+        return res

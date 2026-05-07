@@ -117,7 +117,7 @@ def run_ansible_playbook(
         cmd.extend(ansible_args)
 
     print("\n🚀 Launching Ansible Playbook...\n")
-    result = subprocess.run(cmd, cwd=repo_root)
+    result = subprocess.run(cmd, cwd=repo_root, check=False)
 
     if result.returncode != 0:
         print(

@@ -123,8 +123,7 @@ def build_modes_from_args(
             # if user passed --bar => enable => True, otherwise False
             modes[mode_name] = bool(value)
 
-        else:  # explicit
-            if value is not None:
-                modes[mode_name] = value == "true"
+        elif value is not None:
+            modes[mode_name] = value == "true"
 
     return modes

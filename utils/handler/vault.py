@@ -39,7 +39,7 @@ class VaultHandler:
             "--vault-password-file",
             self.vault_password_file,
         ]
-        proc = subprocess.run(cmd, capture_output=True, text=True)
+        proc = subprocess.run(cmd, capture_output=True, text=True, check=False)
         if proc.returncode != 0:
             raise RuntimeError(f"ansible-vault encrypt_string failed:\n{proc.stderr}")
         return proc.stdout
@@ -49,15 +49,12 @@ class VaultHandler:
         for key, value in branch.items():
             if isinstance(value, dict):
                 self.encrypt_leaves(value, vault_pw)  # Recurse into nested dictionaries
-            else:
-                # Skip if already vaulted (i.e., starts with $ANSIBLE_VAULT)
-                if isinstance(value, str) and not value.lstrip().startswith(
-                    "$ANSIBLE_VAULT"
-                ):
-                    snippet = self.encrypt_string(value, key)
-                    lines = snippet.splitlines()
-                    indent = len(lines[1]) - len(lines[1].lstrip())
-                    body = "\n".join(line[indent:] for line in lines[1:])
-                    branch[key] = VaultScalar(
-                        body
-                    )  # Store encrypted value as VaultScalar
+            # Skip if already vaulted (i.e., starts with $ANSIBLE_VAULT)
+            elif isinstance(value, str) and not value.lstrip().startswith(
+                "$ANSIBLE_VAULT"
+            ):
+                snippet = self.encrypt_string(value, key)
+                lines = snippet.splitlines()
+                indent = len(lines[1]) - len(lines[1].lstrip())
+                body = "\n".join(line[indent:] for line in lines[1:])
+                branch[key] = VaultScalar(body)  # Store encrypted value as VaultScalar

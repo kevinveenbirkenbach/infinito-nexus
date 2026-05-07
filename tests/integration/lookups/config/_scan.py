@@ -102,12 +102,11 @@ def expr_to_wildcard_path(expr: str) -> str | None:
                 parts.append("*")
                 i = j
             expecting_value = False
+        elif ch == "~":
+            expecting_value = True
+            i += 1
         else:
-            if ch == "~":
-                expecting_value = True
-                i += 1
-            else:
-                return None
+            return None
     if expecting_value:
         return None
     raw = "".join(parts)

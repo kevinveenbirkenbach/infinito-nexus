@@ -13,7 +13,7 @@ def load_yaml(path: Path) -> dict[str, Any]:
     inventory CLI's existing error UX."""
     try:
         return _cached_load_yaml(path, default_if_missing={})
-    except ValueError as exc:
+    except TypeError as exc:
         raise SystemExit(str(exc)) from exc
 
 

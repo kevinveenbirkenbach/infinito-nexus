@@ -46,7 +46,9 @@ class FilterModule:
             elif isinstance(domains_dict, str):
                 flat = [domains_dict]
             else:
-                raise AnsibleFilterError(
+                # nocheck (TRY301 below): re-raised verbatim by the
+                # AnsibleFilterError handler — intentional pass-through.
+                raise AnsibleFilterError(  # noqa: TRY301
                     "Expected 'domains_dict' to be dict | list | str."
                 )
 

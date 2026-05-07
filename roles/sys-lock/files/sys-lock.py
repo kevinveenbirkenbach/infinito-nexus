@@ -33,7 +33,7 @@ def check_service_active(service_name):
     Check if a systemd service is currently active or activating.
     """
     result = subprocess.run(
-        ["systemctl", "is-active", service_name], stdout=subprocess.PIPE
+        ["systemctl", "is-active", service_name], stdout=subprocess.PIPE, check=False
     )
     service_status = result.stdout.decode("utf-8").strip()
     is_active = service_status in ["active", "activating"]

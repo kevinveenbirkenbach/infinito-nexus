@@ -25,13 +25,11 @@ def _get_ansible_playbook_help() -> str:
             check=False,
         )
         out = (cp.stdout or "").rstrip()
-        if not out:
-            return "[ansible-playbook --help returned no output]"
-        return out
     except FileNotFoundError:
         return "[ansible-playbook not found in PATH]"
     except Exception as exc:
         return f"[failed to run ansible-playbook --help: {exc}]"
+    return out or "[ansible-playbook --help returned no output]"
 
 
 def _passthrough_explanation() -> str:

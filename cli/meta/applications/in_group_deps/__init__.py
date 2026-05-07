@@ -16,8 +16,5 @@ PROJECT_ROOT: Path = Path(__file__).resolve().parents[4]
 # constant has to be defined first.
 from . import __main__ as _main  # noqa: E402
 
-__all__ = getattr(_main, "__all__", [n for n in dir(_main) if not n.startswith("_")])
+__all__ = getattr(_main, "__all__", [n for n in dir(_main) if not n.startswith("_")])  # noqa: PLE0605
 globals().update({name: getattr(_main, name) for name in __all__})
-
-# Prefer explicit __all__ if the original module defined it.
-__all__ = getattr(_main, "__all__", [n for n in dir(_main) if not n.startswith("_")])

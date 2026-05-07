@@ -192,7 +192,7 @@ def _load_variants_overrides(path: Path) -> list[dict[str, Any]]:
     if raw in (None, {}):
         return [{}]
     if not isinstance(raw, list):
-        raise ValueError(
+        raise TypeError(
             f"{path} must contain a YAML list of override mappings (or be empty)."
         )
     if not raw:

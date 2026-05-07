@@ -82,14 +82,14 @@ class TestInGroupDepsResolver(unittest.TestCase):
         self.assertIn("svc-db-mariadb", result)
 
     def test_invalid_inputs_raise(self) -> None:
-        with self.assertRaises(ValueError):
+        with self.assertRaises(TypeError):
             deps_mod.applications_if_group_and_all_deps(
                 "not-a-dict",
                 [],
                 project_root="/unused",
                 roles_dir="/unused",
             )
-        with self.assertRaises(ValueError):
+        with self.assertRaises(TypeError):
             deps_mod.applications_if_group_and_all_deps(
                 {},
                 "not-a-list",

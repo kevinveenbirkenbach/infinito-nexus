@@ -16,6 +16,7 @@ def run_cmd(cmd: list[str], *, cwd: Path, env: dict[str, str]) -> tuple[int, str
         text=True,
         stdout=subprocess.PIPE,
         stderr=subprocess.STDOUT,
+        check=False,
     )
     return p.returncode, p.stdout or ""
 
@@ -131,7 +132,8 @@ def main() -> int:
 
 if __name__ == "__main__":
     try:
-        raise SystemExit(main())
+        rc = main()
     except Exception as exc:
         print(f"[ERROR] {exc}", file=sys.stderr)
         raise SystemExit(1) from exc
+    raise SystemExit(rc)

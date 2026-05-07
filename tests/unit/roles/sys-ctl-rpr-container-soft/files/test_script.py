@@ -49,8 +49,9 @@ class TestRepairDockerSoft(unittest.TestCase):
         calls = {"checks": 0, "sleeps": 0}
         t = {"now": 0}
 
-        def fake_run(cmd, shell):
+        def fake_run(cmd, shell, check):
             self.assertIn("systemctl is-active --quiet", cmd)
+            self.assertFalse(check)
             calls["checks"] += 1
             return types.SimpleNamespace(returncode=0)
 

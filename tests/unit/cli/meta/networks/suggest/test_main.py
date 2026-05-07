@@ -26,7 +26,7 @@ class TestNetworksSuggest(unittest.TestCase):
             return iter(iter_subnets_yield)
 
         with (
-            patch.object(netsuggest, "iter_subnets", side_effect=lambda: _factory()),
+            patch.object(netsuggest, "iter_subnets", side_effect=_factory),
             patch("sys.argv", ["suggest", *argv]),
         ):
             buf_out = io.StringIO()

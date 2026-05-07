@@ -44,6 +44,7 @@ def run(cmd: list[str], cwd: str | None, verbose: bool) -> RunResult:
         cwd=cwd,
         text=True,
         capture_output=True,
+        check=False,
     )
     return RunResult(
         p.returncode,

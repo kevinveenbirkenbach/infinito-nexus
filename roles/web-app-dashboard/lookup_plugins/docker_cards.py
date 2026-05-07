@@ -64,7 +64,9 @@ class LookupModule(LookupBase):
             vars_path = str(Path(role_dir) / "vars" / "main.yml")
             try:
                 if not Path(vars_path).is_file():
-                    raise AnsibleError(
+                    # nocheck (TRY301): wrapped with role context by the
+                    # outer Exception handler.
+                    raise AnsibleError(  # noqa: TRY301
                         f"Vars file not found for role '{role_basename}': {vars_path}"
                     )
                 vars_data = load_yaml_any(vars_path, default_if_missing={}) or {}
@@ -74,7 +76,11 @@ class LookupModule(LookupBase):
                     else None
                 )
                 if not application_id:
-                    raise AnsibleError(f"Key 'application_id' not found in {vars_path}")
+                    # nocheck (TRY301): wrapped with role context by the
+                    # outer Exception handler.
+                    raise AnsibleError(  # noqa: TRY301
+                        f"Key 'application_id' not found in {vars_path}"
+                    )
             except Exception as e:
                 raise AnsibleError(
                     f"Error getting application_id for role '{role_basename}': {e}"

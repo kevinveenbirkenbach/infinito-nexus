@@ -135,7 +135,7 @@ def main() -> None:
         # First: if "<path>" is a real command, forward help to its argparse
         module, remaining = resolve_command_module(cli_dir, args[:-1])
         if module and not remaining:
-            subprocess.run([sys.executable, "-m", module, "--help"])
+            subprocess.run([sys.executable, "-m", module, "--help"], check=False)
             raise SystemExit(0)
 
         # Otherwise: treat it as a folder overview
@@ -151,7 +151,7 @@ def main() -> None:
 
     # If user requested help for the resolved command, forward directly
     if remaining and remaining[0] in ("-h", "--help"):
-        subprocess.run([sys.executable, "-m", module, remaining[0]])
+        subprocess.run([sys.executable, "-m", module, remaining[0]], check=False)
         raise SystemExit(0)
 
     log_file = None

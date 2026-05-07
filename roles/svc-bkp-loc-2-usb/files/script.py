@@ -20,7 +20,7 @@ def main():
         sys.exit(1)
 
     machine_id = subprocess.run(
-        ["sha256sum", "/etc/machine-id"], capture_output=True, text=True
+        ["sha256sum", "/etc/machine-id"], capture_output=True, text=True, check=True
     ).stdout.strip()[:64]
     print(f"machine id: {machine_id}")
 

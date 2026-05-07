@@ -13,12 +13,12 @@ def parse_roles_list(raw_roles: list[str] | None) -> set[str] | None:
     if not raw_roles:
         return None
     result: set[str] = set()
-    for token in raw_roles:
-        token = token.strip()
+    for raw_token in raw_roles:
+        token = raw_token.strip()
         if not token:
             continue
-        for part in token.split(","):
-            part = part.strip()
+        for raw_part in token.split(","):
+            part = raw_part.strip()
             if part:
                 result.add(part)
     return result

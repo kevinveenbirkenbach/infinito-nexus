@@ -69,7 +69,7 @@ class LookupModule(LookupBase):
                 service_registry=service_registry,
                 meta_deps_resolver=self._meta_deps,
             )
-        except ValueError as exc:
+        except (TypeError, ValueError) as exc:
             raise AnsibleError(f"applications_current_play: {exc}") from exc
 
         _CURRENT_PLAY_CACHE[cache_key] = result

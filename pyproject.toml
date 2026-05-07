@@ -92,6 +92,20 @@ exclude = [
 # - `ISC`  (flake8-implicit-str-concat) — accidental `"foo" "bar"` typos
 # - `SLOT` (flake8-slots)       — require `__slots__` on `str`/`tuple`/`namedtuple` subclasses
 # - `FLY`  (flynt)              — `"{}".format(x)` → f-string
+# - `PYI`  (flake8-pyi)         — stub-hygiene rules (also fire on `.py`)
+# - `PLE0605`               — `__all__` must be a `list`/`tuple` (not a single str)
+# - `PLW1510`               — `subprocess.run(...)` without `check=` swallows non-zero exits
+# - `PLW2901`               — loop variable rebound inside the body (typo/bug class)
+# - `PLW0108`               — `lambda x: f(x)` → just `f`
+# - `PLW0603`               — `global` statement (code smell)
+# - `PLR5501`               — `else: if …` → `elif` (auto-fixable)
+# - `PLC0207`               — `.split()`/`.rsplit()` should use `maxsplit=` when only the first/last segment is used
+# - `PLR1722`               — `sys.exit(0)` over `exit(0)` (interpreter-only alias)
+# - `PLR1714`               — collapse repeated `x == "a" or x == "b"` into `x in {"a", "b"}`
+# - `TRY002`                — don't `raise Exception(...)` (use a specific class)
+# - `TRY004`                — type-check failures must `raise TypeError`, not `ValueError`
+# - `TRY300`                — put the success-path under `else:` so `except:` only sees the dangerous bit
+# - `TRY301`                — don't `raise` inside `try:` for an exception caught by the same `except:`
 select = [
     "E", "F", "I", "B", "UP", "RUF", "SIM", "C4", "PERF", "RET", "PIE",
     "T10", "PGH", "EXE", "RSE", "ICN", "DTZ",
@@ -99,6 +113,11 @@ select = [
     "S",
     "PTH",
     "FURB", "W", "FA", "YTT", "A", "ISC", "SLOT", "FLY",
+    "PYI",
+    "PLE0605",
+    "PLW1510", "PLW2901", "PLW0108", "PLW0603",
+    "PLR5501", "PLC0207", "PLR1722", "PLR1714",
+    "TRY002", "TRY004", "TRY300", "TRY301",
 ]
 
 # `ruff format` (run via `make autoformat`) reflows whatever it can.

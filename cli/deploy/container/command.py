@@ -36,6 +36,7 @@ def ensure_image(image: str, rebuild: bool = False, no_cache: bool = False) -> N
         ["docker", "image", "inspect", image],
         stdout=subprocess.DEVNULL,
         stderr=subprocess.DEVNULL,
+        check=False,
     )
     if result.returncode == 0:
         print(f">>> Docker image '{image}' already exists.")
@@ -76,6 +77,7 @@ def _docker_exec_capture(
         cmd,
         capture_output=True,
         text=True,
+        check=False,
     )
 
 
@@ -288,6 +290,7 @@ def run_in_container(
                 ["docker", "rm", "-f", container_name],
                 stdout=subprocess.DEVNULL,
                 stderr=subprocess.DEVNULL,
+                check=False,
             )
 
 

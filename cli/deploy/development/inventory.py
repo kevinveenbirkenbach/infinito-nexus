@@ -384,9 +384,12 @@ def build_dev_inventory_matrix(
         base_inventory_dir=base_inventory_dir,
     )
     allow: set[str] | None = set(include_filter) if include_filter is not None else None
-    for _round_index, inv_dir, round_variants, include_R in plan:
-        if allow is not None:
-            include_R = tuple(role for role in include_R if role in allow)
+    for _round_index, inv_dir, round_variants, raw_include_R in plan:
+        include_R = (
+            tuple(role for role in raw_include_R if role in allow)
+            if allow is not None
+            else raw_include_R
+        )
         spec = DevInventorySpec(
             inventory_dir=inv_dir,
             include=include_R,

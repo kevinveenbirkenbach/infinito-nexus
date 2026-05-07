@@ -30,8 +30,6 @@ class FilterModule:
 
             if group in group_names:
                 redirects.append({"source": source, "target": target})
-
-            return redirects
-
         except Exception as exc:
             raise AnsibleFilterError(f"add_redirect_if_group failed: {exc}") from exc
+        return redirects

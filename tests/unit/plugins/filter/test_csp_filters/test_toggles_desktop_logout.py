@@ -20,8 +20,8 @@ class TestCspTogglesDashboardLogout(unittest.TestCase):
         }
 
     def _get_directive_tokens(self, header: str, directive: str):
-        for part in header.split(";"):
-            part = part.strip()
+        for raw_part in header.split(";"):
+            part = raw_part.strip()
             if part.startswith(directive + " "):
                 remainder = part[len(directive) :].strip()
                 return [tok for tok in remainder.split(" ") if tok]

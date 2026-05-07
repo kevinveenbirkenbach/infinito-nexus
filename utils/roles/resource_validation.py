@@ -41,7 +41,7 @@ def _parse_storage_to_gb(value: Any) -> float:
 def filter_roles_by_min_storage(
     *,
     role_names: Iterable[str],
-    required_storage: str | int | float,
+    required_storage: str | float,
     emit_warnings: bool = False,
 ) -> list[str]:
     roles_root_path = _roles_root()
@@ -115,11 +115,10 @@ def filter_roles_by_min_storage(
 
         if min_storage_gb <= required_gb:
             out.append(role_name)
-        else:
-            if emit_warnings:
-                warning(
-                    f"{role_name} requires {min_storage_gb:.1f}GB but runner provides only {required_gb:.1f}GB",
-                    title="min_storage validation",
-                )
+        elif emit_warnings:
+            warning(
+                f"{role_name} requires {min_storage_gb:.1f}GB but runner provides only {required_gb:.1f}GB",
+                title="min_storage validation",
+            )
 
     return out

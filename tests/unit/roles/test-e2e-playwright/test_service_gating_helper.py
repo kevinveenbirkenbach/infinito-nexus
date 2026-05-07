@@ -95,6 +95,7 @@ class TestServiceGatingHelper(unittest.TestCase):
             env={**os.environ, **env},
             cwd=self.tmpdir,
             timeout=10,
+            check=False,
         )
 
     # isServiceEnabled -----------------------------------------------------

@@ -42,14 +42,16 @@ class CLIHelpIntegrationTest(unittest.TestCase):
             commands.append(list(Path(rel_dir).parts))
 
         # stable order for test output
-        commands.sort(key=lambda s: "/".join(s))
+        commands.sort(key="/".join)
         return commands
 
     def test_all_cli_commands_help(self):
         for segments in self._discover_command_dirs():
             with self.subTest(command=" ".join(segments)):
                 cmd = [self.python, self.main_py, *segments, "--help"]
-                result = subprocess.run(cmd, capture_output=True, text=True)
+                result = subprocess.run(
+                    cmd, capture_output=True, text=True, check=False
+                )
                 self.assertEqual(
                     result.returncode,
                     0,

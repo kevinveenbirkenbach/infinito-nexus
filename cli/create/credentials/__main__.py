@@ -351,15 +351,14 @@ def main() -> int:
             data["ansible_become_password"] = to_vault_block(
                 manager.vault_handler, val, "ansible_become_password"
             )
-    else:
-        if args.force and "ansible_become_password" in overrides:
-            do_overwrite = args.yes or ask_for_confirmation("ansible_become_password")
-            if do_overwrite:
-                data["ansible_become_password"] = to_vault_block(
-                    manager.vault_handler,
-                    overrides["ansible_become_password"],
-                    "ansible_become_password",
-                )
+    elif args.force and "ansible_become_password" in overrides:
+        do_overwrite = args.yes or ask_for_confirmation("ansible_become_password")
+        if do_overwrite:
+            data["ansible_become_password"] = to_vault_block(
+                manager.vault_handler,
+                overrides["ansible_become_password"],
+                "ansible_become_password",
+            )
 
     # 5) Overrides for existing credential keys (only with --force)
     if args.force:

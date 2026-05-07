@@ -1,13 +1,12 @@
 from __future__ import annotations
 
+from functools import cache
 from pathlib import Path
 from typing import Any
 
 from utils.entity_name_utils import get_entity_name
 
 from . import yaml_io
-
-_KNOWN_ROLES_CACHE: set[str] | None = None
 
 
 def build_network_index(networks_file: Path) -> dict[str, dict[str, Any]]:
@@ -106,10 +105,6 @@ def _split_role_and_entity(
     return combined_key, None
 
 
-def _all_role_names(roles_dir: Path) -> set[str]:
-    global _KNOWN_ROLES_CACHE
-    if _KNOWN_ROLES_CACHE is None:
-        _KNOWN_ROLES_CACHE = {
-            child.name for child in roles_dir.iterdir() if child.is_dir()
-        }
-    return _KNOWN_ROLES_CACHE
+@cache
+def _all_role_names(roles_dir: Path) -> frozenset[str]:
+    return frozenset(child.name for child in roles_dir.iterdir() if child.is_dir())

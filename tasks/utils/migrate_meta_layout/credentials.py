@@ -49,9 +49,11 @@ def convert_runtime_to_schema(node: Any) -> Any:
         if isinstance(value, dict):
             looks_like_schema = any(k in value for k in _SCHEMA_LEAF_KEYS)
             if looks_like_schema:
-                if "algorithm" not in value:
-                    value = {"algorithm": "plain", **value}
-                converted[key] = value
+                converted[key] = (
+                    {"algorithm": "plain", **value}
+                    if "algorithm" not in value
+                    else value
+                )
             else:
                 converted[key] = convert_runtime_to_schema(value)
         else:

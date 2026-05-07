@@ -209,6 +209,7 @@ class TestApplicationsImportableWithoutAnsible(unittest.TestCase):
             text=True,
             cwd=str(repo_root),
             timeout=60,
+            check=False,
         )
         self.assertEqual(
             result.returncode,

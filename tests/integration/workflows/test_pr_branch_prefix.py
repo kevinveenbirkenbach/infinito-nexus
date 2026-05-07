@@ -23,6 +23,7 @@ class TestPullRequestBranchPrefix(unittest.TestCase):
             env=env,
             capture_output=True,
             text=True,
+            check=False,
         )
 
     def test_agents_scope_accepts_agent_prefix(self):

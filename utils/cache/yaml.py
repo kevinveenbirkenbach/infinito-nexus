@@ -103,12 +103,12 @@ def load_yaml(path, *, default_if_missing: Any = _MISSING) -> dict[str, Any]:
       does not exist, mirroring the historical
       `cli.create.inventory.yaml_io.load_yaml` behaviour.
 
-    Raises `ValueError` when the YAML root is not a mapping; use
+    Raises `TypeError` when the YAML root is not a mapping; use
     `load_yaml_any` for files whose root is a list or scalar.
     """
     data = _load_raw(path, default_if_missing=default_if_missing)
     if not isinstance(data, dict):
-        raise ValueError(
+        raise TypeError(
             f"Expected a YAML mapping at top-level in {path}, got {type(data).__name__}"
         )
     return data

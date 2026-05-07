@@ -57,16 +57,13 @@ def process_role(role_dir: Path, prefix: str, preview: bool, overwrite: bool):
             print(
                 f"Mismatch in {vars_file}: application_id='{actual_id}', expected='{expected_id}'"
             )
+    # Create new vars/main.yml
+    elif preview:
+        print(f"[PREVIEW] Would create {vars_file} with application_id: {expected_id}")
     else:
-        # Create new vars/main.yml
-        if preview:
-            print(
-                f"[PREVIEW] Would create {vars_file} with application_id: {expected_id}"
-            )
-        else:
-            vars_dir.mkdir(parents=True, exist_ok=True)
-            dump_yaml(vars_file, {"application_id": expected_id})
-            print(f"Created {vars_file} with application_id: {expected_id}")
+        vars_dir.mkdir(parents=True, exist_ok=True)
+        dump_yaml(vars_file, {"application_id": expected_id})
+        print(f"Created {vars_file} with application_id: {expected_id}")
 
 
 def run(prefix: str, preview: bool = False, overwrite: bool = False):

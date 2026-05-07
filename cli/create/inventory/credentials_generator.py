@@ -48,7 +48,7 @@ def _generate_credentials_snippet_for_app(
         "--allow-empty-plain",
     ]
 
-    result = subprocess.run(cmd, text=True, capture_output=True, env=env)
+    result = subprocess.run(cmd, text=True, capture_output=True, env=env, check=False)
     if result.returncode != 0:
         _fatal(
             f"Command failed ({result.returncode}): {' '.join(cmd)}\n"

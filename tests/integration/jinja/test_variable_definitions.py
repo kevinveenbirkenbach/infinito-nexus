@@ -152,9 +152,8 @@ class TestVariableDefinitions(unittest.TestCase):
                             m = self.mapping_key.match(stripped)
                             if m:
                                 self.defined.add(m.group(1))
-                        else:
-                            if indent <= set_fact_indent and stripped:
-                                in_set_fact = False
+                        elif indent <= set_fact_indent and stripped:
+                            in_set_fact = False
 
                     # --- vars: block (collect mapping keys)
                     if self.ansible_vars_block.match(stripped):
@@ -167,9 +166,8 @@ class TestVariableDefinitions(unittest.TestCase):
                             m = self.mapping_key.match(stripped)
                             if m:
                                 self.defined.add(m.group(1))
-                        else:
-                            if indent <= vars_block_indent and stripped:
-                                in_vars_block = False
+                        elif indent <= vars_block_indent and stripped:
+                            in_vars_block = False
 
                     # --- Always scan every line (including inside blocks) for Jinja definitions
                     for m in self.jinja_set_def.finditer(line):
@@ -187,10 +185,10 @@ class TestVariableDefinitions(unittest.TestCase):
                     for m in self.jinja_macro_def.finditer(line):
                         params_blob = m.group(1)
                         params = [p.strip() for p in params_blob.split(",")]
-                        for p in params:
-                            if not p:
+                        for raw_p in params:
+                            if not raw_p:
                                 continue
-                            p = p.lstrip("*")
+                            p = raw_p.lstrip("*")
                             name = p.split("=", 1)[0].strip()
                             if re.match(r"^[a-zA-Z_]\w*$", name):
                                 self.defined.add(name)

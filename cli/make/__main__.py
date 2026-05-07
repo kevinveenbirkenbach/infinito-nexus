@@ -38,7 +38,7 @@ def main():
     # Invoke make in repo root
     cmd = ["make", *make_args]
     try:
-        result = subprocess.run(cmd, cwd=repo_root)
+        result = subprocess.run(cmd, cwd=repo_root, check=False)
         sys.exit(result.returncode)
     except FileNotFoundError:
         print("Error: 'make' command not found. Please install make.", file=sys.stderr)

@@ -94,16 +94,18 @@ class TestVariablePaths(unittest.TestCase):
             subpath = dotted.split(".", 1)[1]
             try:
                 assert_nested(ctx.user_defaults, subpath, "user_defaults")
-                return True
             except PathNotFound:
                 pass
+            else:
+                return True
 
         for cfg in ctx.application_defaults.values():
             try:
                 assert_nested(cfg, dotted, "application_defaults")
-                return True
             except PathNotFound:
                 pass
+            else:
+                return True
         return False
 
 

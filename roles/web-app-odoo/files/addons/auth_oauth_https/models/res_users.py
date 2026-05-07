@@ -91,13 +91,6 @@ class ResUsersOAuthConfigurableUid(models.Model):
             # ir_attachment._check_contents() → env.user._get_group_ids()
             # on an empty env.user (public/unauthenticated OAuth callback).
             sudo_model.env.flush_all()
-            _logger.info(
-                "OAuth auto-provisioned user login=%s oauth_uid=%s provider=%s",
-                new_user.login,
-                oauth_uid,
-                provider,
-            )
-            return new_user.login
         except Exception:
             _logger.exception(
                 "OAuth signup failed for provider=%s user_id=%s email=%s values=%s",
@@ -107,6 +100,13 @@ class ResUsersOAuthConfigurableUid(models.Model):
                 create_values,
             )
             raise AccessDenied from None
+        _logger.info(
+            "OAuth auto-provisioned user login=%s oauth_uid=%s provider=%s",
+            new_user.login,
+            oauth_uid,
+            provider,
+        )
+        return new_user.login
 
     @api.model
     def _auth_oauth_validate(self, provider, access_token):

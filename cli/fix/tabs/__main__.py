@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 import argparse
+import sys
 from pathlib import Path
 
 FILES_FIXED = []
@@ -41,7 +42,7 @@ def main():
 
     if not base_path.exists():
         print(f"❌ Path does not exist: {base_path}")
-        exit(1)
+        sys.exit(1)
 
     print(f"🔍 Searching for .yml files under: {base_path}\n")
 

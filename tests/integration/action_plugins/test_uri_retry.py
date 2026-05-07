@@ -121,6 +121,7 @@ class TestUriRetryActionPluginIntegration(unittest.TestCase):
                     env=env,
                     capture_output=True,
                     text=True,
+                    check=False,
                 )
 
                 return result, counters

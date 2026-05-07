@@ -137,10 +137,10 @@ def collect_role_resources(
         )
 
     shared_dependencies: list[str] = []
-    for service_key, service_conf in services.items():
+    for service_key, raw_service_conf in services.items():
         if service_key == entity_name:
             continue
-        service_conf = _as_mapping(service_conf)
+        service_conf = _as_mapping(raw_service_conf)
         if not service_conf:
             continue
 

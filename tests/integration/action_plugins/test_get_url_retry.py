@@ -126,6 +126,7 @@ class TestGetUrlRetryActionPluginIntegration(unittest.TestCase):
                     env=env,
                     capture_output=True,
                     text=True,
+                    check=False,
                 )
 
                 default_content = default_dest.read_text(encoding="utf-8")

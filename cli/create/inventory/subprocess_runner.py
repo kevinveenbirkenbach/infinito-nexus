@@ -13,9 +13,11 @@ def run_subprocess(
     Raise SystemExit on non-zero return code.
     """
     if capture_output:
-        result = subprocess.run(cmd, text=True, capture_output=True, env=env)
+        result = subprocess.run(
+            cmd, text=True, capture_output=True, env=env, check=False
+        )
     else:
-        result = subprocess.run(cmd, text=True, env=env)
+        result = subprocess.run(cmd, text=True, env=env, check=False)
 
     if result.returncode != 0:
         msg = f"Command failed: {' '.join(str(c) for c in cmd)}\n"

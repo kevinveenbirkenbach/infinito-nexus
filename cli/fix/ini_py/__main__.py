@@ -7,6 +7,7 @@ folder relative to the project root.
 
 import argparse
 import os
+import sys
 from pathlib import Path
 
 
@@ -40,7 +41,7 @@ def main():
         print(
             f"Error: The folder '{args.folder}' does not exist or is not a directory."
         )
-        exit(1)
+        sys.exit(1)
 
     create_init_files(root_folder)
 

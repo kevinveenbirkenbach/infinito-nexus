@@ -18,8 +18,8 @@ class TestCspStyleSrcElemDefaultInline(unittest.TestCase):
         }
 
     def _get_directive_tokens(self, header: str, directive: str):
-        for part in header.split(";"):
-            part = part.strip()
+        for raw_part in header.split(";"):
+            part = raw_part.strip()
             if not part:
                 continue
             if part.startswith(directive + " "):

@@ -62,10 +62,9 @@ def active_docker_container_count(
             if isinstance(enabled, bool):
                 if enabled:
                     count += 1
-            else:
-                # non-bool enabled -> treat "truthy" as enabled
-                if bool(enabled):
-                    count += 1
+            # non-bool enabled -> treat "truthy" as enabled
+            elif bool(enabled):
+                count += 1
 
     if ensure_min_one and count < 1:
         return 1

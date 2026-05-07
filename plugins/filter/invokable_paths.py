@@ -57,7 +57,7 @@ def get_invokable_paths(
         raise yaml.YAMLError(f"Error parsing YAML {roles_file}: {e}") from e
 
     if not isinstance(data, dict):
-        raise ValueError("YAML root is not a dictionary")
+        raise TypeError("YAML root is not a dictionary")
 
     roles = data
     if "roles" in roles and isinstance(roles["roles"], dict) and len(roles) == 1:
@@ -108,7 +108,7 @@ def get_non_invokable_paths(
         raise yaml.YAMLError(f"Error parsing YAML {roles_file}: {e}") from e
 
     if not isinstance(data, dict):
-        raise ValueError("YAML root is not a dictionary")
+        raise TypeError("YAML root is not a dictionary")
 
     roles = data
     if "roles" in roles and isinstance(roles["roles"], dict) and len(roles) == 1:

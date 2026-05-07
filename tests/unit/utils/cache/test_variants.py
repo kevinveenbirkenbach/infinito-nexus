@@ -68,7 +68,7 @@ class TestLoadYamlVariantList(unittest.TestCase):
 
     def test_non_list_root_rejected(self):
         path = Path(self._write_tmp("a: 1\n"))
-        with self.assertRaises(ValueError):
+        with self.assertRaises(TypeError):
             _load_yaml_variant_list(path)
 
     def test_non_mapping_entry_rejected(self):

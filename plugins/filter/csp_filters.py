@@ -71,9 +71,9 @@ class FilterModule:
                 existing.append(snippet)
             app_entry[directive] = existing
             result[application_id] = app_entry
-            return result
         except Exception as exc:
             raise AnsibleFilterError(f"add_csp_hash failed: {exc}") from exc
+        return result
 
     # -------------------------------
     # Helpers
@@ -168,9 +168,9 @@ class FilterModule:
         try:
             digest = hashlib.sha256(content.encode("utf-8")).digest()
             b64 = base64.b64encode(digest).decode("utf-8")
-            return f"'sha256-{b64}'"
         except Exception as exc:
             raise AnsibleFilterError(f"get_csp_hash failed: {exc}") from exc
+        return f"'sha256-{b64}'"
 
     @staticmethod
     def get_extra_values(extra_mapping, directive):

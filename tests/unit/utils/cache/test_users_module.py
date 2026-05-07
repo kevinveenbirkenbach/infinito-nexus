@@ -38,7 +38,7 @@ def _seed_minimal_user_role(tmp: Path, role_name: str = "web-app-foo") -> Path:
     _write(
         role / "meta" / "users.yml",
         f"""
-        {role_name.split("-")[-1]}:
+        {role_name.rsplit("-", maxsplit=1)[-1]}:
           description: "test-only user"
         """,
     )

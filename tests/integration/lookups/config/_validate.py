@@ -75,9 +75,10 @@ def validate_app_path(
     cfg = application_defaults.get(app_id, {})
     try:
         assert_nested(cfg, dotted, app_id)
-        return
     except PathNotFound:
         pass
+    else:
+        return
     if dotted.startswith("users."):
         sub = dotted.split(".", 1)[1]
         if sub in user_defaults:

@@ -32,10 +32,10 @@ def extract_domains_from_filenames(config_path: str) -> list[str] | None:
             if not DOMAIN_FROM_FILENAME_RE.match(fn):
                 continue
             out.append(fn[:-5])  # strip ".conf"
-        return out
     except FileNotFoundError:
         print(f"Directory {config_path} not found.", file=sys.stderr)
         return None
+    return out
 
 
 def detect_scheme_from_conf(conf_path: Path) -> str | None:

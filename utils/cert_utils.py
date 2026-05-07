@@ -39,8 +39,8 @@ class CertUtils:
                 universal_newlines=True,
             )
             nb, na = None, None
-            for line in output.splitlines():
-                line = line.strip()
+            for raw_line in output.splitlines():
+                line = raw_line.strip()
                 if line.startswith("notBefore="):
                     nb = line.split("=", 1)[1].strip()
                 elif line.startswith("notAfter="):
@@ -64,8 +64,8 @@ class CertUtils:
     def extract_sans(cert_text):
         dns_entries = []
         in_san = False
-        for line in cert_text.splitlines():
-            line = line.strip()
+        for raw_line in cert_text.splitlines():
+            line = raw_line.strip()
             if "X509v3 Subject Alternative Name:" in line:
                 in_san = True
                 continue

@@ -49,7 +49,6 @@ class TestGetEntityNameFilter(unittest.TestCase):
         if plugin_path not in sys.path and Path(plugin_path).is_dir():
             sys.path.insert(0, plugin_path)
         # Import plugin fresh each time
-        global get_entity_name
         from plugins.filter.get_entity_name import get_entity_name
 
         self.get_entity_name = get_entity_name

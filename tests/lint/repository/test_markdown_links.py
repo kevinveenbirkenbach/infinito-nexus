@@ -74,7 +74,7 @@ def _is_checkable_link(target: str) -> bool:
         return False
     # Skip placeholder targets used in documentation examples (e.g. [...](...)
     # where the target consists only of dots and slashes).
-    stripped = target.split("#")[0]
+    stripped = target.split("#", maxsplit=1)[0]
     return not (stripped and all(c in "./" for c in stripped))
 
 

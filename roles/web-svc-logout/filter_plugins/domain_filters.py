@@ -42,8 +42,6 @@ class FilterModule:
                     flattened = [domains_entry]
 
                 result.extend(flattened)
-
-            return result
-
         except Exception as e:
             raise AnsibleFilterError(f"logout_domains filter error: {e}") from e
+        return result

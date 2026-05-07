@@ -204,7 +204,7 @@ class TestLoadUserDefs(unittest.TestCase):
                 alice: "not-a-dict"
                 """,
             )
-            with self.assertRaisesRegex(ValueError, "Invalid definition"):
+            with self.assertRaisesRegex(TypeError, "Invalid definition"):
                 _load_user_defs(roles)
 
 
@@ -511,6 +511,7 @@ def _run_in_ansible_blocked_subprocess(snippet: str):
         text=True,
         cwd=str(repo_root),
         timeout=60,
+        check=False,
     )
     return result.returncode, result.stdout, result.stderr
 

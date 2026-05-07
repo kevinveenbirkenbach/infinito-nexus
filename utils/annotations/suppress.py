@@ -56,8 +56,8 @@ def _rules_on_line(line: str) -> set[str]:
     """Return the set of rule keys present in suppression markers on *line*."""
     found: set[str] = set()
     for match in _KEYWORD_RE.finditer(line):
-        for rule in match.group(1).split(","):
-            rule = rule.strip().lower()
+        for raw_rule in match.group(1).split(","):
+            rule = raw_rule.strip().lower()
             if rule:
                 found.add(rule)
     return found

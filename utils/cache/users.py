@@ -67,7 +67,7 @@ def _load_user_defs(roles_dir: Path) -> OrderedDict[str, dict[str, Any]]:
 
         for key, overrides in users.items():
             if not isinstance(overrides, dict):
-                raise ValueError(f"Invalid definition for user '{key}' in {filepath}")
+                raise TypeError(f"Invalid definition for user '{key}' in {filepath}")
 
             if key not in merged:
                 merged[key] = copy.deepcopy(overrides)

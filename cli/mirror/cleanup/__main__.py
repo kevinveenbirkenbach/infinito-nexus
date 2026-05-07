@@ -47,7 +47,6 @@ def _resolve_account_type(namespace: str, token: str) -> str:
     url = f"https://api.github.com/orgs/{namespace}/packages?package_type=container&per_page=1"
     try:
         _gh_request("GET", url, token)
-        return "orgs"
     except urllib.error.HTTPError as e:
         if e.code == 404:
             print(
@@ -56,6 +55,7 @@ def _resolve_account_type(namespace: str, token: str) -> str:
             )
             return "users"
         raise
+    return "orgs"
 
 
 def _list_packages(

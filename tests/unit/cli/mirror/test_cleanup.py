@@ -4,6 +4,7 @@ import json
 import os
 import unittest
 import urllib.error
+from typing import Self
 from unittest.mock import patch
 
 import cli.mirror.cleanup.__main__ as cleanup_main
@@ -16,7 +17,7 @@ class _FakeResponse:
     def read(self) -> bytes:
         return self._payload
 
-    def __enter__(self) -> _FakeResponse:
+    def __enter__(self) -> Self:
         return self
 
     def __exit__(self, exc_type, exc, tb) -> bool:

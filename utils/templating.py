@@ -209,21 +209,20 @@ def _fallback_eval_expr(expr: str, variables: dict) -> str:
         if val is None:
             # Convenience: match your tests / typical usage (DOMAIN vs domain)
             val = os.environ.get(key.lower(), os.environ.get(key.upper()))
+    # Allow minimal list literals (needed for patterns like: [ DIR_BIN, 'x' ] | path_join)
+    elif head.startswith("[") and head.endswith("]"):
+        val = _eval_list_literal(head, variables)
+    elif _RE_INT_LITERAL.match(head):
+        val = int(head)
+    elif _RE_FLOAT_LITERAL.match(head):
+        val = float(head)
     else:
-        # Allow minimal list literals (needed for patterns like: [ DIR_BIN, 'x' ] | path_join)
-        if head.startswith("[") and head.endswith("]"):
-            val = _eval_list_literal(head, variables)
-        elif _RE_INT_LITERAL.match(head):
-            val = int(head)
-        elif _RE_FLOAT_LITERAL.match(head):
-            val = float(head)
-        else:
-            if not _RE_VARPATH.match(head):
-                raise ValueError(f"unsupported expression: {head}")
-            try:
-                val = _get_by_path(variables, head)
-            except KeyError:
-                val = None
+        if not _RE_VARPATH.match(head):
+            raise ValueError(f"unsupported expression: {head}")
+        try:
+            val = _get_by_path(variables, head)
+        except KeyError:
+            val = None
 
     for filt in parts[1:]:
         val = _apply_filter(val, filt)
@@ -267,9 +266,9 @@ def _set_templar_var(templar: Any, name: str, value: Any) -> tuple[bool, Any]:
     try:
         prev = getattr(templar, name)
         setattr(templar, name, value)
-        return True, prev
     except Exception:
         return False, None
+    return True, prev
 
 
 def _templar_render_best_effort(templar: Any, s: str, variables: dict) -> str:

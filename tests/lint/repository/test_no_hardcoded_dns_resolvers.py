@@ -45,7 +45,7 @@ def _load_resolver_ips() -> list[str]:
     data = yaml.safe_load(text) or {}
     resolvers = data.get("NETWORK_PUBLIC_DNS_RESOLVERS")
     if not isinstance(resolvers, list):
-        raise AssertionError(
+        raise TypeError(
             f"NETWORK_PUBLIC_DNS_RESOLVERS missing or non-list in {_NETWORKS_FILE}"
         )
     out: list[str] = []

@@ -41,6 +41,7 @@ class TestStrongPasswordFilterPathIntegration(unittest.TestCase):
                 env=env,
                 capture_output=True,
                 text=True,
+                check=False,
             )
 
         combined_output = f"{result.stdout}\n{result.stderr}"

@@ -47,9 +47,9 @@ def extract_description_via_help(module: str) -> str:
                     if desc:
                         return desc
                 break
-        return "-"
     except Exception:
         return "-"
+    return "-"
 
 
 def print_global_help(cli_dir: Path) -> None:

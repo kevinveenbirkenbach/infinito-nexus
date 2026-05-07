@@ -100,9 +100,9 @@ def applications_if_group_and_all_deps(
     meta_deps_resolver: MetaDepsResolver | None = None,
 ) -> dict[str, Any]:
     if not isinstance(applications, dict):
-        raise ValueError("'applications' must be a mapping")
+        raise TypeError("'applications' must be a mapping")
     if not isinstance(group_names, list):
-        raise ValueError("'group_names' must be a list")
+        raise TypeError("'group_names' must be a list")
     if not project_root and not roles_dir:
         raise ValueError("'project_root' or 'roles_dir' must be provided")
 

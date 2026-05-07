@@ -67,11 +67,10 @@ class TestMailuServiceDependency(unittest.TestCase):
             # email-alerting / mail-health roles implement or directly
             # service the email subsystem; they call lookup('email') as the
             # source of truth, not as dependent consumers. Exempt them.
-            if (
-                role_name.startswith("sys-svc-mail")
-                or role_name == "sys-ctl-alm-email"
-                or role_name == "sys-ctl-hlth-msmtp"
-            ):
+            if role_name.startswith("sys-svc-mail") or role_name in {
+                "sys-ctl-alm-email",
+                "sys-ctl-hlth-msmtp",
+            }:
                 continue
 
             config_path = role_path / "meta" / "services.yml"

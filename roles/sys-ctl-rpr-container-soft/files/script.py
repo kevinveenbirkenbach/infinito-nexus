@@ -42,7 +42,7 @@ def bash(command: str) -> list[str]:
     output = [line.decode("utf-8", errors="replace") for line in stdout]
     if process.returncode > 0:
         print(command, out, err)
-        raise Exception(stderr or f"Command failed with code {process.returncode}")
+        raise RuntimeError(stderr or f"Command failed with code {process.returncode}")
     return output
 
 
@@ -111,7 +111,9 @@ def wait_while_manipulation_running(
         any_active = False
         for svc in services:
             # `svc` is a project-defined unit name from the role's vars, not user input.
-            res = subprocess.run(f"systemctl is-active --quiet {svc}", shell=True)  # noqa: S602
+            res = subprocess.run(  # noqa: S602
+                f"systemctl is-active --quiet {svc}", shell=True, check=False
+            )
             if res.returncode == 0:
                 any_active = True
                 break

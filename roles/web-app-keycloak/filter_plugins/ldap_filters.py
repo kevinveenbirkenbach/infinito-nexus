@@ -32,7 +32,7 @@ class FilterModule:
             # be forgiving if someone passes a comma-separated string
             flavors = [f.strip() for f in flavors.split(",") if f.strip()]
         if not isinstance(flavors, Iterable):
-            raise ValueError(
+            raise TypeError(
                 "ldap_groups_filter: 'flavors' must be an iterable or comma-separated string"
             )
 

@@ -72,12 +72,10 @@ def run_command_once(
             proc.wait()
             rc = proc.returncode
 
-        if rc != 0:
-            raise SystemExit(rc)
-        return True
-
-    except SystemExit:
-        raise
     except Exception as e:
         print(color_text(f"Exception running command: {e}", Fore.RED))
         raise SystemExit(1) from e
+
+    if rc != 0:
+        raise SystemExit(rc)
+    return True
