@@ -91,9 +91,11 @@ a:
   run_after: dep1
 """,
             )
-            with patch.object(repo_paths, "PROJECT_ROOT", root):
-                with self.assertRaises(CombinedResolutionError):
-                    ri.load_run_after("web-app-a")
+            with (
+                patch.object(repo_paths, "PROJECT_ROOT", root),
+                self.assertRaises(CombinedResolutionError),
+            ):
+                ri.load_run_after("web-app-a")
 
     def test_load_dependencies_app_only_filters_non_app_roles(self) -> None:
         with tempfile.TemporaryDirectory() as td:
@@ -151,6 +153,8 @@ dependencies:
 """,
             )
 
-            with patch.object(repo_paths, "PROJECT_ROOT", root):
-                with self.assertRaises(CombinedResolutionError):
-                    ri.load_dependencies_app_only("web-app-a")
+            with (
+                patch.object(repo_paths, "PROJECT_ROOT", root),
+                self.assertRaises(CombinedResolutionError),
+            ):
+                ri.load_dependencies_app_only("web-app-a")

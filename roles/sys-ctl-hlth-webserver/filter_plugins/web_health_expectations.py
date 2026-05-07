@@ -140,7 +140,7 @@ def web_health_expectations(
 
     expectations = {}
 
-    for app_id in applications.keys():
+    for app_id in applications:
         if app_id not in selection:
             continue
 
@@ -186,7 +186,7 @@ def web_health_expectations(
 
     if www_enabled:
         add = {}
-        for d in expectations.keys():
+        for d in expectations:
             if not d.startswith("www."):
                 add[f"www.{d}"] = [301]
         expectations.update(add)
@@ -194,8 +194,7 @@ def web_health_expectations(
             if d.startswith("www."):
                 expectations[d] = [301]
 
-    ordered = {k: expectations[k] for k in sorted(expectations.keys())}
-    return ordered
+    return {k: expectations[k] for k in sorted(expectations.keys())}
 
 
 class FilterModule:

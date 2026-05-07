@@ -108,7 +108,7 @@ def _role_group_entry(
         "dn": dn,
         "cn": cn,
         "description": display_name,
-        "objectClass": ["top"] + list(flavors),
+        "objectClass": ["top", *list(flavors)],
     }
     if "posixGroup" in flavors:
         entry["gidNumber"] = group_id

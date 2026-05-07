@@ -117,7 +117,7 @@ class FilterModule:
         self, app_id, canonical_domains, seen_domains, result
     ):
         if isinstance(canonical_domains, dict):
-            for _, domain in canonical_domains.items():
+            for domain in canonical_domains.values():
                 self._validate_and_check_domain(app_id, domain, seen_domains)
             result[app_id] = canonical_domains.copy()
         elif isinstance(canonical_domains, list):

@@ -64,8 +64,7 @@ def _all_project_files() -> tuple[str, ...]:
     for dirpath, dirnames, filenames in os.walk(root_str, topdown=True):
         # prune in-place (topdown=True): stops descent into skipped dirs
         dirnames[:] = [d for d in dirnames if d not in _DEFAULT_SKIP_DIRS]
-        for fn in filenames:
-            paths.append(os.path.join(dirpath, fn))
+        paths.extend(os.path.join(dirpath, fn) for fn in filenames)
     return tuple(paths)
 
 

@@ -119,7 +119,7 @@ def _collect_defined_facts(task_files: list[Path]) -> dict[str, set[Path]]:
                 if not _is_set_fact_task(task):
                     continue
                 mapping = _get_set_fact_mapping(task)
-                for k in mapping.keys():
+                for k in mapping:
                     if not isinstance(k, str) or _looks_dynamic(k):
                         continue
                     facts.setdefault(k, set()).add(p)
@@ -143,7 +143,7 @@ def _collect_var_overrides(task_files: list[Path]) -> list[tuple[Path, str, str]
                 if not vmap:
                     continue
                 tname = str(task.get("name", "<unnamed task>"))
-                for k in vmap.keys():
+                for k in vmap:
                     if not isinstance(k, str) or _looks_dynamic(k):
                         continue
                     overrides.append((p, tname, k))

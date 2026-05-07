@@ -124,9 +124,9 @@ class TestComposeFArgs(unittest.TestCase):
                 "get",
                 return_value=_TlsResolveStub(True, "self_signed"),
             ),
+            self.assertRaises(AnsibleError),
         ):
-            with self.assertRaises(AnsibleError):
-                self.lookup.run(["web-app-a"], variables=self.vars)
+            self.lookup.run(["web-app-a"], variables=self.vars)
 
     def test_includes_only_base_when_role_does_not_provide_override(self):
         with (
@@ -158,23 +158,23 @@ class TestComposeFArgs(unittest.TestCase):
         # get_docker_paths returns non-dict -> must fail
         with (
             patch.object(self.m, "get_docker_paths", return_value="nope"),
+            self.assertRaises(AnsibleError),
         ):
-            with self.assertRaises(AnsibleError):
-                self.lookup.run(["web-app-a"], variables=self.vars)
+            self.lookup.run(["web-app-a"], variables=self.vars)
 
         # get_docker_paths returns dict but missing files -> must fail
         with (
             patch.object(self.m, "get_docker_paths", return_value={}),
+            self.assertRaises(AnsibleError),
         ):
-            with self.assertRaises(AnsibleError):
-                self.lookup.run(["web-app-a"], variables=self.vars)
+            self.lookup.run(["web-app-a"], variables=self.vars)
 
         # get_docker_paths returns dict with non-dict files -> must fail
         with (
             patch.object(self.m, "get_docker_paths", return_value={"files": "nope"}),
+            self.assertRaises(AnsibleError),
         ):
-            with self.assertRaises(AnsibleError):
-                self.lookup.run(["web-app-a"], variables=self.vars)
+            self.lookup.run(["web-app-a"], variables=self.vars)
 
 
 if __name__ == "__main__":

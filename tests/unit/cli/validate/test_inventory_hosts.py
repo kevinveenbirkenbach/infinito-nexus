@@ -23,7 +23,7 @@ class TestValidateHostKeys(unittest.TestCase):
         content = {"all": {"children": {}}}
         for group, hosts in groups.items():
             # hosts is a list of hostnames
-            content["all"]["children"][group] = {"hosts": {h: None for h in hosts}}
+            content["all"]["children"][group] = {"hosts": dict.fromkeys(hosts)}
         path = os.path.join(self.test_dir, "devices.yml")
         with open(path, "w", encoding="utf-8") as f:
             yaml.safe_dump(content, f)

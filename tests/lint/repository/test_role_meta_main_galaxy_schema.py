@@ -203,9 +203,11 @@ def _validate_meta_main(path: Path) -> list[str]:
     if "galaxy_tags" in galaxy_info:
         problems.extend(_validate_galaxy_tags(galaxy_info["galaxy_tags"]))
 
-    for str_field in ("author", "description", "license", "company"):
-        if str_field in galaxy_info and not isinstance(galaxy_info[str_field], str):
-            problems.append(f"galaxy_info.{str_field} must be a string")
+    problems.extend(
+        f"galaxy_info.{str_field} must be a string"
+        for str_field in ("author", "description", "license", "company")
+        if str_field in galaxy_info and (not isinstance(galaxy_info[str_field], str))
+    )
 
     if "min_ansible_version" in galaxy_info:
         val = galaxy_info["min_ansible_version"]
@@ -240,8 +242,7 @@ class TestRoleMetaMainGalaxySchema(unittest.TestCase):
         ]
         for path, problems in sorted(offenders.items()):
             lines.append(f"  - {rel(path)}:")
-            for problem in problems:
-                lines.append(f"      * {problem}")
+            lines.extend(f"      * {problem}" for problem in problems)
         self.fail("\n".join(lines))
 
 

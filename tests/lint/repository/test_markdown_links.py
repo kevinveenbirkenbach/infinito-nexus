@@ -75,9 +75,7 @@ def _is_checkable_link(target: str) -> bool:
     # Skip placeholder targets used in documentation examples (e.g. [...](...)
     # where the target consists only of dots and slashes).
     stripped = target.split("#")[0]
-    if stripped and all(c in "./" for c in stripped):
-        return False
-    return True
+    return not (stripped and all(c in "./" for c in stripped))
 
 
 def _strip_anchor(target: str) -> str:

@@ -84,12 +84,11 @@ class TestVariablePaths(unittest.TestCase):
                 if isinstance(creds, Mapping) and key in creds:
                     return True
 
-        if dotted.startswith("images."):
-            if any(
-                isinstance(cfg.get("images"), Mapping)
-                for cfg in ctx.application_defaults.values()
-            ):
-                return True
+        if dotted.startswith("images.") and any(
+            isinstance(cfg.get("images"), Mapping)
+            for cfg in ctx.application_defaults.values()
+        ):
+            return True
 
         if dotted.startswith("users."):
             subpath = dotted.split(".", 1)[1]

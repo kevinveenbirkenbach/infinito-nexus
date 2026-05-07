@@ -1,8 +1,8 @@
 import unittest
 
-import reserved_users  # noqa: E402
-from ansible.errors import AnsibleFilterError  # type: ignore  # noqa: E402
-from reserved_users import non_reserved_users, reserved_usernames  # noqa: E402
+import reserved_users
+from ansible.errors import AnsibleFilterError  # type: ignore
+from reserved_users import non_reserved_users, reserved_usernames
 
 
 class TestReservedUsersFilters(unittest.TestCase):

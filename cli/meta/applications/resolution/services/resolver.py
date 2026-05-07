@@ -139,8 +139,8 @@ class ServicesResolver:
             resolved.append(role_name)
 
             cfg = self._load_role_config(role_name)
-            for inc in self.direct_includes_from_config(cfg):
-                if inc not in seen:
-                    queue.append(inc)
+            queue.extend(
+                inc for inc in self.direct_includes_from_config(cfg) if inc not in seen
+            )
 
         return resolved

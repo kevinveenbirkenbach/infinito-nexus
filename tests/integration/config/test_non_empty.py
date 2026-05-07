@@ -18,14 +18,14 @@ def find_none_values(data, prefix=None):
 
     if isinstance(data, dict):
         for key, value in data.items():
-            path = prefix + [str(key)]
+            path = [*prefix, str(key)]
             if value is None:
                 errors.append((".".join(path), value))
             elif isinstance(value, (dict, list)):
                 errors.extend(find_none_values(value, path))
     elif isinstance(data, list):
         for idx, item in enumerate(data):
-            path = prefix + [f"[{idx}]"]
+            path = [*prefix, f"[{idx}]"]
             if item is None:
                 errors.append((".".join(path), item))
             elif isinstance(item, (dict, list)):

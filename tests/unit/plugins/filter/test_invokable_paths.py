@@ -9,9 +9,8 @@ from plugins.filter.invokable_paths import get_invokable_paths
 
 class TestInvokablePaths(unittest.TestCase):
     def write_yaml(self, data):
-        tmp = tempfile.NamedTemporaryFile(mode="w", delete=False, suffix=".yml")
-        yaml.dump(data, tmp)
-        tmp.close()
+        with tempfile.NamedTemporaryFile(mode="w", delete=False, suffix=".yml") as tmp:
+            yaml.dump(data, tmp)
         return tmp.name
 
     def test_empty_roles(self):

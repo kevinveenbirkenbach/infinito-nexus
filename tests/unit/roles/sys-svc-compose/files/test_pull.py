@@ -87,11 +87,13 @@ services:
             )
 
     def test_run_or_fail_failure_raises(self) -> None:
-        with patch.object(self.m, "run_cmd", return_value=(9, "boom\n")):
-            with self.assertRaises(RuntimeError) as ctx:
-                self.m.run_or_fail(
-                    ["docker", "compose", "pull"], cwd=Path("/"), env={}, label="pull"
-                )
+        with (
+            patch.object(self.m, "run_cmd", return_value=(9, "boom\n")),
+            self.assertRaises(RuntimeError) as ctx,
+        ):
+            self.m.run_or_fail(
+                ["docker", "compose", "pull"], cwd=Path("/"), env={}, label="pull"
+            )
         self.assertIn("pull failed", str(ctx.exception))
 
     def test_main_short_circuits_when_lock_exists(self) -> None:
@@ -195,8 +197,8 @@ services:
             )
 
             # Expect two calls: build --pull, then pull --ignore-buildable
-            self.assertEqual(calls[0], base_cmd + ["build", "--pull"])
-            self.assertEqual(calls[1], base_cmd + ["pull", "--ignore-buildable"])
+            self.assertEqual(calls[0], [*base_cmd, "build", "--pull"])
+            self.assertEqual(calls[1], [*base_cmd, "pull", "--ignore-buildable"])
 
     def test_main_pull_omits_ignore_buildable_when_not_supported(self) -> None:
         with tempfile.TemporaryDirectory() as td:
@@ -248,7 +250,7 @@ services:
 
             self.assertEqual(rc, 0)
             self.assertEqual(len(calls), 1)
-            self.assertEqual(calls[0], base_cmd + ["pull"])
+            self.assertEqual(calls[0], [*base_cmd, "pull"])
 
 
 if __name__ == "__main__":

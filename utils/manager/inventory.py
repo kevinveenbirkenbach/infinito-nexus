@@ -130,9 +130,11 @@ class InventoryManager:
             resolved.append(role_name)
 
             cfg = self.load_role_config(role_name)
-            for inc in self._direct_schema_includes_from_config(cfg):
-                if inc not in seen:
-                    queue.append(inc)
+            queue.extend(
+                inc
+                for inc in self._direct_schema_includes_from_config(cfg)
+                if inc not in seen
+            )
 
         return resolved
 

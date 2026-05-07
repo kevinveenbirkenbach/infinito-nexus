@@ -72,7 +72,7 @@ def _extract_env_keys(env_text: str) -> list[str]:
         stripped = line.lstrip()
         if not stripped or stripped.startswith("#"):
             continue
-        if stripped.startswith("{%") or stripped.startswith("{#"):
+        if stripped.startswith(("{%", "{#")):
             continue
         m = _KEY_LHS_RE.match(stripped)
         if m:

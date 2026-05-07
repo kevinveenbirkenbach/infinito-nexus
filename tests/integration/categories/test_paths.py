@@ -38,9 +38,11 @@ class TestCategoryPaths(unittest.TestCase):
                 expected.add(f"{top_key}-{sub_key}")
 
         missing = []
-        for name in expected:
-            if not any(name in dirname for dirname in self.existing_dirs):
-                missing.append(name)
+        missing.extend(
+            name
+            for name in expected
+            if not any(name in dirname for dirname in self.existing_dirs)
+        )
 
         if missing:
             self.fail(f"Missing role directories for: {', '.join(sorted(missing))}")

@@ -35,9 +35,7 @@ def to_one_liner(s):
         temp = temp.replace(f"__STR{idx}__", lit)
 
     # 5) Collapse all whitespace
-    one_liner = re.sub(r"\s+", " ", temp).strip()
-
-    return one_liner
+    return re.sub(r"\s+", " ", temp).strip()
 
 
 class FilterModule:

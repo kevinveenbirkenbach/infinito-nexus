@@ -71,7 +71,7 @@ def get_invokable_paths(
         METADATA = {"title", "description", "icon", "invokable"}
 
         for key, cfg in subroles.items():
-            path = parent + [key]
+            path = [*parent, key]
             if cfg.get("invokable", False):
                 p = "-".join(path)
                 if suffix:
@@ -122,7 +122,7 @@ def get_non_invokable_paths(
         METADATA = {"title", "description", "icon", "invokable"}
 
         for key, cfg in subroles.items():
-            path = parent + [key]
+            path = [*parent, key]
             p = "-".join(path)
             inv = cfg.get("invokable", False)
             if not inv:

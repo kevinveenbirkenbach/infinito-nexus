@@ -78,9 +78,11 @@ class TestGetAllInvokableApps(unittest.TestCase):
         with self.categories_file.open("w", encoding="utf-8") as f:
             yaml.safe_dump({"roles": {"foo": {"invokable": False}}}, f)
 
-        with patch("utils.invokable.PROJECT_ROOT", self.test_dir):
-            with self.assertRaises(RuntimeError):
-                get_all_invokable_apps()
+        with (
+            patch("utils.invokable.PROJECT_ROOT", self.test_dir),
+            self.assertRaises(RuntimeError),
+        ):
+            get_all_invokable_apps()
 
     def test_empty_when_no_roles(self):
         """Should return an empty list if there are no roles, but categories.yml exists."""
@@ -106,13 +108,15 @@ class TestGetAllInvokableApps(unittest.TestCase):
         """
         self.categories_file.unlink()
 
-        with patch("utils.invokable.PROJECT_ROOT", self.test_dir):
-            with patch(
+        with (
+            patch("utils.invokable.PROJECT_ROOT", self.test_dir),
+            patch(
                 "utils.invokable._get_invokable_paths",
                 side_effect=FileNotFoundError,
-            ):
-                with self.assertRaises(FileNotFoundError):
-                    get_all_invokable_apps()
+            ),
+            self.assertRaises(FileNotFoundError),
+        ):
+            get_all_invokable_apps()
 
 
 if __name__ == "__main__":

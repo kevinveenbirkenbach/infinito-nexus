@@ -67,7 +67,7 @@ def run_ansible_playbook(
     # ---------------------------------------------------------
     # 4) Inventory Validation Phase
     # ---------------------------------------------------------
-    if modes.get("MODE_ASSERT", None) is False:
+    if modes.get("MODE_ASSERT") is False:
         print("\n🔍 Inventory assertion explicitly disabled (MODE_ASSERT=false)\n")
     else:
         print("\n🔍 Validating inventory before deployment...\n")

@@ -99,9 +99,7 @@ def _has_application_metadata(role_dir: Path) -> bool:
             return True
     if (meta_dir / "schema.yml").is_file():
         return True
-    if (meta_dir / "users.yml").is_file():
-        return True
-    return False
+    return bool((meta_dir / "users.yml").is_file())
 
 
 def _build_role_base_config(

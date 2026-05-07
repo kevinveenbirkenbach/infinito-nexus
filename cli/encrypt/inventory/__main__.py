@@ -33,10 +33,10 @@ def encrypt_recursively(
     elif isinstance(data, list):
         for i, item in enumerate(data):
             data[i] = encrypt_recursively(item, vault_handler, ask_confirmation, prefix)
-    elif isinstance(data, str):
+    elif isinstance(data, str):  # noqa: SIM102  outer guard, inner ask_confirmation block has independent siblings
         # Only encrypt if it's not already vaulted
         if not data.lstrip().startswith("$ANSIBLE_VAULT"):
-            if ask_confirmation:
+            if ask_confirmation:  # noqa: SIM102  combining changes semantics: encrypted_value below must run regardless of ask_confirmation
                 # Ask for confirmation before encrypting if not `--all`
                 if not ask_for_confirmation(prefix):
                     print(f"Skipping encryption for '{prefix}'.")

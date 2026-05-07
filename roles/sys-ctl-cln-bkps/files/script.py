@@ -13,7 +13,7 @@ parser.add_argument(
     type=int,
     dest="maximum_backup_size_percent",
     required=True,
-    choices=range(0, 100),
+    choices=range(100),
     help="The directory from which the data should be encrypted.",
 )
 parser.add_argument(
@@ -37,9 +37,7 @@ def is_directory_used_by_another_process(directory_path):
     )
     process.communicate()
     # @See https://stackoverflow.com/questions/29841984/non-zero-exit-code-for-lsof
-    if process.wait() > bool(0):
-        return False
-    return True
+    return not process.wait() > bool(0)
 
 
 def isSmallerThenMaximumBackupSize(maximum_backup_size_percent, backup_dir):

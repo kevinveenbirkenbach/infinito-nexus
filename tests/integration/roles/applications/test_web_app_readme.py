@@ -7,7 +7,7 @@ def find_repo_root(start: Path) -> Path | None:
     Walk up from `start` until we find a directory containing 'roles'.
     Returns the repo root (the directory that contains 'roles') or None.
     """
-    for parent in [start] + list(start.parents):
+    for parent in [start, *list(start.parents)]:
         if (parent / "roles").is_dir():
             return parent
     return None

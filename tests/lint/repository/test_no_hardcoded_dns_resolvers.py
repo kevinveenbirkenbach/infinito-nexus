@@ -49,9 +49,9 @@ def _load_resolver_ips() -> list[str]:
             f"NETWORK_PUBLIC_DNS_RESOLVERS missing or non-list in {_NETWORKS_FILE}"
         )
     out: list[str] = []
-    for item in resolvers:
-        if isinstance(item, str) and item.strip():
-            out.append(item.strip())
+    out.extend(
+        item.strip() for item in resolvers if isinstance(item, str) and item.strip()
+    )
     if not out:
         raise AssertionError(
             f"NETWORK_PUBLIC_DNS_RESOLVERS is empty in {_NETWORKS_FILE}"

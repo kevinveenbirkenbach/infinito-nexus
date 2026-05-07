@@ -174,10 +174,10 @@ class TestComposeBuildRequiresImage(unittest.TestCase):
                 "",
                 "Offenders:",
             ]
-            for it in all_findings:
-                msg_lines.append(
-                    f"- {it.file}:{it.build_line} (build indent={it.build_indent}) -> {it.note}"
-                )
+            msg_lines.extend(
+                f"- {it.file}:{it.build_line} (build indent={it.build_indent}) -> {it.note}"
+                for it in all_findings
+            )
             msg_lines.append("")
             msg_lines.append(
                 "Fix: for each service that has `build:`, add a stable `image:` name on the same level, e.g."

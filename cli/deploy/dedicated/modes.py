@@ -117,11 +117,11 @@ def build_modes_from_args(
 
         if kind == "bool_true":
             # if user passed --skip-foo => disable => False, otherwise True
-            modes[mode_name] = False if value else True
+            modes[mode_name] = not value
 
         elif kind == "bool_false":
             # if user passed --bar => enable => True, otherwise False
-            modes[mode_name] = True if value else False
+            modes[mode_name] = bool(value)
 
         else:  # explicit
             if value is not None:

@@ -13,8 +13,7 @@ def _resolve_repo_root() -> str:
     dedicated_dir = os.path.dirname(here)  # .../cli/deploy/dedicated
     deploy_dir = os.path.dirname(dedicated_dir)  # .../cli/deploy
     cli_root = os.path.dirname(deploy_dir)  # .../cli
-    repo_root = os.path.dirname(cli_root)  # .../<repo-root>
-    return repo_root
+    return os.path.dirname(cli_root)  # .../<repo-root>
 
 
 PROJECT_ROOT: str = _resolve_repo_root()

@@ -46,9 +46,9 @@ size:
 
 
 def run_module() -> None:
-    module_args = dict(
-        path=dict(type="str", required=True),
-    )
+    module_args = {
+        "path": {"type": "str", "required": True},
+    }
 
     module = AnsibleModule(
         argument_spec=module_args,

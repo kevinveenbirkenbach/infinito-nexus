@@ -72,9 +72,11 @@ class _FiltersCollector(ast.NodeVisitor):
             and node.func.id == "dict"
         ):
             # keywords: dict(name=fn)
-            for kw in node.keywords or []:
-                if kw.arg:
-                    pairs.append((kw.arg, self._name_of(kw.value)))
+            pairs.extend(
+                (kw.arg, self._name_of(kw.value))
+                for kw in node.keywords or []
+                if kw.arg
+            )
             return pairs
 
         # Name (variable) that might be a dict assembled earlier in the function

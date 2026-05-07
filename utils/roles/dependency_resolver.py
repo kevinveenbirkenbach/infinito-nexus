@@ -97,9 +97,9 @@ class RoleDependencyResolver:
 
         candidates = []
         for root, _, files in os.walk(tasks_dir):
-            for f in files:
-                if f.endswith(".yml") or f.endswith(".yaml"):
-                    candidates.append(os.path.join(root, f))
+            candidates.extend(
+                os.path.join(root, f) for f in files if f.endswith((".yml", ".yaml"))
+            )
 
         from utils.cache.yaml import load_yaml_any
 
@@ -199,13 +199,16 @@ class RoleDependencyResolver:
         if isinstance(item, dict):
             for k in ("role", "name"):
                 v = item.get(k)
-                if isinstance(v, str) and v.strip():
-                    if (
+                if (
+                    isinstance(v, str)
+                    and v.strip()
+                    and (
                         tmpl in (f"{{{{ item.{k} }}}}", f"{{{{item.{k}}}}}")
                         or not tmpl
                         or "item" in tmpl
-                    ):
-                        return v.strip()
+                    )
+                ):
+                    return v.strip()
         return None
 
     def _match_glob_into(self, pattern: str, all_roles: Iterable[str], out: set[str]):

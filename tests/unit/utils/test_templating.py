@@ -2,7 +2,7 @@
 import os
 
 # Ensure repo root is importable so `utils.*` resolves in all runners
-import sys  # noqa: E402
+import sys
 import unittest
 from unittest.mock import patch
 
@@ -10,9 +10,9 @@ from ansible.errors import AnsibleError
 
 from . import PROJECT_ROOT
 
-sys.path.insert(0, str(PROJECT_ROOT))  # noqa: E402
+sys.path.insert(0, str(PROJECT_ROOT))
 
-from utils.templating import (  # noqa: E402
+from utils.templating import (
     render_ansible_strict,
 )
 

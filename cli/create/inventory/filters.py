@@ -32,10 +32,11 @@ def _filter_inventory_children(
         (all_block.get("children", {}) or {}) if isinstance(all_block, dict) else {}
     )
 
-    filtered: dict[str, Any] = {}
-    for group_name, group_data in children.items():
-        if keep_predicate(group_name, group_data):
-            filtered[group_name] = group_data
+    filtered: dict[str, Any] = {
+        group_name: group_data
+        for group_name, group_data in children.items()
+        if keep_predicate(group_name, group_data)
+    }
 
     new_all = dict(all_block)
     new_all["children"] = filtered

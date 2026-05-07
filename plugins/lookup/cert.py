@@ -158,7 +158,7 @@ class LookupModule(LookupBase):
 
             all_domains = collect_domains_for_app(domains, app_id, err_prefix="cert")
             all_domains = (
-                uniq_preserve([primary_domain] + all_domains)
+                uniq_preserve([primary_domain, *all_domains])
                 if all_domains
                 else [primary_domain]
             )
@@ -167,7 +167,7 @@ class LookupModule(LookupBase):
             if san_override is None:
                 san_domains = all_domains[:]
             else:
-                san_domains = uniq_preserve([primary_domain] + san_override)
+                san_domains = uniq_preserve([primary_domain, *san_override])
 
         elif mode == "self_signed":
             ss_base_raw = require(variables, "TLS_SELFSIGNED_BASE_PATH", str)
@@ -196,7 +196,7 @@ class LookupModule(LookupBase):
 
                 # Ensure primary domain is always included
                 if primary_domain:
-                    san_domains = uniq_preserve([primary_domain] + san_domains)
+                    san_domains = uniq_preserve([primary_domain, *san_domains])
 
             else:
                 cert_id = app_id
@@ -207,7 +207,7 @@ class LookupModule(LookupBase):
                     domains, app_id, err_prefix="cert"
                 )
                 all_domains = (
-                    uniq_preserve([primary_domain] + all_domains)
+                    uniq_preserve([primary_domain, *all_domains])
                     if all_domains
                     else [primary_domain]
                 )
@@ -216,7 +216,7 @@ class LookupModule(LookupBase):
                 if san_override is None:
                     san_domains = all_domains[:]
                 else:
-                    san_domains = uniq_preserve([primary_domain] + san_override)
+                    san_domains = uniq_preserve([primary_domain, *san_override])
 
         else:
             raise AnsibleError(f"cert: unsupported mode '{mode}'")

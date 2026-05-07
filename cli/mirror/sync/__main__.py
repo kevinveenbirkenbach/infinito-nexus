@@ -87,13 +87,12 @@ def main() -> int:
         label = f"{img.role}:{img.service} ({img.name}:{img.version})"
 
         try:
-            if args.only_missing:
-                if provider.tag_exists(img):
-                    print(
-                        f"[mirror] {label}: destination exists, skipping ({dest})",
-                        flush=True,
-                    )
-                    continue
+            if args.only_missing and provider.tag_exists(img):
+                print(
+                    f"[mirror] {label}: destination exists, skipping ({dest})",
+                    flush=True,
+                )
+                continue
 
             print(f"[mirror] {label}: {src} -> {dest}", flush=True)
             provider.mirror(img)

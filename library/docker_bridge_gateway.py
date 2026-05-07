@@ -15,9 +15,9 @@ def run(cmd: list[str]) -> str:
 
 def main():
     module = AnsibleModule(
-        argument_spec=dict(
-            network=dict(type="str", default="bridge"),
-        ),
+        argument_spec={
+            "network": {"type": "str", "default": "bridge"},
+        },
         supports_check_mode=True,
     )
 

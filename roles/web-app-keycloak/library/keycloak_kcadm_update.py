@@ -242,24 +242,24 @@ def send_create(module, object_kind, api, realm, kcadm_exec, payload):
 
 
 def run_module():
-    module_args = dict(
-        object_kind=dict(type="str", required=True),
-        lookup_value=dict(type="str", required=True),
-        desired=dict(type="dict", required=True),
-        lookup_field=dict(type="str", required=False, default=None),
-        merge_path=dict(type="str", required=False, default=None),
-        force_attrs=dict(type="dict", required=False, default=None),
-        kcadm_exec=dict(type="str", required=True),
-        realm=dict(type="str", required=False, default=None),
-        assert_mode=dict(type="bool", required=False, default=True),
-    )
+    module_args = {
+        "object_kind": {"type": "str", "required": True},
+        "lookup_value": {"type": "str", "required": True},
+        "desired": {"type": "dict", "required": True},
+        "lookup_field": {"type": "str", "required": False, "default": None},
+        "merge_path": {"type": "str", "required": False, "default": None},
+        "force_attrs": {"type": "dict", "required": False, "default": None},
+        "kcadm_exec": {"type": "str", "required": True},
+        "realm": {"type": "str", "required": False, "default": None},
+        "assert_mode": {"type": "bool", "required": False, "default": True},
+    }
 
-    result = dict(
-        changed=False,
-        object_exists=False,
-        object_id="",
-        result={},
-    )
+    result = {
+        "changed": False,
+        "object_exists": False,
+        "object_id": "",
+        "result": {},
+    }
 
     module = AnsibleModule(argument_spec=module_args, supports_check_mode=False)
 

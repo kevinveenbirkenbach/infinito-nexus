@@ -36,7 +36,7 @@ def main():
         sys.exit(1)
 
     # Invoke make in repo root
-    cmd = ["make"] + make_args
+    cmd = ["make", *make_args]
     try:
         result = subprocess.run(cmd, cwd=repo_root)
         sys.exit(result.returncode)

@@ -49,9 +49,11 @@ class TestIncludeImportExistence(unittest.TestCase):
                     elif isinstance(val, dict) and value_key in val:
                         refs.append(val[value_key])
                     elif isinstance(val, list):
-                        for item in val:
-                            if isinstance(item, dict) and value_key in item:
-                                refs.append(item[value_key])
+                        refs.extend(
+                            item[value_key]
+                            for item in val
+                            if isinstance(item, dict) and value_key in item
+                        )
                 else:
                     refs.extend(
                         TestIncludeImportExistence._collect_refs(
@@ -93,7 +95,7 @@ class TestIncludeImportExistence(unittest.TestCase):
                     self.fail(
                         "Invalid include_role/import_role name detected.\n"
                         f"  • File: {file_path}\n"
-                        f"  • Extracted name value: {repr(role_name)}\n"
+                        f"  • Extracted name value: {role_name!r}\n"
                         "The 'name:' field must contain a non-empty string.\n"
                         "Example:\n"
                         "  include_role:\n"

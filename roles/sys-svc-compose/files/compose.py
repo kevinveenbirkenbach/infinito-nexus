@@ -8,7 +8,7 @@ import sys
 from pathlib import Path
 
 # `utils.cache.yaml` is unavailable here: this file is copy-deployed.
-import yaml  # noqa: E402
+import yaml
 
 
 def detect_env_file(project_dir: Path) -> Path | None:

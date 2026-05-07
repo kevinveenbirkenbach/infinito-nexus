@@ -79,11 +79,13 @@ class TestInventoryManager(unittest.TestCase):
         (role_dir / "vars").mkdir(parents=True)
         (role_dir / "vars" / "main.yml").write_text("{}", encoding="utf-8")
 
-        with patch.object(YamlHandler, "load_yaml", return_value={}):
-            with self.assertRaises(SystemExit):
-                InventoryManager(
-                    role_dir, self.tmpdir / "inventory.yml", "pw", {}
-                ).load_application_id(role_dir)
+        with (
+            patch.object(YamlHandler, "load_yaml", return_value={}),
+            self.assertRaises(SystemExit),
+        ):
+            InventoryManager(
+                role_dir, self.tmpdir / "inventory.yml", "pw", {}
+            ).load_application_id(role_dir)
 
     def test_generate_value_algorithms(self):
         """
@@ -155,14 +157,19 @@ class TestInventoryManager(unittest.TestCase):
 
         # IMPORTANT:
         # This unit test is NOT about transitive shared-provider resolution.
-        with patch.object(
-            InventoryManager, "resolve_schema_includes_recursive", return_value=[]
+        with (
+            patch.object(
+                InventoryManager,
+                "resolve_schema_includes_recursive",
+                return_value=[],
+            ),
+            patch.object(
+                ValueGenerator,
+                "generate_value",
+                side_effect=lambda alg: f"GEN_{alg}",
+            ),
         ):
-            # Patch ValueGenerator for predictable outputs
-            with patch.object(
-                ValueGenerator, "generate_value", side_effect=lambda alg: f"GEN_{alg}"
-            ):
-                result = mgr.apply_schema()
+            result = mgr.apply_schema()
 
         apps = result["applications"]["testapp"]
 

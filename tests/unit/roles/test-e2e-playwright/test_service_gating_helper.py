@@ -91,7 +91,7 @@ class TestServiceGatingHelper(unittest.TestCase):
         script_path = os.path.join(self.tmpdir, "run.js")
         with open(script_path, "w") as f:
             f.write(script)
-        proc = subprocess.run(
+        return subprocess.run(
             ["node", "run.js"],
             capture_output=True,
             text=True,
@@ -99,7 +99,6 @@ class TestServiceGatingHelper(unittest.TestCase):
             cwd=self.tmpdir,
             timeout=10,
         )
-        return proc
 
     # isServiceEnabled -----------------------------------------------------
 

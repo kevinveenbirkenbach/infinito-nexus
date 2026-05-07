@@ -111,9 +111,11 @@ class TestAffected(unittest.TestCase):
         with tempfile.TemporaryDirectory() as td:
             root = Path(td)
             _mk_app_role(root, "leaf", "leaf")
-            with patch.object(repo_paths, "PROJECT_ROOT", root):
-                with self.assertRaises(SystemExit):
-                    affected_main.affected_roles(["does-not-exist"])
+            with (
+                patch.object(repo_paths, "PROJECT_ROOT", root),
+                self.assertRaises(SystemExit),
+            ):
+                affected_main.affected_roles(["does-not-exist"])
 
     def test_non_modellable_seed_exits_with_sentinel_code(self) -> None:
         with tempfile.TemporaryDirectory() as td:
@@ -150,12 +152,14 @@ class TestAffected(unittest.TestCase):
 
             with patch.object(repo_paths, "PROJECT_ROOT", root):
                 buf = io.StringIO()
-                with redirect_stdout(buf):
-                    with patch(
+                with (
+                    redirect_stdout(buf),
+                    patch(
                         "sys.argv",
                         ["prog", "--changed-roles", "leaf"],
-                    ):
-                        affected_main.main()
+                    ),
+                ):
+                    affected_main.main()
                 self.assertEqual(buf.getvalue().strip(), "consumer leaf")
 
 

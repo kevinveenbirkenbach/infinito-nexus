@@ -387,7 +387,7 @@ def container_run(argv: list[str], debug: bool, with_ca: bool) -> int:
                 f"CURL_CA_BUNDLE={ca_container}",
             ]
             return exec_docker(
-                ["docker", "run"] + run_opts + ca_inject_opts + [image] + user_args,
+                ["docker", "run", *run_opts, *ca_inject_opts, image, *user_args],
                 debug=debug,
             )
 

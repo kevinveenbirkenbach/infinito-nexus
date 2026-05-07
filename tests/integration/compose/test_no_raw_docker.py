@@ -186,8 +186,7 @@ def git_ls_files(root: Path) -> list[Path]:
             for d in pruned:
                 dirs.remove(d)
 
-            for f in files:
-                results.append(Path(r) / f)
+            results.extend(Path(r) / f for f in files)
         return results
 
 
@@ -202,10 +201,7 @@ def is_whitelisted(path: Path, root: Path) -> bool:
         return True
 
     rel_wrapped = f"/{rel}/"
-    if any(fragment in rel_wrapped for fragment in WHITELIST_PATH_FRAGMENTS):
-        return True
-
-    return False
+    return bool(any(fragment in rel_wrapped for fragment in WHITELIST_PATH_FRAGMENTS))
 
 
 def is_probably_text(data: bytes) -> bool:

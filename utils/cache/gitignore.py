@@ -50,7 +50,7 @@ def load_gitignore_patterns(root: str | None = None) -> tuple[str, ...]:
     patterns: list[str] = []
     for raw in gitignore.read_text(encoding="utf-8").splitlines():
         line = raw.strip()
-        if not line or line.startswith("#") or line.startswith("!"):
+        if not line or line.startswith(("#", "!")):
             continue
         patterns.append(line)
     return tuple(patterns)

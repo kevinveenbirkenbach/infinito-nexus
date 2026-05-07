@@ -70,11 +70,11 @@ class TestComposeBuildTemplateRequiresImageTag(unittest.TestCase):
                 continue
 
             ind = TestComposeBuildTemplateRequiresImageTag._indent_len(line)
-            if ind < props_indent_len:
-                if line.rstrip().endswith(":") and not line.lstrip().startswith(
-                    ("-", "#")
-                ):
-                    return i
+            if ind < props_indent_len and (
+                line.rstrip().endswith(":")
+                and (not line.lstrip().startswith(("-", "#")))
+            ):
+                return i
         return None
 
     def test_build_lookup_requires_image_or_merge_on_same_level(self):

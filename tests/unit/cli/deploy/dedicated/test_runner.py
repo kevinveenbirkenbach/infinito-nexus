@@ -23,10 +23,7 @@ class TestRunAnsiblePlaybook(unittest.TestCase):
 
         def _side_effect(cmd, *args, **kwargs):
             # Normalize command to list[str] for easier assertions
-            if isinstance(cmd, list):
-                norm_cmd = cmd
-            else:
-                norm_cmd = [cmd]
+            norm_cmd = cmd if isinstance(cmd, list) else [cmd]
 
             calls_store.append((norm_cmd, dict(kwargs)))
 
@@ -231,24 +228,26 @@ class TestRunAnsiblePlaybook(unittest.TestCase):
             "MODE_DEBUG": False,
         }
 
-        with unittest.mock.patch(
-            "cli.deploy.dedicated.runner.assert_services_disabled_inventory_consistency_from_env"
+        with (
+            unittest.mock.patch(
+                "cli.deploy.dedicated.runner.assert_services_disabled_inventory_consistency_from_env"
+            ),
+            self.assertRaises(SystemExit) as ctx,
         ):
-            with self.assertRaises(SystemExit) as ctx:
-                runner.run_ansible_playbook(
-                    repo_root=repo_root,
-                    playbook_path=playbook_path,
-                    inventory_validator_path=inventory_validator_path,
-                    inventory="/etc/inventories/github-ci/devices.yml",
-                    modes=modes,
-                    limit=None,
-                    allowed_applications=None,
-                    password_file=None,
-                    verbose=0,
-                    skip_build=True,
-                    diff=False,
-                    ansible_args=None,
-                )
+            runner.run_ansible_playbook(
+                repo_root=repo_root,
+                playbook_path=playbook_path,
+                inventory_validator_path=inventory_validator_path,
+                inventory="/etc/inventories/github-ci/devices.yml",
+                modes=modes,
+                limit=None,
+                allowed_applications=None,
+                password_file=None,
+                verbose=0,
+                skip_build=True,
+                diff=False,
+                ansible_args=None,
+            )
 
         self.assertEqual(ctx.exception.code, 4)
 
@@ -279,29 +278,31 @@ class TestRunAnsiblePlaybook(unittest.TestCase):
         calls: list[tuple[list[str], dict[str, Any]]] = []
         mock_run.side_effect = self._fake_run_side_effect(calls, ansible_rc=0)
 
-        with unittest.mock.patch(
-            "cli.deploy.dedicated.runner.assert_services_disabled_inventory_consistency_from_env",
-            side_effect=ServicesDisabledConflictError("boom"),
+        with (
+            unittest.mock.patch(
+                "cli.deploy.dedicated.runner.assert_services_disabled_inventory_consistency_from_env",
+                side_effect=ServicesDisabledConflictError("boom"),
+            ),
+            self.assertRaises(SystemExit) as ctx,
         ):
-            with self.assertRaises(SystemExit) as ctx:
-                runner.run_ansible_playbook(
-                    repo_root="/repo",
-                    playbook_path="/repo/playbook.yml",
-                    inventory_validator_path="/repo/cli/validate/inventory/__main__.py",
-                    inventory="/etc/inventories/github-ci/devices.yml",
-                    modes={
-                        "MODE_CLEANUP": False,
-                        "MODE_ASSERT": True,
-                        "MODE_DEBUG": False,
-                    },
-                    limit=None,
-                    allowed_applications=None,
-                    password_file=None,
-                    verbose=0,
-                    skip_build=True,
-                    diff=False,
-                    ansible_args=None,
-                )
+            runner.run_ansible_playbook(
+                repo_root="/repo",
+                playbook_path="/repo/playbook.yml",
+                inventory_validator_path="/repo/cli/validate/inventory/__main__.py",
+                inventory="/etc/inventories/github-ci/devices.yml",
+                modes={
+                    "MODE_CLEANUP": False,
+                    "MODE_ASSERT": True,
+                    "MODE_DEBUG": False,
+                },
+                limit=None,
+                allowed_applications=None,
+                password_file=None,
+                verbose=0,
+                skip_build=True,
+                diff=False,
+                ansible_args=None,
+            )
 
         self.assertEqual(ctx.exception.code, 1)
         self.assertFalse(

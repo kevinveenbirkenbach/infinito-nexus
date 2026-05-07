@@ -162,16 +162,17 @@ class TestAuthVariantsCoverage(unittest.TestCase):
                         f"variant entry with both flags false."
                     )
 
-            if dynamic_auth and ldap_dynamic:
-                if not _has_ldap_only_variant(variants, dynamic_auth):
-                    auth_list = " / ".join(f"services.{k}" for k in dynamic_auth)
-                    offenders.append(
-                        f"{role_name}: both ldap and {auth_list} are dynamic, "
-                        f"but no variant pins ``ldap.enabled: true`` together "
-                        f"with ``enabled: false`` on the auth service(s) — the "
-                        f"LDAP-only branch is never exercised. See "
-                        f"docs/requirements/018-playwright-ldap-coverage.md."
-                    )
+            if (dynamic_auth and ldap_dynamic) and not _has_ldap_only_variant(
+                variants, dynamic_auth
+            ):
+                auth_list = " / ".join(f"services.{k}" for k in dynamic_auth)
+                offenders.append(
+                    f"{role_name}: both ldap and {auth_list} are dynamic, "
+                    f"but no variant pins ``ldap.enabled: true`` together "
+                    f"with ``enabled: false`` on the auth service(s) — the "
+                    f"LDAP-only branch is never exercised. See "
+                    f"docs/requirements/018-playwright-ldap-coverage.md."
+                )
 
         if offenders:
             self.fail(

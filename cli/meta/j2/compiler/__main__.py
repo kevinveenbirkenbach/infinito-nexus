@@ -37,8 +37,9 @@ def expand_includes(rel_path, seen=None):
             else:
                 indent, inc_rel = m.group(1), m.group(2)
                 # rekursiver Aufruf
-                for inc_line in expand_includes(inc_rel, seen):
-                    output_lines.append(indent + inc_line)
+                output_lines.extend(
+                    indent + inc_line for inc_line in expand_includes(inc_rel, seen)
+                )
     seen.remove(rp)
     return output_lines
 

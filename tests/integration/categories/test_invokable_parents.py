@@ -27,7 +27,7 @@ class TestCategoriesInvokableExclusion(unittest.TestCase):
                     continue
 
                 is_invokable = value.get("invokable", False)
-                current_path = path + [key]
+                current_path = [*path, key]
 
                 # Violation: a descendant is invokable despite an invokable ancestor
                 if ancestor_invokable and is_invokable:

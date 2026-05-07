@@ -72,19 +72,21 @@ def _collect_pipefail_vars(tree: ast.Module) -> set[str]:
     while changed:
         changed = False
         for node in ast.walk(tree):
-            if isinstance(node, ast.Assign):
-                if _expr_contains_pipefail(node.value, names):
-                    for t in node.targets:
-                        for name in _iter_assigned_names(t):
-                            if name not in names:
-                                names.add(name)
-                                changed = True
-            elif isinstance(node, ast.AnnAssign) and node.value is not None:
-                if _expr_contains_pipefail(node.value, names):
-                    for name in _iter_assigned_names(node.target):
+            if isinstance(node, ast.Assign) and _expr_contains_pipefail(
+                node.value, names
+            ):
+                for t in node.targets:
+                    for name in _iter_assigned_names(t):
                         if name not in names:
                             names.add(name)
                             changed = True
+            if (
+                isinstance(node, ast.AnnAssign) and node.value is not None
+            ) and _expr_contains_pipefail(node.value, names):
+                for name in _iter_assigned_names(node.target):
+                    if name not in names:
+                        names.add(name)
+                        changed = True
     return names
 
 

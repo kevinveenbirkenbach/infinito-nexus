@@ -339,9 +339,8 @@ class TestComposeCaInject(unittest.TestCase):
             "/etc/infinito/bin/with-ca-trust.sh",
             # missing: --trust-name
         ]
-        with patch("sys.argv", argv):
-            with self.assertRaises(SystemExit):
-                self.m.main()
+        with patch("sys.argv", argv), self.assertRaises(SystemExit):
+            self.m.main()
 
     def test_docker_image_has_bin_sh_true(self):
         """

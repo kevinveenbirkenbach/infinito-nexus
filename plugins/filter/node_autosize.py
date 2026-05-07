@@ -69,7 +69,7 @@ def _to_bytes(val):
 
 def _mb(bytes_val: int) -> int:
     """Return decimal MB (10^6) as integer — Node expects MB units."""
-    return int(round(bytes_val / 10**6))
+    return round(bytes_val / 10**6)
 
 
 def _compute_old_space_mb(

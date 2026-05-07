@@ -115,9 +115,11 @@ def validate_host_keys(app_ids, inv_dir):
         children = all_node.get("children")
         if not isinstance(children, dict):
             continue
-        for grp in children.keys():
-            if grp not in app_ids:
-                errs.append(f"{f}: Invalid group '{grp}' (not in application_ids)")
+        errs.extend(
+            f"{f}: Invalid group '{grp}' (not in application_ids)"
+            for grp in children
+            if grp not in app_ids
+        )
     return errs
 
 

@@ -79,10 +79,7 @@ def _get_invokable_paths() -> list[str]:
 def _is_role_invokable(role_name: str, invokable_paths: Iterable[str]) -> bool:
     # Matches your existing logic:
     # role == p or role.startswith(p + "-")
-    for p in invokable_paths:
-        if role_name == p or role_name.startswith(p + "-"):
-            return True
-    return False
+    return any(role_name == p or role_name.startswith(p + "-") for p in invokable_paths)
 
 
 def _role_to_app_id(role_dir: Path) -> str:
@@ -105,11 +102,13 @@ def list_invokable_app_ids() -> list[str]:
         return []
 
     result: list[str] = []
-    for role_dir in sorted(
-        [p for p in roles_dir.iterdir() if p.is_dir()], key=lambda p: p.name
-    ):
-        if _is_role_invokable(role_dir.name, invokable_paths):
-            result.append(_role_to_app_id(role_dir))
+    result.extend(
+        _role_to_app_id(role_dir)
+        for role_dir in sorted(
+            [p for p in roles_dir.iterdir() if p.is_dir()], key=lambda p: p.name
+        )
+        if _is_role_invokable(role_dir.name, invokable_paths)
+    )
 
     return sorted(set(result))
 
@@ -117,9 +116,7 @@ def list_invokable_app_ids() -> list[str]:
 def _rule_matches_role_name(rule: DeploymentTypeRule, role_name: str) -> bool:
     if not rule.include_re.search(role_name):
         return False
-    if rule.exclude_re and rule.exclude_re.search(role_name):
-        return False
-    return True
+    return not (rule.exclude_re and rule.exclude_re.search(role_name))
 
 
 def list_invokables_by_type(

@@ -279,8 +279,7 @@ def _materialize_builtin_user_aliases(
         if "://" in text:
             parsed = urlparse(text)
             text = parsed.hostname or text
-        text = text.split("/", 1)[0].split(":", 1)[0].strip()
-        return text
+        return text.split("/", 1)[0].split(":", 1)[0].strip()
 
     def _to_primary_domain(value: Any) -> str:
         text = _normalize_domain_candidate(value)

@@ -53,9 +53,11 @@ def _dynamic_pairs(services: dict) -> list[tuple[str, str]]:
     for key, entry in services.items():
         if not isinstance(entry, dict):
             continue
-        for flag in ("enabled", "shared"):
-            if _is_dynamic_flag(entry.get(flag)):
-                pairs.append((key, flag))
+        pairs.extend(
+            (key, flag)
+            for flag in ("enabled", "shared")
+            if _is_dynamic_flag(entry.get(flag))
+        )
     return pairs
 
 

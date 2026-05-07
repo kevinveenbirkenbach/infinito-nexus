@@ -207,9 +207,7 @@ def _bake_overrides(
     existing_apps = merged.get("applications")
     if not isinstance(existing_apps, Mapping):
         existing_apps = {}
-    apps: dict[str, Any] = {
-        app_id: payload for app_id, payload in variant_payloads.items()
-    }
+    apps: dict[str, Any] = dict(variant_payloads.items())
     # Caller-supplied `applications.*` entries deep-overlay the variant
     # payload so overrides like `applications.web-app-foo.feature_flag` from
     # `--vars` still take precedence.

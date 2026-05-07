@@ -11,10 +11,10 @@ from . import PROJECT_ROOT
 
 sys.path.insert(0, str(PROJECT_ROOT))
 
-from humanfriendly import format_size, parse_size  # noqa: E402
+from humanfriendly import format_size, parse_size
 
-from utils.entity_name_utils import get_entity_name  # noqa: E402
-from utils.service_registry import (  # noqa: E402
+from utils.entity_name_utils import get_entity_name
+from utils.service_registry import (
     build_service_registry_from_applications,
     load_applications_from_roles_dir,
 )
@@ -71,9 +71,7 @@ def _is_enabled(service_conf: dict[str, Any], is_primary: bool) -> bool:
     if isinstance(raw, bool):
         return raw
     text = str(raw).strip().lower()
-    if text in ("false", "0", "no", "off"):
-        return False
-    return True
+    return text not in ("false", "0", "no", "off")
 
 
 def _is_shared(service_conf: dict[str, Any]) -> bool:
@@ -230,17 +228,17 @@ def render_text(
     headers = ["service", "role", "mem_reservation", "mem_limit", "pids_limit", "cpus"]
     table_rows: list[tuple[str, ...]] = []
 
-    for row in sorted(rows, key=lambda r: (r["service"], r["role"])):
-        table_rows.append(
-            (
-                row["service"],
-                row["role"],
-                _fmt_mem(row["mem_reservation_bytes"]),
-                _fmt_mem(row["mem_limit_bytes"]),
-                _fmt_int(row["pids_limit_int"]),
-                _fmt_float(row["cpus_float"]),
-            )
+    table_rows.extend(
+        (
+            row["service"],
+            row["role"],
+            _fmt_mem(row["mem_reservation_bytes"]),
+            _fmt_mem(row["mem_limit_bytes"]),
+            _fmt_int(row["pids_limit_int"]),
+            _fmt_float(row["cpus_float"]),
         )
+        for row in sorted(rows, key=lambda r: (r["service"], r["role"]))
+    )
 
     total_label = "TOTAL (mem=SUM, pids=SUM max-provisioned, cpus=MAX)"
     total_row = (
@@ -253,7 +251,7 @@ def render_text(
     )
 
     widths = [len(h) for h in headers]
-    for r in table_rows + [total_row]:
+    for r in [*table_rows, total_row]:
         for i, cell in enumerate(r):
             widths[i] = max(widths[i], len(cell))
 
@@ -274,8 +272,7 @@ def render_text(
     if warnings:
         lines.append("")
         lines.append("# Warnings")
-        for w in warnings:
-            lines.append(f"! {w}")
+        lines.extend(f"! {w}" for w in warnings)
 
     return "\n".join(lines)
 

@@ -19,9 +19,11 @@ class TestTestFilesContainUnittestTests(unittest.TestCase):
     def _iter_test_files(self) -> list[str]:
         out: list[str] = []
         for root, _dirs, files in os.walk(self.tests_dir):
-            for fn in files:
-                if fn.startswith("test_") and fn.endswith(".py"):
-                    out.append(os.path.join(root, fn))
+            out.extend(
+                os.path.join(root, fn)
+                for fn in files
+                if fn.startswith("test_") and fn.endswith(".py")
+            )
         return sorted(out)
 
     def _file_contains_runnable_unittest_test(self, path: str) -> bool:
@@ -46,24 +48,22 @@ class TestTestFilesContainUnittestTests(unittest.TestCase):
                 for n in node.names:
                     if n.name == "unittest":
                         unittest_aliases.add(n.asname or "unittest")
-            elif isinstance(node, ast.ImportFrom):
-                if node.module == "unittest":
-                    for n in node.names:
-                        if n.name == "TestCase":
-                            testcase_aliases.add(n.asname or "TestCase")
+            if isinstance(node, ast.ImportFrom) and node.module == "unittest":
+                for n in node.names:
+                    if n.name == "TestCase":
+                        testcase_aliases.add(n.asname or "TestCase")
 
         def is_testcase_base(base: ast.expr) -> bool:
             # TestCase
             if isinstance(base, ast.Name) and base.id in testcase_aliases:
                 return True
             # unittest.TestCase or alias.TestCase
-            if isinstance(base, ast.Attribute) and base.attr == "TestCase":
-                if (
-                    isinstance(base.value, ast.Name)
-                    and base.value.id in unittest_aliases
-                ):
-                    return True
-            return False
+            return bool(
+                isinstance(base, ast.Attribute)
+                and base.attr == "TestCase"
+                and isinstance(base.value, ast.Name)
+                and base.value.id in unittest_aliases
+            )
 
         # 1) module-level test_* function (uncommon but valid for discovery in some setups)
         for node in tree.body:

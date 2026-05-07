@@ -92,11 +92,10 @@ class TestWildcardPaths(unittest.TestCase):
             creds = schema.get("credentials") if isinstance(schema, Mapping) else None
             if isinstance(creds, Mapping) and match_wildcard_segment(creds, sub):
                 return True
-        if wildcard_path.startswith("images.") and isinstance(
-            cfg.get("images"), Mapping
-        ):
-            return True
-        return False
+        return bool(
+            wildcard_path.startswith("images.")
+            and isinstance(cfg.get("images"), Mapping)
+        )
 
 
 if __name__ == "__main__":

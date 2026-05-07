@@ -98,7 +98,7 @@ def url_join(parts):
             s = after_scheme
 
         # check if this is a query element (starts with ? or &)
-        if s.startswith("?") or s.startswith("&"):
+        if s.startswith(("?", "&")):
             in_query = True
             raw_pair = s[1:]  # strip the leading ? or &
             if raw_pair == "":

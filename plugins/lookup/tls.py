@@ -74,7 +74,7 @@ class LookupModule(LookupBase):
 
         all_domains = collect_domains_for_app(domains, app_id, err_prefix="tls")
         all_domains = (
-            uniq_preserve([primary_domain] + all_domains)
+            uniq_preserve([primary_domain, *all_domains])
             if all_domains
             else [primary_domain]
         )

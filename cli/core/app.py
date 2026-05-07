@@ -159,7 +159,7 @@ def main() -> None:
         log_file, log_path = open_log_file(flags.log_dir)
         print(color_text(f"Tip: Log file created at {log_path}", Fore.GREEN))
 
-    full_cmd = [sys.executable, "-m", module] + remaining
+    full_cmd = [sys.executable, "-m", module, *remaining]
 
     cfg = RunConfig(
         log_enabled=flags.log_dir is not None,

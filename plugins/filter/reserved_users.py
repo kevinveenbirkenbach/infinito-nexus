@@ -13,7 +13,7 @@ def reserved_usernames(users_dict):
 
     results = []
 
-    for _key, user in users_dict.items():
+    for user in users_dict.values():
         if not isinstance(user, dict):
             continue
         if not user.get("reserved", False):

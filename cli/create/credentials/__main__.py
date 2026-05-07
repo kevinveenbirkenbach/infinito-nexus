@@ -72,9 +72,7 @@ def _is_vault_encrypted(val: Any) -> bool:
         return True
     if _is_ruamel_vault(val):
         return True
-    if isinstance(val, str) and ("$ANSIBLE_VAULT" in val or "!vault" in val):
-        return True
-    return False
+    return bool(isinstance(val, str) and ("$ANSIBLE_VAULT" in val or "!vault" in val))
 
 
 def _vault_body(text: str) -> str:
@@ -330,10 +328,7 @@ def main() -> int:
             )
             value_for_new_key: str | Any
 
-            if ov is not None:
-                value_for_new_key = ov
-            else:
-                value_for_new_key = default_val
+            value_for_new_key = ov if ov is not None else default_val
 
             if _is_vault_encrypted(value_for_new_key):
                 creds[key] = to_vault_block(

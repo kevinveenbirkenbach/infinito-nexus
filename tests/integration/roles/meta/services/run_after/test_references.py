@@ -36,12 +36,11 @@ class TestRunAfterReferences(unittest.TestCase):
             data = load_yaml_any(meta_path, default_if_missing={}) or {}
 
             run_after = data.get("galaxy_info", {}).get("run_after", [])
-            for dep in run_after:
-                if dep not in self.existing_roles:
-                    errors.append(
-                        f"Role '{role}' declares run_after: '{dep}', "
-                        f"but '{dep}' is not a directory under roles/"
-                    )
+            errors.extend(
+                f"Role '{role}' declares run_after: '{dep}', but '{dep}' is not a directory under roles/"
+                for dep in run_after
+                if dep not in self.existing_roles
+            )
 
         if errors:
             self.fail(

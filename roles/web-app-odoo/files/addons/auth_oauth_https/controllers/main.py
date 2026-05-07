@@ -66,13 +66,13 @@ class OAuthLoginHTTPS(OAuthLogin):
 
         for provider in providers:
             state = self.get_state(provider)
-            params = dict(
-                response_type="token",
-                client_id=provider["client_id"],
-                redirect_uri=return_url,
-                scope=provider["scope"],
-                state=json.dumps(state),
-            )
+            params = {
+                "response_type": "token",
+                "client_id": provider["client_id"],
+                "redirect_uri": return_url,
+                "scope": provider["scope"],
+                "state": json.dumps(state),
+            }
             provider["auth_link"] = "{}?{}".format(
                 provider["auth_endpoint"],
                 werkzeug.urls.url_encode(params),
@@ -96,11 +96,11 @@ class OAuthLoginHTTPS(OAuthLogin):
                 redirect[1:] if redirect.startswith("/") else redirect,
             )
 
-        state = dict(
-            d=request.session.db,
-            p=provider["id"],
-            r=werkzeug.urls.url_quote_plus(redirect),
-        )
+        state = {
+            "d": request.session.db,
+            "p": provider["id"],
+            "r": werkzeug.urls.url_quote_plus(redirect),
+        }
         token = request.params.get("token")
         if token:
             state["t"] = token

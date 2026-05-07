@@ -52,7 +52,7 @@ class TestVariantsServicesMatch(unittest.TestCase):
             services = _load_yaml(role_dir / "meta" / "services.yml")
             if not isinstance(services, dict):
                 continue
-            declared_keys = {k for k in services.keys() if isinstance(k, str)}
+            declared_keys = {k for k in services if isinstance(k, str)}
 
             variants_raw = _load_yaml(role_dir / "meta" / "variants.yml")
             if not isinstance(variants_raw, list):
@@ -64,7 +64,7 @@ class TestVariantsServicesMatch(unittest.TestCase):
                 variant_services = variant.get("services")
                 if not isinstance(variant_services, dict):
                     continue
-                for key in variant_services.keys():
+                for key in variant_services:
                     if not isinstance(key, str):
                         continue
                     if key in declared_keys:

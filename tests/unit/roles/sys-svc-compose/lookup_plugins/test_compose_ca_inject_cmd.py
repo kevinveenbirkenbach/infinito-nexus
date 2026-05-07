@@ -49,7 +49,7 @@ class _FakeComposeFArgsLookup:
 
     def run(self, terms, variables=None, **kwargs):
         self.calls.append({"terms": terms, "kwargs": kwargs})
-        if kwargs.get("include_ca", None) is not False:
+        if kwargs.get("include_ca") is not False:
             raise AnsibleError(
                 "Fake compose_file_args lookup: expected include_ca=False"
             )
@@ -226,9 +226,9 @@ class ComposeCaInjectCmdLookupTests(unittest.TestCase):
                 self.mod, "render_ansible_strict", side_effect=lambda **kw: kw["raw"]
             ),
             patch.object(self.mod, "get_entity_name", side_effect=lambda _x: "myproj"),
+            self.assertRaises(AnsibleError) as ctx,
         ):
-            with self.assertRaises(AnsibleError) as ctx:
-                lk.run(["web-app-test"], variables=variables)
+            lk.run(["web-app-test"], variables=variables)
 
         self.assertIn("missing required variable 'CA_TRUST'", str(ctx.exception))
 

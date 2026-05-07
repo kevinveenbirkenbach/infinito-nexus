@@ -64,13 +64,24 @@ exclude = [
 
 [tool.ruff.lint]
 # Default ruff is `E4 + E7 + E9 + F`. We add:
-# - `I`  (isort)        — import order, auto-fixable
-# - `B`  (flake8-bugbear) — likely-bug patterns (mutable defaults, etc.)
-# - `UP` (pyupgrade)    — modernise syntax to the target_version above
-select = ["E", "F", "I", "B", "UP"]
+# - `I`    (isort)              — import order, auto-fixable
+# - `B`    (flake8-bugbear)     — likely-bug patterns (mutable defaults, etc.)
+# - `UP`   (pyupgrade)          — modernise syntax to the target_version above
+# - `RUF`  (ruff-specific)      — unused-noqa, ambiguous unicode, mutable class attrs, …
+# - `SIM`  (flake8-simplify)    — `if x: True else: False` → `bool(x)`, etc.
+# - `C4`   (flake8-comprehensions) — `list(x for x in y)` → `[x for x in y]`, …
+# - `PERF` (perflint)           — avoid try/except in hot loops, etc.
+# - `RET`  (flake8-return)      — unneeded `else` after `return`, redundant assigns
+# - `PIE`  (flake8-pie)         — small wins (no-op `pass`, redundant `dict()` calls)
+select = ["E", "F", "I", "B", "UP", "RUF", "SIM", "C4", "PERF", "RET", "PIE"]
 
 # `ruff format` (run via `make autoformat`) reflows whatever it can.
 # E501 leftovers are content the formatter can't break (long string
 # literals, URLs / shell commands inside f-strings, comments). Trust
 # the formatter; don't fail CI on the unsplittable rest.
-ignore = ["E501"]
+#
+# RUF001/002/003 (ambiguous unicode in strings / docstrings / comments)
+# exist to catch homoglyph attacks, not English typography. The project
+# uses em/en-dashes deliberately and `ℹ` as a UI-hint glyph in CLI help
+# output; flagging those is noise.
+ignore = ["E501", "RUF001", "RUF002", "RUF003"]

@@ -59,10 +59,9 @@ def has_healthcheck(container):
 
 def get_health_status(container):
     """Return the health status."""
-    status = run_command(
+    return run_command(
         f"container inspect --format='{{{{.State.Health.Status}}}}' {container}"
     )
-    return status
 
 
 def run_rsync(src, dest):

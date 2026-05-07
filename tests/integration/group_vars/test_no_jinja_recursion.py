@@ -69,14 +69,13 @@ def build_edges(vars_dict):
     def walk(node, path):
         if isinstance(node, dict):
             for k, v in node.items():
-                walk(v, path + [k])
+                walk(v, [*path, k])
         elif isinstance(node, list):
             for i, e in enumerate(node):
-                walk(e, path + [f"[{i}]"])
+                walk(e, [*path, f"[{i}]"])
         else:
             full_key = ".".join(path)
-            for ref in find_jinja_refs(node):
-                edges.append((full_key, ref))
+            edges.extend((full_key, ref) for ref in find_jinja_refs(node))
 
     walk(vars_dict, [])
     return edges
@@ -111,7 +110,7 @@ class TestNoJinjaReferenceCycles(unittest.TestCase):
 
         def dfs(node, visited, stack):
             if node in stack:
-                return stack[stack.index(node) :] + [node]
+                return [*stack[stack.index(node) :], node]
             if node in visited:
                 return None
             visited.add(node)

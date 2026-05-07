@@ -125,16 +125,16 @@ def main(vendor_and_product_id):
     start_color, end_color = get_current_period(current_time, color_times)
 
     sorted_times = sorted(color_times.keys())
-    for time_str in sorted_times + [sorted_times[0]]:
+    for time_str in [*sorted_times, sorted_times[0]]:
         next_start_time_obj = datetime.datetime.strptime(time_str, "%H:%M").time()
         if current_time < next_start_time_obj:
             break
 
-    current_period_start_time_str = [
+    current_period_start_time_str = next(
         time
         for time, colors in color_times.items()
         if colors == (start_color, end_color)
-    ][0]
+    )
     current_period_start_time_obj = datetime.datetime.strptime(
         current_period_start_time_str, "%H:%M"
     ).time()

@@ -131,7 +131,7 @@ class TestVariableDefinitions(unittest.TestCase):
                                 data = yaml.safe_load(inline_map)
                                 if isinstance(data, dict):
                                     self.defined.update(
-                                        k for k in data.keys() if isinstance(k, str)
+                                        k for k in data if isinstance(k, str)
                                     )
                             except yaml.YAMLError as exc:
                                 logging.debug(
@@ -273,7 +273,7 @@ class TestVariableDefinitions(unittest.TestCase):
                         if m_expr:
                             var = m_expr.group(1)
 
-                            if var not in (
+                            if var not in (  # noqa: SIM102  the long literal whitelist is more readable as a separate guard
                                 "lookup",
                                 "role_name",
                                 "domains",

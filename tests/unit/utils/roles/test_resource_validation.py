@@ -224,13 +224,15 @@ demo:
         self.assertIn("Invalid min_storage value", err.getvalue())
 
     def test_invalid_required_storage_raises_value_error(self) -> None:
-        with patch.object(rrv, "_roles_root", return_value=self.roles_root):
-            with self.assertRaises(ValueError):
-                rrv.filter_roles_by_min_storage(
-                    role_names=["web-app-demo"],
-                    required_storage="not-a-size",
-                    emit_warnings=False,
-                )
+        with (
+            patch.object(rrv, "_roles_root", return_value=self.roles_root),
+            self.assertRaises(ValueError),
+        ):
+            rrv.filter_roles_by_min_storage(
+                role_names=["web-app-demo"],
+                required_storage="not-a-size",
+                emit_warnings=False,
+            )
 
     def test_entity_name_missing_emits_warning_and_skips(self) -> None:
         self._write_role_config(

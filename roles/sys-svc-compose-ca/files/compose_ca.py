@@ -158,6 +158,7 @@ def normalize_cmd(value: Any) -> list[str]:
     if isinstance(value, str) and value.strip():
         return ["/bin/sh", "-lc", value]
     die(f"Unsupported command type in compose config: {type(value)}")
+    return None
 
 
 def normalize_entrypoint(value: Any) -> list[str]:
@@ -176,6 +177,7 @@ def normalize_entrypoint(value: Any) -> list[str]:
     if isinstance(value, str) and value.strip():
         return ["/bin/sh", "-lc", value]
     die(f"Unsupported entrypoint type in compose config: {type(value)}")
+    return None
 
 
 def escape_compose_vars(argv: list[str]) -> list[str]:
@@ -310,7 +312,7 @@ def ensure_image_available(
 
     if _has_build(svc):
         run_checked(
-            compose_base_cmd + ["build", service_name],
+            [*compose_base_cmd, "build", service_name],
             cwd=cwd,
             env=env,
             label=f"compose build {service_name}",
@@ -322,14 +324,14 @@ def ensure_image_available(
             if not builder_cmd:
                 builder_cmd = compose_base_cmd
             run_checked(
-                builder_cmd + ["build", builder],
+                [*builder_cmd, "build", builder],
                 cwd=cwd,
                 env=env,
                 label=f"compose build {builder} (builder for image {img})",
             )
         else:
             run_checked(
-                compose_base_cmd + ["pull", service_name],
+                [*compose_base_cmd, "pull", service_name],
                 cwd=cwd,
                 env=env,
                 label=f"compose pull {service_name}",
@@ -387,7 +389,7 @@ def _discover_profiles_from_files(compose_files: list[Path]) -> list[str]:
         if not isinstance(services, dict):
             continue
 
-        for _svc_name, svc in services.items():
+        for svc in services.values():
             if not isinstance(svc, dict):
                 continue
             p = svc.get("profiles")
@@ -402,7 +404,7 @@ def _discover_profiles_from_files(compose_files: list[Path]) -> list[str]:
 
 
 def _compose_base_cmd(*, project: str, parts: list[str], env_file: str) -> list[str]:
-    cmd: list[str] = ["docker", "compose", "-p", project] + parts
+    cmd: list[str] = ["docker", "compose", "-p", project, *parts]
     if env_file.strip():
         cmd += ["--env-file", env_file.strip()]
     return cmd
@@ -417,7 +419,7 @@ def _compose_cmd_with_profile(base_cmd: list[str], profile: str) -> list[str]:
         die(f"Invalid compose base cmd: {base_cmd}")
 
     # Insert after the compose wrapper prefix
-    return base_cmd[:2] + ["--profile", profile] + base_cmd[2:]
+    return [*base_cmd[:2], "--profile", profile, *base_cmd[2:]]
 
 
 def _load_services_via_config(
@@ -427,7 +429,7 @@ def _load_services_via_config(
     env: dict[str, str],
     label: str,
 ) -> dict[str, Any]:
-    rc, out, err = run(compose_cmd + ["config"], cwd=cwd, env=env)
+    rc, out, err = run([*compose_cmd, "config"], cwd=cwd, env=env)
     if rc != 0:
         die(f"compose config failed for {label} (rc={rc}): {err.strip()}")
 

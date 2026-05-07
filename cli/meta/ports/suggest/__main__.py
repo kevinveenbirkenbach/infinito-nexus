@@ -115,7 +115,7 @@ def suggest_relay_ranges(
     gaps_filled = 0
     cursor = band_start
 
-    sorted_occ = sorted(occupied + [(band_end + 1, band_end + 1)])
+    sorted_occ = sorted([*occupied, (band_end + 1, band_end + 1)])
 
     while len(suggestions) < count and cursor + length - 1 <= band_end:
         candidate = (cursor, cursor + length - 1)

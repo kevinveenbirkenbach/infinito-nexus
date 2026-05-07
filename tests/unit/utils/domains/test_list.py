@@ -139,9 +139,11 @@ class TestDomainList(unittest.TestCase):
             self.write_role(roles_dir, "app-a", "app-a", shared_config)
             self.write_role(roles_dir, "app-b", "app-b", shared_config)
 
-            with patch.object(domain_list, "ROLES_DIR", roles_dir):
-                with self.assertRaises(AnsibleError):
-                    domain_list.list_application_domains("infinito.example")
+            with (
+                patch.object(domain_list, "ROLES_DIR", roles_dir),
+                self.assertRaises(AnsibleError),
+            ):
+                domain_list.list_application_domains("infinito.example")
 
 
 if __name__ == "__main__":

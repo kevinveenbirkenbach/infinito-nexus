@@ -27,9 +27,9 @@ class TestRunAfterRoles(unittest.TestCase):
                 continue
 
             run_after = data.get("galaxy_info", {}).get("run_after", [])
-            for ref in run_after:
-                if ref not in self.valid_role_names:
-                    invalid_refs.append((role, ref))
+            invalid_refs.extend(
+                (role, ref) for ref in run_after if ref not in self.valid_role_names
+            )
 
         if invalid_refs:
             msg = "\n".join(

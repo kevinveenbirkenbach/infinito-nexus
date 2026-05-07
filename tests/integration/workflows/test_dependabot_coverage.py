@@ -177,7 +177,7 @@ def _load_gitignore_patterns() -> list[str]:
     patterns: list[str] = []
     for raw in GITIGNORE_PATH.read_text().splitlines():
         line = raw.strip()
-        if not line or line.startswith("#") or line.startswith("!"):
+        if not line or line.startswith(("#", "!")):
             continue
         patterns.append(line.rstrip("/"))
     return patterns

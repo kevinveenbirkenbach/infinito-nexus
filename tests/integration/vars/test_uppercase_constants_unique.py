@@ -57,7 +57,7 @@ def _extract_top_level_uppercase_keys(docs):
     found = set()
     for doc in docs:
         if isinstance(doc, dict):
-            for k in doc.keys():
+            for k in doc:
                 if isinstance(k, str) and UPPER_CONST_RE.match(k):
                     found.add(k)
     return found
@@ -108,8 +108,7 @@ class TestUppercaseConstantVarsUnique(unittest.TestCase):
             ]
             for const, files in sorted(duplicates.items()):
                 msg_lines.append(f"* {const} defined in {len(files)} files:")
-                for f in files:
-                    msg_lines.append(f"    - {f}")
+                msg_lines.extend(f"    - {f}" for f in files)
                 msg_lines.append("")  # spacer
             self.fail("\n".join(msg_lines))
 

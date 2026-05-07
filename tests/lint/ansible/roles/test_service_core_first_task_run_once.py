@@ -67,9 +67,11 @@ class TestServiceCoreFirstTaskRunOnce(unittest.TestCase):
 
     def test_01_core_exists(self):
         missing = []
-        for role in unique_roles(self.registry):
-            if not self._core_path(role).is_file():
-                missing.append(role)
+        missing.extend(
+            role
+            for role in unique_roles(self.registry)
+            if not self._core_path(role).is_file()
+        )
         if missing:
             self.fail(
                 "roles missing tasks/01_core.yml:\n"

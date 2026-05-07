@@ -33,9 +33,8 @@ class TestParseProps(unittest.TestCase):
 
 class TestParseLog(unittest.TestCase):
     def _write_log(self, content: str) -> Path:
-        f = tempfile.NamedTemporaryFile(mode="w", suffix=".txt", delete=False)
-        f.write(content)
-        f.close()
+        with tempfile.NamedTemporaryFile(mode="w", suffix=".txt", delete=False) as f:
+            f.write(content)
         return Path(f.name)
 
     def test_parses_warning(self) -> None:

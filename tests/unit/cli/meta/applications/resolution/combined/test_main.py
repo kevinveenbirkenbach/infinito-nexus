@@ -51,9 +51,8 @@ class TestCombinedMain(unittest.TestCase):
 
             with patch.object(repo_paths, "PROJECT_ROOT", root):
                 buf = io.StringIO()
-                with redirect_stdout(buf):
-                    with patch("sys.argv", ["prog", "app"]):
-                        combined_main.main()
+                with redirect_stdout(buf), patch("sys.argv", ["prog", "app"]):
+                    combined_main.main()
                 out = buf.getvalue().strip()
                 self.assertEqual(out, "ra1")
 
@@ -66,9 +65,8 @@ class TestCombinedMain(unittest.TestCase):
 
             with patch.object(repo_paths, "PROJECT_ROOT", root):
                 buf = io.StringIO()
-                with redirect_stdout(buf):
-                    with patch("sys.argv", ["prog", "app", "--tree"]):
-                        combined_main.main()
+                with redirect_stdout(buf), patch("sys.argv", ["prog", "app", "--tree"]):
+                    combined_main.main()
                 s = buf.getvalue()
                 self.assertIn("app", s)
                 self.assertIn("[run_after]", s)

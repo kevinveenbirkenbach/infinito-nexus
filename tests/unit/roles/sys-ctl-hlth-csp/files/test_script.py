@@ -264,13 +264,15 @@ class TestMain(unittest.TestCase):
     ) -> None:
         mock_extract.return_value = None
 
-        with patch.object(
-            script.sys,
-            "argv",
-            ["script.py", "--nginx-config-dir", "/missing", "--image", "img:tag"],
+        with (
+            patch.object(
+                script.sys,
+                "argv",
+                ["script.py", "--nginx-config-dir", "/missing", "--image", "img:tag"],
+            ),
+            self.assertRaises(SystemExit) as cm,
         ):
-            with self.assertRaises(SystemExit) as cm:
-                script.main()
+            script.main()
 
         self.assertEqual(cm.exception.code, 1)
         mock_run_checker.assert_not_called()
@@ -284,13 +286,15 @@ class TestMain(unittest.TestCase):
     ) -> None:
         mock_extract.return_value = []
 
-        with patch.object(
-            script.sys,
-            "argv",
-            ["script.py", "--nginx-config-dir", "/etc/nginx", "--image", "img:tag"],
+        with (
+            patch.object(
+                script.sys,
+                "argv",
+                ["script.py", "--nginx-config-dir", "/etc/nginx", "--image", "img:tag"],
+            ),
+            self.assertRaises(SystemExit) as cm,
         ):
-            with self.assertRaises(SystemExit) as cm:
-                script.main()
+            script.main()
 
         self.assertEqual(cm.exception.code, 0)
         mock_run_checker.assert_not_called()
@@ -311,23 +315,25 @@ class TestMain(unittest.TestCase):
         ]
         mock_run_checker.return_value = 5
 
-        with patch.object(
-            script.sys,
-            "argv",
-            [
-                "script.py",
-                "--nginx-config-dir",
-                "/etc/nginx",
-                "--image",
-                "img:tag",
-                "--short",
-                "--ignore-network-blocks-from",
-                "pxscdn.com",
-                "cdn.example.org",
-            ],
+        with (
+            patch.object(
+                script.sys,
+                "argv",
+                [
+                    "script.py",
+                    "--nginx-config-dir",
+                    "/etc/nginx",
+                    "--image",
+                    "img:tag",
+                    "--short",
+                    "--ignore-network-blocks-from",
+                    "pxscdn.com",
+                    "cdn.example.org",
+                ],
+            ),
+            self.assertRaises(SystemExit) as cm,
         ):
-            with self.assertRaises(SystemExit) as cm:
-                script.main()
+            script.main()
 
         self.assertEqual(cm.exception.code, 5)
 
@@ -357,20 +363,22 @@ class TestMain(unittest.TestCase):
         mock_build_urls.return_value = ["http://example.com/"]
         mock_run_checker.return_value = 0
 
-        with patch.object(
-            script.sys,
-            "argv",
-            [
-                "script.py",
-                "--nginx-config-dir",
-                "/etc/nginx",
-                "--image",
-                "img:tag",
-                "--no-host-network",
-            ],
+        with (
+            patch.object(
+                script.sys,
+                "argv",
+                [
+                    "script.py",
+                    "--nginx-config-dir",
+                    "/etc/nginx",
+                    "--image",
+                    "img:tag",
+                    "--no-host-network",
+                ],
+            ),
+            self.assertRaises(SystemExit) as cm,
         ):
-            with self.assertRaises(SystemExit) as cm:
-                script.main()
+            script.main()
 
         self.assertEqual(cm.exception.code, 0)
 
@@ -389,13 +397,15 @@ class TestMain(unittest.TestCase):
         mock_extract.return_value = ["example.com"]
         mock_build_urls.return_value = []
 
-        with patch.object(
-            script.sys,
-            "argv",
-            ["script.py", "--nginx-config-dir", "/etc/nginx", "--image", "img:tag"],
+        with (
+            patch.object(
+                script.sys,
+                "argv",
+                ["script.py", "--nginx-config-dir", "/etc/nginx", "--image", "img:tag"],
+            ),
+            self.assertRaises(SystemExit) as cm,
         ):
-            with self.assertRaises(SystemExit) as cm:
-                script.main()
+            script.main()
 
         self.assertEqual(cm.exception.code, 0)
         mock_run_checker.assert_not_called()

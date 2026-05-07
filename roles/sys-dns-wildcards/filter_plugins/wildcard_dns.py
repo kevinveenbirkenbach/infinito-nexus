@@ -123,13 +123,10 @@ def _build_wildcard_records(
         if p == apex:
             wc = "*"
         else:
-            # relative part (drop ".apex")
+            # relative part (drop ".apex"); empty rel is a safety guard
+            # — shouldn't happen because p==apex handled above.
             rel = p[: -len(apex) - 1]
-            if not rel:
-                # Safety guard; should not happen because p==apex handled above
-                wc = "*"
-            else:
-                wc = f"*.{rel}"
+            wc = "*" if not rel else f"*.{rel}"
         _add(wc, "A", str(ip4))
         if ipv6_enabled and ip6 and _is_global(str(ip6)):
             _add(wc, "AAAA", str(ip6))

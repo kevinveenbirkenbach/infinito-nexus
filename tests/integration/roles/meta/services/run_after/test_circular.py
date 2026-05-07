@@ -22,7 +22,7 @@ class TestCircularDependencies(unittest.TestCase):
 
     def test_no_circular_dependencies(self):
         # Build the dependency graph using the real roles/
-        graph, in_degree, roles = build_dependency_graph(self.roles_dir)
+        _graph, _in_degree, roles = build_dependency_graph(self.roles_dir)
 
         # Attempt to find a cycle in the run_after mapping
         cycle = find_cycle(roles)

@@ -110,9 +110,7 @@ def _collect_top_level_keys(file: Path) -> list[tuple[str, int]]:
     if not isinstance(data, dict):
         return []
 
-    declared: set[str] = {
-        k for k in data.keys() if isinstance(k, str) and k.isidentifier()
-    }
+    declared: set[str] = {k for k in data if isinstance(k, str) and k.isidentifier()}
     if not declared:
         return []
 
@@ -195,9 +193,8 @@ def _scan_ansible_expr_idents(node, sink: set[str]) -> None:
         for k, v in node.items():
             if k in _ANSIBLE_EXPR_KEYS:
                 _harvest_idents_from_value(v, sink)
-            elif isinstance(k, str) and k.startswith("with_"):
-                if isinstance(v, str):
-                    _harvest_idents_from_value(v, sink)
+            if (isinstance(k, str) and k.startswith("with_")) and isinstance(v, str):
+                _harvest_idents_from_value(v, sink)
             _scan_ansible_expr_idents(v, sink)
     elif isinstance(node, list):
         for item in node:

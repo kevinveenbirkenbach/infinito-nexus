@@ -157,9 +157,11 @@ class _FiltersCollector(ast.NodeVisitor):
             and isinstance(node.func, ast.Name)
             and node.func.id == "dict"
         ):
-            for kw in node.keywords or []:
-                if kw.arg:
-                    pairs.append((kw.arg, self._name_of(kw.value)))
+            pairs.extend(
+                (kw.arg, self._name_of(kw.value))
+                for kw in node.keywords or []
+                if kw.arg
+            )
             return pairs
         if isinstance(node, ast.Name):
             return []
@@ -328,8 +330,7 @@ class TestAllUsedFiltersAreDefined(unittest.TestCase):
                 "These filters are used in templates/YAML but have no local definition "
                 "(and are not in BUILTIN_FILTERS):"
             ]
-            for f in unknown:
-                lines.append("- " + f)
+            lines.extend("- " + f for f in unknown)
             self.fail("\n".join(lines))
 
 

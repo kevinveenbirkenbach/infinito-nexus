@@ -38,7 +38,7 @@ from ansible.errors import AnsibleError
 from ansible.plugins.lookup import LookupBase
 
 try:
-    from ansible.utils.display import Display  # noqa: F401  pragma: no cover
+    from ansible.utils.display import Display
 except Exception:  # pragma: no cover
     Display = None  # type: ignore
 
@@ -104,7 +104,7 @@ def _resolve_role_scope(app_cfg, application_id, role):
         raise AnsibleError(
             f"rbac_group_path: role '{role}' is not declared under "
             f"applications[{application_id}].rbac.roles. Declared roles: "
-            f"{declared + [_IMPLICIT_ADMIN_ROLE]}."
+            f"{[*declared, _IMPLICIT_ADMIN_ROLE]}."
         )
 
     tenancy = (rbac.get("tenancy") or {}) if isinstance(rbac, dict) else {}

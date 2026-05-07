@@ -88,15 +88,16 @@ class TestServiceSharedConsistency(unittest.TestCase):
                 has_enabled = "enabled" in svc_cfg
 
                 # Rule 1: enabled=true requires shared=true
-                if enabled is True and not has_shared:
-                    if svc_name not in exceptions:
-                        errors.append(
-                            f"{role_name}: services.{svc_name} has enabled=true "
-                            f"but is missing shared=true. "
-                            f"Add 'shared: true' or place a '# nocheck: shared' "
-                            f"comment on the line directly above '{svc_name}:' to mark "
-                            f"the intentional exception. ({file_path})"
-                        )
+                if (
+                    enabled is True and (not has_shared)
+                ) and svc_name not in exceptions:
+                    errors.append(
+                        f"{role_name}: services.{svc_name} has enabled=true "
+                        f"but is missing shared=true. "
+                        f"Add 'shared: true' or place a '# nocheck: shared' "
+                        f"comment on the line directly above '{svc_name}:' to mark "
+                        f"the intentional exception. ({file_path})"
+                    )
 
                 # Rule 2: shared key requires enabled key
                 if has_shared and not has_enabled:

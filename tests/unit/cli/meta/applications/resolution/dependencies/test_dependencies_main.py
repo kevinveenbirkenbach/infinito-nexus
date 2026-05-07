@@ -68,7 +68,6 @@ dependencies:
 
             with patch.object(deps_main, "PROJECT_ROOT", root):
                 buf = io.StringIO()
-                with redirect_stdout(buf):
-                    with patch("sys.argv", ["prog", "app"]):
-                        deps_main.main()
+                with redirect_stdout(buf), patch("sys.argv", ["prog", "app"]):
+                    deps_main.main()
                 self.assertEqual(buf.getvalue().strip(), "app_dep")

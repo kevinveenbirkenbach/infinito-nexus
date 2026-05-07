@@ -182,7 +182,7 @@ class LookupModule(LookupBase):
         }
 
         if domain:
-            protocol_override = kwargs.get("protocol", None)
+            protocol_override = kwargs.get("protocol")
             protocol = (
                 _resolve_protocol_via_tls(
                     domain=domain,

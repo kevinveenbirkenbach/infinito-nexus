@@ -53,7 +53,7 @@ def active_docker_container_count(
             # sometimes roles define a single service name string; ignore
             continue
 
-        for _svc_name, svc_cfg in services.items():
+        for svc_cfg in services.values():
             if not _is_mapping(svc_cfg):
                 # allow shorthand like: service: {} or image string -> counts as enabled
                 count += 1

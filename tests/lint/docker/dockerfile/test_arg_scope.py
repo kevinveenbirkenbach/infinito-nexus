@@ -54,9 +54,11 @@ def _undeclared_from_args(dockerfile: Path) -> list[tuple[int, str, str]]:
     # Pass 2 — check every FROM that references an ARG
     violations: list[tuple[int, str, str]] = []
     for lineno, line in enumerate(lines, start=1):
-        for m in _FROM_ARG_RE.finditer(line):
-            if m.group(1) not in global_args:
-                violations.append((lineno, line.strip(), m.group(1)))
+        violations.extend(
+            (lineno, line.strip(), m.group(1))
+            for m in _FROM_ARG_RE.finditer(line)
+            if m.group(1) not in global_args
+        )
 
     return violations
 

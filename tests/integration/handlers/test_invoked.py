@@ -285,8 +285,7 @@ class TestHandlersInvoked(unittest.TestCase):
 
         if missing_groups:
             representatives: list[str] = []
-            for grp in missing_groups:
-                representatives.append(sorted(grp)[0])
+            representatives.extend(sorted(grp)[0] for grp in missing_groups)
             representatives = sorted(set(representatives))
 
             msg = [

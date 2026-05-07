@@ -86,7 +86,7 @@ def resolve_run_after_transitively(start_role: str) -> list[str]:
         if node in stack:
             # Cycle: show a readable path: A -> B -> C -> A
             idx = stack.index(node)
-            cycle = stack[idx:] + [node]
+            cycle = [*stack[idx:], node]
             raise RunAfterResolutionError(
                 f"Circular run_after dependency detected: {' -> '.join(cycle)}"
             )

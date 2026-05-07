@@ -38,9 +38,11 @@ class TestCreateCredentials(unittest.TestCase):
         completed = subprocess.CompletedProcess(
             args=["ansible-vault"], returncode=1, stdout="", stderr="error"
         )
-        with unittest.mock.patch("subprocess.run", return_value=completed):
-            with self.assertRaises(RuntimeError):
-                handler.encrypt_string("plain_val", "name")
+        with (
+            unittest.mock.patch("subprocess.run", return_value=completed),
+            self.assertRaises(RuntimeError),
+        ):
+            handler.encrypt_string("plain_val", "name")
 
     def test_main_overrides_and_file_writing(self):
         # Setup temporary files for role-path vars and inventory

@@ -6,7 +6,7 @@ from utils.applications.config import (
     AppConfigKeyError,
     ConfigEntryNotSetError,
     get,
-)  # noqa: F401
+)
 from utils.entity_name_utils import get_entity_name
 
 

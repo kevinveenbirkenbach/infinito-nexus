@@ -117,10 +117,7 @@ def is_suppressed_in_head(
     the file so the cost of carrying the exemption stays visible.
     """
     rule = rule.lower()
-    for line in lines[:scan_lines]:
-        if line_has_rule(line, rule):
-            return True
-    return False
+    return any(line_has_rule(line, rule) for line in lines[:scan_lines])
 
 
 def is_suppressed_anywhere(lines: Sequence[str], rule: str) -> bool:

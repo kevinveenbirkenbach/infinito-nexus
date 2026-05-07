@@ -10,7 +10,7 @@ from . import PROJECT_ROOT
 
 sys.path.insert(0, str(PROJECT_ROOT))
 
-from utils.invokable import list_invokables_by_type  # noqa: E402
+from utils.invokable import list_invokables_by_type
 
 
 def main() -> None:

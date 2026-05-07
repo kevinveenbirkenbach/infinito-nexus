@@ -1,8 +1,9 @@
+import contextlib
 import re
 import unittest
 from collections.abc import Iterable
 from pathlib import Path
-from typing import Any
+from typing import Any, ClassVar
 
 from utils.cache.files import iter_project_files, read_text
 from utils.cache.yaml import load_yaml_all
@@ -30,13 +31,13 @@ class TestVarsPassedAreUsed(unittest.TestCase):
       i.e. treat `var_name(` as a function/macro call, not a variable usage.
     """
 
-    YAML_EXTENSIONS = {".yml", ".yaml"}
-    JINJA_EXTENSIONS = {".j2"}
+    YAML_EXTENSIONS: ClassVar[set[str]] = {".yml", ".yaml"}
+    JINJA_EXTENSIONS: ClassVar[set[str]] = {".j2"}
 
     # Inventories are data-only bundle definitions (not tasks/templates) and can legitimately
     # contain vars that are not referenced inside Jinja blocks or Ansible expressions.
     # Therefore they are excluded from this lint.
-    EXCLUDED_TOP_LEVEL_DIRS = {"inventories"}
+    EXCLUDED_TOP_LEVEL_DIRS: ClassVar[set[str]] = {"inventories"}
 
     # ---------- File iteration & YAML loading ----------
 
@@ -132,11 +133,9 @@ class TestVarsPassedAreUsed(unittest.TestCase):
     def _concat_texts(self) -> str:
         parts: list[str] = []
         for f in self._iter_files(self.YAML_EXTENSIONS | self.JINJA_EXTENSIONS):
-            try:
+            # Non-UTF8 or unreadable files are silently skipped.
+            with contextlib.suppress(Exception):
                 parts.append(read_text(str(f)))
-            except Exception:
-                # Non-UTF8 or unreadable — ignore
-                pass
         return "\n".join(parts)
 
     # ---------- Extract Ansible expression strings from YAML ----------
@@ -159,12 +158,11 @@ class TestVarsPassedAreUsed(unittest.TestCase):
                                 exprs.append(val)
                             elif isinstance(val, list):
                                 exprs.extend([x for x in val if isinstance(x, str)])
-                        elif key == "loop":
-                            if isinstance(val, str):
-                                exprs.append(val)
-                        elif isinstance(key, str) and key.startswith("with_"):
-                            if isinstance(val, str):
-                                exprs.append(val)
+                        elif (
+                            key == "loop"
+                            or (isinstance(key, str) and key.startswith("with_"))
+                        ) and isinstance(val, str):
+                            exprs.append(val)
         return exprs
 
     # ---------- Usage checks ----------
@@ -213,9 +211,8 @@ class TestVarsPassedAreUsed(unittest.TestCase):
             used = self._used_in_jinja_blocks(
                 var_name, all_text
             ) or self._used_in_ansible_exprs(var_name, ansible_exprs)
-            if not used:
-                if var_name not in ["ansible_python_interpreter"]:
-                    unused.append(var_name)
+            if not used and var_name not in ["ansible_python_interpreter"]:
+                unused.append(var_name)
 
         if unused:
             lines: list[str] = []

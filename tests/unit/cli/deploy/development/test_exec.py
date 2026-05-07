@@ -26,14 +26,16 @@ class TestDevelopmentExec(unittest.TestCase):
         compose = unittest.mock.Mock()
         compose.exec.return_value.returncode = 0
 
-        with unittest.mock.patch(
-            "cli.deploy.development.exec.make_compose",
-            return_value=compose,
-        ):
-            with unittest.mock.patch.dict(
+        with (
+            unittest.mock.patch(
+                "cli.deploy.development.exec.make_compose",
+                return_value=compose,
+            ),
+            unittest.mock.patch.dict(
                 os.environ, {"SERVICES_DISABLED": "email"}, clear=False
-            ):
-                rc = exec_cmd.handler(_args(cmd=["--", "sh", "-lc", "true"]))
+            ),
+        ):
+            rc = exec_cmd.handler(_args(cmd=["--", "sh", "-lc", "true"]))
 
         self.assertEqual(rc, 0)
         compose.exec.assert_called_once_with(
@@ -47,12 +49,14 @@ class TestDevelopmentExec(unittest.TestCase):
         compose.exec.return_value.returncode = 0
 
         env = {k: v for k, v in os.environ.items() if k != "SERVICES_DISABLED"}
-        with unittest.mock.patch(
-            "cli.deploy.development.exec.make_compose",
-            return_value=compose,
+        with (
+            unittest.mock.patch(
+                "cli.deploy.development.exec.make_compose",
+                return_value=compose,
+            ),
+            unittest.mock.patch.dict(os.environ, env, clear=True),
         ):
-            with unittest.mock.patch.dict(os.environ, env, clear=True):
-                rc = exec_cmd.handler(_args(cmd=["echo", "hi"]))
+            rc = exec_cmd.handler(_args(cmd=["echo", "hi"]))
 
         self.assertEqual(rc, 0)
         compose.exec.assert_called_once_with(
@@ -68,17 +72,19 @@ class TestDevelopmentExec(unittest.TestCase):
         compose.exec.return_value.returncode = 0
 
         env = {k: v for k, v in os.environ.items() if k != "SERVICES_DISABLED"}
-        with unittest.mock.patch(
-            "cli.deploy.development.exec.make_compose",
-            return_value=compose,
+        with (
+            unittest.mock.patch(
+                "cli.deploy.development.exec.make_compose",
+                return_value=compose,
+            ),
+            unittest.mock.patch.dict(os.environ, env, clear=True),
         ):
-            with unittest.mock.patch.dict(os.environ, env, clear=True):
-                rc = exec_cmd.handler(
-                    _args(
-                        cmd=["bash", "/opt/helper.sh"],
-                        env=["INVENTORY_FILE=/srv/inv/devices.yml", "APPS=web-app-foo"],
-                    )
+            rc = exec_cmd.handler(
+                _args(
+                    cmd=["bash", "/opt/helper.sh"],
+                    env=["INVENTORY_FILE=/srv/inv/devices.yml", "APPS=web-app-foo"],
                 )
+            )
 
         self.assertEqual(rc, 0)
         compose.exec.assert_called_once_with(
@@ -95,12 +101,14 @@ class TestDevelopmentExec(unittest.TestCase):
         compose.exec.return_value.returncode = 0
 
         env = {k: v for k, v in os.environ.items() if k != "SERVICES_DISABLED"}
-        with unittest.mock.patch(
-            "cli.deploy.development.exec.make_compose",
-            return_value=compose,
+        with (
+            unittest.mock.patch(
+                "cli.deploy.development.exec.make_compose",
+                return_value=compose,
+            ),
+            unittest.mock.patch.dict(os.environ, env, clear=True),
         ):
-            with unittest.mock.patch.dict(os.environ, env, clear=True):
-                exec_cmd.handler(_args(cmd=["true"], env=["EXTRA_VARS=a=1 b=2"]))
+            exec_cmd.handler(_args(cmd=["true"], env=["EXTRA_VARS=a=1 b=2"]))
 
         # Only the first '=' splits key from value; everything after stays intact.
         compose.exec.assert_called_once_with(
@@ -113,16 +121,16 @@ class TestDevelopmentExec(unittest.TestCase):
         compose = unittest.mock.Mock()
         compose.exec.return_value.returncode = 0
 
-        with unittest.mock.patch(
-            "cli.deploy.development.exec.make_compose",
-            return_value=compose,
-        ):
-            with unittest.mock.patch.dict(
+        with (
+            unittest.mock.patch(
+                "cli.deploy.development.exec.make_compose",
+                return_value=compose,
+            ),
+            unittest.mock.patch.dict(
                 os.environ, {"SERVICES_DISABLED": "from-env"}, clear=False
-            ):
-                exec_cmd.handler(
-                    _args(cmd=["true"], env=["SERVICES_DISABLED=from-cli"])
-                )
+            ),
+        ):
+            exec_cmd.handler(_args(cmd=["true"], env=["SERVICES_DISABLED=from-cli"]))
 
         compose.exec.assert_called_once_with(
             ["true"],
@@ -132,21 +140,25 @@ class TestDevelopmentExec(unittest.TestCase):
 
     def test_env_pair_without_equals_is_rejected(self):
         compose = unittest.mock.Mock()
-        with unittest.mock.patch(
-            "cli.deploy.development.exec.make_compose",
-            return_value=compose,
+        with (
+            unittest.mock.patch(
+                "cli.deploy.development.exec.make_compose",
+                return_value=compose,
+            ),
+            self.assertRaisesRegex(SystemExit, "expects KEY=VALUE"),
         ):
-            with self.assertRaisesRegex(SystemExit, "expects KEY=VALUE"):
-                exec_cmd.handler(_args(cmd=["true"], env=["BARE"]))
+            exec_cmd.handler(_args(cmd=["true"], env=["BARE"]))
 
     def test_env_pair_with_empty_key_is_rejected(self):
         compose = unittest.mock.Mock()
-        with unittest.mock.patch(
-            "cli.deploy.development.exec.make_compose",
-            return_value=compose,
+        with (
+            unittest.mock.patch(
+                "cli.deploy.development.exec.make_compose",
+                return_value=compose,
+            ),
+            self.assertRaisesRegex(SystemExit, "KEY is empty"),
         ):
-            with self.assertRaisesRegex(SystemExit, "KEY is empty"):
-                exec_cmd.handler(_args(cmd=["true"], env=["=value"]))
+            exec_cmd.handler(_args(cmd=["true"], env=["=value"]))
 
 
 if __name__ == "__main__":

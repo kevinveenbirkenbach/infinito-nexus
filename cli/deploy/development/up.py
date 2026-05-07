@@ -53,10 +53,9 @@ def _stack_is_running() -> bool:
 
 def handler(args: argparse.Namespace) -> int:
     # when-down: skip if already running
-    if args.when_down:
-        if _stack_is_running():
-            print(">>> Stack already running — skipping up")
-            return 0
+    if args.when_down and _stack_is_running():
+        print(">>> Stack already running — skipping up")
+        return 0
 
     rc = _maybe_build_missing()
     if rc != 0:

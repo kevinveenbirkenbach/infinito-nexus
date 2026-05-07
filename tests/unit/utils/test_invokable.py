@@ -51,13 +51,15 @@ class TestInvokable(TestCase):
         shutil.rmtree(self.tmp)
 
     def test_list_invokable_app_ids(self) -> None:
-        with patch.object(inv, "PROJECT_ROOT", self.tmp):
-            with patch.object(
+        with (
+            patch.object(inv, "PROJECT_ROOT", self.tmp),
+            patch.object(
                 inv,
                 "_get_invokable_paths",
                 return_value=["web-app", "update", "util-desk"],
-            ):
-                got = inv.list_invokable_app_ids()
+            ),
+        ):
+            got = inv.list_invokable_app_ids()
 
         self.assertEqual(
             got,
@@ -65,13 +67,15 @@ class TestInvokable(TestCase):
         )
 
     def test_list_invokables_by_type(self) -> None:
-        with patch.object(inv, "PROJECT_ROOT", self.tmp):
-            with patch.object(
+        with (
+            patch.object(inv, "PROJECT_ROOT", self.tmp),
+            patch.object(
                 inv,
                 "_get_invokable_paths",
                 return_value=["web-app", "update", "util-desk"],
-            ):
-                grouped = inv.list_invokables_by_type()
+            ),
+        ):
+            grouped = inv.list_invokables_by_type()
 
         # server: web-app-* minus excluded oauth2 proxy (not present in test)
         self.assertIn("server", grouped)
@@ -91,32 +95,36 @@ class TestInvokable(TestCase):
         with (rd / "vars" / "main.yml").open("w", encoding="utf-8") as f:
             yaml.safe_dump({}, f)
 
-        with patch.object(inv, "PROJECT_ROOT", self.tmp):
-            with patch.object(
+        with (
+            patch.object(inv, "PROJECT_ROOT", self.tmp),
+            patch.object(
                 inv,
                 "_get_invokable_paths",
                 return_value=["web-app", "update", "util-desk"],
-            ):
-                grouped = inv.list_invokables_by_type()
+            ),
+        ):
+            grouped = inv.list_invokables_by_type()
 
         self.assertNotIn("web-app-oauth2-proxy", grouped["server"])
 
     def test_types_from_group_names(self) -> None:
-        with patch.object(inv, "PROJECT_ROOT", self.tmp):
-            with patch.object(
+        with (
+            patch.object(inv, "PROJECT_ROOT", self.tmp),
+            patch.object(
                 inv,
                 "_get_invokable_paths",
                 return_value=["web-app", "update", "util-desk"],
-            ):
-                got = inv.types_from_group_names(
-                    [
-                        "all",  # not invokable -> ignored
-                        "web-app-nextcloud",  # invokable + matches server rule
-                        "util-desk-custom",  # invokable + matches workstation rule
-                        "update",  # invokable leftover -> universal
-                        "foo",  # not invokable -> ignored
-                    ]
-                )
+            ),
+        ):
+            got = inv.types_from_group_names(
+                [
+                    "all",  # not invokable -> ignored
+                    "web-app-nextcloud",  # invokable + matches server rule
+                    "util-desk-custom",  # invokable + matches workstation rule
+                    "update",  # invokable leftover -> universal
+                    "foo",  # not invokable -> ignored
+                ]
+            )
 
         self.assertEqual(got, ["server", "universal", "workstation"])
 

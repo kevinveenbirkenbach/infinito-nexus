@@ -63,8 +63,7 @@ class FilterModule:
             count = len(unique_domains)
 
             raw = overhead_seconds + per_domain_seconds * count
-            clamped = max(min_seconds, min(max_seconds, int(raw)))
-            return clamped
+            return max(min_seconds, min(max_seconds, int(raw)))
 
         except AnsibleFilterError:
             raise

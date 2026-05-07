@@ -6,6 +6,7 @@ from __future__ import annotations
 import json
 import unittest
 from pathlib import Path
+from typing import ClassVar
 from unittest.mock import MagicMock, patch
 
 from cli.deploy.development.common import DEV_INVENTORY_VARS_FILE
@@ -21,12 +22,12 @@ from cli.deploy.development.inventory import (
 
 
 def _spec(**overrides) -> DevInventorySpec:
-    base = dict(
-        inventory_dir="/tmp/inv",
-        include=("web-app-keycloak", "web-app-nextcloud"),
-        storage_constrained=False,
-        runtime="dev",
-    )
+    base = {
+        "inventory_dir": "/tmp/inv",
+        "include": ("web-app-keycloak", "web-app-nextcloud"),
+        "storage_constrained": False,
+        "runtime": "dev",
+    }
     base.update(overrides)
     return DevInventorySpec(**base)
 
@@ -306,7 +307,7 @@ class TestPlanDevInventoryMatrix(unittest.TestCase):
 
 
 class TestFilterPlanToVariant(unittest.TestCase):
-    PLAN = [
+    PLAN: ClassVar[list[tuple]] = [
         (
             0,
             "/srv/inv-0",

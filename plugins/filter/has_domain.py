@@ -29,16 +29,10 @@ def _value_has_domain(v: Any) -> bool:
         return True
 
     if isinstance(v, (list, tuple, set)):
-        for item in v:
-            if _value_has_domain(item):
-                return True
-        return False
+        return any(_value_has_domain(item) for item in v)
 
     if isinstance(v, dict):
-        for _, item in v.items():
-            if _value_has_domain(item):
-                return True
-        return False
+        return any(_value_has_domain(item) for _, item in v.items())
 
     # Fallback: treat other scalars as "no domain"
     return False

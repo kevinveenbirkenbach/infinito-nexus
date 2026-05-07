@@ -111,9 +111,9 @@ class TestMemoryFilters(unittest.TestCase):
                     "8Q" if key.endswith(".mem_limit") else "4g"
                 ),
             ),
+            self.assertRaises(memory_filters.AnsibleFilterError),
         ):
-            with self.assertRaises(memory_filters.AnsibleFilterError):
-                memory_filters.jvm_max_mb(self.apps, self.app_id)
+            memory_filters.jvm_max_mb(self.apps, self.app_id)
 
     def test_zero_limit_raises(self):
         with (
@@ -127,9 +127,9 @@ class TestMemoryFilters(unittest.TestCase):
                     "0" if key.endswith(".mem_limit") else "4g"
                 ),
             ),
+            self.assertRaises(memory_filters.AnsibleFilterError),
         ):
-            with self.assertRaises(memory_filters.AnsibleFilterError):
-                memory_filters.jvm_max_mb(self.apps, self.app_id)
+            memory_filters.jvm_max_mb(self.apps, self.app_id)
 
     def test_zero_reservation_raises(self):
         with (
@@ -143,9 +143,9 @@ class TestMemoryFilters(unittest.TestCase):
                     "8g" if key.endswith(".mem_limit") else "0"
                 ),
             ),
+            self.assertRaises(memory_filters.AnsibleFilterError),
         ):
-            with self.assertRaises(memory_filters.AnsibleFilterError):
-                memory_filters.jvm_min_mb(self.apps, self.app_id)
+            memory_filters.jvm_min_mb(self.apps, self.app_id)
 
     def test_entity_name_is_derived_not_passed(self):
         """

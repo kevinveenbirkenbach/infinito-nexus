@@ -107,9 +107,9 @@ def resolve_app_id_from_domain(domains: dict, domain: str, *, err_prefix: str) -
     matches: list[str] = []
 
     for app_id, val in domains.items():
-        for d in iter_domains(val):
-            if norm_domain(d) == needle:
-                matches.append(str(app_id))
+        matches.extend(
+            str(app_id) for d in iter_domains(val) if norm_domain(d) == needle
+        )
 
     if not matches:
         raise AnsibleError(
@@ -175,7 +175,7 @@ def collect_domains_for_app(
 
 def collect_domains_global(domains: dict) -> list[str]:
     all_items: list[str] = []
-    for _, val in domains.items():
+    for val in domains.values():
         all_items.extend(list(iter_domains(val)))
     return uniq_preserve(all_items)
 

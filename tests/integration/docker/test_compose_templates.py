@@ -1,5 +1,6 @@
 import re
 import unittest
+from typing import ClassVar
 
 from . import PROJECT_ROOT
 
@@ -9,7 +10,7 @@ class TestDockerComposeTemplates(unittest.TestCase):
     TEMPLATE_PATTERN = "roles/*/templates/compose.yml.j2"
 
     # Allowed lines before BASE_INCLUDE
-    ALLOWED_BEFORE_BASE = [
+    ALLOWED_BEFORE_BASE: ClassVar[list[re.Pattern]] = [
         re.compile(r"^\s*$"),  # empty line
         re.compile(r"^\s*version:.*$"),  # version: ...
         re.compile(r"^\s*#.*$"),  # YAML comment

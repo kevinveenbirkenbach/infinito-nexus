@@ -117,8 +117,7 @@ def find_var_positions(text: str, varname: str) -> list[int]:
     """Return byte offsets for occurrences of varname (word-ish boundary)."""
     positions: list[int] = []
     pattern = re.compile(rf"(?<!\w){re.escape(varname)}(?!\w)")
-    for m in pattern.finditer(text):
-        positions.append(m.start())
+    positions.extend(m.start() for m in pattern.finditer(text))
     return positions
 
 

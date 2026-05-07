@@ -20,6 +20,7 @@ from __future__ import annotations
 
 import unittest
 from pathlib import Path
+from typing import ClassVar
 
 import yaml
 
@@ -107,7 +108,7 @@ class TestNoLegacyPathReferences(unittest.TestCase):
         "/.cache/",
     )
 
-    EXEMPT_FILES: set[Path] = {
+    EXEMPT_FILES: ClassVar[set[Path]] = {
         PROJECT_ROOT / "tasks" / "utils" / "migrate_meta_layout.py",
     }
 
@@ -195,10 +196,7 @@ class TestLifecycleAllowedValues(unittest.TestCase):
                 lifecycle = entity.get("lifecycle")
                 if lifecycle is None:
                     continue
-                if isinstance(lifecycle, str):
-                    value = lifecycle.strip().lower()
-                else:
-                    value = ""
+                value = lifecycle.strip().lower() if isinstance(lifecycle, str) else ""
                 if value not in ALLOWED_LIFECYCLES:
                     offenders.append(
                         f"{role_dir.name}/{entity_name}: lifecycle={lifecycle!r}"
@@ -246,7 +244,7 @@ class TestHostBoundPortCollisions(unittest.TestCase):
     # inside the BBB relay range (40000-49999) historically. Same role
     # owning both ends of the collision is acceptable for this specific
     # documented exception.
-    _SAME_ROLE_LEGACY_OVERLAPS = {
+    _SAME_ROLE_LEGACY_OVERLAPS: ClassVar[set[tuple[str, int]]] = {
         ("web-app-bigbluebutton", 48087),
     }
 

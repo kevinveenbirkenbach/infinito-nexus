@@ -98,17 +98,17 @@ def _collect_findings(root: Path) -> list[MissingKeyFinding]:
             continue
 
         service_line = _find_service_line(config_path, entity_name)
-        for key in REQUIRED_KEYS:
-            if key not in primary_conf:
-                findings.append(
-                    MissingKeyFinding(
-                        role=role_dir.name,
-                        service=entity_name,
-                        key=key,
-                        config_path=config_path,
-                        line=service_line,
-                    )
-                )
+        findings.extend(
+            MissingKeyFinding(
+                role=role_dir.name,
+                service=entity_name,
+                key=key,
+                config_path=config_path,
+                line=service_line,
+            )
+            for key in REQUIRED_KEYS
+            if key not in primary_conf
+        )
 
     findings.sort(key=lambda f: (f.role, f.service, f.key))
     return findings

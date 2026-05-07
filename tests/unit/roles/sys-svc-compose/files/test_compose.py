@@ -83,9 +83,7 @@ class TestInfinitoComposeWrapper(unittest.TestCase):
                     return True
                 if str(self) == "/proj/compose.override.yml":
                     return True
-                if str(self) == "/proj/compose.ca.override.yml":
-                    return True
-                return False
+                return str(self) == "/proj/compose.ca.override.yml"
 
             s.Path.is_file = fake_is_file  # type: ignore[assignment]
             files = s.detect_compose_files(base)
@@ -116,9 +114,7 @@ class TestInfinitoComposeWrapper(unittest.TestCase):
                     return False
                 if str(self) == "/proj/.env":
                     return True
-                if str(self) == "/proj/.env/env":
-                    return True
-                return False
+                return str(self) == "/proj/.env/env"
 
             s.Path.is_file = fake_is_file  # type: ignore[assignment]
             # Signature changed to accept extra_files=None, but default keeps old call valid.
@@ -410,7 +406,7 @@ class TestInfinitoComposeWrapper(unittest.TestCase):
                     list(passthrough),
                     extra_files,
                 )
-                return ["docker", "compose", "-p", project] + list(passthrough)
+                return ["docker", "compose", "-p", project, *list(passthrough)]
 
             def fake_execvp(prog, argv):
                 raise RuntimeError("execvp called")

@@ -13,8 +13,8 @@ from . import PROJECT_ROOT
 if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
 
-from utils.cache import _reset_cache_for_tests  # noqa: E402
-from utils.cache.applications import (  # noqa: E402
+from utils.cache import _reset_cache_for_tests
+from utils.cache.applications import (
     _build_variants,
     get_application_defaults,
     get_merged_applications,
@@ -79,10 +79,8 @@ class TestLoadYamlVariantList(unittest.TestCase):
     def _write_tmp(self, content: str) -> str:
         import tempfile
 
-        f = tempfile.NamedTemporaryFile("w", suffix=".yml", delete=False)
-        f.write(content)
-        f.flush()
-        f.close()
+        with tempfile.NamedTemporaryFile("w", suffix=".yml", delete=False) as f:
+            f.write(content)
         self.addCleanup(os.remove, f.name)
         return f.name
 

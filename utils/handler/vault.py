@@ -8,8 +8,6 @@ from yaml.loader import SafeLoader
 class VaultScalar(str):
     """A subclass of str to represent vault-encrypted strings."""
 
-    pass
-
 
 def _vault_constructor(loader, node):
     """Custom constructor to handle !vault tag as plain text."""

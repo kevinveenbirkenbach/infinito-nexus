@@ -6,7 +6,7 @@ from ansible.errors import AnsibleFilterError
 
 
 def application_allowed(
-    application_id: str, group_names: list, allowed_applications: list = None
+    application_id: str, group_names: list, allowed_applications: list | None = None
 ):
     """
     Return True if:

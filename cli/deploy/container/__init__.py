@@ -14,8 +14,8 @@ from .command import (  # noqa: E402
 
 __all__ = [
     "main",
+    "remove_container",
     "run_in_container",
     "start_ci_container",
     "stop_container",
-    "remove_container",
 ]

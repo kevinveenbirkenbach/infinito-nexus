@@ -41,7 +41,7 @@ def base_compose_cmd(*, project: str, cwd: Path) -> list[str]:
 def has_buildable_services(
     *, base_cmd: list[str], cwd: Path, env: dict[str, str]
 ) -> bool:
-    rc, out = run_cmd(base_cmd + ["config"], cwd=cwd, env=env)
+    rc, out = run_cmd([*base_cmd, "config"], cwd=cwd, env=env)
 
     if rc != 0:
         if out.strip():
@@ -104,16 +104,16 @@ def main() -> int:
         base_cmd=base_cmd, cwd=cwd, env=env
     ):
         run_or_fail(
-            base_cmd + ["build", "--pull"],
+            [*base_cmd, "build", "--pull"],
             cwd=cwd,
             env=env,
             label="docker compose build --pull",
         )
 
-    pull_cmd = base_cmd + ["pull"]
+    pull_cmd = [*base_cmd, "pull"]
 
     if args.ignore_buildable:
-        rc, help_out = run_cmd(base_cmd + ["pull", "--help"], cwd=cwd, env=env)
+        rc, help_out = run_cmd([*base_cmd, "pull", "--help"], cwd=cwd, env=env)
         if rc == 0 and "--ignore-buildable" in help_out:
             pull_cmd.append("--ignore-buildable")
 

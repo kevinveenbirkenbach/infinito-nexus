@@ -126,8 +126,7 @@ def flatten_callorder(groups: list[Group]) -> list[tuple[str, str]]:
     """
     out: list[tuple[str, str]] = []
     for g in groups:
-        for r in g.roles:
-            out.append((g.group_name, r))
+        out.extend((g.group_name, r) for r in g.roles)
     return out
 
 

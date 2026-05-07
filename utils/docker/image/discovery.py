@@ -13,7 +13,8 @@ DOCKER_HUB_PREFIXES = (
 )
 
 # All registry hostname prefixes that are stripped when building the canonical name.
-_ALL_REGISTRY_PREFIXES = DOCKER_HUB_PREFIXES + (
+_ALL_REGISTRY_PREFIXES = (
+    *DOCKER_HUB_PREFIXES,
     "quay.io/",
     "ghcr.io/",
     "mcr.microsoft.com/",

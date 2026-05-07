@@ -132,11 +132,10 @@ def _file_offenders(path: Path) -> list[str]:
             for alias in node.names:
                 if alias.name == "yaml":
                     yaml_module_aliases.add(alias.asname or "yaml")
-        elif isinstance(node, ast.ImportFrom):
-            if node.module == "yaml":
-                for alias in node.names:
-                    if alias.name in _FORBIDDEN_FUNCTIONS:
-                        direct_function_aliases[alias.asname or alias.name] = alias.name
+        elif isinstance(node, ast.ImportFrom) and node.module == "yaml":
+            for alias in node.names:
+                if alias.name in _FORBIDDEN_FUNCTIONS:
+                    direct_function_aliases[alias.asname or alias.name] = alias.name
 
     # The marker may appear on the call's own line OR, for multi-line
     # calls, on any line spanned by the call expression.
@@ -169,12 +168,11 @@ def _file_offenders(path: Path) -> list[str]:
                 offenders.append(
                     f"line {node.lineno}: {func.value.id}.{func.attr}(...)"
                 )
-        elif isinstance(func, ast.Name):
-            if func.id in direct_function_aliases:
-                if _is_suppressed(node):
-                    continue
-                actual = direct_function_aliases[func.id]
-                offenders.append(f"line {node.lineno}: {func.id}(...) [yaml.{actual}]")
+        elif isinstance(func, ast.Name) and func.id in direct_function_aliases:
+            if _is_suppressed(node):
+                continue
+            actual = direct_function_aliases[func.id]
+            offenders.append(f"line {node.lineno}: {func.id}(...) [yaml.{actual}]")
     return offenders
 
 
@@ -214,8 +212,7 @@ class TestNoDirectYamlCalls(unittest.TestCase):
         ]
         for path, issues in sorted(offenders.items()):
             lines.append(f"  - {rel(path)}:")
-            for issue in issues:
-                lines.append(f"      * {issue}")
+            lines.extend(f"      * {issue}" for issue in issues)
         lines.append("")
         lines.append(
             "Fix: replace `yaml.safe_load(path.read_text())` with "

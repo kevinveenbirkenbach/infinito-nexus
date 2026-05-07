@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import contextlib
 import os
 import pty
 import subprocess
@@ -26,12 +27,9 @@ def open_log_file(log_dir: Path) -> tuple[TextIO, Path]:
     log_dir = log_dir.expanduser()
     log_dir.mkdir(parents=True, exist_ok=True)
 
-    # Best-effort permission hardening (ignore failures on non-POSIX / special FS)
-    try:
+    # Best-effort permission hardening (ignore failures on non-POSIX / special FS).
+    with contextlib.suppress(Exception):
         os.chmod(log_dir, 0o700)
-    except Exception:
-        # Intentionally ignore chmod failures: non-critical hardening step
-        pass
 
     timestamp = datetime.now().strftime("%Y%m%dT%H%M%S")
     log_file_path = log_dir / f"{timestamp}.log"

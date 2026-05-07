@@ -21,10 +21,9 @@ def filetype(path, full=False):
         if len(parts) == 2:
             return parts[1]
         return ""
-    else:
-        # Last extension only (e.g., "script.sh.j2" -> "j2", "script.py" -> "py")
-        _, ext = os.path.splitext(basename)
-        return ext[1:] if ext else ""
+    # Last extension only (e.g., "script.sh.j2" -> "j2", "script.py" -> "py")
+    _, ext = os.path.splitext(basename)
+    return ext[1:] if ext else ""
 
 
 class FilterModule:

@@ -11,8 +11,6 @@ BREAK_TIME_SECONDS = 5
 class AttemptException(Exception):
     """A custom exception for maximum number of attempts."""
 
-    pass
-
 
 def parse_time_to_seconds(time_str):
     """

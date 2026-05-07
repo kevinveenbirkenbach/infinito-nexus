@@ -20,10 +20,9 @@ from compose_mods import compose_mods
 def sort_dict(obj):
     if isinstance(obj, dict):
         return {k: sort_dict(obj[k]) for k in sorted(obj)}
-    elif isinstance(obj, list):
+    if isinstance(obj, list):
         return [sort_dict(v) for v in obj]
-    else:
-        return obj
+    return obj
 
 
 class TestComposeModsFullFile(unittest.TestCase):

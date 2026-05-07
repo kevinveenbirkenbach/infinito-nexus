@@ -36,9 +36,7 @@ class Command:
 def _is_valid_package_dir(path: Path) -> bool:
     if not path.is_dir():
         return False
-    if path.name == "__pycache__":
-        return False
-    return True
+    return path.name != "__pycache__"
 
 
 def discover_commands(cli_dir: Path) -> list[Command]:

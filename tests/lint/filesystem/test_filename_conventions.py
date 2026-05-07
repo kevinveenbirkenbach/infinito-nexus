@@ -15,9 +15,11 @@ class TestFilenameConventions(unittest.TestCase):
         for path in iter_project_files():
             filename = os.path.basename(path)
             lower = filename.lower()
-            if lower in ("readme.md", "todo.md"):
-                if filename not in ("README.md", "TODO.md"):
-                    bad_files.append(path)
+            if lower in ("readme.md", "todo.md") and filename not in (
+                "README.md",
+                "TODO.md",
+            ):
+                bad_files.append(path)
 
         msg = (
             (

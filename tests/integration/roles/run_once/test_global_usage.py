@@ -120,7 +120,7 @@ def collect_set_fact_suffixes(obj, out_suffixes: set[str]):
     elif isinstance(obj, dict):
         sf = obj.get("set_fact") or obj.get("ansible.builtin.set_fact")
         if isinstance(sf, dict):
-            for k in sf.keys():
+            for k in sf:
                 if isinstance(k, str):
                     m = RUN_ONCE_USAGE_RE.fullmatch(k.strip())
                     if m:
@@ -169,8 +169,7 @@ def role_defines_suffix_in_doc(doc, role_suffix: str) -> bool:
             if isinstance(sf, dict) and target_var in sf:
                 return True
             # Recurse
-            for v in node.values():
-                queue.append(v)
+            queue.extend(node.values())
         elif isinstance(node, list):
             queue.extend(node)
     return False
@@ -258,26 +257,26 @@ class RunOnceGlobalUsageFastTest(unittest.TestCase):
         offenders: list[tuple[str, str, str]] = []
 
         # A) Unknown suffixes used (no corresponding role) must be globally defined
-        for suffix in sorted(used_suffixes):
-            if suffix not in known_suffixes and suffix not in global_defined_suffixes:
-                offenders.append(
-                    (
-                        "<no-role>",
-                        f"run_once_{suffix}",
-                        "<global usage without global set_fact>",
-                    )
-                )
+        offenders.extend(
+            (
+                "<no-role>",
+                f"run_once_{suffix}",
+                "<global usage without global set_fact>",
+            )
+            for suffix in sorted(used_suffixes)
+            if suffix not in known_suffixes and suffix not in global_defined_suffixes
+        )
 
         # B) Known role suffixes used must be defined either globally or in that exact role
         for role in sorted(roles):
             suffix = suffix_for_role[role]
-            if suffix in used_suffixes:
-                if (suffix not in global_defined_suffixes) and (
-                    suffix not in role_defined_suffixes[role]
-                ):
-                    offenders.append(
-                        (role, f"run_once_{suffix}", os.path.join(rroot, role, "tasks"))
-                    )
+            if suffix in used_suffixes and (
+                suffix not in global_defined_suffixes
+                and suffix not in role_defined_suffixes[role]
+            ):
+                offenders.append(
+                    (role, f"run_once_{suffix}", os.path.join(rroot, role, "tasks"))
+                )
 
         if offenders:
             lines = [

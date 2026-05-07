@@ -63,9 +63,9 @@ class TestSuggestSinglePorts(unittest.TestCase):
             patch.object(portsuggest, "lookup_band", return_value=None),
             patch.object(portsuggest, "available_categories", return_value=["http"]),
             patch("sys.argv", ["suggest", "--scope", "local", "--category", "metrics"]),
+            self.assertRaises(SystemExit) as ctx,
         ):
-            with self.assertRaises(SystemExit) as ctx:
-                portsuggest.main()
+            portsuggest.main()
         self.assertIn("metrics", str(ctx.exception.code))
 
     def test_explicit_range_overrides_band(self):

@@ -102,11 +102,14 @@ def _is_service_required(
         dep_app_id = _resolve_service_provider_app_id(
             applications, service_registry, svc
         )
-        if dep_app_id and dep_app_id in applications:
-            if _is_service_required(
+        if (
+            dep_app_id
+            and dep_app_id in applications
+            and _is_service_required(
                 applications, service_registry, dep_app_id, service_key, visited
-            ):
-                return True
+            )
+        ):
+            return True
 
     return False
 

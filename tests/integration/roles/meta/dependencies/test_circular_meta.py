@@ -15,8 +15,7 @@ def get_meta_info(role_path):
     if not os.path.isfile(meta_file):
         return []
     meta_data = load_yaml_file(meta_file)
-    dependencies = meta_data.get("dependencies", [])
-    return dependencies
+    return meta_data.get("dependencies", [])
 
 
 def resolve_dependencies(roles_dir):
@@ -57,7 +56,7 @@ def resolve_dependencies(roles_dir):
                 visit(role_path, [])  # Start recursion from this role
             except ValueError as e:
                 raise ValueError(
-                    f"Error processing role '{role_name}' at path '{role_path}': {str(e)}"
+                    f"Error processing role '{role_name}' at path '{role_path}': {e!s}"
                 ) from e
 
 

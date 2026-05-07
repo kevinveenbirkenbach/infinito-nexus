@@ -70,10 +70,9 @@ class ValueGenerator:
             pw = secrets.token_urlsafe(16).encode()
             raw_hash = bcrypt.hashpw(pw, bcrypt.gensalt()).decode()
             alnum = string.digits + string.ascii_lowercase
-            escaped = "".join(
+            return "".join(
                 secrets.choice(alnum) if ch == "$" else ch for ch in raw_hash
             )
-            return escaped
         if algorithm == "alphanumeric":
             return self.generate_secure_alphanumeric(64)
         if algorithm == "base64_prefixed_32":

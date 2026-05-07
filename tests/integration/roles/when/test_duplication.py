@@ -77,9 +77,8 @@ def _iter_tasks(node: Any) -> Iterable[dict[str, Any]]:
                     yield from _iter_tasks(item)
         # Also traverse other nested structures conservatively
         for k, v in node.items():
-            if k not in ("block", "rescue", "always"):
-                if isinstance(v, (list, dict)):
-                    yield from _iter_tasks(v)
+            if k not in ("block", "rescue", "always") and isinstance(v, (list, dict)):
+                yield from _iter_tasks(v)
 
 
 def _load_yaml_documents(path: Path) -> list[Any]:

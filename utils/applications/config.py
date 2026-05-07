@@ -20,15 +20,11 @@ class AppConfigKeyError(AnsibleFilterError, ValueError):
     Compatible with Ansible error handling and Python ValueError.
     """
 
-    pass
-
 
 class ConfigEntryNotSetError(AppConfigKeyError):
     """
     Raised when a config entry is defined in schema but not set in application.
     """
-
-    pass
 
 
 def get(
@@ -98,7 +94,7 @@ def get(
                 raise AppConfigKeyError(
                     f"Key '{k}' not found in dict at '{key}'\n"
                     f"Full path so far: {'.'.join(path_trace)}\n"
-                    f"Current object: {repr(obj)}\n"
+                    f"Current object: {obj!r}\n"
                     f"application_id: {application_id}\n"
                     f"config_path: {config_path}"
                 )
@@ -109,7 +105,7 @@ def get(
             raise AppConfigKeyError(
                 f"Expected dict for '{k}', got {type(obj).__name__} at '{key}'\n"
                 f"Full path so far: {'.'.join(path_trace)}\n"
-                f"Current object: {repr(obj)}\n"
+                f"Current object: {obj!r}\n"
                 f"application_id: {application_id}\n"
                 f"config_path: {config_path}"
             )
@@ -122,7 +118,7 @@ def get(
                 raise AppConfigKeyError(
                     f"Expected list for '{k}[{idx}]', got {type(obj).__name__}\n"
                     f"Full path so far: {'.'.join(path_trace)}\n"
-                    f"Current object: {repr(obj)}\n"
+                    f"Current object: {obj!r}\n"
                     f"application_id: {application_id}\n"
                     f"config_path: {config_path}"
                 )
@@ -133,7 +129,7 @@ def get(
                 raise AppConfigKeyError(
                     f"Index {i} out of range for list at '{k}'\n"
                     f"Full path so far: {'.'.join(path_trace)}\n"
-                    f"Current object: {repr(obj)}\n"
+                    f"Current object: {obj!r}\n"
                     f"application_id: {application_id}\n"
                     f"config_path: {config_path}"
                 )
@@ -141,7 +137,7 @@ def get(
         return obj
 
     # Begin traversal
-    path_trace = [f"applications[{repr(application_id)}]"]
+    path_trace = [f"applications[{application_id!r}]"]
     try:
         obj = applications[application_id]
     except KeyError:

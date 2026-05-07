@@ -152,7 +152,7 @@ def resolve_dependencies_transitively(start_role: str) -> list[str]:
     def dfs(node: str) -> None:
         if node in stack:
             idx = stack.index(node)
-            cycle = stack[idx:] + [node]
+            cycle = [*stack[idx:], node]
             raise DependenciesResolutionError(
                 f"Circular dependencies detected: {' -> '.join(cycle)}"
             )

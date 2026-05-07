@@ -60,12 +60,7 @@ def _iter_text_files(root):
     for dirpath, dirnames, filenames in os.walk(root):
         dirnames[:] = [d for d in dirnames if d not in EXCLUDED_DIRS]
         for filename in filenames:
-            if not (
-                filename.endswith(".yml")
-                or filename.endswith(".yaml")
-                or filename.endswith(".j2")
-                or filename.endswith(".py")
-            ):
+            if not (filename.endswith((".yml", ".yaml", ".j2", ".py"))):
                 continue
             yield os.path.join(dirpath, filename)
 

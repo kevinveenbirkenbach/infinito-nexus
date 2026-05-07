@@ -325,8 +325,7 @@ class _DummyTemplar:
         rendered = value
         for key, replacement in self.available_variables.items():
             rendered = rendered.replace("{{ " + key + " }}", str(replacement))
-        rendered = rendered.replace("{{ 42 | strong_password }}", "strong-password-42")
-        return rendered
+        return rendered.replace("{{ 42 | strong_password }}", "strong-password-42")
 
 
 class _NoopTemplar:

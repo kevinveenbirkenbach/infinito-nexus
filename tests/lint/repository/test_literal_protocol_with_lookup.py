@@ -139,8 +139,7 @@ class TestLiteralProtocolWithLookup(unittest.TestCase):
         ]
         for path, issues in sorted(offenders.items()):
             lines.append(f"  - {rel(path)}:")
-            for issue in issues:
-                lines.append(f"      * {issue}")
+            lines.extend(f"      * {issue}" for issue in issues)
         lines.append("")
         lines.append(
             "Fix: replace the literal-protocol concatenation with "

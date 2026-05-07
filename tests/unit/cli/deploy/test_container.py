@@ -180,10 +180,12 @@ class TestMain(unittest.TestCase):
             "foo,bar",
         ]
 
-        with unittest.mock.patch.dict(os.environ, {}, clear=True):
-            with unittest.mock.patch.object(sys, "argv", argv):
-                with self.assertRaises(SystemExit):
-                    deploy_container.main()
+        with (
+            unittest.mock.patch.dict(os.environ, {}, clear=True),
+            unittest.mock.patch.object(sys, "argv", argv),
+            self.assertRaises(SystemExit),
+        ):
+            deploy_container.main()
 
         mock_run_in_container.assert_not_called()
 
@@ -204,11 +206,13 @@ class TestMain(unittest.TestCase):
             "foo,bar",
         ]
 
-        with unittest.mock.patch.dict(
-            os.environ, {"INVENTORY_DIR": "/env/inventory"}, clear=True
+        with (
+            unittest.mock.patch.dict(
+                os.environ, {"INVENTORY_DIR": "/env/inventory"}, clear=True
+            ),
+            unittest.mock.patch.object(sys, "argv", argv),
         ):
-            with unittest.mock.patch.object(sys, "argv", argv):
-                rc = deploy_container.main()
+            rc = deploy_container.main()
 
         self.assertEqual(rc, 0)
         mock_run_in_container.assert_called_once()

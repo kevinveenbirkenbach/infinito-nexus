@@ -142,8 +142,7 @@ class TestMetaInfoShape(unittest.TestCase):
         lines = [f"{len(offenders)} meta/info.yml file(s) violate req-011:"]
         for path, problems in sorted(offenders.items()):
             lines.append(f"  - {rel(path)}:")
-            for problem in problems:
-                lines.append(f"      * {problem}")
+            lines.extend(f"      * {problem}" for problem in problems)
         self.fail("\n".join(lines))
 
 
@@ -167,8 +166,7 @@ class TestMetaMainHasNoMigratedFields(unittest.TestCase):
         ]
         for path, problems in sorted(offenders.items()):
             lines.append(f"  - {rel(path)}:")
-            for problem in problems:
-                lines.append(f"      * {problem}")
+            lines.extend(f"      * {problem}" for problem in problems)
         self.fail("\n".join(lines))
 
 

@@ -1,4 +1,5 @@
 import unittest
+from typing import ClassVar
 from urllib.parse import urlparse
 
 import yaml
@@ -19,7 +20,7 @@ class TestCspConfigurationConsistency(unittest.TestCase):
     On error, include role name and file path for easier debugging.
     """
 
-    SUPPORTED_DIRECTIVES = {
+    SUPPORTED_DIRECTIVES: ClassVar[set[str]] = {
         "default-src",
         "connect-src",
         "frame-ancestors",
@@ -36,7 +37,7 @@ class TestCspConfigurationConsistency(unittest.TestCase):
         "script-src-attr",
     }
 
-    SUPPORTED_FLAGS = {"unsafe-eval", "unsafe-inline"}
+    SUPPORTED_FLAGS: ClassVar[set[str]] = {"unsafe-eval", "unsafe-inline"}
 
     def is_valid_whitelist_entry(self, entry: str) -> bool:
         """
@@ -175,11 +176,11 @@ class TestCspConfigurationConsistency(unittest.TestCase):
                         )
                         snippets = []
 
-                    for snippet in snippets:
-                        if not isinstance(snippet, str) or not snippet.strip():
-                            errors.append(
-                                f"{role_path.name}: hashes.{directive} contains empty or non-string snippet ({cfg_file})"
-                            )
+                    errors.extend(
+                        f"{role_path.name}: hashes.{directive} contains empty or non-string snippet ({cfg_file})"
+                        for snippet in snippets
+                        if not isinstance(snippet, str) or not snippet.strip()
+                    )
 
         if errors:
             self.fail(

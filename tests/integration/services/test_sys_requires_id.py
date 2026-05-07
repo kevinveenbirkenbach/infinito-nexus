@@ -10,9 +10,8 @@ from utils.cache.files import read_text
 
 def _safe_yaml_load(path):
     try:
-        doc = yaml.safe_load(read_text(path))
+        return yaml.safe_load(read_text(path))
         # A tasks file can be a list (usual) or a dict (blocks, etc.)
-        return doc
     except Exception as e:
         raise AssertionError(f"Failed to parse YAML: {path}\n{e}") from e
 
@@ -80,7 +79,7 @@ class TestSysServiceRequiresSystemServiceId(unittest.TestCase):
                     for bt in t["block"]:
                         if check_task(bt):
                             return True
-        elif isinstance(tasks_doc, dict):
+        elif isinstance(tasks_doc, dict):  # noqa: SIM102  pairs with the for-list branch above; flat structure is clearer
             # top-level block file (rare)
             if "block" in tasks_doc and isinstance(tasks_doc["block"], list):
                 for bt in tasks_doc["block"]:

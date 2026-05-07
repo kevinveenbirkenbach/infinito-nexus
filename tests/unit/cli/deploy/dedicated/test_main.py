@@ -10,7 +10,7 @@ class TestDedicatedMainParser(unittest.TestCase):
         parser = dedicated_main.build_parser()
 
         # Smoke-check: parser exists and has some core options
-        opts = {a.dest for a in parser._actions}  # noqa: SLF001 (test-only introspection)
+        opts = {a.dest for a in parser._actions}
 
         self.assertIn("inventory", opts)
         self.assertIn("limit", opts)

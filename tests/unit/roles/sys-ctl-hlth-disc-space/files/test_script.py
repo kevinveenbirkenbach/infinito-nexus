@@ -53,14 +53,16 @@ class TestDiskSpaceScript(TestCase):
                 return df_print_cp
             raise AssertionError(f"Unexpected subprocess.run args: {args}")
 
-        with mock.patch.object(SCRIPT_MODULE.subprocess, "run", side_effect=fake_run):
-            with mock.patch.object(sys, "argv", ["script.py", "80"]):
-                with mock.patch.object(
-                    SCRIPT_MODULE.sys, "exit", side_effect=SystemExit
-                ) as mock_exit:
-                    with contextlib.redirect_stdout(io.StringIO()):
-                        with self.assertRaises(SystemExit):
-                            SCRIPT_MODULE.main()
+        with (
+            mock.patch.object(SCRIPT_MODULE.subprocess, "run", side_effect=fake_run),
+            mock.patch.object(sys, "argv", ["script.py", "80"]),
+            mock.patch.object(
+                SCRIPT_MODULE.sys, "exit", side_effect=SystemExit
+            ) as mock_exit,
+            contextlib.redirect_stdout(io.StringIO()),
+            self.assertRaises(SystemExit),
+        ):
+            SCRIPT_MODULE.main()
 
         mock_exit.assert_called_once_with(0)
 
@@ -75,15 +77,16 @@ class TestDiskSpaceScript(TestCase):
                 return df_print_cp
             raise AssertionError(f"Unexpected subprocess.run args: {args}")
 
-        with mock.patch.object(SCRIPT_MODULE.subprocess, "run", side_effect=fake_run):
-            with mock.patch.object(sys, "argv", ["script.py", "80"]):
-                with mock.patch.object(
-                    SCRIPT_MODULE.sys, "exit", side_effect=SystemExit
-                ) as mock_exit:
-                    buffer = io.StringIO()
-                    with contextlib.redirect_stdout(buffer):
-                        with self.assertRaises(SystemExit):
-                            SCRIPT_MODULE.main()
+        with (
+            mock.patch.object(SCRIPT_MODULE.subprocess, "run", side_effect=fake_run),
+            mock.patch.object(sys, "argv", ["script.py", "80"]),
+            mock.patch.object(
+                SCRIPT_MODULE.sys, "exit", side_effect=SystemExit
+            ) as mock_exit,
+        ):
+            buffer = io.StringIO()
+            with contextlib.redirect_stdout(buffer), self.assertRaises(SystemExit):
+                SCRIPT_MODULE.main()
 
         mock_exit.assert_called_once_with(2)
 

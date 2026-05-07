@@ -40,9 +40,7 @@ def is_explicit_truth(value: Any) -> bool:
     """
     if value is True:
         return True
-    if isinstance(value, str) and "in group_names" in value:
-        return True
-    return False
+    return bool(isinstance(value, str) and "in group_names" in value)
 
 
 def detect_service_channel(role_name: str) -> str:
@@ -350,7 +348,7 @@ def ordered_primary_service_entries(
             continue
 
         graph: dict[str, list[str]] = {role_name: [] for role_name in roles_in_bucket}
-        indegree: dict[str, int] = {role_name: 0 for role_name in roles_in_bucket}
+        indegree: dict[str, int] = dict.fromkeys(roles_in_bucket, 0)
 
         for role_name in roles_in_bucket:
             current = primary_entries[role_name]

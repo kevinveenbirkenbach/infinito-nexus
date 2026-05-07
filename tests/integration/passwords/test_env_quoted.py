@@ -55,7 +55,7 @@ def _is_full_line_comment(line: str) -> bool:
 
 def _is_jinja_control_line(line: str) -> bool:
     s = line.lstrip()
-    return s.startswith("{%") or s.startswith("{#")
+    return s.startswith(("{%", "{#"))
 
 
 class TestEnvPasswordsQuotedAndFiltered(unittest.TestCase):

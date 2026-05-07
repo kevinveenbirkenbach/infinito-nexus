@@ -13,11 +13,10 @@ class CertUtils:
     @staticmethod
     def run_openssl(cert_path):
         try:
-            output = subprocess.check_output(
+            return subprocess.check_output(
                 ["openssl", "x509", "-in", cert_path, "-noout", "-text"],
                 universal_newlines=True,
             )
-            return output
         except subprocess.CalledProcessError:
             return ""
 
@@ -90,11 +89,10 @@ class CertUtils:
             # Wildcard matches ONLY one additional label
             if domain == base:
                 return False
-            if domain.endswith("." + base) and domain.count(".") == base.count(".") + 1:
-                return True
-            return False
-        else:
-            return domain == san
+            return bool(
+                domain.endswith("." + base) and domain.count(".") == base.count(".") + 1
+            )
+        return domain == san
 
     @classmethod
     def build_snapshot(cls, cert_base_path):
@@ -197,8 +195,7 @@ class CertUtils:
             if not entries:
                 return None
             # newest by (not_before, mtime)
-            best = max(entries, key=cls._score_entry)
-            return best
+            return max(entries, key=cls._score_entry)
 
         best_exact = _pick_newest(candidates_exact)
         best_wild = _pick_newest(candidates_wild)

@@ -35,7 +35,7 @@ def match_wildcard_segment(mapping: Any, segment: str) -> bool:
         return False
     if "*" not in segment:
         return segment in mapping
-    return any(fnmatch.fnmatchcase(k, segment) for k in mapping.keys())
+    return any(fnmatch.fnmatchcase(k, segment) for k in mapping)
 
 
 def match_wildcard_path(mapping: Any, dotted: str) -> bool:
