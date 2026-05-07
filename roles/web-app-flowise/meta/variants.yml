@@ -30,6 +30,9 @@
     prometheus:
       enabled: true
       shared: true
+    ldap:
+      enabled: true
+      shared: true
 - services:
     dashboard:
       enabled: false
@@ -50,5 +53,15 @@
       enabled: false
       shared: false
     prometheus:
+      enabled: false
+      shared: false
+    ldap:
+      enabled: false
+      shared: false
+- services:
+    ldap:
+      enabled: true
+      shared: true
+    oauth2:
       enabled: false
       shared: false

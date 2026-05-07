@@ -25,6 +25,9 @@
     prometheus:
       enabled: true
       shared: true
+    ldap:
+      enabled: true
+      shared: true
 - services:
     oidc:
       enabled: false
@@ -42,5 +45,15 @@
       enabled: false
       shared: false
     prometheus:
+      enabled: false
+      shared: false
+    ldap:
+      enabled: false
+      shared: false
+- services:
+    ldap:
+      enabled: true
+      shared: true
+    oidc:
       enabled: false
       shared: false

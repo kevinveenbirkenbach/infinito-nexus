@@ -5,13 +5,14 @@
 # scenario can sign in without an out-of-band password handoff.
 
 - credentials:
-    administrator_password: "'$tr0ng\u20ACxampl3PW!"
+    administrator_password: "'$tr0ng€xampl3PW!"
   services:
     dashboard:
       enabled: true
       shared: true
     ldap:
       shared: true
+      enabled: true
     logout:
       enabled: true
       shared: true
@@ -25,13 +26,14 @@
       enabled: true
       shared: true
 - credentials:
-    administrator_password: "'$tr0ng\u20ACxampl3PW!"
+    administrator_password: "'$tr0ng€xampl3PW!"
   services:
     dashboard:
       enabled: false
       shared: false
     ldap:
       shared: false
+      enabled: false
     logout:
       enabled: false
       shared: false
@@ -42,5 +44,12 @@
       enabled: false
       shared: false
     prometheus:
+      enabled: false
+      shared: false
+- services:
+    ldap:
+      enabled: true
+      shared: true
+    oauth2:
       enabled: false
       shared: false

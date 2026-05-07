@@ -11,12 +11,14 @@
 - services:
     ldap:
       shared: true
+      enabled: true
     prometheus:
       enabled: true
       shared: true
 - services:
     ldap:
       shared: false
+      enabled: false
     prometheus:
       enabled: false
       shared: false

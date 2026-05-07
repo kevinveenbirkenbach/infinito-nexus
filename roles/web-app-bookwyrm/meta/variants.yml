@@ -25,6 +25,12 @@
     prometheus:
       enabled: true
       shared: true
+    ldap:
+      enabled: true
+      shared: true
+    oidc:
+      enabled: true
+      shared: true
 - services:
     dashboard:
       enabled: false
@@ -44,5 +50,21 @@
     postgres:
       shared: false
     prometheus:
+      enabled: false
+      shared: false
+    ldap:
+      enabled: false
+      shared: false
+    oidc:
+      enabled: false
+      shared: false
+- services:
+    ldap:
+      enabled: true
+      shared: true
+    oidc:
+      enabled: false
+      shared: false
+    oauth2:
       enabled: false
       shared: false

@@ -15,6 +15,7 @@
       shared: true
     ldap:
       shared: true
+      enabled: true
     logout:
       enabled: true
       shared: true
@@ -44,6 +45,7 @@
       shared: false
     ldap:
       shared: false
+      enabled: false
     logout:
       enabled: false
       shared: false
@@ -56,5 +58,12 @@
     postgres:
       shared: false
     prometheus:
+      enabled: false
+      shared: false
+- services:
+    ldap:
+      enabled: true
+      shared: true
+    oidc:
       enabled: false
       shared: false

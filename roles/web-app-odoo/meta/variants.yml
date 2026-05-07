@@ -27,6 +27,9 @@
 
 # variant pinning every dynamic services.yml flag to false so the
 # matrix also exercises the out-of-group_names branch.
+    ldap:
+      enabled: true
+      shared: true
 - services:
     dashboard:
       enabled: false
@@ -46,5 +49,15 @@
     postgres:
       shared: false
     prometheus:
+      enabled: false
+      shared: false
+    ldap:
+      enabled: false
+      shared: false
+- services:
+    ldap:
+      enabled: true
+      shared: true
+    oidc:
       enabled: false
       shared: false

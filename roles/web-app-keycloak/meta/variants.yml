@@ -6,7 +6,7 @@
 # the extra TOTP enrollment step.
 
 - credentials:
-    administrator_password: "'$tr0ng\u20ACxampl3PW!"
+    administrator_password: "'$tr0ng€xampl3PW!"
   services:
     keycloak:
       realm:
@@ -19,6 +19,7 @@
       shared: true
     ldap:
       shared: true
+      enabled: true
     matomo:
       enabled: true
       shared: true
@@ -28,7 +29,7 @@
       enabled: true
       shared: true
 - credentials:
-    administrator_password: "'$tr0ng\u20ACxampl3PW!"
+    administrator_password: "'$tr0ng€xampl3PW!"
   services:
     dashboard:
       enabled: false
@@ -38,6 +39,7 @@
       shared: false
     ldap:
       shared: false
+      enabled: false
     matomo:
       enabled: false
       shared: false

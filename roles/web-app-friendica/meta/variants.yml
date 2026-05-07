@@ -12,6 +12,7 @@
       shared: true
     ldap:
       shared: true
+      enabled: true
     logout:
       enabled: true
       shared: true
@@ -29,6 +30,9 @@
 
 # variant pinning every dynamic services.yml flag to false so the
 # matrix also exercises the out-of-group_names branch.
+    oidc:
+      enabled: true
+      shared: true
 - services:
     dashboard:
       enabled: false
@@ -38,6 +42,7 @@
       shared: false
     ldap:
       shared: false
+      enabled: false
     logout:
       enabled: false
       shared: false
@@ -50,5 +55,18 @@
       enabled: false
       shared: false
     prometheus:
+      enabled: false
+      shared: false
+    oidc:
+      enabled: false
+      shared: false
+- services:
+    ldap:
+      enabled: true
+      shared: true
+    oidc:
+      enabled: false
+      shared: false
+    oauth2:
       enabled: false
       shared: false

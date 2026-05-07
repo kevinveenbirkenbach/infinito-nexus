@@ -15,6 +15,7 @@
       shared: true
     ldap:
       shared: true
+      enabled: true
     logout:
       enabled: true
       shared: true
@@ -27,6 +28,7 @@
 - services:
     ldap:
       shared: false
+      enabled: false
     dashboard:
       enabled: false
       shared: false
@@ -40,5 +42,12 @@
       enabled: false
       shared: false
     prometheus:
+      enabled: false
+      shared: false
+- services:
+    ldap:
+      enabled: true
+      shared: true
+    oauth2:
       enabled: false
       shared: false
