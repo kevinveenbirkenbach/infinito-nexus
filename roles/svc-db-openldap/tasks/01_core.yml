@@ -165,9 +165,3 @@
 - name: "Add Objects to all users"
   include_tasks: 05_update.yml
   when: OPENLDAP_PROVISION_UPDATE | bool
-
-# Requirement 005 one-time migration. Idempotent: no-op on fresh deploys
-# and on re-runs that find no pre-005 flat DNs remaining.
-- name: "Run requirement 005 LDAP migration (flat -> hierarchical)"
-  include_tasks: 06_migrate_005.yml
-  when: OPENLDAP_PROVISION_GROUPS | bool
