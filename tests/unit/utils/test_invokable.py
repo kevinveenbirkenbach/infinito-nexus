@@ -51,7 +51,7 @@ class TestInvokable(TestCase):
         shutil.rmtree(self.tmp)
 
     def test_list_invokable_app_ids(self) -> None:
-        with patch.object(inv, "_repo_root", return_value=self.tmp):
+        with patch.object(inv, "PROJECT_ROOT", self.tmp):
             with patch.object(
                 inv,
                 "_get_invokable_paths",
@@ -65,7 +65,7 @@ class TestInvokable(TestCase):
         )
 
     def test_list_invokables_by_type(self) -> None:
-        with patch.object(inv, "_repo_root", return_value=self.tmp):
+        with patch.object(inv, "PROJECT_ROOT", self.tmp):
             with patch.object(
                 inv,
                 "_get_invokable_paths",
@@ -91,7 +91,7 @@ class TestInvokable(TestCase):
         with (rd / "vars" / "main.yml").open("w", encoding="utf-8") as f:
             yaml.safe_dump({}, f)
 
-        with patch.object(inv, "_repo_root", return_value=self.tmp):
+        with patch.object(inv, "PROJECT_ROOT", self.tmp):
             with patch.object(
                 inv,
                 "_get_invokable_paths",
@@ -102,7 +102,7 @@ class TestInvokable(TestCase):
         self.assertNotIn("web-app-oauth2-proxy", grouped["server"])
 
     def test_types_from_group_names(self) -> None:
-        with patch.object(inv, "_repo_root", return_value=self.tmp):
+        with patch.object(inv, "PROJECT_ROOT", self.tmp):
             with patch.object(
                 inv,
                 "_get_invokable_paths",

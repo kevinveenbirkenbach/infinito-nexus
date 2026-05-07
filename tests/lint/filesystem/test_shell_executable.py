@@ -4,13 +4,13 @@ from __future__ import annotations
 
 import stat
 import unittest
-from pathlib import Path
+from . import PROJECT_ROOT
 
 
 class TestShellScriptsExecutable(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        cls.repo_root = Path(__file__).resolve().parents[3]
+        cls.repo_root = PROJECT_ROOT
         cls.scripts_root = cls.repo_root / "scripts"
 
     def test_all_shell_scripts_under_scripts_are_executable(self):

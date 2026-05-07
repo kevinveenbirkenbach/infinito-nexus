@@ -29,6 +29,7 @@ import yaml
 
 from utils.cache.yaml import load_yaml_any
 from utils.entity_name_utils import get_entity_name
+from . import PROJECT_ROOT
 
 
 PathLike = Union[str, Path]
@@ -130,7 +131,7 @@ def _resolve_role(role: PathLike, role_name: Optional[str]) -> tuple[Path, str]:
     else:
         # Treat as a role name relative to <repo>/roles. The repo root is
         # two levels above this module: utils/roles/meta_lookup.py -> repo.
-        repo_root = Path(__file__).resolve().parents[2]
+        repo_root = PROJECT_ROOT
         role_dir = repo_root / "roles" / str(role)
     name = role_name or role_dir.name
     return role_dir, name

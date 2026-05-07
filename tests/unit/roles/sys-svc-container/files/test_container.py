@@ -7,6 +7,7 @@ import os
 import tempfile
 import contextlib
 import io
+from . import PROJECT_ROOT
 
 # ---------------------------------------------------------------------------
 # Manual import of roles/sys-svc-container/files/container.py
@@ -15,8 +16,6 @@ import io
 THIS_FILE = Path(__file__).resolve()
 
 # tests/unit/roles/sys-svc-container/files/test_container.py -> project root
-PROJECT_ROOT = THIS_FILE.parents[5]
-
 CONTAINER_PY = PROJECT_ROOT / "roles" / "sys-svc-container" / "files" / "container.py"
 
 if not CONTAINER_PY.exists():

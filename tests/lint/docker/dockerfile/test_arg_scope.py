@@ -19,8 +19,9 @@ from __future__ import annotations
 import re
 import unittest
 from pathlib import Path
+from . import PROJECT_ROOT
 
-_REPO_ROOT = Path(__file__).resolve().parents[4]
+_REPO_ROOT = PROJECT_ROOT
 _ROLES_ROOT = _REPO_ROOT / "roles"
 
 # Matches a FROM line that references at least one ${VAR}

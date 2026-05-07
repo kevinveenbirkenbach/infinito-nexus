@@ -7,9 +7,8 @@ import importlib.util
 import sys
 import types
 from unittest.mock import patch
+from . import PROJECT_ROOT
 
-
-PROJECT_ROOT = Path(__file__).resolve().parents[4]  # /opt/src/infinito
 ROLE_DIR = PROJECT_ROOT / "roles" / "web-app-keycloak"
 LIB_PATH = ROLE_DIR / "library" / "keycloak_kcadm_update.py"
 MODUTILS_PATH = ROLE_DIR / "module_utils" / "kcadm_json.py"

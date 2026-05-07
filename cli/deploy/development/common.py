@@ -1,10 +1,10 @@
 from __future__ import annotations
 
 import os
-from pathlib import Path
 from typing import TYPE_CHECKING
 
 from .deps import apps_with_deps, resolve_run_after
+from . import PROJECT_ROOT
 
 if TYPE_CHECKING:
     from .compose import Compose
@@ -18,10 +18,6 @@ DEV_INVENTORY_VARS_FILE: str = os.environ.get(
 
 
 VALID_DISTROS: tuple[str, ...] = ("arch", "debian", "ubuntu", "fedora", "centos")
-
-
-def repo_root_from_here() -> Path:
-    return Path(__file__).resolve().parents[3]
 
 
 def compose_file_args() -> list[str]:
@@ -91,7 +87,7 @@ def make_compose() -> Compose:
     distro = resolve_distro()
     # Surface env-script gap here rather than as a cryptic compose error later.
     resolve_container()
-    return Compose(repo_root=repo_root_from_here(), distro=distro)
+    return Compose(repo_root=PROJECT_ROOT, distro=distro)
 
 
 def resolve_deploy_ids_for_app(compose: Compose, app_id: str) -> list[str]:

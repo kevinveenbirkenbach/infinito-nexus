@@ -53,7 +53,7 @@ class TestAffected(unittest.TestCase):
             _mk_app_role(root, "leaf", "leaf")
             _mk_app_role(root, "other", "other")
 
-            with patch.object(repo_paths, "repo_root_from_here", return_value=root):
+            with patch.object(repo_paths, "PROJECT_ROOT", root):
                 self.assertEqual(
                     affected_main.affected_roles(["leaf"]),
                     ["leaf"],
@@ -66,7 +66,7 @@ class TestAffected(unittest.TestCase):
             _mk_app_role(root, "consumer", "consumer")
             _write_run_after(root, "consumer", ["leaf"])
 
-            with patch.object(repo_paths, "repo_root_from_here", return_value=root):
+            with patch.object(repo_paths, "PROJECT_ROOT", root):
                 self.assertEqual(
                     affected_main.affected_roles(["leaf"]),
                     ["consumer", "leaf"],
@@ -81,7 +81,7 @@ class TestAffected(unittest.TestCase):
             _write_dependencies(root, "mid", ["leaf"])
             _write_dependencies(root, "top", ["mid"])
 
-            with patch.object(repo_paths, "repo_root_from_here", return_value=root):
+            with patch.object(repo_paths, "PROJECT_ROOT", root):
                 self.assertEqual(
                     affected_main.affected_roles(["leaf"]),
                     ["leaf", "mid", "top"],
@@ -102,7 +102,7 @@ class TestAffected(unittest.TestCase):
                 encoding="utf-8",
             )
 
-            with patch.object(repo_paths, "repo_root_from_here", return_value=root):
+            with patch.object(repo_paths, "PROJECT_ROOT", root):
                 got = affected_main.affected_roles(["web-app-keycloak"])
                 self.assertIn("web-app-keycloak", got)
                 self.assertIn("web-app-consumer", got)
@@ -111,7 +111,7 @@ class TestAffected(unittest.TestCase):
         with tempfile.TemporaryDirectory() as td:
             root = Path(td)
             _mk_app_role(root, "leaf", "leaf")
-            with patch.object(repo_paths, "repo_root_from_here", return_value=root):
+            with patch.object(repo_paths, "PROJECT_ROOT", root):
                 with self.assertRaises(SystemExit):
                     affected_main.affected_roles(["does-not-exist"])
 
@@ -121,7 +121,7 @@ class TestAffected(unittest.TestCase):
             _mk_non_app_role(root, "sys-helper")
             _mk_app_role(root, "consumer", "consumer")
 
-            with patch.object(repo_paths, "repo_root_from_here", return_value=root):
+            with patch.object(repo_paths, "PROJECT_ROOT", root):
                 with self.assertRaises(SystemExit) as ctx:
                     affected_main.affected_roles(["sys-helper"])
                 self.assertEqual(
@@ -136,7 +136,7 @@ class TestAffected(unittest.TestCase):
             _mk_app_role(root, "consumer", "consumer")
             _write_run_after(root, "consumer", ["sys-helper"])
 
-            with patch.object(repo_paths, "repo_root_from_here", return_value=root):
+            with patch.object(repo_paths, "PROJECT_ROOT", root):
                 got = affected_main.affected_roles(["sys-helper"])
             self.assertIn("sys-helper", got)
             self.assertIn("consumer", got)
@@ -148,7 +148,7 @@ class TestAffected(unittest.TestCase):
             _mk_app_role(root, "consumer", "consumer")
             _write_run_after(root, "consumer", ["leaf"])
 
-            with patch.object(repo_paths, "repo_root_from_here", return_value=root):
+            with patch.object(repo_paths, "PROJECT_ROOT", root):
                 buf = io.StringIO()
                 with redirect_stdout(buf):
                     with patch(

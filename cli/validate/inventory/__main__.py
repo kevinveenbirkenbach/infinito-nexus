@@ -4,10 +4,15 @@ import re
 import sys
 from pathlib import Path
 
-# Ensure imports work when invoked as a script (subprocess without PYTHONPATH).
-repo_root = Path(__file__).resolve().parents[3]
-if str(repo_root) not in sys.path:
-    sys.path.insert(0, str(repo_root))
+# This script is also invoked as a standalone subprocess
+# (`python __main__.py …`), in which case ``from . import PROJECT_ROOT``
+# would fail with ``attempted relative import with no known parent
+# package``. Compute the repo root locally and prepend it to sys.path
+# before any project-package import resolves.
+# nocheck: project-root-import  sys.path bootstrap before package imports resolve
+PROJECT_ROOT = Path(__file__).resolve().parents[3]
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
 
 from utils.cache.applications import get_application_defaults  # noqa: E402
 from utils.cache.files import read_text  # noqa: E402
@@ -121,7 +126,7 @@ def main():
     p.add_argument("inventory_dir")
     p.add_argument(
         "--roles-dir",
-        default=str(repo_root / "roles"),
+        default=str(PROJECT_ROOT / "roles"),
         help="Path to the repository roles directory.",
     )
     args = p.parse_args()

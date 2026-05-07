@@ -8,6 +8,7 @@ import unittest
 from pathlib import Path
 from unittest.mock import patch
 import importlib.util
+from . import PROJECT_ROOT
 
 
 class _ExitJson(Exception):
@@ -48,19 +49,8 @@ def _import_module_under_test():
       tests/unit/roles/sys-ctl-bkp-docker-2-loc/library/test_file_has_content.py
     Repo root is parents[5] from the test file path.
     """
-    this_file = Path(__file__).resolve()
-
-    # parents:
-    # [0]=.../library
-    # [1]=.../sys-ctl-bkp-docker-2-loc
-    # [2]=.../roles
-    # [3]=.../unit
-    # [4]=.../tests
-    # [5]=.../ (repo root)
-    repo_root = this_file.parents[5]
-
     module_path = (
-        repo_root
+        PROJECT_ROOT
         / "roles"
         / "sys-ctl-bkp-docker-2-loc"
         / "library"

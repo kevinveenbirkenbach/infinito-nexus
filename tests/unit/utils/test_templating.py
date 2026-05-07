@@ -1,22 +1,15 @@
 # tests/unit/utils/test_templating.py
 import os
 import unittest
-from pathlib import Path
 from unittest.mock import patch
 
 from ansible.errors import AnsibleError
-
-
-def _repo_root() -> Path:
-    # __file__ = tests/unit/utils/test_templating.py
-    return Path(__file__).resolve().parents[3]
-
+from . import PROJECT_ROOT
 
 # Ensure repo root is importable so `utils.*` resolves in all runners
 import sys  # noqa: E402
 
-sys.path.insert(0, str(_repo_root()))  # noqa: E402
-
+sys.path.insert(0, str(PROJECT_ROOT))  # noqa: E402
 
 from utils.templating import (  # noqa: E402
     render_ansible_strict,

@@ -25,9 +25,9 @@ def main():
     # Default to 'build' if no target is specified
     make_args = args.targets or ["build"]
 
-    # Determine repository root (one level up from cli/)
-    script_dir = os.path.dirname(os.path.realpath(__file__))
-    repo_root = os.path.abspath(os.path.join(script_dir, os.pardir))
+    from . import PROJECT_ROOT
+
+    repo_root = str(PROJECT_ROOT)
 
     # Check for Makefile
     makefile_path = os.path.join(repo_root, "Makefile")

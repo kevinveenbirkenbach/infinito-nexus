@@ -8,10 +8,7 @@ from pathlib import Path
 
 from .common import cache_env_overrides, compose_file_args, resolve_distro
 from .profile import Profile
-
-
-def _repo_root_from_here() -> Path:
-    return Path(__file__).resolve().parents[3]
+from . import PROJECT_ROOT
 
 
 CI_DOCKER_ROOT = Path("/mnt/docker")
@@ -82,5 +79,5 @@ def add_parser(sub: argparse._SubParsersAction) -> None:
 
 
 def handler(args: argparse.Namespace) -> int:
-    down_stack(repo_root=_repo_root_from_here(), distro=resolve_distro())
+    down_stack(repo_root=PROJECT_ROOT, distro=resolve_distro())
     return 0

@@ -33,8 +33,9 @@ import requests
 
 from utils.annotations.message import error, warning
 from utils.annotations.suppress import is_suppressed_at
+from . import PROJECT_ROOT
 
-_REPO_ROOT = Path(__file__).resolve().parents[3]
+_REPO_ROOT = PROJECT_ROOT
 _URL_RE = re.compile(r"https?://[^\s<>'\"`\]]+")
 _TEMPLATE_MARKERS = ("${", "{{", "}}", "{%", "%}")
 _PUBLIC_HOST_RE = re.compile(r"^[A-Za-z0-9.-]+$")

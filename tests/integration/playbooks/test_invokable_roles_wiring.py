@@ -1,11 +1,11 @@
 import unittest
-from pathlib import Path
 import re
 import sys
 from plugins.filter.invokable_paths import get_invokable_paths
+from . import PROJECT_ROOT
 
 # Ensure project root is on PYTHONPATH so plugins.filter.* can be imported
-ROOT = Path(__file__).parents[3]
+ROOT = PROJECT_ROOT
 sys.path.insert(0, str(ROOT))
 
 STAGES_DIR = ROOT / "tasks" / "stages"

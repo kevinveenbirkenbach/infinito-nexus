@@ -1,9 +1,9 @@
 import yaml
 import unittest
-from pathlib import Path
 from plugins.filter.invokable_paths import get_invokable_paths
+from . import PROJECT_ROOT
 
-ROLES_DIR = Path(__file__).resolve().parents[5] / "roles"
+ROLES_DIR = PROJECT_ROOT / "roles"
 
 
 class TestApplicationIdConsistency(unittest.TestCase):

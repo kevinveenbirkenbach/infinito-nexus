@@ -4,6 +4,8 @@ from pathlib import Path
 
 import yaml
 
+from . import PROJECT_ROOT
+
 _MAILU_ROLE = "web-app-mailu"
 _EMAIL_SERVICE_KEY = "email"
 
@@ -40,10 +42,8 @@ class TestMailuServiceDependency(unittest.TestCase):
     must declare services.email with enabled: true and shared: true
     in its config/main.yml."""
 
-    PROJECT_ROOT = Path(__file__).resolve().parents[3]
-
     def setUp(self):
-        self.roles_root = self.PROJECT_ROOT / "roles"
+        self.roles_root = PROJECT_ROOT / "roles"
         self.assertTrue(
             self.roles_root.is_dir(),
             f"Roles directory not found: {self.roles_root}",
@@ -90,7 +90,7 @@ class TestMailuServiceDependency(unittest.TestCase):
             reason_str = " and ".join(reasons)
 
             email_svc = self._email_service_conf(config_path)
-            rel = config_path.relative_to(self.PROJECT_ROOT)
+            rel = config_path.relative_to(PROJECT_ROOT)
 
             if not email_svc.get("enabled"):
                 errors.append(

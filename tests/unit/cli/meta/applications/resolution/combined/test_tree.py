@@ -66,7 +66,7 @@ class TestCombinedTree(unittest.TestCase):
             (root / "roles" / "web-app-keycloak").mkdir(parents=True, exist_ok=True)
             (root / "roles" / "web-app-dashboard").mkdir(parents=True, exist_ok=True)
 
-            with patch.object(repo_paths, "repo_root_from_here", return_value=root):
+            with patch.object(repo_paths, "PROJECT_ROOT", root):
                 buf = io.StringIO()
                 with redirect_stdout(buf):
                     print_tree("start")

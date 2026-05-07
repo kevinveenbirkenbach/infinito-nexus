@@ -1,12 +1,10 @@
-import os
 import re
 import sys
 import unittest
+from . import PROJECT_ROOT
 
 # ensure project root is on PYTHONPATH so we can import the CLI code
-ROOT = os.path.abspath(
-    os.path.join(os.path.dirname(__file__), os.pardir, os.pardir, os.pardir, os.pardir)
-)
+ROOT = str(PROJECT_ROOT)
 sys.path.insert(0, ROOT)
 
 from cli.meta.applications.all import find_application_ids  # noqa: E402

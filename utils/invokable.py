@@ -7,6 +7,7 @@ from pathlib import Path
 from typing import Iterable, Set
 
 from utils.cache.yaml import load_yaml_any
+from . import PROJECT_ROOT
 
 
 @dataclass(frozen=True)
@@ -36,13 +37,8 @@ DEFAULT_RULES: tuple[DeploymentTypeRule, ...] = (
 )
 
 
-def _repo_root() -> Path:
-    # utils/invokable.py -> utils -> repo root
-    return Path(__file__).resolve().parents[1]
-
-
 def _roles_dir() -> Path:
-    return _repo_root() / "roles"
+    return PROJECT_ROOT / "roles"
 
 
 def _categories_file() -> Path:

@@ -12,7 +12,7 @@ class TestCombinedRepoPaths(unittest.TestCase):
     def test_roles_dir_and_role_paths(self) -> None:
         root = Path("/tmp/fake-root")
 
-        with patch.object(repo_paths, "repo_root_from_here", return_value=root):
+        with patch.object(repo_paths, "PROJECT_ROOT", root):
             self.assertEqual(repo_paths.roles_dir(), root / "roles")
             self.assertEqual(
                 repo_paths.role_dir("web-app-x"), root / "roles" / "web-app-x"

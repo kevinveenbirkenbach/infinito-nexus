@@ -23,8 +23,9 @@ import unittest
 from pathlib import Path
 
 from utils.annotations.message import warning
+from . import PROJECT_ROOT
 
-_REPO_ROOT = Path(__file__).resolve().parents[4]
+_REPO_ROOT = PROJECT_ROOT
 _ROLES_ROOT = _REPO_ROOT / "roles"
 
 # Matches any Jinja2 control-flow or structural tag: {% ... %}
@@ -39,6 +40,7 @@ def _has_j2_logic(dockerfile_j2: Path) -> bool:
 def _collect_templated_dockerfiles() -> list[Path]:
     templated: list[Path] = []
     for dockerfile_j2 in sorted(_ROLES_ROOT.glob("*/templates/Dockerfile.j2")):
+        # nocheck: project-root-import  walking from a discovered glob match (<role>/templates/...) up to its role dir, not the repo root
         plain_dockerfile = dockerfile_j2.parents[1] / "files" / "Dockerfile"
         if plain_dockerfile.is_file():
             continue

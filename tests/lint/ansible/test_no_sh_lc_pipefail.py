@@ -5,6 +5,7 @@ import unittest
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Iterable, Set
+from . import PROJECT_ROOT
 
 
 @dataclass(frozen=True)
@@ -16,11 +17,6 @@ class Finding:
     def format(self, repo_root: Path) -> str:
         rel = self.file.relative_to(repo_root).as_posix()
         return f"{rel}:{self.line}: {self.snippet}"
-
-
-def _repo_root() -> Path:
-    # tests/integration/<cluster>/<file>.py -> repo root
-    return Path(__file__).resolve().parents[3]
 
 
 def _iter_target_files(repo_root: Path) -> Iterable[Path]:
@@ -127,7 +123,7 @@ class TestNoShLcPipefail(unittest.TestCase):
         `pipefail` requires bash. Using it via `sh -lc` is not portable and breaks
         on Debian/Ubuntu (dash) with: `set: Illegal option -o pipefail`.
         """
-        repo_root = _repo_root()
+        repo_root = PROJECT_ROOT
         findings: list[Finding] = []
         for py_file in _iter_target_files(repo_root):
             findings.extend(_scan_file(py_file))

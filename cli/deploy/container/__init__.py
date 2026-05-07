@@ -1,6 +1,10 @@
 from __future__ import annotations
 
-from .command import (
+from pathlib import Path
+
+PROJECT_ROOT: Path = Path(__file__).resolve().parents[3]
+
+from .command import (  # noqa: E402
     main,
     remove_container,
     run_in_container,

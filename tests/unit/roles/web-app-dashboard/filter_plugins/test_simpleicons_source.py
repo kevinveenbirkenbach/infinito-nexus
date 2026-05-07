@@ -1,19 +1,17 @@
 import importlib.util
 import os
-import pathlib
 import tempfile
 import unittest
 from unittest.mock import patch
 
 import certifi
 
+from . import PROJECT_ROOT
+
 
 def _load_simpleicons_module():
-    test_file = pathlib.Path(__file__).resolve()
-    repo_root = test_file.parents[5]
-
     module_path = (
-        repo_root
+        PROJECT_ROOT
         / "roles"
         / "web-app-dashboard"
         / "filter_plugins"

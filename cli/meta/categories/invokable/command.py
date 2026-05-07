@@ -12,7 +12,6 @@ from __future__ import annotations
 
 import argparse
 import sys
-from pathlib import Path
 
 import yaml
 
@@ -24,13 +23,7 @@ from plugins.filter.invokable_paths import (
     get_non_invokable_paths,
 )
 
-
-def _project_root_from_here() -> Path:
-    """
-    Determine repo root by fixed parent depth.
-    command.py -> invokable -> categories -> meta -> cli -> repo_root
-    """
-    return Path(__file__).resolve().parents[4]
+from . import PROJECT_ROOT
 
 
 def main() -> None:
@@ -69,7 +62,7 @@ def main() -> None:
     args = parser.parse_args()
 
     # Ensure repo root is importable (CLI use outside repo root)
-    repo_root = _project_root_from_here()
+    repo_root = PROJECT_ROOT
     sys.path.insert(0, str(repo_root))
 
     try:

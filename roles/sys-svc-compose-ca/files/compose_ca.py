@@ -376,8 +376,9 @@ def _discover_profiles_from_files(compose_files: List[Path]) -> List[str]:
             die(f"Compose file does not exist: {f}")
         try:
             doc = (
-                yaml.safe_load(f.read_text(encoding="utf-8")) or {}
-            )  # nocheck: direct-yaml
+                yaml.safe_load(f.read_text(encoding="utf-8"))  # nocheck: direct-yaml
+                or {}
+            )
         except Exception as e:
             die(f"Failed to parse compose file '{f}': {e}")
 

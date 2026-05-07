@@ -11,9 +11,10 @@ import yaml
 from utils.cache.yaml import dump_yaml, load_yaml_any
 from pathlib import Path
 
+from . import PROJECT_ROOT
+
 # Directory containing roles; can be overridden by tests
-MODULE_DIR = Path(__file__).resolve().parent
-ROLES_DIR = (MODULE_DIR.parents[3] / "roles").resolve()
+ROLES_DIR = (PROJECT_ROOT / "roles").resolve()
 
 
 def process_role(role_dir: Path, prefix: str, preview: bool, overwrite: bool):

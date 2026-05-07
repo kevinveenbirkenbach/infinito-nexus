@@ -3,18 +3,12 @@ import os
 import glob
 
 from utils.cache.yaml import load_yaml_any
+from . import PROJECT_ROOT
 
 
 class TestRoleDependencies(unittest.TestCase):
     def test_dependencies_exist(self):
-        # Determine the path to the roles directory relative to this test file
-        tests_dir = os.path.dirname(__file__)
-        project_root = os.path.abspath(
-            os.path.join(
-                tests_dir, os.pardir, os.pardir, os.pardir, os.pardir, os.pardir
-            )
-        )
-        roles_dir = os.path.join(project_root, "roles")
+        roles_dir = os.path.join(str(PROJECT_ROOT), "roles")
 
         # Find all meta/main.yml files under roles/*/meta/main.yml
         pattern = os.path.join(roles_dir, "*", "meta", "main.yml")

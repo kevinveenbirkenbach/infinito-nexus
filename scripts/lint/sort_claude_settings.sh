@@ -8,4 +8,8 @@ set -euo pipefail
 SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd -- "${SCRIPT_DIR}/../.." && pwd)"
 
-exec python3 "${REPO_ROOT}/utils/claude/settings_sort.py" "$@"
+# Invoke as a module (`python -m`) so the script's `from . import
+# PROJECT_ROOT` resolves against the real package, not as a standalone
+# script with no parent.
+cd -- "${REPO_ROOT}"
+exec python3 -m utils.claude.settings_sort "$@"

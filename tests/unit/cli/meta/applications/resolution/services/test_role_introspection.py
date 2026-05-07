@@ -28,7 +28,7 @@ class TestCombinedRoleIntrospection(unittest.TestCase):
             root = Path(td)
             (root / "roles" / "web-app-x").mkdir(parents=True)
 
-            with patch.object(repo_paths, "repo_root_from_here", return_value=root):
+            with patch.object(repo_paths, "PROJECT_ROOT", root):
                 require_role_exists("web-app-x")
                 with self.assertRaises(CombinedResolutionError):
                     require_role_exists("missing-role")
@@ -39,7 +39,7 @@ class TestCombinedRoleIntrospection(unittest.TestCase):
             _write(root / "roles" / "a" / "vars" / "main.yml", "application_id: a\n")
             (root / "roles" / "b").mkdir(parents=True)
 
-            with patch.object(repo_paths, "repo_root_from_here", return_value=root):
+            with patch.object(repo_paths, "PROJECT_ROOT", root):
                 self.assertTrue(has_application_id("a"))
                 self.assertFalse(has_application_id("b"))
 
@@ -55,7 +55,7 @@ class TestCombinedRoleIntrospection(unittest.TestCase):
             (root / "roles" / "web-app-x").mkdir(parents=True)
             (root / "roles" / "web-app-y").mkdir(parents=True)
 
-            with patch.object(repo_paths, "repo_root_from_here", return_value=root):
+            with patch.object(repo_paths, "PROJECT_ROOT", root):
                 self.assertEqual(load_run_after("a"), ["web-app-x", "web-app-y"])
 
     def test_load_dependencies_app_only_filters_non_app_roles(self) -> None:
@@ -80,7 +80,7 @@ class TestCombinedRoleIntrospection(unittest.TestCase):
             # non-app-dep exists but no application_id
             (root / "roles" / "non-app-dep").mkdir(parents=True, exist_ok=True)
 
-            with patch.object(repo_paths, "repo_root_from_here", return_value=root):
+            with patch.object(repo_paths, "PROJECT_ROOT", root):
                 deps = load_dependencies_app_only("start")
                 self.assertEqual(deps, ["app-dep"])
 
@@ -109,7 +109,7 @@ class TestCombinedRoleIntrospection(unittest.TestCase):
             (root / "roles" / "web-app-keycloak").mkdir(parents=True)
             (root / "roles" / "web-app-dashboard").mkdir(parents=True)
 
-            with patch.object(repo_paths, "repo_root_from_here", return_value=root):
+            with patch.object(repo_paths, "PROJECT_ROOT", root):
                 roles = load_shared_service_roles_for_app("web-app-wordpress")
                 self.assertEqual(roles, ["web-app-keycloak", "web-app-dashboard"])
 

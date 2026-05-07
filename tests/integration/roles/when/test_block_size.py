@@ -3,6 +3,8 @@ from pathlib import Path
 import yaml
 from typing import Any, Dict, List, Tuple, Union
 
+from . import PROJECT_ROOT
+
 
 # -------- YAML loader that's tolerant of Ansible-specific tags (e.g. !vault) -----
 class AnsibleTolerantLoader(yaml.SafeLoader):
@@ -23,22 +25,6 @@ def _ansible_tag_passthrough(loader: yaml.Loader, tag_prefix: str, node: yaml.No
 yaml.add_multi_constructor("!", _ansible_tag_passthrough, Loader=AnsibleTolerantLoader)
 
 # -------------------------------------------------------------------------------
-
-
-def _repo_root() -> Path:
-    """Find a plausible project root by walking upward from this file."""
-    here = Path(__file__).resolve()
-    cur = here.parent
-    markers = {".git", "ansible.cfg", "roles", "playbook.yml"}
-    for _ in range(7):
-        if any((cur / m).exists() for m in markers):
-            return cur
-        parent = cur.parent
-        if parent == cur:
-            break
-        cur = parent
-    # Fallback: project/tests/integration/roles/when/ -> pick parent of 'tests'
-    return here.parents[4] if len(here.parents) >= 5 else here.parent
 
 
 Yaml = Union[Dict[str, Any], List[Any], Any]
@@ -103,7 +89,7 @@ class BlockWhenSizeTest(unittest.TestCase):
     MAX_TASKS = 3  # performance threshold
 
     def test_blocks_with_when_and_sections_have_max_three_tasks(self):
-        root = _repo_root()
+        root = PROJECT_ROOT
         violations: List[str] = []
 
         for yml in _iter_yaml_files(root):

@@ -1,14 +1,14 @@
 import unittest
-from pathlib import Path
 
 import yaml
 
 from plugins.lookup.service import LookupModule
+from . import PROJECT_ROOT
 
 
 class TestServiceTransitiveDependencies(unittest.TestCase):
     def setUp(self):
-        self.repo_root = Path(__file__).resolve().parents[3]
+        self.repo_root = PROJECT_ROOT
         self.applications = {
             "web-app-dashboard": self._load_yaml(
                 "roles", "web-app-dashboard", "meta", "services.yml"

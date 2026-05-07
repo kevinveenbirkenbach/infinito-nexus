@@ -4,12 +4,12 @@ import sys
 import contextlib
 import importlib.util
 from types import SimpleNamespace
-from pathlib import Path
 from unittest import TestCase, main, mock
+from . import PROJECT_ROOT
 
 
 def load_target_module():
-    repo_root = Path(__file__).resolve().parents[5]  # /opt/src/infinito
+    repo_root = PROJECT_ROOT  # /opt/src/infinito
     script_path = (
         repo_root / "roles" / "sys-ctl-hlth-disc-space" / "files" / "script.py"
     )

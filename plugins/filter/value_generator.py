@@ -3,8 +3,8 @@
 from __future__ import annotations
 
 from functools import lru_cache
-from pathlib import Path
 import sys
+from pathlib import Path
 from typing import Type
 
 
@@ -17,6 +17,7 @@ def _value_generator_cls() -> Type[object]:
     - utils/manager/__init__.py exists (package import works)
     - plugins/filter/ is located at repo root
     """
+    # nocheck: project-root-import  ansible loads filter plugins outside the project package, so relative imports don't resolve
     repo_root = Path(__file__).resolve().parents[2]
     utils_path = repo_root / "utils"
 

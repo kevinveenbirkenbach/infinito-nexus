@@ -5,6 +5,7 @@ import argparse
 from pathlib import Path
 
 from utils.docker.version_updater import apply_updates, find_outdated_updates
+from . import PROJECT_ROOT
 
 
 def main() -> int:
@@ -14,7 +15,7 @@ def main() -> int:
     parser.add_argument(
         "--repo-root",
         type=Path,
-        default=Path(__file__).resolve().parents[3],
+        default=PROJECT_ROOT,
         help="Repository root to scan and update",
     )
     parser.add_argument(

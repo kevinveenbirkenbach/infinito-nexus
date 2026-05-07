@@ -2,19 +2,7 @@ from __future__ import annotations
 
 import os
 from pathlib import Path
-
-
-def get_project_root() -> Path:
-    """
-    Return the project root based on the location of this file.
-
-    Assumes this file lives in:
-        <project-root>/cli/meta/runtime/__init__.py
-
-    Therefore:
-        project-root = parents[3]
-    """
-    return Path(__file__).resolve().parents[3]
+from . import PROJECT_ROOT
 
 
 def detect_runtime(project_root: Path | None = None) -> str:
@@ -51,7 +39,7 @@ def detect_runtime(project_root: Path | None = None) -> str:
         return "github"
 
     # 4) local dev compose stack (project-root relative marker)
-    root = project_root or get_project_root()
+    root = project_root or PROJECT_ROOT
 
     if (root / "env.development").exists():
         return "dev"

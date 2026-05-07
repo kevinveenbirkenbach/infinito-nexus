@@ -8,6 +8,7 @@ from typing import Any, Dict, Iterable, List, Tuple
 import yaml
 
 from utils.docker.image.ref import is_valid_image_name
+from . import PROJECT_ROOT
 
 # Docker tag (version)
 TAG_RE = re.compile(r"^[A-Za-z0-9_][A-Za-z0-9_.-]{0,127}$")
@@ -65,7 +66,7 @@ class TestDockerServicesImageVersionValid(unittest.TestCase):
         - `version` is OPTIONAL → only validated if present
         - No coupling required between image/version
         """
-        repo_root = Path(__file__).resolve().parents[3]
+        repo_root = PROJECT_ROOT
         failures: List[str] = []
 
         config_files = _iter_role_config_files(repo_root)

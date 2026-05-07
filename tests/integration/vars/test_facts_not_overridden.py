@@ -5,6 +5,7 @@ from typing import Any, Dict, Iterable, List, Optional, Set, Tuple
 import yaml
 
 from utils.cache.files import read_text
+from . import PROJECT_ROOT
 
 
 def _safe_yaml_load_all(path: Path) -> List[Any]:
@@ -188,7 +189,7 @@ class TestFactsAreNotOverriddenByVars(unittest.TestCase):
     """
 
     def test_no_fact_is_overridden_via_vars_on_includes(self) -> None:
-        repo_root = Path(__file__).resolve().parents[3]
+        repo_root = PROJECT_ROOT
         task_files = _find_task_files(repo_root)
 
         facts = _collect_defined_facts(task_files)  # fact -> {paths}

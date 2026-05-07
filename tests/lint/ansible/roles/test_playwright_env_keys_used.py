@@ -110,6 +110,7 @@ class TestPlaywrightEnvKeysUsed(unittest.TestCase):
         unreferenced_keys: List[str] = []
 
         for env_path in sorted(roles_dir.glob("*/templates/playwright.env.j2")):
+            # nocheck: project-root-import  walking from a discovered glob match (<role>/templates/...) up to its role dir, not the repo root
             role_dir = env_path.parents[1]
             role_name = role_dir.name
             spec_path = role_dir / "files" / "playwright.spec.js"

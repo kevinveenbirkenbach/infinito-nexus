@@ -5,10 +5,10 @@ Utility for validating deployment application IDs against defined roles and inve
 from __future__ import annotations
 
 import os
-from pathlib import Path
 from utils.cache.yaml import load_yaml_any
 
 from plugins.filter.get_all_application_ids import get_all_application_ids
+from . import PROJECT_ROOT
 
 
 class ValidDeployId:
@@ -16,7 +16,7 @@ class ValidDeployId:
         """
         Always resolve roles/ from the repository root, independent of CWD.
         """
-        repo_root = Path(__file__).resolve().parents[1]
+        repo_root = PROJECT_ROOT
         roles_dir = repo_root / "roles"
 
         if not roles_dir.is_dir():

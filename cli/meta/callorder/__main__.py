@@ -35,23 +35,11 @@ from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple
 
 from utils.cache.yaml import load_yaml_any as _load_yaml_cached
+from . import PROJECT_ROOT
 
 
 def eprint(msg: str) -> None:
     print(msg, file=sys.stderr)
-
-
-def repo_root_from_this_script() -> Path:
-    """
-    Compute repo root *only* from this script's absolute location.
-
-    Expected layout:
-      <repo_root>/cli/meta/callorder/__main__.py
-
-    Therefore:
-      repo_root = Path(__file__).resolve().parents[3]
-    """
-    return Path(__file__).resolve().parents[3]
 
 
 def list_group_files(groups_dir: Path) -> List[Path]:
@@ -169,7 +157,7 @@ def main(argv: Optional[List[str]] = None) -> int:
 
     args = ap.parse_args(argv)
 
-    repo_root = repo_root_from_this_script()
+    repo_root = PROJECT_ROOT
     groups = build_groups(repo_root)
     global_order = flatten_callorder(groups)
 

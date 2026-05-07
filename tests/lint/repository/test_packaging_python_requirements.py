@@ -4,13 +4,13 @@ from __future__ import annotations
 
 import re
 import unittest
-from pathlib import Path
+from . import PROJECT_ROOT
 
 
 class TestPackagingPythonRequirements(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        cls.repo_root = Path(__file__).resolve().parents[3]
+        cls.repo_root = PROJECT_ROOT
         cls.arch_pkgbuild = cls.repo_root / "packaging" / "arch" / "PKGBUILD"
         cls.fedora_spec = cls.repo_root / "packaging" / "fedora" / "infinito-nexus.spec"
         cls.debian_control = cls.repo_root / "packaging" / "debian" / "control"

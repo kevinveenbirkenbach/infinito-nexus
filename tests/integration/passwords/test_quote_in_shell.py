@@ -6,6 +6,7 @@ import unittest
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Iterable, List
+from . import PROJECT_ROOT
 
 
 JINJA_EXPR_RE = re.compile(r"{{(.*?)}}", re.DOTALL)
@@ -141,9 +142,7 @@ def _scan_shell_block(file_path: Path, start_line: int, block: str) -> List[Find
 
 class TestPasswordQuoteInShellTasks(unittest.TestCase):
     def test_passwords_are_quoted_in_shell_tasks(self) -> None:
-        repo_root = (
-            Path(__file__).resolve().parents[3]
-        )  # tests/integration/<cluster>/ -> repo root
+        repo_root = PROJECT_ROOT  # tests/integration/<cluster>/ -> repo root
 
         all_findings: List[Finding] = []
         for yml in _iter_roles_yml_files(repo_root):

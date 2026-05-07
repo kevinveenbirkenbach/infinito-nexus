@@ -6,6 +6,7 @@ import unittest
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Iterable, List
+from . import PROJECT_ROOT
 
 
 QUOTE_FILTER_RE = re.compile(r"\|\s*quote\b", re.IGNORECASE)
@@ -63,9 +64,7 @@ def _scan_file(path: Path) -> List[Finding]:
 
 class TestPasswordDefinitionsNoQuote(unittest.TestCase):
     def test_password_definitions_must_not_use_quote_filter(self) -> None:
-        repo_root = (
-            Path(__file__).resolve().parents[3]
-        )  # tests/integration/<cluster>/ -> repo root
+        repo_root = PROJECT_ROOT  # tests/integration/<cluster>/ -> repo root
 
         all_findings: List[Finding] = []
         for yml in _iter_roles_yml_files(repo_root):

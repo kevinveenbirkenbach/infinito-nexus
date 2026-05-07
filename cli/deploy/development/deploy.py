@@ -13,10 +13,10 @@ from cli.create.inventory.services_disabler import (
 
 from .common import (
     make_compose,
-    repo_root_from_here,
     resolve_container,
 )
 from .inventory import filter_plan_to_variant, plan_dev_inventory_matrix
+from . import PROJECT_ROOT
 
 
 def _env_variant() -> int | None:
@@ -115,7 +115,7 @@ def _purge_app_entities(*, container: str, app_ids: list[str]) -> None:
     """
     if not app_ids:
         return
-    repo_root = repo_root_from_here()
+    repo_root = PROJECT_ROOT
     purge_script = (
         repo_root / "scripts" / "tests" / "deploy" / "local" / "purge" / "entity.sh"
     )

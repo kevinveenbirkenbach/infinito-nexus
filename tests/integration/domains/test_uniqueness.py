@@ -1,8 +1,8 @@
 import unittest
-from pathlib import Path
 from collections import defaultdict
 
 from utils.cache.applications import get_application_defaults
+from . import PROJECT_ROOT
 
 
 class TestDomainUniqueness(unittest.TestCase):
@@ -12,7 +12,7 @@ class TestDomainUniqueness(unittest.TestCase):
         collect all entries under domains.canonical and domains.aliases across all applications,
         and assert that no domain appears more than once.
         """
-        repo_root = Path(__file__).resolve().parents[3]
+        repo_root = PROJECT_ROOT
         apps = get_application_defaults(roles_dir=repo_root / "roles")
 
         domain_to_apps = defaultdict(set)

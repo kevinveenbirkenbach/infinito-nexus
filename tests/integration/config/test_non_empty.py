@@ -3,6 +3,8 @@ import glob
 import yaml
 import unittest
 
+from . import PROJECT_ROOT
+
 
 def find_none_values(data, prefix=None):
     """
@@ -38,13 +40,7 @@ class TestConfigurationNoNone(unittest.TestCase):
         # volumes.yml). The legacy roles/*/config/main.yml file no longer
         # exists. Recurse into every meta/*.yml file and assert no key
         # resolves to a YAML null.
-        roles_root = os.path.join(
-            os.path.dirname(__file__),
-            os.pardir,
-            os.pardir,
-            os.pardir,
-            "roles",
-        )
+        roles_root = str(PROJECT_ROOT / "roles")
         pattern = os.path.join(roles_root, "*", "meta", "*.yml")
         files = glob.glob(pattern)
         self.assertTrue(

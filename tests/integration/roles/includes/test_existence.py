@@ -5,6 +5,7 @@ import yaml
 import re
 
 from utils.cache.files import read_text
+from . import PROJECT_ROOT
 
 
 class TestIncludeImportExistence(unittest.TestCase):
@@ -16,10 +17,7 @@ class TestIncludeImportExistence(unittest.TestCase):
     """
 
     def setUp(self):
-        tests_dir = os.path.dirname(__file__)
-        self.project_root = os.path.abspath(
-            os.path.join(tests_dir, os.pardir, os.pardir, os.pardir, os.pardir)
-        )
+        self.project_root = str(PROJECT_ROOT)
         self.roles_dir = os.path.join(self.project_root, "roles")
 
         self.files_to_scan = []

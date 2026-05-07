@@ -1,11 +1,11 @@
 import re
 import unittest
-from pathlib import Path
+
+from . import PROJECT_ROOT
 
 
 class TestDockerComposeTemplates(unittest.TestCase):
     # Search for all roles/*/templates/compose.yml.j2
-    PROJECT_ROOT = Path(__file__).resolve().parents[3]
     TEMPLATE_PATTERN = "roles/*/templates/compose.yml.j2"
 
     # Allowed lines before BASE_INCLUDE
@@ -28,7 +28,7 @@ class TestDockerComposeTemplates(unittest.TestCase):
         3. BASE_INCLUDE appears before NET_INCLUDE when both are required
         4. Only allowed lines appear before BASE_INCLUDE (invalid lines issue warnings)
         """
-        template_paths = sorted(self.PROJECT_ROOT.glob(self.TEMPLATE_PATTERN))
+        template_paths = sorted(PROJECT_ROOT.glob(self.TEMPLATE_PATTERN))
         self.assertTrue(
             template_paths, f"No templates found for pattern {self.TEMPLATE_PATTERN}"
         )

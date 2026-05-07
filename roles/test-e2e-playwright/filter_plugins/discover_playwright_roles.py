@@ -39,6 +39,7 @@ def discover_playwright_roles(
     # Current marker for Playwright-enabled app roles:
     # .../roles/<role>/templates/playwright.env.j2
     for env_file in base.rglob("templates/playwright.env.j2"):
+        # nocheck: project-root-import  walking from a discovered glob match (<role>/templates/...) up to its role dir, not the repo root
         role_name = env_file.parents[1].name
         found.append(role_name)
 

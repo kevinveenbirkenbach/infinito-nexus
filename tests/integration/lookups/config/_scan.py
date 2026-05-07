@@ -31,6 +31,7 @@ from utils.cache.applications import get_application_defaults
 from utils.cache.files import iter_project_files_with_content
 from utils.cache.users import get_user_defaults
 from utils.cache.yaml import load_yaml_any
+from . import PROJECT_ROOT
 
 
 # Rule key consumed by every `tests/integration/lookups/config/test_*.py`.
@@ -261,7 +262,7 @@ _SCANNED_EXTENSIONS: Tuple[str, ...] = (".yml", ".yaml", ".j2")
 @functools.lru_cache(maxsize=1)
 def get_context() -> ScanContext:
     """Return the cached :class:`ScanContext` for the current repo."""
-    root = Path(__file__).resolve().parents[4]
+    root = PROJECT_ROOT
     roles_root = root / "roles"
     application_defaults = get_application_defaults(roles_dir=roles_root)
     user_defaults = get_user_defaults(roles_dir=roles_root)

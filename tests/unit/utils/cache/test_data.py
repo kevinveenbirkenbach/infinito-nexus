@@ -492,9 +492,8 @@ def _run_in_ansible_blocked_subprocess(snippet: str):
     """
     import subprocess
     import sys
-    from pathlib import Path
 
-    repo_root = Path(__file__).resolve().parents[4]
+    repo_root = PROJECT_ROOT
     preamble = (
         "import sys\n"
         "sys.path.insert(0, %r)\n"

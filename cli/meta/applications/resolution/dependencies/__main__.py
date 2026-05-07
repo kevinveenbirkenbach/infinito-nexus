@@ -18,18 +18,15 @@ from pathlib import Path
 from typing import Dict, List, Set
 
 from utils.cache.yaml import load_yaml
+from . import PROJECT_ROOT
 
 
 class DependenciesResolutionError(RuntimeError):
     """Raised when dependencies resolution fails (e.g., cycle detected)."""
 
 
-def repo_root_from_here() -> Path:
-    return Path(__file__).resolve().parents[5]
-
-
 def roles_dir() -> Path:
-    return repo_root_from_here() / "roles"
+    return PROJECT_ROOT / "roles"
 
 
 def role_meta_path(role_name: str) -> Path:

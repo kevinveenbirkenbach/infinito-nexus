@@ -1,11 +1,11 @@
 import re
 import unittest
 import yaml
-from pathlib import Path
 from collections import defaultdict
+from . import PROJECT_ROOT
 
 # Directory containing group_vars/all/*.yml
-GROUPVARS_DIR = Path(__file__).resolve().parents[3] / "group_vars" / "all"
+GROUPVARS_DIR = PROJECT_ROOT / "group_vars" / "all"
 JINJA_RE = re.compile(r"{{\s*([^}]+)\s*}}")
 # Matches variables like foo.bar, foo["bar"], foo['bar']
 VAR_PATTERN = re.compile(

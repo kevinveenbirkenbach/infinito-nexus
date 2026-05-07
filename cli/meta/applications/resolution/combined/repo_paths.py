@@ -1,15 +1,11 @@
-# cli/meta/applications/resolution/combined/repo_paths.py
 from __future__ import annotations
 
 from pathlib import Path
-
-
-def repo_root_from_here() -> Path:
-    return Path(__file__).resolve().parents[5]
+from . import PROJECT_ROOT
 
 
 def roles_dir() -> Path:
-    return repo_root_from_here() / "roles"
+    return PROJECT_ROOT / "roles"
 
 
 def role_dir(role_name: str) -> Path:

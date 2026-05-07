@@ -6,19 +6,19 @@
 # handlers, otherwise `compose build` fires against a missing build context.
 # Pre-create the services directory and clone the repo here, before any
 # compose-touching include.
-- name: "Ensure social-app services directory exists"
-  ansible.builtin.file:
-    path: "{{ BLUESKY_SOCIAL_APP_DIR | dirname }}"
-    state: directory
-    mode: "0755"
-  when: BLUESKY_WEB_ENABLED | bool
+- name: "Pre-compose web-enabled staging (services dir + social-app + login-broker)"
+  block:
+    - name: "Ensure social-app services directory exists"
+      ansible.builtin.file:
+        path: "{{ BLUESKY_SOCIAL_APP_DIR | dirname }}"
+        state: directory
+        mode: "0755"
 
-- name: "Clone social-app build context (pre-compose)"
-  ansible.builtin.include_tasks: "03_social_app.yml"
-  when: BLUESKY_WEB_ENABLED | bool
+    - name: "Clone social-app build context (pre-compose)"
+      ansible.builtin.include_tasks: "03_social_app.yml"
 
-- name: "Stage login-broker build context (pre-compose)"
-  ansible.builtin.include_tasks: "06_login_broker.yml"
+    - name: "Stage login-broker build context (pre-compose)"
+      ansible.builtin.include_tasks: "06_login_broker.yml"
   when: BLUESKY_WEB_ENABLED | bool
 
 # Bind-mount safety: if a previous role-iteration ran without

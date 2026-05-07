@@ -28,7 +28,6 @@ but any non-comment line resets the search):
 from __future__ import annotations
 
 import unittest
-from pathlib import Path
 
 from utils.annotations.message import warning
 from utils.docker.version_updater import (
@@ -46,7 +45,9 @@ from utils.docker.version_updater import (
 
 from utils.docker.image.discovery import iter_role_images
 
-_REPO_ROOT = Path(__file__).resolve().parents[3]
+from . import PROJECT_ROOT
+
+_REPO_ROOT = PROJECT_ROOT
 _ROLES_ROOT = _REPO_ROOT / "roles"
 
 

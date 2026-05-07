@@ -25,9 +25,8 @@ from __future__ import annotations
 
 import re
 import unittest
-from pathlib import Path
 from typing import List
-
+from . import PROJECT_ROOT
 
 PASSWORD_ASSIGN_RE = re.compile(
     r"""^
@@ -50,11 +49,6 @@ JINJA_DOUBLE_WRAPPED_RE = re.compile(r'^"\{\{\s*(?P<expr>.+?)\s*\}\}"$')
 DOTENV_FILTER = "dotenv_quote"
 
 
-def _repo_root_from_test_file() -> Path:
-    # tests/integration/<cluster>/test_*.py -> repo root is three levels up
-    return Path(__file__).resolve().parents[3]
-
-
 def _is_full_line_comment(line: str) -> bool:
     return line.lstrip().startswith("#")
 
@@ -66,7 +60,7 @@ def _is_jinja_control_line(line: str) -> bool:
 
 class TestEnvPasswordsQuotedAndFiltered(unittest.TestCase):
     def test_password_env_vars_are_dotenv_quoted_without_double_quoting(self):
-        root = _repo_root_from_test_file()
+        root = PROJECT_ROOT
         env_templates = sorted(root.rglob("env.j2"))
 
         failures: List[str] = []

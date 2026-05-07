@@ -20,6 +20,8 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import List, Tuple
 
+from . import PROJECT_ROOT
+
 
 BUILD_RE = re.compile(r"^(?P<indent>[ \t]*)build:\s*(#.*)?$")
 IMAGE_RE = re.compile(r"^(?P<indent>[ \t]*)image:\s*(?P<rest>.+)?$")
@@ -33,16 +35,6 @@ class Finding:
     build_line: int
     build_indent: int
     note: str
-
-
-def _repo_root_from_test_file(test_file: str) -> Path:
-    """
-    Compute repo root from this test file location.
-    tests/integration/<cluster>/<this_file> -> repo root is parents[3]
-    """
-    p = Path(test_file).resolve()
-    # .../tests/integration/<cluster>/test_*.py
-    return p.parents[3]
 
 
 def _is_ignored_line(line: str) -> bool:
@@ -156,8 +148,7 @@ def _scan_file_for_missing_image(path: Path) -> List[Finding]:
 
 class TestComposeBuildRequiresImage(unittest.TestCase):
     def test_all_compose_templates_and_files_have_image_for_build(self) -> None:
-        repo_root = _repo_root_from_test_file(__file__)
-        roles_dir = repo_root / "roles"
+        roles_dir = PROJECT_ROOT / "roles"
 
         patterns = [
             "*/templates/compose.yml.j2",

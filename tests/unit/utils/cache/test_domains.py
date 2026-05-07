@@ -18,6 +18,7 @@ from unittest.mock import patch
 
 from utils.cache import _reset_cache_for_tests
 from utils.cache import domains as cache_domains
+from . import PROJECT_ROOT
 
 
 def _write(path: Path, content: str) -> None:
@@ -152,9 +153,8 @@ class TestImportableWithoutAnsible(unittest.TestCase):
 
     def test_module_imports_without_ansible(self):
         import subprocess
-        from pathlib import Path
 
-        repo_root = Path(__file__).resolve().parents[4]
+        repo_root = PROJECT_ROOT
         snippet = (
             "import sys\n"
             "sys.path.insert(0, %r)\n"

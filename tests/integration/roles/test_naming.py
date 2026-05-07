@@ -1,6 +1,6 @@
 import unittest
 import re
-from pathlib import Path
+from . import PROJECT_ROOT
 
 # Regex:
 # - one or more lowercase letters, digits or hyphens
@@ -10,7 +10,7 @@ ROLE_NAME_PATTERN = re.compile(r"^[a-z0-9-]+(?:_[a-z0-9-]+)?$")
 
 class TestRoleNames(unittest.TestCase):
     def test_role_names_follow_naming_convention(self):
-        roles_dir = Path(__file__).resolve().parents[3] / "roles"
+        roles_dir = PROJECT_ROOT / "roles"
         self.assertTrue(
             roles_dir.is_dir(), f"'roles/' directory not found at {roles_dir}"
         )

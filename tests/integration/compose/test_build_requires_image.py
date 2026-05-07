@@ -2,6 +2,7 @@ import re
 import unittest
 from pathlib import Path
 
+from . import PROJECT_ROOT
 
 BUILD_LOOKUP_RE = re.compile(
     r"""\{\{\s*lookup\(\s*['"]template['"]\s*,\s*['"]roles/sys-svc-container/templates/build\.yml\.j2['"]\s*\)\s*\|\s*indent\(\s*4\s*\)\s*\}\}"""
@@ -28,10 +29,6 @@ class TestComposeBuildTemplateRequiresImageTag(unittest.TestCase):
       - an `image:` tag on the same indentation level, OR
       - a YAML merge key `<<:` on the same indentation level (since it may inject `image:`).
     """
-
-    @staticmethod
-    def _repo_root() -> Path:
-        return Path(__file__).resolve().parents[3]
 
     @staticmethod
     def _iter_compose_templates(repo_root: Path):
@@ -81,7 +78,7 @@ class TestComposeBuildTemplateRequiresImageTag(unittest.TestCase):
         return None
 
     def test_build_lookup_requires_image_or_merge_on_same_level(self):
-        repo_root = self._repo_root()
+        repo_root = PROJECT_ROOT
         compose_files = self._iter_compose_templates(repo_root)
 
         self.assertTrue(

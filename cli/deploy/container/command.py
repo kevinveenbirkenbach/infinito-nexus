@@ -7,8 +7,8 @@ import subprocess
 import sys
 import time
 import uuid
-from pathlib import Path
 from typing import List, Tuple
+from . import PROJECT_ROOT
 
 INFINITO_SRC_DIR = "/opt/src/infinito"
 
@@ -153,7 +153,7 @@ def start_ci_container(
         name = f"infinito-ci-{uuid.uuid4().hex[:8]}"
 
     print(f">>> Starting CI container '{name}' (host Docker socket mode)...")
-    project_root = str(Path(__file__).resolve().parents[3])
+    project_root = str(PROJECT_ROOT)
     subprocess.run(
         [
             "docker",

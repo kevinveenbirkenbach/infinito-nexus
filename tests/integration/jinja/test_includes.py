@@ -1,6 +1,7 @@
 import re
 import unittest
-from pathlib import Path
+
+from . import PROJECT_ROOT
 
 
 class TestJinjaIncludePaths(unittest.TestCase):
@@ -11,12 +12,11 @@ class TestJinjaIncludePaths(unittest.TestCase):
     - Includes are resolved relative to project root, template directory, or file's parent.
     """
 
-    PROJECT_ROOT = Path(__file__).resolve().parents[3]
     INCLUDE_STMT_RE = re.compile(r"{%\s*include\s+(.+?)\s*%}")
     LITERAL_PATH_RE = re.compile(r"^[\'\"]([^\'\"]+)[\'\"]$")
 
     def test_all_jinja_includes_exist(self):
-        template_paths = list(self.PROJECT_ROOT.glob("**/*.j2"))
+        template_paths = list(PROJECT_ROOT.glob("**/*.j2"))
         self.assertTrue(
             template_paths, "No .j2 templates found anywhere in the project"
         )
@@ -32,7 +32,7 @@ class TestJinjaIncludePaths(unittest.TestCase):
 
                 include_path = m.group(1)
                 # check absolute project-relative path
-                abs_target = self.PROJECT_ROOT / include_path
+                abs_target = PROJECT_ROOT / include_path
                 # check path relative to the template file
                 rel_target = tpl.parent / include_path
 
@@ -51,10 +51,10 @@ class TestJinjaIncludePaths(unittest.TestCase):
                     or rel_target.exists()
                     or (role_target and role_target.exists())
                 ):
-                    rel_tpl = tpl.relative_to(self.PROJECT_ROOT)
+                    rel_tpl = tpl.relative_to(PROJECT_ROOT)
                     missing.append(
                         f"{rel_tpl}: included file '{include_path}' not found "
-                        f"(checked in project root, {tpl.parent.relative_to(self.PROJECT_ROOT)} or templates folder)"
+                        f"(checked in project root, {tpl.parent.relative_to(PROJECT_ROOT)} or templates folder)"
                     )
 
         if missing:

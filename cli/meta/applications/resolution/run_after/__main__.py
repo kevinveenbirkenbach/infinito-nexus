@@ -25,17 +25,15 @@ from utils.roles.meta_lookup import (
     get_role_run_after,
 )
 
+from . import PROJECT_ROOT
+
 
 class RunAfterResolutionError(RuntimeError):
     """Raised when run_after resolution fails (e.g., cycle detected)."""
 
 
-def repo_root_from_here() -> Path:
-    return Path(__file__).resolve().parents[5]
-
-
 def roles_dir() -> Path:
-    return repo_root_from_here() / "roles"
+    return PROJECT_ROOT / "roles"
 
 
 def load_run_after(role_name: str) -> List[str]:

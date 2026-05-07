@@ -1,5 +1,9 @@
 from __future__ import annotations
 
-from .cli import main
+from pathlib import Path
+
+PROJECT_ROOT: Path = Path(__file__).resolve().parents[3]
+
+from .cli import main  # noqa: E402
 
 __all__ = ["main"]

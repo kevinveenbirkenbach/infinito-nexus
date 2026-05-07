@@ -1,6 +1,7 @@
 import unittest
 from pathlib import Path
 from typing import Any, Dict, Iterable, List, Tuple
+from . import PROJECT_ROOT
 
 try:
     import yaml  # PyYAML
@@ -11,24 +12,6 @@ except ImportError as e:
 
 
 THRESHOLD = 3  # fail if the same when-condition occurs on more than this many tasks
-
-
-def _find_repo_root_containing(marker_names: Iterable[str], max_up: int = 8) -> Path:
-    """
-    Walk upwards from this file to find the repo root. We assume the project root
-    contains at least one of `marker_names` (e.g., 'roles', '.git', 'playbooks').
-    """
-    here = Path(__file__).resolve().parent
-    cur = here
-    for _ in range(max_up):
-        for marker in marker_names:
-            if (cur / marker).exists():
-                return cur
-        if cur.parent == cur:
-            break
-        cur = cur.parent
-    # Fallback: repo root assumed 4 levels up from tests/integration/roles/when
-    return Path(__file__).resolve().parents[4]
 
 
 def _normalize_when(value: Any) -> str:
@@ -150,9 +133,7 @@ class WhenConditionDuplicationTest(unittest.TestCase):
     """
 
     def test_excessive_repeated_when_in_tasks_files(self):
-        repo_root = _find_repo_root_containing(
-            marker_names=(".git", "roles", "playbooks")
-        )
+        repo_root = PROJECT_ROOT
         tasks_globs = [
             "**/tasks/**/*.yml",
             "**/tasks/**/*.yaml",

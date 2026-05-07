@@ -14,6 +14,8 @@ import argparse
 
 from utils.cache.yaml import load_yaml
 
+from . import PROJECT_ROOT
+
 
 def get_role(application_id, roles_path):
     """
@@ -55,13 +57,7 @@ def main():
     parser.add_argument(
         "-r",
         "--roles-path",
-        default=os.path.join(
-            os.path.dirname(os.path.realpath(__file__)),
-            os.pardir,
-            os.pardir,
-            os.pardir,
-            "roles",
-        ),
+        default=str(PROJECT_ROOT / "roles"),
         help="Path to the roles directory (default: roles/ at project root)",
     )
 

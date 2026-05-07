@@ -2,13 +2,9 @@ import importlib
 import importlib.util
 import sys
 import unittest
-from pathlib import Path
 
 from ansible.errors import AnsibleError
-
-
-def _repo_root() -> Path:
-    return Path(__file__).resolve().parents[4]
+from . import PROJECT_ROOT
 
 
 def _load_module(rel_path: str, name: str):
@@ -28,7 +24,7 @@ def _load_module(rel_path: str, name: str):
     importlib.import_module("utils.applications.config")
     importlib.import_module("utils.cache.applications")
 
-    path = _repo_root() / rel_path
+    path = PROJECT_ROOT / rel_path
     spec = importlib.util.spec_from_file_location(name, str(path))
     mod = importlib.util.module_from_spec(spec)
     assert spec and spec.loader

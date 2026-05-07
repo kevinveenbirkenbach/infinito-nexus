@@ -49,7 +49,7 @@ class TestCombinedMain(unittest.TestCase):
             _mk_role(root, "ra1", app_id="ra1")
             _write_meta_services_run_after(root, "app", run_after=["ra1"])
 
-            with patch.object(repo_paths, "repo_root_from_here", return_value=root):
+            with patch.object(repo_paths, "PROJECT_ROOT", root):
                 buf = io.StringIO()
                 with redirect_stdout(buf):
                     with patch("sys.argv", ["prog", "app"]):
@@ -64,7 +64,7 @@ class TestCombinedMain(unittest.TestCase):
             _mk_role(root, "ra1", app_id="ra1")
             _write_meta_services_run_after(root, "app", run_after=["ra1"])
 
-            with patch.object(repo_paths, "repo_root_from_here", return_value=root):
+            with patch.object(repo_paths, "PROJECT_ROOT", root):
                 buf = io.StringIO()
                 with redirect_stdout(buf):
                     with patch("sys.argv", ["prog", "app", "--tree"]):

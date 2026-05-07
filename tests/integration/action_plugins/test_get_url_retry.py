@@ -6,6 +6,7 @@ import threading
 import unittest
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
+from . import PROJECT_ROOT
 
 
 class TestGetUrlRetryActionPluginIntegration(unittest.TestCase):
@@ -43,7 +44,7 @@ class TestGetUrlRetryActionPluginIntegration(unittest.TestCase):
         return server, thread, counters, base_url
 
     def _run_get_url_retry_playbook_with_default_and_override_blocks(self):
-        repo_root = Path(__file__).resolve().parents[3]
+        repo_root = PROJECT_ROOT
         server = None
         thread = None
 

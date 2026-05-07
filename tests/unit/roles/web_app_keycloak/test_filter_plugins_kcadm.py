@@ -4,9 +4,8 @@ from __future__ import annotations
 import unittest
 from pathlib import Path
 import importlib.util
+from . import PROJECT_ROOT
 
-
-PROJECT_ROOT = Path(__file__).resolve().parents[4]  # /opt/src/infinito
 ROLE_DIR = PROJECT_ROOT / "roles" / "web-app-keycloak"
 FILTER_PATH = ROLE_DIR / "filter_plugins" / "kcadm.py"
 MODUTILS_PATH = ROLE_DIR / "module_utils" / "kcadm_json.py"

@@ -7,10 +7,12 @@ from utils.service_registry import (
     ordered_primary_service_entries,
 )
 
+from . import PROJECT_ROOT
+
 
 class TestFrontendServiceSpot(unittest.TestCase):
     def setUp(self):
-        self.repo_root = Path(__file__).resolve().parents[3]
+        self.repo_root = PROJECT_ROOT
         self.roles_dir = self.repo_root / "roles"
         self.applications = load_applications_from_roles_dir(self.roles_dir)
         self.service_registry = build_service_registry_from_roles_dir(self.roles_dir)

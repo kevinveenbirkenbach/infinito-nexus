@@ -4,12 +4,13 @@ import subprocess
 import tempfile
 import unittest
 from pathlib import Path
+from . import PROJECT_ROOT
 
 
 class TestStrongPasswordFilterPathIntegration(unittest.TestCase):
     @unittest.skipUnless(shutil.which("ansible"), "ansible not found")
     def test_strong_password_filter_uses_repo_relative_utils_path(self):
-        repo_root = Path(__file__).resolve().parents[3]
+        repo_root = PROJECT_ROOT
         source_plugin = repo_root / "plugins" / "filter" / "value_generator.py"
 
         with tempfile.TemporaryDirectory() as tmpdir:

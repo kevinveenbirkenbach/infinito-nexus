@@ -1,15 +1,15 @@
 import unittest
 from collections import defaultdict
-from pathlib import Path
 
 from utils.service_registry import build_service_registry_from_roles_dir
+from . import PROJECT_ROOT
 
 
 class TestServicesCanonical(unittest.TestCase):
     """Discovered canonical aliases from role-local configs must be internally consistent."""
 
     def setUp(self):
-        self.repo_root = Path(__file__).resolve().parents[3]
+        self.repo_root = PROJECT_ROOT
         self.service_registry = build_service_registry_from_roles_dir(
             self.repo_root / "roles"
         )

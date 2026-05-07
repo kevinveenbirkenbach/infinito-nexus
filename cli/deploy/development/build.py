@@ -4,7 +4,8 @@ import argparse
 import os
 import subprocess
 
-from .common import repo_root_from_here, resolve_distro
+from .common import resolve_distro
+from . import PROJECT_ROOT
 
 
 def add_parser(sub: argparse._SubParsersAction) -> None:
@@ -35,7 +36,7 @@ def add_parser(sub: argparse._SubParsersAction) -> None:
 
 
 def handler(args: argparse.Namespace) -> int:
-    repo_root = repo_root_from_here()
+    repo_root = PROJECT_ROOT
     script = repo_root / "scripts" / "image" / "build.sh"
     repository_name_script = (
         repo_root / "scripts" / "meta" / "resolve" / "repository" / "name.sh"

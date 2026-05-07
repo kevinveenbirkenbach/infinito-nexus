@@ -12,7 +12,9 @@ from utils.service_registry import (
     resolve_service_dependency_roles_from_config,
 )
 
-_ROLES_ROOT = Path(__file__).parents[5] / "roles"
+from . import PROJECT_ROOT
+
+_ROLES_ROOT = PROJECT_ROOT / "roles"
 
 
 def _stable_dedup(items: Iterable[str]) -> List[str]:

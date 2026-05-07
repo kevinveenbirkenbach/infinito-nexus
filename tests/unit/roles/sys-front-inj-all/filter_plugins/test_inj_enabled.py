@@ -1,25 +1,10 @@
 import importlib.util
 from importlib import import_module
-from pathlib import Path
 import sys
 import unittest
 
-THIS_FILE = Path(__file__)
+from . import PROJECT_ROOT
 
-
-def find_repo_root(start: Path) -> Path:
-    target_rel = (
-        Path("roles") / "sys-front-inj-all" / "filter_plugins" / "inj_enabled.py"
-    )
-    cur = start
-    for _ in range(12):
-        if (cur / target_rel).is_file():
-            return cur
-        cur = cur.parent
-    return start.parents[6]
-
-
-PROJECT_ROOT = find_repo_root(THIS_FILE)
 PLUGIN_PATH = (
     PROJECT_ROOT / "roles" / "sys-front-inj-all" / "filter_plugins" / "inj_enabled.py"
 )

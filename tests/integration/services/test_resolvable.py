@@ -1,5 +1,4 @@
 import unittest
-from pathlib import Path
 
 from plugins.lookup.service import LookupModule
 from utils.service_registry import (
@@ -7,12 +6,14 @@ from utils.service_registry import (
     load_applications_from_roles_dir,
 )
 
+from . import PROJECT_ROOT
+
 
 class TestServicesResolvable(unittest.TestCase):
     """Discovered service keys and provider roles must resolve via the service lookup."""
 
     def setUp(self):
-        self.repo_root = Path(__file__).resolve().parents[3]
+        self.repo_root = PROJECT_ROOT
         self.roles_dir = self.repo_root / "roles"
         self.applications = load_applications_from_roles_dir(self.roles_dir)
         self.service_registry = build_service_registry_from_roles_dir(self.roles_dir)

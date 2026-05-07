@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
 import unittest
 import yaml
-from pathlib import Path
+from . import PROJECT_ROOT
 
 
 class TestRunAfterRoles(unittest.TestCase):
     def setUp(self):
-        self.roles_dir = Path(__file__).resolve().parents[5] / "roles"
+        self.roles_dir = PROJECT_ROOT / "roles"
         self.valid_role_names = {p.name for p in self.roles_dir.iterdir() if p.is_dir()}
 
     def test_run_after_roles_are_valid(self):

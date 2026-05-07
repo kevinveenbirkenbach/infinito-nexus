@@ -5,9 +5,10 @@ import sys
 import unittest
 from pathlib import Path
 from unittest.mock import MagicMock, patch
+from . import PROJECT_ROOT
 
 # add role files directory to PYTHONPATH
-ROLE_FILES = Path(__file__).resolve().parents[5] / "roles/sys-ctl-hlth-csp/files"
+ROLE_FILES = PROJECT_ROOT / "roles/sys-ctl-hlth-csp/files"
 sys.path.insert(0, str(ROLE_FILES))
 
 import script  # noqa: E402

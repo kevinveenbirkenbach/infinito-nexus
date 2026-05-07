@@ -7,15 +7,11 @@ from humanfriendly import parse_size
 from utils.annotations.message import warning
 from utils.cache.yaml import load_yaml_any
 from utils.entity_name_utils import get_entity_name
-
-
-def _repo_root() -> Path:
-    # utils/roles/resource_validation.py -> repo root = parents[2]
-    return Path(__file__).resolve().parents[2]
+from . import PROJECT_ROOT
 
 
 def _roles_root() -> Path:
-    return (_repo_root() / "roles").resolve()
+    return (PROJECT_ROOT / "roles").resolve()
 
 
 def _deep_get(dct: dict, path: list[str]) -> Any:

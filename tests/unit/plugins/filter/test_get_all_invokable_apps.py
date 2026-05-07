@@ -61,7 +61,7 @@ class TestGetAllInvokableApps(unittest.TestCase):
 
     def test_get_all_invokable_apps(self):
         """Should return only applications whose role paths match invokable paths."""
-        with patch("utils.invokable._repo_root", return_value=self.test_dir):
+        with patch("utils.invokable.PROJECT_ROOT", self.test_dir):
             result = get_all_invokable_apps()
 
         expected = sorted(
@@ -78,7 +78,7 @@ class TestGetAllInvokableApps(unittest.TestCase):
         with self.categories_file.open("w", encoding="utf-8") as f:
             yaml.safe_dump({"roles": {"foo": {"invokable": False}}}, f)
 
-        with patch("utils.invokable._repo_root", return_value=self.test_dir):
+        with patch("utils.invokable.PROJECT_ROOT", self.test_dir):
             with self.assertRaises(RuntimeError):
                 get_all_invokable_apps()
 
@@ -91,7 +91,7 @@ class TestGetAllInvokableApps(unittest.TestCase):
         with self.categories_file.open("w", encoding="utf-8") as f:
             yaml.safe_dump({"roles": {"web": {"app": {"invokable": True}}}}, f)
 
-        with patch("utils.invokable._repo_root", return_value=self.test_dir):
+        with patch("utils.invokable.PROJECT_ROOT", self.test_dir):
             result = get_all_invokable_apps()
 
         self.assertEqual(result, [])
@@ -106,7 +106,7 @@ class TestGetAllInvokableApps(unittest.TestCase):
         """
         self.categories_file.unlink()
 
-        with patch("utils.invokable._repo_root", return_value=self.test_dir):
+        with patch("utils.invokable.PROJECT_ROOT", self.test_dir):
             with patch(
                 "utils.invokable._get_invokable_paths",
                 side_effect=FileNotFoundError,

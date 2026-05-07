@@ -1,7 +1,7 @@
 # tests/unit/roles/sys-dns-wildcards/filter_plugins/test_wildcard_dns.py
 import unittest
 import importlib.util
-from pathlib import Path
+from . import PROJECT_ROOT
 
 
 def _load_module():
@@ -9,12 +9,12 @@ def _load_module():
     Load the wildcard_dns filter plugin from:
       roles/sys-dns-wildcards/filter_plugins/wildcard_dns.py
     """
-    here = Path(__file__).resolve()
-    # Go up to repository root (…/tests/unit/roles/… → 5 levels up)
-    repo_root = here.parents[5] if len(here.parents) >= 6 else here.parents[0]
-
     path = (
-        repo_root / "roles" / "sys-dns-wildcards" / "filter_plugins" / "wildcard_dns.py"
+        PROJECT_ROOT
+        / "roles"
+        / "sys-dns-wildcards"
+        / "filter_plugins"
+        / "wildcard_dns.py"
     )
     if not path.exists():
         raise FileNotFoundError(f"Could not find {path}")

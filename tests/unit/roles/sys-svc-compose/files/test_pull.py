@@ -7,14 +7,11 @@ from types import ModuleType
 from unittest.mock import patch
 
 
-def _repo_root(start: Path) -> Path:
-    # __file__ = tests/unit/roles/sys-svc-compose/files/test_pull.py
-    return start.resolve().parents[5]
+from . import PROJECT_ROOT
 
 
 def _load_module(rel_path: str, name: str) -> ModuleType:
-    root = _repo_root(Path(__file__))
-    path = root / rel_path
+    path = PROJECT_ROOT / rel_path
     spec = importlib.util.spec_from_file_location(name, str(path))
     mod = importlib.util.module_from_spec(spec)
     assert spec and spec.loader

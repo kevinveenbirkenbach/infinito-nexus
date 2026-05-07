@@ -16,6 +16,8 @@ from cli.core.help import (
 )
 from cli.core.run import RunConfig, open_log_file, run_command_once
 
+from . import PROJECT_ROOT
+
 
 @dataclass
 class Flags:
@@ -109,7 +111,7 @@ def main() -> None:
     flags = parse_flags(argv)
     args = argv[1:]
 
-    cli_dir = Path(__file__).resolve().parents[1]
+    cli_dir = PROJECT_ROOT / "cli"
     # sanity: cli_dir should contain __init__.py and __main__.py of dispatcher
     # but we do not hard-fail here
 

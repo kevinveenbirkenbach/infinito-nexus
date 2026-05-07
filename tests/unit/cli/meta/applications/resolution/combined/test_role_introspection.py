@@ -39,7 +39,7 @@ class TestRoleIntrospection(unittest.TestCase):
             root = Path(td)
             _mk_role(root, "web-app-a", app_id="web-app-a")
 
-            with patch.object(repo_paths, "repo_root_from_here", return_value=root):
+            with patch.object(repo_paths, "PROJECT_ROOT", root):
                 ri.require_role_exists("web-app-a")
                 with self.assertRaises(CombinedResolutionError):
                     ri.require_role_exists("missing-role")
@@ -50,7 +50,7 @@ class TestRoleIntrospection(unittest.TestCase):
             _mk_role(root, "web-app-a", app_id="web-app-a")
             _mk_role(root, "sys-helper", app_id=None)
 
-            with patch.object(repo_paths, "repo_root_from_here", return_value=root):
+            with patch.object(repo_paths, "PROJECT_ROOT", root):
                 self.assertTrue(ri.has_application_id("web-app-a"))
                 self.assertFalse(ri.has_application_id("sys-helper"))
 
@@ -75,7 +75,7 @@ a:
 """,
             )
 
-            with patch.object(repo_paths, "repo_root_from_here", return_value=root):
+            with patch.object(repo_paths, "PROJECT_ROOT", root):
                 ra = ri.load_run_after("web-app-a")
                 self.assertEqual(ra, ["dep1", "dep2"])
 
@@ -91,7 +91,7 @@ a:
   run_after: dep1
 """,
             )
-            with patch.object(repo_paths, "repo_root_from_here", return_value=root):
+            with patch.object(repo_paths, "PROJECT_ROOT", root):
                 with self.assertRaises(CombinedResolutionError):
                     ri.load_run_after("web-app-a")
 
@@ -112,7 +112,7 @@ dependencies:
 """,
             )
 
-            with patch.object(repo_paths, "repo_root_from_here", return_value=root):
+            with patch.object(repo_paths, "PROJECT_ROOT", root):
                 deps = ri.load_dependencies_app_only("web-app-a")
                 # sys-helper should be ignored (no application_id)
                 self.assertEqual(deps, ["web-app-b"])
@@ -134,7 +134,7 @@ dependencies:
 """,
             )
 
-            with patch.object(repo_paths, "repo_root_from_here", return_value=root):
+            with patch.object(repo_paths, "PROJECT_ROOT", root):
                 deps = ri.load_dependencies_app_only("web-app-a")
                 self.assertEqual(deps, ["web-app-b"])
 
@@ -151,6 +151,6 @@ dependencies:
 """,
             )
 
-            with patch.object(repo_paths, "repo_root_from_here", return_value=root):
+            with patch.object(repo_paths, "PROJECT_ROOT", root):
                 with self.assertRaises(CombinedResolutionError):
                     ri.load_dependencies_app_only("web-app-a")

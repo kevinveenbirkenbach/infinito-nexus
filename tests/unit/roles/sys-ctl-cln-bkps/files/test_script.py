@@ -11,25 +11,20 @@ from pathlib import Path
 from types import ModuleType, SimpleNamespace
 from unittest.mock import patch
 
+from . import PROJECT_ROOT
+
 
 def _repo_root() -> Path:
-    """
-    Resolve repository root in a way that works locally and in CI.
+    """Repository root resolution.
 
-    Priority:
-      1. INFINITO_REPO_ROOT env var (if explicitly set)
-      2. Derive from this file location
-
-    This file path:
-      <repo>/tests/unit/roles/sys-ctl-cln-bkps/files/test_script.py
+    The ``INFINITO_REPO_ROOT`` env var still wins when explicitly set
+    (used by some CI fixtures); otherwise the canonical ``PROJECT_ROOT``
+    constant from the package ``__init__.py`` is returned.
     """
     env = os.environ.get("INFINITO_REPO_ROOT")
     if env:
         return Path(env).expanduser().resolve()
-
-    # parents:
-    # files -> sys-ctl-cln-bkps -> roles -> unit -> tests -> <repo>
-    return Path(__file__).resolve().parents[5]
+    return PROJECT_ROOT
 
 
 SCRIPT_PATH = _repo_root() / "roles/sys-ctl-cln-bkps/files/script.py"

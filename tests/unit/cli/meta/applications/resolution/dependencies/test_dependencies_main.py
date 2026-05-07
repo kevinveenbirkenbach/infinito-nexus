@@ -47,7 +47,7 @@ dependencies:
 """,
             )
 
-            with patch.object(deps_main, "repo_root_from_here", return_value=root):
+            with patch.object(deps_main, "PROJECT_ROOT", root):
                 out = deps_main.resolve_dependencies_transitively("app")
                 self.assertEqual(out, ["app_dep"])
 
@@ -66,7 +66,7 @@ dependencies:
 """,
             )
 
-            with patch.object(deps_main, "repo_root_from_here", return_value=root):
+            with patch.object(deps_main, "PROJECT_ROOT", root):
                 buf = io.StringIO()
                 with redirect_stdout(buf):
                     with patch("sys.argv", ["prog", "app"]):

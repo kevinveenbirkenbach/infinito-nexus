@@ -6,6 +6,7 @@ import os
 import subprocess
 import unittest
 from pathlib import Path
+from . import PROJECT_ROOT
 
 
 class TestPythonShebangs(unittest.TestCase):
@@ -14,7 +15,7 @@ class TestPythonShebangs(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
-        cls.repo_root = Path(__file__).resolve().parents[3]
+        cls.repo_root = PROJECT_ROOT
 
     def _tracked_files(self) -> list[Path]:
         try:

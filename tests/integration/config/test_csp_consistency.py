@@ -1,7 +1,7 @@
 import unittest
 import yaml
-from pathlib import Path
 from urllib.parse import urlparse
+from . import PROJECT_ROOT
 
 
 class TestCspConfigurationConsistency(unittest.TestCase):
@@ -59,7 +59,7 @@ class TestCspConfigurationConsistency(unittest.TestCase):
         return parsed.scheme in ("http", "https", "ws", "wss") and bool(parsed.netloc)
 
     def test_csp_configuration_structure(self):
-        roles_dir = Path(__file__).resolve().parents[3] / "roles"
+        roles_dir = PROJECT_ROOT / "roles"
         errors = []
 
         for role_path in sorted(roles_dir.iterdir()):

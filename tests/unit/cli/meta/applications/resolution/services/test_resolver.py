@@ -9,6 +9,8 @@ from cli.meta.applications.resolution.services.resolver import (
     resolve_direct_service_roles_from_config,
 )
 
+from . import PROJECT_ROOT
+
 
 _MINIMAL_SERVICE_REGISTRY = {
     "ldap": {"role": "svc-db-openldap"},
@@ -110,7 +112,7 @@ class TestServicesResolverTransitive(unittest.TestCase):
             self.assertEqual(got, ["web-app-keycloak", "web-app-matomo"])
 
     def test_repo_pixelfed_includes_dashboard(self) -> None:
-        repo_root = Path(__file__).resolve().parents[7]
+        repo_root = PROJECT_ROOT
         resolver = ServicesResolver(repo_root / "roles")
 
         got = resolver.resolve_transitively("web-app-pixelfed")
@@ -118,7 +120,7 @@ class TestServicesResolverTransitive(unittest.TestCase):
         self.assertIn("web-app-dashboard", got)
 
     def test_repo_nextcloud_includes_coturn(self) -> None:
-        repo_root = Path(__file__).resolve().parents[7]
+        repo_root = PROJECT_ROOT
         r = ServicesResolver(repo_root / "roles")
 
         got = r.resolve_transitively("web-app-nextcloud")
