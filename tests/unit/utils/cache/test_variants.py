@@ -9,8 +9,8 @@ import unittest
 from pathlib import Path
 
 from . import PROJECT_ROOT
-if str(REPO_ROOT) not in sys.path:
-    sys.path.insert(0, str(REPO_ROOT))
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
 
 from utils.cache import _reset_cache_for_tests  # noqa: E402
 from utils.cache.applications import (  # noqa: E402

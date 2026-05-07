@@ -13,13 +13,13 @@ def repo_root() -> Path:
     raise AssertionError("Repository root not found from test path.")
 
 
-REPO_ROOT = repo_root()
+PROJECT_ROOT = repo_root()
 
 RUN_ONCE_TASK = {"include_tasks": "utils/once/flag.yml"}
 
 
 def load_service_registry():
-    return build_service_registry_from_roles_dir(REPO_ROOT / "roles")
+    return build_service_registry_from_roles_dir(PROJECT_ROOT / "roles")
 
 
 def unique_roles(registry):
@@ -64,7 +64,7 @@ class TestServiceCoreFirstTaskRunOnce(unittest.TestCase):
     """
 
     def setUp(self):
-        self.project_root = REPO_ROOT
+        self.project_root = PROJECT_ROOT
         self.registry = load_service_registry()
 
     def _core_path(self, role):

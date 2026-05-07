@@ -13,7 +13,7 @@ from utils.cache.yaml import load_yaml_any
 
 
 from . import PROJECT_ROOT
-NETWORKS_FILE = REPO_ROOT / "group_vars" / "all" / "08_networks.yml"
+NETWORKS_FILE = PROJECT_ROOT / "group_vars" / "all" / "08_networks.yml"
 
 
 class PortBandsError(ValueError):

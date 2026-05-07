@@ -3,7 +3,7 @@ import unittest
 from pathlib import Path
 
 from . import PROJECT_ROOT
-SETTINGS_PATH = REPO_ROOT / ".claude" / "settings.json"
+SETTINGS_PATH = PROJECT_ROOT / ".claude" / "settings.json"
 
 SORTED_ARRAYS: list[tuple[str, ...]] = [
     ("permissions", "allow"),

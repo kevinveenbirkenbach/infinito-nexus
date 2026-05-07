@@ -18,7 +18,7 @@ from utils.cache.yaml import load_yaml_any
 
 
 from . import PROJECT_ROOT
-ROLES_DIR = REPO_ROOT / "roles"
+ROLES_DIR = PROJECT_ROOT / "roles"
 
 
 def _load_yaml(path: Path):

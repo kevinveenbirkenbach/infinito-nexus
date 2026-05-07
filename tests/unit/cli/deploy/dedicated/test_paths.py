@@ -15,21 +15,21 @@ class TestPaths(unittest.TestCase):
         cli_dir = os.path.dirname(deploy_dir)
         expected_repo_root = os.path.dirname(cli_dir)
 
-        self.assertEqual(paths.REPO_ROOT, expected_repo_root)
+        self.assertEqual(paths.PROJECT_ROOT, expected_repo_root)
 
     def test_derived_paths_are_consistent(self):
-        self.assertEqual(paths.CLI_ROOT, os.path.join(paths.REPO_ROOT, "cli"))
+        self.assertEqual(paths.CLI_ROOT, os.path.join(paths.PROJECT_ROOT, "cli"))
         self.assertEqual(
-            paths.PLAYBOOK_PATH, os.path.join(paths.REPO_ROOT, "playbook.yml")
+            paths.PLAYBOOK_PATH, os.path.join(paths.PROJECT_ROOT, "playbook.yml")
         )
         self.assertEqual(
             paths.MODES_FILE,
-            os.path.join(paths.REPO_ROOT, "group_vars", "all", "01_modes.yml"),
+            os.path.join(paths.PROJECT_ROOT, "group_vars", "all", "01_modes.yml"),
         )
         self.assertEqual(
             paths.INVENTORY_VALIDATOR_PATH,
             os.path.join(
-                paths.REPO_ROOT, "cli", "validate", "inventory", "__main__.py"
+                paths.PROJECT_ROOT, "cli", "validate", "inventory", "__main__.py"
             ),
         )
 

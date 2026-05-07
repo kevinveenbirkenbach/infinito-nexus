@@ -6,8 +6,8 @@ from pathlib import Path
 import importlib.util
 
 
-REPO_ROOT = Path(__file__).resolve().parents[4]  # /opt/src/infinito
-ROLE_DIR = REPO_ROOT / "roles" / "web-app-keycloak"
+PROJECT_ROOT = Path(__file__).resolve().parents[4]  # /opt/src/infinito
+ROLE_DIR = PROJECT_ROOT / "roles" / "web-app-keycloak"
 FILTER_PATH = ROLE_DIR / "filter_plugins" / "kcadm.py"
 MODUTILS_PATH = ROLE_DIR / "module_utils" / "kcadm_json.py"
 

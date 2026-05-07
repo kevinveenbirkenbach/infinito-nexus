@@ -8,7 +8,7 @@ from pathlib import Path
 
 
 from . import PROJECT_ROOT
-SCRIPT_PATH = REPO_ROOT / "scripts" / "github" / "cancel_pull_request_runs.sh"
+SCRIPT_PATH = PROJECT_ROOT / "scripts" / "github" / "cancel_pull_request_runs.sh"
 EMPTY_RUNS_JSON = '{"workflow_runs":[]}\n'
 
 
@@ -108,7 +108,7 @@ class TestCancelPullRequestRuns(unittest.TestCase):
 
             result = subprocess.run(
                 ["bash", str(SCRIPT_PATH)],
-                cwd=REPO_ROOT,
+                cwd=PROJECT_ROOT,
                 env=env,
                 capture_output=True,
                 text=True,

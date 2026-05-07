@@ -22,7 +22,7 @@ from pathlib import Path
 from cli.deploy.development.common import DEV_INVENTORY_VARS_FILE
 
 from . import PROJECT_ROOT
-INVENTORY_ENV_SH = REPO_ROOT / "scripts" / "meta" / "env" / "inventory.sh"
+INVENTORY_ENV_SH = PROJECT_ROOT / "scripts" / "meta" / "env" / "inventory.sh"
 
 
 def _parse_bash_default(file_text: str) -> str:
@@ -60,7 +60,7 @@ class TestInventoryVarsFileSpotDriftGuard(unittest.TestCase):
         allowed_relative = {
             "scripts/meta/env/inventory.sh",
             "cli/deploy/development/common.py",
-            Path(__file__).relative_to(REPO_ROOT).as_posix(),
+            Path(__file__).relative_to(PROJECT_ROOT).as_posix(),
             # Documentation and historical/comment references stay as-is:
             "docs/administration/deploy.md",
             "docs/requirements/003-reduce-applications-and-users-to-lookup.md",
@@ -69,10 +69,10 @@ class TestInventoryVarsFileSpotDriftGuard(unittest.TestCase):
             "inventories/development/default.yml",
         }
         offenders: list[str] = []
-        for path in REPO_ROOT.rglob("*"):
+        for path in PROJECT_ROOT.rglob("*"):
             if not path.is_file():
                 continue
-            rel = path.relative_to(REPO_ROOT).as_posix()
+            rel = path.relative_to(PROJECT_ROOT).as_posix()
             if rel in allowed_relative:
                 continue
             # Skip vendored/build/cache directories.

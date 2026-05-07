@@ -34,7 +34,7 @@ class TestVarsPassedAreUsed(unittest.TestCase):
       i.e. treat `var_name(` as a function/macro call, not a variable usage.
     """
 
-    REPO_ROOT = repo_root()
+    PROJECT_ROOT = repo_root()
     YAML_EXTENSIONS = {".yml", ".yaml"}
     JINJA_EXTENSIONS = {".j2"}
 
@@ -238,7 +238,7 @@ class TestVarsPassedAreUsed(unittest.TestCase):
                 )
                 if locs:
                     for path, lineno in locs:
-                        rel = path.relative_to(self.REPO_ROOT)
+                        rel = path.relative_to(self.PROJECT_ROOT)
                         lines.append(f"    • {rel}:{lineno}")
                 else:
                     lines.append("    • (location unknown)")

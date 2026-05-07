@@ -8,7 +8,7 @@ from typing import Iterable
 import yaml
 
 from . import PROJECT_ROOT
-DEPENDABOT_PATH = REPO_ROOT / ".github" / "dependabot.yml"
+DEPENDABOT_PATH = PROJECT_ROOT / ".github" / "dependabot.yml"
 
 # Directories skipped when walking the repository
 SKIP_DIRS = {
@@ -31,7 +31,7 @@ SCANNED_HIDDEN_DIRS = {
 # File suffixes that indicate generated/template files, not real dependency files
 SKIP_SUFFIXES = (".j2",)
 
-GITIGNORE_PATH = REPO_ROOT / ".gitignore"
+GITIGNORE_PATH = PROJECT_ROOT / ".gitignore"
 
 # Mapping: Dependabot ecosystem name → indicator filename patterns (fnmatch-style)
 ECOSYSTEM_FILENAME_INDICATORS: dict[str, list[str]] = {
@@ -102,7 +102,7 @@ def _dir_covers(dep_dir: str, file_rel_dir: str) -> bool:
     """Return True if a Dependabot directory pattern covers a file's relative directory.
 
     dep_dir is as written in dependabot.yml (e.g. '/', '/**', '/roles/foo/').
-    file_rel_dir is the directory of the file relative to REPO_ROOT (e.g. 'roles/foo').
+    file_rel_dir is the directory of the file relative to PROJECT_ROOT (e.g. 'roles/foo').
     An empty file_rel_dir means the file is at the repo root.
 
     For many ecosystems GitHub's Dependabot treats '/' as "search recursively
@@ -149,13 +149,13 @@ def _list_candidate_files() -> Iterable[str]:
 
     Prefers `git ls-files` (only tracked files, matches Dependabot's view of
     the repo). Falls back to os.walk with an explicit untracked-skip list when
-    git is unavailable or REPO_ROOT is not a git checkout (e.g. inside the
+    git is unavailable or PROJECT_ROOT is not a git checkout (e.g. inside the
     test-integration container where /opt/src/infinito is a bind mount of the
     source tree without .git/).
     """
     try:
         result = subprocess.run(
-            ["git", "-C", str(REPO_ROOT), "ls-files", "-z"],
+            ["git", "-C", str(PROJECT_ROOT), "ls-files", "-z"],
             check=True,
             capture_output=True,
         )
@@ -199,8 +199,8 @@ def _is_gitignored(rel_file: str, filename: str, patterns: Iterable[str]) -> boo
 def _walk_fallback() -> list[str]:
     patterns = _load_gitignore_patterns()
     files: list[str] = []
-    for root, dirs, filenames in os.walk(REPO_ROOT):
-        rel_root = os.path.relpath(root, REPO_ROOT)
+    for root, dirs, filenames in os.walk(PROJECT_ROOT):
+        rel_root = os.path.relpath(root, PROJECT_ROOT)
         top_segment = "" if rel_root == "." else rel_root.split(os.sep, 1)[0]
 
         dirs[:] = [

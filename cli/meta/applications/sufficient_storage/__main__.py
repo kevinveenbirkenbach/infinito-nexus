@@ -9,7 +9,7 @@ from pathlib import Path
 
 # Ensure repo root is in PYTHONPATH
 from . import PROJECT_ROOT
-sys.path.insert(0, str(REPO_ROOT))
+sys.path.insert(0, str(PROJECT_ROOT))
 
 from utils.roles.resource_validation import filter_roles_by_min_storage  # noqa: E402
 

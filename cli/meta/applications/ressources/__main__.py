@@ -9,7 +9,7 @@ from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple
 
 from . import PROJECT_ROOT
-sys.path.insert(0, str(REPO_ROOT))
+sys.path.insert(0, str(PROJECT_ROOT))
 
 from humanfriendly import format_size, parse_size  # noqa: E402
 
@@ -20,7 +20,7 @@ from utils.service_registry import (  # noqa: E402
 )
 
 
-ROLES_DIR = REPO_ROOT / "roles"
+ROLES_DIR = PROJECT_ROOT / "roles"
 
 
 def _as_mapping(value: Any) -> Dict[str, Any]:

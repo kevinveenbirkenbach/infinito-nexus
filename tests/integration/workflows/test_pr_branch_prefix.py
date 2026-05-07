@@ -5,7 +5,7 @@ from pathlib import Path
 
 
 from . import PROJECT_ROOT
-SCRIPT_PATH = REPO_ROOT / "scripts" / "meta" / "resolve" / "pr" / "branch_prefix.sh"
+SCRIPT_PATH = PROJECT_ROOT / "scripts" / "meta" / "resolve" / "pr" / "branch_prefix.sh"
 
 
 class TestPullRequestBranchPrefix(unittest.TestCase):
@@ -20,7 +20,7 @@ class TestPullRequestBranchPrefix(unittest.TestCase):
 
         return subprocess.run(
             ["bash", str(SCRIPT_PATH)],
-            cwd=REPO_ROOT,
+            cwd=PROJECT_ROOT,
             env=env,
             capture_output=True,
             text=True,

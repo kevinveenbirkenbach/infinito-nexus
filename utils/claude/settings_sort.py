@@ -19,7 +19,7 @@ import sys
 from pathlib import Path
 
 from . import PROJECT_ROOT
-SETTINGS_PATH = REPO_ROOT / ".claude" / "settings.json"
+SETTINGS_PATH = PROJECT_ROOT / ".claude" / "settings.json"
 
 SORTED_ARRAYS: list[tuple[str, ...]] = [
     ("permissions", "allow"),
@@ -65,11 +65,11 @@ def main() -> int:
             print(f"sorted: {'.'.join(path)} ({len(arr)} entries)")
 
     if not changed:
-        print(f"{SETTINGS_PATH.relative_to(REPO_ROOT)} already sorted.")
+        print(f"{SETTINGS_PATH.relative_to(PROJECT_ROOT)} already sorted.")
         return 0
 
     SETTINGS_PATH.write_text(json.dumps(data, indent=2) + "\n", encoding="utf-8")
-    print(f"updated {SETTINGS_PATH.relative_to(REPO_ROOT)}")
+    print(f"updated {SETTINGS_PATH.relative_to(PROJECT_ROOT)}")
     return 0
 
 

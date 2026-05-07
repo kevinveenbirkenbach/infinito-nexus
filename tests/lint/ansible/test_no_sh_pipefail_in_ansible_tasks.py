@@ -8,12 +8,7 @@ import yaml
 
 from utils.cache.files import iter_project_files_with_content, read_text
 
-
-def repo_root() -> Path:
-    for candidate in Path(__file__).resolve().parents:
-        if (candidate / "pyproject.toml").is_file():
-            return candidate
-    raise AssertionError("Repository root not found from test path.")
+from . import PROJECT_ROOT
 
 
 COMMAND_KEYS = frozenset({"command", "ansible.builtin.command"})
@@ -120,7 +115,6 @@ def _scan_doc(rel_path: str, doc: Any, findings: list[tuple[str, str]]) -> None:
 
 
 class TestNoShPipefailInAnsibleTasks(unittest.TestCase):
-    REPO_ROOT = repo_root()
 
     def test_ansible_tasks_stay_on_bash(self) -> None:
         """
@@ -150,7 +144,7 @@ class TestNoShPipefailInAnsibleTasks(unittest.TestCase):
             extensions=(".yml", ".yaml"),
             exclude_tests=True,
         ):
-            rel = Path(path_str).relative_to(self.REPO_ROOT).as_posix()
+            rel = Path(path_str).relative_to(PROJECT_ROOT).as_posix()
             if not rel.startswith("roles/"):
                 continue
             try:
@@ -190,7 +184,7 @@ class TestNoShPipefailInAnsibleTasks(unittest.TestCase):
         of that single definition from re-introducing the
         infinito-nexus/core#194 class of bugs.
         """
-        path = self.REPO_ROOT / GLOBAL_GROUP_VARS_PATH
+        path = PROJECT_ROOT / GLOBAL_GROUP_VARS_PATH
         self.assertTrue(
             path.is_file(),
             f"Expected {GLOBAL_GROUP_VARS_PATH} to exist with "

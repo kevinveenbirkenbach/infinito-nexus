@@ -19,7 +19,7 @@ import re
 import unittest
 
 HERE = os.path.dirname(os.path.abspath(__file__))
-REPO_ROOT = os.path.abspath(os.path.join(HERE, "..", "..", "..", ".."))
+PROJECT_ROOT = os.path.abspath(os.path.join(HERE, "..", "..", "..", ".."))
 
 PATH_JOIN_PATTERN = re.compile(
     r"\[\s*RBAC\.GROUP\.NAME\s*,\s*.+?\]\s*\|\s*path_join",
@@ -73,8 +73,8 @@ def _iter_text_files(root):
 class TestRbacPathJoinIsForbidden(unittest.TestCase):
     def test_no_inline_rbac_group_name_path_join_in_production_code(self):
         offenders = []
-        for path in _iter_text_files(REPO_ROOT):
-            rel = os.path.relpath(path, REPO_ROOT)
+        for path in _iter_text_files(PROJECT_ROOT):
+            rel = os.path.relpath(path, PROJECT_ROOT)
             if _is_allowed(rel):
                 continue
             try:

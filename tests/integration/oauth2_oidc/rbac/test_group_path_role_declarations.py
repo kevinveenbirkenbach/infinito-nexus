@@ -49,8 +49,8 @@ import unittest
 import yaml
 
 HERE = os.path.dirname(os.path.abspath(__file__))
-REPO_ROOT = os.path.abspath(os.path.join(HERE, "..", "..", "..", ".."))
-ROLES_DIR = os.path.join(REPO_ROOT, "roles")
+PROJECT_ROOT = os.path.abspath(os.path.join(HERE, "..", "..", "..", ".."))
+ROLES_DIR = os.path.join(PROJECT_ROOT, "roles")
 
 IMPLICIT_ADMIN_ROLE = "administrator"
 
@@ -165,7 +165,7 @@ def _iter_callsites():
             if not filename.endswith(SCAN_EXTENSIONS):
                 continue
             abs_path = os.path.join(dirpath, filename)
-            rel_path = os.path.relpath(abs_path, REPO_ROOT)
+            rel_path = os.path.relpath(abs_path, PROJECT_ROOT)
             if rel_path in EXCLUDED_RELATIVE_PATHS:
                 continue
             text = _read_text(abs_path)

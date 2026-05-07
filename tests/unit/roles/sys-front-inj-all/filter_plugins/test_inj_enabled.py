@@ -19,14 +19,14 @@ def find_repo_root(start: Path) -> Path:
     return start.parents[6]
 
 
-REPO_ROOT = find_repo_root(THIS_FILE)
+PROJECT_ROOT = find_repo_root(THIS_FILE)
 PLUGIN_PATH = (
-    REPO_ROOT / "roles" / "sys-front-inj-all" / "filter_plugins" / "inj_enabled.py"
+    PROJECT_ROOT / "roles" / "sys-front-inj-all" / "filter_plugins" / "inj_enabled.py"
 )
 
 # Ensure 'utils' is importable under its canonical package name
-if str(REPO_ROOT) not in sys.path:
-    sys.path.insert(0, str(REPO_ROOT))
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
 
 # Import the same module path the plugin uses
 mu_mod = import_module("utils.applications.config")

@@ -8,7 +8,7 @@ import sys
 from pathlib import Path
 
 from . import PROJECT_ROOT
-sys.path.insert(0, str(REPO_ROOT))
+sys.path.insert(0, str(PROJECT_ROOT))
 
 from utils.invokable import list_invokable_app_ids  # noqa: E402
 

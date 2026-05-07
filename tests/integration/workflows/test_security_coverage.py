@@ -8,7 +8,7 @@ import yaml
 from utils.cache.files import iter_project_files
 
 from . import PROJECT_ROOT
-SECURITY_WORKFLOW_PATH = REPO_ROOT / ".github" / "workflows" / "security-codeql.yml"
+SECURITY_WORKFLOW_PATH = PROJECT_ROOT / ".github" / "workflows" / "security-codeql.yml"
 
 # Hidden directories that are the only ones worth scanning (the cached walker
 # already prunes .git/.venv/__pycache__/node_modules etc.).
@@ -74,7 +74,7 @@ class TestSecurityWorkflowCoverage(unittest.TestCase):
         detected_languages: set[str] = set()
 
         for path in iter_project_files():
-            rel_file = os.path.relpath(path, REPO_ROOT)
+            rel_file = os.path.relpath(path, PROJECT_ROOT)
             # Skip top-level hidden directories that are not SCANNED_HIDDEN_DIRS
             # (the cached walker already prunes the vendor/cache junk).
             top = rel_file.split(os.sep, 1)[0]

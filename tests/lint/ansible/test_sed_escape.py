@@ -35,7 +35,7 @@ class SedMatch:
 
 
 def iter_task_files() -> Iterable[Path]:
-    yield from sorted(REPO_ROOT.glob(TASK_FILES_GLOB))
+    yield from sorted(PROJECT_ROOT.glob(TASK_FILES_GLOB))
 
 
 def find_sed_substitutions(text: str, file: Path) -> List[SedMatch]:

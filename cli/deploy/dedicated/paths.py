@@ -17,10 +17,10 @@ def _resolve_repo_root() -> str:
     return repo_root
 
 
-REPO_ROOT: str = _resolve_repo_root()
-CLI_ROOT: str = os.path.join(REPO_ROOT, "cli")
-PLAYBOOK_PATH: str = os.path.join(REPO_ROOT, "playbook.yml")
-MODES_FILE: str = os.path.join(REPO_ROOT, "group_vars", "all", "01_modes.yml")
+PROJECT_ROOT: str = _resolve_repo_root()
+CLI_ROOT: str = os.path.join(PROJECT_ROOT, "cli")
+PLAYBOOK_PATH: str = os.path.join(PROJECT_ROOT, "playbook.yml")
+MODES_FILE: str = os.path.join(PROJECT_ROOT, "group_vars", "all", "01_modes.yml")
 INVENTORY_VALIDATOR_PATH: str = os.path.join(
-    REPO_ROOT, "cli", "validate", "inventory", "__main__.py"
+    PROJECT_ROOT, "cli", "validate", "inventory", "__main__.py"
 )

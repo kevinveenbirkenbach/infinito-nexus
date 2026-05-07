@@ -14,9 +14,9 @@ import re
 import unittest
 
 HERE = os.path.dirname(os.path.abspath(__file__))
-REPO_ROOT = os.path.abspath(os.path.join(HERE, "..", "..", ".."))
+PROJECT_ROOT = os.path.abspath(os.path.join(HERE, "..", "..", ".."))
 
-ROLES_DIR = os.path.join(REPO_ROOT, "roles")
+ROLES_DIR = os.path.join(PROJECT_ROOT, "roles")
 
 SERVICE_FLAG_LINE = re.compile(
     r"^([A-Z][A-Z0-9_]+)_SERVICE_ENABLED\s*=\s*(.*)$",

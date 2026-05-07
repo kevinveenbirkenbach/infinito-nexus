@@ -6,7 +6,7 @@ from typing import Any, Dict, List, Optional, Tuple
 
 from .apps import validate_application_ids
 from .modes import add_dynamic_mode_args, build_modes_from_args, load_modes_from_yaml
-from .paths import INVENTORY_VALIDATOR_PATH, MODES_FILE, PLAYBOOK_PATH, REPO_ROOT
+from .paths import INVENTORY_VALIDATOR_PATH, MODES_FILE, PLAYBOOK_PATH, PROJECT_ROOT
 from .runner import run_ansible_playbook
 
 
@@ -200,7 +200,7 @@ def main(argv: Optional[List[str]] = None) -> int:
     modes: Dict[str, Any] = build_modes_from_args(modes_spec, args)
 
     run_ansible_playbook(
-        repo_root=REPO_ROOT,
+        repo_root=PROJECT_ROOT,
         playbook_path=PLAYBOOK_PATH,
         inventory_validator_path=INVENTORY_VALIDATOR_PATH,
         inventory=args.inventory,

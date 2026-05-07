@@ -25,7 +25,7 @@ import yaml
 
 
 from . import PROJECT_ROOT
-ROLES_DIR = REPO_ROOT / "roles"
+ROLES_DIR = PROJECT_ROOT / "roles"
 
 ALLOWED_LIFECYCLES = {
     # Linear lifecycle axis. See
@@ -70,7 +70,7 @@ class TestNoLegacyRoleDirs(unittest.TestCase):
             for legacy in ("config", "schema", "users"):
                 legacy_path = role_dir / legacy
                 if legacy_path.is_dir():
-                    offenders.append(str(legacy_path.relative_to(REPO_ROOT)))
+                    offenders.append(str(legacy_path.relative_to(PROJECT_ROOT)))
         if offenders:
             self.fail(
                 "Legacy role directories present (must move under meta/, "
@@ -108,13 +108,13 @@ class TestNoLegacyPathReferences(unittest.TestCase):
     )
 
     EXEMPT_FILES: set[Path] = {
-        REPO_ROOT / "tasks" / "utils" / "migrate_meta_layout.py",
+        PROJECT_ROOT / "tasks" / "utils" / "migrate_meta_layout.py",
     }
 
     def test_no_legacy_path_strings(self):
         offenders: list[str] = []
         for sub in self.SCAN_DIRS:
-            root = REPO_ROOT / sub
+            root = PROJECT_ROOT / sub
             if not root.is_dir():
                 continue
             for path in root.rglob("*"):
@@ -141,7 +141,7 @@ class TestNoLegacyPathReferences(unittest.TestCase):
                 for token in self.LEGACY_TOKENS:
                     if token in text:
                         offenders.append(
-                            f"{path.relative_to(REPO_ROOT)} contains {token!r}"
+                            f"{path.relative_to(PROJECT_ROOT)} contains {token!r}"
                         )
                         break
         if offenders:
@@ -166,11 +166,11 @@ class TestMetaMainHasNoRunAfterOrLifecycle(unittest.TestCase):
                 continue
             if "run_after" in galaxy_info:
                 offenders.append(
-                    f"{meta_main.relative_to(REPO_ROOT)}: galaxy_info.run_after"
+                    f"{meta_main.relative_to(PROJECT_ROOT)}: galaxy_info.run_after"
                 )
             if "lifecycle" in galaxy_info:
                 offenders.append(
-                    f"{meta_main.relative_to(REPO_ROOT)}: galaxy_info.lifecycle"
+                    f"{meta_main.relative_to(PROJECT_ROOT)}: galaxy_info.lifecycle"
                 )
         if offenders:
             self.fail(
@@ -416,7 +416,7 @@ class TestNoComposeWrapperInVariants(unittest.TestCase):
             for index, entry in enumerate(docs):
                 if isinstance(entry, dict) and "compose" in entry:
                     offenders.append(
-                        f"{variants_path.relative_to(REPO_ROOT)} variant "
+                        f"{variants_path.relative_to(PROJECT_ROOT)} variant "
                         f"{index} contains a `compose:` wrapper (expected "
                         f"top-level `services:` / `server:` / `volumes:`)."
                     )

@@ -24,9 +24,6 @@ from . import PROJECT_ROOT
 
 MAX_ITEMS_PER_FOLDER = 12
 
-
-REPO_ROOT = PROJECT_ROOT
-
 # Flat structure folders that intentionally stay one level deep.
 FLAT_STRUCTURE_WHITELIST = {
     ".github/workflows",
@@ -154,10 +151,10 @@ class TestFolderItemLimit(unittest.TestCase):
     def test_folder_item_limit_warns_only(self) -> None:
         """Warn when any tracked folder exceeds the direct item limit."""
         self.assertTrue(
-            REPO_ROOT.is_dir(), f"Repository root not found at: {REPO_ROOT}"
+            PROJECT_ROOT.is_dir(), f"Repository root not found at: {PROJECT_ROOT}"
         )
 
-        findings = _collect_folder_findings(REPO_ROOT)
+        findings = _collect_folder_findings(PROJECT_ROOT)
 
         for finding in findings:
             _emit_ci_warning(finding)

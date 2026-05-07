@@ -20,7 +20,7 @@ LEGACY_URI_MODULE_PATTERN = re.compile(
 
 
 class TestNoLegacyUriModuleUsage(unittest.TestCase):
-    REPO_ROOT = repo_root()
+    PROJECT_ROOT = repo_root()
 
     def test_no_legacy_uri_module_call_is_used(self):
         """
@@ -30,7 +30,7 @@ class TestNoLegacyUriModuleUsage(unittest.TestCase):
 
         for path_str, content in iter_project_files_with_content(extensions=(".yml",)):
             yml_file = Path(path_str)
-            rel = yml_file.relative_to(self.REPO_ROOT).as_posix()
+            rel = yml_file.relative_to(self.PROJECT_ROOT).as_posix()
             for line_no, line in enumerate(content.splitlines(), start=1):
                 if LEGACY_URI_MODULE_PATTERN.match(line):
                     findings.append((rel, line_no, line.strip()))

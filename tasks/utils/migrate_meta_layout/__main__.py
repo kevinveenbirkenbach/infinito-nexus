@@ -6,11 +6,11 @@ import sys
 from pathlib import Path
 
 from . import PROJECT_ROOT
-ROLES_DIR = REPO_ROOT / "roles"
-NETWORKS_FILE = REPO_ROOT / "group_vars" / "all" / "08_networks.yml"
-PORTS_FILE = REPO_ROOT / "group_vars" / "all" / "09_ports.yml"
+ROLES_DIR = PROJECT_ROOT / "roles"
+NETWORKS_FILE = PROJECT_ROOT / "group_vars" / "all" / "08_networks.yml"
+PORTS_FILE = PROJECT_ROOT / "group_vars" / "all" / "09_ports.yml"
 
-sys.path.insert(0, str(REPO_ROOT))
+sys.path.insert(0, str(PROJECT_ROOT))
 
 from . import yaml_io  # noqa: E402
 from .indices import build_network_index, build_port_index  # noqa: E402

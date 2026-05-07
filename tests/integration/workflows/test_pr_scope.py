@@ -8,7 +8,7 @@ from pathlib import Path
 
 
 from . import PROJECT_ROOT
-SCRIPT_PATH = REPO_ROOT / "scripts" / "meta" / "resolve" / "pr" / "scope.sh"
+SCRIPT_PATH = PROJECT_ROOT / "scripts" / "meta" / "resolve" / "pr" / "scope.sh"
 
 
 @unittest.skipUnless(
@@ -56,7 +56,7 @@ class TestPullRequestScope(unittest.TestCase):
 
             result = subprocess.run(
                 ["bash", str(SCRIPT_PATH)],
-                cwd=REPO_ROOT,
+                cwd=PROJECT_ROOT,
                 env=env,
                 capture_output=True,
                 text=True,

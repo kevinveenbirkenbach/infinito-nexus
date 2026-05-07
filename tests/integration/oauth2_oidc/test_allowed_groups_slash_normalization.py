@@ -31,9 +31,9 @@ import re
 import unittest
 
 HERE = os.path.dirname(os.path.abspath(__file__))
-REPO_ROOT = os.path.abspath(os.path.join(HERE, "..", "..", ".."))
+PROJECT_ROOT = os.path.abspath(os.path.join(HERE, "..", "..", ".."))
 TEMPLATE_PATH = os.path.join(
-    REPO_ROOT,
+    PROJECT_ROOT,
     "roles",
     "web-app-oauth2-proxy",
     "templates",

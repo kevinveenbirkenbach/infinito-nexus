@@ -31,7 +31,7 @@ from plugins.lookup.domains import (
 
 
 from . import PROJECT_ROOT
-ROLES_DIR = REPO_ROOT / "roles"
+ROLES_DIR = PROJECT_ROOT / "roles"
 
 
 def _simulate_ansible_variables(
