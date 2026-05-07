@@ -3,7 +3,7 @@ from __future__ import annotations
 import os
 from pathlib import Path
 
-from . import PROJECT_ROOT
+PROJECT_ROOT: Path = Path(__file__).resolve().parents[3]
 
 
 def detect_runtime(project_root: Path | None = None) -> str:
