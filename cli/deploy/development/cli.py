@@ -4,7 +4,7 @@ import argparse
 import importlib
 import importlib.util
 import sys
-from typing import Iterable
+from collections.abc import Iterable
 
 
 def _module_exists(fullname: str) -> bool:

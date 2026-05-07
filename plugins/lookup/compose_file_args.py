@@ -26,15 +26,15 @@
 from __future__ import annotations
 
 import os
-from typing import Any, Optional
+from typing import Any
 
 from ansible.errors import AnsibleError
-from ansible.plugins.lookup import LookupBase
 from ansible.plugins.loader import lookup_loader
+from ansible.plugins.lookup import LookupBase
 
+from utils.cache.domains import get_merged_domains
 from utils.docker.paths_utils import get_docker_paths
 from utils.jinja_strict import render_strict
-from utils.cache.domains import get_merged_domains
 
 
 def _as_str(v: Any) -> str:
@@ -111,7 +111,7 @@ def _role_provides_override(*, application_id: str, templar: Any) -> bool:
 
 
 class LookupModule(LookupBase):
-    def run(self, terms, variables: Optional[dict] = None, **kwargs):
+    def run(self, terms, variables: dict | None = None, **kwargs):
         variables = variables or {}
 
         if not terms or len(terms) != 1:

@@ -13,11 +13,10 @@ import subprocess
 import unittest
 from dataclasses import dataclass
 from pathlib import Path
-from typing import List
 
 from utils.annotations.message import in_github_actions, warning
-from . import PROJECT_ROOT
 
+from . import PROJECT_ROOT
 
 OPEN_PROJECT_URL_RE = re.compile(r"https://open\.project\.infinito\.nexus/\S*")
 TODO_LIST_ITEM_RE = re.compile(r"^\s*(?:[-*+]|\d+\.)\s+(?P<body>\S.*)$")
@@ -78,7 +77,7 @@ class TodoFinding:
         return WHITESPACE_RE.sub(" ", self.text).strip()
 
 
-def tracked_files(root: Path) -> List[Path]:
+def tracked_files(root: Path) -> list[Path]:
     try:
         out = subprocess.check_output(
             ["git", "-C", str(root), "ls-files", "-z"],
@@ -104,8 +103,8 @@ def finding_sort_key(item: TodoFinding) -> tuple[str, int, str]:
     return (item.path.as_posix(), item.line, item.kind)
 
 
-def scan_todo_file(path: Path) -> List[TodoFinding]:
-    findings: List[TodoFinding] = []
+def scan_todo_file(path: Path) -> list[TodoFinding]:
+    findings: list[TodoFinding] = []
     try:
         lines = path.read_text(encoding="utf-8", errors="replace").splitlines()
     except OSError:
@@ -134,8 +133,8 @@ def scan_todo_file(path: Path) -> List[TodoFinding]:
     return findings
 
 
-def scan_inline_markers(path: Path) -> List[TodoFinding]:
-    findings: List[TodoFinding] = []
+def scan_inline_markers(path: Path) -> list[TodoFinding]:
+    findings: list[TodoFinding] = []
     try:
         lines = path.read_text(encoding="utf-8", errors="replace").splitlines()
     except OSError:
@@ -171,7 +170,7 @@ def emit_github_warning(finding: TodoFinding, root: Path) -> None:
     )
 
 
-def print_summary(label: str, findings: List[TodoFinding], root: Path) -> None:
+def print_summary(label: str, findings: list[TodoFinding], root: Path) -> None:
     if not findings:
         return
 
@@ -188,8 +187,8 @@ class TestTodoTransparency(unittest.TestCase):
         Keep long-lived work visible in the project backlog or in an issue.
         """
         root = PROJECT_ROOT
-        todo_findings: List[TodoFinding] = []
-        inline_findings: List[TodoFinding] = []
+        todo_findings: list[TodoFinding] = []
+        inline_findings: list[TodoFinding] = []
 
         for path in tracked_files(root):
             if is_todo_file(path):

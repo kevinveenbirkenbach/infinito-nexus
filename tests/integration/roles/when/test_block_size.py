@@ -1,7 +1,8 @@
 import unittest
 from pathlib import Path
+from typing import Any
+
 import yaml
-from typing import Any, Dict, List, Tuple, Union
 
 from . import PROJECT_ROOT
 
@@ -27,10 +28,10 @@ yaml.add_multi_constructor("!", _ansible_tag_passthrough, Loader=AnsibleTolerant
 # -------------------------------------------------------------------------------
 
 
-Yaml = Union[Dict[str, Any], List[Any], Any]
+Yaml = dict[str, Any] | list[Any] | Any
 
 
-def _iter_yaml_files(root: Path) -> List[Path]:
+def _iter_yaml_files(root: Path) -> list[Path]:
     """Return all *.yml files in the repository (excluding common junk dirs)."""
     ignore_dirs = {
         ".git",
@@ -41,7 +42,7 @@ def _iter_yaml_files(root: Path) -> List[Path]:
         ".pytest_cache",
         "__pycache__",
     }
-    files: List[Path] = []
+    files: list[Path] = []
     for p in root.rglob("*.yml"):
         if any(part in ignore_dirs for part in p.parts):
             continue
@@ -49,7 +50,7 @@ def _iter_yaml_files(root: Path) -> List[Path]:
     return files
 
 
-def _safe_load_all(path: Path) -> List[Yaml]:
+def _safe_load_all(path: Path) -> list[Yaml]:
     """Load all YAML documents from a file, tolerating Ansible tags; return list of docs."""
     try:
         with path.open("r", encoding="utf-8") as fh:
@@ -61,12 +62,12 @@ def _safe_load_all(path: Path) -> List[Yaml]:
 
 def _find_blocks_with_when(
     node: Yaml, path: str = ""
-) -> List[Tuple[str, Dict[str, Any]]]:
+) -> list[tuple[str, dict[str, Any]]]:
     """
     Recursively find mappings that represent an Ansible block with a block-level `when`.
     Returns list of (yaml_path, block_mapping).
     """
-    found: List[Tuple[str, Dict[str, Any]]] = []
+    found: list[tuple[str, dict[str, Any]]] = []
     if isinstance(node, dict):
         if "block" in node and "when" in node and isinstance(node["block"], list):
             found.append((path or "/", node))
@@ -90,7 +91,7 @@ class BlockWhenSizeTest(unittest.TestCase):
 
     def test_blocks_with_when_and_sections_have_max_three_tasks(self):
         root = PROJECT_ROOT
-        violations: List[str] = []
+        violations: list[str] = []
 
         for yml in _iter_yaml_files(root):
             docs = _safe_load_all(yml)

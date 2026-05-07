@@ -1,8 +1,5 @@
 #!/usr/bin/env python3
 
-from __future__ import absolute_import, division, print_function
-
-__metaclass__ = type
 
 import os
 import subprocess
@@ -80,7 +77,7 @@ class CertUtils:
     @staticmethod
     def list_cert_files(cert_base_path):
         cert_files = []
-        for root, dirs, files in os.walk(cert_base_path):
+        for root, _dirs, files in os.walk(cert_base_path):
             if "cert.pem" in files:
                 cert_files.append(os.path.join(root, "cert.pem"))
         return cert_files

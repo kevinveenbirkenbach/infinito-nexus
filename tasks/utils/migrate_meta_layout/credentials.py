@@ -1,13 +1,13 @@
 from __future__ import annotations
 
-from typing import Any, Dict
+from typing import Any
 
 _SCHEMA_LEAF_KEYS = ("description", "algorithm", "validation", "default")
 
 
 def detect_collision(
-    schema_creds: Dict[str, Any],
-    config_creds: Dict[str, Any],
+    schema_creds: dict[str, Any],
+    config_creds: dict[str, Any],
     role_name: str,
 ) -> None:
     """Raise SystemExit if any path is defined in both schema and config."""
@@ -44,7 +44,7 @@ def convert_runtime_to_schema(node: Any) -> Any:
     """Turn `key: '{{ jinja }}'` runtime credentials into schema entries."""
     if not isinstance(node, dict):
         return node
-    converted: Dict[str, Any] = {}
+    converted: dict[str, Any] = {}
     for key, value in node.items():
         if isinstance(value, dict):
             looks_like_schema = any(k in value for k in _SCHEMA_LEAF_KEYS)

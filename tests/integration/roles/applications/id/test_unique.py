@@ -1,7 +1,8 @@
-import os
 import glob
-import yaml
+import os
 import unittest
+
+import yaml
 
 
 def find_application_ids():
@@ -17,7 +18,7 @@ def find_application_ids():
     pattern = os.path.join(base_dir, "roles", "*", "vars", "main.yml")
 
     for file_path in glob.glob(pattern):
-        with open(file_path, "r") as f:
+        with open(file_path) as f:
             data = yaml.safe_load(f) or {}
         app_id = data.get("application_id")
         if app_id is not None:

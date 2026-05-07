@@ -11,11 +11,10 @@ Reads only ``roles/*/meta/{services,server}.yml`` files.
 from __future__ import annotations
 
 import ipaddress
+from collections.abc import Iterable
 from pathlib import Path
-from typing import Dict, Iterable, List, Tuple
 
 from utils.cache.yaml import load_yaml_any
-
 
 from . import PROJECT_ROOT
 
@@ -37,7 +36,7 @@ def iter_role_dirs() -> Iterable[Path]:
     return sorted(p for p in ROLES_DIR.iterdir() if p.is_dir())
 
 
-def iter_port_assignments() -> Iterable[Tuple[str, str, str, str, int]]:
+def iter_port_assignments() -> Iterable[tuple[str, str, str, str, int]]:
     """Yield ``(role, entity, scope, category, port)`` for every single-int port.
 
     `inter` is intentionally excluded — internal container ports live in
@@ -70,7 +69,7 @@ def iter_port_assignments() -> Iterable[Tuple[str, str, str, str, int]]:
                         )
 
 
-def iter_relay_ranges() -> Iterable[Tuple[str, str, int, int]]:
+def iter_relay_ranges() -> Iterable[tuple[str, str, int, int]]:
     """Yield ``(role, entity, start, end)`` for every public relay range."""
     for role_dir in iter_role_dirs():
         services = _load_yaml(role_dir / "meta" / "services.yml")
@@ -94,7 +93,7 @@ def iter_relay_ranges() -> Iterable[Tuple[str, str, int, int]]:
                 yield (role_dir.name, entity_name, start, end)
 
 
-def iter_subnets() -> Iterable[Tuple[str, ipaddress.IPv4Network]]:
+def iter_subnets() -> Iterable[tuple[str, ipaddress.IPv4Network]]:
     """Yield ``(role, subnet)`` for every role that declares a local subnet."""
     for role_dir in iter_role_dirs():
         server = _load_yaml(role_dir / "meta" / "server.yml")
@@ -115,7 +114,7 @@ def iter_subnets() -> Iterable[Tuple[str, ipaddress.IPv4Network]]:
             continue
 
 
-def occupied_ports_for(scope: str, category: str) -> List[int]:
+def occupied_ports_for(scope: str, category: str) -> list[int]:
     """Return the sorted, de-duplicated list of host-bound ports in use for
     ``<scope>.<category>``.
     """
@@ -126,12 +125,12 @@ def occupied_ports_for(scope: str, category: str) -> List[int]:
     return sorted(seen)
 
 
-def occupied_relay_ranges() -> List[Tuple[int, int]]:
+def occupied_relay_ranges() -> list[tuple[int, int]]:
     """Return the sorted list of ``(start, end)`` relay ranges in use."""
     return sorted({(s, e) for _r, _e, s, e in iter_relay_ranges()})
 
 
-def occupied_subnets(prefix_length: int) -> List[ipaddress.IPv4Network]:
+def occupied_subnets(prefix_length: int) -> list[ipaddress.IPv4Network]:
     """Return all currently occupied subnets at the requested prefix length."""
     return sorted(
         {net for _role, net in iter_subnets() if net.prefixlen == prefix_length},
@@ -139,14 +138,14 @@ def occupied_subnets(prefix_length: int) -> List[ipaddress.IPv4Network]:
     )
 
 
-def host_bound_port_set() -> Dict[int, List[Tuple[str, str, str, str]]]:
+def host_bound_port_set() -> dict[int, list[tuple[str, str, str, str]]]:
     """Build the flat host-bound port map per req-009 lint rule.
 
     Returns ``{port: [(role, entity, scope, category), ...]}``. Single-int
     `local`/`public` categories AND every integer in each relay span are
     included; ``inter`` is skipped.
     """
-    out: Dict[int, List[Tuple[str, str, str, str]]] = {}
+    out: dict[int, list[tuple[str, str, str, str]]] = {}
     for role, entity, scope, category, port in iter_port_assignments():
         out.setdefault(port, []).append((role, entity, scope, category))
     for role, entity, start, end in iter_relay_ranges():

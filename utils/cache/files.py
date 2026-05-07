@@ -29,9 +29,9 @@ view without subprocessing.
 from __future__ import annotations
 
 import os
+from collections.abc import Iterable, Iterator
 from functools import lru_cache
 from pathlib import Path
-from typing import Iterable, Iterator, Tuple
 
 from . import PROJECT_ROOT
 from .gitignore import is_path_gitignored, load_gitignore_patterns
@@ -114,7 +114,7 @@ def read_text(path: str) -> str:
     Raises OSError / UnicodeDecodeError unchanged — callers that scan arbitrary
     files can wrap this in try/except if non-UTF-8 blobs may appear.
     """
-    with open(path, "r", encoding="utf-8") as f:
+    with open(path, encoding="utf-8") as f:
         return f.read()
 
 
@@ -123,7 +123,7 @@ def iter_project_files_with_content(
     extensions: Iterable[str] | None = None,
     exclude_tests: bool = False,
     exclude_dirs: Iterable[str] | None = None,
-) -> Iterator[Tuple[str, str]]:
+) -> Iterator[tuple[str, str]]:
     """Yield ``(path, content)`` for matching files; content is cached.
 
     Files that fail to read (permission errors, non-UTF-8) are silently

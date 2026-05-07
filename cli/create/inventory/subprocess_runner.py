@@ -1,13 +1,12 @@
 from __future__ import annotations
 
 import subprocess
-from typing import Dict, List, Optional
 
 
 def run_subprocess(
-    cmd: List[str],
+    cmd: list[str],
     capture_output: bool = False,
-    env: Optional[Dict[str, str]] = None,
+    env: dict[str, str] | None = None,
 ) -> subprocess.CompletedProcess:
     """
     Run a subprocess command and either stream output or capture it.

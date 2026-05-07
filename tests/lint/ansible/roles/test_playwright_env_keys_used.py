@@ -21,8 +21,8 @@ from __future__ import annotations
 
 import re
 import unittest
+from collections.abc import Iterable
 from pathlib import Path
-from typing import Iterable, List
 
 from utils.cache.files import read_text
 
@@ -57,7 +57,7 @@ def _is_implicitly_consumed(key: str) -> bool:
     return any(key.endswith(suffix) for suffix in _DYNAMIC_KEY_SUFFIXES)
 
 
-def _extract_env_keys(env_text: str) -> List[str]:
+def _extract_env_keys(env_text: str) -> list[str]:
     """Return the ordered list of `KEY=` declarations in a
     `playwright.env.j2` body.
 
@@ -67,7 +67,7 @@ def _extract_env_keys(env_text: str) -> List[str]:
     A line that begins with a Jinja expression like ``{{ … }}`` is
     not a declaration and gets ignored as well.
     """
-    keys: List[str] = []
+    keys: list[str] = []
     for line in env_text.splitlines():
         stripped = line.lstrip()
         if not stripped or stripped.startswith("#"):
@@ -93,7 +93,7 @@ def _key_referenced(key: str, sources: Iterable[str]) -> bool:
     return any(pattern.search(text) for text in sources)
 
 
-def _read_js_sources(directory: Path) -> List[str]:
+def _read_js_sources(directory: Path) -> list[str]:
     return [read_text(str(p)) for p in sorted(directory.rglob("*.js"))]
 
 
@@ -102,12 +102,12 @@ class TestPlaywrightEnvKeysUsed(unittest.TestCase):
         root = _repo_root()
         roles_dir = root / "roles"
         shared_helpers_dir = roles_dir / "test-e2e-playwright" / "files"
-        shared_sources: List[str] = (
+        shared_sources: list[str] = (
             _read_js_sources(shared_helpers_dir) if shared_helpers_dir.is_dir() else []
         )
 
-        missing_specs: List[str] = []
-        unreferenced_keys: List[str] = []
+        missing_specs: list[str] = []
+        unreferenced_keys: list[str] = []
 
         for env_path in sorted(roles_dir.glob("*/templates/playwright.env.j2")):
             # nocheck: project-root-import  walking from a discovered glob match (<role>/templates/...) up to its role dir, not the repo root
@@ -144,7 +144,7 @@ class TestPlaywrightEnvKeysUsed(unittest.TestCase):
                         f"or roles/test-e2e-playwright/files/"
                     )
 
-        report: List[str] = []
+        report: list[str] = []
         if missing_specs:
             report.append(
                 f"{len(missing_specs)} role(s) ship a playwright.env.j2 without "

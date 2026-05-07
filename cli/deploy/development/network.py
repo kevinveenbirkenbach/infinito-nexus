@@ -2,9 +2,8 @@ from __future__ import annotations
 
 import json
 import os
+from collections.abc import Mapping
 from pathlib import Path
-from typing import Mapping
-
 
 DOCKER_DAEMON_CONFIG_PATH = Path("/etc/docker/daemon.json")
 MIN_VALID_MTU = 576

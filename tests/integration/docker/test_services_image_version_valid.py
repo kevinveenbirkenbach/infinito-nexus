@@ -2,38 +2,40 @@ from __future__ import annotations
 
 import re
 import unittest
+from collections.abc import Iterable
 from pathlib import Path
-from typing import Any, Dict, Iterable, List, Tuple
+from typing import Any
 
 import yaml
 
 from utils.docker.image.ref import is_valid_image_name
+
 from . import PROJECT_ROOT
 
 # Docker tag (version)
 TAG_RE = re.compile(r"^[A-Za-z0-9_][A-Za-z0-9_.-]{0,127}$")
 
 
-def _safe_mapping(obj: Any) -> Dict[str, Any]:
+def _safe_mapping(obj: Any) -> dict[str, Any]:
     return obj if isinstance(obj, dict) else {}
 
 
-def _iter_role_config_files(repo_root: Path) -> List[Path]:
+def _iter_role_config_files(repo_root: Path) -> list[Path]:
     roles_dir = repo_root / "roles"
     if not roles_dir.is_dir():
         return []
     return sorted(roles_dir.glob("*/meta/services.yml"))
 
 
-def _extract_services(cfg: Dict[str, Any]) -> Dict[str, Any]:
+def _extract_services(cfg: dict[str, Any]) -> dict[str, Any]:
     # Per req-008 the file root of meta/services.yml IS the services
     # map (no `compose.services` wrapper).
     return _safe_mapping(cfg)
 
 
 def _iter_declared_fields(
-    services: Dict[str, Any],
-) -> Iterable[Tuple[str, str, Any]]:
+    services: dict[str, Any],
+) -> Iterable[tuple[str, str, Any]]:
     """
     Yield (service_name, field_name, value) for each declared field
     where field_name ∈ {"image", "version"}.
@@ -67,7 +69,7 @@ class TestDockerServicesImageVersionValid(unittest.TestCase):
         - No coupling required between image/version
         """
         repo_root = PROJECT_ROOT
-        failures: List[str] = []
+        failures: list[str] = []
 
         config_files = _iter_role_config_files(repo_root)
         self.assertTrue(

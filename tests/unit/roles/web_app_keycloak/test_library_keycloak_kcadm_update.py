@@ -1,12 +1,13 @@
 # tests/unit/roles/web_app_keycloak/test_library_keycloak_kcadm_update.py
 from __future__ import annotations
 
-import unittest
-from pathlib import Path
 import importlib.util
 import sys
 import types
+import unittest
+from pathlib import Path
 from unittest.mock import patch
+
 from . import PROJECT_ROOT
 
 ROLE_DIR = PROJECT_ROOT / "roles" / "web-app-keycloak"

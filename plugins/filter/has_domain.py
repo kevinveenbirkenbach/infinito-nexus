@@ -59,7 +59,7 @@ def has_domain(domains: Any, application_id: Any) -> bool:
     return _value_has_domain(domains)
 
 
-class FilterModule(object):
+class FilterModule:
     def filters(self):
         return {
             "has_domain": has_domain,

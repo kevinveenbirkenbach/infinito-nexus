@@ -1,6 +1,6 @@
 import os
-import sys
 import shutil
+import sys
 import tempfile
 import unittest
 from textwrap import dedent

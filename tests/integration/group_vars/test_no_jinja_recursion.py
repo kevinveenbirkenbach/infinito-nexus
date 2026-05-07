@@ -1,7 +1,9 @@
 import re
 import unittest
-import yaml
 from collections import defaultdict
+
+import yaml
+
 from . import PROJECT_ROOT
 
 # Directory containing group_vars/all/*.yml

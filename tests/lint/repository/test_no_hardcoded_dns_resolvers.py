@@ -21,7 +21,6 @@ import yaml
 from utils.annotations.suppress import is_suppressed_at
 from utils.cache.files import PROJECT_ROOT, iter_project_files, read_text
 
-
 _NETWORKS_FILE = PROJECT_ROOT / "group_vars" / "all" / "08_networks.yml"
 
 _SCAN_EXTENSIONS = (

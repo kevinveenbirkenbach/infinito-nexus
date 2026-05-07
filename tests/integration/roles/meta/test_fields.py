@@ -1,6 +1,7 @@
 import os
-import yaml
 import unittest
+
+import yaml
 
 
 class TestAnsibleRolesMetadata(unittest.TestCase):
@@ -32,7 +33,7 @@ class TestAnsibleRolesMetadata(unittest.TestCase):
                     msg=f"Missing meta/main.yml in role '{role}'",
                 )
 
-                with open(meta_file, "r", encoding="utf-8") as f:
+                with open(meta_file, encoding="utf-8") as f:
                     raw = f.read()
                     meta_data = yaml.safe_load(raw) or {}
 

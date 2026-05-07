@@ -1,9 +1,6 @@
 #!/usr/bin/python
 # roles/web-app-keycloak/library/keycloak_kcadm_update.py
 
-from __future__ import absolute_import, division, print_function
-
-__metaclass__ = type
 
 import json
 import subprocess
@@ -108,8 +105,7 @@ def run_kcadm(module, cmd, ignore_rc=False):
         cmd,
         shell=True,
         check=not ignore_rc,
-        stdout=subprocess.PIPE,
-        stderr=subprocess.PIPE,
+        capture_output=True,
     )
     # kcadm/JVM warnings can appear on stdout; keep raw output.
     stdout = rc.stdout.decode("utf-8", errors="replace").strip()

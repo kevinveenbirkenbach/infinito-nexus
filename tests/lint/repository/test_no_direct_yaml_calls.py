@@ -68,7 +68,6 @@ from pathlib import Path
 
 from utils.cache.files import PROJECT_ROOT, iter_project_files, read_text
 
-
 # `direct-yaml` opts out only via ``nocheck:`` markers. We deliberately
 # do NOT accept the generic ``noqa:`` form here: ruff parses that form
 # as a flake8 directive and warns about non-flake8 codes like

@@ -4,8 +4,8 @@ import tempfile
 from pathlib import Path
 from unittest import TestCase, main, mock
 
-from utils.manager.inventory import InventoryManager  # type: ignore
 from utils.handler.vault import VaultScalar  # type: ignore
+from utils.manager.inventory import InventoryManager  # type: ignore
 from utils.manager.value_generator import ValueGenerator  # type: ignore
 
 

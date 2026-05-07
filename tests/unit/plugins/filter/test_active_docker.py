@@ -1,7 +1,8 @@
 import unittest
+
 from plugins.filter.active_docker import (
-    active_docker_container_count,
     FilterModule,
+    active_docker_container_count,
 )
 
 

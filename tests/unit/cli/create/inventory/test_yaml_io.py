@@ -4,7 +4,7 @@ from pathlib import Path
 
 import yaml
 
-from cli.create.inventory.yaml_io import load_yaml, dump_yaml
+from cli.create.inventory.yaml_io import dump_yaml, load_yaml
 
 
 class TestYamlIO(unittest.TestCase):

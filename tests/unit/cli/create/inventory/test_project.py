@@ -3,8 +3,8 @@ import unittest
 from pathlib import Path
 
 from cli.create.inventory.project import (
-    detect_project_root,
     build_env_with_project_root,
+    detect_project_root,
 )
 
 

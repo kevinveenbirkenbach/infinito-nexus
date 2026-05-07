@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import os
-from typing import List
 
 from ruamel.yaml.comments import CommentedSeq
 
@@ -14,12 +13,12 @@ def sanitize_run_once_var(role_name: str) -> str:
     return "run_once_" + role_name.replace("-", "_")
 
 
-def build_include_block_yaml(consumer_role: str, moved_deps: List[str]) -> List[dict]:
+def build_include_block_yaml(consumer_role: str, moved_deps: list[str]) -> list[dict]:
     """Guarded block prepended to tasks/01_core.yml or tasks/main.yml."""
     guard_var = sanitize_run_once_var(consumer_role)
 
     if len(moved_deps) == 1:
-        inner_tasks: List[dict] = [
+        inner_tasks: list[dict] = [
             {
                 "name": f"Include dependency '{moved_deps[0]}'",
                 "include_role": {"name": moved_deps[0]},
@@ -74,7 +73,7 @@ def prepend_tasks(tasks_path: str, new_tasks, dry_run: bool) -> None:
     print(f"[OK] Updated {tasks_path} (prepended {len(new_tasks)} task(s)).")
 
 
-def update_meta_remove_deps(meta_path: str, remove: List[str], dry_run: bool) -> bool:
+def update_meta_remove_deps(meta_path: str, remove: list[str], dry_run: bool) -> bool:
     """Drop given entries from meta.dependencies, preserving everything else."""
     if not os.path.exists(meta_path):
         return False
@@ -84,7 +83,7 @@ def update_meta_remove_deps(meta_path: str, remove: List[str], dry_run: bool) ->
         return False
 
     keep = CommentedSeq()
-    removed: List[str] = []
+    removed: list[str] = []
     for item in deps:
         name = item.get("role") or item.get("name") if isinstance(item, dict) else item
         if name in remove:

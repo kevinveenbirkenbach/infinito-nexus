@@ -15,9 +15,9 @@ from __future__ import annotations
 
 import argparse
 from pathlib import Path
-from typing import Dict, List, Set
 
 from utils.cache.yaml import load_yaml
+
 from . import PROJECT_ROOT
 
 
@@ -56,7 +56,7 @@ def has_application_id(role_name: str) -> bool:
     return isinstance(app_id, str) and bool(app_id.strip())
 
 
-def _extract_dependency_role_names(raw: object, *, meta_path: Path) -> List[str]:
+def _extract_dependency_role_names(raw: object, *, meta_path: Path) -> list[str]:
     """
     Normalize dependencies to a list of role names.
 
@@ -74,7 +74,7 @@ def _extract_dependency_role_names(raw: object, *, meta_path: Path) -> List[str]
             f"Invalid dependencies type in {meta_path}: expected list, got {type(raw).__name__}"
         )
 
-    out: List[str] = []
+    out: list[str] = []
     for item in raw:
         if isinstance(item, str):
             name = item.strip()
@@ -102,7 +102,7 @@ def _extract_dependency_role_names(raw: object, *, meta_path: Path) -> List[str]
     return out
 
 
-def load_dependencies(role_name: str) -> List[str]:
+def load_dependencies(role_name: str) -> list[str]:
     """
     Read dependencies from roles/<role_name>/meta/main.yml.
     """
@@ -119,7 +119,7 @@ def load_dependencies(role_name: str) -> List[str]:
     return _extract_dependency_role_names(deps_raw, meta_path=meta)
 
 
-def resolve_dependencies_transitively(start_role: str) -> List[str]:
+def resolve_dependencies_transitively(start_role: str) -> list[str]:
     """
     Resolve dependencies recursively (dependencies of dependencies, ...),
     but only include roles that define application_id.
@@ -134,9 +134,9 @@ def resolve_dependencies_transitively(start_role: str) -> List[str]:
             f"Unknown role: {start_role!r} (missing folder {rdir / start_role})"
         )
 
-    cache: Dict[str, List[str]] = {}
+    cache: dict[str, list[str]] = {}
 
-    def deps(role: str) -> List[str]:
+    def deps(role: str) -> list[str]:
         if role not in cache:
             if not (rdir / role).is_dir():
                 raise DependenciesResolutionError(
@@ -145,9 +145,9 @@ def resolve_dependencies_transitively(start_role: str) -> List[str]:
             cache[role] = load_dependencies(role)
         return cache[role]
 
-    visited: Set[str] = set()
-    stack: List[str] = []
-    out: List[str] = []
+    visited: set[str] = set()
+    stack: list[str] = []
+    out: list[str] = []
 
     def dfs(node: str) -> None:
         if node in stack:

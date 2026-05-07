@@ -1,9 +1,8 @@
 import unittest
 from pathlib import Path
-from typing import List, Optional
 
 
-def find_repo_root(start: Path) -> Optional[Path]:
+def find_repo_root(start: Path) -> Path | None:
     """
     Walk up from `start` until we find a directory containing 'roles'.
     Returns the repo root (the directory that contains 'roles') or None.
@@ -14,7 +13,7 @@ def find_repo_root(start: Path) -> Optional[Path]:
     return None
 
 
-def web_app_role_dirs(root: Path) -> List[Path]:
+def web_app_role_dirs(root: Path) -> list[Path]:
     """Return all role directories that match roles/web-app-*."""
     roles_dir = root / "roles"
     return sorted([p for p in roles_dir.glob("web-app-*") if p.is_dir()])

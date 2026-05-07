@@ -1,12 +1,13 @@
 from __future__ import annotations
 
+import contextlib
 import importlib.util
-import unittest
-from pathlib import Path
+import io
 import os
 import tempfile
-import contextlib
-import io
+import unittest
+from pathlib import Path
+
 from . import PROJECT_ROOT
 
 # ---------------------------------------------------------------------------

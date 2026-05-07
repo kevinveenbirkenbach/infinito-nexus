@@ -7,7 +7,6 @@ import subprocess
 import sys
 import time
 from dataclasses import dataclass
-from typing import List, Optional
 
 
 @dataclass
@@ -37,7 +36,7 @@ def log(msg: str, verbose: bool) -> None:
         print(f"[git-pull] {msg}", file=sys.stderr)
 
 
-def run(cmd: List[str], cwd: Optional[str], verbose: bool) -> RunResult:
+def run(cmd: list[str], cwd: str | None, verbose: bool) -> RunResult:
     log(f"run: {' '.join(cmd)} (cwd={cwd})", verbose)
     p = subprocess.run(
         cmd,
@@ -58,8 +57,8 @@ def _is_transient_git_failure(r: RunResult) -> bool:
 
 
 def run_checked(
-    cmd: List[str],
-    cwd: Optional[str],
+    cmd: list[str],
+    cwd: str | None,
     verbose: bool,
     *,
     retries: int = 5,
@@ -71,7 +70,7 @@ def run_checked(
     For likely transient transport/network issues (common in CI/docker),
     retry with exponential backoff.
     """
-    last: Optional[RunResult] = None
+    last: RunResult | None = None
 
     for attempt in range(1, retries + 1):
         r = run(cmd, cwd=cwd, verbose=verbose)

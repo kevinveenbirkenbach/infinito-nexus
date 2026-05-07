@@ -36,7 +36,6 @@ from utils.annotations.suppress import is_suppressed_in_head
 from utils.cache.base import PROJECT_ROOT
 from utils.cache.files import iter_non_ignored_files
 
-
 # A file at this length is generally too coupled / too scope-broad and
 # should be split. Bumping this number requires a corresponding cleanup
 # pass. Do not raise it just to silence the linter.

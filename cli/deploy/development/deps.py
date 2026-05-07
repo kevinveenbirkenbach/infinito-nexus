@@ -9,7 +9,7 @@ if TYPE_CHECKING:
 
 
 def resolve_run_after(
-    compose: "Compose",
+    compose: Compose,
     role_name: str,
     *,
     services_overrides_container_path: str | None = None,

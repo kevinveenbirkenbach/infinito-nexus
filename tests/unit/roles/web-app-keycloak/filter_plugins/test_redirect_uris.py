@@ -1,8 +1,8 @@
+import importlib.util
 import os
 import sys
 import types
 import unittest
-import importlib.util
 
 PLUGIN_REL_PATH = os.path.join(
     "roles", "web-app-keycloak", "filter_plugins", "redirect_uris.py"

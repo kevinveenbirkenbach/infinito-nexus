@@ -1,7 +1,8 @@
-import unittest
-import tempfile
-import yaml
 import os
+import tempfile
+import unittest
+
+import yaml
 
 from plugins.filter.invokable_paths import get_non_invokable_paths
 

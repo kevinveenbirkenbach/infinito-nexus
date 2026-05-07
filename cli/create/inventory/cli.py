@@ -2,24 +2,24 @@ from __future__ import annotations
 
 import argparse
 import os
-from pathlib import Path
-from typing import Any, Dict, List, Optional
 import sys
+from pathlib import Path
+from typing import Any
 
-from .project import detect_project_root, build_env_with_project_root
-from .yaml_io import load_yaml, dump_yaml
-from .inventory_generator import generate_dynamic_inventory
-from .filters import parse_roles_list, filter_dynamic_inventory
+from .credentials_generator import generate_credentials_for_roles
+from .filters import filter_dynamic_inventory, parse_roles_list
 from .host_vars import (
-    ensure_host_vars_file,
-    ensure_become_password,
     apply_vars_overrides,
     apply_vars_overrides_from_file,
+    ensure_become_password,
+    ensure_host_vars_file,
 )
+from .inventory_generator import generate_dynamic_inventory
 from .mirror_overrides import apply_mirror_overrides
-from .services_disabler import apply_services_disabled_from_env
-from .credentials_generator import generate_credentials_for_roles
 from .passwords import generate_random_password
+from .project import build_env_with_project_root, detect_project_root
+from .services_disabler import apply_services_disabled_from_env
+from .yaml_io import dump_yaml, load_yaml
 
 
 def _fatal(msg: str) -> None:
@@ -27,22 +27,20 @@ def _fatal(msg: str) -> None:
 
 
 def _resolve_inventory_file(
-    inventory_dir: Path, inventory_file_arg: Optional[str]
+    inventory_dir: Path, inventory_file_arg: str | None
 ) -> Path:
     if inventory_file_arg:
         return Path(inventory_file_arg).resolve()
     return (inventory_dir / "devices.yml").resolve()
 
 
-def _resolve_roles_dir(project_root: Path, roles_dir_arg: Optional[str]) -> Path:
+def _resolve_roles_dir(project_root: Path, roles_dir_arg: str | None) -> Path:
     return (
         Path(roles_dir_arg) if roles_dir_arg else (project_root / "roles")
     ).resolve()
 
 
-def _resolve_categories_file(
-    roles_dir: Path, categories_file_arg: Optional[str]
-) -> Path:
+def _resolve_categories_file(roles_dir: Path, categories_file_arg: str | None) -> Path:
     return (
         Path(categories_file_arg)
         if categories_file_arg
@@ -50,9 +48,7 @@ def _resolve_categories_file(
     ).resolve()
 
 
-def _resolve_mirrors_file(
-    project_root: Path, mirror_arg: Optional[str]
-) -> Optional[Path]:
+def _resolve_mirrors_file(project_root: Path, mirror_arg: str | None) -> Path | None:
     """
     --mirror can be used in two ways:
       - --mirror            -> uses <repo-root>/mirrors.yml
@@ -71,7 +67,7 @@ def _resolve_mirrors_file(
     return candidate.resolve()
 
 
-def main(argv: Optional[List[str]] = None) -> int:
+def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(
         description=(
             "Create or update a full inventory for a host and generate credentials "
@@ -333,8 +329,8 @@ def main(argv: Optional[List[str]] = None) -> int:
 
 
 def _merge_inventories(
-    base: Dict[str, Any], new: Dict[str, Any], host: str
-) -> Dict[str, Any]:
+    base: dict[str, Any], new: dict[str, Any], host: str
+) -> dict[str, Any]:
     """
     Merge `new` inventory into `base` inventory without deleting existing groups/hosts/vars.
 
@@ -356,7 +352,7 @@ def _merge_inventories(
         base_hosts = base_group.setdefault("hosts", {})
 
         new_hosts = (group_data or {}).get("hosts", {}) or {}
-        host_vars: Dict[str, Any] = {}
+        host_vars: dict[str, Any] = {}
         if isinstance(new_hosts, dict) and host in new_hosts:
             hv = new_hosts.get(host) or {}
             if isinstance(hv, dict):

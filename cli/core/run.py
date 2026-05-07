@@ -6,7 +6,7 @@ import subprocess
 from dataclasses import dataclass
 from datetime import datetime
 from pathlib import Path
-from typing import List, TextIO
+from typing import TextIO
 
 from cli.core.colors import Fore, color_text
 
@@ -40,7 +40,7 @@ def open_log_file(log_dir: Path) -> tuple[TextIO, Path]:
 
 
 def run_command_once(
-    full_cmd: List[str], cfg: RunConfig, log_file: TextIO | None
+    full_cmd: list[str], cfg: RunConfig, log_file: TextIO | None
 ) -> bool:
     try:
         if cfg.log_enabled and log_file is not None:
@@ -82,4 +82,4 @@ def run_command_once(
         raise
     except Exception as e:
         print(color_text(f"Exception running command: {e}", Fore.RED))
-        raise SystemExit(1)
+        raise SystemExit(1) from e

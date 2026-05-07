@@ -1,6 +1,7 @@
 import unittest
 
 from ansible.errors import AnsibleError
+
 from plugins.lookup.rbac_group_path import LookupModule
 
 

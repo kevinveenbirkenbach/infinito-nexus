@@ -5,7 +5,7 @@ from __future__ import annotations
 import argparse
 import json
 import sys
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any
 
 from . import PROJECT_ROOT
 
@@ -19,15 +19,14 @@ from utils.service_registry import (  # noqa: E402
     load_applications_from_roles_dir,
 )
 
-
 ROLES_DIR = PROJECT_ROOT / "roles"
 
 
-def _as_mapping(value: Any) -> Dict[str, Any]:
+def _as_mapping(value: Any) -> dict[str, Any]:
     return value if isinstance(value, dict) else {}
 
 
-def _parse_mem_bytes(value: Any) -> Optional[int]:
+def _parse_mem_bytes(value: Any) -> int | None:
     if value is None:
         return None
     if isinstance(value, (int, float)):
@@ -41,7 +40,7 @@ def _parse_mem_bytes(value: Any) -> Optional[int]:
         return None
 
 
-def _parse_cpus(value: Any) -> Optional[float]:
+def _parse_cpus(value: Any) -> float | None:
     if value is None:
         return None
     if isinstance(value, (int, float)):
@@ -52,7 +51,7 @@ def _parse_cpus(value: Any) -> Optional[float]:
         return None
 
 
-def _parse_int(value: Any) -> Optional[int]:
+def _parse_int(value: Any) -> int | None:
     if value is None:
         return None
     if isinstance(value, bool):
@@ -65,7 +64,7 @@ def _parse_int(value: Any) -> Optional[int]:
         return None
 
 
-def _is_enabled(service_conf: Dict[str, Any], is_primary: bool) -> bool:
+def _is_enabled(service_conf: dict[str, Any], is_primary: bool) -> bool:
     if "enabled" not in service_conf:
         return is_primary
     raw = service_conf.get("enabled")
@@ -77,7 +76,7 @@ def _is_enabled(service_conf: Dict[str, Any], is_primary: bool) -> bool:
     return True
 
 
-def _is_shared(service_conf: Dict[str, Any]) -> bool:
+def _is_shared(service_conf: dict[str, Any]) -> bool:
     raw = service_conf.get("shared", False)
     if isinstance(raw, bool):
         return raw
@@ -88,15 +87,15 @@ _RESOURCE_KEYS = ("mem_reservation", "mem_limit", "pids_limit", "cpus")
 _CONTAINER_KEYS = ("image", "name", "version", "container")
 
 
-def _looks_like_container(service_conf: Dict[str, Any]) -> bool:
+def _looks_like_container(service_conf: dict[str, Any]) -> bool:
     return any(key in service_conf for key in _RESOURCE_KEYS + _CONTAINER_KEYS)
 
 
 def _row_for_service(
     role_name: str,
     service_key: str,
-    service_conf: Dict[str, Any],
-) -> Dict[str, Any]:
+    service_conf: dict[str, Any],
+) -> dict[str, Any]:
     return {
         "role": role_name,
         "service": service_key,
@@ -113,11 +112,11 @@ def _row_for_service(
 
 def collect_role_resources(
     role_name: str,
-    applications: Dict[str, Dict[str, Any]],
-    service_registry: Dict[str, Dict[str, Any]],
+    applications: dict[str, dict[str, Any]],
+    service_registry: dict[str, dict[str, Any]],
     visited: set,
-    rows: List[Dict[str, Any]],
-    warnings: List[str],
+    rows: list[dict[str, Any]],
+    warnings: list[str],
 ) -> None:
     if role_name in visited:
         return
@@ -139,7 +138,7 @@ def collect_role_resources(
             f"role '{role_name}' has no services.{entity_name or '<entity>'} entry"
         )
 
-    shared_dependencies: List[str] = []
+    shared_dependencies: list[str] = []
     for service_key, service_conf in services.items():
         if service_key == entity_name:
             continue
@@ -175,7 +174,7 @@ def collect_role_resources(
         )
 
 
-def aggregate(rows: List[Dict[str, Any]]) -> Dict[str, Any]:
+def aggregate(rows: list[dict[str, Any]]) -> dict[str, Any]:
     total_mem_res = 0
     total_mem_lim = 0
     total_pids = 0
@@ -204,17 +203,17 @@ def aggregate(rows: List[Dict[str, Any]]) -> Dict[str, Any]:
     }
 
 
-def _fmt_mem(value: Optional[int]) -> str:
+def _fmt_mem(value: int | None) -> str:
     if value is None:
         return "-"
     return format_size(value, binary=False)
 
 
-def _fmt_int(value: Optional[int]) -> str:
+def _fmt_int(value: int | None) -> str:
     return "-" if value is None else str(value)
 
 
-def _fmt_float(value: Optional[float]) -> str:
+def _fmt_float(value: float | None) -> str:
     if value is None:
         return "-"
     if float(value).is_integer():
@@ -224,12 +223,12 @@ def _fmt_float(value: Optional[float]) -> str:
 
 def render_text(
     role_name: str,
-    rows: List[Dict[str, Any]],
-    totals: Dict[str, Any],
-    warnings: List[str],
+    rows: list[dict[str, Any]],
+    totals: dict[str, Any],
+    warnings: list[str],
 ) -> str:
     headers = ["service", "role", "mem_reservation", "mem_limit", "pids_limit", "cpus"]
-    table_rows: List[Tuple[str, ...]] = []
+    table_rows: list[tuple[str, ...]] = []
 
     for row in sorted(rows, key=lambda r: (r["service"], r["role"])):
         table_rows.append(
@@ -258,7 +257,7 @@ def render_text(
         for i, cell in enumerate(r):
             widths[i] = max(widths[i], len(cell))
 
-    def fmt_row(cells: Tuple[str, ...]) -> str:
+    def fmt_row(cells: tuple[str, ...]) -> str:
         return "  ".join(cell.ljust(widths[i]) for i, cell in enumerate(cells))
 
     sep = "  ".join("-" * w for w in widths)
@@ -283,11 +282,11 @@ def render_text(
 
 def render_json(
     role_name: str,
-    rows: List[Dict[str, Any]],
-    totals: Dict[str, Any],
-    warnings: List[str],
+    rows: list[dict[str, Any]],
+    totals: dict[str, Any],
+    warnings: list[str],
 ) -> str:
-    def _row(row: Dict[str, Any]) -> Dict[str, Any]:
+    def _row(row: dict[str, Any]) -> dict[str, Any]:
         return {
             "role": row["role"],
             "service": row["service"],
@@ -369,8 +368,8 @@ def main() -> int:
     applications = load_applications_from_roles_dir(ROLES_DIR)
     service_registry = build_service_registry_from_applications(applications)
 
-    rows: List[Dict[str, Any]] = []
-    warnings: List[str] = []
+    rows: list[dict[str, Any]] = []
+    warnings: list[str] = []
     collect_role_resources(
         role_name=args.role,
         applications=applications,

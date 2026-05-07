@@ -1,10 +1,12 @@
 import argparse
 from pathlib import Path
-import yaml
 from typing import Any
+
+import yaml
+from yaml.dumper import SafeDumper
+
 from utils.handler.vault import VaultHandler, VaultScalar
 from utils.handler.yaml import YamlHandler
-from yaml.dumper import SafeDumper
 
 
 def ask_for_confirmation(key: str) -> bool:

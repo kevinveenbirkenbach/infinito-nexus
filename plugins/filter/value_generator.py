@@ -2,14 +2,13 @@
 
 from __future__ import annotations
 
-from functools import lru_cache
 import sys
+from functools import lru_cache
 from pathlib import Path
-from typing import Type
 
 
 @lru_cache(maxsize=1)
-def _value_generator_cls() -> Type[object]:
+def _value_generator_cls() -> type[object]:
     """
     Load ValueGenerator from utils/manager/value_generator.py.
 

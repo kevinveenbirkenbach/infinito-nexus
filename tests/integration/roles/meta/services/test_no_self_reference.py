@@ -28,7 +28,6 @@ import unittest
 from utils.cache.yaml import load_yaml_any
 from utils.entity_name_utils import get_entity_name
 
-
 from . import PROJECT_ROOT
 
 ROLES_DIR = PROJECT_ROOT / "roles"

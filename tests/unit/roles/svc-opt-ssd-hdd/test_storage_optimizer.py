@@ -1,8 +1,8 @@
+import importlib.util
+import os
+import sys
 import unittest
 from unittest.mock import patch
-import os
-import importlib.util
-import sys
 
 
 # Dynamically load the module under test from the Ansible role's files directory

@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # Part of Infinito.Nexus. See LICENSE file for full copyright and licensing details.
 
 import logging
@@ -107,7 +106,7 @@ class ResUsersOAuthConfigurableUid(models.Model):
                 validation.get("email"),
                 create_values,
             )
-            raise AccessDenied()
+            raise AccessDenied() from None
 
     @api.model
     def _auth_oauth_validate(self, provider, access_token):

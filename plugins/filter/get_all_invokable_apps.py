@@ -8,6 +8,6 @@ def get_all_invokable_apps():
     return list_invokable_app_ids()
 
 
-class FilterModule(object):
+class FilterModule:
     def filters(self):
         return {"get_all_invokable_apps": get_all_invokable_apps}

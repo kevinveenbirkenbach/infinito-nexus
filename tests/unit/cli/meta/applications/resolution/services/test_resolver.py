@@ -11,7 +11,6 @@ from cli.meta.applications.resolution.services.resolver import (
 
 from . import PROJECT_ROOT
 
-
 _MINIMAL_SERVICE_REGISTRY = {
     "ldap": {"role": "svc-db-openldap"},
     "oidc": {"role": "web-app-keycloak"},

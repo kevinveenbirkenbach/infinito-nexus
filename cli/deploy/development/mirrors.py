@@ -4,8 +4,6 @@ from __future__ import annotations
 import os
 import shlex
 from pathlib import Path
-from typing import Dict
-
 
 CONTAINER_REPO_ROOT = Path("/opt/src/infinito")
 
@@ -35,7 +33,7 @@ def should_use_mirrors_on_ci() -> bool:
     return _require_bool_env("RUNNING_ON_GITHUB")
 
 
-def _exec_env() -> Dict[str, str]:
+def _exec_env() -> dict[str, str]:
     """
     All variables are mandatory. No fallbacks.
     """

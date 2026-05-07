@@ -6,10 +6,9 @@ import shutil
 import subprocess
 from pathlib import Path
 
+from . import PROJECT_ROOT
 from .common import cache_env_overrides, compose_file_args, resolve_distro
 from .profile import Profile
-from . import PROJECT_ROOT
-
 
 CI_DOCKER_ROOT = Path("/mnt/docker")
 CI_DOCKER_ROOT_STR = str(CI_DOCKER_ROOT)

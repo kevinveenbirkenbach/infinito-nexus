@@ -10,7 +10,6 @@ from utils.service_registry import is_explicit_truth
 
 from . import PROJECT_ROOT
 
-
 _ROLE_PREFIX = "web-app-"
 _MAILU_ROLE = "web-app-mailu"
 _EMAIL_LOOKUP_RE = re.compile(r"""lookup\(\s*['"]email['"]""")

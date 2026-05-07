@@ -2,9 +2,10 @@ from __future__ import annotations
 
 import ast
 import unittest
+from collections.abc import Iterable
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Iterable, Set
+
 from . import PROJECT_ROOT
 
 
@@ -41,7 +42,7 @@ def _iter_assigned_names(target: ast.AST) -> Iterable[str]:
             yield from _iter_assigned_names(elt)
 
 
-def _expr_contains_pipefail(node: ast.AST, pipefail_vars: Set[str]) -> bool:
+def _expr_contains_pipefail(node: ast.AST, pipefail_vars: set[str]) -> bool:
     if isinstance(node, ast.Constant) and isinstance(node.value, str):
         return "pipefail" in node.value
 
@@ -65,8 +66,8 @@ def _expr_contains_pipefail(node: ast.AST, pipefail_vars: Set[str]) -> bool:
     return False
 
 
-def _collect_pipefail_vars(tree: ast.Module) -> Set[str]:
-    names: Set[str] = set()
+def _collect_pipefail_vars(tree: ast.Module) -> set[str]:
+    names: set[str] = set()
     changed = True
     while changed:
         changed = False

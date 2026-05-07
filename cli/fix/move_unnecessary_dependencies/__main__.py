@@ -30,7 +30,6 @@ from __future__ import annotations
 import argparse
 import os
 import sys
-from typing import Dict, List, Optional, Set, Tuple
 
 from .analysis import (
     collect_role_defined_vars,
@@ -52,8 +51,8 @@ from .yaml_io import (
 
 
 def build_providers_index(
-    all_roles: List[str],
-) -> Dict[str, Tuple[Set[str], Set[str]]]:
+    all_roles: list[str],
+) -> dict[str, tuple[set[str], set[str]]]:
     return {
         role_name_from_dir(rd): (
             collect_role_defined_vars(rd),
@@ -65,8 +64,8 @@ def build_providers_index(
 
 def process_role(
     role_dir: str,
-    providers_index: Dict[str, Tuple[Set[str], Set[str]]],
-    only_role: Optional[str],
+    providers_index: dict[str, tuple[set[str], set[str]]],
+    only_role: str | None,
     dry_run: bool,
 ) -> bool:
     consumer_name = role_name_from_dir(role_dir)
@@ -77,7 +76,7 @@ def process_role(
     if not meta_deps:
         return False
 
-    moved: List[str] = []
+    moved: list[str] = []
     for producer in meta_deps:
         if producer not in providers_index:
             continue

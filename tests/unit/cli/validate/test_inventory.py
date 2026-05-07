@@ -1,10 +1,11 @@
-import unittest
-import tempfile
-import shutil
 import os
-from pathlib import Path
+import shutil
 import subprocess
 import sys
+import tempfile
+import unittest
+from pathlib import Path
+
 import yaml
 
 SCRIPT_PATH = os.path.abspath(
@@ -47,8 +48,7 @@ class TestValidateInventory(unittest.TestCase):
                 "--roles-dir",
                 str(self.roles_dir),
             ],
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
+            capture_output=True,
             encoding="utf-8",
             cwd=self.temp_dir,
         )

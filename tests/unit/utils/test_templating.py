@@ -1,13 +1,14 @@
 # tests/unit/utils/test_templating.py
 import os
+
+# Ensure repo root is importable so `utils.*` resolves in all runners
+import sys  # noqa: E402
 import unittest
 from unittest.mock import patch
 
 from ansible.errors import AnsibleError
-from . import PROJECT_ROOT
 
-# Ensure repo root is importable so `utils.*` resolves in all runners
-import sys  # noqa: E402
+from . import PROJECT_ROOT
 
 sys.path.insert(0, str(PROJECT_ROOT))  # noqa: E402
 

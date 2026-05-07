@@ -32,9 +32,10 @@ import argparse
 import sys
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any
 
 from utils.cache.yaml import load_yaml_any as _load_yaml_cached
+
 from . import PROJECT_ROOT
 
 
@@ -42,12 +43,12 @@ def eprint(msg: str) -> None:
     print(msg, file=sys.stderr)
 
 
-def list_group_files(groups_dir: Path) -> List[Path]:
+def list_group_files(groups_dir: Path) -> list[Path]:
     """
     Return group YAML files under tasks/groups (skip .gitignore and non-yml).
     Sort by filename for deterministic order.
     """
-    out: List[Path] = []
+    out: list[Path] = []
     for p in groups_dir.iterdir():
         if not p.is_file():
             continue
@@ -64,12 +65,12 @@ def load_yaml(path: Path) -> Any:
     return _load_yaml_cached(str(path), default_if_missing=None)
 
 
-def extract_roles_from_tasks(doc: Any) -> List[str]:
+def extract_roles_from_tasks(doc: Any) -> list[str]:
     """
     Extract include_role.name values from a task list.
     Ignores meta: flush_handlers (and everything else).
     """
-    roles: List[str] = []
+    roles: list[str] = []
     if doc is None or not isinstance(doc, list):
         return roles
 
@@ -104,14 +105,14 @@ def group_name_from_file(path: Path) -> str:
 class Group:
     file: Path
     group_name: str
-    roles: List[str]
+    roles: list[str]
 
 
-def build_groups(repo_root: Path) -> List[Group]:
+def build_groups(repo_root: Path) -> list[Group]:
     groups_dir = repo_root / "tasks" / "groups"
     files = list_group_files(groups_dir)
 
-    groups: List[Group] = []
+    groups: list[Group] = []
     for f in files:
         doc = load_yaml(f)
         roles = extract_roles_from_tasks(doc)
@@ -119,22 +120,22 @@ def build_groups(repo_root: Path) -> List[Group]:
     return groups
 
 
-def flatten_callorder(groups: List[Group]) -> List[Tuple[str, str]]:
+def flatten_callorder(groups: list[Group]) -> list[tuple[str, str]]:
     """
     Global order across groups: (group_name, role) in file sort order.
     """
-    out: List[Tuple[str, str]] = []
+    out: list[tuple[str, str]] = []
     for g in groups:
         for r in g.roles:
             out.append((g.group_name, r))
     return out
 
 
-def normalize_call_list(s: str) -> List[str]:
+def normalize_call_list(s: str) -> list[str]:
     return [x.strip() for x in s.split() if x.strip()]
 
 
-def main(argv: Optional[List[str]] = None) -> int:
+def main(argv: list[str] | None = None) -> int:
     ap = argparse.ArgumentParser(
         prog="python -m cli.meta.callorder",
         description="Print role call order per tasks/groups/*.yml and analyze relative to a marker role.",
@@ -162,17 +163,17 @@ def main(argv: Optional[List[str]] = None) -> int:
     global_order = flatten_callorder(groups)
 
     # Build global index for marker comparisons.
-    global_index: Dict[str, int] = {}
+    global_index: dict[str, int] = {}
     for i, (_grp, role) in enumerate(global_order):
         global_index.setdefault(role, i)
 
-    call_set: Optional[set[str]] = None
+    call_set: set[str] | None = None
     if args.call:
         call_set = set(normalize_call_list(args.call))
 
     marker_role = (args.marker or "").strip() or None
-    marker_pos: Optional[int] = None
-    marker_group: Optional[str] = None
+    marker_pos: int | None = None
+    marker_group: str | None = None
     if marker_role:
         if marker_role in global_index:
             marker_pos = global_index[marker_role]
@@ -210,7 +211,7 @@ def main(argv: Optional[List[str]] = None) -> int:
     # Decide group filtering:
     # - If --call: only groups that contain at least one selected role
     # - Else: all groups
-    filtered_groups: List[Group] = []
+    filtered_groups: list[Group] = []
     for g in groups:
         if call_set is not None:
             if any(r in call_set for r in g.roles):

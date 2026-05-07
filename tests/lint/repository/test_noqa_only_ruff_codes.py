@@ -45,7 +45,6 @@ from utils.cache.files import iter_project_files, read_text
 
 from . import PROJECT_ROOT
 
-
 # Match ``(#|//|{#) noqa`` markers carrying a colon-prefixed code list.
 # Captures only the comma-separated rules list. The character class
 # deliberately excludes ``<`` / ``>`` so docstring placeholders that

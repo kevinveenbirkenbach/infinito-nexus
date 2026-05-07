@@ -1,6 +1,8 @@
-from ansible.errors import AnsibleFilterError
-import hashlib
 import base64
+import hashlib
+
+from ansible.errors import AnsibleFilterError
+
 from utils.applications.config import get
 from utils.get_url import get_url
 
@@ -38,7 +40,7 @@ def _sort_tokens(tokens):
     return uniq
 
 
-class FilterModule(object):
+class FilterModule:
     """
     Jinja filters for building a robust, CSP3-aware Content-Security-Policy header.
     Safari/CSP2 compatibility is ensured by merging the -elem/-attr variants into the base
@@ -71,7 +73,7 @@ class FilterModule(object):
             result[application_id] = app_entry
             return result
         except Exception as exc:
-            raise AnsibleFilterError(f"add_csp_hash failed: {exc}")
+            raise AnsibleFilterError(f"add_csp_hash failed: {exc}") from exc
 
     # -------------------------------
     # Helpers
@@ -168,7 +170,7 @@ class FilterModule(object):
             b64 = base64.b64encode(digest).decode("utf-8")
             return f"'sha256-{b64}'"
         except Exception as exc:
-            raise AnsibleFilterError(f"get_csp_hash failed: {exc}")
+            raise AnsibleFilterError(f"get_csp_hash failed: {exc}") from exc
 
     @staticmethod
     def get_extra_values(extra_mapping, directive):
@@ -381,4 +383,4 @@ class FilterModule(object):
             return " ".join(parts)
 
         except Exception as exc:
-            raise AnsibleFilterError(f"build_csp_header failed: {exc}")
+            raise AnsibleFilterError(f"build_csp_header failed: {exc}") from exc

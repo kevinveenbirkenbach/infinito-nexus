@@ -1,5 +1,6 @@
-import unittest
 import os
+import unittest
+
 import yaml
 
 
@@ -23,7 +24,7 @@ class TestBackupsEnabledIntegrity(unittest.TestCase):
             if not os.path.isfile(docker_config_path):
                 continue
 
-            with open(docker_config_path, "r") as f:
+            with open(docker_config_path) as f:
                 try:
                     config = yaml.safe_load(f) or {}
                 except yaml.YAMLError as e:

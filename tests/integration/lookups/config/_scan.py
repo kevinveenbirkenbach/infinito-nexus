@@ -24,15 +24,15 @@ import functools
 import re
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Any, Dict, FrozenSet, List, Tuple
+from typing import Any
 
 from utils.annotations.suppress import is_suppressed_at
 from utils.cache.applications import get_application_defaults
 from utils.cache.files import iter_project_files_with_content
 from utils.cache.users import get_user_defaults
 from utils.cache.yaml import load_yaml_any
-from . import PROJECT_ROOT
 
+from . import PROJECT_ROOT
 
 # Rule key consumed by every `tests/integration/lookups/config/test_*.py`.
 # A marker in `same-or-above` position skips the call from all four
@@ -144,17 +144,17 @@ class ScanContext:
     """Repo-derived context the four classifications validate against."""
 
     root: Path
-    application_defaults: Dict[str, Any]
-    user_defaults: Dict[str, Any]
-    role_schemas: Dict[str, Dict[str, Any]]
-    role_for_app: Dict[str, str]
+    application_defaults: dict[str, Any]
+    user_defaults: dict[str, Any]
+    role_schemas: dict[str, dict[str, Any]]
+    role_for_app: dict[str, str]
     # Role directories that declare `application_id:` in
     # `vars/main.yml`. Consumed by the role-local classifier; a role
     # without an `application_id` is not an "application" in the
     # lookup-config sense and its `lookup('config', application_id, …)`
     # calls would resolve against an inherited application_id at
     # runtime that the static scan cannot pin down to a single role.
-    roles_with_application_id: FrozenSet[str] = field(default_factory=frozenset)
+    roles_with_application_id: frozenset[str] = field(default_factory=frozenset)
 
 
 def _is_quoted(token: str) -> bool:
@@ -206,7 +206,7 @@ def _has_default_arg(text: str, scan_from: int) -> bool:
     return False
 
 
-def _build_role_for_app_map(roles_root: Path) -> Dict[str, str]:
+def _build_role_for_app_map(roles_root: Path) -> dict[str, str]:
     """Walk ``roles/`` once and return ``{application_id: role_dir_name}``.
 
     Replaces the per-app ``plugins.filter.get_role.get_role`` call which
@@ -215,7 +215,7 @@ def _build_role_for_app_map(roles_root: Path) -> Dict[str, str]:
     the walk once here keeps it O(n) and routes every YAML read
     through the process-wide ``utils.cache.yaml.load_yaml_any`` cache.
     """
-    mapping: Dict[str, str] = {}
+    mapping: dict[str, str] = {}
     if not roles_root.is_dir():
         return mapping
     for role_dir in roles_root.iterdir():
@@ -234,11 +234,11 @@ def _build_role_for_app_map(roles_root: Path) -> Dict[str, str]:
 
 
 def _build_role_schemas(
-    application_defaults: Dict[str, Any],
-    role_for_app: Dict[str, str],
+    application_defaults: dict[str, Any],
+    role_for_app: dict[str, str],
     roles_root: Path,
-) -> Dict[str, Dict[str, Any]]:
-    role_schemas: Dict[str, Dict[str, Any]] = {}
+) -> dict[str, dict[str, Any]]:
+    role_schemas: dict[str, dict[str, Any]] = {}
     for app_id in application_defaults:
         role = role_for_app.get(app_id)
         if role is None:
@@ -256,7 +256,7 @@ def _build_role_schemas(
 # this project: Ansible YAML and Jinja templates. Restricting the walk
 # this way skips the bulk of binary / icon / web-asset files entirely,
 # which the underlying file-content cache otherwise has to read once.
-_SCANNED_EXTENSIONS: Tuple[str, ...] = (".yml", ".yaml", ".j2")
+_SCANNED_EXTENSIONS: tuple[str, ...] = (".yml", ".yaml", ".j2")
 
 
 @functools.lru_cache(maxsize=1)
@@ -279,7 +279,7 @@ def get_context() -> ScanContext:
 
 
 def _emit_literal_match(
-    text: str, lines: List[str], file_path: Path, m: re.Match[str]
+    text: str, lines: list[str], file_path: Path, m: re.Match[str]
 ) -> LookupMatch | None:
     if _line_is_commented(text, m.start()):
         return None
@@ -304,7 +304,7 @@ def _emit_literal_match(
 
 
 def _emit_concat_match(
-    text: str, lines: List[str], file_path: Path, m: re.Match[str]
+    text: str, lines: list[str], file_path: Path, m: re.Match[str]
 ) -> LookupMatch | None:
     if _line_is_commented(text, m.start()):
         return None
@@ -329,7 +329,7 @@ def _emit_concat_match(
 
 
 @functools.lru_cache(maxsize=1)
-def iter_matches() -> Tuple[LookupMatch, ...]:
+def iter_matches() -> tuple[LookupMatch, ...]:
     """Return the deduplicated tuple of qualifying lookup matches.
 
     Each project file is read at most once (via the
@@ -338,7 +338,7 @@ def iter_matches() -> Tuple[LookupMatch, ...]:
     (``_SCANNED_EXTENSIONS``) skip the bulk of files before the regex
     passes ever run.
     """
-    matches: List[LookupMatch] = []
+    matches: list[LookupMatch] = []
     for path_str, text in iter_project_files_with_content(
         extensions=_SCANNED_EXTENSIONS,
         exclude_tests=True,

@@ -1,6 +1,6 @@
-from collections.abc import Mapping
 import os
 import sys
+from collections.abc import Mapping
 
 from utils.applications.config import get  # reuse existing helper
 
@@ -198,7 +198,7 @@ def web_health_expectations(
     return ordered
 
 
-class FilterModule(object):
+class FilterModule:
     def filters(self):
         return {
             "web_health_expectations": web_health_expectations,

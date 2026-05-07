@@ -1,9 +1,8 @@
 # tests/integration/test_unnecessary_role_dependencies.py
+import glob
 import os
 import re
-import glob
 import unittest
-from typing import Dict, Set, List, Optional
 
 from utils.cache.files import read_text as _read_text_cached
 from utils.cache.yaml import load_yaml_any
@@ -29,7 +28,7 @@ def roles_root(project_root: str) -> str:
     return os.path.join(project_root, "roles")
 
 
-def iter_role_dirs(project_root: str) -> List[str]:
+def iter_role_dirs(project_root: str) -> list[str]:
     root = roles_root(project_root)
     return [d for d in glob.glob(os.path.join(root, "*")) if os.path.isdir(d)]
 
@@ -38,13 +37,13 @@ def role_name_from_dir(role_dir: str) -> str:
     return os.path.basename(role_dir.rstrip(os.sep))
 
 
-def path_if_exists(*parts) -> Optional[str]:
+def path_if_exists(*parts) -> str | None:
     p = os.path.join(*parts)
     return p if os.path.exists(p) else None
 
 
-def gather_yaml_files(base: str, patterns: List[str]) -> List[str]:
-    files: List[str] = []
+def gather_yaml_files(base: str, patterns: list[str]) -> list[str]:
+    files: list[str] = []
     for pat in patterns:
         files.extend(glob.glob(os.path.join(base, pat), recursive=True))
     return [f for f in files if os.path.isfile(f)]
@@ -53,8 +52,8 @@ def gather_yaml_files(base: str, patterns: List[str]) -> List[str]:
 # ---------------- Providers: vars & handlers ----------------
 
 
-def flatten_keys(data) -> Set[str]:
-    out: Set[str] = set()
+def flatten_keys(data) -> set[str]:
+    out: set[str] = set()
     if isinstance(data, dict):
         for k, v in data.items():
             if isinstance(k, str):
@@ -66,9 +65,9 @@ def flatten_keys(data) -> Set[str]:
     return out
 
 
-def collect_role_defined_vars(role_dir: str) -> Set[str]:
+def collect_role_defined_vars(role_dir: str) -> set[str]:
     """Vars a role 'provides': defaults/vars keys + set_fact keys in tasks."""
-    provided: Set[str] = set()
+    provided: set[str] = set()
 
     for rel in ("defaults/main.yml", "vars/main.yml"):
         p = path_if_exists(role_dir, rel)
@@ -95,13 +94,13 @@ def collect_role_defined_vars(role_dir: str) -> Set[str]:
     return {v for v in provided if isinstance(v, str) and v and v not in noisy}
 
 
-def collect_role_handler_names(role_dir: str) -> Set[str]:
+def collect_role_handler_names(role_dir: str) -> set[str]:
     """Handler names defined by a role (for notify detection)."""
     handler_file = path_if_exists(role_dir, "handlers/main.yml")
     if not handler_file:
         return set()
     data = safe_load_yaml(handler_file)
-    names: Set[str] = set()
+    names: set[str] = set()
     if isinstance(data, list):
         for task in data:
             if isinstance(task, dict):
@@ -114,17 +113,17 @@ def collect_role_handler_names(role_dir: str) -> Set[str]:
 # ---------------- Consumers: usage scanning ----------------
 
 
-def find_var_positions(text: str, varname: str) -> List[int]:
+def find_var_positions(text: str, varname: str) -> list[int]:
     """Return byte offsets for occurrences of varname (word-ish boundary)."""
-    positions: List[int] = []
+    positions: list[int] = []
     pattern = re.compile(rf"(?<!\w){re.escape(varname)}(?!\w)")
     for m in pattern.finditer(text):
         positions.append(m.start())
     return positions
 
 
-def first_var_use_offset_in_text(text: str, provided_vars: Set[str]) -> Optional[int]:
-    first: Optional[int] = None
+def first_var_use_offset_in_text(text: str, provided_vars: set[str]) -> int | None:
+    first: int | None = None
     for v in provided_vars:
         for off in find_var_positions(text, v):
             if first is None or off < first:
@@ -132,7 +131,7 @@ def first_var_use_offset_in_text(text: str, provided_vars: Set[str]) -> Optional
     return first
 
 
-def first_include_offset_for_role(text: str, producer_role: str) -> Optional[int]:
+def first_include_offset_for_role(text: str, producer_role: str) -> int | None:
     """
     Find earliest include/import of a given role in this YAML text.
     Handles compact dict and block styles.
@@ -151,14 +150,14 @@ def first_include_offset_for_role(text: str, producer_role: str) -> Optional[int
     return m.start() if m else None
 
 
-def find_notify_offsets_for_handlers(text: str, handler_names: Set[str]) -> List[int]:
+def find_notify_offsets_for_handlers(text: str, handler_names: set[str]) -> list[int]:
     """
     Heuristic: for each handler name, find occurrences where 'notify' appears within
     the preceding ~200 chars. Works for single string or list-style notify blocks.
     """
     if not handler_names:
         return []
-    offsets: List[int] = []
+    offsets: list[int] = []
     for h in handler_names:
         # Find occurrences of the handler name
         for m in re.finditer(re.escape(h), text):
@@ -171,8 +170,8 @@ def find_notify_offsets_for_handlers(text: str, handler_names: Set[str]) -> List
     return sorted(offsets)
 
 
-def parse_meta_dependencies(role_dir: str) -> Set[str]:
-    deps: Set[str] = set()
+def parse_meta_dependencies(role_dir: str) -> set[str]:
+    deps: set[str] = set()
     meta = path_if_exists(role_dir, "meta/main.yml")
     if not meta:
         return deps
@@ -213,21 +212,21 @@ class TestUnnecessaryRoleDependencies(unittest.TestCase):
         self.roles = iter_role_dirs(self.project_root)
 
         # Index provider data
-        self.role_vars: Dict[str, Set[str]] = {}
-        self.role_handlers: Dict[str, Set[str]] = {}
+        self.role_vars: dict[str, set[str]] = {}
+        self.role_handlers: dict[str, set[str]] = {}
         for rd in self.roles:
             rn = role_name_from_dir(rd)
             self.role_vars[rn] = collect_role_defined_vars(rd)
             self.role_handlers[rn] = collect_role_handler_names(rd)
 
         # Map meta deps
-        self.role_meta_deps: Dict[str, Set[str]] = {}
+        self.role_meta_deps: dict[str, set[str]] = {}
         for rd in self.roles:
             rn = role_name_from_dir(rd)
             self.role_meta_deps[rn] = parse_meta_dependencies(rd)
 
     def test_unnecessary_meta_dependencies(self):
-        warnings: List[str] = []
+        warnings: list[str] = []
 
         # Prepare lookup: role_dir by name
         role_dir_by_name = {role_name_from_dir(rd): rd for rd in self.roles}
@@ -266,7 +265,7 @@ class TestUnnecessaryRoleDependencies(unittest.TestCase):
 
                 # --- 1) Early usage in defaults/vars/handlers? If yes -> necessary, skip.
                 early_use = False
-                for path, text in defaults_texts:
+                for _path, text in defaults_texts:
                     if not text:
                         continue
                     off = first_var_use_offset_in_text(text, provided_vars)
@@ -283,7 +282,7 @@ class TestUnnecessaryRoleDependencies(unittest.TestCase):
                 any_usage = False
                 any_bad_order = False
 
-                for path, text in task_texts:
+                for _path, text in task_texts:
                     if not text:
                         continue
 

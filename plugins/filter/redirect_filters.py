@@ -1,7 +1,7 @@
 from ansible.errors import AnsibleFilterError
 
 
-class FilterModule(object):
+class FilterModule:
     """
     Custom filters for redirect domain mappings
     """
@@ -34,4 +34,4 @@ class FilterModule(object):
             return redirects
 
         except Exception as exc:
-            raise AnsibleFilterError(f"add_redirect_if_group failed: {exc}")
+            raise AnsibleFilterError(f"add_redirect_if_group failed: {exc}") from exc

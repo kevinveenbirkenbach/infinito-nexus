@@ -7,7 +7,6 @@ from ansible.errors import AnsibleError
 
 from plugins.lookup.service import LookupModule
 
-
 _SERVICE_REGISTRY = {
     "matomo": {"role": "web-app-matomo"},
     "cdn": {"role": "web-svc-cdn"},

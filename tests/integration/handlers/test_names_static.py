@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 
 """
 Integration test: ensure no Jinja variables are used in handler *names*.
@@ -20,8 +19,8 @@ Allowed:
 This test scans: roles/*/handlers/main.yml
 """
 
-import os
 import glob
+import os
 import re
 import unittest
 
@@ -73,7 +72,7 @@ class StaticHandlerNamesTest(unittest.TestCase):
         for handler_path in sorted(glob.glob(pattern)):
             # Load possibly multi-document YAML safely
             try:
-                with open(handler_path, "r", encoding="utf-8") as f:
+                with open(handler_path, encoding="utf-8") as f:
                     docs = list(yaml.safe_load_all(f))
             except FileNotFoundError:
                 continue

@@ -2,16 +2,16 @@ import tempfile
 import unittest
 from pathlib import Path
 from unittest.mock import patch
-from cli.create.inventory.host_vars import apply_vars_overrides_from_file
 
 import yaml
 from ruamel.yaml import YAML
 from ruamel.yaml.comments import CommentedMap
 
 from cli.create.inventory.host_vars import (
-    ensure_host_vars_file,
     apply_vars_overrides,
+    apply_vars_overrides_from_file,
     ensure_become_password,
+    ensure_host_vars_file,
 )
 
 

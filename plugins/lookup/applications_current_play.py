@@ -1,9 +1,8 @@
 from __future__ import annotations
 
 import os
-from typing import Any, Dict, List, Optional
+from typing import Any
 
-from utils.cache.yaml import load_yaml_any
 from ansible.errors import AnsibleError
 from ansible.plugins.lookup import LookupBase
 
@@ -14,10 +13,10 @@ from utils.cache.base import (
     _resolve_roles_dir,
     _stable_variables_signature,
 )
+from utils.cache.yaml import load_yaml_any
 from utils.service_registry import build_service_registry_from_applications
 
-
-_CURRENT_PLAY_CACHE: "dict[tuple, Dict[str, Any]]" = {}
+_CURRENT_PLAY_CACHE: dict[tuple, dict[str, Any]] = {}
 
 
 def _reset_cache_for_tests() -> None:
@@ -32,10 +31,10 @@ class LookupModule(LookupBase):
 
     def run(
         self,
-        terms: List[Any],
-        variables: Optional[Dict[str, Any]] = None,
+        terms: list[Any],
+        variables: dict[str, Any] | None = None,
         **kwargs: Any,
-    ) -> List[Dict[str, Any]]:
+    ) -> list[dict[str, Any]]:
         vars_ = variables or getattr(self._templar, "available_variables", {}) or {}
 
         roles_dir_arg = kwargs.get("roles_dir")
@@ -83,7 +82,7 @@ class LookupModule(LookupBase):
         plugin_dir = os.path.dirname(__file__)
         return os.path.abspath(os.path.join(plugin_dir, "..", ".."))
 
-    def _meta_deps(self, role: str, roles_dir: str) -> List[str]:
+    def _meta_deps(self, role: str, roles_dir: str) -> list[str]:
         meta_file = os.path.join(roles_dir, role, "meta", "main.yml")
         if not os.path.isfile(meta_file):
             return []

@@ -5,7 +5,6 @@ import subprocess
 import sys
 import time
 from pathlib import Path
-from typing import List, Optional
 
 from cli.mirror.providers import GHCRProvider
 from utils.docker.image.discovery import iter_role_images
@@ -22,7 +21,7 @@ def _validate_positive_int(value: str) -> int:
 
 
 def _throttle_before_next_copy(
-    *, images_per_hour: Optional[int], last_start_ts: Optional[float]
+    *, images_per_hour: int | None, last_start_ts: float | None
 ) -> float:
     """
     If images_per_hour is set, ensure at least (3600 / images_per_hour) seconds
@@ -70,10 +69,10 @@ def main() -> int:
     provider = GHCRProvider.from_args(args)
     repo_root = Path(args.repo_root).resolve()
 
-    failures: List[str] = []
+    failures: list[str] = []
     total = 0
 
-    last_start_ts: Optional[float] = None
+    last_start_ts: float | None = None
 
     for img in iter_role_images(repo_root):
         # Optional throttling (only when --images-per-hour is set)

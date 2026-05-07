@@ -2,7 +2,6 @@ import ast
 import os
 import re
 import unittest
-from typing import Dict, List, Tuple, Optional
 
 from utils.cache.files import iter_project_files, read_text
 
@@ -43,19 +42,19 @@ class _FiltersCollector(ast.NodeVisitor):
     """
 
     def __init__(self):
-        self.defs: List[Tuple[str, str]] = []  # (filter_name, callable_name)
+        self.defs: list[tuple[str, str]] = []  # (filter_name, callable_name)
 
     def visit_Return(self, node: ast.Return):
         mapping = self._extract_mapping(node.value)
         for k, v in mapping:
             self.defs.append((k, v))
 
-    def _extract_mapping(self, node) -> List[Tuple[str, str]]:
-        pairs: List[Tuple[str, str]] = []
+    def _extract_mapping(self, node) -> list[tuple[str, str]]:
+        pairs: list[tuple[str, str]] = []
 
         # dict literal
         if isinstance(node, ast.Dict):
-            for k, v in zip(node.keys, node.values):
+            for k, v in zip(node.keys, node.values, strict=False):
                 key = (
                     k.value
                     if isinstance(k, ast.Constant) and isinstance(k.value, str)
@@ -96,7 +95,7 @@ class _FiltersCollector(ast.NodeVisitor):
 
 def _collect_filters_from_filters_method(
     func: ast.FunctionDef,
-) -> List[Tuple[str, str]]:
+) -> list[tuple[str, str]]:
     """
     Walks the function to assemble any mapping that flows into the return.
     We capture direct return dicts and also a common pattern:
@@ -109,8 +108,8 @@ def _collect_filters_from_filters_method(
 
     # additionally scan simple 'X = {...}' and 'X.update({...})' patterns,
     # and if 'return X' occurs, merge those dicts.
-    name_dicts: Dict[str, List[Tuple[str, str]]] = {}
-    returns: List[str] = []
+    name_dicts: dict[str, list[tuple[str, str]]] = {}
+    returns: list[str] = []
 
     for n in ast.walk(func):
         if isinstance(n, ast.Assign):
@@ -139,7 +138,7 @@ def _collect_filters_from_filters_method(
 
     # dedupe
     seen = set()
-    out: List[Tuple[str, str]] = []
+    out: list[tuple[str, str]] = []
     for k, v in collector.defs:
         if (k, v) not in seen:
             seen.add((k, v))
@@ -147,7 +146,7 @@ def _collect_filters_from_filters_method(
     return out
 
 
-def _ast_collect_filters_from_file(path: str) -> List[Tuple[str, str, str]]:
+def _ast_collect_filters_from_file(path: str) -> list[tuple[str, str, str]]:
     code = _read(path)
     if not code:
         return []
@@ -156,7 +155,7 @@ def _ast_collect_filters_from_file(path: str) -> List[Tuple[str, str, str]]:
     except Exception:
         return []
 
-    results: List[Tuple[str, str, str]] = []
+    results: list[tuple[str, str, str]] = []
     for node in tree.body:
         if isinstance(node, ast.ClassDef) and node.name == "FilterModule":
             for item in node.body:
@@ -166,8 +165,8 @@ def _ast_collect_filters_from_file(path: str) -> List[Tuple[str, str, str]]:
     return results
 
 
-def collect_defined_filters() -> List[Dict[str, str]]:
-    found: List[Dict[str, str]] = []
+def collect_defined_filters() -> list[dict[str, str]]:
+    found: list[dict[str, str]] = []
     for path in _iter_files(py_only=True):
         if not _is_filter_plugins_dir(path):
             continue
@@ -184,8 +183,8 @@ def collect_defined_filters() -> List[Dict[str, str]]:
 
 
 def _scan_filter_usage(
-    definitions: List[Dict[str, str]],
-) -> Dict[str, Dict[str, bool]]:
+    definitions: list[dict[str, str]],
+) -> dict[str, dict[str, bool]]:
     """Single-pass inverted scan: for every project file, check all filters at once.
 
     Complexity before (per-filter loop): O(N_filters * M_files * 4_regex). For this
@@ -203,12 +202,12 @@ def _scan_filter_usage(
       ``{filter_name: {"used_any": bool, "used_outside": bool}}``
     """
     # Map filter name → its own definition file (skip self-matches).
-    def_file_by_name: Dict[str, str] = {
+    def_file_by_name: dict[str, str] = {
         d["filter"]: os.path.realpath(d["file"]) for d in definitions
     }
 
     # Reverse index: callable name → filter name (for the Python-call match group).
-    callable_to_filter: Dict[str, str] = {}
+    callable_to_filter: dict[str, str] = {}
     for d in definitions:
         c = d.get("callable")
         if c:
@@ -223,11 +222,11 @@ def _scan_filter_usage(
     if callable_to_filter:
         escaped_callables = [re.escape(c) for c in callable_to_filter]
         call_alt = "(" + "|".join(escaped_callables) + ")"
-        call_pat: Optional[re.Pattern] = re.compile(r"\b" + call_alt + r"\s*\(")
+        call_pat: re.Pattern | None = re.compile(r"\b" + call_alt + r"\s*\(")
     else:
         call_pat = None
 
-    state: Dict[str, Dict[str, bool]] = {
+    state: dict[str, dict[str, bool]] = {
         d["filter"]: {"used_any": False, "used_outside": False} for d in definitions
     }
 
@@ -239,13 +238,21 @@ def _scan_filter_usage(
         path_real = os.path.realpath(path)
         is_test_path = "/tests/" in path or path.endswith("tests")
 
-        def _record(name: str) -> None:
+        # Bind loop variables via default args so each iteration gets its
+        # own snapshot — without this, all closures share the LAST values
+        # of `path_real` / `is_test_path` (B023).
+        def _record(
+            name: str,
+            *,
+            _path_real: str = path_real,
+            _is_test_path: bool = is_test_path,
+        ) -> None:
             # Skip self-matches — a filter's own definition file is not a usage site.
-            if path_real == def_file_by_name.get(name):
+            if _path_real == def_file_by_name.get(name):
                 return
             s = state[name]
             s["used_any"] = True
-            if not is_test_path:
+            if not _is_test_path:
                 s["used_outside"] = True
 
         for m in bare_pat.finditer(content):

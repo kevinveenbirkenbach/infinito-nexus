@@ -1,8 +1,10 @@
-import unittest
-import tempfile
-import shutil
 import os
+import shutil
+import tempfile
+import unittest
+
 import yaml
+
 from cli.build import graph
 
 

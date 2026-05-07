@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import argparse
 import subprocess
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any
 
 from .apps import validate_application_ids
 from .modes import add_dynamic_mode_args, build_modes_from_args, load_modes_from_yaml
@@ -141,9 +141,9 @@ def build_parser() -> argparse.ArgumentParser:
 
 
 def _split_args(
-    argv: Optional[List[str]],
+    argv: list[str] | None,
     parser: argparse.ArgumentParser,
-) -> Tuple[argparse.Namespace, List[str]]:
+) -> tuple[argparse.Namespace, list[str]]:
     """
     Parse wrapper args and keep unknown args for direct ansible-playbook passthrough.
 
@@ -154,14 +154,14 @@ def _split_args(
     return args, unknown
 
 
-def _normalize_app_ids(raw_ids: List[str]) -> List[str]:
+def _normalize_app_ids(raw_ids: list[str]) -> list[str]:
     """
     Normalize application IDs:
       - allow space-separated
       - allow comma-separated
       - allow mixed
     """
-    result: List[str] = []
+    result: list[str] = []
 
     for item in raw_ids:
         parts = [p.strip() for p in item.split(",") if p.strip()]
@@ -169,7 +169,7 @@ def _normalize_app_ids(raw_ids: List[str]) -> List[str]:
 
     # remove duplicates while preserving order
     seen = set()
-    unique: List[str] = []
+    unique: list[str] = []
     for app in result:
         if app not in seen:
             seen.add(app)
@@ -178,7 +178,7 @@ def _normalize_app_ids(raw_ids: List[str]) -> List[str]:
     return unique
 
 
-def main(argv: Optional[List[str]] = None) -> int:
+def main(argv: list[str] | None = None) -> int:
     """
     CLI entrypoint for `python -m cli.deploy.dedicated`.
 
@@ -197,7 +197,7 @@ def main(argv: Optional[List[str]] = None) -> int:
     validate_application_ids(args.inventory, args.id)
 
     # Build final mode map
-    modes: Dict[str, Any] = build_modes_from_args(modes_spec, args)
+    modes: dict[str, Any] = build_modes_from_args(modes_spec, args)
 
     run_ansible_playbook(
         repo_root=PROJECT_ROOT,

@@ -1,16 +1,14 @@
 # cli/meta/applications/resolution/combined/role_introspection.py
 from __future__ import annotations
 
-from typing import List, Set
-
-from .errors import CombinedResolutionError
-from .repo_paths import role_config_path, role_dir, role_meta_path, role_vars_path
-from .yaml_utils import load_yaml_file
-
 from cli.meta.applications.resolution.services.errors import ServicesResolutionError
 from cli.meta.applications.resolution.services.resolver import (
     resolve_direct_service_roles_from_config,
 )
+
+from .errors import CombinedResolutionError
+from .repo_paths import role_config_path, role_dir, role_meta_path, role_vars_path
+from .yaml_utils import load_yaml_file
 
 
 def require_role_exists(role_name: str) -> None:
@@ -33,7 +31,7 @@ def has_application_id(role_name: str) -> bool:
     return isinstance(app_id, str) and bool(app_id.strip())
 
 
-def load_run_after(role_name: str) -> List[str]:
+def load_run_after(role_name: str) -> list[str]:
     """Return ``run_after`` for the role (or ``[]`` when absent).
 
     Per req-010 the value lives at
@@ -56,7 +54,7 @@ def load_run_after(role_name: str) -> List[str]:
     return _stable_dedup(cleaned)
 
 
-def load_dependencies_app_only(role_name: str) -> List[str]:
+def load_dependencies_app_only(role_name: str) -> list[str]:
     """
     Read top-level 'dependencies' from roles/<role_name>/meta/main.yml.
     Keep ONLY those dependencies whose target role defines application_id.
@@ -70,7 +68,7 @@ def load_dependencies_app_only(role_name: str) -> List[str]:
     deps_raw = data.get("dependencies", None)
     deps = _extract_dependency_role_names(deps_raw, meta_path=str(meta))
 
-    out: List[str] = []
+    out: list[str] = []
     for dep in deps:
         require_role_exists(dep)
         if has_application_id(dep):
@@ -83,7 +81,7 @@ def load_shared_service_roles_for_app(
     role_name: str,
     *,
     services_override: dict | None = None,
-) -> List[str]:
+) -> list[str]:
     """
     If role is an application role, inspect roles/<role>/meta/services.yml and
     return provider roles implied by services.* flags.
@@ -127,7 +125,7 @@ def load_shared_service_roles_for_app(
     return _stable_dedup(includes)
 
 
-def _extract_dependency_role_names(raw: object, *, meta_path: str) -> List[str]:
+def _extract_dependency_role_names(raw: object, *, meta_path: str) -> list[str]:
     """
     Normalize dependencies to a list of role names.
 
@@ -145,7 +143,7 @@ def _extract_dependency_role_names(raw: object, *, meta_path: str) -> List[str]:
             f"Invalid dependencies type in {meta_path}: expected list, got {type(raw).__name__}"
         )
 
-    out: List[str] = []
+    out: list[str] = []
     for item in raw:
         if isinstance(item, str):
             name = item.strip()
@@ -173,9 +171,9 @@ def _extract_dependency_role_names(raw: object, *, meta_path: str) -> List[str]:
     return out
 
 
-def _stable_dedup(items: List[str]) -> List[str]:
-    seen: Set[str] = set()
-    out: List[str] = []
+def _stable_dedup(items: list[str]) -> list[str]:
+    seen: set[str] = set()
+    out: list[str] = []
     for x in items:
         if x not in seen:
             out.append(x)

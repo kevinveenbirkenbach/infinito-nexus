@@ -3,15 +3,14 @@ from __future__ import annotations
 import argparse
 import os
 import re
-from typing import Any, Dict, List, Optional
-
+from typing import Any
 
 MODE_LINE_RE = re.compile(
     r"""^\s*(?P<key>[A-Z0-9_]+)\s*:\s*(?P<value>.+?)\s*(?:#\s*(?P<cmt>.*))?\s*$"""
 )
 
 
-def _parse_bool_literal(text: str) -> Optional[bool]:
+def _parse_bool_literal(text: str) -> bool | None:
     """Convert simple true/false/yes/no/on/off into boolean."""
     t = text.strip().lower()
     if t in ("true", "yes", "on"):
@@ -21,7 +20,7 @@ def _parse_bool_literal(text: str) -> Optional[bool]:
     return None
 
 
-def load_modes_from_yaml(modes_yaml_path: str) -> List[Dict[str, Any]]:
+def load_modes_from_yaml(modes_yaml_path: str) -> list[dict[str, Any]]:
     """
     Load MODE_* definitions from a YAML-like key/value file.
 
@@ -33,9 +32,9 @@ def load_modes_from_yaml(modes_yaml_path: str) -> List[Dict[str, Any]]:
     if not os.path.exists(modes_yaml_path):
         raise FileNotFoundError(f"Modes file not found: {modes_yaml_path}")
 
-    modes: List[Dict[str, Any]] = []
+    modes: list[dict[str, Any]] = []
 
-    with open(modes_yaml_path, "r", encoding="utf-8") as fh:
+    with open(modes_yaml_path, encoding="utf-8") as fh:
         for raw in fh:
             line = raw.rstrip()
             if not line or line.lstrip().startswith("#"):
@@ -66,14 +65,14 @@ def load_modes_from_yaml(modes_yaml_path: str) -> List[Dict[str, Any]]:
 
 
 def add_dynamic_mode_args(
-    parser: argparse.ArgumentParser, modes_meta: List[Dict[str, Any]]
-) -> Dict[str, Dict[str, Any]]:
+    parser: argparse.ArgumentParser, modes_meta: list[dict[str, Any]]
+) -> dict[str, dict[str, Any]]:
     """
     Add command-line args dynamically based on MODE_* metadata.
 
     Returns a spec mapping MODE_NAME -> info used by build_modes_from_args().
     """
-    spec: Dict[str, Dict[str, Any]] = {}
+    spec: dict[str, dict[str, Any]] = {}
 
     for meta in modes_meta:
         name = meta["name"]
@@ -106,10 +105,10 @@ def add_dynamic_mode_args(
 
 
 def build_modes_from_args(
-    spec: Dict[str, Dict[str, Any]], args_namespace: argparse.Namespace
-) -> Dict[str, Any]:
+    spec: dict[str, dict[str, Any]], args_namespace: argparse.Namespace
+) -> dict[str, Any]:
     """Resolve CLI arguments into a MODE_* dictionary."""
-    modes: Dict[str, Any] = {}
+    modes: dict[str, Any] = {}
 
     for mode_name, info in spec.items():
         dest = info["dest"]

@@ -6,10 +6,11 @@ containing the correct application_id. Can preview actions or overwrite mismatch
 
 import argparse
 import sys
+from pathlib import Path
+
 import yaml
 
 from utils.cache.yaml import dump_yaml, load_yaml_any
-from pathlib import Path
 
 from . import PROJECT_ROOT
 

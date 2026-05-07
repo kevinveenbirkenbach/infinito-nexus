@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import sys
 from pathlib import Path
-from typing import Dict, Optional
 
 from .subprocess_runner import run_subprocess
 
@@ -11,8 +10,8 @@ def resolve_role_path(
     application_id: str,
     roles_dir: Path,
     project_root: Path,
-    env: Optional[Dict[str, str]],
-) -> Optional[Path]:
+    env: dict[str, str] | None,
+) -> Path | None:
     """
     Resolve role path by calling:
       python -m cli.meta.applications.role_name <app_id> -r <roles_dir>

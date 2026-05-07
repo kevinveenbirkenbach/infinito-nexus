@@ -3,7 +3,8 @@ import unittest
 from pathlib import Path
 from unittest.mock import patch
 
-from cli.core.app import parse_flags, main as app_main
+from cli.core.app import main as app_main
+from cli.core.app import parse_flags
 
 
 class TestApp(unittest.TestCase):

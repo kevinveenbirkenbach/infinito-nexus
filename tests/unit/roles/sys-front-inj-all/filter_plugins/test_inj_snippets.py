@@ -8,10 +8,10 @@ Unit tests for roles/sys-front-inj-all/filter_plugins/inj_snippets.py
 - Calls the filter function via the loaded module to avoid method-binding.
 """
 
-import os
-import unittest
-import tempfile
 import importlib.util
+import os
+import tempfile
+import unittest
 
 
 class TestInjSnippets(unittest.TestCase):

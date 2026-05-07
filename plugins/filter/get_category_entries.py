@@ -24,7 +24,7 @@ def get_category_entries(prefix, roles_path="roles"):
     return sorted(roles)
 
 
-class FilterModule(object):
+class FilterModule:
     """Custom filters for Ansible"""
 
     def filters(self):

@@ -1,7 +1,8 @@
+import glob
 import os
 import unittest
+
 import yaml
-import glob
 
 
 class TestDependencyApplicationId(unittest.TestCase):

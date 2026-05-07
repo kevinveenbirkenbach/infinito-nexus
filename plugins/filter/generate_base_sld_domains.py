@@ -1,8 +1,9 @@
 import re
+
 from ansible.errors import AnsibleFilterError
 
 
-class FilterModule(object):
+class FilterModule:
     def filters(self):
         return {"generate_base_sld_domains": self.generate_base_sld_domains}
 

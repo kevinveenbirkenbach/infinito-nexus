@@ -1,12 +1,15 @@
 from __future__ import annotations
+
 import os
 import sys
-from typing import Iterable, Sequence
+from collections.abc import Iterable, Sequence
+
 from ansible.errors import AnsibleFilterError
+
 from utils.applications.config import (
-    get,
     AppConfigKeyError,
     ConfigEntryNotSetError,
+    get,
 )
 from utils.get_url import get_url  # returns "<protocol>://<domain>"
 
@@ -104,13 +107,13 @@ def redirect_uris(
             except Exception as e:
                 raise AnsibleFilterError(
                     f"redirect_uris: get_url failed for app '{app_id}' with domain '{d}': {e}"
-                )
+                ) from e
             uris.append(f"{url}{wildcard}")
 
     return _stable_dedup(uris) if dedup else uris
 
 
-class FilterModule(object):
+class FilterModule:
     """Infinito.Nexus redirect URI builder (uses get + get_url)"""
 
     def filters(self):

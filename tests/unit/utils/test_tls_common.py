@@ -1,7 +1,9 @@
+import importlib
 import sys
 import unittest
-import importlib
+
 from ansible.errors import AnsibleError
+
 from utils.tls_common import (
     AVAILABLE_FLAVORS,
     as_str,

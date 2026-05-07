@@ -1,9 +1,10 @@
 import os
 import re
-import yaml
-import tempfile
 import shutil
+import tempfile
 import unittest
+
+import yaml
 
 # Module under test
 import cli.validate.inventory as inventory_mod

@@ -1,5 +1,7 @@
 import unittest
+
 from ansible.errors import AnsibleFilterError
+
 from plugins.filter.domain_redirect_mappings import FilterModule
 
 

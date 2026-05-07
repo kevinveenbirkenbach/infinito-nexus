@@ -18,6 +18,6 @@ def cdn_dirs(tree):
     return sorted(out)
 
 
-class FilterModule(object):
+class FilterModule:
     def filters(self):
         return {"cdn_dirs": cdn_dirs}

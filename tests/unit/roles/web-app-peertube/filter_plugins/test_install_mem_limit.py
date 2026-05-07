@@ -1,5 +1,5 @@
-import unittest
 import importlib.util
+import unittest
 
 from ansible.errors import AnsibleFilterError
 

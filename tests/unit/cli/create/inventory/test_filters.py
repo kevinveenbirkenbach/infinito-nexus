@@ -1,8 +1,8 @@
 import unittest
 
 from cli.create.inventory.filters import (
-    parse_roles_list,
     filter_dynamic_inventory,
+    parse_roles_list,
 )
 
 

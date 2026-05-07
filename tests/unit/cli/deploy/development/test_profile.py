@@ -8,7 +8,6 @@ from unittest.mock import patch
 
 from cli.deploy.development.profile import Profile
 
-
 # Blank explicit signals; clear=True would unset PATH.
 _BLANK_CI_ENV = {
     "GITHUB_ACTIONS": "",

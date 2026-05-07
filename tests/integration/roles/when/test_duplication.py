@@ -1,6 +1,8 @@
 import unittest
+from collections.abc import Iterable
 from pathlib import Path
-from typing import Any, Dict, Iterable, List, Tuple
+from typing import Any
+
 from . import PROJECT_ROOT
 
 try:
@@ -36,7 +38,7 @@ def _normalize_when(value: Any) -> str:
     return " ".join(s.split())
 
 
-def _iter_tasks(node: Any) -> Iterable[Dict[str, Any]]:
+def _iter_tasks(node: Any) -> Iterable[dict[str, Any]]:
     """
     Yield task-like dicts (those which may contain 'when') from arbitrary YAML structures.
     Handles:
@@ -80,7 +82,7 @@ def _iter_tasks(node: Any) -> Iterable[Dict[str, Any]]:
                     yield from _iter_tasks(v)
 
 
-def _load_yaml_documents(path: Path) -> List[Any]:
+def _load_yaml_documents(path: Path) -> list[Any]:
     """
     Load all YAML documents from a file. Best-effort parsing:
     - If YAML fails due to Jinja syntax, we still raise, because a broken file
@@ -90,12 +92,12 @@ def _load_yaml_documents(path: Path) -> List[Any]:
     return list(yaml.safe_load_all(text))  # may return [None] if empty
 
 
-def _collect_when_counts(yaml_docs: List[Any]) -> Dict[str, List[Tuple[str, str]]]:
+def _collect_when_counts(yaml_docs: list[Any]) -> dict[str, list[tuple[str, str]]]:
     """
     Return a mapping: normalized_when -> list of (task_name, hint_location)
     where each entry corresponds to a task that uses that 'when'.
     """
-    counts: Dict[str, List[Tuple[str, str]]] = {}
+    counts: dict[str, list[tuple[str, str]]] = {}
     for doc in yaml_docs:
         for task in _iter_tasks(doc):
             if "when" not in task:
@@ -139,7 +141,7 @@ class WhenConditionDuplicationTest(unittest.TestCase):
             "**/tasks/**/*.yaml",
         ]
 
-        violations: List[str] = []
+        violations: list[str] = []
 
         for pattern in tasks_globs:
             for path in repo_root.glob(pattern):
@@ -160,15 +162,13 @@ class WhenConditionDuplicationTest(unittest.TestCase):
                             f"    - {tname} ({hint})" for tname, hint in occurrences[:5]
                         )
                         violations.append(
-                            (
-                                f"{path} uses the same 'when' condition more than {THRESHOLD} times "
-                                f"({len(occurrences)} occurrences):\n"
-                                f"  WHEN: {normalized_when}\n"
-                                f"  Sample tasks:\n{sample}\n"
-                                f"Suggestion: Group these tasks into a separate file and call it with "
-                                f"`include_tasks`, or use a single `block` guarded by this 'when' to avoid "
-                                f"re-evaluating the condition repeatedly."
-                            )
+                            f"{path} uses the same 'when' condition more than {THRESHOLD} times "
+                            f"({len(occurrences)} occurrences):\n"
+                            f"  WHEN: {normalized_when}\n"
+                            f"  Sample tasks:\n{sample}\n"
+                            f"Suggestion: Group these tasks into a separate file and call it with "
+                            f"`include_tasks`, or use a single `block` guarded by this 'when' to avoid "
+                            f"re-evaluating the condition repeatedly."
                         )
 
         if violations:

@@ -1,12 +1,12 @@
-import os
 import glob
+import os
 import unittest
-from typing import Any, Dict, List, Tuple, Optional
+from typing import Any
 
 try:
     import yaml
 except ImportError:  # pragma: no cover
-    raise SystemExit("Please `pip install pyyaml` to run this test.")
+    raise SystemExit("Please `pip install pyyaml` to run this test.") from None
 
 
 # ---------- Helpers: repo + YAML parsing ----------
@@ -27,16 +27,16 @@ def _find_repo_root_containing(relative: str, max_depth: int = 8) -> str:
     raise FileNotFoundError(f"Could not find {relative!r} upwards from {here}")
 
 
-def _load_yaml_file(path: str) -> List[Dict[str, Any]]:
+def _load_yaml_file(path: str) -> list[dict[str, Any]]:
     """
     Load a tasks YAML file.
     Returns a list of top-level task dicts. If the file is empty, returns [].
     Supports multi-doc YAML.
     """
-    with open(path, "r", encoding="utf-8") as f:
+    with open(path, encoding="utf-8") as f:
         content = f.read()
     docs = list(yaml.safe_load_all(content)) or []
-    tasks: List[Dict[str, Any]] = []
+    tasks: list[dict[str, Any]] = []
     for doc in docs:
         if doc is None:
             continue
@@ -53,7 +53,7 @@ def _load_yaml_file(path: str) -> List[Dict[str, Any]]:
 # ---------- Helpers: when / structure checks ----------
 
 
-def _normalize_when(value: Any) -> List[str]:
+def _normalize_when(value: Any) -> list[str]:
     """
     Normalize a 'when' value (string | list | bool | None) to a list of strings.
     Non-string entries are ignored.
@@ -64,7 +64,7 @@ def _normalize_when(value: Any) -> List[str]:
         v = value.strip()
         return [v] if v else []
     if isinstance(value, list):
-        out: List[str] = []
+        out: list[str] = []
         for item in value:
             if isinstance(item, str):
                 s = item.strip()
@@ -74,11 +74,11 @@ def _normalize_when(value: Any) -> List[str]:
     return []
 
 
-def _task_has_block_with_when(task: Dict[str, Any]) -> bool:
+def _task_has_block_with_when(task: dict[str, Any]) -> bool:
     return "block" in task and bool(_normalize_when(task.get("when")))
 
 
-def _is_pure_guarded_tasks_file(tasks: List[Dict[str, Any]]) -> Tuple[List[str], bool]:
+def _is_pure_guarded_tasks_file(tasks: list[dict[str, Any]]) -> tuple[list[str], bool]:
     """
     A "pure guarded" tasks file has EXACTLY ONE top-level task,
     that task contains a 'block', and that task has a 'when' condition.
@@ -95,7 +95,7 @@ def _is_pure_guarded_tasks_file(tasks: List[Dict[str, Any]]) -> Tuple[List[str],
 # ---------- Helpers: discovery ----------
 
 
-def _iter_all_tasks_files(repo_root: str) -> List[str]:
+def _iter_all_tasks_files(repo_root: str) -> list[str]:
     """
     Return all tasks/*.yml|*.yaml files in the project (recursively).
     """
@@ -103,12 +103,12 @@ def _iter_all_tasks_files(repo_root: str) -> List[str]:
         os.path.join(repo_root, "**", "tasks", "*.yml"),
         os.path.join(repo_root, "**", "tasks", "*.yaml"),
     ]
-    files: List[str] = []
+    files: list[str] = []
     for pat in patterns:
         files.extend(glob.glob(pat, recursive=True))
     # Deduplicate while keeping order
     seen = set()
-    ordered: List[str] = []
+    ordered: list[str] = []
     for p in files:
         if p not in seen:
             ordered.append(p)
@@ -116,7 +116,7 @@ def _iter_all_tasks_files(repo_root: str) -> List[str]:
     return ordered
 
 
-def _get_include_role_name(task: Dict[str, Any]) -> Optional[str]:
+def _get_include_role_name(task: dict[str, Any]) -> str | None:
     """
     If task is an include_role task, return the role 'name'.
     Supports 'include_role' and 'ansible.builtin.include_role'.
@@ -129,7 +129,7 @@ def _get_include_role_name(task: Dict[str, Any]) -> Optional[str]:
     return None
 
 
-def _get_include_tasks_target(task: Dict[str, Any]) -> Optional[str]:
+def _get_include_tasks_target(task: dict[str, Any]) -> str | None:
     """
     If task is an include_tasks, return the path string as-is (could be relative).
     Supports 'include_tasks' and 'ansible.builtin.include_tasks'.
@@ -147,9 +147,7 @@ def _contains_jinja(s: str) -> bool:
     return "{{" in s or "{%" in s or "}}" in s or "%}" in s
 
 
-def _resolve_include_tasks_path(
-    include_value: str, including_file: str
-) -> Optional[str]:
+def _resolve_include_tasks_path(include_value: str, including_file: str) -> str | None:
     """
     Resolve an include_tasks path relative to the including file.
     If it contains Jinja or does not resolve to an existing file, return None.
@@ -159,14 +157,14 @@ def _resolve_include_tasks_path(
         return None
 
     # Absolute path?
-    candidates: List[str] = []
+    candidates: list[str] = []
     if os.path.isabs(include_value):
         candidates.append(include_value)
     else:
         base = os.path.dirname(including_file)
         candidates.append(os.path.join(base, include_value))
 
-    final_candidates: List[str] = []
+    final_candidates: list[str] = []
     for c in candidates:
         final_candidates.append(c)
         root, ext = os.path.splitext(c)
@@ -197,7 +195,7 @@ class PureGuardedIncludeTest(unittest.TestCase):
         cls.repo_root = _find_repo_root_containing("roles")
 
         # Map pure guarded roles: role_name -> (guards, main_path)
-        cls.pure_guarded_roles: Dict[str, Tuple[List[str], str]] = {}
+        cls.pure_guarded_roles: dict[str, tuple[list[str], str]] = {}
 
         role_main_glob = os.path.join(cls.repo_root, "roles", "*", "tasks", "main.yml")
         for main_path in glob.glob(role_main_glob):
@@ -214,7 +212,7 @@ class PureGuardedIncludeTest(unittest.TestCase):
                 pass
 
         # Cache of parsed tasks files for include_tasks: path -> (guards, pure)
-        cls.tasks_file_cache: Dict[str, Tuple[List[str], bool]] = {}
+        cls.tasks_file_cache: dict[str, tuple[list[str], bool]] = {}
 
         # All tasks files across repo
         cls.all_tasks_files = _iter_all_tasks_files(cls.repo_root)
@@ -222,7 +220,7 @@ class PureGuardedIncludeTest(unittest.TestCase):
     # ---------- Tests ----------
 
     def test_include_role_short_circuits_when_target_is_pure_guarded(self):
-        failures: List[str] = []
+        failures: list[str] = []
 
         if not self.pure_guarded_roles:
             self.skipTest(
@@ -273,7 +271,7 @@ class PureGuardedIncludeTest(unittest.TestCase):
             )
 
     def test_include_tasks_short_circuits_when_target_is_pure_guarded(self):
-        failures: List[str] = []
+        failures: list[str] = []
 
         for including_path in self.all_tasks_files:
             try:

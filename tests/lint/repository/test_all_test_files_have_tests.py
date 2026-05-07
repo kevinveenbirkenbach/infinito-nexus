@@ -2,7 +2,6 @@
 import ast
 import os
 import unittest
-from typing import List
 
 from utils.cache.files import read_text
 
@@ -17,8 +16,8 @@ class TestTestFilesContainUnittestTests(unittest.TestCase):
             f"'tests' directory not found at: {self.tests_dir}",
         )
 
-    def _iter_test_files(self) -> List[str]:
-        out: List[str] = []
+    def _iter_test_files(self) -> list[str]:
+        out: list[str] = []
         for root, _dirs, files in os.walk(self.tests_dir):
             for fn in files:
                 if fn.startswith("test_") and fn.endswith(".py"):

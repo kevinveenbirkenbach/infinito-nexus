@@ -1,12 +1,13 @@
 #!/usr/bin/python
 from __future__ import annotations
 
-from ansible.module_utils.basic import AnsibleModule
 import subprocess
+
+from ansible.module_utils.basic import AnsibleModule
 
 
 def run(cmd: list[str]) -> str:
-    p = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+    p = subprocess.run(cmd, capture_output=True, text=True)
     if p.returncode != 0:
         raise RuntimeError(p.stderr.strip())
     return (p.stdout or "").strip()

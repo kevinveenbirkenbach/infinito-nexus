@@ -6,7 +6,7 @@ The classifier here owns the rule "literal app id + complete path
 handled by the sibling tests."""
 
 import unittest
-from typing import Dict, Iterable, List, Tuple
+from collections.abc import Iterable
 
 from utils.applications.config import ConfigEntryNotSetError, get
 
@@ -16,8 +16,8 @@ from ._validate import PathNotFound, validate_app_path
 
 def _build_literal_paths(
     matches: Iterable[LookupMatch],
-) -> Dict[str, Dict[str, List[Tuple]]]:
-    out: Dict[str, Dict[str, List[Tuple]]] = {}
+) -> dict[str, dict[str, list[tuple]]]:
+    out: dict[str, dict[str, list[tuple]]] = {}
     for m in matches:
         if m.kind != "literal":
             continue
@@ -39,8 +39,8 @@ class TestLiteralPaths(unittest.TestCase):
 
     def test_literal_paths(self):
         ctx = self.ctx
-        failures: List[str] = []
-        missing_apps: List[str] = []
+        failures: list[str] = []
+        missing_apps: list[str] = []
         for app_id, paths in self.literal_paths.items():
             if app_id not in ctx.application_defaults:
                 missing_apps.append(app_id)
@@ -69,7 +69,7 @@ class TestLiteralPaths(unittest.TestCase):
                     file_path, lineno = occs[0]
                     failures.append(f"{exc}; called at {file_path}:{lineno}")
 
-        report: List[str] = []
+        report: list[str] = []
         if missing_apps:
             report.append(
                 f"{len(missing_apps)} application id(s) referenced by literal "

@@ -1,5 +1,6 @@
-import unittest
 import glob
+import unittest
+
 import yaml
 
 
@@ -15,7 +16,7 @@ class TestUniversalLogoutSetting(unittest.TestCase):
         errors = []
 
         for file_path in files:
-            with open(file_path, "r", encoding="utf-8") as f:
+            with open(file_path, encoding="utf-8") as f:
                 try:
                     data = yaml.safe_load(f)
                 except yaml.YAMLError as e:

@@ -35,7 +35,7 @@ class TestPlaywrightEnvServiceFlags(unittest.TestCase):
     def test_every_flag_renders_strict_true_or_false(self):
         offenders = []
         for role, path in _iter_env_templates():
-            with open(path, "r", encoding="utf-8") as f:
+            with open(path, encoding="utf-8") as f:
                 content = f.read()
             for match in SERVICE_FLAG_LINE.finditer(content):
                 rhs = match.group(2).strip()

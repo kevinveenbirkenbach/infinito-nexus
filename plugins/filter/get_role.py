@@ -31,7 +31,7 @@ def get_role(application_id, roles_path="roles"):
             try:
                 data = load_yaml_any(vars_file, default_if_missing={}) or {}
             except Exception as e:
-                raise AnsibleFilterError(f"Failed to load {vars_file}: {e}")
+                raise AnsibleFilterError(f"Failed to load {vars_file}: {e}") from e
             if not isinstance(data, dict):
                 continue
 
@@ -43,7 +43,7 @@ def get_role(application_id, roles_path="roles"):
     )
 
 
-class FilterModule(object):
+class FilterModule:
     """
     Register the get_role filter
     """

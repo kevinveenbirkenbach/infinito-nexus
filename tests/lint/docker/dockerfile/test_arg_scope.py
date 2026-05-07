@@ -19,6 +19,7 @@ from __future__ import annotations
 import re
 import unittest
 from pathlib import Path
+
 from . import PROJECT_ROOT
 
 _REPO_ROOT = PROJECT_ROOT

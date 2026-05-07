@@ -6,7 +6,6 @@ from pathlib import Path
 from types import ModuleType
 from unittest.mock import patch
 
-
 from . import PROJECT_ROOT
 
 

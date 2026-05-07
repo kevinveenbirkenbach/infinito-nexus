@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import sys
-from typing import List
 
 
 def _dump_inventory_full(inventory: str) -> None:
@@ -18,7 +17,7 @@ def _dump_inventory_full(inventory: str) -> None:
         return
 
     try:
-        with open(inventory, "r", encoding="utf-8", errors="replace") as f:
+        with open(inventory, encoding="utf-8", errors="replace") as f:
             content = f.read()
 
         print("\n===== BEGIN INVENTORY FILE =====")
@@ -28,7 +27,7 @@ def _dump_inventory_full(inventory: str) -> None:
         print(f"[DEBUG] failed to read inventory: {exc}")
 
 
-def validate_application_ids(inventory: str, app_ids: List[str]) -> None:
+def validate_application_ids(inventory: str, app_ids: list[str]) -> None:
     """Validate requested application IDs using ValidDeployId."""
     if not app_ids:
         return

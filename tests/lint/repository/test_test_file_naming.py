@@ -1,6 +1,6 @@
-from pathlib import Path
 import os
 import unittest
+from pathlib import Path
 
 from utils.cache.files import iter_project_files
 

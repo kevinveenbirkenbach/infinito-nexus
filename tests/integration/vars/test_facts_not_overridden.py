@@ -1,14 +1,16 @@
 import unittest
+from collections.abc import Iterable
 from pathlib import Path
-from typing import Any, Dict, Iterable, List, Optional, Set, Tuple
+from typing import Any
 
 import yaml
 
 from utils.cache.files import read_text
+
 from . import PROJECT_ROOT
 
 
-def _safe_yaml_load_all(path: Path) -> List[Any]:
+def _safe_yaml_load_all(path: Path) -> list[Any]:
     """
     Load YAML documents from a file.
     Returns a list of documents (usually 1), each can be list/dict/None.
@@ -29,7 +31,7 @@ def _safe_yaml_load_all(path: Path) -> List[Any]:
         return ["__YAML_PARSE_ERROR__"]
 
 
-def _iter_task_dicts(obj: Any) -> Iterable[Dict[str, Any]]:
+def _iter_task_dicts(obj: Any) -> Iterable[dict[str, Any]]:
     """
     Yield task dicts from arbitrary YAML structures.
     Ansible task files are typically a list of dict tasks, but can contain blocks.
@@ -58,11 +60,11 @@ def _iter_task_dicts(obj: Any) -> Iterable[Dict[str, Any]]:
                 yield from _iter_task_dicts(obj.get(key))
 
 
-def _is_set_fact_task(task: Dict[str, Any]) -> bool:
+def _is_set_fact_task(task: dict[str, Any]) -> bool:
     return "set_fact" in task or "ansible.builtin.set_fact" in task
 
 
-def _get_set_fact_mapping(task: Dict[str, Any]) -> Dict[str, Any]:
+def _get_set_fact_mapping(task: dict[str, Any]) -> dict[str, Any]:
     if "set_fact" in task and isinstance(task["set_fact"], dict):
         return task["set_fact"]
     if "ansible.builtin.set_fact" in task and isinstance(
@@ -72,12 +74,12 @@ def _get_set_fact_mapping(task: Dict[str, Any]) -> Dict[str, Any]:
     return {}
 
 
-def _find_vars_mapping(task: Dict[str, Any]) -> Optional[Dict[str, Any]]:
+def _find_vars_mapping(task: dict[str, Any]) -> dict[str, Any] | None:
     v = task.get("vars")
     return v if isinstance(v, dict) else None
 
 
-def _is_include_like(task: Dict[str, Any]) -> bool:
+def _is_include_like(task: dict[str, Any]) -> bool:
     """
     Tasks that can carry a `vars:` section that becomes the scope for included content.
     """
@@ -103,11 +105,11 @@ def _looks_dynamic(varname: str) -> bool:
     )
 
 
-def _collect_defined_facts(task_files: List[Path]) -> Dict[str, Set[Path]]:
+def _collect_defined_facts(task_files: list[Path]) -> dict[str, set[Path]]:
     """
     Return mapping: fact_name -> set(paths where it's set via set_fact)
     """
-    facts: Dict[str, Set[Path]] = {}
+    facts: dict[str, set[Path]] = {}
     for p in task_files:
         docs = _safe_yaml_load_all(p)
         if "__YAML_PARSE_ERROR__" in docs:
@@ -124,11 +126,11 @@ def _collect_defined_facts(task_files: List[Path]) -> Dict[str, Set[Path]]:
     return facts
 
 
-def _collect_var_overrides(task_files: List[Path]) -> List[Tuple[Path, str, str]]:
+def _collect_var_overrides(task_files: list[Path]) -> list[tuple[Path, str, str]]:
     """
     Return list of (path, task_name, var_key) for vars used on include-like tasks.
     """
-    overrides: List[Tuple[Path, str, str]] = []
+    overrides: list[tuple[Path, str, str]] = []
     for p in task_files:
         docs = _safe_yaml_load_all(p)
         if "__YAML_PARSE_ERROR__" in docs:
@@ -148,13 +150,13 @@ def _collect_var_overrides(task_files: List[Path]) -> List[Tuple[Path, str, str]
     return overrides
 
 
-def _find_task_files(repo_root: Path) -> List[Path]:
+def _find_task_files(repo_root: Path) -> list[Path]:
     """
     All YAML files under:
       - roles/*/tasks/
       - tasks/
     """
-    task_files: List[Path] = []
+    task_files: list[Path] = []
 
     roles_dir = repo_root / "roles"
     if roles_dir.is_dir():
@@ -170,7 +172,7 @@ def _find_task_files(repo_root: Path) -> List[Path]:
         task_files.extend(sorted(top_tasks.rglob("*.yaml")))
 
     # De-dup
-    uniq: List[Path] = []
+    uniq: list[Path] = []
     seen = set()
     for p in task_files:
         rp = str(p.resolve())
@@ -196,11 +198,11 @@ class TestFactsAreNotOverriddenByVars(unittest.TestCase):
         var_overrides = _collect_var_overrides(task_files)  # (path, task_name, var_key)
 
         # Build reverse index for fast lookup
-        override_index: Dict[str, List[Tuple[Path, str]]] = {}
+        override_index: dict[str, list[tuple[Path, str]]] = {}
         for p, tname, key in var_overrides:
             override_index.setdefault(key, []).append((p, tname))
 
-        violations: List[str] = []
+        violations: list[str] = []
         for fact_name, fact_paths in sorted(facts.items(), key=lambda x: x[0]):
             if fact_name not in override_index:
                 continue

@@ -1,8 +1,9 @@
-import unittest
-import types
-from unittest.mock import patch
-import subprocess
 import os
+import subprocess
+import types
+import unittest
+from unittest.mock import patch
+
 from . import PROJECT_ROOT
 
 

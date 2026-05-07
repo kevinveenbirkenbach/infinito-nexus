@@ -22,17 +22,16 @@ With snippet mode (no file changes, just YAML output):
 import argparse
 import sys
 from pathlib import Path
-from typing import Dict, Any, Union
+from typing import Any
 
 from ruamel.yaml import YAML
 from ruamel.yaml.comments import CommentedMap
 
-from utils.manager.inventory import InventoryManager
 from utils.handler.vault import (
     VaultHandler,
     VaultScalar,
 )  # uses your existing handler
-
+from utils.manager.inventory import InventoryManager
 
 # ---------- helpers ----------
 
@@ -103,9 +102,7 @@ def _make_vault_scalar_from_text(text: str) -> Any:
     return y.load(snippet)["v"]
 
 
-def to_vault_block(
-    vault_handler: VaultHandler, value: Union[str, Any], label: str
-) -> Any:
+def to_vault_block(vault_handler: VaultHandler, value: str | Any, label: str) -> Any:
     """
     Return a ruamel scalar tagged as !vault. If the input value is already
     vault-encrypted (string contains $ANSIBLE_VAULT, is a !vault scalar, or a VaultScalar),
@@ -135,12 +132,12 @@ def to_vault_block(
     return _make_vault_scalar_from_text(snippet)
 
 
-def parse_overrides(pairs: list[str]) -> Dict[str, str]:
+def parse_overrides(pairs: list[str]) -> dict[str, str]:
     """
     Parse --set key=value pairs into a dict.
     Supports both 'credentials.key=val' and 'key=val' (short) forms.
     """
-    out: Dict[str, str] = {}
+    out: dict[str, str] = {}
     for pair in pairs:
         k, v = pair.split("=", 1)
         out[k.strip()] = v.strip()
@@ -148,7 +145,7 @@ def parse_overrides(pairs: list[str]) -> Dict[str, str]:
 
 
 def _override_for(
-    app_id: str, key: str, overrides: Dict[str, str], *, is_primary: bool
+    app_id: str, key: str, overrides: dict[str, str], *, is_primary: bool
 ) -> str | None:
     """
     Resolve overrides for a credential key.
@@ -242,7 +239,7 @@ def main() -> int:
     yaml_rt.preserve_quotes = True
 
     # Get schema-applied structure (includes shared-provider application blocks)
-    schema_inventory: Dict[str, Any] = manager.apply_schema()
+    schema_inventory: dict[str, Any] = manager.apply_schema()
     schema_apps = schema_inventory.get("applications", {}) or {}
 
     # -------------------------------------------------------------------------
@@ -268,7 +265,7 @@ def main() -> int:
                 )
 
                 if ov is not None:
-                    value_for_key: Union[str, Any] = ov
+                    value_for_key: str | Any = ov
                 else:
                     value_for_key = default_val
 
@@ -301,7 +298,7 @@ def main() -> int:
     # -------------------------------------------------------------------------
 
     # 1) Load existing inventory with ruamel (round-trip)
-    with open(args.inventory_file, "r", encoding="utf-8") as f:
+    with open(args.inventory_file, encoding="utf-8") as f:
         data = yaml_rt.load(f)  # CommentedMap or None
     if data is None:
         data = CommentedMap()
@@ -331,7 +328,7 @@ def main() -> int:
             ov = _override_for(
                 app_id, key, overrides, is_primary=(app_id == manager.app_id)
             )
-            value_for_new_key: Union[str, Any]
+            value_for_new_key: str | Any
 
             if ov is not None:
                 value_for_new_key = ov

@@ -1,6 +1,7 @@
 import os
-import unittest
 import sys
+import unittest
+
 import yaml
 
 sys.path.insert(

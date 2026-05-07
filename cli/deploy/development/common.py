@@ -3,8 +3,8 @@ from __future__ import annotations
 import os
 from typing import TYPE_CHECKING
 
-from .deps import apps_with_deps, resolve_run_after
 from . import PROJECT_ROOT
+from .deps import apps_with_deps, resolve_run_after
 
 if TYPE_CHECKING:
     from .compose import Compose

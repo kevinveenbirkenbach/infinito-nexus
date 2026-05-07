@@ -5,7 +5,6 @@ import os
 import subprocess
 import sys
 
-
 BOOTSTRAP_CODE = r"""
 import os
 from django.contrib.auth import get_user_model

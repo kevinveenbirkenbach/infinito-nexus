@@ -2,7 +2,7 @@
 from __future__ import annotations
 
 import json
-from typing import Any, Optional
+from typing import Any
 
 
 def json_from_noisy_stdout(text: Any) -> Any:
@@ -37,7 +37,7 @@ def json_from_noisy_stdout(text: Any) -> Any:
     if not candidates:
         raise ValueError("No JSON start delimiter found")
 
-    last_err: Optional[Exception] = None
+    last_err: Exception | None = None
     for idx in candidates:
         chunk = s[idx:].strip()
         try:

@@ -2,8 +2,8 @@ from __future__ import annotations
 
 import argparse
 import sys
+from collections.abc import Iterable
 from pathlib import Path
-from typing import Iterable, Optional, Set, Tuple
 
 from utils.roles.meta_lookup import get_role_lifecycle
 
@@ -20,7 +20,7 @@ def _repo_root() -> Path:
     raise RuntimeError("Failed to locate repository root (missing 'cli/' directory).")
 
 
-def _iter_role_dirs(roles_dir: Path) -> Iterable[Tuple[str, Path]]:
+def _iter_role_dirs(roles_dir: Path) -> Iterable[tuple[str, Path]]:
     """Yield ``(role_name, role_dir)`` for every directory under ``roles_dir``."""
     if not roles_dir.exists() or not roles_dir.is_dir():
         return
@@ -32,8 +32,8 @@ def _iter_role_dirs(roles_dir: Path) -> Iterable[Tuple[str, Path]]:
 def filter_roles(
     roles_dir: Path,
     mode: str,
-    statuses: Set[str],
-    selection: Optional[Set[str]] = None,
+    statuses: set[str],
+    selection: set[str] | None = None,
     include_missing_lifecycle_on_blacklist: bool = True,
 ) -> list[str]:
     matched: list[str] = []
@@ -110,7 +110,7 @@ def build_parser() -> argparse.ArgumentParser:
     return p
 
 
-def main(argv: Optional[list[str]] = None) -> int:
+def main(argv: list[str] | None = None) -> int:
     args = build_parser().parse_args(argv)
 
     roles_dir: Path = args.roles_dir

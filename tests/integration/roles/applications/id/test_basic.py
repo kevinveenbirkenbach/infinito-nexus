@@ -1,7 +1,8 @@
-import unittest
-import yaml
-import os
 import glob
+import os
+import unittest
+
+import yaml
 
 from plugins.filter.invokable_paths import get_invokable_paths
 

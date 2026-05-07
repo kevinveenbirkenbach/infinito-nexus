@@ -30,7 +30,7 @@ class TestNoApplicationsVariableUsage(unittest.TestCase):
                 if os.path.abspath(file_path) == os.path.abspath(__file__):
                     continue
                 try:
-                    with open(file_path, "r", encoding="utf-8") as f:
+                    with open(file_path, encoding="utf-8") as f:
                         for lineno, line in enumerate(f, 1):
                             match = self.APPLICATIONS_VARIABLE_PATTERN.search(line)
                             if match:

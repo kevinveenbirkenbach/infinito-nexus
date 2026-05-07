@@ -1,7 +1,5 @@
 from __future__ import annotations
 
-from typing import List, Set
-
 from .resolver import CombinedResolver
 from .role_introspection import require_role_exists
 
@@ -18,8 +16,8 @@ def print_tree(start_role: str) -> None:
 
     resolver = CombinedResolver()
 
-    expanded: Set[str] = set()
-    stack: List[str] = []
+    expanded: set[str] = set()
+    stack: list[str] = []
 
     def show_node(node: str, prefix: str, is_last: bool) -> None:
         connector = "└── " if is_last else "├── "
@@ -41,7 +39,7 @@ def print_tree(start_role: str) -> None:
 
         edges = resolver.edges_for(node)
 
-        groups: List[tuple[str, List[str]]] = []
+        groups: list[tuple[str, list[str]]] = []
         if edges.run_after:
             groups.append(("run_after", edges.run_after))
         if edges.dependencies:

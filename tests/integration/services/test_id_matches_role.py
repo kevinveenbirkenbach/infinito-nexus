@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
-import os
 import glob
+import os
 import unittest
+
 import yaml
 
 
@@ -18,7 +19,7 @@ class TestSystemServiceIdMatchesRole(unittest.TestCase):
         )
 
     def _load_yaml(self, path: str):
-        with open(path, "r", encoding="utf-8") as f:
+        with open(path, encoding="utf-8") as f:
             return yaml.safe_load(f) or {}
 
     def test_system_service_id_equals_role_name(self):

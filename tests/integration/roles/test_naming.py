@@ -1,5 +1,6 @@
-import unittest
 import re
+import unittest
+
 from . import PROJECT_ROOT
 
 # Regex:

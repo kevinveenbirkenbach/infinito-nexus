@@ -1,11 +1,12 @@
 from __future__ import annotations
+
 import argparse
 import json
 from pathlib import Path
-from utils.cache.yaml import dump_yaml_str
 
-from utils.docker.image.discovery import iter_role_images
 from cli.mirror.providers import GHCRProvider
+from utils.cache.yaml import dump_yaml_str
+from utils.docker.image.discovery import iter_role_images
 
 
 def main() -> int:

@@ -4,8 +4,8 @@ import argparse
 import os
 import subprocess
 
-from .common import resolve_distro
 from . import PROJECT_ROOT
+from .common import resolve_distro
 
 
 def add_parser(sub: argparse._SubParsersAction) -> None:

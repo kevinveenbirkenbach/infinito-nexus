@@ -9,7 +9,8 @@ if PROJECT_ROOT not in sys.path:
     sys.path.insert(0, PROJECT_ROOT)
 
 from ansible.errors import AnsibleFilterError  # noqa: E402
-from plugins.filter.domain_tools import to_zone, FilterModule  # noqa: E402
+
+from plugins.filter.domain_tools import FilterModule, to_zone  # noqa: E402
 
 
 class TestDomainTools(unittest.TestCase):

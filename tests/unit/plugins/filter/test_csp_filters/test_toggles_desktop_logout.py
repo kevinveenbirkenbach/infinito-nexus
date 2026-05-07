@@ -1,5 +1,6 @@
-import unittest
 import copy
+import unittest
+
 from plugins.filter.csp_filters import FilterModule
 
 

@@ -8,9 +8,9 @@ roles directory is located at the project root, relative to this script's locati
 
 """
 
+import argparse
 import os
 import sys
-import argparse
 
 from utils.cache.yaml import load_yaml
 
@@ -36,7 +36,7 @@ def get_role(application_id, roles_path):
             try:
                 data = load_yaml(vars_file)
             except Exception as e:
-                raise RuntimeError(f"Failed to load {vars_file}: {e}")
+                raise RuntimeError(f"Failed to load {vars_file}: {e}") from e
 
             if data.get("application_id") == application_id:
                 return role

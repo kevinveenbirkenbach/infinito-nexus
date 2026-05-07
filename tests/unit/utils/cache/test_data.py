@@ -496,14 +496,14 @@ def _run_in_ansible_blocked_subprocess(snippet: str):
     repo_root = PROJECT_ROOT
     preamble = (
         "import sys\n"
-        "sys.path.insert(0, %r)\n"
+        f"sys.path.insert(0, {str(repo_root)!r})\n"
         "class _Block:\n"
         "    def find_spec(self, name, path=None, target=None):\n"
         "        if name == 'ansible' or name.startswith('ansible.'):\n"
         "            raise ImportError(f'blocked: {name}')\n"
         "        return None\n"
         "sys.meta_path.insert(0, _Block())\n"
-    ) % str(repo_root)
+    )
     code = preamble + snippet
     result = subprocess.run(
         [sys.executable, "-c", code],

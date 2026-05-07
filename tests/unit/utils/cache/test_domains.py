@@ -18,6 +18,7 @@ from unittest.mock import patch
 
 from utils.cache import _reset_cache_for_tests
 from utils.cache import domains as cache_domains
+
 from . import PROJECT_ROOT
 
 
@@ -157,7 +158,7 @@ class TestImportableWithoutAnsible(unittest.TestCase):
         repo_root = PROJECT_ROOT
         snippet = (
             "import sys\n"
-            "sys.path.insert(0, %r)\n"
+            f"sys.path.insert(0, {str(repo_root)!r})\n"
             "class _Block:\n"
             "    def find_spec(self, name, path=None, target=None):\n"
             "        if name == 'ansible' or name.startswith('ansible.'):\n"
@@ -167,7 +168,7 @@ class TestImportableWithoutAnsible(unittest.TestCase):
             "from utils.cache.domains import get_merged_domains\n"
             "assert callable(get_merged_domains)\n"
             "print('OK')\n"
-        ) % str(repo_root)
+        )
         result = subprocess.run(
             [sys.executable, "-c", snippet],
             capture_output=True,

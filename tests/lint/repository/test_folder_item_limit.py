@@ -20,6 +20,7 @@ from dataclasses import dataclass
 from pathlib import Path
 
 from utils.annotations.message import warning
+
 from . import PROJECT_ROOT
 
 MAX_ITEMS_PER_FOLDER = 12

@@ -20,9 +20,10 @@ so wrapper and init step compute the same plan independently.
 from __future__ import annotations
 
 import json
+from collections.abc import Mapping, Sequence
 from dataclasses import dataclass
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, Mapping, Sequence
+from typing import TYPE_CHECKING, Any
 
 from utils.cache.applications import get_variants
 from utils.cache.base import _deep_merge

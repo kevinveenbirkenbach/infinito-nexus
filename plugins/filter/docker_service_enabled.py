@@ -1,4 +1,4 @@
-class FilterModule(object):
+class FilterModule:
     """Custom filter to safely check if a docker service is enabled for an application_id"""
 
     def filters(self):

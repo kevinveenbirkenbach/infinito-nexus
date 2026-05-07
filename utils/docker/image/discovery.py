@@ -1,11 +1,10 @@
 from __future__ import annotations
 
+from collections.abc import Iterable
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Iterable, Tuple
 
 from utils.cache.yaml import load_yaml_any as _load_yaml_cached
-
 
 DOCKER_HUB_PREFIXES = (
     "docker.io/",
@@ -97,7 +96,7 @@ def normalize_docker_hub(image: str) -> str:
     return image
 
 
-def split_name_and_suffix(image: str) -> Tuple[str, str]:
+def split_name_and_suffix(image: str) -> tuple[str, str]:
     """
     Split image into base name and suffix:
       repo/name:tag   -> (repo/name, :tag)

@@ -17,8 +17,8 @@
 
 from __future__ import annotations
 
-from ansible.plugins.lookup import LookupBase
 from ansible.errors import AnsibleError
+from ansible.plugins.lookup import LookupBase
 
 
 def _looks_like_template(value) -> bool:

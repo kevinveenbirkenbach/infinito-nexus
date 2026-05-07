@@ -1,8 +1,8 @@
-import subprocess
-import os
-import time
-import shutil
 import argparse
+import os
+import shutil
+import subprocess
+import time
 
 
 def run_command(command):

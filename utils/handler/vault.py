@@ -1,8 +1,8 @@
 import subprocess
-from typing import Any, Dict
+from typing import Any
 
-from yaml.loader import SafeLoader
 from yaml.dumper import SafeDumper
+from yaml.loader import SafeLoader
 
 
 class VaultScalar(str):
@@ -44,7 +44,7 @@ class VaultHandler:
             raise RuntimeError(f"ansible-vault encrypt_string failed:\n{proc.stderr}")
         return proc.stdout
 
-    def encrypt_leaves(self, branch: Dict[str, Any], vault_pw: str):
+    def encrypt_leaves(self, branch: dict[str, Any], vault_pw: str):
         """Recursively encrypt all leaves (plain text values) under the credentials section."""
         for key, value in branch.items():
             if isinstance(value, dict):

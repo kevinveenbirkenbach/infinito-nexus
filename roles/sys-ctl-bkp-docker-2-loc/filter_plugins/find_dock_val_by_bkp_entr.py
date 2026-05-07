@@ -33,7 +33,7 @@ def find_dock_val_by_bkp_entr(applications, search_string, mapped_entry):
     return sorted(results)
 
 
-class FilterModule(object):
+class FilterModule:
     def filters(self):
         return {
             "find_dock_val_by_bkp_entr": find_dock_val_by_bkp_entr,

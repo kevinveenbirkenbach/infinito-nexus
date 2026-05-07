@@ -34,7 +34,7 @@ def fediverse_url(handle, protocol="https", path_prefix="@"):
     return f"{protocol}://{host}/{path_prefix}{username}"
 
 
-class FilterModule(object):
+class FilterModule:
     def filters(self):
         return {
             "fediverse_url": fediverse_url,

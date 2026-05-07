@@ -1,4 +1,5 @@
 import unittest
+
 from ansible.errors import AnsibleFilterError
 
 # Import the filter plugin

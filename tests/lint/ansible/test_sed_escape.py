@@ -16,10 +16,9 @@ from __future__ import annotations
 
 import re
 import unittest
+from collections.abc import Iterable
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Iterable, List, Optional, Tuple
-
 
 from . import PROJECT_ROOT
 
@@ -39,7 +38,7 @@ def iter_task_files() -> Iterable[Path]:
     yield from sorted(PROJECT_ROOT.glob(TASK_FILES_GLOB))
 
 
-def find_sed_substitutions(text: str, file: Path) -> List[SedMatch]:
+def find_sed_substitutions(text: str, file: Path) -> list[SedMatch]:
     """
     Find sed substitution invocations like:
       sed -i "s|PAT|REPL|"
@@ -51,7 +50,7 @@ def find_sed_substitutions(text: str, file: Path) -> List[SedMatch]:
       blocks {{ ... }} are ignored so expressions like sed_escape('|') don't
       confuse the parser.
     """
-    matches: List[SedMatch] = []
+    matches: list[SedMatch] = []
 
     # Broad match for a sed command that contains a substitution starting with s<delim>
     sed_cmd_re = re.compile(
@@ -125,7 +124,7 @@ def find_sed_substitutions(text: str, file: Path) -> List[SedMatch]:
     return matches
 
 
-def extract_replacement(expr: str) -> Optional[Tuple[str, str]]:
+def extract_replacement(expr: str) -> tuple[str, str] | None:
     """
     Given a sed snippet that includes `s<d>`, extract (delimiter, replacement_part).
     Ignores delimiter characters inside Jinja blocks {{ ... }}.
@@ -137,8 +136,8 @@ def extract_replacement(expr: str) -> Optional[Tuple[str, str]]:
 
     # Parse: s<d> PAT <d> REPL <d> ...
     rest = expr[m.end() :]
-    parts: List[str] = []
-    buf: List[str] = []
+    parts: list[str] = []
+    buf: list[str] = []
 
     i = 0
     in_jinja = 0
@@ -188,7 +187,7 @@ class TestSedEscapeUsage(unittest.TestCase):
     def test_all_sed_replacements_use_sed_escape_filter_for_jinja_in_replacement(
         self,
     ) -> None:
-        violations: List[str] = []
+        violations: list[str] = []
 
         for file in iter_task_files():
             text = file.read_text(encoding="utf-8", errors="replace")

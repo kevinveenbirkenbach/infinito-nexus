@@ -4,19 +4,20 @@ import argparse
 import json
 import os
 import subprocess
-from typing import Any, Mapping
+from collections.abc import Mapping
+from typing import Any
 
 from cli.create.inventory.services_disabler import (
     find_provider_roles,
     parse_services_disabled,
 )
 
+from . import PROJECT_ROOT
 from .common import (
     make_compose,
     resolve_container,
 )
 from .inventory import filter_plan_to_variant, plan_dev_inventory_matrix
-from . import PROJECT_ROOT
 
 
 def _env_variant() -> int | None:
@@ -28,7 +29,7 @@ def _env_variant() -> int | None:
     except ValueError:
         raise SystemExit(
             f"VARIANT environment variable must be an integer, got {raw!r}"
-        )
+        ) from None
 
 
 def _env_full_cycle() -> bool:
@@ -256,7 +257,7 @@ def handler(args: argparse.Namespace) -> int:
     try:
         plan = filter_plan_to_variant(plan, args.variant)
     except ValueError as exc:
-        raise SystemExit(f"--variant: {exc}")
+        raise SystemExit(f"--variant: {exc}") from exc
 
     # INFINITO_CONTAINER is the single SPOT — defaults.sh keeps it in
     # lock-step with INFINITO_DISTRO across matrix iterations. Read it

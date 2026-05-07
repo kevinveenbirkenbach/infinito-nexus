@@ -39,13 +39,13 @@ def split_postgres_connections(total_connections, roles_dir="roles"):
     except Exception:
         raise AnsibleFilterError(
             f"total_connections must be int-like, got: {total_connections!r}"
-        )
+        ) from None
 
     count = sum(1 for vf in _iter_role_vars_files(roles_dir) if _is_postgres_role(vf))
     denom = max(count, 1)
     return max(1, total // denom)
 
 
-class FilterModule(object):
+class FilterModule:
     def filters(self):
         return {"split_postgres_connections": split_postgres_connections}

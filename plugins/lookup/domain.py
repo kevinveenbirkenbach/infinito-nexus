@@ -3,7 +3,7 @@ from __future__ import annotations
 
 import os
 import sys
-from typing import Any, Dict, Optional
+from typing import Any
 
 from ansible.errors import AnsibleError
 from ansible.plugins.lookup import LookupBase
@@ -22,7 +22,7 @@ class LookupModule(LookupBase):
     regular applications-merge pipeline.
     """
 
-    def run(self, terms, variables: Optional[Dict[str, Any]] = None, **kwargs):
+    def run(self, terms, variables: dict[str, Any] | None = None, **kwargs):
         if not terms or len(terms) != 1:
             raise AnsibleError(
                 "lookup('domain', application_id) expects exactly 1 term"
@@ -52,13 +52,13 @@ class LookupModule(LookupBase):
         except Exception as e:
             raise AnsibleError(
                 f"lookup('domain'): could not import utils.domains.primary_domain.get_domain: {e}"
-            )
+            ) from e
 
         try:
             domain = get_domain(domains, application_id.strip())
         except Exception as e:
             raise AnsibleError(
                 f"lookup('domain'): failed to resolve domain for '{application_id}': {e}"
-            )
+            ) from e
 
         return [domain]

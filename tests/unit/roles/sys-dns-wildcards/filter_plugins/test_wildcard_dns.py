@@ -1,6 +1,7 @@
 # tests/unit/roles/sys-dns-wildcards/filter_plugins/test_wildcard_dns.py
-import unittest
 import importlib.util
+import unittest
+
 from . import PROJECT_ROOT
 
 
@@ -231,7 +232,9 @@ class TestWildcardDNS(unittest.TestCase):
         self.assertEqual(got, expected)
 
     def test_error_on_missing_ip4(self):
-        with self.assertRaises(Exception):
+        from ansible.errors import AnsibleFilterError
+
+        with self.assertRaises(AnsibleFilterError):
             self.wildcard_records(
                 current_play_domains_all={"svc": ["a.b.example.com"]},
                 apex="example.com",

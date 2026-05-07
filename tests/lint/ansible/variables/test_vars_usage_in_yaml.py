@@ -1,7 +1,8 @@
-import unittest
-from pathlib import Path
 import re
-from typing import Any, Iterable, Set, List, Dict, Tuple
+import unittest
+from collections.abc import Iterable
+from pathlib import Path
+from typing import Any
 
 from utils.cache.files import iter_project_files, read_text
 from utils.cache.yaml import load_yaml_all
@@ -47,7 +48,7 @@ class TestVarsPassedAreUsed(unittest.TestCase):
         ):
             yield Path(path_str)
 
-    def _load_yaml_documents(self, path: Path) -> List[Any]:
+    def _load_yaml_documents(self, path: Path) -> list[Any]:
         try:
             return list(load_yaml_all(path, default_if_missing=()))
         except Exception:
@@ -67,7 +68,7 @@ class TestVarsPassedAreUsed(unittest.TestCase):
 
     def _collect_vars_passed_with_locations(
         self,
-    ) -> Tuple[Set[str], Dict[str, Set[Tuple[Path, int]]]]:
+    ) -> tuple[set[str], dict[str, set[tuple[Path, int]]]]:
         """
         Returns:
           - a set of all var names passed via `vars:`
@@ -76,8 +77,8 @@ class TestVarsPassedAreUsed(unittest.TestCase):
         Line numbers are best-effort based on raw text scanning (not YAML AST),
         because PyYAML doesn't preserve line info.
         """
-        collected: Set[str] = set()
-        locations: Dict[str, Set[Tuple[Path, int]]] = {}
+        collected: set[str] = set()
+        locations: dict[str, set[tuple[Path, int]]] = {}
 
         # Regex-based scan for:
         #   <indent>vars:
@@ -129,7 +130,7 @@ class TestVarsPassedAreUsed(unittest.TestCase):
     # ---------- Gather text for Jinja usage scanning ----------
 
     def _concat_texts(self) -> str:
-        parts: List[str] = []
+        parts: list[str] = []
         for f in self._iter_files(self.YAML_EXTENSIONS | self.JINJA_EXTENSIONS):
             try:
                 parts.append(read_text(str(f)))
@@ -140,14 +141,14 @@ class TestVarsPassedAreUsed(unittest.TestCase):
 
     # ---------- Extract Ansible expression strings from YAML ----------
 
-    def _collect_ansible_expressions(self) -> List[str]:
+    def _collect_ansible_expressions(self) -> list[str]:
         """
         Return a flat list of strings taken from Ansible expression-bearing fields:
         - when: <str> or when: [<str>, <str>, ...]
         - loop: <str>
         - with_*: <str>
         """
-        exprs: List[str] = []
+        exprs: list[str] = []
         for yml in self._iter_files(self.YAML_EXTENSIONS):
             docs = self._load_yaml_documents(yml)
             for doc in docs:
@@ -186,7 +187,7 @@ class TestVarsPassedAreUsed(unittest.TestCase):
         )
         return pat_output.search(text) is not None or pat_stmt.search(text) is not None
 
-    def _used_in_ansible_exprs(self, var_name: str, exprs: List[str]) -> bool:
+    def _used_in_ansible_exprs(self, var_name: str, exprs: list[str]) -> bool:
         """
         Detect var usage in Ansible expressions (when/loop/with_*),
         excluding function/macro calls like `var_name(...)`.
@@ -207,7 +208,7 @@ class TestVarsPassedAreUsed(unittest.TestCase):
         all_text = self._concat_texts()
         ansible_exprs = self._collect_ansible_expressions()
 
-        unused: List[str] = []
+        unused: list[str] = []
         for var_name in sorted(vars_passed):
             used = self._used_in_jinja_blocks(
                 var_name, all_text
@@ -217,7 +218,7 @@ class TestVarsPassedAreUsed(unittest.TestCase):
                     unused.append(var_name)
 
         if unused:
-            lines: List[str] = []
+            lines: list[str] = []
             lines.append(
                 "The following variables are passed via `vars:` but never referenced in:\n"
                 "  • Jinja output/statement blocks ({{ ... }} / {% ... %}) OR\n"

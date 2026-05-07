@@ -1,6 +1,7 @@
-import unittest
-import tempfile
 import os
+import tempfile
+import unittest
+
 import yaml
 
 from plugins.filter.get_all_application_ids import get_all_application_ids

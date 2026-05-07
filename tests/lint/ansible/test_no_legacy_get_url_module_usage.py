@@ -8,7 +8,6 @@ from utils.cache.files import iter_project_files_with_content
 
 from . import PROJECT_ROOT
 
-
 LEGACY_GET_URL_MODULE_PATTERN = re.compile(
     r"^\s*(ansible\.builtin\.get_url|get_url)\s*:\s*(?:#.*)?$"
 )

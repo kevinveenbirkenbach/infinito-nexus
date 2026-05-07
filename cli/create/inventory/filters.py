@@ -1,9 +1,9 @@
 from __future__ import annotations
 
-from typing import Any, Dict, Optional, Set
+from typing import Any
 
 
-def parse_roles_list(raw_roles: Optional[list[str]]) -> Optional[Set[str]]:
+def parse_roles_list(raw_roles: list[str] | None) -> set[str] | None:
     """
     Parse a list of IDs supplied on the CLI. Supports:
       --include web-app-nextcloud web-app-mastodon
@@ -12,7 +12,7 @@ def parse_roles_list(raw_roles: Optional[list[str]]) -> Optional[Set[str]]:
     """
     if not raw_roles:
         return None
-    result: Set[str] = set()
+    result: set[str] = set()
     for token in raw_roles:
         token = token.strip()
         if not token:
@@ -25,14 +25,14 @@ def parse_roles_list(raw_roles: Optional[list[str]]) -> Optional[Set[str]]:
 
 
 def _filter_inventory_children(
-    inv_data: Dict[str, Any], keep_predicate
-) -> Dict[str, Any]:
+    inv_data: dict[str, Any], keep_predicate
+) -> dict[str, Any]:
     all_block = inv_data.get("all", {}) or {}
     children = (
         (all_block.get("children", {}) or {}) if isinstance(all_block, dict) else {}
     )
 
-    filtered: Dict[str, Any] = {}
+    filtered: dict[str, Any] = {}
     for group_name, group_data in children.items():
         if keep_predicate(group_name, group_data):
             filtered[group_name] = group_data
@@ -43,11 +43,11 @@ def _filter_inventory_children(
 
 
 def filter_dynamic_inventory(
-    dyn_inv: Dict[str, Any],
-    include_filter: Optional[Set[str]],
-    exclude_filter: Optional[Set[str]],
-    legacy_roles_filter: Optional[Set[str]],
-) -> Dict[str, Any]:
+    dyn_inv: dict[str, Any],
+    include_filter: set[str] | None,
+    exclude_filter: set[str] | None,
+    legacy_roles_filter: set[str] | None,
+) -> dict[str, Any]:
     """
     Apply include/exclude/legacy role filters in the same order as before:
       include -> exclude -> legacy roles

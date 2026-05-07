@@ -2,7 +2,6 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import Dict, List, Set, Tuple
 
 from .role_introspection import (
     load_dependencies_app_only,
@@ -14,9 +13,9 @@ from .role_introspection import (
 
 @dataclass(frozen=True)
 class RoleEdges:
-    run_after: List[str]
-    dependencies: List[str]
-    services: List[str]
+    run_after: list[str]
+    dependencies: list[str]
+    services: list[str]
 
 
 class CombinedResolver:
@@ -41,10 +40,10 @@ class CombinedResolver:
 
     def __init__(
         self,
-        services_overrides: Dict[str, dict] | None = None,
+        services_overrides: dict[str, dict] | None = None,
     ) -> None:
-        self._cache: Dict[str, RoleEdges] = {}
-        self._services_overrides: Dict[str, dict] = dict(services_overrides or {})
+        self._cache: dict[str, RoleEdges] = {}
+        self._services_overrides: dict[str, dict] = dict(services_overrides or {})
 
     def edges_for(self, role_name: str) -> RoleEdges:
         if role_name in self._cache:
@@ -67,7 +66,7 @@ class CombinedResolver:
         self._cache[role_name] = edges
         return edges
 
-    def resolve(self, start_role: str) -> List[str]:
+    def resolve(self, start_role: str) -> list[str]:
         """
         Return prerequisites-first (post-order) list, excluding start_role.
 
@@ -76,9 +75,9 @@ class CombinedResolver:
         """
         require_role_exists(start_role)
 
-        visited: Set[str] = set()
-        stack: List[str] = []
-        out: List[str] = []
+        visited: set[str] = set()
+        stack: list[str] = []
+        out: list[str] = []
 
         def dfs(node: str) -> None:
             if node in stack:
@@ -110,6 +109,6 @@ class CombinedResolver:
 
     def resolve_with_edges(
         self, start_role: str
-    ) -> Tuple[List[str], Dict[str, RoleEdges]]:
+    ) -> tuple[list[str], dict[str, RoleEdges]]:
         resolved = self.resolve(start_role)
         return resolved, dict(self._cache)

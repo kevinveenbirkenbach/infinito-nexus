@@ -23,6 +23,7 @@ import unittest
 from pathlib import Path
 
 from utils.annotations.message import warning
+
 from . import PROJECT_ROOT
 
 _REPO_ROOT = PROJECT_ROOT

@@ -1,10 +1,10 @@
 import glob
 import unittest
-import yaml
 from pathlib import Path
 
-from utils.service_registry import is_explicit_truth
+import yaml
 
+from utils.service_registry import is_explicit_truth
 
 PROMETHEUS_APP_ID = "web-app-prometheus"
 

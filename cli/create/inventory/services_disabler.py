@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import os
 from pathlib import Path
-from typing import Optional
 
 from ruamel.yaml import YAML
 from ruamel.yaml.comments import CommentedMap
@@ -147,7 +146,7 @@ def apply_services_disabled(
     host_vars_file: Path,
     services: list[str],
     roles_dir: Path,
-    inventory_file: Optional[Path] = None,
+    inventory_file: Path | None = None,
 ) -> None:
     """
     For every role under roles_dir whose meta/services.yml defines a service listed
@@ -225,7 +224,7 @@ def apply_services_disabled(
 def apply_services_disabled_from_env(
     host_vars_file: Path,
     roles_dir: Path,
-    inventory_file: Optional[Path] = None,
+    inventory_file: Path | None = None,
 ) -> None:
     """Read SERVICES_DISABLED from the environment and apply to host_vars and inventory."""
     raw = os.environ.get("SERVICES_DISABLED", "").strip()

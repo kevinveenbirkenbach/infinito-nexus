@@ -1,6 +1,6 @@
-import unittest
 import os
 import shutil
+import unittest
 
 # Import the filter directly
 from plugins.filter.has_env import has_env

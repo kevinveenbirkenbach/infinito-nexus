@@ -2,9 +2,10 @@
 import importlib.util
 import json
 import unittest
-import yaml
 from pathlib import Path
 from unittest.mock import patch
+
+import yaml
 
 from . import PROJECT_ROOT
 

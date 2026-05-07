@@ -5,6 +5,7 @@ from pathlib import Path
 from unittest.mock import patch
 
 from ansible.errors import AnsibleError
+
 from . import PROJECT_ROOT
 
 

@@ -36,7 +36,7 @@ def merge_mapping(list1, list2, key_name="source"):
     return list(merged.values())
 
 
-class FilterModule(object):
+class FilterModule:
     def filters(self):
         return {
             "merge_mapping": merge_mapping,

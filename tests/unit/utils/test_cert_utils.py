@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 import unittest
+
 from utils.cert_utils import CertUtils
 
 

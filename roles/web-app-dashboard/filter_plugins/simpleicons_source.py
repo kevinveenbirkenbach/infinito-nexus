@@ -1,11 +1,7 @@
-from __future__ import absolute_import, division, print_function
-
-__metaclass__ = type
-
-import certifi
 import os
 import re
 
+import certifi
 import requests
 from ansible.errors import AnsibleFilterError
 
@@ -110,7 +106,7 @@ def add_simpleicon_source(
     return enhanced
 
 
-class FilterModule(object):
+class FilterModule:
     """Ansible filter plugin to add simpleicons source URLs to portfolio cards"""
 
     def filters(self):

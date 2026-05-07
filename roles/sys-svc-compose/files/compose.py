@@ -6,13 +6,12 @@ import os
 import shlex
 import sys
 from pathlib import Path
-from typing import List, Optional
 
 # `utils.cache.yaml` is unavailable here: this file is copy-deployed.
 import yaml  # noqa: E402
 
 
-def detect_env_file(project_dir: Path) -> Optional[Path]:
+def detect_env_file(project_dir: Path) -> Path | None:
     """Detect compose env file: <dir>/.env or legacy <dir>/.env/env."""
     c1 = project_dir / ".env"
     if c1.is_file():
@@ -23,7 +22,7 @@ def detect_env_file(project_dir: Path) -> Optional[Path]:
     return None
 
 
-def detect_compose_files(project_dir: Path) -> List[Path]:
+def detect_compose_files(project_dir: Path) -> list[Path]:
     """Detect Compose file stack: compose.yml + optional overrides."""
     base = project_dir / "compose.yml"
     if not base.is_file():
@@ -56,7 +55,7 @@ _CACHE_HTTP_HOSTNAMES = (
 )
 
 
-def generate_cache_override(project_dir: Path, base_compose: Path) -> Optional[Path]:
+def generate_cache_override(project_dir: Path, base_compose: Path) -> Path | None:
     """Emit transient build.extra_hosts override when cache profile active."""
     cache_ip = (os.environ.get("INFINITO_PACKAGE_CACHE_FRONTEND_IP") or "").strip()
     if not cache_ip or not base_compose.is_file():
@@ -88,9 +87,9 @@ def generate_cache_override(project_dir: Path, base_compose: Path) -> Optional[P
     return out
 
 
-def resolve_files(project_dir: Path, files: List[str]) -> List[Path]:
+def resolve_files(project_dir: Path, files: list[str]) -> list[Path]:
     """Resolve -f/--file paths against project_dir."""
-    out: List[Path] = []
+    out: list[Path] = []
     for f in files:
         p = Path(f)
         if not p.is_absolute():
@@ -102,9 +101,9 @@ def resolve_files(project_dir: Path, files: List[str]) -> List[Path]:
 def build_cmd(
     project: str,
     project_dir: Path,
-    passthrough: List[str],
-    extra_files: Optional[List[str]] = None,
-) -> List[str]:
+    passthrough: list[str],
+    extra_files: list[str] | None = None,
+) -> list[str]:
     """Auto-detected compose files, with extra_files appended last."""
     files = detect_compose_files(project_dir)
 
@@ -113,7 +112,7 @@ def build_cmd(
 
     env_file = detect_env_file(project_dir)
 
-    cmd: List[str] = ["docker", "compose", "-p", project]
+    cmd: list[str] = ["docker", "compose", "-p", project]
     for f in files:
         cmd += ["-f", str(f)]
     if env_file:

@@ -40,11 +40,9 @@ from __future__ import annotations
 import re
 import unittest
 from pathlib import Path
-from typing import List, Tuple
 
 from utils.annotations.suppress import is_suppressed_at
 from utils.cache.files import iter_project_files, read_text
-
 
 SUPPRESS_RULE: str = "project-root-import"
 
@@ -58,7 +56,7 @@ SUPPRESS_RULE: str = "project-root-import"
 # legitimately need to walk to the repo root (sys.path bootstrap shims,
 # standalone scripts without a package container) MUST mark the line
 # with `# nocheck: project-root-import` and document why.
-_FORBIDDEN_PATTERNS: Tuple[Tuple[str, "re.Pattern[str]"], ...] = (
+_FORBIDDEN_PATTERNS: tuple[tuple[str, re.Pattern[str]], ...] = (
     (
         "`parents[N]` index expression",
         re.compile(r"\.parents\[\s*\d+\s*\]"),
@@ -101,7 +99,7 @@ def _strip_strings_and_comments(text: str) -> str:
     rule definitions in this very file, the dictionary docstring of
     `utils/cache/__init__.py`, etc.).
     """
-    out: List[str] = []
+    out: list[str] = []
     i = 0
     n = len(text)
     while i < n:
@@ -143,7 +141,7 @@ def _strip_strings_and_comments(text: str) -> str:
     return "".join(out)
 
 
-def _scan_file(path: Path) -> List[str]:
+def _scan_file(path: Path) -> list[str]:
     """Return human-readable failure descriptions for *path*.
 
     Empty list means the file is clean. Suppression markers are
@@ -158,7 +156,7 @@ def _scan_file(path: Path) -> List[str]:
 
     raw_lines = text.splitlines()
     code_lines = _strip_strings_and_comments(text).splitlines()
-    failures: List[str] = []
+    failures: list[str] = []
 
     is_init = _is_init_file(path)
 
@@ -180,7 +178,7 @@ def _scan_file(path: Path) -> List[str]:
     return failures
 
 
-def _check_init_project_root(path: Path) -> List[str]:
+def _check_init_project_root(path: Path) -> list[str]:
     """If *path* is an ``__init__.py`` that defines ``PROJECT_ROOT`` at
     top level via ``Path(__file__).resolve().parents[N]``, validate
     that the resolved path actually carries ``pyproject.toml``."""
@@ -191,7 +189,7 @@ def _check_init_project_root(path: Path) -> List[str]:
     except Exception:
         return []
 
-    failures: List[str] = []
+    failures: list[str] = []
     for lineno, line in enumerate(text.splitlines(), start=1):
         m = _INIT_PROJECT_ROOT_RE.match(line)
         if not m:
@@ -216,7 +214,7 @@ def _check_init_project_root(path: Path) -> List[str]:
 
 class TestProjectRootImport(unittest.TestCase):
     def test_no_local_project_root_computation(self):
-        offenders: List[str] = []
+        offenders: list[str] = []
         for path_str in iter_project_files(extensions=(".py",)):
             path = Path(path_str)
             offenders.extend(_scan_file(path))

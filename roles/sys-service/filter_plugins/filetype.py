@@ -27,7 +27,7 @@ def filetype(path, full=False):
         return ext[1:] if ext else ""
 
 
-class FilterModule(object):
+class FilterModule:
     """Custom Jinja2 filters for Ansible"""
 
     def filters(self):

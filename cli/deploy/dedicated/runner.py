@@ -5,7 +5,7 @@ import os
 import subprocess
 import sys
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 from cli.create.inventory.services_disabler import (
     ServicesDisabledConflictError,
@@ -21,14 +21,14 @@ def run_ansible_playbook(
     playbook_path: str,
     inventory_validator_path: str,
     inventory: str,
-    modes: Dict[str, Any],
-    limit: Optional[str] = None,
-    allowed_applications: Optional[List[str]] = None,
-    password_file: Optional[str] = None,
+    modes: dict[str, Any],
+    limit: str | None = None,
+    allowed_applications: list[str] | None = None,
+    password_file: str | None = None,
     verbose: int = 0,
     skip_build: bool = False,
     diff: bool = False,
-    ansible_args: Optional[List[str]] = None,
+    ansible_args: list[str] | None = None,
 ) -> None:
     """Run ansible-playbook with the given parameters and execution modes."""
     start_time = datetime.datetime.now()
@@ -87,7 +87,7 @@ def run_ansible_playbook(
     # ---------------------------------------------------------
     # 5) Build ansible-playbook command
     # ---------------------------------------------------------
-    cmd: List[str] = ["ansible-playbook", "-i", inventory, playbook_path]
+    cmd: list[str] = ["ansible-playbook", "-i", inventory, playbook_path]
 
     if limit:
         cmd.extend(["-l", limit])

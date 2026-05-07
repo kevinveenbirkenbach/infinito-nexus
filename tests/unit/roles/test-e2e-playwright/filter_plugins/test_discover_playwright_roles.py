@@ -4,6 +4,7 @@ import unittest
 from pathlib import Path
 
 from ansible.errors import AnsibleFilterError
+
 from . import PROJECT_ROOT
 
 

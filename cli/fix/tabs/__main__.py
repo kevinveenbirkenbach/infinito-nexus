@@ -8,7 +8,7 @@ FILES_FIXED = []
 
 def fix_tabs_in_file(file_path):
     """Replaces tab characters with two spaces in the specified file."""
-    with open(file_path, "r", encoding="utf-8") as f:
+    with open(file_path, encoding="utf-8") as f:
         lines = f.readlines()
 
     if any("\t" in line for line in lines):

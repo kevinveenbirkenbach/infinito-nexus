@@ -1,9 +1,11 @@
 from __future__ import annotations
 
-from typing import Any, Dict, Mapping, Optional, Sequence
+from collections.abc import Mapping, Sequence
+from typing import Any
+
+from ansible.errors import AnsibleFilterError
 
 from utils.cache.yaml import dump_yaml_str
-from ansible.errors import AnsibleFilterError
 
 try:
     # Preferred when imported as Python package (tests, local scripts).
@@ -20,6 +22,7 @@ except ModuleNotFoundError:
     # Fallback when loaded by Ansible plugin loader from filter_plugins path.
     from docker_service_enabled import FilterModule as _DockerServiceEnabledFilter
     from get_entity_name import get_entity_name
+
     from utils.applications.config import get
     from utils.database_service import (
         get_database_service_config,
@@ -61,11 +64,11 @@ def _to_plain(obj: Any) -> Any:
 
 
 def compose_volumes(
-    applications: Dict[str, Any],
+    applications: dict[str, Any],
     application_id: str,
     *,
-    database_volume: Optional[str] = None,
-    extra_volumes: Optional[Dict[str, Dict[str, Any]]] = None,
+    database_volume: str | None = None,
+    extra_volumes: dict[str, dict[str, Any]] | None = None,
 ) -> str:
     """
     Builds the top-level `volumes:` section for compose.
@@ -103,7 +106,7 @@ def compose_volumes(
             f"compose_volumes: unknown application_id '{application_id}'"
         )
 
-    volumes: Dict[str, Any] = {}
+    volumes: dict[str, Any] = {}
 
     # ------------------------------------------------------------------
     # Database volume (same condition as Jinja2)
@@ -151,6 +154,6 @@ def compose_volumes(
     return dump_yaml_str(payload).rstrip()
 
 
-class FilterModule(object):
+class FilterModule:
     def filters(self):
         return {"compose_volumes": compose_volumes}

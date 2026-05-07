@@ -3,11 +3,11 @@ from __future__ import annotations
 
 import re
 import unittest
+from collections.abc import Iterable
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Iterable, List
-from . import PROJECT_ROOT
 
+from . import PROJECT_ROOT
 
 JINJA_EXPR_RE = re.compile(r"{{(.*?)}}", re.DOTALL)
 PASSWORD_TOKEN_RE = re.compile(r"(?i)\b[a-z0-9_]*password[a-z0-9_]*\b")
@@ -40,13 +40,13 @@ def _indent_level(s: str) -> int:
     return len(s) - len(s.lstrip(" "))
 
 
-def _collect_shell_blocks(text: str) -> List[tuple[int, str]]:
+def _collect_shell_blocks(text: str) -> list[tuple[int, str]]:
     """
     Return list of (start_line_no, block_text) for each shell: block.
     Best-effort indentation-based collector (no YAML parsing).
     """
     lines = text.splitlines()
-    blocks: List[tuple[int, str]] = []
+    blocks: list[tuple[int, str]] = []
 
     i = 0
     while i < len(lines):
@@ -96,8 +96,8 @@ def _is_directly_wrapped_by_quotes(block: str, start: int, end: int) -> bool:
     return (pre in QUOTE_CHARS) or (post in QUOTE_CHARS)
 
 
-def _scan_shell_block(file_path: Path, start_line: int, block: str) -> List[Finding]:
-    findings: List[Finding] = []
+def _scan_shell_block(file_path: Path, start_line: int, block: str) -> list[Finding]:
+    findings: list[Finding] = []
 
     for m in JINJA_EXPR_RE.finditer(block):
         expr = (m.group(1) or "").strip()
@@ -144,7 +144,7 @@ class TestPasswordQuoteInShellTasks(unittest.TestCase):
     def test_passwords_are_quoted_in_shell_tasks(self) -> None:
         repo_root = PROJECT_ROOT  # tests/integration/<cluster>/ -> repo root
 
-        all_findings: List[Finding] = []
+        all_findings: list[Finding] = []
         for yml in _iter_roles_yml_files(repo_root):
             text = yml.read_text(encoding="utf-8", errors="replace")
             for start_line, block in _collect_shell_blocks(text):

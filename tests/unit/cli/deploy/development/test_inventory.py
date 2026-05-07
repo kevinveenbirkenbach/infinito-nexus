@@ -583,8 +583,8 @@ class TestBuildDevInventoryMatrix(unittest.TestCase):
         # active_variants matches the round's plan entry and whose include
         # is the round's variant-resolved include set.
         self.assertEqual(build_inventory_mock.call_count, 2)
-        for (round_idx, inv_dir, round_vars, include_R), call in zip(
-            plan, build_inventory_mock.call_args_list
+        for (_round_idx, inv_dir, round_vars, include_R), call in zip(
+            plan, build_inventory_mock.call_args_list, strict=False
         ):
             spec_arg = call.args[1]
             self.assertEqual(spec_arg.inventory_dir, inv_dir)

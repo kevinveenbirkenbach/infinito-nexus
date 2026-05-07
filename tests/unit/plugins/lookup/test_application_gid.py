@@ -1,8 +1,10 @@
 import os
-import tempfile
 import shutil
+import tempfile
 import unittest
+
 import yaml
+
 from plugins.lookup.application_gid import LookupModule
 
 

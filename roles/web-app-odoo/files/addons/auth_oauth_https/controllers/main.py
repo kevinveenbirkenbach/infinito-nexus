@@ -1,12 +1,11 @@
-# -*- coding: utf-8 -*-
 # Part of Infinito.Nexus. See LICENSE file for full copyright and licensing details.
 
 import json
 import logging
-import werkzeug.urls
 
-from odoo.http import request
+import werkzeug.urls
 from odoo.addons.auth_oauth.controllers.main import OAuthLogin
+from odoo.http import request
 
 _logger = logging.getLogger(__name__)
 
@@ -74,7 +73,7 @@ class OAuthLoginHTTPS(OAuthLogin):
                 scope=provider["scope"],
                 state=json.dumps(state),
             )
-            provider["auth_link"] = "%s?%s" % (
+            provider["auth_link"] = "{}?{}".format(
                 provider["auth_endpoint"],
                 werkzeug.urls.url_encode(params),
             )
@@ -92,7 +91,7 @@ class OAuthLoginHTTPS(OAuthLogin):
         base_url = self._get_base_url()
 
         if not redirect.startswith(("//", "http://", "https://")):
-            redirect = "%s%s" % (
+            redirect = "{}{}".format(
                 base_url.rstrip("/") + "/",
                 redirect[1:] if redirect.startswith("/") else redirect,
             )

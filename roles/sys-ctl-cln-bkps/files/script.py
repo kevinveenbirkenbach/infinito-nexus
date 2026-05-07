@@ -1,9 +1,10 @@
-import psutil
-import shutil
-import os
 import argparse
+import os
+import shutil
 import subprocess
 import time
+
+import psutil
 
 # Validating arguments
 parser = argparse.ArgumentParser()
@@ -26,10 +27,7 @@ args = parser.parse_args()
 
 
 def print_used_disc_space(backup_dir):
-    print(
-        "%d %% of disk %s are used"
-        % (psutil.disk_usage(backup_dir).percent, backup_dir)
-    )
+    print(f"{psutil.disk_usage(backup_dir).percent:d} % of disk {backup_dir} are used")
 
 
 def is_directory_used_by_another_process(directory_path):
@@ -50,16 +48,15 @@ def isSmallerThenMaximumBackupSize(maximum_backup_size_percent, backup_dir):
 
 
 def isDirectoryDeletable(version, versions, version_path):
-    print("Checking directory %s ..." % (version_path))
+    print(f"Checking directory {version_path} ...")
     if version == versions[-1]:
         print(
-            "Directory %s contains the last version of the backup. Skipped."
-            % (version_path)
+            f"Directory {version_path} contains the last version of the backup. Skipped."
         )
         return False
 
     if is_directory_used_by_another_process(version_path):
-        print("Directory %s is used by another process. Skipped." % (version_path))
+        print(f"Directory {version_path} is used by another process. Skipped.")
         return False
 
     print(f"Directory {version_path} can be deleted.")
@@ -67,12 +64,12 @@ def isDirectoryDeletable(version, versions, version_path):
 
 
 def deleteVersion(version_path, backup_dir):
-    print("Deleting %s to free space." % (version_path))
+    print(f"Deleting {version_path} to free space.")
     current_disc_usage_percent = psutil.disk_usage(backup_dir).percent
     shutil.rmtree(version_path)
     new_disc_usage_percent = psutil.disk_usage(backup_dir).percent
     difference_percent = current_disc_usage_percent - new_disc_usage_percent
-    print("{:6.2f} %% of drive freed".format(difference_percent))
+    print(f"{difference_percent:6.2f} %% of drive freed")
 
 
 def count_total_application_directories(backup_dir):

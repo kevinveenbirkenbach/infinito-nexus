@@ -268,6 +268,6 @@ def build_ldap_role_entries(applications, users, ldap, group_names=None):
     return result
 
 
-class FilterModule(object):
+class FilterModule:
     def filters(self):
         return {"build_ldap_role_entries": build_ldap_role_entries}

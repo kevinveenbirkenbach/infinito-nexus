@@ -1,13 +1,13 @@
 # tests/unit/cli/test_inventory_manager.py
 
-import unittest
-import tempfile
 import shutil
+import tempfile
+import unittest
 from pathlib import Path
 from unittest.mock import patch
 
-from utils.handler.yaml import YamlHandler
 from utils.handler.vault import VaultHandler, VaultScalar
+from utils.handler.yaml import YamlHandler
 from utils.manager.inventory import InventoryManager
 from utils.manager.value_generator import ValueGenerator
 

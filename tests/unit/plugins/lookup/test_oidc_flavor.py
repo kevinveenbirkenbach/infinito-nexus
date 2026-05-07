@@ -4,6 +4,7 @@ import sys
 import unittest
 
 from ansible.errors import AnsibleError
+
 from . import PROJECT_ROOT
 
 

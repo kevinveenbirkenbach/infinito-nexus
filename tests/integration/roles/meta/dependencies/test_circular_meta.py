@@ -1,5 +1,5 @@
-import unittest
 import os
+import unittest
 
 from utils.cache.yaml import load_yaml_any
 
@@ -58,7 +58,7 @@ def resolve_dependencies(roles_dir):
             except ValueError as e:
                 raise ValueError(
                     f"Error processing role '{role_name}' at path '{role_path}': {str(e)}"
-                )
+                ) from e
 
 
 class TestRoleDependencies(unittest.TestCase):

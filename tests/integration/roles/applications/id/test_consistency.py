@@ -1,6 +1,9 @@
-import yaml
 import unittest
+
+import yaml
+
 from plugins.filter.invokable_paths import get_invokable_paths
+
 from . import PROJECT_ROOT
 
 ROLES_DIR = PROJECT_ROOT / "roles"
@@ -30,7 +33,7 @@ class TestApplicationIdConsistency(unittest.TestCase):
                 failed_roles.append((role_name, "vars/main.yml missing"))
                 continue
 
-            with open(vars_file, "r") as f:
+            with open(vars_file) as f:
                 try:
                     vars_data = yaml.safe_load(f) or {}
                 except yaml.YAMLError as e:

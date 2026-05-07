@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from collections import deque
 from pathlib import Path
-from typing import Any, Dict, List
+from typing import Any
 
 from utils.cache.yaml import load_yaml_any
 from utils.entity_name_utils import get_entity_name
@@ -14,7 +14,7 @@ class ServiceRegistryError(ValueError):
     """Raised when role-local service discovery is invalid."""
 
 
-def _as_mapping(value: Any) -> Dict[str, Any]:
+def _as_mapping(value: Any) -> dict[str, Any]:
     return value if isinstance(value, dict) else {}
 
 
@@ -73,14 +73,14 @@ def detect_service_bucket(role_name: str) -> str:
     return deploy_type
 
 
-def read_yaml_file(path: Path) -> Dict[str, Any]:
+def read_yaml_file(path: Path) -> dict[str, Any]:
     if not path.is_file():
         return {}
     return _as_mapping(load_yaml_any(str(path), default_if_missing={}) or {})
 
 
-def load_applications_from_roles_dir(roles_dir: Path) -> Dict[str, Dict[str, Any]]:
-    applications: Dict[str, Dict[str, Any]] = {}
+def load_applications_from_roles_dir(roles_dir: Path) -> dict[str, dict[str, Any]]:
+    applications: dict[str, dict[str, Any]] = {}
     for role_dir in sorted(p for p in roles_dir.iterdir() if p.is_dir()):
         vars_file = role_dir / "vars" / "main.yml"
         if not vars_file.is_file():
@@ -93,7 +93,7 @@ def load_applications_from_roles_dir(roles_dir: Path) -> Dict[str, Dict[str, Any
         # Reassemble the legacy `{compose: {services: ...}, server: ...}`
         # shape so this module's downstream readers stay unchanged.
         meta_dir = role_dir / "meta"
-        config: Dict[str, Any] = {}
+        config: dict[str, Any] = {}
         services_data = read_yaml_file(meta_dir / "services.yml")
         if services_data:
             config["services"] = services_data
@@ -107,8 +107,8 @@ def load_applications_from_roles_dir(roles_dir: Path) -> Dict[str, Dict[str, Any
 
 def discover_role_services(
     role_name: str,
-    config: Dict[str, Any],
-) -> Dict[str, Dict[str, Any]]:
+    config: dict[str, Any],
+) -> dict[str, dict[str, Any]]:
     services = _as_mapping(config.get("services"))
     entity_name = get_entity_name(role_name)
     primary_entry = _as_mapping(services.get(entity_name))
@@ -137,7 +137,7 @@ def discover_role_services(
 
     primary_id = provides or entity_name
     raw_covers = primary_entry.get("covers")
-    covers: List[str] = (
+    covers: list[str] = (
         [_normalized_name(item) for item in raw_covers if isinstance(item, str)]
         if isinstance(raw_covers, list)
         else []
@@ -157,7 +157,7 @@ def discover_role_services(
     if provides:
         base_entry["provides"] = provides
 
-    discovered: Dict[str, Dict[str, Any]] = {primary_id: base_entry}
+    discovered: dict[str, dict[str, Any]] = {primary_id: base_entry}
     for alias_key, alias_entry in sorted(alias_entries.items()):
         discovered[alias_key] = {
             **base_entry,
@@ -171,9 +171,9 @@ def discover_role_services(
 
 
 def build_service_registry_from_applications(
-    applications: Dict[str, Any],
-) -> Dict[str, Dict[str, Any]]:
-    registry: Dict[str, Dict[str, Any]] = {}
+    applications: dict[str, Any],
+) -> dict[str, dict[str, Any]]:
+    registry: dict[str, dict[str, Any]] = {}
     for role_name, config in sorted(applications.items()):
         role_services = discover_role_services(role_name, _as_mapping(config))
         for service_key, entry in role_services.items():
@@ -189,16 +189,16 @@ def build_service_registry_from_applications(
 
 def build_service_registry_from_roles_dir(
     roles_dir: Path,
-) -> Dict[str, Dict[str, Any]]:
+) -> dict[str, dict[str, Any]]:
     return build_service_registry_from_applications(
         load_applications_from_roles_dir(roles_dir)
     )
 
 
 def build_role_to_primary_service_key(
-    service_registry: Dict[str, Dict[str, Any]],
-) -> Dict[str, str]:
-    result: Dict[str, str] = {}
+    service_registry: dict[str, dict[str, Any]],
+) -> dict[str, str]:
+    result: dict[str, str] = {}
     for service_key, entry in service_registry.items():
         if "canonical" in entry:
             continue
@@ -209,15 +209,15 @@ def build_role_to_primary_service_key(
 
 
 def build_role_to_covered_keys(
-    service_registry: Dict[str, Dict[str, Any]],
-) -> Dict[str, List[str]]:
+    service_registry: dict[str, dict[str, Any]],
+) -> dict[str, list[str]]:
     """For each role, return ``[primary_key, *covers]`` — the set of
     service keys whose presence in a consumer's ``services`` map counts
     as an explicit declaration of a dep on that role. ``covers`` comes
     from the primary entity's ``covers:`` list (e.g. ``web-app-keycloak``
     covers ``oauth2`` because the per-app oauth2-proxy only makes sense
     when the IdP is on the host)."""
-    result: Dict[str, List[str]] = {}
+    result: dict[str, list[str]] = {}
     for service_key, entry in service_registry.items():
         if "canonical" in entry:
             continue
@@ -234,15 +234,15 @@ def build_role_to_covered_keys(
 
 
 def build_covered_key_to_role(
-    service_registry: Dict[str, Dict[str, Any]],
-) -> Dict[str, str]:
+    service_registry: dict[str, dict[str, Any]],
+) -> dict[str, str]:
     """Inverse of :func:`build_role_to_covered_keys`: for each covered
     service key (NOT including the primary), the role that covers it.
     Use :func:`build_role_to_primary_service_key` for the primary
     direction; this helper is intentionally limited to the
     ``covers:`` extension so callers can distinguish "this role IS the
     provider" from "this role covers this dep transitively"."""
-    result: Dict[str, str] = {}
+    result: dict[str, str] = {}
     for entry in service_registry.values():
         if "canonical" in entry:
             continue
@@ -257,7 +257,7 @@ def build_covered_key_to_role(
 
 
 def canonical_service_key(
-    service_registry: Dict[str, Dict[str, Any]],
+    service_registry: dict[str, dict[str, Any]],
     service_key: str,
 ) -> str:
     entry = _as_mapping(service_registry.get(service_key))
@@ -265,9 +265,9 @@ def canonical_service_key(
 
 
 def equivalent_service_keys(
-    service_registry: Dict[str, Dict[str, Any]],
+    service_registry: dict[str, dict[str, Any]],
     service_key: str,
-) -> List[str]:
+) -> list[str]:
     primary = canonical_service_key(service_registry, service_key)
     keys = [
         key
@@ -278,11 +278,11 @@ def equivalent_service_keys(
 
 
 def resolve_service_dependency_roles_from_config(
-    config: Dict[str, Any],
-    service_registry: Dict[str, Dict[str, Any]],
-) -> List[str]:
+    config: dict[str, Any],
+    service_registry: dict[str, dict[str, Any]],
+) -> list[str]:
     services = _as_mapping(config.get("services"))
-    includes: List[str] = []
+    includes: list[str] = []
     for service_key, service_conf in services.items():
         service_conf = _as_mapping(service_conf)
         if not (
@@ -297,7 +297,7 @@ def resolve_service_dependency_roles_from_config(
             includes.append(role_name)
 
     seen = set()
-    ordered: List[str] = []
+    ordered: list[str] = []
     for role_name in includes:
         if role_name not in seen:
             ordered.append(role_name)
@@ -305,7 +305,7 @@ def resolve_service_dependency_roles_from_config(
     return ordered
 
 
-def load_run_after_from_roles_dir(roles_dir: Path, role_name: str) -> List[str]:
+def load_run_after_from_roles_dir(roles_dir: Path, role_name: str) -> list[str]:
     # Per req-010 `run_after` lives at
     # `meta/services.yml.<primary_entity>.run_after`. The helper resolves
     # the primary entity name and surfaces shape errors via
@@ -330,16 +330,16 @@ _BUCKET_ORDER = {
 
 
 def ordered_primary_service_entries(
-    service_registry: Dict[str, Dict[str, Any]],
+    service_registry: dict[str, dict[str, Any]],
     roles_dir: Path,
-) -> List[Dict[str, Any]]:
+) -> list[dict[str, Any]]:
     primary_entries = {
         entry["role"]: {"id": service_key, **entry}
         for service_key, entry in service_registry.items()
         if "canonical" not in entry
     }
 
-    ordered: List[Dict[str, Any]] = []
+    ordered: list[dict[str, Any]] = []
     for bucket in ("universal", "workstation", "server", "web-svc", "web-app"):
         roles_in_bucket = sorted(
             role_name
@@ -349,8 +349,8 @@ def ordered_primary_service_entries(
         if not roles_in_bucket:
             continue
 
-        graph: Dict[str, List[str]] = {role_name: [] for role_name in roles_in_bucket}
-        indegree: Dict[str, int] = {role_name: 0 for role_name in roles_in_bucket}
+        graph: dict[str, list[str]] = {role_name: [] for role_name in roles_in_bucket}
+        indegree: dict[str, int] = {role_name: 0 for role_name in roles_in_bucket}
 
         for role_name in roles_in_bucket:
             current = primary_entries[role_name]

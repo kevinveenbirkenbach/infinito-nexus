@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Ansible lookup plugin: version
 
@@ -14,6 +13,7 @@ Resolution order:
 from __future__ import annotations
 
 import os
+
 from ansible.errors import AnsibleError
 from ansible.plugins.lookup import LookupBase
 

@@ -25,7 +25,7 @@ from __future__ import annotations
 
 import re
 import unittest
-from typing import List
+
 from . import PROJECT_ROOT
 
 PASSWORD_ASSIGN_RE = re.compile(
@@ -63,7 +63,7 @@ class TestEnvPasswordsQuotedAndFiltered(unittest.TestCase):
         root = PROJECT_ROOT
         env_templates = sorted(root.rglob("env.j2"))
 
-        failures: List[str] = []
+        failures: list[str] = []
 
         for path in env_templates:
             rel = path.relative_to(root)

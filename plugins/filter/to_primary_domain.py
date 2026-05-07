@@ -2,14 +2,14 @@ from ansible.errors import AnsibleFilterError
 
 try:
     import tld
-    from tld.exceptions import TldDomainNotFound, TldBadUrl
+    from tld.exceptions import TldBadUrl, TldDomainNotFound
 except ImportError:
     raise AnsibleFilterError(
         "The 'tld' Python package is required for the to_primary_domain filter. Install with 'pip install tld'."
-    )
+    ) from None
 
 
-class FilterModule(object):
+class FilterModule:
     """Custom filter to extract the primary/zone domain from a full domain name"""
 
     def filters(self):
@@ -32,4 +32,4 @@ class FilterModule(object):
                 )
             return res
         except (TldDomainNotFound, TldBadUrl) as exc:
-            raise AnsibleFilterError(str(exc))
+            raise AnsibleFilterError(str(exc)) from exc

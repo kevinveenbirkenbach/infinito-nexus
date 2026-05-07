@@ -27,7 +27,7 @@ from __future__ import annotations
 
 import argparse
 import sys
-from typing import Iterable, List, Set
+from collections.abc import Iterable
 
 from cli.meta.applications.resolution.combined.errors import CombinedResolutionError
 from cli.meta.applications.resolution.combined.repo_paths import roles_dir
@@ -40,14 +40,14 @@ from cli.meta.applications.resolution.combined.role_introspection import (
 EXIT_NON_MODELLABLE_SEED = 2
 
 
-def _list_role_names() -> List[str]:
+def _list_role_names() -> list[str]:
     rdir = roles_dir()
     if not rdir.is_dir():
         return []
     return sorted(p.name for p in rdir.iterdir() if p.is_dir())
 
 
-def _non_modellable_seeds(seeds: Set[str], all_roles: List[str]) -> List[str]:
+def _non_modellable_seeds(seeds: set[str], all_roles: list[str]) -> list[str]:
     """Return seeds that the resolver cannot reach as a downstream prereq.
 
     A seed is reachable iff at least one of:
@@ -65,7 +65,7 @@ def _non_modellable_seeds(seeds: Set[str], all_roles: List[str]) -> List[str]:
     if not seeds:
         return []
 
-    run_after_index: Set[str] = set()
+    run_after_index: set[str] = set()
     for role in all_roles:
         try:
             for target in load_run_after(role):
@@ -73,7 +73,7 @@ def _non_modellable_seeds(seeds: Set[str], all_roles: List[str]) -> List[str]:
         except CombinedResolutionError:
             continue
 
-    out: List[str] = []
+    out: list[str] = []
     for seed in sorted(seeds):
         if has_application_id(seed):
             continue
@@ -83,8 +83,8 @@ def _non_modellable_seeds(seeds: Set[str], all_roles: List[str]) -> List[str]:
     return out
 
 
-def affected_roles(changed: Iterable[str]) -> List[str]:
-    seeds: Set[str] = {r.strip() for r in changed if r and r.strip()}
+def affected_roles(changed: Iterable[str]) -> list[str]:
+    seeds: set[str] = {r.strip() for r in changed if r and r.strip()}
     if not seeds:
         return []
 
@@ -105,7 +105,7 @@ def affected_roles(changed: Iterable[str]) -> List[str]:
         raise SystemExit(EXIT_NON_MODELLABLE_SEED)
 
     resolver = CombinedResolver()
-    affected: Set[str] = set(seeds)
+    affected: set[str] = set(seeds)
 
     for role in all_roles:
         if role in affected:

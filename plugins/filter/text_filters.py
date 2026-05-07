@@ -1,5 +1,6 @@
-from ansible.errors import AnsibleFilterError
 import re
+
+from ansible.errors import AnsibleFilterError
 
 
 def to_one_liner(s):
@@ -39,7 +40,7 @@ def to_one_liner(s):
     return one_liner
 
 
-class FilterModule(object):
+class FilterModule:
     def filters(self):
         return {
             "to_one_liner": to_one_liner,

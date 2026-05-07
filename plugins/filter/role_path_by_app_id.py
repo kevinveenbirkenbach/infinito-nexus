@@ -78,7 +78,7 @@ def rel_role_path_by_application_id(application_id):
     return matches[0]
 
 
-class FilterModule(object):
+class FilterModule:
     """
     Provides the filters `abs_role_path_by_application_id` and
     `rel_role_path_by_application_id`.

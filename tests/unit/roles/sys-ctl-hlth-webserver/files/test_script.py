@@ -1,8 +1,8 @@
-from contextlib import redirect_stdout
+import importlib.util
 import io
 import os
 import unittest
-import importlib.util
+from contextlib import redirect_stdout
 from unittest.mock import patch
 
 

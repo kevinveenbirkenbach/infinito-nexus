@@ -1,10 +1,11 @@
 import os
-import tempfile
 import shutil
-import yaml
+import tempfile
 import unittest
 
+import yaml
 from ansible.errors import AnsibleFilterError
+
 from plugins.filter.role_path_by_app_id import (
     abs_role_path_by_application_id,
     rel_role_path_by_application_id,

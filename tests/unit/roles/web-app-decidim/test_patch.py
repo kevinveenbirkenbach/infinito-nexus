@@ -16,8 +16,7 @@ def _repo_root() -> Path:
 
 sys.path.insert(0, str(_repo_root() / "roles" / "web-app-decidim" / "files"))
 
-from patch import patch_omniauth_rb, patch_omniauth_helper_rb  # noqa: E402
-
+from patch import patch_omniauth_helper_rb, patch_omniauth_rb  # noqa: E402
 
 OMNIAUTH_RB_FIXTURE = """\
 Decidim::Auth.setup do |config|

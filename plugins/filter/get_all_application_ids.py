@@ -30,7 +30,7 @@ def get_all_application_ids(roles_dir="roles"):
     return sorted(set(app_ids))
 
 
-class FilterModule(object):
+class FilterModule:
     """
     Ansible filter plugin for retrieving application IDs.
     """

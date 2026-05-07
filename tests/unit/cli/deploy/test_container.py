@@ -2,7 +2,6 @@ import os
 import subprocess
 import sys
 import unittest
-from typing import List
 
 from cli.deploy.container import command as deploy_container
 
@@ -44,7 +43,7 @@ class TestEnsureImage(unittest.TestCase):
         If the image does not exist, ensure_image should call
         `docker image inspect` first and then `docker build`.
         """
-        calls: List[List[str]] = []
+        calls: list[list[str]] = []
 
         def _side_effect(cmd, *args, **kwargs):
             calls.append(cmd)

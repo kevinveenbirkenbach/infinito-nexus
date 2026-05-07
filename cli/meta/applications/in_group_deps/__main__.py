@@ -7,10 +7,8 @@ import argparse
 import os
 import sys
 
-from utils.cache.yaml import dump_yaml_str
-
 from utils.applications.in_group_deps import applications_if_group_and_all_deps
-from utils.cache.yaml import load_yaml
+from utils.cache.yaml import dump_yaml_str, load_yaml
 
 __all__ = [
     "find_role_dirs_by_app_id",

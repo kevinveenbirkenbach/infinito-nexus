@@ -1,6 +1,6 @@
-import unittest
-import sys
 import os
+import sys
+import unittest
 
 # Allow import from project plugins/filter directory
 sys.path.insert(

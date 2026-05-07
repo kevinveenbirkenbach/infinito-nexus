@@ -78,7 +78,7 @@ class TestRbacPathJoinIsForbidden(unittest.TestCase):
             if _is_allowed(rel):
                 continue
             try:
-                with open(path, "r", encoding="utf-8") as f:
+                with open(path, encoding="utf-8") as f:
                     content = f.read()
             except (OSError, UnicodeDecodeError):
                 continue

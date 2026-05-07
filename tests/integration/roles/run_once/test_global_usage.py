@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 
 """
 Ultra-fast + YAML-strict integration test (single pass, per-suffix validation)

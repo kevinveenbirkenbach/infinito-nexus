@@ -1,10 +1,11 @@
 #!/usr/bin/env python3
-import io
-import sys
 import contextlib
 import importlib.util
+import io
+import sys
 from types import SimpleNamespace
 from unittest import TestCase, main, mock
+
 from . import PROJECT_ROOT
 
 

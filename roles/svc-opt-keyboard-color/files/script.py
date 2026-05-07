@@ -1,6 +1,6 @@
-import sys
 import datetime
 import subprocess
+import sys
 
 
 def hex_to_rgb(hex_color):
@@ -31,7 +31,8 @@ def calculate_color(start_color, end_color, ratio):
     start_rgb = hex_to_rgb(start_color)
     end_rgb = hex_to_rgb(end_color)
     current_rgb = [
-        round(start + (end - start) * ratio) for start, end in zip(start_rgb, end_rgb)
+        round(start + (end - start) * ratio)
+        for start, end in zip(start_rgb, end_rgb, strict=False)
     ]
     return "".join(f"{value:02x}" for value in current_rgb)
 
@@ -49,7 +50,7 @@ def get_current_period(current_time, color_times):
     tuple: A tuple of the start and end color (as hex codes) for the current period.
     """
     sorted_periods = sorted(color_times.items())
-    for i, (period_start_str, colors) in enumerate(sorted_periods):
+    for i, (period_start_str, _colors) in enumerate(sorted_periods):
         period_start_time = datetime.datetime.strptime(period_start_str, "%H:%M").time()
         if current_time <= period_start_time:
             return sorted_periods[i - 1 if i > 0 else -1][1]

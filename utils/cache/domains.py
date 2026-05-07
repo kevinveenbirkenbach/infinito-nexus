@@ -10,7 +10,7 @@ through the regular applications-merge pipeline.
 from __future__ import annotations
 
 import os
-from typing import Any, Optional
+from typing import Any
 
 from .base import (
     _cache_key,
@@ -18,14 +18,13 @@ from .base import (
     _stable_variables_signature,
 )
 
-
 _MERGED_DOMAINS_CACHE: dict[tuple, dict[str, Any]] = {}
 
 
 def get_merged_domains(
     *,
-    variables: Optional[dict[str, Any]] = None,
-    roles_dir: Optional[str | os.PathLike[str]] = None,
+    variables: dict[str, Any] | None = None,
+    roles_dir: str | os.PathLike[str] | None = None,
     templar: Any = None,
 ) -> dict[str, Any]:
     """Build the canonical-domain map lazily from the merged applications view.

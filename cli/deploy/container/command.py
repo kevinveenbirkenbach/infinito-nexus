@@ -7,7 +7,7 @@ import subprocess
 import sys
 import time
 import uuid
-from typing import List, Tuple
+
 from . import PROJECT_ROOT
 
 INFINITO_SRC_DIR = "/opt/src/infinito"
@@ -48,7 +48,7 @@ def ensure_image(image: str, rebuild: bool = False, no_cache: bool = False) -> N
 
 def docker_exec(
     container: str,
-    args: List[str],
+    args: list[str],
     check: bool = True,
 ) -> subprocess.CompletedProcess:
     """
@@ -65,7 +65,7 @@ def docker_exec(
 
 
 def _docker_exec_capture(
-    container: str, args: List[str]
+    container: str, args: list[str]
 ) -> subprocess.CompletedProcess:
     cmd = ["docker", "exec", container, *args]
 
@@ -74,8 +74,7 @@ def _docker_exec_capture(
 
     return subprocess.run(
         cmd,
-        stdout=subprocess.PIPE,
-        stderr=subprocess.PIPE,
+        capture_output=True,
         text=True,
     )
 
@@ -181,8 +180,8 @@ def run_in_container(
     rebuild: bool,
     no_cache: bool,
     inventory_dir: str,
-    inventory_args: List[str],
-    deploy_args: List[str],
+    inventory_args: list[str],
+    deploy_args: list[str],
     name: str | None = None,
 ) -> None:
     """
@@ -212,7 +211,7 @@ def run_in_container(
         print(
             ">>> Creating CI inventory inside container (infinito create inventory)..."
         )
-        inventory_cmd: List[str] = [
+        inventory_cmd: list[str] = [
             "infinito",
             "create",
             "inventory",
@@ -304,7 +303,7 @@ def remove_container(name: str) -> None:
     print(f">>> Container '{name}' removed.")
 
 
-def exec_in_container(name: str, cmd_args: List[str]) -> int:
+def exec_in_container(name: str, cmd_args: list[str]) -> int:
     if not cmd_args:
         print(
             "Error: exec mode requires a command to run inside the container.",
@@ -317,7 +316,7 @@ def exec_in_container(name: str, cmd_args: List[str]) -> int:
     return result.returncode
 
 
-def split_inventory_and_deploy_args(rest: List[str]) -> Tuple[List[str], List[str]]:
+def split_inventory_and_deploy_args(rest: list[str]) -> tuple[list[str], list[str]]:
     """
     Split remaining arguments into:
       - inventory_args: passed to cli.create.inventory

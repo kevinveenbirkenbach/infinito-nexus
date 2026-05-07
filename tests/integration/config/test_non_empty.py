@@ -1,7 +1,8 @@
-import os
 import glob
-import yaml
+import os
 import unittest
+
+import yaml
 
 from . import PROJECT_ROOT
 
@@ -49,13 +50,13 @@ class TestConfigurationNoNone(unittest.TestCase):
 
         all_errors = []
         for filepath in files:
-            with open(filepath, "r") as f:
+            with open(filepath) as f:
                 try:
                     data = yaml.safe_load(f)
                 except yaml.YAMLError as e:
                     self.fail(f"Failed to parse YAML in {filepath}: {e}")
             errors = find_none_values(data)
-            for path, value in errors:
+            for path, _value in errors:
                 all_errors.append(f"{filepath}: Key '{path}' is None")
 
         if all_errors:

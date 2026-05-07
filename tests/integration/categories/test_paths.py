@@ -1,5 +1,6 @@
 import os
 import unittest
+
 import yaml
 
 
@@ -12,7 +13,7 @@ class TestCategoryPaths(unittest.TestCase):
                 os.path.dirname(__file__), "..", "..", "..", "roles", "categories.yml"
             )
         )
-        with open(file_path, "r") as f:
+        with open(file_path) as f:
             data = yaml.safe_load(f)
         cls.roles_def = data["roles"]
 

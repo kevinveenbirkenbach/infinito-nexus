@@ -1,6 +1,6 @@
+import importlib.util
 import os
 import unittest
-import importlib.util
 from unittest.mock import patch
 
 

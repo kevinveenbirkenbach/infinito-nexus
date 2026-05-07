@@ -1,5 +1,7 @@
 import unittest
+
 from ansible.errors import AnsibleFilterError
+
 from plugins.filter.canonical_domains_map import FilterModule
 
 

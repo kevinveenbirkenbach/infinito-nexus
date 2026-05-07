@@ -1,10 +1,11 @@
+import importlib.util
 import os
 import shutil
 import tempfile
 import textwrap
-import importlib.util
 import unittest
 from types import ModuleType
+
 from ansible.errors import AnsibleFilterError
 
 

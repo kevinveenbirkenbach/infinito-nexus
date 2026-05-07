@@ -5,8 +5,8 @@ This script creates __init__.py files in every subdirectory under the specified
 folder relative to the project root.
 """
 
-import os
 import argparse
+import os
 
 
 def create_init_files(root_folder):
@@ -14,7 +14,7 @@ def create_init_files(root_folder):
     Walk through all subdirectories of root_folder and create an __init__.py file
     in each directory if it doesn't already exist.
     """
-    for dirpath, dirnames, filenames in os.walk(root_folder):
+    for dirpath, _dirnames, _filenames in os.walk(root_folder):
         init_file = os.path.join(dirpath, "__init__.py")
         if not os.path.exists(init_file):
             open(init_file, "w").close()

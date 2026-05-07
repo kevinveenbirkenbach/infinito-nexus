@@ -1,5 +1,5 @@
-import unittest
 import glob
+import unittest
 from pathlib import Path
 
 from utils.annotations.suppress import line_has_rule

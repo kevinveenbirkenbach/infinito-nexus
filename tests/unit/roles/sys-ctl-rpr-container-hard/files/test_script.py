@@ -1,6 +1,7 @@
-import unittest
 import sys
-from importlib.util import spec_from_file_location, module_from_spec
+import unittest
+from importlib.util import module_from_spec, spec_from_file_location
+
 from . import PROJECT_ROOT
 
 

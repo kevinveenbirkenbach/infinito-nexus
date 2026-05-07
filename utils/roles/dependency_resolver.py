@@ -1,9 +1,8 @@
-import os
 import fnmatch
-import re
-from typing import Dict, Set, Iterable, Tuple, Optional
-
 import logging
+import os
+import re
+from collections.abc import Iterable
 
 
 class RoleDependencyResolver:
@@ -22,11 +21,11 @@ class RoleDependencyResolver:
         resolve_import_role: bool = True,
         resolve_dependencies: bool = True,
         resolve_run_after: bool = False,
-        max_depth: Optional[int] = None,
-    ) -> Set[str]:
+        max_depth: int | None = None,
+    ) -> set[str]:
         to_visit = list(dict.fromkeys(start_roles))
-        visited: Set[str] = set()
-        depth: Dict[str, int] = {}
+        visited: set[str] = set()
+        depth: dict[str, int] = {}
 
         for r in to_visit:
             depth[r] = 0
@@ -62,12 +61,12 @@ class RoleDependencyResolver:
         resolve_import_role: bool = True,
         resolve_dependencies: bool = True,
         resolve_run_after: bool = False,
-    ) -> Set[str]:
+    ) -> set[str]:
         role_path = os.path.join(self.roles_dir, role_name)
         if not os.path.isdir(role_path):
             return set()
 
-        deps: Set[str] = set()
+        deps: set[str] = set()
 
         if resolve_include_role or resolve_import_role:
             includes, imports = self._scan_tasks(role_path)
@@ -86,10 +85,10 @@ class RoleDependencyResolver:
 
     # -------------------------- scanning helpers --------------------------
 
-    def _scan_tasks(self, role_path: str) -> Tuple[Set[str], Set[str]]:
+    def _scan_tasks(self, role_path: str) -> tuple[set[str], set[str]]:
         tasks_dir = os.path.join(role_path, "tasks")
-        include_roles: Set[str] = set()
-        import_roles: Set[str] = set()
+        include_roles: set[str] = set()
+        import_roles: set[str] = set()
 
         if not os.path.isdir(tasks_dir):
             return include_roles, import_roles
@@ -136,8 +135,8 @@ class RoleDependencyResolver:
 
     def _extract_from_task(
         self, task: dict, key: str, all_roles: Iterable[str]
-    ) -> Set[str]:
-        roles: Set[str] = set()
+    ) -> set[str]:
+        roles: set[str] = set()
         spec = task.get(key)
         if not isinstance(spec, dict):
             return roles
@@ -185,12 +184,11 @@ class RoleDependencyResolver:
         if isinstance(value, list):
             for v in value:
                 if isinstance(v, list):
-                    for x in v:
-                        yield x
+                    yield from v
                 else:
                     yield v
 
-    def _role_from_loop_item(self, item, name_template=None) -> Optional[str]:
+    def _role_from_loop_item(self, item, name_template=None) -> str | None:
         tmpl = (name_template or "").strip() if isinstance(name_template, str) else ""
 
         if isinstance(item, str):
@@ -210,7 +208,7 @@ class RoleDependencyResolver:
                         return v.strip()
         return None
 
-    def _match_glob_into(self, pattern: str, all_roles: Iterable[str], out: Set[str]):
+    def _match_glob_into(self, pattern: str, all_roles: Iterable[str], out: set[str]):
         if "*" in pattern or "?" in pattern or "[" in pattern:
             for r in all_roles:
                 if fnmatch.fnmatch(r, pattern):
@@ -220,8 +218,8 @@ class RoleDependencyResolver:
 
     # -------------------------- meta helpers --------------------------
 
-    def _extract_meta_dependencies(self, role_path: str) -> Set[str]:
-        deps: Set[str] = set()
+    def _extract_meta_dependencies(self, role_path: str) -> set[str]:
+        deps: set[str] = set()
         meta_main = os.path.join(role_path, "meta", "main.yml")
         if not os.path.isfile(meta_main):
             return deps
@@ -242,7 +240,7 @@ class RoleDependencyResolver:
             logging.exception(f"Failed to parse dependencies from {meta_main}")
         return deps
 
-    def _extract_meta_run_after(self, role_path: str) -> Set[str]:
+    def _extract_meta_run_after(self, role_path: str) -> set[str]:
         # Per req-010 `run_after` lives on the role's primary entity at
         # `meta/services.yml.<primary_entity>.run_after`. Delegate to the
         # canonical helper so the primary-entity derivation is in one

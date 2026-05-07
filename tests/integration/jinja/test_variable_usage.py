@@ -1,9 +1,10 @@
-import unittest
-import os
-import yaml
 import logging
-from glob import glob
+import os
 import re
+import unittest
+from glob import glob
+
+import yaml
 
 from utils.cache.files import iter_project_files_with_content, read_text
 

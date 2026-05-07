@@ -5,6 +5,7 @@ import argparse
 from pathlib import Path
 
 from utils.docker.version_updater import apply_updates, find_outdated_updates
+
 from . import PROJECT_ROOT
 
 

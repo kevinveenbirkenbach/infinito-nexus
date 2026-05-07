@@ -1,6 +1,7 @@
-import sys
 import re
+import sys
 import unittest
+
 from . import PROJECT_ROOT
 
 # ensure project root is on PYTHONPATH so we can import your CLI code

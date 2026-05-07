@@ -19,19 +19,17 @@ which auto-adds:
 - --env-file (if .env or .env/env exists)
 """
 
+import argparse
+import os
 import subprocess
 import time
-import os
-import argparse
-from typing import List, Optional, Tuple
-
 
 # ---------------------------
 # Shell helpers
 # ---------------------------
 
 
-def bash(command: str) -> List[str]:
+def bash(command: str) -> list[str]:
     print(command)
     process = subprocess.Popen(
         [command], stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True
@@ -46,11 +44,11 @@ def bash(command: str) -> List[str]:
     return output
 
 
-def list_to_string(lst: List[str]) -> str:
+def list_to_string(lst: list[str]) -> str:
     return " ".join(lst)
 
 
-def print_bash(command: str) -> List[str]:
+def print_bash(command: str) -> list[str]:
     """
     Wrapper around bash() that echoes combined output for easier debugging
     and can be monkeypatched in tests.
@@ -79,7 +77,7 @@ def compose_cmd(subcmd: str, project_path: str, project_name: str) -> str:
 # ---------------------------
 
 
-def normalize_services_arg(raw: List[str] | None, raw_str: str | None) -> List[str]:
+def normalize_services_arg(raw: list[str] | None, raw_str: str | None) -> list[str]:
     """
     Accept either:
       - multiple --manipulation SERVICE flags (nargs='*')
@@ -94,9 +92,9 @@ def normalize_services_arg(raw: List[str] | None, raw_str: str | None) -> List[s
 
 
 def wait_while_manipulation_running(
-    services: List[str],
+    services: list[str],
     waiting_time: int = 600,
-    timeout: Optional[int] = None,
+    timeout: int | None = None,
 ) -> None:
     """
     Wait until none of the given services are active anymore.
@@ -131,7 +129,7 @@ def wait_while_manipulation_running(
             break
 
 
-def get_compose_project_info(container: str) -> Tuple[str, str]:
+def get_compose_project_info(container: str) -> tuple[str, str]:
     """
     Resolve project name and working dir from Docker labels.
     STRICT: Raises RuntimeError if labels are missing/unreadable.
@@ -165,7 +163,7 @@ def get_compose_project_info(container: str) -> Tuple[str, str]:
 
 
 def main(
-    base_directory: str, manipulation_services: List[str], timeout: Optional[int]
+    base_directory: str, manipulation_services: list[str], timeout: int | None
 ) -> int:
     _ = base_directory  # unused in STRICT label mode
     errors = 0

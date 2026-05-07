@@ -1,11 +1,10 @@
 from __future__ import annotations
 
+from collections.abc import Iterable
 from pathlib import Path
-from typing import Any, Dict, Iterable, List, Optional, Set
+from typing import Any
 
 from utils.cache.yaml import load_yaml
-
-from .errors import ServicesResolutionError
 from utils.service_registry import (
     build_service_registry_from_roles_dir,
     is_explicit_truth,
@@ -13,13 +12,14 @@ from utils.service_registry import (
 )
 
 from . import PROJECT_ROOT
+from .errors import ServicesResolutionError
 
 _ROLES_ROOT = PROJECT_ROOT / "roles"
 
 
-def _stable_dedup(items: Iterable[str]) -> List[str]:
-    seen: Set[str] = set()
-    out: List[str] = []
+def _stable_dedup(items: Iterable[str]) -> list[str]:
+    seen: set[str] = set()
+    out: list[str] = []
     for x in items:
         if x not in seen:
             out.append(x)
@@ -38,7 +38,7 @@ def _is_enabled_shared(svc: object) -> bool:
     )
 
 
-def _load_service_registry(roles_root: Path = _ROLES_ROOT) -> Dict[str, Any]:
+def _load_service_registry(roles_root: Path = _ROLES_ROOT) -> dict[str, Any]:
     try:
         return build_service_registry_from_roles_dir(roles_root)
     except Exception as exc:
@@ -49,8 +49,8 @@ def _load_service_registry(roles_root: Path = _ROLES_ROOT) -> Dict[str, Any]:
 
 def resolve_direct_service_roles_from_config(
     config: dict,
-    service_registry: Optional[Dict[str, Any]] = None,
-) -> List[str]:
+    service_registry: dict[str, Any] | None = None,
+) -> list[str]:
     """
     Single source of truth for "service -> provider role(s)" mapping.
     """
@@ -114,19 +114,19 @@ class ServicesResolver:
                 f"(missing folder {role_dir})"
             )
 
-    def direct_includes_from_config(self, config: dict) -> List[str]:
+    def direct_includes_from_config(self, config: dict) -> list[str]:
         return resolve_direct_service_roles_from_config(config, self._service_registry)
 
-    def resolve_transitively(self, root_role_name: str) -> List[str]:
+    def resolve_transitively(self, root_role_name: str) -> list[str]:
         """
         BFS over roles discovered via service flags.
         Queue order is stable, results are deduped.
         """
-        resolved: List[str] = []
-        seen: Set[str] = set()
+        resolved: list[str] = []
+        seen: set[str] = set()
 
         root_cfg = self._load_role_config(root_role_name)
-        queue: List[str] = self.direct_includes_from_config(root_cfg)
+        queue: list[str] = self.direct_includes_from_config(root_cfg)
 
         while queue:
             role_name = queue.pop(0)

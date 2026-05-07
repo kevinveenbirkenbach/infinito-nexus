@@ -3,6 +3,7 @@ import unittest
 import yaml
 
 from plugins.lookup.service import LookupModule
+
 from . import PROJECT_ROOT
 
 

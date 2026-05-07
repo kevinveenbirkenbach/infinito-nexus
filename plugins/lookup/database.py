@@ -1,18 +1,18 @@
 # lookup_plugins/database.py
 from __future__ import annotations
 
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 from ansible.errors import AnsibleError
 from ansible.plugins.lookup import LookupBase
 
 from utils.applications.config import get
+from utils.cache.applications import get_merged_applications
 from utils.database_service import (
     get_database_service_config,
     resolve_database_service_key,
 )
 from utils.entity_name_utils import get_entity_name
-from utils.cache.applications import get_merged_applications
 
 
 class LookupModule(LookupBase):
@@ -30,10 +30,10 @@ class LookupModule(LookupBase):
 
     def run(
         self,
-        terms: List[Any],
-        variables: Optional[Dict[str, Any]] = None,
+        terms: list[Any],
+        variables: dict[str, Any] | None = None,
         **kwargs: Any,
-    ) -> List[Any]:
+    ) -> list[Any]:
         terms = terms or []
         if len(terms) not in (1, 2):
             raise AnsibleError("database: requires database_consumer_id [, want_path]")
@@ -187,7 +187,7 @@ class LookupModule(LookupBase):
         return [resolved if want == "all" else resolved.get(want, "")]
 
     @staticmethod
-    def _require_var(vars_: Dict[str, Any], key: str) -> Any:
+    def _require_var(vars_: dict[str, Any], key: str) -> Any:
         if key not in vars_:
             raise AnsibleError(f"database: required variable '{key}' is not set")
         return vars_[key]

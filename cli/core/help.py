@@ -4,7 +4,6 @@ import subprocess
 import sys
 import textwrap
 from pathlib import Path
-from typing import List
 
 from cli.core.colors import Fore, Style, color_text
 from cli.core.discovery import discover_commands
@@ -183,7 +182,7 @@ def show_full_help_for_all(cli_dir: Path) -> None:
         print()
 
 
-def show_help_for_directory(cli_dir: Path, dir_parts: List[str]) -> bool:
+def show_help_for_directory(cli_dir: Path, dir_parts: list[str]) -> bool:
     """
     If cli/<dir_parts>/ is a directory, show commands directly below it.
     """

@@ -1,6 +1,6 @@
-import unittest
-import sys
 import os
+import sys
+import unittest
 
 # Ensure plugins/filter directory is on the path
 sys.path.insert(

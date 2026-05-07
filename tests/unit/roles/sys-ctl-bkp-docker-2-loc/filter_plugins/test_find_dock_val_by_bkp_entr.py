@@ -1,6 +1,6 @@
-import unittest
 import importlib.util
 import os
+import unittest
 
 TEST_DIR = os.path.dirname(__file__)
 PLUGIN_PATH = os.path.abspath(
@@ -88,9 +88,11 @@ class TestFindDockValByBkpEntr(unittest.TestCase):
         self.assertEqual(result, [])
 
     def test_raises_on_non_dict_input(self):
-        with self.assertRaises(Exception):
+        from ansible.errors import AnsibleFilterError
+
+        with self.assertRaises(AnsibleFilterError):
             find_dock_val_by_bkp_entr(None, "enabled", "name")
-        with self.assertRaises(Exception):
+        with self.assertRaises(AnsibleFilterError):
             find_dock_val_by_bkp_entr([], "enabled", "name")
 
     def test_works_with_missing_field(self):

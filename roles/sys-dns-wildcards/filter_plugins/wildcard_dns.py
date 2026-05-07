@@ -1,6 +1,7 @@
 # roles/sys-dns-wildcards/filter_plugins/wildcard_dns.py
-from ansible.errors import AnsibleFilterError
 import ipaddress
+
+from ansible.errors import AnsibleFilterError
 
 
 def _validate(d: str) -> None:
@@ -177,7 +178,7 @@ def wildcard_records(
     )
 
 
-class FilterModule(object):
+class FilterModule:
     def filters(self):
         return {
             "wildcard_records": wildcard_records,

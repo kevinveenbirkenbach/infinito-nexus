@@ -6,7 +6,6 @@ import textwrap
 import unittest
 from pathlib import Path
 
-
 from . import PROJECT_ROOT
 
 SCRIPT_PATH = PROJECT_ROOT / "scripts" / "meta" / "resolve" / "pr" / "scope.sh"

@@ -4,7 +4,6 @@ import subprocess
 import sys
 from dataclasses import dataclass
 from pathlib import Path
-from typing import List
 
 from cli.core.colors import Fore, Style, color_text
 from cli.core.discovery import resolve_command_module
@@ -27,7 +26,7 @@ class Flags:
     help_all: bool = False
 
 
-def _first_non_flag_token(argv: List[str]) -> str | None:
+def _first_non_flag_token(argv: list[str]) -> str | None:
     """
     Return the first non-flag token after argv[0], but treat '--log <ARG>' as a flag
     with a required argument (skip both tokens).
@@ -51,7 +50,7 @@ def _first_non_flag_token(argv: List[str]) -> str | None:
     return None
 
 
-def _parse_log_dir(argv: List[str]) -> Path | None:
+def _parse_log_dir(argv: list[str]) -> Path | None:
     """
     Parse and remove '--log <LOG_DIR>' from argv.
 
@@ -95,7 +94,7 @@ def _parse_log_dir(argv: List[str]) -> Path | None:
     return Path(raw).expanduser()
 
 
-def parse_flags(argv: List[str]) -> Flags:
+def parse_flags(argv: list[str]) -> Flags:
     flags = Flags()
     flags.log_dir = _parse_log_dir(argv)
 
@@ -180,7 +179,7 @@ def main() -> None:
     except KeyboardInterrupt:
         print()
         print(color_text("Execution interrupted by user (Ctrl+C).", Fore.YELLOW))
-        raise SystemExit(130)
+        raise SystemExit(130) from None
     finally:
         if log_file:
             log_file.close()

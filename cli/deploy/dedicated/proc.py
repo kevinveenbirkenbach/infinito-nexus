@@ -2,13 +2,12 @@ from __future__ import annotations
 
 import subprocess
 import sys
-from typing import List, Optional
 
 
 def run(
-    cmd: List[str],
+    cmd: list[str],
     *,
-    cwd: Optional[str] = None,
+    cwd: str | None = None,
     check: bool = True,
 ) -> subprocess.CompletedProcess:
     """

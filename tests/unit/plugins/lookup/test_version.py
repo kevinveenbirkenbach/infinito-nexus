@@ -1,7 +1,7 @@
-import os
-import unittest
-import tempfile
 import importlib
+import os
+import tempfile
+import unittest
 
 
 class TestVersionLookup(unittest.TestCase):

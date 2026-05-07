@@ -56,8 +56,8 @@ from __future__ import annotations
 import os
 import re
 import unittest
+from collections.abc import Sequence
 from dataclasses import dataclass
-from typing import List, Sequence, Tuple
 
 from utils.annotations.suppress import (
     is_suppressed_at,
@@ -167,7 +167,7 @@ RE_DOCKER_DASH_COMPOSE_CMD = re.compile(
 )
 
 # Rules: order matters (prefer specific messages)
-RULES: Tuple[Tuple[str, re.Pattern, str], ...] = (
+RULES: tuple[tuple[str, re.Pattern, str], ...] = (
     (
         "docker compose usage",
         RE_DOCKER_COMPOSE_CMD,
@@ -190,7 +190,7 @@ RULES: Tuple[Tuple[str, re.Pattern, str], ...] = (
 # across lines, and inline scalars where docker follows a YAML key. Both
 # must use the wrapper. Restrict these rules to .yml/.yaml files to keep
 # unrelated text immune.
-YAML_SUFFIXES: Tuple[str, ...] = (".yml", ".yaml")
+YAML_SUFFIXES: tuple[str, ...] = (".yml", ".yaml")
 
 # Multi-line scan: any `argv:` block whose first/any element is the
 # bareword `docker`. The intermediate lines (between `argv:` and the
@@ -218,8 +218,8 @@ def _line_no_at(text: str, offset: int) -> int:
     return text.count("\n", 0, offset) + 1
 
 
-def _scan_yaml_argv_and_inline(text: str, rel: str) -> List[Finding]:
-    findings: List[Finding] = []
+def _scan_yaml_argv_and_inline(text: str, rel: str) -> list[Finding]:
+    findings: list[Finding] = []
 
     for match in RE_ARGV_DOCKER_BLOCK.finditer(text):
         offender_line_offset = match.start("offender")
@@ -256,10 +256,10 @@ def _scan_yaml_argv_and_inline(text: str, rel: str) -> List[Finding]:
     return findings
 
 
-def scan_text(text: str, rel: str) -> List[Finding]:
+def scan_text(text: str, rel: str) -> list[Finding]:
     """Apply every rule to `text`. `rel` is the project-relative POSIX
     path used for diagnostic messages and YAML-rule gating."""
-    findings: List[Finding] = []
+    findings: list[Finding] = []
     seen_offenders = set()  # line_no — dedupe across single+multi-line passes
 
     for idx, line in enumerate(text.splitlines(), start=1):
@@ -288,7 +288,7 @@ def scan_text(text: str, rel: str) -> List[Finding]:
 
 
 def format_findings(findings: Sequence[Finding]) -> str:
-    lines: List[str] = []
+    lines: list[str] = []
     lines.append("Forbidden raw Docker command invocations detected.")
     lines.append("")
     lines.append("Why this matters:")
@@ -315,7 +315,7 @@ def format_findings(findings: Sequence[Finding]) -> str:
 # Ansible task/var/meta YAML, Jinja2 templates, and bundled shell
 # scripts that ship as role files. Documentation (.md), JSON config,
 # and Python sources under roles/ are out of scope.
-SCAN_EXTENSIONS: Tuple[str, ...] = (".yml", ".yaml", ".j2", ".sh")
+SCAN_EXTENSIONS: tuple[str, ...] = (".yml", ".yaml", ".j2", ".sh")
 
 # Project-relative path prefix that scopes the scan. Every file outside
 # this prefix is skipped before any rule fires.
@@ -330,7 +330,7 @@ HEAD_SCAN_LINES: int = 30
 
 class TestNoRawDockerCommands(unittest.TestCase):
     def test_no_raw_docker_commands_in_roles(self) -> None:
-        findings: List[Finding] = []
+        findings: list[Finding] = []
         project_root_str = str(PROJECT_ROOT)
         for path in iter_non_ignored_files(extensions=SCAN_EXTENSIONS):
             rel = os.path.relpath(path, project_root_str).replace(os.sep, "/")

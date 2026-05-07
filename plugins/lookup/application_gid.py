@@ -1,7 +1,3 @@
-from __future__ import absolute_import, division, print_function
-
-__metaclass__ = type
-
 import os
 
 
@@ -51,7 +47,9 @@ def compute_application_gid(application_id, roles_dir="roles", base_gid=10000):
     try:
         index = sorted_ids.index(application_id)
     except ValueError:
-        raise ValueError(f"Application ID '{application_id}' not found in any role")
+        raise ValueError(
+            f"Application ID '{application_id}' not found in any role"
+        ) from None
 
     return base_gid + index
 
@@ -67,8 +65,8 @@ def compute_application_gid(application_id, roles_dir="roles", base_gid=10000):
 # cost — see CI run 24935979190 for the regression that motivated this
 # split.
 try:
-    from ansible.plugins.lookup import LookupBase
     from ansible.errors import AnsibleError
+    from ansible.plugins.lookup import LookupBase
 
     class LookupModule(LookupBase):
         def run(self, terms, variables=None, **kwargs):
@@ -79,7 +77,7 @@ try:
             try:
                 return [compute_application_gid(application_id, roles_dir, base_gid)]
             except ValueError as exc:
-                raise AnsibleError(str(exc))
+                raise AnsibleError(str(exc)) from exc
 
 except ImportError:  # pragma: no cover - exercised on ansible-less hosts only
     # Sentinel so callers that *try* to instantiate the lookup outside

@@ -1,13 +1,13 @@
-import unittest
+import logging
 import os
-import yaml
 import re
-from glob import glob
 import sys
+import unittest
+from glob import glob
+
+import yaml
 
 from utils.cache.files import iter_project_files_with_content
-
-import logging
 
 logging.basicConfig(level=logging.WARNING)
 
@@ -95,7 +95,7 @@ class TestVariableDefinitions(unittest.TestCase):
         # 1) Keys from var files (top-level dict keys)
         for vf in self.var_files:
             try:
-                with open(vf, "r", encoding="utf-8") as f:
+                with open(vf, encoding="utf-8") as f:
                     data = yaml.safe_load(f)
                 if isinstance(data, dict):
                     self.defined.update(data.keys())

@@ -1,10 +1,10 @@
 import os
 import re
-from utils.cache.yaml import load_yaml_any
-from ansible.errors import AnsibleFilterError
 from collections.abc import Mapping
 
-from ansible.errors import AnsibleUndefinedVariable
+from ansible.errors import AnsibleFilterError, AnsibleUndefinedVariable
+
+from utils.cache.yaml import load_yaml_any
 
 try:
     from ansible.utils.unsafe_proxy import AnsibleUndefined
@@ -153,7 +153,7 @@ def get(
             f"path_trace: {path_trace}\n"
             f"applications keys: {list(applications.keys())}\n"
             f"config_path: {config_path}"
-        )
+        ) from None
 
     for part in config_path.split("."):
         path_trace.append(part)

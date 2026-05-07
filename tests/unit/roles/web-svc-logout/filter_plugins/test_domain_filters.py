@@ -1,8 +1,8 @@
 # tests/unit/roles/web-svc-logout/filter_plugins/test_domain_filters.py
 
+import importlib.util
 import os
 import unittest
-import importlib.util
 
 # Directory of this test file: .../tests/unit/roles/web-svc-logout/filter_plugins
 THIS_DIR = os.path.dirname(__file__)

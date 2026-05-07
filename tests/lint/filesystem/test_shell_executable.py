@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import stat
 import unittest
+
 from . import PROJECT_ROOT
 
 

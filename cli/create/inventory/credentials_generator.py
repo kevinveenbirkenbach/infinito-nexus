@@ -2,12 +2,12 @@ from __future__ import annotations
 
 import concurrent.futures
 import subprocess
+import sys
 from pathlib import Path
-from typing import Dict, List, Optional
 
 from ruamel.yaml import YAML
 from ruamel.yaml.comments import CommentedMap
-import sys
+
 from .role_resolver import resolve_role_path
 
 
@@ -27,8 +27,8 @@ def _generate_credentials_snippet_for_app(
     host_vars_file: Path,
     vault_password_file: Path,
     project_root: Path,
-    env: Optional[Dict[str, str]],
-) -> Optional[CommentedMap]:
+    env: dict[str, str] | None,
+) -> CommentedMap | None:
     role_path = resolve_role_path(app_id, roles_dir, project_root, env=env)
     if role_path is None:
         return None
@@ -63,7 +63,9 @@ def _generate_credentials_snippet_for_app(
     try:
         data = yaml_rt.load(snippet_text)
     except Exception as exc:
-        raise SystemExit(f"Failed to parse credentials snippet for {app_id}: {exc}")
+        raise SystemExit(
+            f"Failed to parse credentials snippet for {app_id}: {exc}"
+        ) from exc
 
     if data is None:
         return None
@@ -77,22 +79,22 @@ def _generate_credentials_snippet_for_app(
 
 
 def generate_credentials_for_roles(
-    application_ids: List[str],
+    application_ids: list[str],
     roles_dir: Path,
     host_vars_file: Path,
     vault_password_file: Path,
     project_root: Path,
-    env: Optional[Dict[str, str]],
+    env: dict[str, str] | None,
     workers: int = 4,
 ) -> None:
     if not application_ids:
         return
 
     max_workers = max(1, workers)
-    snippets: List[CommentedMap] = []
+    snippets: list[CommentedMap] = []
 
     with concurrent.futures.ThreadPoolExecutor(max_workers=max_workers) as executor:
-        future_to_app: Dict[concurrent.futures.Future, str] = {}
+        future_to_app: dict[concurrent.futures.Future, str] = {}
         for app_id in application_ids:
             future = executor.submit(
                 _generate_credentials_snippet_for_app,

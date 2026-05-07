@@ -10,14 +10,14 @@
 from __future__ import annotations
 
 import os
-from typing import Any, Dict, Optional, List
+from typing import Any
 
 from ansible.errors import AnsibleError
 from ansible.plugins.lookup import LookupBase
 
-from utils.jinja_strict import render_strict
 from utils.cache.applications import get_merged_applications
 from utils.cache.domains import get_merged_domains
+from utils.jinja_strict import render_strict
 from utils.tls_common import (
     AVAILABLE_FLAVORS,
     as_str,
@@ -41,7 +41,7 @@ def _join(*parts: Any) -> str:
     return os.path.join(*cleaned) if cleaned else ""
 
 
-def _require_current_play_domains_all_strict(variables: dict) -> List[str]:
+def _require_current_play_domains_all_strict(variables: dict) -> list[str]:
     """
     STRICT FORMAT REQUIREMENT
 
@@ -61,7 +61,7 @@ def _require_current_play_domains_all_strict(variables: dict) -> List[str]:
             f"Got {type(value).__name__}."
         )
 
-    cleaned: List[str] = []
+    cleaned: list[str] = []
     for item in value:
         if not isinstance(item, str):
             raise AnsibleError(
@@ -81,7 +81,7 @@ def _require_current_play_domains_all_strict(variables: dict) -> List[str]:
 
 
 class LookupModule(LookupBase):
-    def run(self, terms, variables: Optional[dict] = None, **kwargs):
+    def run(self, terms, variables: dict | None = None, **kwargs):
         variables = variables or {}
 
         # New API: want-path is the 2nd positional term.
@@ -134,7 +134,7 @@ class LookupModule(LookupBase):
         cert_file = ""
         key_file = ""
         ca_file = ""
-        san_domains: List[str] = []
+        san_domains: list[str] = []
         cert_id = ""
         scope = "app"
 
@@ -221,7 +221,7 @@ class LookupModule(LookupBase):
         else:
             raise AnsibleError(f"cert: unsupported mode '{mode}'")
 
-        resolved: Dict[str, Any] = {
+        resolved: dict[str, Any] = {
             "application_id": app_id,
             "domain": primary_domain,
             "enabled": enabled,

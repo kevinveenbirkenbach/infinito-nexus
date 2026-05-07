@@ -1,8 +1,9 @@
-import os
 import glob
-import yaml
-import warnings
+import os
 import unittest
+import warnings
+
+import yaml
 
 # import your filters
 from plugins.filter.invokable_paths import get_invokable_paths, get_non_invokable_paths
@@ -38,7 +39,7 @@ class TestApplicationIdAndInvocability(unittest.TestCase):
             # load vars/main.yml if it exists
             data = {}
             if os.path.exists(vars_main):
-                with open(vars_main, "r", encoding="utf-8") as f:
+                with open(vars_main, encoding="utf-8") as f:
                     data = yaml.safe_load(f) or {}
 
             app_id = data.get("application_id")
@@ -64,7 +65,8 @@ class TestApplicationIdAndInvocability(unittest.TestCase):
                 warnings.warn(
                     f"{role_name}: 'application_id' is '{app_id}',"
                     f" but the folder name is '{role_name}'."
-                    " Consider setting application_id to exactly the role folder name to avoid confusion."
+                    " Consider setting application_id to exactly the role folder name to avoid confusion.",
+                    stacklevel=2,
                 )
 
         # if we get here, all presence/absence checks passed

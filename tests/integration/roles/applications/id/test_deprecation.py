@@ -1,5 +1,6 @@
 import os
 import unittest
+
 import yaml
 
 # Dynamically determine the path to the roles directory
@@ -21,7 +22,7 @@ class TestApplicationIdDeprecation(unittest.TestCase):
             vars_main_yml = os.path.join(role_path, "vars", "main.yml")
             if not os.path.isfile(vars_main_yml):
                 continue
-            with open(vars_main_yml, "r", encoding="utf-8") as f:
+            with open(vars_main_yml, encoding="utf-8") as f:
                 try:
                     data = yaml.safe_load(f)
                 except Exception as e:

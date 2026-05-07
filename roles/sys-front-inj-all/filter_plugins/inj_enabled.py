@@ -42,7 +42,7 @@ def inj_enabled_filter(
     return result
 
 
-class FilterModule(object):
+class FilterModule:
     def filters(self):
         return {
             "inj_enabled": inj_enabled_filter,

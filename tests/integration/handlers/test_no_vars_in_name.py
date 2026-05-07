@@ -1,6 +1,7 @@
 import unittest
-import yaml
 from pathlib import Path
+
+import yaml
 
 
 class HandlerNameIntegrationTest(unittest.TestCase):

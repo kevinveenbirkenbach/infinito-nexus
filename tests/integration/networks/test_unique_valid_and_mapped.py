@@ -26,7 +26,7 @@ class TestNetworksUniqueValidAndMapped(unittest.TestCase):
             server_file = os.path.join(role_path, "meta", "server.yml")
             if not os.path.isfile(server_file):
                 continue
-            with open(server_file, "r", encoding="utf-8") as f:
+            with open(server_file, encoding="utf-8") as f:
                 server_data = yaml.safe_load(f) or {}
             networks = server_data.get("networks") or {}
             if not isinstance(networks, dict):

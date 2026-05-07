@@ -23,11 +23,11 @@
 from __future__ import annotations
 
 import os
-from typing import Any, Optional
+from typing import Any
 
 from ansible.errors import AnsibleError
-from ansible.plugins.lookup import LookupBase
 from ansible.plugins.loader import lookup_loader
+from ansible.plugins.lookup import LookupBase
 
 from utils.tls_common import as_str
 
@@ -79,7 +79,7 @@ def _to_url_tree(obj: Any, cdn_root: str, base_url: str) -> Any:
 
 
 class LookupModule(LookupBase):
-    def run(self, terms, variables: Optional[dict] = None, **kwargs):
+    def run(self, terms, variables: dict | None = None, **kwargs):
         variables = variables or {}
 
         if not terms:

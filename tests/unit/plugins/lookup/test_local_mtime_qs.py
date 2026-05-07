@@ -2,7 +2,9 @@ import os
 import tempfile
 import time
 import unittest
+
 from ansible.errors import AnsibleError  # type: ignore
+
 from plugins.lookup.local_mtime_qs import LookupModule
 
 

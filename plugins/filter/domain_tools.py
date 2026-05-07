@@ -14,7 +14,7 @@ def to_zone(hostname: str) -> str:
     return ".".join(parts[-2:])
 
 
-class FilterModule(object):
+class FilterModule:
     def filters(self):
         return {
             "to_zone": to_zone,

@@ -54,7 +54,7 @@ ALLOWED_GROUPS_NORMALISED = re.compile(
 
 class TestAllowedGroupsSlashNormalization(unittest.TestCase):
     def test_template_normalises_allowed_groups_with_leading_slash(self):
-        with open(TEMPLATE_PATH, "r", encoding="utf-8") as f:
+        with open(TEMPLATE_PATH, encoding="utf-8") as f:
             content = f.read()
 
         self.assertRegex(

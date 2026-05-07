@@ -16,7 +16,7 @@
 
 from __future__ import annotations
 
-from typing import Any, Dict, Tuple
+from typing import Any
 
 from ansible.errors import AnsibleError
 
@@ -29,7 +29,7 @@ def looks_like_jinja(s: str) -> bool:
     return ("{{" in s) or ("{%" in s)
 
 
-def build_render_context(variables: Dict[str, Any]) -> Tuple[dict, str]:
+def build_render_context(variables: dict[str, Any]) -> tuple[dict, str]:
     """
     Build a robust context for rendering Jinja-in-strings.
 
@@ -143,7 +143,7 @@ def render_jinja2_strict_recursive(
 def render_strict(
     value: Any,
     *,
-    variables: Dict[str, Any],
+    variables: dict[str, Any],
     var_name: str,
     err_prefix: str,
     max_passes: int = 5,

@@ -1,7 +1,7 @@
 import importlib.util
-from importlib import import_module
 import sys
 import unittest
+from importlib import import_module
 
 from . import PROJECT_ROOT
 

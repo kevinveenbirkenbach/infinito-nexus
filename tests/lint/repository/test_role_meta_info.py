@@ -28,7 +28,6 @@ import yaml as _yaml
 from utils.cache.files import PROJECT_ROOT
 from utils.cache.yaml import load_yaml_any
 
-
 ROLES_DIR = PROJECT_ROOT / "roles"
 
 _ALLOWED_INFO_KEYS: frozenset[str] = frozenset({"logo", "homepage", "video", "display"})

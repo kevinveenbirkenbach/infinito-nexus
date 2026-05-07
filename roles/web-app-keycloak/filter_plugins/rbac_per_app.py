@@ -35,7 +35,7 @@ def kc_per_app_ldap_filter(application_id):
     return f"(&(objectClass=groupOfNames)(cn={application_id}-*))"
 
 
-class FilterModule(object):
+class FilterModule:
     def filters(self):
         return {
             "kc_per_app_mapper_name": kc_per_app_mapper_name,

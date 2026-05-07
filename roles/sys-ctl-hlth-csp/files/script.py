@@ -1,12 +1,11 @@
 #!/usr/bin/env python3
 
+import argparse
 import os
 import re
 import subprocess
 import sys
-import argparse
 from pathlib import Path
-
 
 DOMAIN_FROM_FILENAME_RE = re.compile(r"^([a-zA-Z0-9-]+\.)+[a-zA-Z]{2,}\.conf$")
 

@@ -1,10 +1,11 @@
 #!/usr/bin/env python3
 import os
 import sys
+
 from ansible.errors import AnsibleFilterError
 
 
-class FilterModule(object):
+class FilterModule:
     def filters(self):
         plugin_dir = os.path.dirname(__file__)
         project_root = os.path.abspath(os.path.join(plugin_dir, "..", ".."))
@@ -16,6 +17,6 @@ class FilterModule(object):
         except ImportError as e:
             raise AnsibleFilterError(
                 f"could not import utils.domains.primary_domain: {e}"
-            )
+            ) from e
 
         return {"get_domain": get_domain}

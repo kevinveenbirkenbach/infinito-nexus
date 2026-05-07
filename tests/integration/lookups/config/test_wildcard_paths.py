@@ -13,8 +13,7 @@ literal app argument when present, otherwise from the file's
 """
 
 import unittest
-from collections.abc import Mapping
-from typing import Dict, Iterable, List, Tuple
+from collections.abc import Iterable, Mapping
 
 from ._scan import (
     LookupMatch,
@@ -28,8 +27,8 @@ from ._validate import match_wildcard_path, match_wildcard_segment
 
 def _build_wildcard_paths(
     matches: Iterable[LookupMatch],
-) -> Dict[Tuple[str, str], List[Tuple]]:
-    out: Dict[Tuple[str, str], List[Tuple]] = {}
+) -> dict[tuple[str, str], list[tuple]]:
+    out: dict[tuple[str, str], list[tuple]] = {}
     for m in matches:
         if m.kind != "concat":
             continue
@@ -55,7 +54,7 @@ class TestWildcardPaths(unittest.TestCase):
     def test_wildcard_paths(self):
         if not self.wildcard_paths:
             self.skipTest("No `~`-concatenated lookup paths found")
-        failures: List[str] = []
+        failures: list[str] = []
         for (role_id, wildcard_path), occs in self.wildcard_paths.items():
             cfg = self.ctx.application_defaults.get(role_id)
             if cfg is None:

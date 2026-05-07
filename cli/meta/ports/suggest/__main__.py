@@ -19,7 +19,6 @@ from __future__ import annotations
 
 import argparse
 import sys
-from typing import List, Optional, Tuple
 
 from utils.meta.port_bands import (
     PortBandsError,
@@ -32,7 +31,7 @@ from utils.meta.scan import (
 )
 
 
-def _parse_range(text: str) -> Tuple[int, int]:
+def _parse_range(text: str) -> tuple[int, int]:
     head, _, tail = text.partition("-")
     try:
         start = int(head)
@@ -48,8 +47,8 @@ def suggest_single_ports(
     scope: str,
     category: str,
     count: int,
-    explicit_range: Optional[Tuple[int, int]],
-) -> Tuple[List[int], int]:
+    explicit_range: tuple[int, int] | None,
+) -> tuple[list[int], int]:
     """Return ``(suggestions, gap_count)``.
 
     `gap_count` is the number of suggestions that came from a band gap (vs.
@@ -70,7 +69,7 @@ def suggest_single_ports(
 
     start, end = band
     occupied = set(occupied_ports_for(scope, category))
-    suggestions: List[int] = []
+    suggestions: list[int] = []
     gaps_filled = 0
 
     cursor = start
@@ -90,15 +89,15 @@ def suggest_single_ports(
     return suggestions, gaps_filled
 
 
-def _ranges_overlap(a: Tuple[int, int], b: Tuple[int, int]) -> bool:
+def _ranges_overlap(a: tuple[int, int], b: tuple[int, int]) -> bool:
     a_start, a_end = a
     b_start, b_end = b
     return not (a_end < b_start or b_end < a_start)
 
 
 def suggest_relay_ranges(
-    length: int, count: int, explicit_range: Optional[Tuple[int, int]]
-) -> Tuple[List[Tuple[int, int]], int]:
+    length: int, count: int, explicit_range: tuple[int, int] | None
+) -> tuple[list[tuple[int, int]], int]:
     if explicit_range is not None:
         band = explicit_range
     else:
@@ -112,7 +111,7 @@ def suggest_relay_ranges(
     band_start, band_end = band
     occupied = list(occupied_relay_ranges())
 
-    suggestions: List[Tuple[int, int]] = []
+    suggestions: list[tuple[int, int]] = []
     gaps_filled = 0
     cursor = band_start
 
@@ -140,7 +139,7 @@ def suggest_relay_ranges(
     return suggestions, gaps_filled
 
 
-def main(argv: Optional[List[str]] = None) -> int:
+def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(
         prog="cli meta ports suggest",
         description=(

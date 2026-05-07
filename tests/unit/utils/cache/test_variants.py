@@ -16,10 +16,12 @@ if str(PROJECT_ROOT) not in sys.path:
 from utils.cache import _reset_cache_for_tests  # noqa: E402
 from utils.cache.applications import (  # noqa: E402
     _build_variants,
-    _load_variants_overrides as _load_yaml_variant_list,
     get_application_defaults,
     get_merged_applications,
     get_variants,
+)
+from utils.cache.applications import (
+    _load_variants_overrides as _load_yaml_variant_list,
 )
 
 

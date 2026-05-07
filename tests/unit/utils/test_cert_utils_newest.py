@@ -2,6 +2,7 @@
 import unittest
 from types import SimpleNamespace
 from unittest.mock import patch
+
 from utils.cert_utils import CertUtils
 
 

@@ -3,8 +3,8 @@ from __future__ import annotations
 import unittest
 from unittest.mock import patch
 
-from cli.mirror.model import ImageRef
 import cli.mirror.sync.__main__ as sync_main
+from cli.mirror.model import ImageRef
 
 
 class TestMirrorSync(unittest.TestCase):

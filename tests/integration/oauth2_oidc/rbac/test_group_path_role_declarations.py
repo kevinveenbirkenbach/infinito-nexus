@@ -89,7 +89,7 @@ EXCLUDED_RELATIVE_PATHS = frozenset(
 
 def _read_text(path):
     try:
-        with open(path, "r", encoding="utf-8") as f:
+        with open(path, encoding="utf-8") as f:
             return f.read()
     except (OSError, UnicodeDecodeError):
         return None

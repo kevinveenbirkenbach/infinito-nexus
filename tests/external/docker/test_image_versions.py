@@ -30,6 +30,7 @@ from __future__ import annotations
 import unittest
 
 from utils.annotations.message import warning
+from utils.docker.image.discovery import iter_role_images
 from utils.docker.version_updater import (
     fetch_dockerhub_tags,
     fetch_ghcr_tags,
@@ -42,8 +43,6 @@ from utils.docker.version_updater import (
     version_flavor,
     version_key,
 )
-
-from utils.docker.image.discovery import iter_role_images
 
 from . import PROJECT_ROOT
 

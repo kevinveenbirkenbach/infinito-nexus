@@ -1,10 +1,12 @@
-import unittest
-import os
 import glob
-import yaml
+import os
 import re
+import unittest
+
+import yaml
 
 from utils.cache.files import read_text
+
 from . import PROJECT_ROOT
 
 

@@ -2,9 +2,10 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from utils.cache.yaml import load_yaml_any
 from ruamel.yaml import YAML
 from ruamel.yaml.comments import CommentedMap
+
+from utils.cache.yaml import load_yaml_any
 
 
 def _ensure_ruamel_map(node: CommentedMap, key: str) -> CommentedMap:

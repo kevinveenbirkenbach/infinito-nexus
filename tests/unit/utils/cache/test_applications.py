@@ -19,6 +19,7 @@ from pathlib import Path
 
 from utils.cache import _reset_cache_for_tests
 from utils.cache import applications as cache_apps
+
 from . import PROJECT_ROOT
 
 
@@ -188,7 +189,7 @@ class TestApplicationsImportableWithoutAnsible(unittest.TestCase):
         repo_root = PROJECT_ROOT
         snippet = (
             "import sys\n"
-            "sys.path.insert(0, %r)\n"
+            f"sys.path.insert(0, {str(repo_root)!r})\n"
             "class _Block:\n"
             "    def find_spec(self, name, path=None, target=None):\n"
             "        if name == 'ansible' or name.startswith('ansible.'):\n"
@@ -201,7 +202,7 @@ class TestApplicationsImportableWithoutAnsible(unittest.TestCase):
             "v = get_variants(roles_dir=ROLES_DIR)\n"
             "assert len(v) > 0\n"
             "print('OK', len(v))\n"
-        ) % str(repo_root)
+        )
         result = subprocess.run(
             [sys.executable, "-c", snippet],
             capture_output=True,

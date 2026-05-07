@@ -27,14 +27,14 @@ CACHE SEMANTICS
 
 from __future__ import annotations
 
+from collections.abc import Mapping
 from pathlib import Path
-from typing import Any, Dict, Mapping, Tuple
+from typing import Any
 
 import yaml
 
-
 _MISSING = object()
-_CACHE: Dict[Tuple[str, int, int], Any] = {}
+_CACHE: dict[tuple[str, int, int], Any] = {}
 
 
 def _path_key(path) -> str:
@@ -48,7 +48,7 @@ def _key(path) -> str:
     return _path_key(path)
 
 
-def _signature(p: Path) -> Tuple[str, int, int]:
+def _signature(p: Path) -> tuple[str, int, int]:
     st = p.stat()
     return (_path_key(p), st.st_mtime_ns, st.st_size)
 
@@ -93,7 +93,7 @@ def _load_raw(path, *, default_if_missing: Any) -> Any:
     return data
 
 
-def load_yaml(path, *, default_if_missing: Any = _MISSING) -> Dict[str, Any]:
+def load_yaml(path, *, default_if_missing: Any = _MISSING) -> dict[str, Any]:
     """Load a YAML file as a dict, memoised by absolute path.
 
     `default_if_missing` controls the missing-file behaviour:
@@ -125,10 +125,10 @@ def load_yaml_any(path, *, default_if_missing: Any = _MISSING) -> Any:
     return _load_raw(path, default_if_missing=default_if_missing)
 
 
-_CACHE_ALL: Dict[Tuple[str, int, int], Tuple[Any, ...]] = {}
+_CACHE_ALL: dict[tuple[str, int, int], tuple[Any, ...]] = {}
 
 
-def load_yaml_all(path, *, default_if_missing: Any = _MISSING) -> Tuple[Any, ...]:
+def load_yaml_all(path, *, default_if_missing: Any = _MISSING) -> tuple[Any, ...]:
     """Memoised multi-document YAML load.
 
     Returns a tuple of every document parsed by ``yaml.safe_load_all``

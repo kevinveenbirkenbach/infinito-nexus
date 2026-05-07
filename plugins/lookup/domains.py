@@ -1,7 +1,7 @@
 # lookup_plugins/domains.py
 from __future__ import annotations
 
-from typing import Any, Dict, Optional
+from typing import Any
 
 from ansible.errors import AnsibleError
 from ansible.plugins.lookup import LookupBase
@@ -31,8 +31,8 @@ class LookupModule(LookupBase):
 
     def run(
         self,
-        terms: Optional[list[Any]],
-        variables: Optional[Dict[str, Any]] = None,
+        terms: list[Any] | None,
+        variables: dict[str, Any] | None = None,
         **kwargs: Any,
     ) -> list[Any]:
         terms = terms or []

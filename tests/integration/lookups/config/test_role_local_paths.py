@@ -27,8 +27,7 @@ Mirrors the resolution logic of `plugins/lookup/config.py`:
 """
 
 import unittest
-from collections.abc import Mapping
-from typing import Dict, FrozenSet, Iterable, List, Tuple
+from collections.abc import Iterable, Mapping
 
 from ._scan import LookupMatch, get_context, iter_matches, role_id_from_path
 from ._validate import PathNotFound, assert_nested, validate_app_path
@@ -36,9 +35,9 @@ from ._validate import PathNotFound, assert_nested, validate_app_path
 
 def _build_role_local_paths(
     matches: Iterable[LookupMatch],
-    roles_with_application_id: FrozenSet[str],
-) -> Dict[Tuple[str, str], List[Tuple]]:
-    out: Dict[Tuple[str, str], List[Tuple]] = {}
+    roles_with_application_id: frozenset[str],
+) -> dict[tuple[str, str], list[tuple]]:
+    out: dict[tuple[str, str], list[tuple]] = {}
     for m in matches:
         if m.kind != "literal":
             continue
@@ -69,7 +68,7 @@ class TestRoleLocalLiteralPaths(unittest.TestCase):
         if not self.role_local_paths:
             self.skipTest("No role-local lookup('config', <var>, 'literal') calls")
         ctx = self.ctx
-        failures: List[str] = []
+        failures: list[str] = []
         for (role_id, dotted), occs in self.role_local_paths.items():
             if role_id not in ctx.application_defaults:
                 continue

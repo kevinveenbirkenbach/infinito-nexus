@@ -3,11 +3,11 @@ from __future__ import annotations
 
 import re
 import unittest
+from collections.abc import Iterable
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Iterable, List
-from . import PROJECT_ROOT
 
+from . import PROJECT_ROOT
 
 QUOTE_FILTER_RE = re.compile(r"\|\s*quote\b", re.IGNORECASE)
 
@@ -39,9 +39,9 @@ def _iter_roles_yml_files(repo_root: Path) -> Iterable[Path]:
     return roles_dir.rglob("*.yml")
 
 
-def _scan_file(path: Path) -> List[Finding]:
+def _scan_file(path: Path) -> list[Finding]:
     text = path.read_text(encoding="utf-8", errors="replace")
-    findings: List[Finding] = []
+    findings: list[Finding] = []
 
     for idx, line in enumerate(text.splitlines(), start=1):
         m = PASSWORD_KEY_LINE_RE.match(line)
@@ -66,7 +66,7 @@ class TestPasswordDefinitionsNoQuote(unittest.TestCase):
     def test_password_definitions_must_not_use_quote_filter(self) -> None:
         repo_root = PROJECT_ROOT  # tests/integration/<cluster>/ -> repo root
 
-        all_findings: List[Finding] = []
+        all_findings: list[Finding] = []
         for yml in _iter_roles_yml_files(repo_root):
             all_findings.extend(_scan_file(yml))
 

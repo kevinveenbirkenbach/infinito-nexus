@@ -3,7 +3,6 @@ from __future__ import annotations
 import os
 from dataclasses import dataclass
 from pathlib import Path
-from typing import List, Tuple
 
 
 @dataclass(frozen=True)
@@ -15,7 +14,7 @@ class Command:
       cli/build/tree/__main__.py  -> parts=("build","tree"), module="cli.build.tree"
     """
 
-    parts: Tuple[str, ...]  # relative path parts under cli/
+    parts: tuple[str, ...]  # relative path parts under cli/
     module: str  # python -m module
     main_path: Path  # filesystem path to __main__.py
 
@@ -42,11 +41,11 @@ def _is_valid_package_dir(path: Path) -> bool:
     return True
 
 
-def discover_commands(cli_dir: Path) -> List[Command]:
+def discover_commands(cli_dir: Path) -> list[Command]:
     """
     Recursively find all packages under cli_dir that contain __main__.py.
     """
-    commands: List[Command] = []
+    commands: list[Command] = []
 
     for root, dirnames, filenames in os.walk(cli_dir):
         # prune __pycache__ eagerly
@@ -75,8 +74,8 @@ def discover_commands(cli_dir: Path) -> List[Command]:
 
 
 def resolve_command_module(
-    cli_dir: Path, argv_parts: List[str]
-) -> tuple[str | None, List[str]]:
+    cli_dir: Path, argv_parts: list[str]
+) -> tuple[str | None, list[str]]:
     """
     Resolve the longest argv prefix that matches a discovered command module.
 

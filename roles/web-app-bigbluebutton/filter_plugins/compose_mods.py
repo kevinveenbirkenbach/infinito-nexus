@@ -117,7 +117,7 @@ def compose_mods(yml_text, docker_repository_path, env_file):
     return yml_text
 
 
-class FilterModule(object):
+class FilterModule:
     def filters(self):
         return {
             "compose_mods": compose_mods,

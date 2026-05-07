@@ -14,8 +14,7 @@ import re
 import subprocess
 import unittest
 from pathlib import Path
-from typing import List, NamedTuple
-
+from typing import NamedTuple
 
 # Matches markdown inline links: [text](target) and image links ![alt](target).
 _MD_LINK_RE = re.compile(r"!?\[[^\]]*\]\(([^)]+)\)")
@@ -49,7 +48,7 @@ def _repo_root() -> Path:
     raise AssertionError("Repository root not found from test path.")
 
 
-def _tracked_md_files(root: Path) -> List[Path]:
+def _tracked_md_files(root: Path) -> list[Path]:
     try:
         out = subprocess.check_output(
             ["git", "-C", str(root), "ls-files", "-z"],
@@ -87,7 +86,7 @@ def _strip_anchor(target: str) -> str:
     return target[:anchor_pos] if anchor_pos >= 0 else target
 
 
-def _extract_links(file: Path) -> List[tuple[int, str]]:
+def _extract_links(file: Path) -> list[tuple[int, str]]:
     """
     Return (line_number, raw_target) pairs for relative links in file.
 
@@ -125,7 +124,7 @@ def _extract_links(file: Path) -> List[tuple[int, str]]:
     return results
 
 
-def _check_file(file: Path, root: Path) -> List[BrokenLink]:
+def _check_file(file: Path, root: Path) -> list[BrokenLink]:
     """Return BrokenLink entries for every unresolvable link in file.
 
     Relative paths are resolved against the file's directory.

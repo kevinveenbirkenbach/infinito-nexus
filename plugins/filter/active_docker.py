@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Ansible filter to count active docker services for current host.
 
@@ -13,7 +12,8 @@ Returns an integer. If ensure_min_one=True, returns at least 1.
 """
 
 import re
-from typing import Any, Mapping, Iterable
+from collections.abc import Iterable, Mapping
+from typing import Any
 
 
 def _is_mapping(x: Any) -> bool:
@@ -72,7 +72,7 @@ def active_docker_container_count(
     return count
 
 
-class FilterModule(object):
+class FilterModule:
     def filters(self):
         return {
             # usage: {{ lookup('applications') | active_docker_container_count(group_names) }}

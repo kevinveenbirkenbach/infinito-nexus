@@ -1,7 +1,7 @@
 # lookup_plugins/config.py
 from __future__ import annotations
 
-from typing import Any, Dict, Optional
+from typing import Any
 
 from ansible.errors import AnsibleError
 from ansible.plugins.lookup import LookupBase
@@ -25,7 +25,7 @@ class LookupModule(LookupBase):
         3) optional default value
     """
 
-    def run(self, terms, variables: Optional[Dict[str, Any]] = None, **kwargs):
+    def run(self, terms, variables: dict[str, Any] | None = None, **kwargs):
         if not terms or len(terms) not in (2, 3):
             raise AnsibleError(
                 "lookup('config', application_id, config_path[, default]) expects 2 or 3 terms."

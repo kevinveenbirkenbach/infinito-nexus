@@ -4,9 +4,9 @@ import tempfile
 import unittest
 
 from utils.applications.config import (
-    get,
     AppConfigKeyError,
     ConfigEntryNotSetError,
+    get,
 )
 
 

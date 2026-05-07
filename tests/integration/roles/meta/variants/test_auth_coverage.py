@@ -33,16 +33,14 @@ from __future__ import annotations
 
 import unittest
 from pathlib import Path
-from typing import List, Tuple
 
 from utils.cache.yaml import load_yaml_any
-
 
 from . import PROJECT_ROOT
 
 ROLES_DIR = PROJECT_ROOT / "roles"
 
-_AUTH_KEYS: Tuple[str, ...] = ("oidc", "oauth2")
+_AUTH_KEYS: tuple[str, ...] = ("oidc", "oauth2")
 _LDAP_KEY: str = "ldap"
 
 _MISSING = object()
@@ -80,7 +78,7 @@ def _variant_overrides_for(variant: dict, service_key: str, flag: str) -> object
     return entry[flag]
 
 
-def _has_pair_polarity(variants: List[dict], service_key: str, polarity: bool) -> bool:
+def _has_pair_polarity(variants: list[dict], service_key: str, polarity: bool) -> bool:
     """True iff some variant pins ``services.<key>.enabled`` AND
     ``services.<key>.shared`` to literal *polarity* in the same entry."""
     for variant in variants:
@@ -91,7 +89,7 @@ def _has_pair_polarity(variants: List[dict], service_key: str, polarity: bool) -
     return False
 
 
-def _has_ldap_only_variant(variants: List[dict], auth_keys: List[str]) -> bool:
+def _has_ldap_only_variant(variants: list[dict], auth_keys: list[str]) -> bool:
     """True iff some variant pins ``ldap.enabled: true`` while pinning
     every dynamic auth service (`oidc` / `oauth2`) to ``enabled:
     false`` in the SAME entry."""
@@ -107,7 +105,7 @@ def _has_ldap_only_variant(variants: List[dict], auth_keys: List[str]) -> bool:
 
 class TestAuthVariantsCoverage(unittest.TestCase):
     def test_oidc_oauth2_ldap_variants_cover_auth_matrix(self):
-        offenders: List[str] = []
+        offenders: list[str] = []
 
         for role_dir in sorted(p for p in ROLES_DIR.iterdir() if p.is_dir()):
             role_name = role_dir.name

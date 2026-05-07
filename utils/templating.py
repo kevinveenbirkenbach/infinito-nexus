@@ -4,9 +4,10 @@ from __future__ import annotations
 import os
 import posixpath
 import re
-from typing import Any, Optional
+from typing import Any
 
 from ansible.errors import AnsibleError
+
 from utils.manager.value_generator import ValueGenerator
 
 try:
@@ -54,7 +55,7 @@ def _split_list_items(s: str) -> list[str]:
     """
     items: list[str] = []
     buf: list[str] = []
-    q: Optional[str] = None
+    q: str | None = None
 
     for ch in s:
         if q:
@@ -283,7 +284,7 @@ def _templar_render_best_effort(templar: Any, s: str, variables: dict) -> str:
     if templar is None:
         return _fallback_render_embedded(s, variables)
 
-    prev_avail: Optional[Any] = None
+    prev_avail: Any | None = None
 
     # Temporarily force lookups ON (different Ansible versions use different flags)
     disable_changed_1, prev_disable_1 = _set_templar_var(
@@ -328,13 +329,13 @@ def _templar_render_best_effort(templar: Any, s: str, variables: dict) -> str:
 
         if disable_changed_2:
             try:
-                setattr(templar, "_disable_lookups", prev_disable_2)
+                templar._disable_lookups = prev_disable_2
             except Exception:
                 # Best-effort cleanup: failure to restore _disable_lookups is ignored.
                 pass
         if disable_changed_1:
             try:
-                setattr(templar, "disable_lookups", prev_disable_1)
+                templar.disable_lookups = prev_disable_1
             except Exception:
                 # Best-effort cleanup: failure to restore disable_lookups is ignored.
                 pass

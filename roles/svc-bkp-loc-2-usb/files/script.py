@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
 
-import sys
-import subprocess
-import os
-import glob
 import datetime
+import glob
+import os
+import subprocess
+import sys
 
 
 def main():

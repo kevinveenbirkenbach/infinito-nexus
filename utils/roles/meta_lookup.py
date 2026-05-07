@@ -23,23 +23,22 @@ Both helpers degrade gracefully:
 from __future__ import annotations
 
 from pathlib import Path
-from typing import List, Optional, Union
 
 import yaml
 
 from utils.cache.yaml import load_yaml_any
 from utils.entity_name_utils import get_entity_name
+
 from . import PROJECT_ROOT
 
-
-PathLike = Union[str, Path]
+PathLike = str | Path
 
 
 class MetaServicesShapeError(ValueError):
     """Raised when ``meta/services.yml`` is malformed."""
 
 
-def _read_meta_services(role_dir: Path) -> Optional[dict]:
+def _read_meta_services(role_dir: Path) -> dict | None:
     services_path = role_dir / "meta" / "services.yml"
     if not services_path.is_file():
         return None
@@ -58,7 +57,7 @@ def _read_meta_services(role_dir: Path) -> Optional[dict]:
     return loaded
 
 
-def _primary_entry(role_name: str, services: Optional[dict]) -> Optional[dict]:
+def _primary_entry(role_name: str, services: dict | None) -> dict | None:
     if not services:
         return None
     primary_entity = get_entity_name(role_name) or role_name
@@ -74,7 +73,7 @@ def _primary_entry(role_name: str, services: Optional[dict]) -> Optional[dict]:
     return entry
 
 
-def get_role_run_after(role: PathLike, *, role_name: Optional[str] = None) -> List[str]:
+def get_role_run_after(role: PathLike, *, role_name: str | None = None) -> list[str]:
     """Return the role's ``run_after`` list (or ``[]`` when absent).
 
     ``role`` may be a role name (relative to ``roles/``) or an absolute
@@ -95,7 +94,7 @@ def get_role_run_after(role: PathLike, *, role_name: Optional[str] = None) -> Li
             f"Invalid run_after type in meta/services.yml for role '{name}': "
             f"expected list, got {type(raw).__name__}."
         )
-    out: List[str] = []
+    out: list[str] = []
     for item in raw:
         if not isinstance(item, str) or not item.strip():
             raise MetaServicesShapeError(
@@ -106,9 +105,7 @@ def get_role_run_after(role: PathLike, *, role_name: Optional[str] = None) -> Li
     return out
 
 
-def get_role_lifecycle(
-    role: PathLike, *, role_name: Optional[str] = None
-) -> Optional[str]:
+def get_role_lifecycle(role: PathLike, *, role_name: str | None = None) -> str | None:
     """Return the role's ``lifecycle`` string (or ``None`` when absent)."""
     role_dir, name = _resolve_role(role, role_name)
     services = _read_meta_services(role_dir)
@@ -124,7 +121,7 @@ def get_role_lifecycle(
     return str(raw).strip().lower() if isinstance(raw, str) else None
 
 
-def _resolve_role(role: PathLike, role_name: Optional[str]) -> tuple[Path, str]:
+def _resolve_role(role: PathLike, role_name: str | None) -> tuple[Path, str]:
     role_path = Path(role)
     if role_path.is_absolute() or role_path.parts[:1] == (".",):
         role_dir = role_path.resolve()

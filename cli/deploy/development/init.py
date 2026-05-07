@@ -4,13 +4,14 @@ from __future__ import annotations
 import argparse
 import json
 import os
-from typing import Any, Dict
+from typing import Any
 
 from cli.create.inventory.services_disabler import (
     find_provider_roles,
     parse_services_disabled,
 )
 
+from ...meta.runtime import detect_runtime
 from .common import make_compose
 from .inventory import (
     DevInventorySpec,
@@ -19,7 +20,6 @@ from .inventory import (
     plan_dev_inventory_matrix,
 )
 from .storage import detect_storage_constrained
-from ...meta.runtime import detect_runtime
 
 
 def add_parser(sub: argparse._SubParsersAction) -> None:
@@ -89,7 +89,7 @@ def _env_variant() -> int | None:
     except ValueError:
         raise SystemExit(
             f"VARIANT environment variable must be an integer, got {raw!r}"
-        )
+        ) from None
 
 
 def handler(args: argparse.Namespace) -> int:
@@ -130,12 +130,12 @@ def handler(args: argparse.Namespace) -> int:
             "All primary apps disabled by SERVICES_DISABLED — nothing to initialise"
         )
 
-    extra_vars: Dict[str, Any] | None = None
+    extra_vars: dict[str, Any] | None = None
     if args.vars is not None:
         try:
             parsed = json.loads(args.vars)
         except Exception as exc:
-            raise SystemExit(f"--vars must be valid JSON: {exc}")
+            raise SystemExit(f"--vars must be valid JSON: {exc}") from exc
         if not isinstance(parsed, dict):
             raise SystemExit("--vars must be a JSON object")
         extra_vars = parsed
@@ -155,7 +155,7 @@ def handler(args: argparse.Namespace) -> int:
     try:
         plan = filter_plan_to_variant(plan, args.variant)
     except ValueError as exc:
-        raise SystemExit(f"--variant: {exc}")
+        raise SystemExit(f"--variant: {exc}") from exc
 
     runtime = os.environ.get("RUNTIME") or detect_runtime()
     services_disabled = os.environ.get("SERVICES_DISABLED", "")

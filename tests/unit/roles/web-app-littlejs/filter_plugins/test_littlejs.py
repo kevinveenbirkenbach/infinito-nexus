@@ -1,5 +1,6 @@
-import unittest
 import importlib.util
+import unittest
+
 from . import PROJECT_ROOT
 
 

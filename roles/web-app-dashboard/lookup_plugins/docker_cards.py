@@ -1,19 +1,16 @@
-from __future__ import absolute_import, division, print_function
-
-__metaclass__ = type
-
 import glob
 import os
 import re
 
-from ansible.plugins.lookup import LookupBase
 from ansible.errors import AnsibleError
+from ansible.plugins.loader import lookup_loader
+from ansible.plugins.lookup import LookupBase
+
 from utils.applications.config import get
 from utils.cache.applications import get_merged_applications
 from utils.cache.domains import get_merged_domains
 from utils.cache.files import read_text
 from utils.cache.yaml import load_yaml_any
-from ansible.plugins.loader import lookup_loader
 
 
 class LookupModule(LookupBase):
@@ -81,7 +78,7 @@ class LookupModule(LookupBase):
             except Exception as e:
                 raise AnsibleError(
                     f"Error getting application_id for role '{role_basename}': {e}"
-                )
+                ) from e
 
             # Skip roles not listed in group_names
             if application_id not in group_names:
@@ -105,7 +102,7 @@ class LookupModule(LookupBase):
                 title_match = re.search(r"^#\s+(.*)$", readme_content, re.MULTILINE)
                 title = title_match.group(1).strip() if title_match else application_id
             except Exception as e:
-                raise AnsibleError(f"Error reading '{readme_path}': {e}")
+                raise AnsibleError(f"Error reading '{readme_path}': {e}") from e
 
             # Extract Galaxy-spec metadata from meta/main.yml (cached parse).
             try:
@@ -118,7 +115,7 @@ class LookupModule(LookupBase):
                 description = galaxy_info.get("description", "")
                 tags = galaxy_info.get("galaxy_tags", [])
             except Exception as e:
-                raise AnsibleError(f"Error reading '{meta_path}': {e}")
+                raise AnsibleError(f"Error reading '{meta_path}': {e}") from e
 
             # Extract project-internal descriptive metadata from meta/info.yml.
             # File-root convention: the file's content IS applications.<role>.info.
@@ -128,7 +125,7 @@ class LookupModule(LookupBase):
                     loaded = load_yaml_any(info_path, default_if_missing={}) or {}
                     info_data = loaded if isinstance(loaded, dict) else {}
                 except Exception as e:
-                    raise AnsibleError(f"Error reading '{info_path}': {e}")
+                    raise AnsibleError(f"Error reading '{info_path}': {e}") from e
 
             # If display is set to False ignore it (default: shown)
             if not info_data.get("display", True):
@@ -170,7 +167,7 @@ class LookupModule(LookupBase):
                 except Exception as e:
                     raise AnsibleError(
                         f"Error building URL via tls for '{application_id}': {e}"
-                    )
+                    ) from e
 
             iframe = get(
                 applications,

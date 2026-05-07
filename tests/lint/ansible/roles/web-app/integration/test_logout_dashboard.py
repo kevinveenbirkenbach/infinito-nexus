@@ -23,7 +23,6 @@ from utils.service_registry import is_explicit_truth
 
 from . import PROJECT_ROOT
 
-
 _ROLE_PREFIX = "web-app-"
 
 # Roles that ARE the providers — exempt by definition (their own

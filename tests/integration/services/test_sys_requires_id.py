@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
-import os
 import glob
+import os
 import unittest
+
 import yaml
 
 from utils.cache.files import read_text

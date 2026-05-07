@@ -2,11 +2,12 @@
 from __future__ import annotations
 
 import re
+from collections.abc import Iterable
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Iterable, Set
 
 from utils.cache.yaml import load_yaml_any
+
 from . import PROJECT_ROOT
 
 
@@ -124,7 +125,7 @@ def _rule_matches_role_name(rule: DeploymentTypeRule, role_name: str) -> bool:
 def list_invokables_by_type(
     *,
     rules: Iterable[DeploymentTypeRule] = DEFAULT_RULES,
-    lifecycles: Set[str] | None = None,
+    lifecycles: set[str] | None = None,
 ) -> dict[str, list[str]]:
     """
     Returns:

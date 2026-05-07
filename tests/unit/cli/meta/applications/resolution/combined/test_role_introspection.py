@@ -5,9 +5,9 @@ import unittest
 from pathlib import Path
 from unittest.mock import patch
 
-from cli.meta.applications.resolution.combined.errors import CombinedResolutionError
 from cli.meta.applications.resolution.combined import repo_paths
 from cli.meta.applications.resolution.combined import role_introspection as ri
+from cli.meta.applications.resolution.combined.errors import CombinedResolutionError
 
 
 def _mk_role(root: Path, role: str, *, app_id: str | None = None) -> None:

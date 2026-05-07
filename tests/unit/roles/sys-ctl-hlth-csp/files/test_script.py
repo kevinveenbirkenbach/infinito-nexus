@@ -5,6 +5,7 @@ import sys
 import unittest
 from pathlib import Path
 from unittest.mock import MagicMock, patch
+
 from . import PROJECT_ROOT
 
 # add role files directory to PYTHONPATH

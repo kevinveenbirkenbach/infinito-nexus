@@ -1,7 +1,7 @@
 # tests/unit/plugins/filter/test_get_url.py
-import unittest
-import sys
 import os
+import sys
+import unittest
 
 # Ensure plugins/filter directory is on the path
 sys.path.insert(
@@ -11,8 +11,8 @@ sys.path.insert(
     ),
 )
 
-from get_url import FilterModule
 from ansible.errors import AnsibleFilterError
+from get_url import FilterModule
 
 
 class TestGetUrlFilter(unittest.TestCase):

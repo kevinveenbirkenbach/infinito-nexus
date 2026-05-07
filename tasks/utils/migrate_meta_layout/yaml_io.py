@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import shutil
 from pathlib import Path
-from typing import Any, Dict
+from typing import Any
 
 import yaml
 
@@ -41,7 +41,7 @@ def empty_dir(path: Path) -> None:
 
 def deep_merge(base: Any, override: Any) -> Any:
     if isinstance(base, dict) and isinstance(override, dict):
-        merged: Dict[str, Any] = dict(base)
+        merged: dict[str, Any] = dict(base)
         for key, value in override.items():
             merged[key] = deep_merge(merged[key], value) if key in merged else value
         return merged

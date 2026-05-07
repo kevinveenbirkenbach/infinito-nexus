@@ -1,12 +1,12 @@
 from __future__ import annotations
 
+from collections.abc import Iterable
 from pathlib import Path
-from typing import Iterable, List, Optional, Set
 
 from ansible.errors import AnsibleFilterError
 
 
-def _to_role_set(raw: Optional[Iterable[str] | str], var_name: str) -> Set[str]:
+def _to_role_set(raw: Iterable[str] | str | None, var_name: str) -> set[str]:
     if raw is None:
         return set()
 
@@ -24,9 +24,9 @@ def _to_role_set(raw: Optional[Iterable[str] | str], var_name: str) -> Set[str]:
 
 def discover_playwright_roles(
     playbook_dir: str,
-    only_roles: Optional[Iterable[str] | str] = None,
-    skip_roles: Optional[Iterable[str] | str] = None,
-) -> List[str]:
+    only_roles: Iterable[str] | str | None = None,
+    skip_roles: Iterable[str] | str | None = None,
+) -> list[str]:
     base = Path(playbook_dir) / "roles"
     if not base.exists():
         raise AnsibleFilterError(f"roles dir not found: {base}")
@@ -34,7 +34,7 @@ def discover_playwright_roles(
     only = _to_role_set(only_roles, "only_roles")
     skip = _to_role_set(skip_roles, "skip_roles")
 
-    found: List[str] = []
+    found: list[str] = []
 
     # Current marker for Playwright-enabled app roles:
     # .../roles/<role>/templates/playwright.env.j2
@@ -54,7 +54,7 @@ def discover_playwright_roles(
     return uniq
 
 
-class FilterModule(object):
+class FilterModule:
     def filters(self):
         return {
             "discover_playwright_roles": discover_playwright_roles,

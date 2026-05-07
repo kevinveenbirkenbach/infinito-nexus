@@ -4,8 +4,8 @@ import unittest
 try:
     from plugins.filter.docker_service_enabled import FilterModule
 except ModuleNotFoundError:
-    import sys
     import os
+    import sys
 
     sys.path.insert(
         0,

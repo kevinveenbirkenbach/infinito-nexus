@@ -1,7 +1,9 @@
 from __future__ import annotations
-from ansible.plugins.lookup import LookupBase
-from ansible.errors import AnsibleError
+
 import os
+
+from ansible.errors import AnsibleError
+from ansible.plugins.lookup import LookupBase
 
 
 class LookupModule(LookupBase):
@@ -44,7 +46,7 @@ class LookupModule(LookupBase):
             try:
                 mtime = int(os.stat(path).st_mtime)
             except OSError as e:
-                raise AnsibleError(f"local_mtime_qs: cannot stat '{path}': {e}")
+                raise AnsibleError(f"local_mtime_qs: cannot stat '{path}': {e}") from e
 
             if mode == "qs":
                 results.append(f"?{param}={mtime}")

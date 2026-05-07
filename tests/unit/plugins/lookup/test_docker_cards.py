@@ -1,13 +1,12 @@
 import os
+import shutil
 import sys
 import tempfile
-import shutil
 import unittest
 from unittest.mock import patch
 
 from ansible.errors import AnsibleError
 from jinja2 import Environment, StrictUndefined, select_autoescape
-
 
 # Adjust the PYTHONPATH to include the lookup_plugins folder from the web-app-dashboard role.
 sys.path.insert(

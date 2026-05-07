@@ -53,6 +53,7 @@ include-package-data = true
 
 [tool.ruff]
 respect-gitignore = true
+target-version = "py311"
 exclude = [
   "build",
   "dist",
@@ -60,3 +61,16 @@ exclude = [
   ".venv",
   "venv",
 ]
+
+[tool.ruff.lint]
+# Default ruff is `E4 + E7 + E9 + F`. We add:
+# - `I`  (isort)        — import order, auto-fixable
+# - `B`  (flake8-bugbear) — likely-bug patterns (mutable defaults, etc.)
+# - `UP` (pyupgrade)    — modernise syntax to the target_version above
+select = ["E", "F", "I", "B", "UP"]
+
+# `ruff format` (run via `make autoformat`) reflows whatever it can.
+# E501 leftovers are content the formatter can't break (long string
+# literals, URLs / shell commands inside f-strings, comments). Trust
+# the formatter; don't fail CI on the unsplittable rest.
+ignore = ["E501"]

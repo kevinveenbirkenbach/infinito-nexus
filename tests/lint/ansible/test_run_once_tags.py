@@ -36,7 +36,7 @@ def find_role_includes(roles_dir):
 
             try:
                 lines = read_text(fpath).splitlines(keepends=True)
-            except (IOError, OSError, UnicodeDecodeError):
+            except (OSError, UnicodeDecodeError):
                 continue
 
             for idx, line in enumerate(lines):

@@ -22,15 +22,15 @@ because it composes the cached project walk with this matcher.
 from __future__ import annotations
 
 import fnmatch
+from collections.abc import Iterable
 from functools import lru_cache
 from pathlib import Path
-from typing import Iterable, Tuple
 
 from . import PROJECT_ROOT
 
 
 @lru_cache(maxsize=4)
-def load_gitignore_patterns(root: str | None = None) -> Tuple[str, ...]:
+def load_gitignore_patterns(root: str | None = None) -> tuple[str, ...]:
     """Load non-comment, non-blank, non-negated patterns from ``<root>/.gitignore``.
 
     Returns a tuple (immutable, hashable for ``lru_cache``). Pass ``root``

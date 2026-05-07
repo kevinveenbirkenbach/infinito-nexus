@@ -22,13 +22,12 @@ from __future__ import annotations
 
 import re
 import unittest
+from collections.abc import Iterable
 from pathlib import Path
-from typing import Dict, Iterable, List, Set, Tuple
 
 from utils.annotations.suppress import is_suppressed_at
 from utils.cache.files import iter_project_files_with_content, read_text
 from utils.cache.yaml import load_yaml_any
-
 
 # Rule key consumed by this lint via `nocheck`-keyword suppression
 # markers. A `same-or-above` placement on the var declaration line
@@ -95,7 +94,7 @@ def _iter_definition_files(repo_root: Path) -> Iterable[Path]:
             yield f
 
 
-def _collect_top_level_keys(file: Path) -> List[Tuple[str, int]]:
+def _collect_top_level_keys(file: Path) -> list[tuple[str, int]]:
     """Return ``[(name, lineno), …]`` for every top-level mapping key
     in *file*, dropping any whose declaration line carries the
     ``unused-var`` suppression marker.
@@ -111,14 +110,14 @@ def _collect_top_level_keys(file: Path) -> List[Tuple[str, int]]:
     if not isinstance(data, dict):
         return []
 
-    declared: Set[str] = {
+    declared: set[str] = {
         k for k in data.keys() if isinstance(k, str) and k.isidentifier()
     }
     if not declared:
         return []
 
     raw_lines = read_text(str(file)).splitlines()
-    line_for_key: Dict[str, int] = {}
+    line_for_key: dict[str, int] = {}
     for i, line in enumerate(raw_lines, start=1):
         if line[:1].isspace():  # only true top-level (no indent)
             continue
@@ -129,7 +128,7 @@ def _collect_top_level_keys(file: Path) -> List[Tuple[str, int]]:
         if k in declared and k not in line_for_key:
             line_for_key[k] = i
 
-    out: List[Tuple[str, int]] = []
+    out: list[tuple[str, int]] = []
     for k in declared:
         lineno = line_for_key.get(k, 0)
         if lineno > 0 and is_suppressed_at(
@@ -146,7 +145,7 @@ _BLOCK_RE = re.compile(r"{{(?:(?!}}).)*?}}|{%(?:(?!%}).)*?%}", re.DOTALL)
 _IDENT_RE = re.compile(r"\b([A-Za-z_][A-Za-z0-9_]*)\b(?!\s*\()")
 
 
-def _scan_jinja_block_idents(text: str, sink: Set[str]) -> None:
+def _scan_jinja_block_idents(text: str, sink: set[str]) -> None:
     for block in _BLOCK_RE.finditer(text):
         for m in _IDENT_RE.finditer(block.group(0)):
             sink.add(m.group(1))
@@ -171,7 +170,7 @@ _ANSIBLE_EXPR_KEYS: frozenset[str] = frozenset(
 )
 
 
-def _harvest_idents_from_value(value, sink: Set[str]) -> None:
+def _harvest_idents_from_value(value, sink: set[str]) -> None:
     """Pull identifiers from a value that is either a single
     expression string or a list of expression strings (Ansible accepts
     both shapes for `when:` / `failed_when:` / `changed_when:` /
@@ -183,7 +182,7 @@ def _harvest_idents_from_value(value, sink: Set[str]) -> None:
                 sink.add(m.group(1))
 
 
-def _scan_ansible_expr_idents(node, sink: Set[str]) -> None:
+def _scan_ansible_expr_idents(node, sink: set[str]) -> None:
     """Walk a parsed YAML structure and harvest identifiers from every
     Ansible expression-bearing key (`when:` / `loop:` / `with_*:` /
     `failed_when:` / `changed_when:` / `until:`).
@@ -205,7 +204,7 @@ def _scan_ansible_expr_idents(node, sink: Set[str]) -> None:
             _scan_ansible_expr_idents(item, sink)
 
 
-def _build_usage_indices(repo_root: Path) -> Tuple[Set[str], Set[str]]:
+def _build_usage_indices(repo_root: Path) -> tuple[set[str], set[str]]:
     """Single project-tree walk that builds both identifier indices.
 
     Routes every read through the project's cached helpers:
@@ -217,8 +216,8 @@ def _build_usage_indices(repo_root: Path) -> Tuple[Set[str], Set[str]]:
       structure on every later call in the same process — no
       `yaml.safe_load*` call bypasses the cache.
     """
-    jinja_idents: Set[str] = set()
-    ansible_expr_idents: Set[str] = set()
+    jinja_idents: set[str] = set()
+    ansible_expr_idents: set[str] = set()
 
     for path_str, text in iter_project_files_with_content(
         extensions=(".yml", ".yaml", ".j2"),
@@ -241,7 +240,7 @@ class TestRoleAndGroupVarsUsed(unittest.TestCase):
         cls.jinja_idents, cls.ansible_expr_idents = _build_usage_indices(cls.repo_root)
 
     def test_role_and_group_vars_referenced(self):
-        unused: List[str] = []
+        unused: list[str] = []
         for def_file in _iter_definition_files(self.repo_root):
             rel = def_file.relative_to(self.repo_root).as_posix()
             for name, lineno in _collect_top_level_keys(def_file):

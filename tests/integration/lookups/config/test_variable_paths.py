@@ -10,8 +10,7 @@ a fully-literal lookup (which lands in :mod:`test_literal_paths`):
 """
 
 import unittest
-from collections.abc import Mapping
-from typing import Dict, Iterable, List, Tuple
+from collections.abc import Iterable, Mapping
 
 from ._scan import LookupMatch, get_context, iter_matches
 from ._validate import PathNotFound, assert_nested
@@ -19,8 +18,8 @@ from ._validate import PathNotFound, assert_nested
 
 def _build_variable_paths(
     matches: Iterable[LookupMatch],
-) -> Dict[str, List[Tuple]]:
-    out: Dict[str, List[Tuple]] = {}
+) -> dict[str, list[tuple]]:
+    out: dict[str, list[tuple]] = {}
     for m in matches:
         if m.kind != "literal":
             continue
@@ -40,7 +39,7 @@ class TestVariablePaths(unittest.TestCase):
     def test_variable_paths(self):
         if not self.variable_paths:
             self.skipTest("No dynamic lookup('config', ...) calls")
-        failures: List[str] = []
+        failures: list[str] = []
         for dotted, occs in self.variable_paths.items():
             if self._resolves_anywhere(dotted):
                 continue

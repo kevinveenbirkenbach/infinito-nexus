@@ -3,7 +3,7 @@ from __future__ import annotations
 import os
 import sys
 import unittest
-from typing import Any, Dict
+from typing import Any
 
 import yaml
 from ansible.errors import AnsibleFilterError
@@ -24,7 +24,7 @@ from plugins.filter.compose_volumes import compose_volumes  # noqa: E402
 
 
 class TestComposeVolumes(unittest.TestCase):
-    def _parse_yaml(self, rendered: str) -> Dict[str, Any]:
+    def _parse_yaml(self, rendered: str) -> dict[str, Any]:
         self.assertIsInstance(rendered, str)
         data = yaml.safe_load(rendered) if rendered.strip() else {}
         self.assertIsInstance(data, dict)
@@ -32,7 +32,7 @@ class TestComposeVolumes(unittest.TestCase):
         self.assertIsInstance(data["volumes"], dict)
         return data
 
-    def _base_apps(self) -> Dict[str, Any]:
+    def _base_apps(self) -> dict[str, Any]:
         # Per req-008 the materialised payload moved from
         # `applications.<app>.compose.services.<X>` to
         # `applications.<app>.services.<X>`.

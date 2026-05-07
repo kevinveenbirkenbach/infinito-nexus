@@ -2,9 +2,10 @@ import os
 import shutil
 import tempfile
 import unittest
-import yaml
 
+import yaml
 from ansible.errors import AnsibleFilterError
+
 from plugins.filter.get_role import get_role
 
 

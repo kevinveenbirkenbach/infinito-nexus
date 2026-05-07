@@ -9,7 +9,7 @@ def has_env(application_id, base_dir="."):
     return os.path.isfile(path)
 
 
-class FilterModule(object):
+class FilterModule:
     def filters(self):
         return {
             "has_env": has_env,

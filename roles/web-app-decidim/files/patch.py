@@ -25,7 +25,6 @@ import glob
 import re
 from pathlib import Path
 
-
 OMNIAUTH_REGISTRATION = r"""if ENV["OIDC_ENABLED"].to_s == "true"
   Decidim.omniauth_providers[:openid_connect] = {
     enabled: true,

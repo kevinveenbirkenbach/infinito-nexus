@@ -15,10 +15,10 @@ Only TOP-LEVEL keys are checked for uniqueness. Nested keys are ignored to allow
 namespacing like DICTIONARYA.ENTRY and DICTIONARYB.ENTRY without conflicts.
 """
 
-import os
 import glob
-import unittest
+import os
 import re
+import unittest
 from collections import defaultdict
 
 try:
@@ -74,7 +74,7 @@ class TestUppercaseConstantVarsUnique(unittest.TestCase):
         yaml_files = list(_iter_yaml_files())
         for yml in yaml_files:
             try:
-                with open(yml, "r", encoding="utf-8") as f:
+                with open(yml, encoding="utf-8") as f:
                     docs = list(yaml.safe_load_all(f))
             except Exception as e:
                 parse_errors.append(f"{yml}: {e}")

@@ -1,7 +1,7 @@
-from typing import Iterable
+from collections.abc import Iterable
 
 
-class FilterModule(object):
+class FilterModule:
     """Custom Jinja2 filters for LDAP related rendering."""
 
     def filters(self):

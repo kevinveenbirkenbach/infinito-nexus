@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import subprocess
 import unittest
-from typing import Any, Dict, List, Tuple
+from typing import Any
 
 from cli.create.inventory.services_disabler import ServicesDisabledConflictError
 from cli.deploy.dedicated import runner
@@ -11,7 +11,7 @@ from cli.deploy.dedicated import runner
 class TestRunAnsiblePlaybook(unittest.TestCase):
     def _fake_run_side_effect(
         self,
-        calls_store: List[Tuple[List[str], Dict[str, Any]]],
+        calls_store: list[tuple[list[str], dict[str, Any]]],
         ansible_rc: int = 0,
     ):
         """
@@ -46,14 +46,14 @@ class TestRunAnsiblePlaybook(unittest.TestCase):
     def test_run_ansible_playbook_builds_correct_command_and_uses_repo_root_cwd(
         self, mock_run
     ):
-        calls: List[Tuple[List[str], Dict[str, Any]]] = []
+        calls: list[tuple[list[str], dict[str, Any]]] = []
         mock_run.side_effect = self._fake_run_side_effect(calls, ansible_rc=0)
 
         repo_root = "/repo"
         playbook_path = "/repo/playbook.yml"
         inventory_validator_path = "/repo/cli/validate/inventory/__main__.py"
 
-        modes: Dict[str, Any] = {
+        modes: dict[str, Any] = {
             "MODE_CLEANUP": True,
             "MODE_ASSERT": True,
             "MODE_DEBUG": True,
@@ -84,7 +84,7 @@ class TestRunAnsiblePlaybook(unittest.TestCase):
 
         mock_services_disabled_guard.assert_called_once()
 
-        def was_called(cmd: List[str]) -> bool:
+        def was_called(cmd: list[str]) -> bool:
             return any(call_cmd == cmd for call_cmd, _kw in calls)
 
         # Cleanup, build (make must run in repo_root)
@@ -110,7 +110,7 @@ class TestRunAnsiblePlaybook(unittest.TestCase):
             inv_calls,
             "Expected inventory validation call (... inventory/__main__.py ...)",
         )
-        for call_cmd, kw in inv_calls:
+        for _call_cmd, kw in inv_calls:
             self.assertEqual(kw.get("cwd"), repo_root)
 
         # The last call should be ansible-playbook
@@ -160,14 +160,14 @@ class TestRunAnsiblePlaybook(unittest.TestCase):
     def test_run_ansible_playbook_appends_passthrough_args_last_for_overrides(
         self, mock_run
     ):
-        calls: List[Tuple[List[str], Dict[str, Any]]] = []
+        calls: list[tuple[list[str], dict[str, Any]]] = []
         mock_run.side_effect = self._fake_run_side_effect(calls, ansible_rc=0)
 
         repo_root = "/repo"
         playbook_path = "/repo/playbook.yml"
         inventory_validator_path = "/repo/cli/validate/inventory/__main__.py"
 
-        modes: Dict[str, Any] = {
+        modes: dict[str, Any] = {
             "MODE_CLEANUP": False,
             "MODE_ASSERT": False,
             "MODE_DEBUG": False,
@@ -218,14 +218,14 @@ class TestRunAnsiblePlaybook(unittest.TestCase):
     def test_run_ansible_playbook_failure_exits_with_code_and_skips_phases(
         self, mock_run
     ):
-        calls: List[Tuple[List[str], Dict[str, Any]]] = []
+        calls: list[tuple[list[str], dict[str, Any]]] = []
         mock_run.side_effect = self._fake_run_side_effect(calls, ansible_rc=4)
 
         repo_root = "/repo"
         playbook_path = "/repo/playbook.yml"
         inventory_validator_path = "/repo/cli/validate/inventory/__main__.py"
 
-        modes: Dict[str, Any] = {
+        modes: dict[str, Any] = {
             "MODE_CLEANUP": False,
             "MODE_ASSERT": False,
             "MODE_DEBUG": False,
@@ -276,7 +276,7 @@ class TestRunAnsiblePlaybook(unittest.TestCase):
     def test_run_ansible_playbook_fails_early_on_services_disabled_conflict(
         self, mock_run
     ):
-        calls: List[Tuple[List[str], Dict[str, Any]]] = []
+        calls: list[tuple[list[str], dict[str, Any]]] = []
         mock_run.side_effect = self._fake_run_side_effect(calls, ansible_rc=0)
 
         with unittest.mock.patch(

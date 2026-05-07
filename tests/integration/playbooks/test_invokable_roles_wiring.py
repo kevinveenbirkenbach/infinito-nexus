@@ -1,7 +1,9 @@
-import unittest
 import re
 import sys
+import unittest
+
 from plugins.filter.invokable_paths import get_invokable_paths
+
 from . import PROJECT_ROOT
 
 # Ensure project root is on PYTHONPATH so plugins.filter.* can be imported

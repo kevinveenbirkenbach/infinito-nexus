@@ -26,10 +26,8 @@ from __future__ import annotations
 
 import unittest
 from pathlib import Path
-from typing import List
 
 from utils.cache.yaml import load_yaml_any
-
 
 from . import PROJECT_ROOT
 
@@ -47,7 +45,7 @@ def _load_yaml(path: Path) -> object:
 
 class TestVariantsServicesMatch(unittest.TestCase):
     def test_variants_only_reference_services_declared_in_services_yml(self):
-        offenders: List[str] = []
+        offenders: list[str] = []
 
         for role_dir in sorted(p for p in ROLES_DIR.iterdir() if p.is_dir()):
             role_name = role_dir.name

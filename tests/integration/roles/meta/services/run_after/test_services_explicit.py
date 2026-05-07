@@ -38,7 +38,6 @@ from utils.service_registry import (
     is_explicit_truth,
 )
 
-
 from . import PROJECT_ROOT
 
 ROLES_DIR = PROJECT_ROOT / "roles"

@@ -18,7 +18,6 @@ from __future__ import annotations
 
 import argparse
 from pathlib import Path
-from typing import Dict, List, Set
 
 from utils.roles.meta_lookup import (
     MetaServicesShapeError,
@@ -36,7 +35,7 @@ def roles_dir() -> Path:
     return PROJECT_ROOT / "roles"
 
 
-def load_run_after(role_name: str) -> List[str]:
+def load_run_after(role_name: str) -> list[str]:
     """Return the role's ``run_after`` list (or ``[]`` when absent).
 
     Reads from ``meta/services.yml.<primary_entity>.run_after`` per req-010.
@@ -52,7 +51,7 @@ def load_run_after(role_name: str) -> List[str]:
         ) from exc
 
 
-def resolve_run_after_transitively(start_role: str) -> List[str]:
+def resolve_run_after_transitively(start_role: str) -> list[str]:
     """
     Resolve run_after dependencies recursively (run_after of run_after, ...).
 
@@ -67,9 +66,9 @@ def resolve_run_after_transitively(start_role: str) -> List[str]:
         )
 
     # Cache run_after lists per role for speed and consistent error reporting
-    cache: Dict[str, List[str]] = {}
+    cache: dict[str, list[str]] = {}
 
-    def ra(role: str) -> List[str]:
+    def ra(role: str) -> list[str]:
         if role not in cache:
             # Validate role existence when it is referenced
             if not (rdir / role).is_dir():
@@ -79,9 +78,9 @@ def resolve_run_after_transitively(start_role: str) -> List[str]:
             cache[role] = load_run_after(role)
         return cache[role]
 
-    visited: Set[str] = set()
-    stack: List[str] = []
-    out: List[str] = []
+    visited: set[str] = set()
+    stack: list[str] = []
+    out: list[str] = []
 
     def dfs(node: str) -> None:
         if node in stack:

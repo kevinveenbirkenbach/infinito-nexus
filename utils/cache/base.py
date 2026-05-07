@@ -18,15 +18,17 @@ from __future__ import annotations
 import copy
 import os
 import threading
+from collections.abc import Mapping
 from pathlib import Path
-from typing import Any, Mapping, Optional
+from typing import Any
 
 # `merge_with_defaults` is a pure-Python helper with no `ansible` dependency,
 # so it stays at module scope.
-from plugins.filter.merge_with_defaults import merge_with_defaults  # noqa: F401  re-exported
+from plugins.filter.merge_with_defaults import (
+    merge_with_defaults,  # noqa: F401  re-exported
+)
 
 from . import PROJECT_ROOT, ROLES_DIR  # noqa: F401
-
 
 try:
     from ansible.parsing.vault import EncryptedString as _AnsibleEncryptedString
@@ -68,7 +70,7 @@ DEFAULT_TOKENS_FILE = Path("/var/lib/infinito/secrets/tokens.yml")
 _RENDER_GUARD = threading.local()
 
 
-_FINGERPRINT_BY_ID: "dict[int, str]" = {}
+_FINGERPRINT_BY_ID: dict[int, str] = {}
 
 
 def _cache_key(roles_dir: Path) -> str:
@@ -106,7 +108,7 @@ def _fingerprint_mapping(obj: Any) -> str:
     return digest
 
 
-def _stable_variables_signature(variables: Optional[Mapping[str, Any]]) -> tuple:
+def _stable_variables_signature(variables: Mapping[str, Any] | None) -> tuple:
     """Build a content-based cache signature from the subset of `variables`
     that influences the merged applications/users payload.
 
@@ -145,12 +147,12 @@ def _deep_merge(base: Any, override: Any) -> Any:
     return copy.deepcopy(override)
 
 
-def _resolve_roles_dir(*, roles_dir: Optional[str | os.PathLike[str]] = None) -> Path:
+def _resolve_roles_dir(*, roles_dir: str | os.PathLike[str] | None = None) -> Path:
     return Path(roles_dir).resolve() if roles_dir else ROLES_DIR.resolve()
 
 
 def _resolve_override_mapping(
-    variables: Optional[Mapping[str, Any]],
+    variables: Mapping[str, Any] | None,
     key: str,
     templar: Any = None,
 ) -> dict[str, Any]:
@@ -196,9 +198,9 @@ def _render_with_templar(
     value: Any,
     *,
     templar: Any,
-    variables: Optional[dict[str, Any]],
-    raw_applications: Optional[dict[str, Any]] = None,
-    raw_users: Optional[dict[str, Any]] = None,
+    variables: dict[str, Any] | None,
+    raw_applications: dict[str, Any] | None = None,
+    raw_users: dict[str, Any] | None = None,
     max_rounds: int = 4,
 ) -> Any:
     if templar is None:

@@ -1,13 +1,13 @@
 from __future__ import annotations
 
+from ansible.errors import AnsibleFilterError
+
 from utils.applications.config import (
-    get,
     AppConfigKeyError,
     ConfigEntryNotSetError,
+    get,
 )  # noqa: F401
 from utils.entity_name_utils import get_entity_name
-
-from ansible.errors import AnsibleFilterError
 
 
 def resource_filter(
@@ -38,10 +38,10 @@ def resource_filter(
             hard_default,
         )
     except (AppConfigKeyError, ConfigEntryNotSetError) as e:
-        raise AnsibleFilterError(str(e))
+        raise AnsibleFilterError(str(e)) from e
 
 
-class FilterModule(object):
+class FilterModule:
     def filters(self):
         return {
             "resource_filter": resource_filter,

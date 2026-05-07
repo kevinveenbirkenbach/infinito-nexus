@@ -3,22 +3,22 @@ from __future__ import annotations
 import json
 import sys
 from pathlib import Path
-from typing import Any, Dict, Optional
+from typing import Any
 
-from .passwords import generate_random_password
-
-from utils.cache.yaml import load_yaml_any
 from ruamel.yaml import YAML
 from ruamel.yaml.comments import CommentedMap
 
+from utils.cache.yaml import load_yaml_any
 from utils.handler.vault import VaultHandler
+
+from .passwords import generate_random_password
 
 
 def _fatal(msg: str) -> None:
     raise SystemExit(f"[FATAL] {msg}")
 
 
-def _deep_update_commented_map(target: CommentedMap, updates: Dict[str, Any]) -> None:
+def _deep_update_commented_map(target: CommentedMap, updates: dict[str, Any]) -> None:
     for key, value in updates.items():
         if isinstance(value, dict):
             existing = target.get(key)
@@ -102,7 +102,7 @@ def apply_vars_overrides(host_vars_file: Path, json_str: str) -> None:
 def ensure_host_vars_file(
     host_vars_file: Path,
     host: str,
-    primary_domain: Optional[str],
+    primary_domain: str | None,
     ssl_disabled: bool,
     ip4: str,
     ip6: str,
@@ -157,7 +157,7 @@ def ensure_host_vars_file(
 def ensure_become_password(
     host_vars_file: Path,
     vault_password_file: Path,
-    become_password: Optional[str],
+    become_password: str | None,
 ) -> None:
     yaml_rt = YAML(typ="rt")
     yaml_rt.preserve_quotes = True

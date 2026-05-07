@@ -18,10 +18,8 @@ import re
 import unittest
 from dataclasses import dataclass
 from pathlib import Path
-from typing import List, Tuple
 
 from . import PROJECT_ROOT
-
 
 BUILD_RE = re.compile(r"^(?P<indent>[ \t]*)build:\s*(#.*)?$")
 IMAGE_RE = re.compile(r"^(?P<indent>[ \t]*)image:\s*(?P<rest>.+)?$")
@@ -48,8 +46,8 @@ def _indent_len(indent: str) -> int:
 
 
 def _block_bounds_for_key(
-    lines: List[str], idx: int, key_indent_len: int
-) -> Tuple[int, int]:
+    lines: list[str], idx: int, key_indent_len: int
+) -> tuple[int, int]:
     """
     Determine bounds of the YAML mapping block that contains the key at lines[idx],
     based on indentation dropping below key_indent_len.
@@ -95,7 +93,7 @@ def _block_bounds_for_key(
 
 
 def _has_image_same_indent(
-    lines: List[str], start: int, end: int, indent_str: str
+    lines: list[str], start: int, end: int, indent_str: str
 ) -> bool:
     """
     Check if an `image:` key exists at the same indent (exact prefix match) within [start, end).
@@ -112,11 +110,11 @@ def _has_image_same_indent(
     return False
 
 
-def _scan_file_for_missing_image(path: Path) -> List[Finding]:
+def _scan_file_for_missing_image(path: Path) -> list[Finding]:
     text = path.read_text(encoding="utf-8", errors="replace")
     lines = text.splitlines()
 
-    findings: List[Finding] = []
+    findings: list[Finding] = []
 
     for idx, ln in enumerate(lines):
         if _is_ignored_line(ln):
@@ -155,7 +153,7 @@ class TestComposeBuildRequiresImage(unittest.TestCase):
             "*/files/compose.yml",
         ]
 
-        targets: List[Path] = []
+        targets: list[Path] = []
         for pat in patterns:
             targets.extend(sorted(roles_dir.glob(pat)))
 
@@ -164,7 +162,7 @@ class TestComposeBuildRequiresImage(unittest.TestCase):
             f"No compose templates/files found under {roles_dir} for patterns: {patterns}",
         )
 
-        all_findings: List[Finding] = []
+        all_findings: list[Finding] = []
         for f in targets:
             all_findings.extend(_scan_file_for_missing_image(f))
 

@@ -28,7 +28,6 @@ from __future__ import annotations
 
 from pathlib import Path
 
-
 # Repository root, derived once from this package's location. Single
 # source of truth for every callsite in the project that needs to
 # reach the repo root (CLI tools, plugins, tests). External consumers

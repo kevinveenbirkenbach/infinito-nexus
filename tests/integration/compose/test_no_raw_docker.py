@@ -4,9 +4,9 @@ import os
 import re
 import subprocess
 import unittest
+from collections.abc import Sequence
 from dataclasses import dataclass
 from pathlib import Path
-from typing import List, Sequence, Tuple
 
 from . import PROJECT_ROOT
 
@@ -21,7 +21,7 @@ class Finding:
 
 
 # Whitelist: ignore these file endings / filenames / path fragments
-WHITELIST_SUFFIXES: Tuple[str, ...] = (
+WHITELIST_SUFFIXES: tuple[str, ...] = (
     ".md",
     ".js",
     ".json",
@@ -35,9 +35,9 @@ WHITELIST_SUFFIXES: Tuple[str, ...] = (
     ".lock",
 )
 
-WHITELIST_FILENAMES: Tuple[str, ...] = ("LICENSE",)
+WHITELIST_FILENAMES: tuple[str, ...] = ("LICENSE",)
 
-WHITELIST_PATH_FRAGMENTS: Tuple[str, ...] = (
+WHITELIST_PATH_FRAGMENTS: tuple[str, ...] = (
     "/.git/",
     "/.venv/",
     "/.mypy_cache/",
@@ -53,7 +53,7 @@ WHITELIST_PATH_FRAGMENTS: Tuple[str, ...] = (
 )
 
 # Optional: allow docker mentions in specific files (keep empty for strict)
-WHITELIST_EXACT_PATHS: Tuple[str, ...] = (
+WHITELIST_EXACT_PATHS: tuple[str, ...] = (
     # "docs/somefile.txt",
 )
 
@@ -148,7 +148,7 @@ RE_DOCKER_DASH_COMPOSE_CMD = re.compile(
 )
 
 # Rules: order matters (prefer specific messages)
-RULES: Tuple[Tuple[str, re.Pattern, str], ...] = (
+RULES: tuple[tuple[str, re.Pattern, str], ...] = (
     (
         "docker compose usage",
         RE_DOCKER_COMPOSE_CMD,
@@ -167,7 +167,7 @@ RULES: Tuple[Tuple[str, re.Pattern, str], ...] = (
 )
 
 
-def git_ls_files(root: Path) -> List[Path]:
+def git_ls_files(root: Path) -> list[Path]:
     try:
         out = subprocess.check_output(
             ["git", "-C", str(root), "ls-files", "-z"],
@@ -176,7 +176,7 @@ def git_ls_files(root: Path) -> List[Path]:
         rels = [p for p in out.decode("utf-8", errors="replace").split("\0") if p]
         return [root / p for p in rels]
     except Exception:
-        results: List[Path] = []
+        results: list[Path] = []
         for r, dirs, files in os.walk(root):
             pruned = []
             for d in list(dirs):
@@ -212,8 +212,8 @@ def is_probably_text(data: bytes) -> bool:
     return b"\x00" not in data
 
 
-def scan_file(path: Path, root: Path) -> List[Finding]:
-    findings: List[Finding] = []
+def scan_file(path: Path, root: Path) -> list[Finding]:
+    findings: list[Finding] = []
     rel = path.relative_to(root).as_posix()
 
     try:
@@ -244,7 +244,7 @@ def scan_file(path: Path, root: Path) -> List[Finding]:
 
 
 def format_findings(findings: Sequence[Finding]) -> str:
-    lines: List[str] = []
+    lines: list[str] = []
     lines.append("Forbidden raw Docker command invocations detected.")
     lines.append("")
     lines.append("Why this matters:")
@@ -272,7 +272,7 @@ class TestNoRawDockerCommands(unittest.TestCase):
         root = PROJECT_ROOT
         files = git_ls_files(root)
 
-        findings: List[Finding] = []
+        findings: list[Finding] = []
         for p in files:
             if not p.is_file():
                 continue

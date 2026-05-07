@@ -4,7 +4,8 @@
 
 from __future__ import annotations
 
-from typing import Any, Iterable, Optional
+from collections.abc import Iterable
+from typing import Any
 
 from ansible.errors import AnsibleError
 
@@ -142,7 +143,9 @@ def resolve_primary_domain_from_app(
         try:
             first_val = next(iter(val.values()))
         except StopIteration:
-            raise AnsibleError(f"{err_prefix}: domains['{app_id}'] dict is empty")
+            raise AnsibleError(
+                f"{err_prefix}: domains['{app_id}'] dict is empty"
+            ) from None
         if not isinstance(first_val, str) or not first_val:
             raise AnsibleError(f"{err_prefix}: invalid primary domain for '{app_id}'")
         return first_val
@@ -181,7 +184,7 @@ def resolve_term(
     term: str,
     *,
     domains: dict,
-    applications: Optional[dict] = None,
+    applications: dict | None = None,
     forced_mode: str,
     err_prefix: str,
 ) -> tuple[str, str]:
@@ -283,7 +286,7 @@ def resolve_le_name(app: dict, domain: str) -> str:
     return name or domain
 
 
-def override_san_list(app: dict) -> Optional[list[str]]:
+def override_san_list(app: dict) -> list[str] | None:
     raw = get_path(app, "server.tls.domains_san", None)
     if raw is None:
         return None

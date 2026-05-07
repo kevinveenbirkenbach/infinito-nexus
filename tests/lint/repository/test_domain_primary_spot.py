@@ -43,14 +43,12 @@ from __future__ import annotations
 
 import re
 import unittest
+from collections.abc import Iterable
 from functools import lru_cache
 from pathlib import Path
-from typing import Iterable
-
 
 from utils.annotations.suppress import suppressed_line_numbers
 from utils.cache.files import PROJECT_ROOT, iter_project_files, read_text
-
 
 # A leading word boundary plus at least one alphanumeric character before the
 # dot ensures we only match `sub.{{ DOMAIN_PRIMARY }}` constructions, not

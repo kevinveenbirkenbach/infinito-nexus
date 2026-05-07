@@ -1,5 +1,5 @@
-import os
 import importlib.util
+import os
 import unittest
 
 current_dir = os.path.dirname(__file__)

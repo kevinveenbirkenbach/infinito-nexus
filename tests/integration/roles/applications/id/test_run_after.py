@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
 import unittest
+
 import yaml
+
 from . import PROJECT_ROOT
 
 
@@ -18,7 +20,7 @@ class TestRunAfterRoles(unittest.TestCase):
                 continue
 
             try:
-                with open(meta_path, "r", encoding="utf-8") as f:
+                with open(meta_path, encoding="utf-8") as f:
                     data = yaml.safe_load(f) or {}
             except Exception as e:
                 self.fail(f"Failed to parse {meta_path}: {e}")

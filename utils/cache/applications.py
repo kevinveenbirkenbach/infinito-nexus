@@ -12,8 +12,9 @@ from __future__ import annotations
 
 import copy
 import os
+from collections.abc import Mapping
 from pathlib import Path
-from typing import Any, Mapping, Optional
+from typing import Any
 
 from plugins.filter.merge_with_defaults import merge_with_defaults
 
@@ -28,7 +29,6 @@ from .base import (
 )
 from .yaml import load_yaml as _load_yaml_cached
 from .yaml import load_yaml_any as _load_yaml_any_cached
-
 
 _APPLICATIONS_DEFAULTS_CACHE: dict[str, dict[str, Any]] = {}
 _VARIANTS_CACHE: dict[str, dict[str, list[Any]]] = {}
@@ -255,7 +255,7 @@ def _build_application_defaults(roles_dir: Path) -> dict[str, Any]:
 
 
 def get_application_defaults(
-    *, roles_dir: Optional[str | os.PathLike[str]] = None
+    *, roles_dir: str | os.PathLike[str] | None = None
 ) -> dict[str, Any]:
     resolved_roles_dir = _resolve_roles_dir(roles_dir=roles_dir)
     key = _cache_key(resolved_roles_dir)
@@ -267,7 +267,7 @@ def get_application_defaults(
 
 
 def get_variants(
-    *, roles_dir: Optional[str | os.PathLike[str]] = None
+    *, roles_dir: str | os.PathLike[str] | None = None
 ) -> dict[str, list[Any]]:
     """Return ``{application_id: [variant_0, ...]}`` cached per
     ``roles_dir``. Each variant is the role's effective configuration
@@ -284,8 +284,8 @@ def get_variants(
 
 def get_merged_applications(
     *,
-    variables: Optional[dict[str, Any]] = None,
-    roles_dir: Optional[str | os.PathLike[str]] = None,
+    variables: dict[str, Any] | None = None,
+    roles_dir: str | os.PathLike[str] | None = None,
     templar: Any = None,
 ) -> dict[str, Any]:
     # Late import: `get_merged_users` lives in the sibling `users` module

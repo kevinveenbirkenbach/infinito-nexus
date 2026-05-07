@@ -2,9 +2,8 @@
 from __future__ import annotations
 
 import argparse
-from abc import ABC, abstractmethod
 import subprocess
-from typing import List
+from abc import ABC, abstractmethod
 
 from .model import ImageRef
 
@@ -37,7 +36,7 @@ class GHCRProvider(RegistryProvider):
         parser.add_argument("--ghcr-prefix", default="mirror")
 
     @classmethod
-    def from_args(cls, args: argparse.Namespace) -> "GHCRProvider":
+    def from_args(cls, args: argparse.Namespace) -> GHCRProvider:
         """Construct a GHCRProvider from parsed CLI args."""
         return cls(args.ghcr_namespace, args.ghcr_repository, args.ghcr_prefix)
 
@@ -62,7 +61,7 @@ class GHCRProvider(RegistryProvider):
         )
         return r.returncode == 0
 
-    def _run_copy(self, *, src: str, dest: str, extra: List[str] | None = None) -> None:
+    def _run_copy(self, *, src: str, dest: str, extra: list[str] | None = None) -> None:
         cmd = [
             "skopeo",
             "copy",

@@ -33,6 +33,7 @@ import requests
 
 from utils.annotations.message import error, warning
 from utils.annotations.suppress import is_suppressed_at
+
 from . import PROJECT_ROOT
 
 _REPO_ROOT = PROJECT_ROOT
@@ -118,7 +119,7 @@ def _repo_files(root: Path) -> list[Path]:
         return _repo_files_without_git_metadata(root)
 
     rel_paths = [p for p in out.decode("utf-8", errors="replace").split("\0") if p]
-    return sorted((root / rel for rel in rel_paths if (root / rel).is_file()))
+    return sorted(root / rel for rel in rel_paths if (root / rel).is_file())
 
 
 def _load_ignore_rules(root: Path) -> list[IgnoreRule]:

@@ -1,6 +1,8 @@
 # tests/unit/plugins/filter/test_text_filters.py
 import unittest
+
 from ansible.errors import AnsibleFilterError
+
 from plugins.filter.text_filters import to_one_liner
 
 

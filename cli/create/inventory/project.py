@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import os
 from pathlib import Path
-from typing import Dict
 
 
 def detect_project_root(start_file: Path) -> Path:
@@ -27,7 +26,7 @@ def detect_project_root(start_file: Path) -> Path:
     raise SystemExit(f"Could not detect project root from: {here}")
 
 
-def build_env_with_project_root(project_root: Path) -> Dict[str, str]:
+def build_env_with_project_root(project_root: Path) -> dict[str, str]:
     """
     Return an environment dict where PYTHONPATH includes the project root.
     This makes `utils` and other top-level packages importable in subprocesses.

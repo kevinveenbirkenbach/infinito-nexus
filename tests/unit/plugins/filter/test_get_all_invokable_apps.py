@@ -3,9 +3,9 @@ import shutil
 import tempfile
 import unittest
 from pathlib import Path
+from unittest.mock import patch
 
 import yaml
-from unittest.mock import patch
 
 from plugins.filter.get_all_invokable_apps import get_all_invokable_apps
 

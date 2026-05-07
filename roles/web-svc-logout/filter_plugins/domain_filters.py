@@ -1,8 +1,9 @@
 from ansible.errors import AnsibleFilterError
+
 from utils.applications.config import get
 
 
-class FilterModule(object):
+class FilterModule:
     """Ansible filter plugin for generating logout domains based on logout feature."""
 
     def filters(self):
@@ -45,4 +46,4 @@ class FilterModule(object):
             return result
 
         except Exception as e:
-            raise AnsibleFilterError(f"logout_domains filter error: {e}")
+            raise AnsibleFilterError(f"logout_domains filter error: {e}") from e

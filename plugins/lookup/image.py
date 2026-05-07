@@ -1,10 +1,9 @@
 from __future__ import annotations
 
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 from ansible.errors import AnsibleError
 from ansible.plugins.lookup import LookupBase
-
 
 _VALID_WANTS = frozenset({"all", "image", "version", "ref"})
 
@@ -29,10 +28,10 @@ class LookupModule(LookupBase):
 
     def run(
         self,
-        terms: List[Any],
-        variables: Optional[Dict[str, Any]] = None,
+        terms: list[Any],
+        variables: dict[str, Any] | None = None,
         **kwargs: Any,
-    ) -> List[Any]:
+    ) -> list[Any]:
         terms = terms or []
         if len(terms) not in (1, 2, 3):
             raise AnsibleError(
@@ -106,7 +105,7 @@ class LookupModule(LookupBase):
         return [value]
 
     @staticmethod
-    def _infer_role_id(vars_: Dict[str, Any]) -> str:
+    def _infer_role_id(vars_: dict[str, Any]) -> str:
         role_name = _non_blank_string(vars_.get("role_name"))
         if role_name:
             return role_name
@@ -120,10 +119,10 @@ class LookupModule(LookupBase):
         *,
         role_id: str,
         service_name: str,
-        defaults: Dict[str, Any],
-        overrides_root: Dict[str, Any],
-    ) -> Dict[str, str]:
-        merged: Dict[str, str] = {}
+        defaults: dict[str, Any],
+        overrides_root: dict[str, Any],
+    ) -> dict[str, str]:
+        merged: dict[str, str] = {}
 
         default_entry = defaults.get(service_name, {})
         if default_entry is not None and not isinstance(default_entry, dict):

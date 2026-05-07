@@ -1,19 +1,19 @@
 from __future__ import annotations
 
-from typing import Any, Dict, Mapping
-
+from collections.abc import Mapping
+from typing import Any
 
 RDBMS_SERVICE_KEYS = ("mariadb", "postgres")
 
 
-def _as_mapping(value: Any) -> Dict[str, Any]:
+def _as_mapping(value: Any) -> dict[str, Any]:
     return value if isinstance(value, dict) else {}
 
 
 def get_compose_services(
     applications: Mapping[str, Any],
     application_id: str,
-) -> Dict[str, Any]:
+) -> dict[str, Any]:
     """Return the role's services map.
 
     Per req-008 the materialised application payload exposes services
@@ -28,7 +28,7 @@ def get_compose_services(
 def get_database_service_config(
     applications: Mapping[str, Any],
     application_id: str,
-) -> Dict[str, Any]:
+) -> dict[str, Any]:
     service_key = resolve_database_service_key(applications, application_id)
     if not service_key:
         return {}

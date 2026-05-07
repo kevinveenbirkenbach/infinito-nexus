@@ -17,17 +17,22 @@ from ansible.template import Templar
 
 from plugins.lookup.applications import (
     LookupModule as ApplicationsLookup,
+)
+from plugins.lookup.applications import (
     _reset_cache_for_tests,
 )
 from plugins.lookup.applications_current_play import (
     LookupModule as ApplicationsCurrentPlayLookup,
+)
+from plugins.lookup.applications_current_play import (
     _reset_cache_for_tests as _reset_current_play_cache,
 )
 from plugins.lookup.domains import (
     LookupModule as DomainsLookup,
+)
+from plugins.lookup.domains import (
     _reset_cache_for_tests as _reset_domains_cache,
 )
-
 
 from . import PROJECT_ROOT
 

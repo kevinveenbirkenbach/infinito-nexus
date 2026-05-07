@@ -1,28 +1,29 @@
-import os
 import glob
+import os
 import re
 import unittest
-import yaml
-from typing import Any, Dict, Iterable, List, Set, Tuple, Optional
+from collections.abc import Iterable
+from typing import Any
 
+import yaml
 
 # ---------- YAML helpers ----------
 
 
-def load_yaml_documents(path: str) -> List[Any]:
+def load_yaml_documents(path: str) -> list[Any]:
     """
     Load one or more YAML documents from a file and return them as a list.
     Raises AssertionError with a helpful message on parse errors.
     """
-    with open(path, "r", encoding="utf-8") as f:
+    with open(path, encoding="utf-8") as f:
         try:
             docs = list(yaml.safe_load_all(f))
             return [d for d in docs if d is not None]
         except yaml.YAMLError as e:
-            raise AssertionError(f"YAML parsing error in {path}: {e}")
+            raise AssertionError(f"YAML parsing error in {path}: {e}") from e
 
 
-def _iter_task_like_entries(node: Any) -> Iterable[Dict[str, Any]]:
+def _iter_task_like_entries(node: Any) -> Iterable[dict[str, Any]]:
     """
     Recursively yield task/handler-like dict entries from a YAML node.
     Handles top-level lists and dict-wrapped lists, and also drills into
@@ -40,12 +41,12 @@ def _iter_task_like_entries(node: Any) -> Iterable[Dict[str, Any]]:
                 yield from _iter_task_like_entries(v)
 
 
-def iter_task_like_entries(docs: List[Any]) -> Iterable[Dict[str, Any]]:
+def iter_task_like_entries(docs: list[Any]) -> Iterable[dict[str, Any]]:
     for doc in docs:
         yield from _iter_task_like_entries(doc)
 
 
-def as_str_list(val: Any) -> List[str]:
+def as_str_list(val: Any) -> list[str]:
     """Normalize a YAML value (string or list) into a list of strings."""
     if val is None:
         return []
@@ -62,7 +63,7 @@ def as_str_list(val: Any) -> List[str]:
 _QUOTED_RE = re.compile(r"""(['"])(.+?)\1""")
 
 
-def _jinja_mixed_to_regex(value: str) -> Optional[re.Pattern]:
+def _jinja_mixed_to_regex(value: str) -> re.Pattern | None:
     """
     Turn a string that mixes plain text with Jinja placeholders into a ^...$ regex.
     Example: 'Import {{ folder }} LDIF files' -> r'^Import .+ LDIF files$'
@@ -83,7 +84,7 @@ def _jinja_mixed_to_regex(value: str) -> Optional[re.Pattern]:
     return re.compile(regex_str)
 
 
-def _expand_dynamic_notify(value: str) -> List[str]:
+def _expand_dynamic_notify(value: str) -> list[str]:
     """
     If 'value' is a Jinja expression like:
         "{{ 'reload system daemon' if cond else 'refresh systemctl service' }}"
@@ -105,17 +106,17 @@ def _expand_dynamic_notify(value: str) -> List[str]:
 # ---------- Extraction from handlers/tasks ----------
 
 
-def collect_handler_groups(handler_file: str) -> List[Set[str]]:
+def collect_handler_groups(handler_file: str) -> list[set[str]]:
     """
     Build groups of acceptable targets for each handler task from a handlers file.
     For each handler, collect its 'name' and all 'listen' aliases.
     A handler is considered covered if ANY alias in its group is notified.
     """
-    groups: List[Set[str]] = []
+    groups: list[set[str]] = []
     docs = load_yaml_documents(handler_file)
 
     for entry in iter_task_like_entries(docs):
-        names: Set[str] = set()
+        names: set[str] = set()
 
         # primary name
         if isinstance(entry.get("name"), str):
@@ -138,7 +139,7 @@ def collect_handler_groups(handler_file: str) -> List[Set[str]]:
 
 def collect_notify_calls_from_tasks(
     task_file: str,
-) -> Tuple[Set[str], List[re.Pattern]]:
+) -> tuple[set[str], list[re.Pattern]]:
     """
     From a task file, collect all notification targets via:
       - 'notify:' (string or list), including dynamic Jinja expressions with literals,
@@ -148,8 +149,8 @@ def collect_notify_calls_from_tasks(
     Returns:
       (exact_names, regex_patterns)
     """
-    notified_exact: Set[str] = set()
-    notified_patterns: List[re.Pattern] = []
+    notified_exact: set[str] = set()
+    notified_patterns: list[re.Pattern] = []
     docs = load_yaml_documents(task_file)
 
     for entry in iter_task_like_entries(docs):
@@ -249,24 +250,24 @@ class TestHandlersInvoked(unittest.TestCase):
 
     def test_all_handlers_have_a_notifier_and_all_notifies_have_a_handler(self):
         # 1) Collect handler groups (name + listen) for each handler task
-        handler_groups: List[Set[str]] = []
+        handler_groups: list[set[str]] = []
         for hf in self.handler_files:
             handler_groups.extend(collect_handler_groups(hf))
 
         # Flatten all handler aliases for reverse checks
-        all_aliases: Set[str] = (
+        all_aliases: set[str] = (
             set().union(*handler_groups) if handler_groups else set()
         )
 
         # 2) Collect all notified targets (notify + package_notify) from tasks
-        notified_exact: Set[str] = set()
-        notified_patterns: List[re.Pattern] = []
+        notified_exact: set[str] = set()
+        notified_patterns: list[re.Pattern] = []
         for tf in self.task_files:
             ex, pats = collect_notify_calls_from_tasks(tf)
             notified_exact |= ex
             notified_patterns.extend(pats)
 
-        def group_is_covered(grp: Set[str]) -> bool:
+        def group_is_covered(grp: set[str]) -> bool:
             # exact hit?
             if grp & notified_exact:
                 return True
@@ -278,12 +279,12 @@ class TestHandlersInvoked(unittest.TestCase):
             return False
 
         # 3A) Every handler group is covered if any alias is notified (exact or regex)
-        missing_groups: List[Set[str]] = [
+        missing_groups: list[set[str]] = [
             grp for grp in handler_groups if not group_is_covered(grp)
         ]
 
         if missing_groups:
-            representatives: List[str] = []
+            representatives: list[str] = []
             for grp in missing_groups:
                 representatives.append(sorted(grp)[0])
             representatives = sorted(set(representatives))

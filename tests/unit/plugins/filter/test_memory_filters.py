@@ -1,7 +1,6 @@
+import importlib
 import unittest
 from unittest.mock import patch
-
-import importlib
 
 memory_filters = importlib.import_module("plugins.filter.memory_filters")
 

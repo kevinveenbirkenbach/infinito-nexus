@@ -17,7 +17,6 @@ from . import yaml_io  # noqa: E402
 from .indices import build_network_index, build_port_index  # noqa: E402
 from .role_builder import build as build_role_meta  # noqa: E402
 
-
 _PORT_BANDS = {
     "local": {
         "http": {"start": 8001, "end": 8099},

@@ -1,12 +1,15 @@
 from __future__ import annotations
 
+from collections.abc import Iterable
 from pathlib import Path
-from typing import Iterable, List, Any
+from typing import Any
 
 from humanfriendly import parse_size
+
 from utils.annotations.message import warning
 from utils.cache.yaml import load_yaml_any
 from utils.entity_name_utils import get_entity_name
+
 from . import PROJECT_ROOT
 
 
@@ -40,9 +43,9 @@ def filter_roles_by_min_storage(
     role_names: Iterable[str],
     required_storage: str | int | float,
     emit_warnings: bool = False,
-) -> List[str]:
+) -> list[str]:
     roles_root_path = _roles_root()
-    out: List[str] = []
+    out: list[str] = []
 
     try:
         required_gb = _parse_storage_to_gb(required_storage)

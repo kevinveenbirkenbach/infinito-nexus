@@ -1,9 +1,10 @@
 import base64
-import bcrypt
 import hashlib
 import re
 import secrets
 import string
+
+import bcrypt
 
 
 class ValueGenerator:

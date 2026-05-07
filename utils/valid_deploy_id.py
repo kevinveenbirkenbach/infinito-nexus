@@ -5,9 +5,10 @@ Utility for validating deployment application IDs against defined roles and inve
 from __future__ import annotations
 
 import os
-from utils.cache.yaml import load_yaml_any
 
 from plugins.filter.get_all_application_ids import get_all_application_ids
+from utils.cache.yaml import load_yaml_any
+
 from . import PROJECT_ROOT
 
 
@@ -60,7 +61,7 @@ class ValidDeployId:
         return self._search_ini_sections(inventory_path, app_id)
 
     def _search_ini_sections(self, inventory_path: str, app_id: str) -> bool:
-        with open(inventory_path, "r", encoding="utf-8") as f:
+        with open(inventory_path, encoding="utf-8") as f:
             current_section = None
             for raw in f:
                 line = raw.strip()

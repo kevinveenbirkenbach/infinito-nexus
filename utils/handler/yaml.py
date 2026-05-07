@@ -1,12 +1,14 @@
+from typing import Any
+
 import yaml
 from yaml.loader import SafeLoader
-from typing import Any, Dict
+
 from utils.handler.vault import VaultScalar
 
 
 class YamlHandler:
     @staticmethod
-    def load_yaml(path) -> Dict:
+    def load_yaml(path) -> dict:
         """Load the YAML file and wrap existing !vault entries."""
         text = path.read_text()
         # Custom Loader subclass wraps !vault scalars; the path-keyed

@@ -1,15 +1,15 @@
 from __future__ import annotations
 
 import unittest
+from collections.abc import Iterable
 from pathlib import Path
-from typing import Any, Iterable
+from typing import Any
 
 import yaml
 
 from utils.cache.files import iter_project_files_with_content, read_text
 
 from . import PROJECT_ROOT
-
 
 COMMAND_KEYS = frozenset({"command", "ansible.builtin.command"})
 SHELL_KEYS = frozenset({"shell", "ansible.builtin.shell"})

@@ -2,7 +2,7 @@
 from ansible.errors import AnsibleFilterError
 
 
-class FilterModule(object):
+class FilterModule:
     def filters(self):
         return {
             "timeout_start_sec_for_domains": self.timeout_start_sec_for_domains,
@@ -69,4 +69,6 @@ class FilterModule(object):
         except AnsibleFilterError:
             raise
         except Exception as exc:
-            raise AnsibleFilterError(f"timeout_start_sec_for_domains failed: {exc}")
+            raise AnsibleFilterError(
+                f"timeout_start_sec_for_domains failed: {exc}"
+            ) from exc

@@ -52,7 +52,7 @@ def inj_features_filter(features, kind: str = "head"):
     return valid
 
 
-class FilterModule(object):
+class FilterModule:
     def filters(self):
         return {
             "inj_features": inj_features_filter,

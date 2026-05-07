@@ -5,7 +5,8 @@ exactly the helpers it needs."""
 from __future__ import annotations
 
 import fnmatch
-from typing import Any, Dict, Mapping
+from collections.abc import Mapping
+from typing import Any
 
 
 class PathNotFound(Exception):
@@ -61,9 +62,9 @@ def match_wildcard_path(mapping: Any, dotted: str) -> bool:
 
 
 def validate_app_path(
-    application_defaults: Dict[str, Any],
-    role_schemas: Dict[str, Dict[str, Any]],
-    user_defaults: Dict[str, Any],
+    application_defaults: dict[str, Any],
+    role_schemas: dict[str, dict[str, Any]],
+    user_defaults: dict[str, Any],
     app_id: str,
     dotted: str,
 ) -> None:

@@ -1,11 +1,10 @@
 #!/usr/bin/python
-# -*- coding: utf-8 -*-
 
 from __future__ import annotations
 
 import os
-from ansible.module_utils.basic import AnsibleModule
 
+from ansible.module_utils.basic import AnsibleModule
 
 DOCUMENTATION = r"""
 ---
@@ -75,7 +74,7 @@ def run_module() -> None:
     result["size"] = os.path.getsize(path)
 
     try:
-        with open(path, "r", encoding="utf-8", errors="ignore") as f:
+        with open(path, encoding="utf-8", errors="ignore") as f:
             content = f.read().strip()
             result["has_content"] = bool(content)
     except Exception as exc:

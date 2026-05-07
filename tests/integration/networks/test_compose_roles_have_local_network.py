@@ -33,7 +33,7 @@ class TestComposeRolesHaveLocalNetwork(unittest.TestCase):
             if not os.path.isfile(vars_file):
                 continue
 
-            with open(vars_file, "r", encoding="utf-8") as f:
+            with open(vars_file, encoding="utf-8") as f:
                 vars_data = yaml.safe_load(f) or {}
             application_id = vars_data.get("application_id")
             if not application_id:
@@ -42,7 +42,7 @@ class TestComposeRolesHaveLocalNetwork(unittest.TestCase):
             server_file = os.path.join(role_path, "meta", "server.yml")
             subnet = None
             if os.path.isfile(server_file):
-                with open(server_file, "r", encoding="utf-8") as f:
+                with open(server_file, encoding="utf-8") as f:
                     server_data = yaml.safe_load(f) or {}
                 networks = server_data.get("networks") or {}
                 local = networks.get("local") if isinstance(networks, dict) else None

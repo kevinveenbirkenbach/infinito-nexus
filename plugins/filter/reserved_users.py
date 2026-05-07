@@ -1,5 +1,6 @@
-from ansible.errors import AnsibleFilterError
 import re
+
+from ansible.errors import AnsibleFilterError
 
 
 def reserved_usernames(users_dict):
@@ -43,7 +44,7 @@ def non_reserved_users(users_dict):
     return results
 
 
-class FilterModule(object):
+class FilterModule:
     """User filters for extracting reserved and non-reserved subsets."""
 
     def filters(self):

@@ -2,6 +2,7 @@ import unittest
 from collections import defaultdict
 
 from utils.cache.applications import get_application_defaults
+
 from . import PROJECT_ROOT
 
 

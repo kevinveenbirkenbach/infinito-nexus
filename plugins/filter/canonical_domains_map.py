@@ -1,12 +1,14 @@
-from ansible.errors import AnsibleFilterError
 import os
-from utils.entity_name_utils import get_entity_name
+from collections.abc import Iterable
+
+from ansible.errors import AnsibleFilterError
+
 from utils.domains.list import render_domain_value
+from utils.entity_name_utils import get_entity_name
 from utils.roles.dependency_resolver import RoleDependencyResolver
-from typing import Iterable
 
 
-class FilterModule(object):
+class FilterModule:
     def filters(self):
         return {"canonical_domains_map": self.canonical_domains_map}
 

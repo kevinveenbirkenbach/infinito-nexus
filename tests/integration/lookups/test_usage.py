@@ -28,10 +28,8 @@ import os
 import re
 import unittest
 from pathlib import Path
-from typing import Dict, List, Set
 
 from utils.cache.files import iter_project_files, read_text
-
 
 from . import PROJECT_ROOT
 
@@ -58,9 +56,9 @@ def _defines_lookup_module(path: Path) -> bool:
     return False
 
 
-def collect_defined_lookups() -> Dict[str, Path]:
+def collect_defined_lookups() -> dict[str, Path]:
     """Return mapping ``{lookup_name: plugin_path}`` for all discovered plugins."""
-    defined: Dict[str, Path] = {}
+    defined: dict[str, Path] = {}
     if not LOOKUP_PLUGINS_DIR.is_dir():
         return defined
     for entry in sorted(LOOKUP_PLUGINS_DIR.iterdir()):
@@ -73,15 +71,15 @@ def collect_defined_lookups() -> Dict[str, Path]:
 
 
 def _scan_lookup_usage(
-    defined: Dict[str, Path],
-) -> Dict[str, Dict[str, bool]]:
+    defined: dict[str, Path],
+) -> dict[str, dict[str, bool]]:
     """Single-pass inverted scan for ``lookup('name', ...)`` / ``query('name', ...)``.
 
     Complexity: O(M_files * 1_master_regex) rather than O(N_lookups * M_files).
     The combined regex carries alternation over every defined lookup name and
     covers both ``lookup(...)`` and ``query(...)`` invocation forms.
     """
-    state: Dict[str, Dict[str, bool]] = {
+    state: dict[str, dict[str, bool]] = {
         name: {"used_any": False, "used_outside": False} for name in defined
     }
     if not defined:
@@ -97,7 +95,7 @@ def _scan_lookup_usage(
     import_pat = re.compile(r"from\s+plugins\.lookup\." + name_alt + r"\s+import\b")
 
     tests_prefix = str(PROJECT_ROOT / "tests") + os.sep
-    defined_paths: Set[str] = {str(p) for p in defined.values()}
+    defined_paths: set[str] = {str(p) for p in defined.values()}
 
     for path in iter_project_files(extensions=USAGE_EXTS):
         # Skip the plugin's own definition file — docstrings contain example
@@ -141,7 +139,7 @@ class TestLookupDefinitionsAreUsed(unittest.TestCase):
 
         state = _scan_lookup_usage(defined)
 
-        unused: List[tuple[str, Path, str]] = []
+        unused: list[tuple[str, Path, str]] = []
         for name in sorted(defined):
             s = state[name]
             if not s["used_any"]:

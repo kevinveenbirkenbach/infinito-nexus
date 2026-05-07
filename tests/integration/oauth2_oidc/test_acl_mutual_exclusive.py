@@ -1,6 +1,7 @@
-import yaml
 import unittest
 from pathlib import Path
+
+import yaml
 
 ROLES_DIR = Path(__file__).resolve().parent.parent.parent.parent / "roles"
 

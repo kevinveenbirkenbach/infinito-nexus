@@ -1,7 +1,8 @@
-import yaml
 import unittest
-from pathlib import Path
 from collections import Counter
+from pathlib import Path
+
+import yaml
 
 ROLES_DIR = Path(__file__).resolve().parent.parent.parent.parent / "roles"
 
@@ -24,7 +25,7 @@ class TestDomainsStructure(unittest.TestCase):
 
             for vars_file in vars_dir.glob("*.yml"):
                 try:
-                    with open(vars_file, "r") as f:
+                    with open(vars_file) as f:
                         data = yaml.safe_load(f) or {}
                 except yaml.YAMLError as e:
                     failed_roles.append(

@@ -1,13 +1,12 @@
 from __future__ import annotations
 
-from typing import Any, Dict, Optional
+from typing import Any
 
 from ansible.errors import AnsibleError
 from ansible.plugins.lookup import LookupBase
 
 from utils.applications.config import get
 from utils.cache.applications import get_merged_applications
-
 
 _APPLICATION_ID = "web-app-nextcloud"
 
@@ -29,7 +28,7 @@ class LookupModule(LookupBase):
     that was removed in commit 77a0e16ea.
     """
 
-    def run(self, terms, variables: Optional[Dict[str, Any]] = None, **kwargs):
+    def run(self, terms, variables: dict[str, Any] | None = None, **kwargs):
         if terms:
             raise AnsibleError("lookup('oidc_flavor') takes no positional terms.")
 

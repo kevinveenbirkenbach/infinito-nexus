@@ -21,11 +21,11 @@
 from __future__ import annotations
 
 import os
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 from ansible.errors import AnsibleError
-from ansible.plugins.lookup import LookupBase
 from ansible.plugins.loader import lookup_loader
+from ansible.plugins.lookup import LookupBase
 
 from utils.applications.config import get
 from utils.cache.applications import get_merged_applications
@@ -51,7 +51,7 @@ def _normalize_protocol(value: str) -> str:
     )
 
 
-def _dir_spec(path: str, mode: str) -> Dict[str, str]:
+def _dir_spec(path: str, mode: str) -> dict[str, str]:
     path = as_str(path).strip()
     mode = as_str(mode).strip()
     if not path:
@@ -82,7 +82,7 @@ def _resolve_protocol_via_tls(
 
 
 class LookupModule(LookupBase):
-    def run(self, terms, variables: Optional[dict] = None, **kwargs):
+    def run(self, terms, variables: dict | None = None, **kwargs):
         variables = variables or {}
         terms = terms or []
 
@@ -128,7 +128,7 @@ class LookupModule(LookupBase):
         cache_general_dir = "/tmp/cache_nginx_general/"
         cache_image_dir = "/tmp/cache_nginx_image/"
 
-        ensure: List[Dict[str, str]] = [
+        ensure: list[dict[str, str]] = [
             _dir_spec(nginx_dir, "0755"),
             _dir_spec(conf_dir, "0755"),
             _dir_spec(global_dir, "0755"),
@@ -146,7 +146,7 @@ class LookupModule(LookupBase):
             _dir_spec(cache_image_dir, "0700"),
         ]
 
-        resolved: Dict[str, Any] = {
+        resolved: dict[str, Any] = {
             "files": {
                 "configuration": _join(nginx_dir, "nginx.conf"),
             },

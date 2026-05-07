@@ -21,15 +21,14 @@ import re
 import unittest
 from dataclasses import dataclass
 from pathlib import Path
-from typing import List
 
 import yaml
 
-from utils.cache.files import read_text
 from utils.annotations.message import in_github_actions, warning
+from utils.cache.files import read_text
 from utils.entity_name_utils import get_entity_name
-from . import PROJECT_ROOT
 
+from . import PROJECT_ROOT
 
 REQUIRED_KEYS = (
     "min_storage",
@@ -73,8 +72,8 @@ def _find_service_line(config_path: Path, service_name: str) -> int:
     return 1
 
 
-def _collect_findings(root: Path) -> List[MissingKeyFinding]:
-    findings: List[MissingKeyFinding] = []
+def _collect_findings(root: Path) -> list[MissingKeyFinding]:
+    findings: list[MissingKeyFinding] = []
     roles_dir = root / "roles"
     for role_dir in sorted(roles_dir.iterdir()):
         if not role_dir.is_dir():
@@ -125,7 +124,7 @@ def _emit_warning(finding: MissingKeyFinding, root: Path) -> None:
     )
 
 
-def _print_summary(findings: List[MissingKeyFinding], root: Path) -> None:
+def _print_summary(findings: list[MissingKeyFinding], root: Path) -> None:
     if not findings:
         return
     print()

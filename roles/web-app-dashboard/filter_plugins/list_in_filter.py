@@ -1,4 +1,4 @@
-class FilterModule(object):
+class FilterModule:
     """Custom filters for Ansible"""
 
     def filters(self):

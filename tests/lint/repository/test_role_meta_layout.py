@@ -23,7 +23,6 @@ from pathlib import Path
 
 import yaml
 
-
 from . import PROJECT_ROOT
 
 ROLES_DIR = PROJECT_ROOT / "roles"

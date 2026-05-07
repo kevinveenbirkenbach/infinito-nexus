@@ -4,7 +4,6 @@ from __future__ import annotations
 
 import os
 import re
-from typing import List, Optional, Set
 
 from .yaml_io import (
     gather_yaml_files,
@@ -14,8 +13,8 @@ from .yaml_io import (
 )
 
 
-def flatten_keys(data) -> Set[str]:
-    out: Set[str] = set()
+def flatten_keys(data) -> set[str]:
+    out: set[str] = set()
     if isinstance(data, dict):
         for k, v in data.items():
             if isinstance(k, str):
@@ -27,9 +26,9 @@ def flatten_keys(data) -> Set[str]:
     return out
 
 
-def collect_role_defined_vars(role_dir: str) -> Set[str]:
+def collect_role_defined_vars(role_dir: str) -> set[str]:
     """Vars a role 'provides': defaults/vars keys + set_fact keys in tasks."""
-    provided: Set[str] = set()
+    provided: set[str] = set()
 
     for rel in ("defaults/main.yml", "vars/main.yml"):
         p = path_if_exists(role_dir, rel)
@@ -51,12 +50,12 @@ def collect_role_defined_vars(role_dir: str) -> Set[str]:
     return {v for v in provided if isinstance(v, str) and v and v not in noisy}
 
 
-def collect_role_handler_names(role_dir: str) -> Set[str]:
+def collect_role_handler_names(role_dir: str) -> set[str]:
     handler_file = path_if_exists(role_dir, "handlers/main.yml")
     if not handler_file:
         return set()
     data = load_yaml_rt(handler_file)
-    names: Set[str] = set()
+    names: set[str] = set()
     if isinstance(data, list):
         for task in data:
             if isinstance(task, dict):
@@ -66,15 +65,15 @@ def collect_role_handler_names(role_dir: str) -> Set[str]:
     return names
 
 
-def find_var_positions(text: str, varname: str) -> List[int]:
+def find_var_positions(text: str, varname: str) -> list[int]:
     if not varname:
         return []
     pattern = re.compile(rf"(?<!\w){re.escape(varname)}(?!\w)")
     return [m.start() for m in pattern.finditer(text)]
 
 
-def first_var_use_offset_in_text(text: str, provided_vars: Set[str]) -> Optional[int]:
-    first: Optional[int] = None
+def first_var_use_offset_in_text(text: str, provided_vars: set[str]) -> int | None:
+    first: int | None = None
     for v in provided_vars:
         for off in find_var_positions(text, v):
             if first is None or off < first:
@@ -82,7 +81,7 @@ def first_var_use_offset_in_text(text: str, provided_vars: Set[str]) -> Optional
     return first
 
 
-def first_include_offset_for_role(text: str, producer_role: str) -> Optional[int]:
+def first_include_offset_for_role(text: str, producer_role: str) -> int | None:
     pattern = re.compile(
         r"(include_role|import_role)\s*:\s*\{[^}]*\bname\s*:\s*['\"]?"
         + re.escape(producer_role)
@@ -97,11 +96,11 @@ def first_include_offset_for_role(text: str, producer_role: str) -> Optional[int
     return m.start() if m else None
 
 
-def find_notify_offsets_for_handlers(text: str, handler_names: Set[str]) -> List[int]:
+def find_notify_offsets_for_handlers(text: str, handler_names: set[str]) -> list[int]:
     """For each handler name, return offsets that follow a `notify:` within ~200 chars."""
     if not handler_names:
         return []
-    offsets: List[int] = []
+    offsets: list[int] = []
     for h in handler_names:
         for m in re.finditer(re.escape(h), text):
             start = m.start()
@@ -111,13 +110,13 @@ def find_notify_offsets_for_handlers(text: str, handler_names: Set[str]) -> List
     return sorted(offsets)
 
 
-def parse_meta_dependencies(role_dir: str) -> List[str]:
+def parse_meta_dependencies(role_dir: str) -> list[str]:
     meta = path_if_exists(role_dir, "meta/main.yml")
     if not meta:
         return []
     data = load_yaml_rt(meta)
     raw = data.get("dependencies")
-    deps: List[str] = []
+    deps: list[str] = []
     if isinstance(raw, list):
         for item in raw:
             if isinstance(item, str):
@@ -133,8 +132,8 @@ def dependency_is_unnecessary(
     consumer_dir: str,
     consumer_name: str,
     producer_name: str,
-    provider_vars: Set[str],
-    provider_handlers: Set[str],
+    provider_vars: set[str],
+    provider_handlers: set[str],
 ) -> bool:
     """True iff the consumer can safely move the meta dep to a guarded include."""
     early_files = [

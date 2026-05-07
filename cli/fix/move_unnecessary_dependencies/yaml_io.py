@@ -7,7 +7,6 @@ import logging
 import os
 import shutil
 import sys
-from typing import List, Optional
 
 try:
     from ruamel.yaml import YAML
@@ -37,7 +36,7 @@ def backup(path: str) -> None:
 
 def read_text(path: str) -> str:
     try:
-        with open(path, "r", encoding="utf-8") as f:
+        with open(path, encoding="utf-8") as f:
             return f.read()
     except Exception:
         return ""
@@ -45,7 +44,7 @@ def read_text(path: str) -> str:
 
 def load_yaml_rt(path: str):
     try:
-        with open(path, "r", encoding="utf-8") as f:
+        with open(path, encoding="utf-8") as f:
             data = yaml_rt.load(f)
         return data if data is not None else CommentedMap()
     except FileNotFoundError:
@@ -70,7 +69,7 @@ def roles_root(project_root: str) -> str:
     return os.path.join(project_root, "roles")
 
 
-def iter_role_dirs(project_root: str) -> List[str]:
+def iter_role_dirs(project_root: str) -> list[str]:
     return [
         d
         for d in glob.glob(os.path.join(roles_root(project_root), "*"))
@@ -82,13 +81,13 @@ def role_name_from_dir(role_dir: str) -> str:
     return os.path.basename(role_dir.rstrip(os.sep))
 
 
-def path_if_exists(*parts: str) -> Optional[str]:
+def path_if_exists(*parts: str) -> str | None:
     p = os.path.join(*parts)
     return p if os.path.exists(p) else None
 
 
-def gather_yaml_files(base: str, patterns: List[str]) -> List[str]:
-    files: List[str] = []
+def gather_yaml_files(base: str, patterns: list[str]) -> list[str]:
+    files: list[str] = []
     for pat in patterns:
         files.extend(glob.glob(os.path.join(base, pat), recursive=True))
     return [f for f in files if os.path.isfile(f)]

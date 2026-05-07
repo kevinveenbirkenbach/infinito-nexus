@@ -8,8 +8,8 @@ from contextlib import redirect_stdout
 from pathlib import Path
 from unittest.mock import patch
 
-from cli.meta.applications.resolution.combined import repo_paths
 from cli.meta.applications.resolution.combined import __main__ as combined_main
+from cli.meta.applications.resolution.combined import repo_paths
 
 
 def _mk_role(root: Path, role: str, *, app_id: str | None = None) -> None:

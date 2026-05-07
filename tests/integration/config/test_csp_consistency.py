@@ -1,6 +1,8 @@
 import unittest
-import yaml
 from urllib.parse import urlparse
+
+import yaml
+
 from . import PROJECT_ROOT
 
 

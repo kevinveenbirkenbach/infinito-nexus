@@ -2,12 +2,11 @@ from __future__ import annotations
 
 import re
 import unittest
+from collections.abc import Iterable
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Iterable, List
 
 from utils.cache.files import read_text
-
 
 from . import PROJECT_ROOT
 
@@ -47,11 +46,11 @@ def _iter_yaml_files(repo_root: Path) -> Iterable[Path]:
                 yield path
 
 
-def _scan_file(path: Path) -> List[Finding]:
-    findings: List[Finding] = []
+def _scan_file(path: Path) -> list[Finding]:
+    findings: list[Finding] = []
     try:
         text = read_text(str(path))
-    except (IOError, OSError, UnicodeDecodeError):
+    except (OSError, UnicodeDecodeError):
         return findings
 
     for idx, line in enumerate(text.splitlines(), start=1):
@@ -79,7 +78,7 @@ class TestNoLiteralNoLogTrue(unittest.TestCase):
         single play with ``-e MASK_CREDENTIALS_IN_LOGS=false`` when they need
         the masked values to surface in logs for diagnosis.
         """
-        findings: List[Finding] = []
+        findings: list[Finding] = []
         for yml in _iter_yaml_files(PROJECT_ROOT):
             findings.extend(_scan_file(yml))
 

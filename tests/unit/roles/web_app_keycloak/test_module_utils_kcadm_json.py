@@ -1,9 +1,10 @@
 # tests/unit/roles/web_app_keycloak/test_module_utils_kcadm_json.py
 from __future__ import annotations
 
+import importlib.util
 import unittest
 from pathlib import Path
-import importlib.util
+
 from . import PROJECT_ROOT
 
 ROLE_DIR = PROJECT_ROOT / "roles" / "web-app-keycloak"

@@ -3,7 +3,6 @@ import ast
 import os
 import re
 import unittest
-from typing import Dict, List, Set, Tuple
 
 from utils.cache.files import iter_project_files, read_text
 
@@ -16,7 +15,7 @@ EXCLUDE_TESTS = True
 USAGE_EXTS = (".yml", ".yaml", ".j2", ".jinja2", ".tmpl")
 
 # Built-in / common filters that shouldn't require local definitions
-BUILTIN_FILTERS: Set[str] = {
+BUILTIN_FILTERS: set[str] = {
     # Jinja2 core/common
     "abs",
     "attr",
@@ -91,10 +90,6 @@ BUILTIN_FILTERS: Set[str] = {
     "mandatory",
     "hash",
     "checksum",
-    "lower",
-    "upper",
-    "capitalize",
-    "unique",
     "dict2items",
     "items2dict",
     "password_hash",
@@ -112,7 +107,7 @@ BUILTIN_FILTERS: Set[str] = {
 }
 
 
-def _iter_files(*, exts: Tuple[str, ...]):
+def _iter_files(*, exts: tuple[str, ...]):
     yield from iter_project_files(
         extensions=exts,
         exclude_tests=EXCLUDE_TESTS,
@@ -139,15 +134,15 @@ def _read(path: str) -> str:
 
 class _FiltersCollector(ast.NodeVisitor):
     def __init__(self):
-        self.defs: List[Tuple[str, str]] = []
+        self.defs: list[tuple[str, str]] = []
 
     def visit_Return(self, node: ast.Return):
         self.defs.extend(self._extract_mapping(node.value))
 
-    def _extract_mapping(self, node) -> List[Tuple[str, str]]:
-        pairs: List[Tuple[str, str]] = []
+    def _extract_mapping(self, node) -> list[tuple[str, str]]:
+        pairs: list[tuple[str, str]] = []
         if isinstance(node, ast.Dict):
-            for k, v in zip(node.keys, node.values):
+            for k, v in zip(node.keys, node.values, strict=False):
                 key = (
                     k.value
                     if isinstance(k, ast.Constant) and isinstance(k.value, str)
@@ -181,12 +176,12 @@ class _FiltersCollector(ast.NodeVisitor):
 
 def _collect_filters_from_filters_method(
     func: ast.FunctionDef,
-) -> List[Tuple[str, str]]:
+) -> list[tuple[str, str]]:
     c = _FiltersCollector()
     c.visit(func)
 
-    name_dicts: Dict[str, List[Tuple[str, str]]] = {}
-    returned_names: List[str] = []
+    name_dicts: dict[str, list[tuple[str, str]]] = {}
+    returned_names: list[str] = []
 
     for n in ast.walk(func):
         if isinstance(n, ast.Assign):
@@ -211,7 +206,7 @@ def _collect_filters_from_filters_method(
 
     # dedupe
     seen = set()
-    out: List[Tuple[str, str]] = []
+    out: list[tuple[str, str]] = []
     for k, v in c.defs:
         if (k, v) not in seen:
             seen.add((k, v))
@@ -219,8 +214,8 @@ def _collect_filters_from_filters_method(
     return out
 
 
-def collect_defined_filters() -> Set[str]:
-    defined: Set[str] = set()
+def collect_defined_filters() -> set[str]:
+    defined: set[str] = set()
     for path in _iter_files(exts=(".py",)):
         if not _is_filter_plugins_dir(path):
             continue
@@ -284,14 +279,14 @@ def _strip_quoted(text: str) -> str:
     return "".join(out)
 
 
-def _extract_filters_from_jinja_body(body: str) -> Set[str]:
+def _extract_filters_from_jinja_body(body: str) -> set[str]:
     # Strip quoted strings first so pipes inside strings are ignored
     body_no_str = _strip_quoted(body)
     return {m.group(1) for m in RE_PIPE_IN_BODY.finditer(body_no_str)}
 
 
-def collect_used_filters() -> Set[str]:
-    used: Set[str] = set()
+def collect_used_filters() -> set[str]:
+    used: set[str] = set()
     for path in _iter_files(exts=USAGE_EXTS):
         text = _read(path)
         if not text:

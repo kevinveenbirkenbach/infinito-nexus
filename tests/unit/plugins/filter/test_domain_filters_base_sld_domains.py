@@ -1,6 +1,6 @@
-import unittest
-import sys
 import os
+import sys
+import unittest
 
 # Ensure plugins/filter directory is on the path
 sys.path.insert(
@@ -10,8 +10,8 @@ sys.path.insert(
     ),
 )
 
-from generate_base_sld_domains import FilterModule
 from ansible.errors import AnsibleFilterError
+from generate_base_sld_domains import FilterModule
 
 
 class TestGenerateBaseSldDomains(unittest.TestCase):

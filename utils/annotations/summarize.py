@@ -19,7 +19,6 @@ import sys
 from collections import defaultdict
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Optional
 
 ANNOTATION_RE = re.compile(r"^::(warning|error|notice)(?:\s([^:]*))?::(.*)$")
 PROP_RE = re.compile(r"(\w+)=([^,]*)")
@@ -32,10 +31,10 @@ HEADINGS = {"error": "Errors", "warning": "Warnings", "notice": "Notices"}
 class Annotation:
     level: str
     message: str
-    title: Optional[str] = None
-    file: Optional[str] = None
-    line: Optional[int] = None
-    col: Optional[int] = None
+    title: str | None = None
+    file: str | None = None
+    line: int | None = None
+    col: int | None = None
 
 
 def parse_props(props_str: str) -> dict[str, str]:

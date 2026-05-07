@@ -9,7 +9,6 @@ import argparse
 import json
 import os
 import sys
-from typing import Dict, List
 
 import requests
 
@@ -30,11 +29,11 @@ def parse_args(argv=None):
     return p.parse_args(argv)
 
 
-def _parse_json_mapping(name: str, value: str) -> Dict[str, List[int]]:
+def _parse_json_mapping(name: str, value: str) -> dict[str, list[int]]:
     try:
         obj = json.loads(value)
     except json.JSONDecodeError as e:
-        raise SystemExit(f"--{name} must be a valid JSON string: {e}")
+        raise SystemExit(f"--{name} must be a valid JSON string: {e}") from e
     if not isinstance(obj, dict):
         raise SystemExit(f"--{name} must be a JSON object (mapping)")
     # sanitize list-of-ints shape

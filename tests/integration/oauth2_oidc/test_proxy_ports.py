@@ -35,7 +35,6 @@ from pathlib import Path
 
 from utils.cache.yaml import load_yaml
 
-
 ROOT = Path(__file__).resolve().parent.parent.parent.parent
 ROLES_DIR = ROOT / "roles"
 
