@@ -175,6 +175,36 @@ def _line_is_commented(text: str, match_start: int) -> bool:
     return 0 <= idx_hash < idx_call
 
 
+def _has_default_arg(text: str, scan_from: int) -> bool:
+    """Return True when the `lookup('config', app, path[, default])` call
+    being parsed carries an explicit default value (4th positional arg).
+
+    Mirrors the runtime semantics of `plugins/lookup/config.py`: a third
+    `terms` element flips the call to `strict=False`, so a missing path
+    silently falls through to the default. Such calls are explicitly
+    defensive and out of scope for the path-existence lints — they
+    cannot fail at runtime even when the static scan would mark them.
+
+    Starting from ``scan_from`` (the index right after the path literal
+    or expression), this skips whitespace and reports whether the next
+    significant character inside the same `lookup(...)` call is a
+    comma. Bounded at the call's closing paren so we never look past
+    it."""
+    i = scan_from
+    n = len(text)
+    while i < n:
+        ch = text[i]
+        if ch.isspace():
+            i += 1
+            continue
+        if ch == ",":
+            return True
+        if ch == ")":
+            return False
+        return False
+    return False
+
+
 def _build_role_for_app_map(roles_root: Path) -> Dict[str, str]:
     """Walk ``roles/`` once and return ``{application_id: role_dir_name}``.
 
@@ -254,6 +284,8 @@ def _emit_literal_match(
         return None
     lineno = text.count("\n", 0, m.start()) + 1
     if is_suppressed_at(lines, lineno, SUPPRESS_RULE, mode="same-or-above"):
+        return None
+    if _has_default_arg(text, m.end()):
         return None
     app_arg = m.group(1).strip()
     path_arg = m.group(2).strip()
