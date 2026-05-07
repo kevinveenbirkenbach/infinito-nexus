@@ -70,8 +70,7 @@ RUN apt-get update \
 RUN docker-php-ext-configure gd --with-freetype --with-jpeg --with-webp \
  && docker-php-ext-configure intl \
  && docker-php-ext-configure ldap \
-# `-j1`: parallel build races on modules/ → "cp: cannot stat 'modules/*'" on PHP 8.5-fpm
- && docker-php-ext-install -j1 \
+ && docker-php-ext-install -j"$(nproc)" \
       exif \
       gd \
       intl \
