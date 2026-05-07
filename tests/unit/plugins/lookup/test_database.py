@@ -124,8 +124,6 @@ class DatabaseLookupTests(unittest.TestCase):
 
     def test_postgres_dedicated_matches_helper_variables_definition(self):
         # Consumer config: postgres enabled locally (shared=false).
-        # Per req-009 the database port is hung on the database role's own
-        # services.<type>.ports.local.database entry.
         applications = {
             "web-app-foo": {
                 "services": {"postgres": {"enabled": True, "shared": False}},
@@ -137,7 +135,7 @@ class DatabaseLookupTests(unittest.TestCase):
                     "postgres": {
                         "name": "postgres-central",
                         "version": "16",
-                        "ports": {"local": {"database": "5432"}},
+                        "ports": {"local": {"postgres": "5432"}},
                     }
                 }
             },
@@ -208,7 +206,7 @@ class DatabaseLookupTests(unittest.TestCase):
                     "postgres": {
                         "name": "postgres-central",
                         "version": "16",
-                        "ports": {"local": {"database": "5432"}},
+                        "ports": {"local": {"postgres": "5432"}},
                     }
                 }
             },
@@ -261,7 +259,7 @@ class DatabaseLookupTests(unittest.TestCase):
                     "mariadb": {
                         "name": "mariadb-central",
                         "version": "11.4",
-                        "ports": {"local": {"database": "3306"}},
+                        "ports": {"local": {"mariadb": "3306"}},
                     }
                 }
             },

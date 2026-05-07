@@ -126,12 +126,10 @@ class LookupModule(LookupBase):
             default="",
         )
 
-        # Per req-009 the database port lives on the database role itself at
-        # `applications.svc-db-<type>.services.<type>.ports.local.database`.
         port = get(
             applications,
             db_id,
-            f"services.{dbtype}.ports.local.database",
+            f"services.{dbtype}.ports.local.{dbtype}",
             strict=False,
             default="",
             skip_missing_app=True,
