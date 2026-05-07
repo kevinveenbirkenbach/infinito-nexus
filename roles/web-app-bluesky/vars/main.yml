@@ -50,6 +50,9 @@ BLUESKY_API_PORT:               "{{ lookup('config', 'web-app-bluesky', 'service
 # this is purely about syntactic validity.
 BLUESKY_PDS_HANDLE_DOMAIN:      "{{ DOMAIN_PRIMARY | regex_replace('\\.(example|test|invalid|local|localhost|arpa|alt|internal|onion)$', '.app') }}"
 
+## Auth integrations
+BLUESKY_LDAP_ENABLED:           "{{ lookup('config', application_id, 'services.ldap.enabled') }}"
+
 ## Credentials
 BLUESKY_JWT_SECRET:             "{{ lookup('config', application_id, 'credentials.jwt_secret') }}"
 BLUESKY_ROTATION_KEY:           "{{ lookup('config', application_id, 'credentials.plc_rotation_key_k256_private_key_hex') }}"

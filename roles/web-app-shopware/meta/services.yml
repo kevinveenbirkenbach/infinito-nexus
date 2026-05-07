@@ -11,6 +11,9 @@ oidc:
 oauth2:
   enabled: false
   shared: false
+ldap:
+  enabled: "{{ 'svc-db-openldap' in group_names }}"
+  shared: "{{ 'svc-db-openldap' in group_names }}"
 dashboard:
   enabled: "{{ 'web-app-dashboard' in group_names }}"
   shared: "{{ 'web-app-dashboard' in group_names }}"

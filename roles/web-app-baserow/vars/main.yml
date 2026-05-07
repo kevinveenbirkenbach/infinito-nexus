@@ -10,6 +10,9 @@ BASEROW_IMAGE:        "{{ lookup('config', application_id, 'services.baserow.ima
 BASEROW_CONTAINER:    "{{ lookup('config', application_id, 'services.baserow.name') }}"
 BASEROW_VOLUME:       "{{ lookup('config', application_id, 'volumes.data') }}"
 
+# Auth integrations
+BASEROW_LDAP_ENABLED: "{{ lookup('config', application_id, 'services.ldap.enabled') }}"
+
 # Required by Django/Baserow (e.g. JWT, sessions, etc.)
 BASEROW_SECRET_KEY:   "{{ lookup('config', application_id, 'credentials.secret_key') }}"
 

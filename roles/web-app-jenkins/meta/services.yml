@@ -13,6 +13,9 @@ prometheus:
 oidc:
   enabled: "{{ 'web-app-keycloak' in group_names }}"
   shared: "{{ 'web-app-keycloak' in group_names }}"
+ldap:
+  enabled: "{{ 'svc-db-openldap' in group_names }}"
+  shared: "{{ 'svc-db-openldap' in group_names }}"
 jenkins:
   image: jenkins/jenkins
   version: lts
