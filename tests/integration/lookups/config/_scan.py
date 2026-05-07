@@ -16,10 +16,18 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any, Dict, List, Tuple
 
+from utils.annotations.suppress import is_suppressed_at
 from utils.cache.applications import get_application_defaults
 from utils.cache.files import iter_project_files_with_content
 from utils.cache.users import get_user_defaults
 from utils.cache.yaml import load_yaml_any
+
+
+# Rule key consumed by every `tests/integration/lookups/config/test_*.py`.
+# A marker in `same-or-above` position skips the call from all four
+# scanners (literal / variable / wildcard / role-local). See
+# docs/contributing/actions/testing/suppression.md.
+SUPPRESS_RULE: str = "lookup-config-path"
 
 
 PATTERN = re.compile(
@@ -179,11 +187,17 @@ def _build_role_schemas(
 
 
 def _scan_literal_match(
-    result: ScanResult, file_path: Path, text: str, match: re.Match[str]
+    result: ScanResult,
+    file_path: Path,
+    text: str,
+    lines: List[str],
+    match: re.Match[str],
 ) -> None:
     if _line_is_commented(text, match.start()):
         return
     lineno = text.count("\n", 0, match.start()) + 1
+    if is_suppressed_at(lines, lineno, SUPPRESS_RULE, mode="same-or-above"):
+        return
     app_arg = match.group(1).strip()
     path_arg = match.group(2).strip()
     if "{%" in path_arg:
@@ -210,7 +224,11 @@ def _scan_literal_match(
 
 
 def _scan_concat_match(
-    result: ScanResult, file_path: Path, text: str, match: re.Match[str]
+    result: ScanResult,
+    file_path: Path,
+    text: str,
+    lines: List[str],
+    match: re.Match[str],
 ) -> None:
     if _line_is_commented(text, match.start()):
         return
@@ -222,6 +240,8 @@ def _scan_concat_match(
     if wildcard_path is None:
         return
     lineno = text.count("\n", 0, match.start()) + 1
+    if is_suppressed_at(lines, lineno, SUPPRESS_RULE, mode="same-or-above"):
+        return
     if _is_quoted(app_arg):
         role_id = app_arg.strip("'\"")
     else:
@@ -276,9 +296,12 @@ def get_scan() -> ScanResult:
         if "lookup" not in text:
             continue
         file_path = Path(path_str)
+        # Split once per file so `is_suppressed_at` can index lines for
+        # both regex passes without re-splitting.
+        lines = text.splitlines()
         for m in PATTERN.finditer(text):
-            _scan_literal_match(result, file_path, text, m)
+            _scan_literal_match(result, file_path, text, lines, m)
         for m in CONCAT_PATTERN.finditer(text):
-            _scan_concat_match(result, file_path, text, m)
+            _scan_concat_match(result, file_path, text, lines, m)
 
     return result

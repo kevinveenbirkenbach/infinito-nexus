@@ -77,6 +77,7 @@ labels:
 | `raw-docker`        | same or above; head (first 30 lines) | [test_no_raw_docker.py](../../../../tests/integration/docker/test_no_raw_docker.py)                       | Marks a single line or a whole file under `roles/` as legitimately calling `docker` / `docker compose` / `docker-compose` directly. The check is scoped to `roles/`; bootstrap scripts and CI workflows outside `roles/` are not scanned and need no marker. |
 | `hardcoded-dns-resolver` | same or above | [test_no_hardcoded_dns_resolvers.py](../../../../tests/lint/repository/test_no_hardcoded_dns_resolvers.py) | Marks a line that legitimately needs a literal IP from `NETWORK_PUBLIC_DNS_RESOLVERS` at the substitution point (CoreDNS `forward` directives that don't run through Jinja, host-bootstrap shell scripts, documentation examples). The variable in `group_vars/all/08_networks.yml` is the SPOT for these IPs everywhere else.   |
 | `dynamic-flag`      | same line (per-flag) OR comment block above key (whole block) | [test_services_dynamic_flags.py](../../../../tests/integration/roles/meta/test_services_dynamic_flags.py)                  | Marks a `roles/*/meta/services.yml` flag whose value legitimately stays literal. Per-flag (same line) is the typical shape for databases (`enabled: true` literal, `shared` still dynamic). Block-level (comment block above the service key) is for entries where both flags stay literal (e.g. `css`). |
+| `lookup-config-path`| same or above       | [tests/integration/lookups/config/](../../../../tests/integration/lookups/config/) (literal / variable / wildcard / role-local) | Skips a single `lookup('config', …)` call from every path-validation pass. Use when the call legitimately resolves at runtime against state that is NOT visible to the static scan — typically a self-referential role like `web-app-oauth2-proxy` reading `services.oauth2.*` keys that other roles publish but its own `meta/services.yml` does not. |
 
 ## Examples 💡
 
@@ -185,6 +186,21 @@ entries whose both flags legitimately stay literal (e.g. `css`,
 css:
   enabled: true
   shared: true
+```
+
+`lookup-config-path`, on the line carrying a `lookup('config', …)`
+call (or directly above it) when the path legitimately resolves
+against runtime-only state that the static scan cannot see — for
+example a self-referential role that consumes the `services.<self>.*`
+keys other roles publish about it:
+
+```jinja
+# nocheck: lookup-config-path
+upstreams = {{ lookup('config', application_id, 'services.oauth2.origin.host') }}
+```
+
+```jinja
+upstreams = {{ lookup('config', application_id, 'services.oauth2.origin.host') }}  {# nocheck: lookup-config-path #}
 ```
 
 `hardcoded-dns-resolver`, on the line that emits the literal IP, when
