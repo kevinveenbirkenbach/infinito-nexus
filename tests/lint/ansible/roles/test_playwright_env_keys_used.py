@@ -103,9 +103,7 @@ class TestPlaywrightEnvKeysUsed(unittest.TestCase):
         roles_dir = root / "roles"
         shared_helpers_dir = roles_dir / "test-e2e-playwright" / "files"
         shared_sources: List[str] = (
-            _read_js_sources(shared_helpers_dir)
-            if shared_helpers_dir.is_dir()
-            else []
+            _read_js_sources(shared_helpers_dir) if shared_helpers_dir.is_dir() else []
         )
 
         missing_specs: List[str] = []
