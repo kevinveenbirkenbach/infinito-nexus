@@ -28,6 +28,7 @@ import yaml
 from utils.cache.files import read_text
 from utils.annotations.message import in_github_actions, warning
 from utils.entity_name_utils import get_entity_name
+from . import PROJECT_ROOT
 
 
 REQUIRED_KEYS = (
@@ -37,13 +38,6 @@ REQUIRED_KEYS = (
     "mem_limit",
     "pids_limit",
 )
-
-
-def repo_root() -> Path:
-    for candidate in Path(__file__).resolve().parents:
-        if (candidate / "pyproject.toml").is_file():
-            return candidate
-    raise AssertionError("Repository root not found from test path.")
 
 
 @dataclass(frozen=True)
@@ -146,7 +140,7 @@ class TestComposeResourceLimits(unittest.TestCase):
         """Warn per missing resource key on every role's primary compose service.
         Fails once nothing is missing so the rule gets flipped to strict mode.
         """
-        root = repo_root()
+        root = PROJECT_ROOT
         findings = _collect_findings(root)
 
         for finding in findings:

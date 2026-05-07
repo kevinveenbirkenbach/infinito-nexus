@@ -26,7 +26,7 @@ from functools import lru_cache
 from pathlib import Path
 from typing import Iterable, Tuple
 
-from .base import PROJECT_ROOT
+from . import PROJECT_ROOT
 
 
 @lru_cache(maxsize=4)

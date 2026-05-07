@@ -12,7 +12,7 @@ from typing import Dict, Optional, Tuple
 from utils.cache.yaml import load_yaml_any
 
 
-REPO_ROOT = Path(__file__).resolve().parents[2]
+from . import PROJECT_ROOT
 NETWORKS_FILE = REPO_ROOT / "group_vars" / "all" / "08_networks.yml"
 
 

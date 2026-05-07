@@ -31,7 +31,7 @@ from typing import List
 from utils.cache.yaml import load_yaml_any
 
 
-PROJECT_ROOT = Path(__file__).resolve().parents[5]
+from . import PROJECT_ROOT
 ROLES_DIR = PROJECT_ROOT / "roles"
 
 

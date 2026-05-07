@@ -17,7 +17,7 @@ from typing import Dict, Iterable, List, Tuple
 from utils.cache.yaml import load_yaml_any
 
 
-REPO_ROOT = Path(__file__).resolve().parents[2]
+from . import PROJECT_ROOT
 ROLES_DIR = REPO_ROOT / "roles"
 
 

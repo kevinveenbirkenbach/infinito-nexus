@@ -5,7 +5,7 @@ from __future__ import annotations
 import sys
 from pathlib import Path
 
-REPO_ROOT = Path(__file__).resolve().parents[3]
+from . import PROJECT_ROOT
 ROLES_DIR = REPO_ROOT / "roles"
 NETWORKS_FILE = REPO_ROOT / "group_vars" / "all" / "08_networks.yml"
 PORTS_FILE = REPO_ROOT / "group_vars" / "all" / "09_ports.yml"

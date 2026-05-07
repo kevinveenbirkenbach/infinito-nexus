@@ -33,7 +33,7 @@ from functools import lru_cache
 from pathlib import Path
 from typing import Iterable, Iterator, Tuple
 
-from .base import PROJECT_ROOT
+from . import PROJECT_ROOT
 from .gitignore import is_path_gitignored, load_gitignore_patterns
 
 # Directories never worth descending into during project-tree scans.

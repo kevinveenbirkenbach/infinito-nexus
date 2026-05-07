@@ -8,7 +8,7 @@ import sys
 from pathlib import Path
 
 # Ensure repo root is in PYTHONPATH
-REPO_ROOT = Path(__file__).resolve().parents[4]
+from . import PROJECT_ROOT
 sys.path.insert(0, str(REPO_ROOT))
 
 from utils.roles.resource_validation import filter_roles_by_min_storage  # noqa: E402

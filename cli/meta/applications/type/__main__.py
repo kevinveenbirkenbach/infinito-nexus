@@ -7,7 +7,7 @@ import json
 import sys
 from pathlib import Path
 
-REPO_ROOT = Path(__file__).resolve().parents[4]
+from . import PROJECT_ROOT
 sys.path.insert(0, str(REPO_ROOT))
 
 from utils.invokable import list_invokables_by_type  # noqa: E402

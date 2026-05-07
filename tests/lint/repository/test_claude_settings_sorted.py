@@ -2,7 +2,7 @@ import json
 import unittest
 from pathlib import Path
 
-REPO_ROOT = Path(__file__).resolve().parents[3]
+from . import PROJECT_ROOT
 SETTINGS_PATH = REPO_ROOT / ".claude" / "settings.json"
 
 SORTED_ARRAYS: list[tuple[str, ...]] = [

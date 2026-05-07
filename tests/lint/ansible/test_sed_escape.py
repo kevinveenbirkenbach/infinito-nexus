@@ -21,7 +21,7 @@ from pathlib import Path
 from typing import Iterable, List, Optional, Tuple
 
 
-REPO_ROOT = Path(__file__).resolve().parents[3]
+from . import PROJECT_ROOT
 TASK_FILES_GLOB = "roles/*/tasks/**/*.yml"
 
 

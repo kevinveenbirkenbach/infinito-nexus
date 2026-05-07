@@ -7,7 +7,7 @@ from typing import Iterable
 
 import yaml
 
-REPO_ROOT = Path(__file__).resolve().parents[3]
+from . import PROJECT_ROOT
 DEPENDABOT_PATH = REPO_ROOT / ".github" / "dependabot.yml"
 
 # Directories skipped when walking the repository

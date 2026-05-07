@@ -7,7 +7,7 @@ import yaml
 
 from utils.cache.files import iter_project_files
 
-REPO_ROOT = Path(__file__).resolve().parents[3]
+from . import PROJECT_ROOT
 SECURITY_WORKFLOW_PATH = REPO_ROOT / ".github" / "workflows" / "security-codeql.yml"
 
 # Hidden directories that are the only ones worth scanning (the cached walker

@@ -8,7 +8,7 @@ import sys
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple
 
-REPO_ROOT = Path(__file__).resolve().parents[4]
+from . import PROJECT_ROOT
 sys.path.insert(0, str(REPO_ROOT))
 
 from humanfriendly import format_size, parse_size  # noqa: E402

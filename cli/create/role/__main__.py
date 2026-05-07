@@ -28,7 +28,7 @@ from cli.meta.ports.suggest.__main__ import (
 from utils.entity_name_utils import get_entity_name
 
 
-REPO_ROOT = Path(__file__).resolve().parents[3]
+from . import PROJECT_ROOT
 ROLE_TEMPLATE_DIR = REPO_ROOT / "templates" / "roles" / "web-app"
 ROLES_DIR = REPO_ROOT / "roles"
 

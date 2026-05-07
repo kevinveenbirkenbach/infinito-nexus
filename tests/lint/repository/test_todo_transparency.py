@@ -16,6 +16,7 @@ from pathlib import Path
 from typing import List
 
 from utils.annotations.message import in_github_actions, warning
+from . import PROJECT_ROOT
 
 
 OPEN_PROJECT_URL_RE = re.compile(r"https://open\.project\.infinito\.nexus/\S*")
@@ -75,13 +76,6 @@ class TodoFinding:
 
     def warning_message(self) -> str:
         return WHITESPACE_RE.sub(" ", self.text).strip()
-
-
-def repo_root() -> Path:
-    for candidate in Path(__file__).resolve().parents:
-        if (candidate / "pyproject.toml").is_file():
-            return candidate
-    raise AssertionError("Repository root not found from test path.")
 
 
 def tracked_files(root: Path) -> List[Path]:
@@ -193,7 +187,7 @@ class TestTodoTransparency(unittest.TestCase):
         Items in TODO.md should stay temporary thought aids.
         Keep long-lived work visible in the project backlog or in an issue.
         """
-        root = repo_root()
+        root = PROJECT_ROOT
         todo_findings: List[TodoFinding] = []
         inline_findings: List[TodoFinding] = []
 

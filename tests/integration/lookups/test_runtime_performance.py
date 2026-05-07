@@ -30,7 +30,7 @@ from plugins.lookup.domains import (
 )
 
 
-REPO_ROOT = Path(__file__).resolve().parents[3]
+from . import PROJECT_ROOT
 ROLES_DIR = REPO_ROOT / "roles"
 
 

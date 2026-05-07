@@ -5,7 +5,7 @@ from typing import Any
 
 from utils.cache.yaml import load_yaml as _load_yaml_cached
 
-PROJECT_ROOT = Path(__file__).resolve().parents[2]
+from . import PROJECT_ROOT
 ROLES_DIR = PROJECT_ROOT / "roles"
 
 

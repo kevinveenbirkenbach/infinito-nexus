@@ -8,13 +8,7 @@ from __future__ import annotations
 import subprocess
 import unittest
 from pathlib import Path
-
-
-def repo_root() -> Path:
-    for candidate in Path(__file__).resolve().parents:
-        if (candidate / "pyproject.toml").is_file():
-            return candidate
-    raise AssertionError("Repository root not found from test path.")
+from . import PROJECT_ROOT
 
 
 def tracked_files(root: Path) -> list[Path]:
@@ -37,7 +31,7 @@ def tracked_files(root: Path) -> list[Path]:
 
 class TestUtilsFolderFiles(unittest.TestCase):
     def test_utils_contains_only_py_files(self) -> None:
-        root = repo_root()
+        root = PROJECT_ROOT
         utils_root = root / "utils"
 
         violations = [

@@ -9,7 +9,7 @@ from pathlib import Path
 #
 # Without this, sys.path[0] points to "<root>/cli", and importing "cli.*"
 # may accidentally resolve to an installed package from site-packages.
-PROJECT_ROOT = Path(__file__).resolve().parents[1]
+from . import PROJECT_ROOT
 if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
 

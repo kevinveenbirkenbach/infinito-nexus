@@ -24,7 +24,7 @@ from pathlib import Path
 import yaml
 
 
-REPO_ROOT = Path(__file__).resolve().parents[3]
+from . import PROJECT_ROOT
 ROLES_DIR = REPO_ROOT / "roles"
 
 ALLOWED_LIFECYCLES = {

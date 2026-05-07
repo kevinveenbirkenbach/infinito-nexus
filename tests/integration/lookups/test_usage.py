@@ -33,7 +33,7 @@ from typing import Dict, List, Set
 from utils.cache.files import iter_project_files, read_text
 
 
-PROJECT_ROOT = Path(__file__).resolve().parents[3]
+from . import PROJECT_ROOT
 LOOKUP_PLUGINS_DIR = PROJECT_ROOT / "plugins" / "lookup"
 
 # Extensions we consider capable of invoking a lookup.

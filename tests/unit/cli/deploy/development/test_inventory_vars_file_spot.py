@@ -21,7 +21,7 @@ from pathlib import Path
 
 from cli.deploy.development.common import DEV_INVENTORY_VARS_FILE
 
-REPO_ROOT = Path(__file__).resolve().parents[5]
+from . import PROJECT_ROOT
 INVENTORY_ENV_SH = REPO_ROOT / "scripts" / "meta" / "env" / "inventory.sh"
 
 

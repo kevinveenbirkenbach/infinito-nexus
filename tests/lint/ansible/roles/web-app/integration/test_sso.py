@@ -29,6 +29,7 @@ from utils.annotations.suppress import is_suppressed_at
 from utils.cache.files import read_text
 from utils.cache.yaml import load_yaml_any, load_yaml_str
 from utils.service_registry import is_explicit_truth
+from . import PROJECT_ROOT
 
 
 _ROLE_PREFIX = "web-app-"
@@ -39,13 +40,6 @@ _PROVIDER_EXEMPT: set[str] = {
     "web-app-keycloak",
     "web-app-oauth2-proxy",
 }
-
-
-def repo_root() -> Path:
-    for candidate in Path(__file__).resolve().parents:
-        if (candidate / "pyproject.toml").is_file():
-            return candidate
-    raise AssertionError("Repository root not found from test path.")
 
 
 def _parsed_yaml(text: str) -> dict:
@@ -93,7 +87,7 @@ class TestWebAppSsoIntegration(unittest.TestCase):
     or carry explicit opt-out markers on both."""
 
     def test_oidc_or_oauth2_activated(self):
-        root = repo_root()
+        root = PROJECT_ROOT
         roles_dir = root / "roles"
         self.assertTrue(roles_dir.is_dir(), f"missing: {roles_dir}")
 

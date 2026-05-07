@@ -39,7 +39,7 @@ from utils.service_registry import (
 )
 
 
-PROJECT_ROOT = Path(__file__).resolve().parents[6]
+from . import PROJECT_ROOT
 ROLES_DIR = PROJECT_ROOT / "roles"
 
 
