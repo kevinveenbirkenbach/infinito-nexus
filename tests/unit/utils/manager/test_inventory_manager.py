@@ -270,6 +270,119 @@ class TestInventoryManager(TestCase):
                 )
                 mock_vault.encrypt_string.assert_not_called()
 
+    def test_oauth2_dynamic_flag_seeds_cookie_secret(self):
+        with tempfile.TemporaryDirectory() as tmpdir:
+            role_path = Path(tmpdir) / "role"
+            inv_path = Path(tmpdir) / "inventory.yml"
+            role_path.mkdir(parents=True, exist_ok=True)
+            (role_path / "meta").mkdir(parents=True, exist_ok=True)
+            (role_path / "vars").mkdir(parents=True, exist_ok=True)
+            (role_path / "config").mkdir(parents=True, exist_ok=True)
+            inv_path.write_text("{}", encoding="utf-8")
+            (role_path / "meta" / "schema.yml").write_text("{}", encoding="utf-8")
+            (role_path / "vars" / "main.yml").write_text("{}", encoding="utf-8")
+            (role_path / "meta" / "services.yml").write_text("{}", encoding="utf-8")
+
+            schema_data = {
+                "credentials": {
+                    "oauth2_proxy_cookie_secret": {
+                        "description": "Cookie secret",
+                        "algorithm": "plain",
+                        "validation": {},
+                    }
+                }
+            }
+
+            def fake_load_yaml(path):
+                p = Path(path)
+                if p == inv_path:
+                    return {"applications": {}}
+                if p == role_path / "meta" / "schema.yml":
+                    return schema_data
+                if p == role_path / "vars" / "main.yml":
+                    return {"application_id": "app_test"}
+                if p == role_path / "meta" / "services.yml":
+                    return {
+                        "oauth2": {
+                            "enabled": "{{ 'web-app-keycloak' in group_names }}",
+                            "shared": "{{ 'web-app-keycloak' in group_names }}",
+                        }
+                    }
+                return {}
+
+            with (
+                mock.patch(
+                    "utils.manager.inventory.YamlHandler.load_yaml",
+                    side_effect=fake_load_yaml,
+                ),
+                mock.patch("utils.manager.inventory.VaultHandler"),
+                mock.patch.object(
+                    ValueGenerator, "generate_value", return_value="dynamic-secret"
+                ),
+            ):
+                mgr = InventoryManager(
+                    role_path=role_path,
+                    inventory_path=inv_path,
+                    vault_pw="dummy",
+                    overrides={},
+                    allow_empty_plain=True,
+                )
+                inv = mgr.apply_schema()
+                creds = inv["applications"]["app_test"]["credentials"]
+                self.assertEqual(
+                    creds["oauth2_proxy_cookie_secret"], "dynamic-secret"
+                )
+
+    def test_oauth2_disabled_skips_cookie_secret(self):
+        with tempfile.TemporaryDirectory() as tmpdir:
+            role_path = Path(tmpdir) / "role"
+            inv_path = Path(tmpdir) / "inventory.yml"
+            role_path.mkdir(parents=True, exist_ok=True)
+            (role_path / "meta").mkdir(parents=True, exist_ok=True)
+            (role_path / "vars").mkdir(parents=True, exist_ok=True)
+            (role_path / "config").mkdir(parents=True, exist_ok=True)
+            inv_path.write_text("{}", encoding="utf-8")
+            (role_path / "meta" / "schema.yml").write_text("{}", encoding="utf-8")
+            (role_path / "vars" / "main.yml").write_text("{}", encoding="utf-8")
+            (role_path / "meta" / "services.yml").write_text("{}", encoding="utf-8")
+
+            def fake_load_yaml(path):
+                p = Path(path)
+                if p == inv_path:
+                    return {"applications": {}}
+                if p == role_path / "meta" / "schema.yml":
+                    return {"credentials": {}}
+                if p == role_path / "vars" / "main.yml":
+                    return {"application_id": "app_test"}
+                if p == role_path / "meta" / "services.yml":
+                    return {"oauth2": {"enabled": False}, "oidc": {"enabled": False}}
+                return {}
+
+            with (
+                mock.patch(
+                    "utils.manager.inventory.YamlHandler.load_yaml",
+                    side_effect=fake_load_yaml,
+                ),
+                mock.patch("utils.manager.inventory.VaultHandler"),
+                mock.patch.object(
+                    ValueGenerator, "generate_value", return_value="should-not-fire"
+                ),
+            ):
+                mgr = InventoryManager(
+                    role_path=role_path,
+                    inventory_path=inv_path,
+                    vault_pw="dummy",
+                    overrides={},
+                    allow_empty_plain=True,
+                )
+                inv = mgr.apply_schema()
+                creds = (
+                    inv.get("applications", {})
+                    .get("app_test", {})
+                    .get("credentials", {})
+                )
+                self.assertNotIn("oauth2_proxy_cookie_secret", creds)
+
     def test_non_plain_algorithm_encrypts_and_sets_vaultscalar(self):
         """
         For non-plain algorithms, apply_schema must generate a value (via ValueGenerator)

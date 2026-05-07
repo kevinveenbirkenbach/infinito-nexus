@@ -10,6 +10,7 @@ from utils.database_service import resolve_database_service_key
 from utils.manager.value_generator import ValueGenerator
 from utils.service_registry import (
     build_service_registry_from_roles_dir,
+    is_explicit_truth,
     resolve_service_dependency_roles_from_config,
 )
 
@@ -175,7 +176,9 @@ class InventoryManager:
                 self.value_generator.generate_value("alphanumeric")
             )
 
-        if oauth2.get("enabled") is True or oidc.get("enabled") is True:
+        if is_explicit_truth(oauth2.get("enabled")) or is_explicit_truth(
+            oidc.get("enabled")
+        ):
             apps = self.inventory.setdefault("applications", {})
             target = apps.setdefault(app_id, {})
             target.setdefault("credentials", {})["oauth2_proxy_cookie_secret"] = (
