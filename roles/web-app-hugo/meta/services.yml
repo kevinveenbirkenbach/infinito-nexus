@@ -26,6 +26,11 @@ hugo:
     local:
       http: 8008
   lifecycle: alpha
+  min_storage: 1GB
+  cpus: '0.2'
+  mem_reservation: 128m
+  mem_limit: 256m
+  pids_limit: 256
 # noqa: email
 email:
   enabled: false

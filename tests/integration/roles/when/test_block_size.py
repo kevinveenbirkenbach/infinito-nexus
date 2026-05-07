@@ -3,6 +3,8 @@ from pathlib import Path
 import yaml
 from typing import Any, Dict, List, Tuple, Union
 
+from utils.cache.yaml import load_yaml_all_str
+
 
 # -------- YAML loader that's tolerant of Ansible-specific tags (e.g. !vault) -----
 class AnsibleTolerantLoader(yaml.SafeLoader):
@@ -56,7 +58,7 @@ def _iter_yaml_files(root: Path) -> List[Path]:
         "__pycache__",
     }
     files: List[Path] = []
-    for p in root.rglob("*.yml"):
+    for p in root.rglob("*.yml"):  # noqa: project-walk
         if any(part in ignore_dirs for part in p.parts):
             continue
         files.append(p)
@@ -67,7 +69,7 @@ def _safe_load_all(path: Path) -> List[Yaml]:
     """Load all YAML documents from a file, tolerating Ansible tags; return list of docs."""
     try:
         with path.open("r", encoding="utf-8") as fh:
-            return list(yaml.load_all(fh, Loader=AnsibleTolerantLoader))
+            return list(load_yaml_all_str(fh))
     except Exception:
         # If a file is completely unparsable, treat as empty (so test won't crash).
         return []

@@ -9,6 +9,10 @@ libretranslate:
       http: 8045
       oauth2: 16493
   lifecycle: beta
+  cpus: '0.2'
+  mem_reservation: 128m
+  mem_limit: 256m
+  pids_limit: 256
 oauth2:
   enabled: true
   shared: false

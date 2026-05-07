@@ -8,10 +8,9 @@ from contextlib import redirect_stdout
 from pathlib import Path
 from unittest.mock import patch
 
-import yaml
-
 from cli.meta.applications.resolution.affected import __main__ as affected_main
 from cli.meta.applications.resolution.combined import repo_paths
+from utils.cache.yaml import dump_yaml
 
 
 def _mk_app_role(root: Path, role: str, app_id: str) -> None:
@@ -29,20 +28,16 @@ def _mk_non_app_role(root: Path, role: str) -> None:
 
 
 def _write_run_after(root: Path, role: str, run_after: list[str]) -> None:
-    p = root / "roles" / role / "meta" / "services.yml"
-    p.parent.mkdir(parents=True, exist_ok=True)
-    p.write_text(
-        yaml.safe_dump({role: {"run_after": run_after}}),
-        encoding="utf-8",
+    dump_yaml(
+        root / "roles" / role / "meta" / "services.yml",
+        {role: {"run_after": run_after}},
     )
 
 
 def _write_dependencies(root: Path, role: str, deps: list[str]) -> None:
-    p = root / "roles" / role / "meta" / "main.yml"
-    p.parent.mkdir(parents=True, exist_ok=True)
-    p.write_text(
-        yaml.safe_dump({"dependencies": deps}),
-        encoding="utf-8",
+    dump_yaml(
+        root / "roles" / role / "meta" / "main.yml",
+        {"dependencies": deps},
     )
 
 
@@ -92,14 +87,12 @@ class TestAffected(unittest.TestCase):
             root = Path(td)
             _mk_app_role(root, "web-app-keycloak", "keycloak")
             _mk_app_role(root, "web-app-consumer", "consumer")
-            (root / "roles" / "web-app-consumer" / "meta" / "services.yml").write_text(
-                yaml.safe_dump(
-                    {
-                        "consumer": {},
-                        "oidc": {"enabled": True, "shared": True, "flavor": ""},
-                    }
-                ),
-                encoding="utf-8",
+            dump_yaml(
+                root / "roles" / "web-app-consumer" / "meta" / "services.yml",
+                {
+                    "consumer": {},
+                    "oidc": {"enabled": True, "shared": True, "flavor": ""},
+                },
             )
 
             with patch.object(repo_paths, "repo_root_from_here", return_value=root):

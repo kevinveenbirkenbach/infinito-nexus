@@ -4,6 +4,7 @@
 
 site.retry
 *__pycache__
+compose.cache.override.yml
 venv
 *.log
 *.bak

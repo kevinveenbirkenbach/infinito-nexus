@@ -2,9 +2,10 @@
 import importlib.util
 import json
 import unittest
-import yaml
 from pathlib import Path
 from unittest.mock import patch
+
+from utils.cache.yaml import load_yaml_str
 
 
 def _repo_root(start: Path) -> Path:
@@ -663,7 +664,7 @@ class TestComposeCaInject(unittest.TestCase):
 
             args, _kwargs = p_write.call_args
             written = args[1] if len(args) > 1 else ""
-            parsed = yaml.safe_load(written)
+            parsed = load_yaml_str(written)
             self.assertIn("services", parsed)
             self.assertIn("app", parsed["services"])
             self.assertEqual(
@@ -845,7 +846,7 @@ class TestComposeCaInject(unittest.TestCase):
 
         args, _kwargs = p_write.call_args
         written = args[1] if len(args) > 1 else ""
-        parsed = yaml.safe_load(written)
+        parsed = load_yaml_str(written)
 
         self.assertIn("services", parsed)
         self.assertIn("app", parsed["services"])

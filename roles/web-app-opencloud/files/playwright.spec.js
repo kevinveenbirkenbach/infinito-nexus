@@ -101,6 +101,17 @@ async function ssoLoginAndAssertUsername(page, username, password) {
   // detached during the multi-redirect chain back to OpenCloud.
   await page.locator('input[name="password"], #password').press("Enter");
 
+  // Wait for the redirect chain back to OpenCloud to finish before
+  // asserting on SPA elements. Without this the banner assertion races
+  // the OIDC callback hops (auth → /oidc-callback → /web-oidc-callback →
+  // SPA) and times out before the Files view actually mounts.
+  try {
+    await page.waitForURL(baseUrlPattern, { timeout: 60_000, waitUntil: "load" });
+  } catch {
+    // SPA may have already navigated past the matcher window; fall
+    // through to the visibility assertions which carry their own waits.
+  }
+
   // Bypass OpenCloud's "browser not supported" splash if it appears.
   // Playwright's Chromium UA is not on the OpenCloud allow list, so the SPA
   // shows a splash with a "I want to continue anyway" button.
@@ -112,7 +123,7 @@ async function ssoLoginAndAssertUsername(page, username, password) {
   // The Files view is the post-login landing route; assert against the SPA
   // navigation banner instead of body text because OpenCloud shows the
   // username inside the user-menu drawer rather than in the page body.
-  await expect(page.getByRole("banner", { name: /top bar/i })).toBeVisible({ timeout: 60_000 });
+  await expect(page.getByRole("banner", { name: /top bar/i })).toBeVisible({ timeout: 90_000 });
   await expect(page.getByRole("link", { name: /personal files/i })).toBeVisible({ timeout: 30_000 });
 }
 

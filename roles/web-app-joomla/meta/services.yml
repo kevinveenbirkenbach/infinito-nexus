@@ -49,10 +49,14 @@ joomla:
     local:
       http: 8014
   run_after:
-  - web-app-matomo
-  - web-app-keycloak
-  - web-app-mailu
+    - web-app-matomo
+    - web-app-keycloak
+    - web-app-mailu
   lifecycle: beta
+  cpus: '0.5'
+  mem_reservation: 256m
+  mem_limit: 1g
+  pids_limit: 512
 css:
   enabled: true
   shared: true

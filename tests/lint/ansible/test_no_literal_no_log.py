@@ -6,11 +6,11 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Iterable, List
 
-from utils.cache.files import read_text
+from utils.cache.files import iter_project_files, read_text
 
 
 PROJECT_ROOT = Path(__file__).resolve().parents[3]
-SCAN_DIRS = ("roles", "tasks", "playbooks")
+SCAN_DIRS = frozenset({"roles", "tasks", "playbooks"})
 
 _LITERAL_TRUE_RE = re.compile(
     r"""^\s*-?\s*               # optional list dash
@@ -37,13 +37,10 @@ class Finding:
 
 
 def _iter_yaml_files(repo_root: Path) -> Iterable[Path]:
-    for sub in SCAN_DIRS:
-        base = repo_root / sub
-        if not base.is_dir():
-            continue
-        for path in base.rglob("*"):
-            if path.suffix in (".yml", ".yaml") and path.is_file():
-                yield path
+    for path_str in iter_project_files(extensions=(".yml", ".yaml")):
+        rel = Path(path_str).relative_to(repo_root)
+        if rel.parts and rel.parts[0] in SCAN_DIRS:
+            yield Path(path_str)
 
 
 def _scan_file(path: Path) -> List[Finding]:

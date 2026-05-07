@@ -3,10 +3,7 @@ import glob
 import unittest
 from typing import Any, Dict, List, Tuple, Optional
 
-try:
-    import yaml
-except ImportError:  # pragma: no cover
-    raise SystemExit("Please `pip install pyyaml` to run this test.")
+from utils.cache.yaml import load_yaml_all_str
 
 
 # ---------- Helpers: repo + YAML parsing ----------
@@ -35,7 +32,7 @@ def _load_yaml_file(path: str) -> List[Dict[str, Any]]:
     """
     with open(path, "r", encoding="utf-8") as f:
         content = f.read()
-    docs = list(yaml.safe_load_all(content)) or []
+    docs = list(load_yaml_all_str(content)) or []
     tasks: List[Dict[str, Any]] = []
     for doc in docs:
         if doc is None:
@@ -105,7 +102,7 @@ def _iter_all_tasks_files(repo_root: str) -> List[str]:
     ]
     files: List[str] = []
     for pat in patterns:
-        files.extend(glob.glob(pat, recursive=True))
+        files.extend(glob.glob(pat, recursive=True))  # noqa: project-walk
     # Deduplicate while keeping order
     seen = set()
     ordered: List[str] = []
@@ -200,7 +197,7 @@ class PureGuardedIncludeTest(unittest.TestCase):
         cls.pure_guarded_roles: Dict[str, Tuple[List[str], str]] = {}
 
         role_main_glob = os.path.join(cls.repo_root, "roles", "*", "tasks", "main.yml")
-        for main_path in glob.glob(role_main_glob):
+        for main_path in glob.glob(role_main_glob):  # noqa: project-walk
             role_name = os.path.basename(
                 os.path.dirname(os.path.dirname(main_path))
             )  # roles/<role>/tasks/main.yml

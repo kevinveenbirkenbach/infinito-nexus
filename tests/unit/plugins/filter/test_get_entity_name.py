@@ -3,7 +3,8 @@ import tempfile
 import shutil
 import os
 import sys
-import yaml
+
+from utils.cache.yaml import dump_yaml
 
 
 class TestGetEntityNameFilter(unittest.TestCase):
@@ -35,8 +36,7 @@ class TestGetEntityNameFilter(unittest.TestCase):
                 "svc": {"db": {"title": "Databases", "invokable": True}},
             }
         }
-        with open(self.categories_file, "w", encoding="utf-8") as f:
-            yaml.safe_dump(categories, f, default_flow_style=False)
+        dump_yaml(self.categories_file, categories)
 
         # Patch working directory so plugin finds the test categories.yml
         self._cwd = os.getcwd()

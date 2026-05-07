@@ -11,6 +11,8 @@ from unittest.mock import patch
 from cli.meta.applications.resolution.combined import repo_paths
 from cli.meta.applications.resolution.combined import __main__ as combined_main
 
+from utils.cache.yaml import dump_yaml_str
+
 
 def _mk_role(root: Path, role: str, *, app_id: str | None = None) -> None:
     role_dir = root / "roles" / role
@@ -32,13 +34,12 @@ def _write_meta_services_run_after(
     root: Path, role: str, *, run_after: list[str]
 ) -> None:
     """Write meta/services.yml with the role's primary entity and run_after."""
-    import yaml
 
     p = root / "roles" / role / "meta" / "services.yml"
     p.parent.mkdir(parents=True, exist_ok=True)
     # For role names without a known category prefix, get_entity_name returns
     # the role name itself.
-    p.write_text(yaml.safe_dump({role: {"run_after": run_after}}), encoding="utf-8")
+    p.write_text(dump_yaml_str({role: {"run_after": run_after}}), encoding="utf-8")
 
 
 class TestCombinedMain(unittest.TestCase):

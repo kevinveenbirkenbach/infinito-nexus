@@ -5,9 +5,10 @@ import unittest
 from pathlib import Path
 from typing import Any, Dict, Iterable, List, Tuple
 
-import yaml
 
 from utils.docker.image.ref import is_valid_image_name
+
+from utils.cache.yaml import load_yaml_str
 
 # Docker tag (version)
 TAG_RE = re.compile(r"^[A-Za-z0-9_][A-Za-z0-9_.-]{0,127}$")
@@ -76,7 +77,7 @@ class TestDockerServicesImageVersionValid(unittest.TestCase):
 
         for cfg_path in config_files:
             with cfg_path.open("r", encoding="utf-8") as f:
-                data = yaml.safe_load(f) or {}
+                data = load_yaml_str(f) or {}
 
             cfg = _safe_mapping(data)
             services = _extract_services(cfg)

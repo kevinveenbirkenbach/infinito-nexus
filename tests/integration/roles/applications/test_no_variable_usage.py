@@ -19,7 +19,7 @@ class TestNoApplicationsVariableUsage(unittest.TestCase):
         )
         found = []
 
-        for root, dirs, files in os.walk(roles_dir):
+        for root, dirs, files in os.walk(roles_dir):  # noqa: project-walk
             # Skip __pycache__ folders
             dirs[:] = [d for d in dirs if d != "__pycache__"]
             for file in files:

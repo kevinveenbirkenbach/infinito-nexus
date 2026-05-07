@@ -68,6 +68,7 @@ livekit:
   name: opentalk-livekit
   image: livekit/livekit-server
   version: v1.11.0
+  min_storage: 1GB
   cpus: '2.0'
   mem_reservation: 512m
   mem_limit: 2g
@@ -84,6 +85,7 @@ minio:
   name: opentalk-minio
   image: minio/minio
   version: latest
+  min_storage: 20GB
   cpus: '0.5'
   mem_reservation: 256m
   mem_limit: 1g
@@ -92,6 +94,7 @@ rabbit:
   name: opentalk-rabbit
   image: rabbitmq
   version: 4.3.0
+  min_storage: 2GB
   cpus: '0.5'
   mem_reservation: 256m
   mem_limit: 1g
@@ -100,6 +103,7 @@ recorder:
   name: opentalk-recorder
   image: registry.opencode.de/opentalk/recorder
   version: v0.16.2
+  min_storage: 2GB
   cpus: '1.5'
   mem_reservation: 512m
   mem_limit: 2g

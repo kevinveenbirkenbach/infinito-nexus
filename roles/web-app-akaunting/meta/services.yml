@@ -46,10 +46,14 @@ akaunting:
       http: 8025
       oauth2: 16499
   run_after:
-  - web-app-matomo
-  - web-app-keycloak
-  - web-app-mailu
+    - web-app-matomo
+    - web-app-keycloak
+    - web-app-mailu
   lifecycle: beta
+  cpus: '0.5'
+  mem_reservation: 256m
+  mem_limit: 1g
+  pids_limit: 512
 redis:
   backup:
     disabled: true

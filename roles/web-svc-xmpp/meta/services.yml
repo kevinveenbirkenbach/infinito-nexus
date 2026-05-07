@@ -18,6 +18,11 @@ xmpp:
     local:
       http: 8082
   run_after:
-  - web-app-keycloak
-  - svc-db-openldap
+    - web-app-keycloak
+    - svc-db-openldap
   lifecycle: beta
+  min_storage: 5GB
+  cpus: '0.5'
+  mem_reservation: 256m
+  mem_limit: 1g
+  pids_limit: 512

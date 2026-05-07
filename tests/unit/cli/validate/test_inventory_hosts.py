@@ -1,12 +1,13 @@
 import os
 import re
-import yaml
 import tempfile
 import shutil
 import unittest
 
 # Module under test
 import cli.validate.inventory as inventory_mod
+
+from utils.cache.yaml import dump_yaml
 
 
 class TestValidateHostKeys(unittest.TestCase):
@@ -24,8 +25,7 @@ class TestValidateHostKeys(unittest.TestCase):
             # hosts is a list of hostnames
             content["all"]["children"][group] = {"hosts": {h: None for h in hosts}}
         path = os.path.join(self.test_dir, "devices.yml")
-        with open(path, "w", encoding="utf-8") as f:
-            yaml.safe_dump(content, f)
+        dump_yaml(path, content)
         return path
 
     def test_no_invalid_groups(self):

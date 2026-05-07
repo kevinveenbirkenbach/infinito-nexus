@@ -2,6 +2,8 @@ import unittest
 import os
 import yaml
 
+from utils.cache.yaml import load_yaml_any
+
 
 class TestBackupsEnabledIntegrity(unittest.TestCase):
     def setUp(self):
@@ -23,12 +25,11 @@ class TestBackupsEnabledIntegrity(unittest.TestCase):
             if not os.path.isfile(docker_config_path):
                 continue
 
-            with open(docker_config_path, "r") as f:
-                try:
-                    config = yaml.safe_load(f) or {}
-                except yaml.YAMLError as e:
-                    self.fail(f"YAML parsing failed for {docker_config_path}: {e}")
-                    continue
+            try:
+                config = load_yaml_any(docker_config_path) or {}
+            except yaml.YAMLError as e:
+                self.fail(f"YAML parsing failed for {docker_config_path}: {e}")
+                continue
 
             # Per req-008 the file root of meta/services.yml IS the
             # services map (no `compose.services` wrapper).

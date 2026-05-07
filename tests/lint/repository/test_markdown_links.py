@@ -14,6 +14,8 @@ import re
 import subprocess
 import unittest
 from pathlib import Path
+
+from utils.cache.files import iter_project_files, read_text
 from typing import List, NamedTuple
 
 
@@ -58,7 +60,7 @@ def _tracked_md_files(root: Path) -> List[Path]:
         rel_paths = [p for p in out.decode("utf-8", errors="replace").split("\0") if p]
         return [root / rel for rel in rel_paths if rel.endswith(".md")]
     except Exception:
-        return [p for p in root.rglob("*.md") if p.is_file()]
+        return [Path(p) for p in iter_project_files(extensions=(".md",))]
 
 
 def _is_checkable_link(target: str) -> bool:
@@ -95,8 +97,8 @@ def _extract_links(file: Path) -> List[tuple[int, str]]:
     """
     results: list[tuple[int, str]] = []
     try:
-        lines = file.read_text(encoding="utf-8", errors="replace").splitlines()
-    except OSError:
+        lines = read_text(str(file)).splitlines()
+    except (OSError, UnicodeDecodeError):
         return results
 
     in_fence = False

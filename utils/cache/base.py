@@ -235,6 +235,34 @@ def _render_with_templar(
             return raw
         data = copy.deepcopy(raw)
         if isinstance(data, str):
+            # Type-preserving fast path: when the entire string is a
+            # single Jinja expression, ask templar directly so a
+            # list/dict-returning ``lookup(...)`` keeps its native type.
+            # `_templar_render_best_effort` always coerces its output
+            # to ``str``, which would turn ``['a','b']`` into the
+            # Python-repr string ``"['a', 'b']"``. Detect the shape
+            # ``{{ ... }}`` (with no nested ``{{`` / ``{%``) and bypass
+            # the str-coercing wrapper for that case only.
+            stripped = data.strip()
+            if (
+                stripped.startswith("{{")
+                and stripped.endswith("}}")
+                and "{{" not in stripped[2:]
+                and "{%" not in stripped
+            ):
+                from utils.templating import _templar_render_preserve_type
+
+                try:
+                    rendered = _templar_render_preserve_type(
+                        templar, data, base_variables
+                    )
+                except Exception:
+                    rendered = None
+                if rendered is not None and not isinstance(rendered, str):
+                    # Recurse into the resolved structure so any nested
+                    # Jinja inside the resolved value is also rendered.
+                    return _render_deep(rendered)
+                # else: fall through to the str-render loop below.
             for _ in range(max_rounds):
                 try:
                     rendered = _templar_render_best_effort(

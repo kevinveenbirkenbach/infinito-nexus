@@ -49,8 +49,18 @@ nginx:
   image: nginx
   version: 1.30-alpine
   name: moodle-nginx
+  min_storage: 1GB
+  cpus: '0.2'
+  mem_reservation: 128m
+  mem_limit: 256m
+  pids_limit: 256
 cron:
   name: moodle-cron
+  min_storage: 1GB
+  cpus: '0.2'
+  mem_reservation: 128m
+  mem_limit: 256m
+  pids_limit: 256
 css:
   enabled: false
   shared: true

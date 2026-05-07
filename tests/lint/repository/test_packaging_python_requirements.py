@@ -6,6 +6,8 @@ import re
 import unittest
 from pathlib import Path
 
+from utils.cache.files import read_text
+
 
 class TestPackagingPythonRequirements(unittest.TestCase):
     @classmethod
@@ -16,7 +18,7 @@ class TestPackagingPythonRequirements(unittest.TestCase):
         cls.debian_control = cls.repo_root / "packaging" / "debian" / "control"
 
     def test_fedora_spec_relaxes_python_capability_on_el9_only(self):
-        spec_text = self.fedora_spec.read_text(encoding="utf-8")
+        spec_text = read_text(str(self.fedora_spec))
         self.assertRegex(
             spec_text,
             re.compile(
@@ -30,15 +32,15 @@ class TestPackagingPythonRequirements(unittest.TestCase):
         )
 
     def test_debian_control_keeps_explicit_python_311_floor(self):
-        control_text = self.debian_control.read_text(encoding="utf-8")
+        control_text = read_text(str(self.debian_control))
         self.assertIn(" python3 (>= 3.11),", control_text)
 
     def test_arch_pkgbuild_requires_docker_compose(self):
-        pkgbuild_text = self.arch_pkgbuild.read_text(encoding="utf-8")
+        pkgbuild_text = read_text(str(self.arch_pkgbuild))
         self.assertIn("  'docker-compose'", pkgbuild_text)
 
     def test_debian_control_requires_compose_v2_plugin(self):
-        control_text = self.debian_control.read_text(encoding="utf-8")
+        control_text = read_text(str(self.debian_control))
         self.assertIn(
             " docker-compose-v2 | docker-compose-plugin,",
             control_text,
@@ -49,7 +51,7 @@ class TestPackagingPythonRequirements(unittest.TestCase):
         )
 
     def test_fedora_spec_requires_compose_plugin(self):
-        spec_text = self.fedora_spec.read_text(encoding="utf-8")
+        spec_text = read_text(str(self.fedora_spec))
         self.assertIn("Requires:       docker-compose-plugin", spec_text)
 
 

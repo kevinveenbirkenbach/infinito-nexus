@@ -23,6 +23,7 @@ import unittest
 from pathlib import Path
 
 from utils.annotations.message import warning
+from utils.cache.files import read_text
 
 _REPO_ROOT = Path(__file__).resolve().parents[4]
 _ROLES_ROOT = _REPO_ROOT / "roles"
@@ -33,7 +34,7 @@ _J2_LOGIC_RE = re.compile(r"\{%-?\s*\w")
 
 def _has_j2_logic(dockerfile_j2: Path) -> bool:
     """Return True if the file contains at least one Jinja2 block tag."""
-    return bool(_J2_LOGIC_RE.search(dockerfile_j2.read_text(encoding="utf-8")))
+    return bool(_J2_LOGIC_RE.search(read_text(str(dockerfile_j2))))
 
 
 def _collect_templated_dockerfiles() -> list[Path]:

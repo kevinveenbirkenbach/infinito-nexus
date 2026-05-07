@@ -1,7 +1,8 @@
 import os
 import unittest
-import yaml
 import glob
+
+from utils.cache.yaml import load_yaml_any
 
 
 class TestDependencyApplicationId(unittest.TestCase):
@@ -23,12 +24,11 @@ class TestDependencyApplicationId(unittest.TestCase):
             vars_file = os.path.join(role_path, "vars", "main.yml")
             if not os.path.isfile(vars_file):
                 return None
-            with open(vars_file, encoding="utf-8") as f:
-                data = yaml.safe_load(f) or {}
+            data = load_yaml_any(meta_file) or {}
             return data.get("application_id")
 
         # Iterate all roles
-        for role_path in glob.glob(os.path.join(roles_dir, "*")):
+        for role_path in glob.glob(os.path.join(roles_dir, "*")):  # noqa: project-walk
             if not os.path.isdir(role_path):
                 continue
 
@@ -37,8 +37,7 @@ class TestDependencyApplicationId(unittest.TestCase):
             if not os.path.isfile(meta_file):
                 continue
 
-            with open(meta_file, encoding="utf-8") as f:
-                meta = yaml.safe_load(f) or {}
+            meta = load_yaml_any(meta_file) or {}
 
             deps = meta.get("dependencies", [])
             if not isinstance(deps, list):

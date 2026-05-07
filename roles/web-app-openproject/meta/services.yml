@@ -26,36 +26,42 @@ web:
   mem_reservation: 3g
   mem_limit: 4g
   pids_limit: 2048
+  min_storage: 5GB
 seeder:
   name: openproject-seeder
   cpus: '0.3'
   mem_reservation: 256m
   mem_limit: 512m
   pids_limit: 256
+  min_storage: 1GB
 cron:
   name: openproject-cron
   cpus: '0.3'
   mem_reservation: 256m
   mem_limit: 512m
   pids_limit: 256
+  min_storage: 1GB
 worker:
   name: openproject-worker
   cpus: '2.0'
   mem_reservation: 2g
   mem_limit: 3g
   pids_limit: 2048
+  min_storage: 5GB
 proxy:
   name: openproject-proxy
   cpus: '0.3'
   mem_reservation: 256m
   mem_limit: 512m
   pids_limit: 256
+  min_storage: 1GB
 cache:
   name: openproject-cache
   cpus: '0.3'
   mem_reservation: 512m
   mem_limit: 512m
   pids_limit: 256
+  min_storage: 1GB
 oauth2:
   enabled: true
   shared: true
@@ -64,9 +70,9 @@ oauth2:
     port: '80'
   acl:
     whitelist:
-    - /users/me
-    - /api/
-    - /oauth/token
+      - /users/me
+      - /api/
+      - /oauth/token
 css:
   enabled: false
   shared: true
@@ -83,5 +89,10 @@ openproject:
       oauth2: 16483
       http: 8023
   run_after:
-  - web-app-keycloak
+    - web-app-keycloak
   lifecycle: beta
+  min_storage: 10GB
+  cpus: '1.0'
+  mem_reservation: 1g
+  mem_limit: 2g
+  pids_limit: 1024

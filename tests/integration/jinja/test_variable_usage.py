@@ -6,6 +6,7 @@ from glob import glob
 import re
 
 from utils.cache.files import iter_project_files_with_content, read_text
+from utils.cache.yaml import load_yaml_str
 
 
 class TestTopLevelVariableUsage(unittest.TestCase):
@@ -14,10 +15,10 @@ class TestTopLevelVariableUsage(unittest.TestCase):
             os.path.join(os.path.dirname(__file__), "../../../")
         )
         # Braces werden von glob nicht unterstützt – also einzeln sammeln:
-        self.roles_vars_paths = glob(
+        self.roles_vars_paths = glob(  # noqa: project-walk
             os.path.join(self.project_root, "roles/*/vars/main.yml")
-        ) + glob(os.path.join(self.project_root, "roles/*/defaults/main.yml"))
-        self.group_vars_paths = glob(
+        ) + glob(os.path.join(self.project_root, "roles/*/defaults/main.yml"))  # noqa: project-walk
+        self.group_vars_paths = glob(  # noqa: project-walk
             os.path.join(self.project_root, "group_vars/all/*.yml")
         )
         self.all_variable_files = self.roles_vars_paths + self.group_vars_paths
@@ -42,7 +43,7 @@ class TestTopLevelVariableUsage(unittest.TestCase):
 
     def get_top_level_keys(self, file_path):
         try:
-            data = yaml.safe_load(read_text(file_path))
+            data = load_yaml_str(read_text(file_path))
         except yaml.YAMLError as e:
             logging.warning("Failed to parse YAML file '%s': %s", file_path, e)
             return []

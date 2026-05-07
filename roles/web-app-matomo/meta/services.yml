@@ -31,12 +31,13 @@ bootstrap:
   version: 1.1.13
   name: matomo-bootstrap
   profiles:
-  - bootstrap
+    - bootstrap
   timeout: 30
   cpus: 1.0
   mem_reservation: 0.5g
   mem_limit: 1g
   pids_limit: 512
+  min_storage: 1GB
 mariadb:
   enabled: true
   shared: true

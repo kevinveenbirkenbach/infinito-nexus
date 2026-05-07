@@ -20,6 +20,7 @@ import unittest
 from pathlib import Path
 
 from cli.deploy.development.common import DEV_INVENTORY_VARS_FILE
+from utils.cache.files import iter_project_files
 
 REPO_ROOT = Path(__file__).resolve().parents[5]
 INVENTORY_ENV_SH = REPO_ROOT / "scripts" / "meta" / "env" / "inventory.sh"
@@ -69,24 +70,16 @@ class TestInventoryVarsFileSpotDriftGuard(unittest.TestCase):
             "inventories/development/default.yml",
         }
         offenders: list[str] = []
-        for path in REPO_ROOT.rglob("*"):
-            if not path.is_file():
-                continue
+        for path_str in iter_project_files():
+            path = Path(path_str)
             rel = path.relative_to(REPO_ROOT).as_posix()
             if rel in allowed_relative:
                 continue
-            # Skip vendored/build/cache directories.
-            if any(
-                rel.startswith(prefix + "/")
-                for prefix in (
-                    ".git",
-                    ".venv",
-                    "node_modules",
-                    "__pycache__",
-                    ".pytest_cache",
-                    ".mypy_cache",
-                )
-            ):
+            # `iter_project_files` already prunes `.git`, `.venv`,
+            # `node_modules`, `__pycache__`, `.pytest_cache` etc., but
+            # `.mypy_cache` is not in the default skip set — keep the
+            # explicit fragment-prefix check for that one.
+            if any(rel.startswith(prefix + "/") for prefix in (".mypy_cache",)):
                 continue
             if path.suffix not in {".py", ".sh", ".yml", ".yaml", ".j2", ".md"}:
                 continue

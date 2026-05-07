@@ -2,8 +2,9 @@ import unittest
 import tempfile
 import shutil
 import os
-import yaml
 from cli.build import graph
+
+from utils.cache.yaml import dump_yaml
 
 
 class TestGraphLogic(unittest.TestCase):
@@ -15,24 +16,22 @@ class TestGraphLogic(unittest.TestCase):
         os.makedirs(os.path.join(self.role_path, "tasks"))
 
         # Write meta/main.yml
-        with open(os.path.join(self.role_path, "meta", "main.yml"), "w") as f:
-            yaml.dump(
-                {
-                    "galaxy_info": {"author": "tester", "run_after": []},
-                    "dependencies": [],
-                },
-                f,
-            )
+        dump_yaml(
+            os.path.join(self.role_path, "meta", "main.yml"),
+            {
+                "galaxy_info": {"author": "tester", "run_after": []},
+                "dependencies": [],
+            },
+        )
 
         # Write tasks/main.yml
-        with open(os.path.join(self.role_path, "tasks", "main.yml"), "w") as f:
-            yaml.dump(
-                [
-                    {"include_role": "some_other_role"},
-                    {"import_role": {"name": "another_role"}},
-                ],
-                f,
-            )
+        dump_yaml(
+            os.path.join(self.role_path, "tasks", "main.yml"),
+            [
+                {"include_role": "some_other_role"},
+                {"import_role": {"name": "another_role"}},
+            ],
+        )
 
     def tearDown(self):
         shutil.rmtree(self.temp_dir)

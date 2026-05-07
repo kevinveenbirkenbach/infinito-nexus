@@ -1,0 +1,32 @@
+{# Per-wall config rendered for slug '{{ wall.slug }}'.
+   Every field is taken VERBATIM from
+   meta/services.yml.fediwall.walls[*].config — services.yml is the
+   single point of truth, no defaults are computed here. An empty
+   `servers` list renders as an empty array; the operator (or a
+   variant) declares the literal sibling domains they want polled. #}
+{
+  "servers": {{ wall.config.servers | to_json }},
+  "tags": {{ wall.config.tags | to_json }},
+  "accounts": {{ wall.config.accounts | to_json }},
+
+  "loadPublic": {{ wall.config.loadPublic | to_json }},
+  "loadFederated": {{ wall.config.loadFederated | to_json }},
+  "loadTrends": {{ wall.config.loadTrends | to_json }},
+
+  "languages": {{ wall.config.languages | to_json }},
+  "badWords": {{ wall.config.badWords | to_json }},
+  "hideSensitive": {{ wall.config.hideSensitive | to_json }},
+  "hideBots": {{ wall.config.hideBots | to_json }},
+  "hideReplies": {{ wall.config.hideReplies | to_json }},
+  "hideBoosts": {{ wall.config.hideBoosts | to_json }},
+
+  "limit": {{ wall.config.limit | to_json }},
+  "interval": {{ wall.config.interval | to_json }},
+
+  "title": {{ wall.config.title | to_json }},
+  "theme": {{ wall.config.theme | to_json }},
+  "showInfobar": {{ wall.config.showInfobar | to_json }},
+  "showText": {{ wall.config.showText | to_json }},
+  "showMedia": {{ wall.config.showMedia | to_json }},
+  "playVideos": {{ wall.config.playVideos | to_json }}
+}

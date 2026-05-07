@@ -79,8 +79,12 @@ nextcloud:
       enabled: true
     external:
       enabled: true
-    files_bpm:
-      enabled: true
+    # Marketplace upstream lags Nextcloud version: deploy fails with
+    # `App "BPM Files" cannot be installed because it is not compatible
+    # with this version of the server.` Re-enable when the plugin
+    # ships a release matching the pinned Nextcloud major.
+    # files_bpm:
+    #   enabled: true
     files_linkeditor:
       enabled: true
     fileslibreofficeedit:
@@ -120,8 +124,8 @@ nextcloud:
     oidc_login:
       enabled: '{{ lookup(''oidc_flavor'') == ''oidc_login'' }}'
       incompatible_plugins:
-      - user_oidc
-      - sociallogin
+        - user_oidc
+        - sociallogin
     phonetrack:
       enabled: true
     polls:
@@ -135,13 +139,13 @@ nextcloud:
     onlyoffice:
       enabled: true
       incompatible_plugins:
-      - richdocuments
-      - fileslibreofficeedit
+        - richdocuments
+        - fileslibreofficeedit
     sociallogin:
       enabled: '{{ lookup(''oidc_flavor'') == ''sociallogin'' }}'
       incompatible_plugins:
-      - user_oidc
-      - oidc_login
+        - user_oidc
+        - oidc_login
     spreed:
       enabled: true
     tables:
@@ -159,8 +163,8 @@ nextcloud:
     user_oidc:
       enabled: '{{ lookup(''oidc_flavor'') == ''user_oidc'' }}'
       incompatible_plugins:
-      - oidc_login
-      - sociallogin
+        - oidc_login
+        - sociallogin
     whiteboard:
       enabled: true
   ports:
@@ -173,8 +177,8 @@ nextcloud:
         start: 50000
         end: 59999
   run_after:
-  - web-app-keycloak
-  - web-app-matomo
+    - web-app-keycloak
+    - web-app-matomo
   lifecycle: beta
 proxy:
   name: nextcloud-proxy
@@ -186,12 +190,14 @@ proxy:
   mem_reservation: 64m
   mem_limit: 256m
   pids_limit: 512
+  min_storage: 1GB
 cron:
   name: nextcloud-cron
   cpus: '0.25'
   mem_reservation: 128m
   mem_limit: 512m
   pids_limit: 256
+  min_storage: 1GB
 talk:
   enabled: '{{ lookup(''config'', ''web-app-nextcloud'', ''plugins.spreed.enabled'', False) }}'
   name: nextcloud-talk
@@ -207,6 +213,7 @@ talk:
   mem_reservation: 1g
   mem_limit: 2g
   pids_limit: 1024
+  min_storage: 1GB
 whiteboard:
   name: nextcloud-whiteboard
   image: ghcr.io/nextcloud-releases/whiteboard
@@ -217,6 +224,7 @@ whiteboard:
   mem_reservation: 128m
   mem_limit: 1g
   pids_limit: 1024
+  min_storage: 1GB
 onlyoffice:
   enabled: true
   shared: true
@@ -233,6 +241,7 @@ talk_recording:
   mem_reservation: 2g
   mem_limit: 6g
   pids_limit: 1024
+  min_storage: 1GB
 css:
   enabled: false
   shared: true

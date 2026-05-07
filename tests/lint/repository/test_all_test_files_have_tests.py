@@ -26,7 +26,7 @@ class TestTestFilesContainUnittestTests(unittest.TestCase):
 
     def _iter_test_files(self) -> List[str]:
         out: List[str] = []
-        for root, _dirs, files in os.walk(self.tests_dir):
+        for root, _dirs, files in os.walk(self.tests_dir):  # noqa: project-walk
             for fn in files:
                 if fn.startswith("test_") and fn.endswith(".py"):
                     out.append(os.path.join(root, fn))

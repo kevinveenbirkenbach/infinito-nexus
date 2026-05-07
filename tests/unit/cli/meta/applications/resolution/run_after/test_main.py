@@ -6,9 +6,10 @@ import unittest
 from contextlib import redirect_stdout
 from pathlib import Path
 
-import yaml
 
 import cli.meta.applications.resolution.run_after.__main__ as run_after_resolution
+
+from utils.cache.yaml import dump_yaml_str
 
 
 class TestRunAfterResolution(unittest.TestCase):
@@ -51,7 +52,7 @@ class TestRunAfterResolution(unittest.TestCase):
             primary_entry["run_after"] = run_after
 
         services_file.write_text(
-            yaml.safe_dump({name: primary_entry}, sort_keys=False),
+            dump_yaml_str({name: primary_entry}),
             encoding="utf-8",
         )
 

@@ -44,6 +44,9 @@ labels:
 
 - **same line**: the marker MUST be on the same line as the construct
   it suppresses.
+- **same line / span**: the marker MUST be on the construct's own line
+  or, for multi-line call expressions, any physical line spanned by
+  that call.
 - **line above**: the marker MUST be on the immediately preceding
   non-empty line. Blank lines between the marker and the construct
   break the association.
@@ -70,6 +73,8 @@ labels:
 | `shared`            | comment block above | [test_service_shared_consistency.py](../../../../tests/lint/ansible/test_service_shared_consistency.py)                     | Marks a service whose `enabled: true` legitimately does not require `shared: true`.                              |
 | `email`             | line above          | [test_web_app_email_integration.py](../../../../tests/lint/ansible/roles/test_web_app_email_integration.py)                 | Suppresses the missing-email-integration warning when paired with `enabled: false` and `shared: false`.          |
 | `file-size`         | head (first 30 lines) | [test_python_file_size.py](../../../../tests/lint/repository/test_python_file_size.py)                                     | Opts the entire `.py` file out of the 500-line cap.                                                              |
+| `project-walk`      | same line / span    | [test_no_raw_project_walk.py](../../../../tests/lint/repository/test_no_raw_project_walk.py)                               | Allows a raw `Path.rglob`, `os.walk`, or `glob.glob` call when the walk is intentionally outside the cached project-tree helper contract. |
+| `cache-read`        | same line / span    | [test_no_uncached_file_reads.py](../../../../tests/lint/repository/test_no_uncached_file_reads.py)                           | Allows a raw `Path.read_text` / `Path.read_bytes` call in a `tests/lint/` test when the read is intentionally outside the LRU-cached `utils.cache.files.read_text` contract. |
 | `run-once`          | anywhere            | [test_run_once_tags.py](../../../../tests/lint/ansible/test_run_once_tags.py), [test_schema.py](../../../../tests/integration/roles/run_once/test_schema.py) | Marks a role's `tasks/main.yml` as intentionally re-runnable; skips both the run-once tag check and the suffix check. |
 | `run-once-suffix`   | same line           | [test_schema.py](../../../../tests/integration/roles/run_once/test_schema.py)                                                | Allows a single `when:` item to reference a `run_once_<other>` flag whose suffix differs from the current role.   |
 | `raw-docker`        | same or above; head (first 30 lines) | [test_no_raw_docker.py](../../../../tests/integration/docker/test_no_raw_docker.py)                       | Marks a single line or a whole file under `roles/` as legitimately calling `docker` / `docker compose` / `docker-compose` directly. The check is scoped to `roles/`; bootstrap scripts and CI workflows outside `roles/` are not scanned and need no marker. |
@@ -127,6 +132,32 @@ email:
 # nocheck: file-size  (single-host orchestration script ships as one file)
 ```
 
+`project-walk`, on the raw walk call or on any line spanned by the call:
+
+```python
+for path in temp_dir.rglob("*"):  # noqa: project-walk
+    ...
+```
+
+Use `project-walk` only for scans that genuinely do not fit
+`utils.cache.files.iter_project_files`, such as temporary directories,
+`.git` metadata, or a deliberately tiny fixed path probe. Broad scans of the
+repository tree SHOULD use the cached helpers instead.
+
+`cache-read`, on the raw read call or on any line spanned by the call:
+
+```python
+text = tmp_path.read_text()  # noqa: cache-read  (synthetic fixture written above)
+```
+
+Use `cache-read` only when the file legitimately does not belong to the
+project-tree LRU cache — e.g. a tempdir written and read inside the same
+test, a file outside the repository root, or an in-memory `io.StringIO`-
+backed `Path`. Reads of project files (under `roles/`, `tasks/`,
+`docs/`, `tests/`, etc.) MUST go through
+`utils.cache.files.read_text` so the LRU cache is shared across the
+pytest session.
+
 `run-once`, at the top of a role's `tasks/main.yml`:
 
 ```yaml
@@ -159,6 +190,22 @@ that legitimately drives the engine directly:
 # nocheck: raw-docker. Runs from sys-svc-container's installer before the wrapper symlink lands.
 docker buildx build ...
 ```
+
+## Tool-Native `noqa` Codes 🧹
+
+Some Python files also use Ruff-compatible uppercase `# noqa` codes. These
+codes are handled by Ruff and related Python linters, not by
+[utils/annotations/suppress.py](../../../../utils/annotations/suppress.py).
+They MAY appear in Python files when the local exception is intentional and
+clear from context.
+
+| Code     | Tool meaning                 | Typical allowed use in this repository |
+| -------- | ---------------------------- | -------------------------------------- |
+| `BLE001` | Blind exception caught       | Narrow command-wrapper boundaries that must convert any underlying failure into a domain-specific error. |
+| `E402`   | Module import not at top     | Tests that MUST adjust `sys.path` or load fixtures before importing the module under test. |
+| `E731`   | Lambda assigned to variable  | Small test-local callbacks or path formatters where a named function would add noise. |
+| `F401`   | Imported but unused          | Re-export modules or import-probe tests where import success is the assertion. |
+| `SLF001` | Private member access        | Test-only introspection of parser or object internals when the public surface does not expose the needed state. |
 
 ## Adding a new rule 🆕
 

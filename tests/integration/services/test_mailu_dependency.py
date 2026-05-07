@@ -2,7 +2,8 @@ import re
 import unittest
 from pathlib import Path
 
-import yaml
+
+from utils.cache.yaml import load_yaml_any
 
 _MAILU_ROLE = "web-app-mailu"
 _EMAIL_SERVICE_KEY = "email"
@@ -19,7 +20,7 @@ def _scan_role(role_path: Path) -> tuple[bool, bool]:
     """Return (refs_mailu, refs_email_lookup) for all scannable files in *role_path*."""
     refs_mailu = False
     refs_email = False
-    for path in role_path.rglob("*"):
+    for path in role_path.rglob("*"):  # noqa: project-walk
         if not path.is_file() or path.suffix not in _SCAN_EXTENSIONS:
             continue
         try:
@@ -52,7 +53,7 @@ class TestMailuServiceDependency(unittest.TestCase):
     def _email_service_conf(self, config_path: Path) -> dict:
         if not config_path.is_file():
             return {}
-        content = yaml.safe_load(config_path.read_text(encoding="utf-8")) or {}
+        content = load_yaml_any(config_path) or {}
         return content.get(_EMAIL_SERVICE_KEY, {}) or {}
 
     def test_mailu_dependents_declare_email_service(self):

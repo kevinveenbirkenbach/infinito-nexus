@@ -7,7 +7,8 @@ import glob
 import os
 import unittest
 
-import yaml
+
+from utils.cache.yaml import load_yaml_any
 
 
 class TestComposeRolesHaveLocalNetwork(unittest.TestCase):
@@ -20,7 +21,7 @@ class TestComposeRolesHaveLocalNetwork(unittest.TestCase):
     def test_every_compose_role_with_application_id_has_local_network(self):
         missing = []
 
-        for role_path in sorted(glob.glob(os.path.join(self.roles_dir, "*"))):
+        for role_path in sorted(glob.glob(os.path.join(self.roles_dir, "*"))):  # noqa: project-walk
             if not os.path.isdir(role_path):
                 continue
 
@@ -33,8 +34,7 @@ class TestComposeRolesHaveLocalNetwork(unittest.TestCase):
             if not os.path.isfile(vars_file):
                 continue
 
-            with open(vars_file, "r", encoding="utf-8") as f:
-                vars_data = yaml.safe_load(f) or {}
+            vars_data = load_yaml_any(vars_file) or {}
             application_id = vars_data.get("application_id")
             if not application_id:
                 continue
@@ -42,8 +42,7 @@ class TestComposeRolesHaveLocalNetwork(unittest.TestCase):
             server_file = os.path.join(role_path, "meta", "server.yml")
             subnet = None
             if os.path.isfile(server_file):
-                with open(server_file, "r", encoding="utf-8") as f:
-                    server_data = yaml.safe_load(f) or {}
+                server_data = load_yaml_any(server_file) or {}
                 networks = server_data.get("networks") or {}
                 local = networks.get("local") if isinstance(networks, dict) else None
                 if isinstance(local, dict):

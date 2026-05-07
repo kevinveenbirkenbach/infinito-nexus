@@ -35,12 +35,6 @@ When a user unexpectedly ends up in the fallback `subscriber` role, check the fo
 2. The OIDC client used by the application has the `groups` client scope attached as a **default** scope (not optional). The design note in [RBAC design](../../contributing/design/iam/rbac.md) explains why.
 3. The Keycloak **Userinfo** preview for the user contains a `groups` array with the full path. If it does not, the scope is not reaching the userinfo endpoint and the mapping will not fire.
 
-## Migration from the pre-005 flat layout 🔁
-
-Infinito.Nexus before requirement 005 provisioned all RBAC groups flat under `ou=roles` with names shaped `<application_id>-<role_name>`. The 005 deploy rewrites these DNs into the hierarchical layout described above, keeps every `memberUid` / `member`, and forces a Keycloak **Logout all** so no stale access tokens keep pre-005 paths alive. The migration runs automatically as part of `svc-db-openldap` provisioning; no manual LDIF editing is required.
-
-If you need to roll back the migration, restore the LDAP backup taken before the first deploy that included requirement 005 and also invalidate the affected Keycloak sessions.
-
 ## See also 🔗
 
 - [RBAC design](../../contributing/design/iam/rbac.md)
