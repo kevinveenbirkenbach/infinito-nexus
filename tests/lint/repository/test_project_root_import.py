@@ -1,6 +1,6 @@
 """Lint that pins ``PROJECT_ROOT`` to a single canonical source.
 
-Two rules are enforced:
+Three rules are enforced:
 
 1. Every Python file in the repo (``*.py``) MUST NOT compute the
    project root locally. The forbidden patterns are:
@@ -18,7 +18,14 @@ Two rules are enforced:
    ``from <pkg> import PROJECT_ROOT``) so a future move of the file
    does not silently break a hard-coded ``parents[N]`` index.
 
-2. Every ``__init__.py`` that DOES define ``PROJECT_ROOT`` MUST point
+2. ``PROJECT_ROOT`` itself MUST only be assigned inside an
+   ``__init__.py``. A ``PROJECT_ROOT = …`` line anywhere else (test
+   modules, ``__main__.py`` shims, helper modules, …) fails the lint
+   even when the right-hand side does not climb ``parents[N]`` —
+   re-binding the constant locally defeats the single-source guarantee
+   rule 1 was added to enforce.
+
+3. Every ``__init__.py`` that DOES define ``PROJECT_ROOT`` MUST point
    at a directory containing ``pyproject.toml``. A wrong
    ``parents[N]`` index turns the constant into a silent footgun;
    the lint catches it the moment the index drifts off the repo root.
@@ -74,6 +81,18 @@ _FORBIDDEN_PATTERNS: tuple[tuple[str, re.Pattern[str]], ...] = (
         re.compile(r"^\s*def\s+(?:repo_root|project_root)\s*\("),
     ),
 )
+
+# A top-level ``PROJECT_ROOT`` (or ``PROJECT_ROOT: <type>``) assignment.
+# Allowed only inside ``__init__.py``; everywhere else the constant
+# MUST be imported via ``from . import PROJECT_ROOT`` (or
+# ``from <pkg> import PROJECT_ROOT``).
+#
+# The regex anchors at the start of a (stripped) line so neither
+# ``_PROJECT_ROOT`` (a private re-binding) nor a regex source string
+# mentioning ``PROJECT_ROOT`` triggers it. The negative ``(?!=)``
+# lookahead after ``=`` keeps a bare comparison (``PROJECT_ROOT == …``)
+# from matching.
+_PROJECT_ROOT_ASSIGN_RE = re.compile(r"^\s*PROJECT_ROOT(?:\s*:\s*[^=]+?)?\s*=(?!=)")
 
 # The legitimate `PROJECT_ROOT = …` definition shape inside an
 # ``__init__.py``. The integrity check (does the resolved path carry
@@ -174,6 +193,21 @@ def _scan_file(path: Path) -> list[str]:
             if is_suppressed_at(raw_lines, lineno, SUPPRESS_RULE, mode="same-or-above"):
                 continue
             failures.append(f"{path}:{lineno}: {label}")
+
+        # `PROJECT_ROOT = …` is allowed only inside an ``__init__.py``.
+        # Anywhere else the constant MUST be imported from the package.
+        if (
+            not is_init
+            and _PROJECT_ROOT_ASSIGN_RE.match(line)
+            and not is_suppressed_at(
+                raw_lines, lineno, SUPPRESS_RULE, mode="same-or-above"
+            )
+        ):
+            failures.append(
+                f"{path}:{lineno}: `PROJECT_ROOT` assignment outside "
+                f"`__init__.py` (import via `from . import PROJECT_ROOT` "
+                f"or `from <pkg> import PROJECT_ROOT` instead)"
+            )
 
     return failures
 

@@ -4,9 +4,7 @@ import re
 import sys
 from pathlib import Path
 
-from . import PROJECT_ROOT as _PROJECT_ROOT_PATH
-
-PROJECT_ROOT = str(_PROJECT_ROOT_PATH)
+from . import PROJECT_ROOT
 
 INCLUDE_RE = re.compile(r"^(\s*)\{%\s*include\s*['\"]([^'\"]+)['\"]\s*%\}")
 
@@ -24,7 +22,7 @@ def expand_includes(rel_path, seen=None):
         raise RuntimeError(f"Circular include detected: {rp}")
     seen.add(rp)
 
-    abs_path = str(Path(PROJECT_ROOT) / rp)
+    abs_path = str(PROJECT_ROOT / rp)
     if not Path(abs_path).is_file():
         raise FileNotFoundError(f"Template not found: {rp}")
 

@@ -14,10 +14,9 @@ import re
 import unittest
 from pathlib import Path
 
-HERE = str(Path(str(Path(__file__).resolve())).parent)
-PROJECT_ROOT = str(Path(str(Path(HERE) / ".." / ".." / "..")).resolve())
+from . import PROJECT_ROOT
 
-ROLES_DIR = str(Path(PROJECT_ROOT) / "roles")
+ROLES_DIR = str(PROJECT_ROOT / "roles")
 
 SERVICE_FLAG_LINE = re.compile(
     r"^([A-Z][A-Z0-9_]+)_SERVICE_ENABLED\s*=\s*(.*)$",

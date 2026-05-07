@@ -16,10 +16,10 @@ import textwrap
 import unittest
 from pathlib import Path
 
-HERE = str(Path(str(Path(__file__).resolve())).parent)
-PROJECT_ROOT = str(Path(str(Path(HERE) / ".." / ".." / ".." / "..")).resolve())
+from . import PROJECT_ROOT
+
 HELPER_PATH = str(
-    Path(PROJECT_ROOT) / "roles" / "test-e2e-playwright" / "files" / "service-gating.js"
+    PROJECT_ROOT / "roles" / "test-e2e-playwright" / "files" / "service-gating.js"
 )
 
 STUB_PKG_JSON = json.dumps({"name": "@playwright/test", "main": "index.js"})

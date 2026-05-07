@@ -49,9 +49,9 @@ from pathlib import Path
 
 import yaml
 
-HERE = str(Path(str(Path(__file__).resolve())).parent)
-PROJECT_ROOT = str(Path(str(Path(HERE) / ".." / ".." / ".." / "..")).resolve())
-ROLES_DIR = str(Path(PROJECT_ROOT) / "roles")
+from . import PROJECT_ROOT
+
+ROLES_DIR = str(PROJECT_ROOT / "roles")
 
 IMPLICIT_ADMIN_ROLE = "administrator"
 

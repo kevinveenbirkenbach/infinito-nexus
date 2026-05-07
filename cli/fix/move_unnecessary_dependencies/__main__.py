@@ -113,9 +113,8 @@ def main() -> None:
     )
     parser.add_argument(
         "--project-root",
-        default=str(
-            Path(__file__).resolve().parents[3]
-        ),  # nocheck: project-root-import  CLI default arg
+        # nocheck: project-root-import  CLI default arg
+        default=str(Path(__file__).resolve().parents[3]),
         help="Path to project root (default: two levels up from this script).",
     )
     parser.add_argument(

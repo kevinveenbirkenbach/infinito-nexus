@@ -30,10 +30,10 @@ import re
 import unittest
 from pathlib import Path
 
-HERE = str(Path(str(Path(__file__).resolve())).parent)
-PROJECT_ROOT = str(Path(str(Path(HERE) / ".." / ".." / "..")).resolve())
+from . import PROJECT_ROOT
+
 TEMPLATE_PATH = str(
-    Path(PROJECT_ROOT)
+    PROJECT_ROOT
     / "roles"
     / "web-app-oauth2-proxy"
     / "templates"

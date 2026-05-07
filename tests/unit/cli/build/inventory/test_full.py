@@ -1,15 +1,13 @@
 from __future__ import annotations
 
-import os
 import sys
 import unittest
 
+from . import PROJECT_ROOT
+
 # Ensure repo root is importable (so `import cli...` works in all runners)
-PROJECT_ROOT = os.path.abspath(
-    os.path.join(os.path.dirname(__file__), "../../../../../")
-)
-if PROJECT_ROOT not in sys.path:
-    sys.path.insert(0, PROJECT_ROOT)
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
 
 from cli.build.inventory.full import command as full  # noqa: E402
 

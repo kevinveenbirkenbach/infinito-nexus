@@ -2,21 +2,12 @@
 
 import importlib.util
 import unittest
-from pathlib import Path
 
-# Directory of this test file: .../tests/unit/roles/web-svc-logout/filter_plugins
-THIS_DIR = str(Path(__file__).parent)
-
-# Compute the repo root by going up five levels: tests → unit → roles → web-svc-logout → filter_plugins → repo root
-PROJECT_ROOT = str(Path(str(Path(THIS_DIR) / "../../../../..")).resolve())
+from . import PROJECT_ROOT
 
 # Path to the actual plugin under roles/web-svc-logout/filter_plugins
 DOMAIN_FILTERS_PATH = str(
-    Path(PROJECT_ROOT)
-    / "roles"
-    / "web-svc-logout"
-    / "filter_plugins"
-    / "domain_filters.py"
+    PROJECT_ROOT / "roles" / "web-svc-logout" / "filter_plugins" / "domain_filters.py"
 )
 
 # Dynamically load the domain_filters module

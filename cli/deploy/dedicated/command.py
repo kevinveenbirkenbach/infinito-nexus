@@ -200,7 +200,7 @@ def main(argv: list[str] | None = None) -> int:
     modes: dict[str, Any] = build_modes_from_args(modes_spec, args)
 
     run_ansible_playbook(
-        repo_root=PROJECT_ROOT,
+        repo_root=str(PROJECT_ROOT),
         playbook_path=PLAYBOOK_PATH,
         inventory_validator_path=INVENTORY_VALIDATOR_PATH,
         inventory=args.inventory,

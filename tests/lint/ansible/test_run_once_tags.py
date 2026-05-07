@@ -7,9 +7,10 @@ from pathlib import Path
 from utils.annotations.suppress import is_suppressed_anywhere
 from utils.cache.files import read_text
 
-PROJECT_ROOT = str(Path(str(Path(str(Path(__file__).parent)) / "../../../")).resolve())
-ROLES_DIR = str(Path(PROJECT_ROOT) / "roles")
-ROOT_TASKS_DIR = str(Path(PROJECT_ROOT) / "tasks")
+from . import PROJECT_ROOT
+
+ROLES_DIR = str(PROJECT_ROOT / "roles")
+ROOT_TASKS_DIR = str(PROJECT_ROOT / "tasks")
 
 
 def is_under_root_tasks(fpath):
@@ -31,7 +32,7 @@ def find_role_includes(roles_dir):
             fpath = str(Path(dirpath) / fname)
             # Skip any files under the root-level tasks/ directory
             if str(Path(fpath).resolve()).startswith(
-                str(Path(str(Path(roles_dir) / ".." / "tasks")).resolve()) + os.sep
+                str(Path(ROOT_TASKS_DIR).resolve()) + os.sep
             ):
                 continue
 

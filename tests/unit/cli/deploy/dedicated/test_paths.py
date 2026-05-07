@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import os
 import unittest
 from pathlib import Path
 
@@ -8,15 +7,9 @@ from cli.deploy.dedicated import paths
 
 
 class TestPaths(unittest.TestCase):
-    def test_repo_root_resolution_matches_expected_parents(self):
-        # paths.py is: <repo>/cli/deploy/dedicated/paths.py
-        here = os.path.realpath(paths.__file__)
-        dedicated_dir = str(Path(here).parent)
-        deploy_dir = str(Path(dedicated_dir).parent)
-        cli_dir = str(Path(deploy_dir).parent)
-        expected_repo_root = str(Path(cli_dir).parent)
-
-        self.assertEqual(paths.PROJECT_ROOT, expected_repo_root)
+    def test_project_root_resolves_to_repo(self):
+        self.assertTrue(Path(paths.PROJECT_ROOT).is_dir())
+        self.assertTrue((Path(paths.PROJECT_ROOT) / "pyproject.toml").is_file())
 
     def test_derived_paths_are_consistent(self):
         self.assertEqual(paths.CLI_ROOT, str(Path(paths.PROJECT_ROOT) / "cli"))

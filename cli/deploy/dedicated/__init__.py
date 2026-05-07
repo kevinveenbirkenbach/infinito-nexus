@@ -1,6 +1,10 @@
 from __future__ import annotations
 
-from .command import main
-from .modes import _parse_bool_literal
+from pathlib import Path
 
-__all__ = ["_parse_bool_literal", "main"]
+PROJECT_ROOT: Path = Path(__file__).resolve().parents[3]
+
+from .command import main  # noqa: E402
+from .modes import _parse_bool_literal  # noqa: E402
+
+__all__ = ["PROJECT_ROOT", "_parse_bool_literal", "main"]

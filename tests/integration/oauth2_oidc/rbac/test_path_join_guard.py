@@ -19,8 +19,7 @@ import re
 import unittest
 from pathlib import Path
 
-HERE = str(Path(str(Path(__file__).resolve())).parent)
-PROJECT_ROOT = str(Path(str(Path(HERE) / ".." / ".." / ".." / "..")).resolve())
+from . import PROJECT_ROOT
 
 PATH_JOIN_PATTERN = re.compile(
     r"\[\s*RBAC\.GROUP\.NAME\s*,\s*.+?\]\s*\|\s*path_join",

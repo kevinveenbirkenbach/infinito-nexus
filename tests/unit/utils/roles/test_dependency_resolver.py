@@ -5,11 +5,12 @@ import unittest
 from pathlib import Path
 from textwrap import dedent
 
-PROJECT_ROOT = str(Path(str(Path(str(Path(__file__).parent)) / "../../..")).resolve())
-if PROJECT_ROOT not in sys.path:
-    sys.path.insert(0, PROJECT_ROOT)
+from . import PROJECT_ROOT
 
-from utils.roles.dependency_resolver import RoleDependencyResolver  # noqa: E402
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
+from utils.roles.dependency_resolver import RoleDependencyResolver
 
 
 def write(path: str, content: str):

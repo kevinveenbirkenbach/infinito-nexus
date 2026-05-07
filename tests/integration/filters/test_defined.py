@@ -6,8 +6,6 @@ from pathlib import Path
 
 from utils.cache.files import iter_project_files, read_text
 
-PROJECT_ROOT = str(Path(str(Path(str(Path(__file__).parent)) / "../../../")).resolve())
-
 # EXCLUDES tests/ by default; keeps True to require real usage sites
 EXCLUDE_TESTS = True
 
