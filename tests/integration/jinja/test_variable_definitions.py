@@ -2,12 +2,12 @@ import logging
 import re
 import sys
 import unittest
-from glob import glob
 from pathlib import Path
 
 import yaml
 
-from utils.cache.files import iter_project_files_with_content
+from utils.cache.files import iter_project_files, iter_project_files_with_content
+from utils.cache.yaml import load_yaml_any, load_yaml_str
 
 logging.basicConfig(level=logging.WARNING)
 logger = logging.getLogger(__name__)
@@ -29,14 +29,22 @@ class TestVariableDefinitions(unittest.TestCase):
         self.project_root = str(PROJECT_ROOT)
 
         # Collect all variable definition files: roles/*/{vars,defaults}/**/*.yml and group_vars/all/*.yml
-        self.var_files = []
-        patterns = [
-            str(Path(self.project_root) / "roles" / "*" / "vars" / "**" / "*.yml"),
-            str(Path(self.project_root) / "roles" / "*" / "defaults" / "**" / "*.yml"),
-            str(Path(self.project_root) / "group_vars" / "all" / "*.yml"),
-        ]
-        for pat in patterns:
-            self.var_files.extend(glob(pat, recursive=True))
+        self.var_files: list[str] = []
+        roles_prefix = str(Path(self.project_root) / "roles") + "/"
+        group_vars_prefix = str(Path(self.project_root) / "group_vars" / "all") + "/"
+
+        def _is_role_var_file(p: str) -> bool:
+            if not p.startswith(roles_prefix):
+                return False
+            parts = p[len(roles_prefix) :].split("/")
+            return len(parts) >= 3 and parts[1] in ("vars", "defaults")
+
+        for p in iter_project_files(extensions=(".yml",)):
+            if _is_role_var_file(p) or (
+                p.startswith(group_vars_prefix)
+                and "/" not in p[len(group_vars_prefix) :]
+            ):
+                self.var_files.append(p)
 
         # File extensions to scan for Jinja usage/inline definitions
         self.scan_extensions = {".yml", ".j2"}
@@ -95,8 +103,7 @@ class TestVariableDefinitions(unittest.TestCase):
         # 1) Keys from var files (top-level dict keys)
         for vf in self.var_files:
             try:
-                with Path(vf).open(encoding="utf-8") as f:
-                    data = yaml.safe_load(f)
+                data = load_yaml_any(vf)
                 if isinstance(data, dict):
                     self.defined.update(data.keys())
             except (OSError, yaml.YAMLError) as exc:
@@ -128,7 +135,7 @@ class TestVariableDefinitions(unittest.TestCase):
                         if inline_map:
                             # Inline mapping: set_fact: { a: 1, b: 2 }
                             try:
-                                data = yaml.safe_load(inline_map)
+                                data = load_yaml_str(inline_map)
                                 if isinstance(data, dict):
                                     self.defined.update(
                                         k for k in data if isinstance(k, str)

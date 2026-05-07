@@ -1,7 +1,7 @@
-import glob
 import unittest
 from pathlib import Path
 
+from utils.cache.files import iter_project_files
 from utils.cache.yaml import load_yaml_any
 
 from . import PROJECT_ROOT
@@ -9,13 +9,18 @@ from . import PROJECT_ROOT
 
 class TestRoleDependencies(unittest.TestCase):
     def test_dependencies_exist(self):
-        roles_dir = str(Path(str(PROJECT_ROOT)) / "roles")
+        roles_dir = Path(str(PROJECT_ROOT)) / "roles"
+        roles_prefix = str(roles_dir) + "/"
 
         # Find all meta/main.yml files under roles/*/meta/main.yml
-        pattern = str(Path(roles_dir) / "*" / "meta" / "main.yml")
-        meta_files = glob.glob(pattern)
+        meta_files = sorted(
+            p
+            for p in iter_project_files(extensions=(".yml",))
+            if p.startswith(roles_prefix) and p.endswith("/meta/main.yml")
+        )
         self.assertTrue(
-            meta_files, f"No meta/main.yml files found with pattern {pattern}"
+            meta_files,
+            f"No meta/main.yml files found under {roles_dir}",
         )
 
         for meta_file in meta_files:
@@ -44,10 +49,10 @@ class TestRoleDependencies(unittest.TestCase):
                             f"Invalid dependency format {dep!r} in role '{role_name}'"
                         )
 
-                    dep_path = str(Path(roles_dir) / dep_name)
+                    dep_path = roles_dir / dep_name
                     # Assert that the dependency role directory exists
                     self.assertTrue(
-                        Path(dep_path).is_dir(),
+                        dep_path.is_dir(),
                         f"Role '{role_name}' declares dependency '{dep_name}' but '{dep_path}' does not exist",
                     )
 

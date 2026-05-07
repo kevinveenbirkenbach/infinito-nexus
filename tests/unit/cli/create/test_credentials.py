@@ -5,9 +5,8 @@ import unittest
 import unittest.mock
 from pathlib import Path
 
-import yaml
-
 from cli.create.credentials import ask_for_confirmation, main
+from utils.cache.yaml import dump_yaml, load_yaml_any
 from utils.handler.vault import VaultHandler
 
 
@@ -52,12 +51,10 @@ class TestCreateCredentials(unittest.TestCase):
             Path(str(Path(role_path) / "vars")).mkdir(parents=True)
             # Create vars/main.yml with application_id
             main_vars = {"application_id": "app_test"}
-            with Path(str(Path(role_path) / "vars" / "main.yml")).open("w") as f:
-                yaml.dump(main_vars, f)
+            dump_yaml(str(Path(role_path) / "vars" / "main.yml"), main_vars)
             # Create config/main.yml with features disabled
             config = {"features": {"central_database": False}}
-            with Path(str(Path(role_path) / "meta" / "services.yml")).open("w") as f:
-                yaml.dump(config, f)
+            dump_yaml(str(Path(role_path) / "meta" / "services.yml"), config)
             # Create schema.yml defining plain credential
             schema = {
                 "credentials": {
@@ -68,12 +65,10 @@ class TestCreateCredentials(unittest.TestCase):
                     }
                 }
             }
-            with Path(str(Path(role_path) / "meta" / "schema.yml")).open("w") as f:
-                yaml.dump(schema, f)
+            dump_yaml(str(Path(role_path) / "meta" / "schema.yml"), schema)
             # Prepare inventory file
             inventory_file = str(Path(tmpdir) / "inventory.yml")
-            with Path(inventory_file).open("w") as f:
-                yaml.dump({}, f)
+            dump_yaml(inventory_file, {})
             vault_pw_file = str(Path(tmpdir) / "pw.txt")
             with Path(vault_pw_file).open("w") as f:
                 f.write("pw")
@@ -100,8 +95,7 @@ class TestCreateCredentials(unittest.TestCase):
                 # Should complete without error
                 main()
                 # Verify inventory file updated with vaulted api_key
-                with Path(inventory_file).open() as f:
-                    data = yaml.safe_load(f)
+                data = load_yaml_any(inventory_file)
                 creds = data["applications"]["app_test"]["credentials"]
                 self.assertIn("api_key", creds)
                 # VaultScalar serializes to a vault block, safe_load returns a string containing the vault header
@@ -122,13 +116,11 @@ class TestCreateCredentials(unittest.TestCase):
 
             # vars/main.yml with application_id
             main_vars = {"application_id": "app_empty_plain"}
-            with Path(str(Path(role_path) / "vars" / "main.yml")).open("w") as f:
-                yaml.dump(main_vars, f)
+            dump_yaml(str(Path(role_path) / "vars" / "main.yml"), main_vars)
 
             # config/main.yml
             config = {"features": {"central_database": False}}
-            with Path(str(Path(role_path) / "meta" / "services.yml")).open("w") as f:
-                yaml.dump(config, f)
+            dump_yaml(str(Path(role_path) / "meta" / "services.yml"), config)
 
             # schema/main.yml: plain credential *without* overrides
             schema = {
@@ -140,13 +132,11 @@ class TestCreateCredentials(unittest.TestCase):
                     }
                 }
             }
-            with Path(str(Path(role_path) / "meta" / "schema.yml")).open("w") as f:
-                yaml.dump(schema, f)
+            dump_yaml(str(Path(role_path) / "meta" / "schema.yml"), schema)
 
             # Empty inventory file
             inventory_file = str(Path(tmpdir) / "inventory.yml")
-            with Path(inventory_file).open("w") as f:
-                yaml.dump({}, f)
+            dump_yaml(inventory_file, {})
 
             # Vault password file
             vault_pw_file = str(Path(tmpdir) / "pw.txt")
@@ -172,8 +162,7 @@ class TestCreateCredentials(unittest.TestCase):
                 ]
                 main()
 
-            with Path(inventory_file).open() as f:
-                data = yaml.safe_load(f)
+            data = load_yaml_any(inventory_file)
             creds = data["applications"]["app_empty_plain"]["credentials"]
             # api_key should exist and be an empty string, not a vault block
             self.assertIn("api_key", creds)

@@ -1,10 +1,8 @@
-import glob
 import unittest
 from pathlib import Path
 
-import yaml
-
 from plugins.filter.invokable_paths import get_invokable_paths
+from utils.cache.yaml import load_yaml_any
 
 
 class TestSysRolesApplicationId(unittest.TestCase):
@@ -23,8 +21,12 @@ class TestSysRolesApplicationId(unittest.TestCase):
         cat_file = str(PROJECT_ROOT / "roles" / "categories.yml")
         cls.invokable_prefixes = set(get_invokable_paths(cat_file))
         # collect actual sys dirs
-        pattern = str(Path(cls.base_dir) / "roles" / "sys-*")
-        cls.actual_dirs = [d for d in glob.glob(pattern) if Path(d).is_dir()]
+        roles_dir = Path(cls.base_dir) / "roles"
+        cls.actual_dirs = [
+            str(p)
+            for p in roles_dir.iterdir()
+            if p.is_dir() and p.name.startswith("sys-")
+        ]
 
     def test_sys_roles_application_id(self):
         for role_dir in self.actual_dirs:
@@ -37,8 +39,7 @@ class TestSysRolesApplicationId(unittest.TestCase):
                     Path(vars_file).is_file(),
                     f"Missing vars/main.yml for invokable role {prefix}",
                 )
-                with Path(vars_file).open() as f:
-                    content = yaml.safe_load(f) or {}
+                content = load_yaml_any(vars_file) or {}
                 self.assertIn(
                     "application_id",
                     content,
@@ -48,8 +49,7 @@ class TestSysRolesApplicationId(unittest.TestCase):
                 # if exists, must not contain id
                 if not Path(vars_file).is_file():
                     continue
-                with Path(vars_file).open() as f:
-                    content = yaml.safe_load(f) or {}
+                content = load_yaml_any(vars_file) or {}
                 self.assertNotIn(
                     "application_id",
                     content,

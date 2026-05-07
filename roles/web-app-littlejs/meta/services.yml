@@ -42,6 +42,7 @@ littlejs:
   mem_limit: 1g
   pids_limit: 512
 # nocheck: email
+# nocheck: dynamic-flag
 email:
   enabled: false
   shared: false

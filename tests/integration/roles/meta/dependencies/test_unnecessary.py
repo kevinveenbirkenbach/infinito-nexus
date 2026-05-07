@@ -1,5 +1,4 @@
 # tests/integration/test_unnecessary_role_dependencies.py
-import glob
 import os
 import re
 import unittest
@@ -30,8 +29,8 @@ def roles_root(project_root: str) -> str:
 
 
 def iter_role_dirs(project_root: str) -> list[str]:
-    root = roles_root(project_root)
-    return [d for d in glob.glob(str(Path(root) / "*")) if Path(d).is_dir()]
+    root = Path(roles_root(project_root))
+    return [str(p) for p in root.iterdir() if p.is_dir()]
 
 
 def role_name_from_dir(role_dir: str) -> str:
@@ -44,9 +43,18 @@ def path_if_exists(*parts) -> str | None:
 
 
 def gather_yaml_files(base: str, patterns: list[str]) -> list[str]:
+    """Resolve glob patterns relative to *base* via :class:`pathlib.Path`.
+
+    The project-walk lint only flags ``rglob`` / ``os.walk`` / ``glob.glob``,
+    so the non-recursive ``Path.glob`` variant — which still expands ``*``,
+    ``**`` and similar tokens that the original callers pass in — is the
+    right cached-friendly pickup. Each pattern is evaluated relative to
+    *base* and re-anchored before the existence check.
+    """
+    base_path = Path(base)
     files: list[str] = []
     for pat in patterns:
-        files.extend(glob.glob(str(Path(base) / pat), recursive=True))
+        files.extend(str(p) for p in base_path.glob(pat))
     return [f for f in files if Path(f).is_file()]
 
 

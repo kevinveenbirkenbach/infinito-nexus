@@ -1,20 +1,29 @@
-import glob
 import re
 import unittest
 from pathlib import Path
 
 import yaml
 
+from utils.cache.files import iter_project_files
 from utils.cache.yaml import load_yaml_all
 
 
 def find_role_task_yml_files(root_dir):
+    """Yield ``.yml`` / ``.yaml`` files under ``<root>/roles/*/tasks/``.
+
+    Routes through the cached project walk so the search shares the same
+    file list every other lint/integration test uses.
     """
-    Find all .yml or .yaml files under roles/*/tasks directories from project root.
-    """
-    pattern_yml = str(Path(root_dir) / "roles" / "*" / "tasks" / "*.yml")
-    pattern_yaml = str(Path(root_dir) / "roles" / "*" / "tasks" / "*.yaml")
-    return glob.glob(pattern_yml) + glob.glob(pattern_yaml)
+    roles_prefix = str(Path(root_dir) / "roles") + "/"
+    matches: list[str] = []
+    for path_str in iter_project_files(extensions=(".yml", ".yaml")):
+        if not path_str.startswith(roles_prefix):
+            continue
+        rel = path_str[len(roles_prefix) :].split("/")
+        # roles/<role>/tasks/<file>
+        if len(rel) == 3 and rel[1] == "tasks":
+            matches.append(path_str)
+    return matches
 
 
 class RunOnceInclusionTest(unittest.TestCase):

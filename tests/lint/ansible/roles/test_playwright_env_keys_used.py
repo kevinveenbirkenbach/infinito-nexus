@@ -24,14 +24,13 @@ import unittest
 from collections.abc import Iterable
 from pathlib import Path
 
-from utils.cache.files import read_text
+from utils.cache.files import iter_project_files, read_text
+
+from . import PROJECT_ROOT
 
 
 def _repo_root() -> Path:
-    for candidate in Path(__file__).resolve().parents:
-        if (candidate / "pyproject.toml").is_file():
-            return candidate
-    raise AssertionError("Repository root not found from test path.")
+    return PROJECT_ROOT
 
 
 _KEY_LHS_RE = re.compile(r"^([A-Z_][A-Z0-9_]*)\s*=")
@@ -94,7 +93,12 @@ def _key_referenced(key: str, sources: Iterable[str]) -> bool:
 
 
 def _read_js_sources(directory: Path) -> list[str]:
-    return [read_text(str(p)) for p in sorted(directory.rglob("*.js"))]
+    dir_prefix = str(directory) + "/"
+    return [
+        read_text(p)
+        for p in sorted(iter_project_files(extensions=(".js",)))
+        if p.startswith(dir_prefix)
+    ]
 
 
 class TestPlaywrightEnvKeysUsed(unittest.TestCase):

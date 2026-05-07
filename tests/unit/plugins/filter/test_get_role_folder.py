@@ -3,10 +3,10 @@ import tempfile
 import unittest
 from pathlib import Path
 
-import yaml
 from ansible.errors import AnsibleFilterError
 
 from plugins.filter.get_role import get_role
+from utils.cache.yaml import dump_yaml
 
 
 class TestGetRoleFolder(unittest.TestCase):
@@ -19,14 +19,12 @@ class TestGetRoleFolder(unittest.TestCase):
         # Role1: matching application_id
         role1_path = str(Path(self.roles_dir) / "role1" / "vars")
         Path(role1_path).mkdir(parents=True)
-        with Path(str(Path(role1_path) / "main.yml")).open("w") as f:
-            yaml.dump({"application_id": "app-123"}, f)
+        dump_yaml(str(Path(role1_path) / "main.yml"), {"application_id": "app-123"})
 
         # Role2: non-matching application_id
         role2_path = str(Path(self.roles_dir) / "role2" / "vars")
         Path(role2_path).mkdir(parents=True)
-        with Path(str(Path(role2_path) / "main.yml")).open("w") as f:
-            yaml.dump({"application_id": "app-456"}, f)
+        dump_yaml(str(Path(role2_path) / "main.yml"), {"application_id": "app-456"})
 
         # Role3: missing vars directory
         Path(str(Path(self.roles_dir) / "role3")).mkdir(parents=True)

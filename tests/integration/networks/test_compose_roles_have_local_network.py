@@ -3,11 +3,9 @@ own local subnet under ``meta/server.yml.networks.local.subnet``."""
 
 from __future__ import annotations
 
-import glob
 import unittest
-from pathlib import Path
 
-import yaml
+from utils.cache.yaml import load_yaml_any
 
 
 class TestComposeRolesHaveLocalNetwork(unittest.TestCase):
@@ -16,35 +14,33 @@ class TestComposeRolesHaveLocalNetwork(unittest.TestCase):
         from . import PROJECT_ROOT
 
         cls.repo_root = str(PROJECT_ROOT)
-        cls.roles_dir = str(PROJECT_ROOT / "roles")
+        cls.roles_dir = PROJECT_ROOT / "roles"
 
     def test_every_compose_role_with_application_id_has_local_network(self):
         missing = []
 
-        for role_path in sorted(glob.glob(str(Path(self.roles_dir) / "*"))):
-            if not Path(role_path).is_dir():
+        for role_path in sorted(self.roles_dir.iterdir()):
+            if not role_path.is_dir():
                 continue
 
-            role_name = Path(role_path).name
-            compose_template = str(Path(role_path) / "templates" / "compose.yml.j2")
-            if not Path(compose_template).is_file():
+            role_name = role_path.name
+            compose_template = role_path / "templates" / "compose.yml.j2"
+            if not compose_template.is_file():
                 continue
 
-            vars_file = str(Path(role_path) / "vars" / "main.yml")
-            if not Path(vars_file).is_file():
+            vars_file = role_path / "vars" / "main.yml"
+            if not vars_file.is_file():
                 continue
 
-            with Path(vars_file).open(encoding="utf-8") as f:
-                vars_data = yaml.safe_load(f) or {}
+            vars_data = load_yaml_any(str(vars_file)) or {}
             application_id = vars_data.get("application_id")
             if not application_id:
                 continue
 
-            server_file = str(Path(role_path) / "meta" / "server.yml")
+            server_file = role_path / "meta" / "server.yml"
             subnet = None
-            if Path(server_file).is_file():
-                with Path(server_file).open(encoding="utf-8") as f:
-                    server_data = yaml.safe_load(f) or {}
+            if server_file.is_file():
+                server_data = load_yaml_any(str(server_file)) or {}
                 networks = server_data.get("networks") or {}
                 local = networks.get("local") if isinstance(networks, dict) else None
                 if isinstance(local, dict):

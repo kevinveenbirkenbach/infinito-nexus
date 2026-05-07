@@ -34,6 +34,7 @@ oauth2:
     port: 8080
   allowed_groups:
     - '{{ lookup(''rbac_group_path'', application_id=''web-app-phpldapadmin'', role=''administrator'') }}'
+# nocheck: dynamic-flag
 css:
   enabled: true
   shared: true

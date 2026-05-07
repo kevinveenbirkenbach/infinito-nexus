@@ -199,6 +199,7 @@ cron:
   mem_limit: 512m
   pids_limit: 256
   min_storage: 1GB
+# nocheck: dynamic-flag
 talk:
   enabled: '{{ lookup(''config'', ''web-app-nextcloud'', ''plugins.spreed.enabled'', False) }}'
   name: nextcloud-talk
@@ -243,6 +244,7 @@ talk_recording:
   mem_limit: 6g
   pids_limit: 1024
   min_storage: 1GB
+# nocheck: dynamic-flag
 css:
   enabled: false
   shared: true

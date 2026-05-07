@@ -7,7 +7,11 @@ from typing import Any
 
 import yaml
 
-from utils.cache.files import iter_project_files_with_content, read_text
+from utils.cache.files import (  # noqa: F401  read_text retained for parity with other lint helpers
+    iter_project_files_with_content,
+    read_text,
+)
+from utils.cache.yaml import load_yaml_all_str, load_yaml_any
 
 from . import PROJECT_ROOT
 
@@ -147,7 +151,7 @@ class TestNoShPipefailInAnsibleTasks(unittest.TestCase):
             if not rel.startswith("roles/"):
                 continue
             try:
-                docs = list(yaml.safe_load_all(content))
+                docs = list(load_yaml_all_str(content))
             except yaml.YAMLError:
                 continue
             for doc in docs:
@@ -189,7 +193,7 @@ class TestNoShPipefailInAnsibleTasks(unittest.TestCase):
             f"Expected {GLOBAL_GROUP_VARS_PATH} to exist with "
             "`ansible_shell_executable: /bin/bash`.",
         )
-        data = yaml.safe_load(read_text(str(path))) or {}
+        data = load_yaml_any(str(path), default_if_missing={}) or {}
         value = data.get("ansible_shell_executable")
         self.assertEqual(
             value,

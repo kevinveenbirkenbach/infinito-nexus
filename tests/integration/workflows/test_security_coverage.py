@@ -3,9 +3,8 @@ import os
 import unittest
 from pathlib import Path
 
-import yaml
-
 from utils.cache.files import iter_project_files
+from utils.cache.yaml import load_yaml_any
 
 from . import PROJECT_ROOT
 
@@ -42,8 +41,7 @@ CODEQL_PATH_INDICATORS: dict[str, list[str]] = {
 
 
 def _load_active_languages() -> set[str]:
-    with Path(SECURITY_WORKFLOW_PATH).open() as fh:
-        data = yaml.safe_load(fh)
+    data = load_yaml_any(str(SECURITY_WORKFLOW_PATH))
 
     include = data["jobs"]["analyze"]["strategy"]["matrix"]["include"]
     return {

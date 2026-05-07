@@ -33,6 +33,17 @@
       enabled: true
       shared: true
 
+# Variant 2 (false-pinning) — siblings opted out so the
+# variant-coverage matrix exercises the out-of-group_names branch
+# of every dynamic services flag.
+- services:
+    mastodon:
+      enabled: false
+      shared: false
+    friendica:
+      enabled: false
+      shared: false
+
 - services:
     mastodon:
       enabled: true

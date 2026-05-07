@@ -18,15 +18,18 @@
     matomo:
       enabled: true
       shared: true
+    oauth2:
+      enabled: true
+      shared: true
     prometheus:
+      enabled: true
+      shared: true
+    ldap:
       enabled: true
       shared: true
 
 # variant pinning every dynamic services.yml flag to false so the
 # matrix also exercises the out-of-group_names branch.
-    ldap:
-      enabled: true
-      shared: true
 - services:
     dashboard:
       enabled: false
@@ -42,9 +45,22 @@
     matomo:
       enabled: false
       shared: false
+    oauth2:
+      enabled: false
+      shared: false
     prometheus:
       enabled: false
       shared: false
     ldap:
+      enabled: false
+      shared: false
+
+# LDAP-only variant per req-018: ldap on, oauth2 off so the
+# Playwright spec exercises the LDAP-bind login path.
+- services:
+    ldap:
+      enabled: true
+      shared: true
+    oauth2:
       enabled: false
       shared: false

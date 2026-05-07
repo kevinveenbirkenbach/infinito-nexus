@@ -16,6 +16,9 @@
     matomo:
       enabled: true
       shared: true
+    oauth2:
+      enabled: true
+      shared: true
     prometheus:
       enabled: true
       shared: true
@@ -33,6 +36,9 @@
       enabled: false
       shared: false
     matomo:
+      enabled: false
+      shared: false
+    oauth2:
       enabled: false
       shared: false
     prometheus:

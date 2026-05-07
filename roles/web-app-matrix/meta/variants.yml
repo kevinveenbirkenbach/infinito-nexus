@@ -13,6 +13,9 @@
     logout:
       enabled: true
       shared: true
+    matomo:
+      enabled: true
+      shared: true
     oidc:
       enabled: true
       shared: true
@@ -32,6 +35,9 @@
       enabled: false
       shared: false
     logout:
+      enabled: false
+      shared: false
+    matomo:
       enabled: false
       shared: false
     oidc:

@@ -4,10 +4,8 @@ non-overlapping across the role tree."""
 
 from __future__ import annotations
 
-import glob
 import ipaddress
 import unittest
-from pathlib import Path
 
 from utils.cache.yaml import load_yaml_any
 
@@ -18,16 +16,16 @@ class TestNetworksUniqueValidAndMapped(unittest.TestCase):
         from . import PROJECT_ROOT
 
         cls.repo_root = str(PROJECT_ROOT)
-        cls.roles_dir = str(PROJECT_ROOT / "roles")
+        cls.roles_dir = PROJECT_ROOT / "roles"
 
         cls.role_to_subnet: dict[str, ipaddress.IPv4Network] = {}
-        for role_path in sorted(glob.glob(str(Path(cls.roles_dir) / "*"))):
-            if not Path(role_path).is_dir():
+        for role_path in sorted(cls.roles_dir.iterdir()):
+            if not role_path.is_dir():
                 continue
-            server_file = str(Path(role_path) / "meta" / "server.yml")
-            if not Path(server_file).is_file():
+            server_file = role_path / "meta" / "server.yml"
+            if not server_file.is_file():
                 continue
-            server_data = load_yaml_any(server_file) or {}
+            server_data = load_yaml_any(str(server_file)) or {}
             networks = server_data.get("networks") or {}
             if not isinstance(networks, dict):
                 continue
@@ -38,13 +36,12 @@ class TestNetworksUniqueValidAndMapped(unittest.TestCase):
             if not isinstance(subnet, str):
                 continue
             try:
-                cls.role_to_subnet[Path(role_path).name] = ipaddress.IPv4Network(
+                cls.role_to_subnet[role_path.name] = ipaddress.IPv4Network(
                     subnet.strip()
                 )
             except (ValueError, ipaddress.AddressValueError) as exc:
                 raise AssertionError(
-                    f"Invalid subnet for role '{Path(role_path).name}': "
-                    f"{subnet!r} ({exc})"
+                    f"Invalid subnet for role '{role_path.name}': {subnet!r} ({exc})"
                 ) from exc
 
     def test_unique_subnets(self):

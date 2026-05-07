@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-import glob
 import os
 import unittest
 from pathlib import Path
@@ -34,13 +33,15 @@ class TestSystemServiceIdMatchesRole(unittest.TestCase):
 
         for role in sorted(role_dirs):
             with self.subTest(role=role):
-                vars_dir = str(Path(self.roles_dir) / role / "vars")
-                if not Path(vars_dir).is_dir():
+                vars_dir = Path(self.roles_dir) / role / "vars"
+                if not vars_dir.is_dir():
                     continue
 
-                candidates = []
-                candidates.extend(glob.glob(str(Path(vars_dir) / "main.yml")))
-                candidates.extend(glob.glob(str(Path(vars_dir) / "main.yaml")))
+                candidates = [
+                    str(vars_dir / name)
+                    for name in ("main.yml", "main.yaml")
+                    if (vars_dir / name).is_file()
+                ]
                 if not candidates:
                     continue
 

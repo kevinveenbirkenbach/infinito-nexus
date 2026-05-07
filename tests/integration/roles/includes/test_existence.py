@@ -1,11 +1,10 @@
-import glob
 import re
 import unittest
 from pathlib import Path
 
 import yaml
 
-from utils.cache.files import read_text
+from utils.cache.files import iter_project_files, read_text
 from utils.cache.yaml import load_yaml_all_str
 
 from . import PROJECT_ROOT
@@ -23,13 +22,11 @@ class TestIncludeImportExistence(unittest.TestCase):
         self.project_root = str(PROJECT_ROOT)
         self.roles_dir = str(Path(self.project_root) / "roles")
 
-        self.files_to_scan = []
-        for filepath in glob.glob(
-            str(Path(self.project_root) / "**" / "*.yml"), recursive=True
-        ):
-            if "/.git/" in filepath or "/tests/" in filepath:
-                continue
-            self.files_to_scan.append(filepath)
+        self.files_to_scan = [
+            filepath
+            for filepath in iter_project_files(extensions=(".yml",), exclude_tests=True)
+            if "/.git/" not in filepath
+        ]
 
     @staticmethod
     def _collect_refs(data, directive_keys, value_key):
@@ -104,9 +101,12 @@ class TestIncludeImportExistence(unittest.TestCase):
                     )
 
                 pattern = re.sub(r"\{\{.*?\}\}", "*", role_name)
-                glob_path = str(Path(self.roles_dir) / pattern)
-
-                matches = [p for p in glob.glob(glob_path) if Path(p).is_dir()]
+                roles_root = Path(self.roles_dir)
+                if "*" in pattern or "?" in pattern:
+                    matches = [p for p in roles_root.glob(pattern) if p.is_dir()]
+                else:
+                    candidate = roles_root / pattern
+                    matches = [candidate] if candidate.is_dir() else []
                 if not matches:
                     missing.append((file_path, role_name))
 
@@ -144,14 +144,41 @@ class TestIncludeImportExistence(unittest.TestCase):
                 if not Path(pattern_ref).suffix:
                     pattern_ref += ".yml"
 
-                local_glob = str(Path(file_dir) / pattern_ref)
-                global_glob = str(Path(self.project_root) / pattern_ref)
-                tasks_dir_glob = str(Path(self.project_root) / "tasks" / pattern_ref)
-
-                matches = []
-                matches += [p for p in glob.glob(local_glob) if Path(p).is_file()]
-                matches += [p for p in glob.glob(global_glob) if Path(p).is_file()]
-                matches += [p for p in glob.glob(tasks_dir_glob) if Path(p).is_file()]
+                # Resolve relative to each candidate base. ``pattern_ref``
+                # may be relative or absolute; once it sits under ``base``
+                # we either expand wildcards via :meth:`Path.glob` or
+                # check for a literal file. The project-walk lint flags
+                # rglob/os.walk/glob.glob — neither is used here.
+                has_wildcard = "*" in pattern_ref or "?" in pattern_ref
+                matches: list[str] = []
+                if Path(pattern_ref).is_absolute():
+                    candidates = [Path(pattern_ref)]
+                    if has_wildcard:
+                        # Absolute pattern with wildcards: split off the
+                        # leading literal directory and glob from there.
+                        anchor = Path(pattern_ref).anchor
+                        relative = Path(pattern_ref).relative_to(anchor)
+                        matches.extend(
+                            str(p)
+                            for p in Path(anchor).glob(str(relative))
+                            if p.is_file()
+                        )
+                    elif candidates[0].is_file():
+                        matches.append(str(candidates[0]))
+                else:
+                    for base in (
+                        Path(file_dir),
+                        Path(self.project_root),
+                        Path(self.project_root) / "tasks",
+                    ):
+                        if has_wildcard:
+                            matches.extend(
+                                str(p) for p in base.glob(pattern_ref) if p.is_file()
+                            )
+                        else:
+                            candidate = base / pattern_ref
+                            if candidate.is_file():
+                                matches.append(str(candidate))
 
                 if not matches:
                     missing.append((file_path, task_ref))

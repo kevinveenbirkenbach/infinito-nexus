@@ -1,12 +1,13 @@
 from __future__ import annotations
 
-import os
 import re
 import subprocess
 import unittest
 from collections.abc import Sequence
 from dataclasses import dataclass
 from pathlib import Path
+
+from utils.cache.files import iter_project_files
 
 from . import PROJECT_ROOT
 
@@ -176,17 +177,20 @@ def git_ls_files(root: Path) -> list[Path]:
         rels = [p for p in out.decode("utf-8", errors="replace").split("\0") if p]
         return [root / p for p in rels]
     except Exception:
+        # Fallback to the cached project walk so the lint guard does not
+        # need to step around a raw os.walk here. The whitelist filter is
+        # applied per-file (instead of pruning directories) which is
+        # functionally identical because the only things we pruned in the
+        # original walk were entire whitelisted subtrees.
         results: list[Path] = []
-        for r, dirs, files in os.walk(root):
-            pruned = []
-            for d in list(dirs):
-                rel = (Path(r) / d).relative_to(root).as_posix()
-                if any(fragment in f"/{rel}/" for fragment in WHITELIST_PATH_FRAGMENTS):
-                    pruned.append(d)
-            for d in pruned:
-                dirs.remove(d)
-
-            results.extend(Path(r) / f for f in files)
+        for path_str in iter_project_files():
+            try:
+                rel = Path(path_str).relative_to(root).as_posix()
+            except ValueError:
+                continue
+            if any(fragment in f"/{rel}/" for fragment in WHITELIST_PATH_FRAGMENTS):
+                continue
+            results.append(Path(path_str))
         return results
 
 

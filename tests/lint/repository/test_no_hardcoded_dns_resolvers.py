@@ -16,10 +16,9 @@ import re
 import unittest
 from pathlib import Path
 
-import yaml
-
 from utils.annotations.suppress import is_suppressed_at
 from utils.cache.files import PROJECT_ROOT, iter_project_files, read_text
+from utils.cache.yaml import load_yaml_any
 
 _NETWORKS_FILE = PROJECT_ROOT / "group_vars" / "all" / "08_networks.yml"
 
@@ -41,8 +40,7 @@ _EXTRA_PATHS = (PROJECT_ROOT / "compose" / "coredns" / "Corefile.tmpl",)
 
 
 def _load_resolver_ips() -> list[str]:
-    text = _NETWORKS_FILE.read_text(encoding="utf-8")
-    data = yaml.safe_load(text) or {}
+    data = load_yaml_any(str(_NETWORKS_FILE)) or {}
     resolvers = data.get("NETWORK_PUBLIC_DNS_RESOLVERS")
     if not isinstance(resolvers, list):
         raise TypeError(

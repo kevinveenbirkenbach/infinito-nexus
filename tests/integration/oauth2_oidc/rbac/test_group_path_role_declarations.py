@@ -49,6 +49,9 @@ from pathlib import Path
 
 import yaml
 
+from utils.cache.files import iter_project_files
+from utils.cache.yaml import load_yaml_any
+
 from . import PROJECT_ROOT
 
 ROLES_DIR = str(PROJECT_ROOT / "roles")
@@ -136,9 +139,8 @@ def _declared_roles(application_id):
     declared = {IMPLICIT_ADMIN_ROLE}
     rbac_yml = str(Path(role_dir) / "meta" / "rbac.yml")
     if Path(rbac_yml).is_file():
-        text = _read_text(rbac_yml) or ""
         try:
-            data = yaml.safe_load(text) or {}
+            data = load_yaml_any(rbac_yml) or {}
         except yaml.YAMLError:
             data = {}
         roles_block = (data.get("roles") if isinstance(data, dict) else None) or {}
@@ -162,22 +164,27 @@ def _enclosing_role_dir(file_path):
 def _iter_callsites():
     """Yield (rel_path, line_no, application_id_repr, role_repr, raw_kwargs)
     for every rbac_group_path lookup call under roles/."""
-    for dirpath, dirnames, filenames in os.walk(ROLES_DIR):
-        # Skip vendored caches if they ever leak under roles/.
-        dirnames[:] = [d for d in dirnames if d not in {"__pycache__", "node_modules"}]
-        for filename in filenames:
-            if not filename.endswith(SCAN_EXTENSIONS):
-                continue
-            abs_path = str(Path(dirpath) / filename)
-            rel_path = os.path.relpath(abs_path, PROJECT_ROOT)
-            if rel_path in EXCLUDED_RELATIVE_PATHS:
-                continue
-            text = _read_text(abs_path)
-            if not text or "rbac_group_path" not in text:
-                continue
-            for call in LOOKUP_CALL.finditer(text):
-                kwargs_blob = call.group("kwargs")
-                yield rel_path, abs_path, _line_of(text, call.start()), kwargs_blob
+    roles_prefix = str(ROLES_DIR) + os.sep
+    for abs_path in iter_project_files(extensions=SCAN_EXTENSIONS):
+        if not abs_path.startswith(roles_prefix):
+            continue
+        if any(
+            seg in abs_path
+            for seg in (
+                os.sep + "__pycache__" + os.sep,
+                os.sep + "node_modules" + os.sep,
+            )
+        ):
+            continue
+        rel_path = os.path.relpath(abs_path, PROJECT_ROOT)
+        if rel_path in EXCLUDED_RELATIVE_PATHS:
+            continue
+        text = _read_text(abs_path)
+        if not text or "rbac_group_path" not in text:
+            continue
+        for call in LOOKUP_CALL.finditer(text):
+            kwargs_blob = call.group("kwargs")
+            yield rel_path, abs_path, _line_of(text, call.start()), kwargs_blob
 
 
 class TestRbacGroupPathRoleDeclarations(unittest.TestCase):

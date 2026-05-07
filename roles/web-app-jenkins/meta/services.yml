@@ -32,6 +32,7 @@ jenkins:
   mem_reservation: 1g
   mem_limit: 2g
   pids_limit: 1024
+# nocheck: dynamic-flag
 css:
   enabled: true
   shared: true

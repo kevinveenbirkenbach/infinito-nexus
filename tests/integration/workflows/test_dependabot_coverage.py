@@ -1,11 +1,11 @@
 import fnmatch
-import os
 import subprocess
 import unittest
 from collections.abc import Iterable
 from pathlib import Path
 
-import yaml
+from utils.cache.files import iter_non_ignored_files
+from utils.cache.yaml import load_yaml_any
 
 from . import PROJECT_ROOT
 
@@ -120,8 +120,7 @@ def _dir_covers(dep_dir: str, file_rel_dir: str) -> bool:
 
 
 def _load_active_entries() -> list[dict]:
-    with Path(DEPENDABOT_PATH).open() as fh:
-        data = yaml.safe_load(fh)
+    data = load_yaml_any(str(DEPENDABOT_PATH)) or {}
     return data.get("updates", [])
 
 
@@ -198,30 +197,36 @@ def _is_gitignored(rel_file: str, filename: str, patterns: Iterable[str]) -> boo
 
 
 def _walk_fallback() -> list[str]:
-    patterns = _load_gitignore_patterns()
+    """Project-tree walk that mirrors git's tracked-file view.
+
+    Routes through :func:`utils.cache.files.iter_non_ignored_files`, which
+    composes the cached project walk with the canonical gitignore matcher,
+    then layers the SKIP_DIRS / hidden-dir filters this test still needs
+    (``iter_non_ignored_files`` does not strip ``.git``-style metadata
+    directories on its own).
+    """
     files: list[str] = []
-    for root, dirs, filenames in os.walk(PROJECT_ROOT):
-        rel_root = os.path.relpath(root, PROJECT_ROOT)
-        top_segment = "" if rel_root == "." else rel_root.split(os.sep, 1)[0]
-
-        dirs[:] = [
-            d
-            for d in dirs
-            if d not in SKIP_DIRS
-            and not (d.startswith(".") and d not in SCANNED_HIDDEN_DIRS)
-            and not _is_gitignored(
-                d if rel_root == "." else str(Path(rel_root) / d), d, patterns
-            )
-        ]
-
-        if top_segment in SKIP_DIRS:
+    for abs_path in iter_non_ignored_files():
+        try:
+            rel_path = Path(abs_path).relative_to(PROJECT_ROOT)
+        except ValueError:
             continue
-
-        for filename in filenames:
-            rel_file = filename if rel_root == "." else str(Path(rel_root) / filename)
-            if _is_gitignored(rel_file, filename, patterns):
-                continue
-            files.append(rel_file)
+        parts = rel_path.parts
+        skip = False
+        for i, part in enumerate(parts):
+            if part in SKIP_DIRS:
+                skip = True
+                break
+            if (
+                part.startswith(".")
+                and part not in SCANNED_HIDDEN_DIRS
+                and i < len(parts) - 1
+            ):
+                skip = True
+                break
+        if skip:
+            continue
+        files.append(rel_path.as_posix())
     return files
 
 

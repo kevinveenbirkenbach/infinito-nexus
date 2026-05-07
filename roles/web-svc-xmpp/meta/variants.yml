@@ -7,18 +7,36 @@
 
 # variant 0: OIDC variant (canonical default; ejabberd LDAP backend
 # stays on, OIDC marker is on so Playwright runs the OIDC scenario).
-
 - services:
     ldap:
       shared: true
       enabled: true
+    oidc:
+      enabled: true
+      shared: true
     prometheus:
       enabled: true
       shared: true
+
+# variant 1: every dynamic flag off — auth-coverage matrix's
+# false-pinning branch.
 - services:
     ldap:
       shared: false
       enabled: false
+    oidc:
+      enabled: false
+      shared: false
     prometheus:
+      enabled: false
+      shared: false
+
+# variant 2 (req-018): LDAP-only branch — ejabberd stays bound to
+# the project LDAP store while OIDC stays opted out.
+- services:
+    ldap:
+      shared: true
+      enabled: true
+    oidc:
       enabled: false
       shared: false

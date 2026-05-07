@@ -5,8 +5,7 @@ import tempfile
 import unittest
 from pathlib import Path
 
-import yaml
-
+from utils.cache.yaml import dump_yaml
 from utils.valid_deploy_id import ValidDeployId
 
 
@@ -35,8 +34,7 @@ class TestValidDeployId(unittest.TestCase):
     def _write_yaml_inventory(self, data) -> str:
         fd, path = tempfile.mkstemp(suffix=".yml")
         os.close(fd)
-        with Path(path).open("w", encoding="utf-8") as f:
-            yaml.safe_dump(data, f)
+        dump_yaml(path, data)
         return path
 
     def test_valid_in_roles_and_ini_inventory(self) -> None:

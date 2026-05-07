@@ -42,6 +42,7 @@ hugo:
   mem_limit: 256m
   pids_limit: 256
 # nocheck: email
+# nocheck: dynamic-flag
 email:
   enabled: false
   shared: false

@@ -1,17 +1,18 @@
+import os
 import tempfile
 import unittest
 from pathlib import Path
 
-import yaml
-
 from plugins.filter.invokable_paths import get_non_invokable_paths
+from utils.cache.yaml import dump_yaml
 
 
 class TestNonInvokablePaths(unittest.TestCase):
     def write_yaml(self, data):
-        with tempfile.NamedTemporaryFile(mode="w", delete=False, suffix=".yml") as tmp:
-            yaml.dump(data, tmp)
-        return tmp.name
+        fd, path = tempfile.mkstemp(suffix=".yml")
+        os.close(fd)
+        dump_yaml(path, data)
+        return path
 
     def test_empty_roles(self):
         path = self.write_yaml({})

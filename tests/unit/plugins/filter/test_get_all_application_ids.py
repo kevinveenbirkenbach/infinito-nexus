@@ -2,9 +2,8 @@ import tempfile
 import unittest
 from pathlib import Path
 
-import yaml
-
 from plugins.filter.get_all_application_ids import get_all_application_ids
+from utils.cache.yaml import dump_yaml
 
 
 class TestGetAllApplicationIds(unittest.TestCase):
@@ -22,8 +21,7 @@ class TestGetAllApplicationIds(unittest.TestCase):
         # Helper to create roles/<role_name>/vars/main.yml with given dict
         path = str(Path(self.roles_dir) / role_name / "vars")
         Path(path).mkdir(parents=True, exist_ok=True)
-        with Path(str(Path(path) / "main.yml")).open("w", encoding="utf-8") as f:
-            yaml.safe_dump(data, f)
+        dump_yaml(str(Path(path) / "main.yml"), data)
 
     def test_single_application_id(self):
         self.create_role("role1", {"application_id": "app1"})

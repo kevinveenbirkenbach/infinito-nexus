@@ -3,7 +3,7 @@ from collections.abc import Iterable
 from pathlib import Path
 from typing import Any
 
-from utils.cache.files import read_text
+from utils.cache.files import iter_project_files, read_text
 from utils.cache.yaml import load_yaml_all_str
 
 from . import PROJECT_ROOT
@@ -159,17 +159,19 @@ def _find_task_files(repo_root: Path) -> list[Path]:
     task_files: list[Path] = []
 
     roles_dir = repo_root / "roles"
-    if roles_dir.is_dir():
-        for role in roles_dir.iterdir():
-            tasks_dir = role / "tasks"
-            if tasks_dir.is_dir():
-                task_files.extend(sorted(tasks_dir.rglob("*.yml")))
-                task_files.extend(sorted(tasks_dir.rglob("*.yaml")))
-
     top_tasks = repo_root / "tasks"
-    if top_tasks.is_dir():
-        task_files.extend(sorted(top_tasks.rglob("*.yml")))
-        task_files.extend(sorted(top_tasks.rglob("*.yaml")))
+    roles_prefix = str(roles_dir) + "/"
+    top_tasks_prefix = str(top_tasks) + "/"
+
+    for path_str in iter_project_files(extensions=(".yml", ".yaml")):
+        if path_str.startswith(roles_prefix):
+            rel = path_str[len(roles_prefix) :].split("/")
+            if len(rel) >= 3 and rel[1] == "tasks":
+                task_files.append(Path(path_str))
+        elif path_str.startswith(top_tasks_prefix):
+            task_files.append(Path(path_str))
+
+    task_files.sort()
 
     # De-dup
     uniq: list[Path] = []

@@ -1,11 +1,12 @@
-import glob
 import re
 import unittest
 from collections.abc import Iterable
-from pathlib import Path
 from typing import Any
 
 import yaml
+
+from utils.cache.files import iter_project_files
+from utils.cache.yaml import load_yaml_all
 
 # ---------- YAML helpers ----------
 
@@ -15,12 +16,11 @@ def load_yaml_documents(path: str) -> list[Any]:
     Load one or more YAML documents from a file and return them as a list.
     Raises AssertionError with a helpful message on parse errors.
     """
-    with Path(path).open(encoding="utf-8") as f:
-        try:
-            docs = list(yaml.safe_load_all(f))
-            return [d for d in docs if d is not None]
-        except yaml.YAMLError as e:
-            raise AssertionError(f"YAML parsing error in {path}: {e}") from e
+    try:
+        docs = list(load_yaml_all(path))
+    except yaml.YAMLError as e:
+        raise AssertionError(f"YAML parsing error in {path}: {e}") from e
+    return [d for d in docs if d is not None]
 
 
 def _iter_task_like_entries(node: Any) -> Iterable[dict[str, Any]]:
@@ -234,20 +234,30 @@ class TestHandlersInvoked(unittest.TestCase):
         from . import PROJECT_ROOT
 
         self.roles_dir = str(PROJECT_ROOT / "roles")
+        roles_prefix = self.roles_dir + "/"
 
         # Handlers: only main.yml/main.yaml define handlers.
         # Other files under handlers/ are typically include_tasks/import_tasks
         # and contain regular tasks, not handler definitions.
-        self.handler_files = glob.glob(
-            str(Path(self.roles_dir) / "*/handlers/main.yml")
-        ) + glob.glob(str(Path(self.roles_dir) / "*/handlers/main.yaml"))
+        handler_suffixes = ("/handlers/main.yml", "/handlers/main.yaml")
+        self.handler_files = [
+            p
+            for p in iter_project_files(extensions=(".yml", ".yaml"))
+            if p.startswith(roles_prefix) and p.endswith(handler_suffixes)
+        ]
 
         # Tasks: recurse under tasks for both .yml and .yaml
-        self.task_files = glob.glob(
-            str(Path(self.roles_dir) / "*" / "tasks" / "**" / "*.yml"), recursive=True
-        ) + glob.glob(
-            str(Path(self.roles_dir) / "*" / "tasks" / "**" / "*.yaml"), recursive=True
-        )
+        def _is_role_tasks_file(p: str) -> bool:
+            if not p.startswith(roles_prefix):
+                return False
+            parts = p[len(roles_prefix) :].split("/")
+            return len(parts) >= 3 and parts[1] == "tasks"
+
+        self.task_files = [
+            p
+            for p in iter_project_files(extensions=(".yml", ".yaml"))
+            if _is_role_tasks_file(p)
+        ]
 
     def test_all_handlers_have_a_notifier_and_all_notifies_have_a_handler(self):
         # 1) Collect handler groups (name + listen) for each handler task

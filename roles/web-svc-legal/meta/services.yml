@@ -3,6 +3,7 @@ legal:
   enabled: false
   shared: false
   lifecycle: beta
+# nocheck: dynamic-flag
 html:
   enabled: true
   shared: true

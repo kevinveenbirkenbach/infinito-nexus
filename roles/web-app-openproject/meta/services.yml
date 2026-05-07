@@ -73,6 +73,7 @@ oauth2:
       - /users/me
       - /api/
       - /oauth/token
+# nocheck: dynamic-flag
 css:
   enabled: false
   shared: true

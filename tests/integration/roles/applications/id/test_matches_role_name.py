@@ -1,12 +1,10 @@
-import glob
 import unittest
 import warnings
 from pathlib import Path
 
-import yaml
-
 # import your filters
 from plugins.filter.invokable_paths import get_invokable_paths, get_non_invokable_paths
+from utils.cache.yaml import load_yaml_any
 
 
 class TestApplicationIdAndInvocability(unittest.TestCase):
@@ -27,18 +25,17 @@ class TestApplicationIdAndInvocability(unittest.TestCase):
         - Non-invokable roles must NOT have application_id (else fail).
         - If application_id exists but != folder name, warn and recommend aligning.
         """
-        for role_path in glob.glob(str(Path(self.roles_dir) / "*")):
-            if not Path(role_path).is_dir():
+        for role_path in Path(self.roles_dir).iterdir():
+            if not role_path.is_dir():
                 continue
 
-            role_name = Path(role_path).name
-            vars_main = str(Path(role_path) / "vars" / "main.yml")
+            role_name = role_path.name
+            vars_main = role_path / "vars" / "main.yml"
 
             # load vars/main.yml if it exists
             data = {}
-            if Path(vars_main).exists():
-                with Path(vars_main).open(encoding="utf-8") as f:
-                    data = yaml.safe_load(f) or {}
+            if vars_main.exists():
+                data = load_yaml_any(str(vars_main)) or {}
 
             app_id = data.get("application_id")
 

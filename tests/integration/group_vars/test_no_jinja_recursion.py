@@ -1,9 +1,8 @@
 import re
 import unittest
 from collections import defaultdict
-from pathlib import Path
 
-import yaml
+from utils.cache.yaml import load_yaml_any
 
 from . import PROJECT_ROOT
 
@@ -22,8 +21,7 @@ def load_all_yaml():
     """
     result = {}
     for yaml_path in GROUPVARS_DIR.glob("*.yml"):
-        with Path(yaml_path).open(encoding="utf-8") as fh:
-            data = yaml.safe_load(fh) or {}
+        data = load_yaml_any(str(yaml_path)) or {}
         for k, v in data.items():
             base = k
             for p in ("defaults_", "default_"):

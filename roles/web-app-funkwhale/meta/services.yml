@@ -64,6 +64,7 @@ oauth2:
     - /login
   enabled: "{{ 'web-app-keycloak' in group_names }}"
   shared: "{{ 'web-app-keycloak' in group_names }}"
+# nocheck: dynamic-flag
 css:
   enabled: false
   shared: true

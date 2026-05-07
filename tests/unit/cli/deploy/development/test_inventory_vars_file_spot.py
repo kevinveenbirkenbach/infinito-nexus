@@ -20,6 +20,7 @@ import unittest
 from pathlib import Path
 
 from cli.deploy.development.common import DEV_INVENTORY_VARS_FILE
+from utils.cache.files import iter_project_files, read_text
 
 from . import PROJECT_ROOT
 
@@ -44,7 +45,7 @@ def _parse_bash_default(file_text: str) -> str:
 
 class TestInventoryVarsFileSpotDriftGuard(unittest.TestCase):
     def test_bash_default_matches_python_fallback(self):
-        bash_default = _parse_bash_default(INVENTORY_ENV_SH.read_text(encoding="utf-8"))
+        bash_default = _parse_bash_default(read_text(str(INVENTORY_ENV_SH)))
         self.assertEqual(
             bash_default,
             DEV_INVENTORY_VARS_FILE,
@@ -70,10 +71,13 @@ class TestInventoryVarsFileSpotDriftGuard(unittest.TestCase):
             "inventories/development/default.yml",
         }
         offenders: list[str] = []
-        for path in PROJECT_ROOT.rglob("*"):
-            if not path.is_file():
+        scan_extensions = (".py", ".sh", ".yml", ".yaml", ".j2", ".md")
+        for path_str in iter_project_files(extensions=scan_extensions):
+            path = Path(path_str)
+            try:
+                rel = path.relative_to(PROJECT_ROOT).as_posix()
+            except ValueError:
                 continue
-            rel = path.relative_to(PROJECT_ROOT).as_posix()
             if rel in allowed_relative:
                 continue
             # `iter_project_files` already prunes `.git`, `.venv`,
@@ -82,10 +86,8 @@ class TestInventoryVarsFileSpotDriftGuard(unittest.TestCase):
             # explicit fragment-prefix check for that one.
             if any(rel.startswith(prefix + "/") for prefix in (".mypy_cache",)):
                 continue
-            if path.suffix not in {".py", ".sh", ".yml", ".yaml", ".j2", ".md"}:
-                continue
             try:
-                text = path.read_text(encoding="utf-8")
+                text = read_text(path_str)
             except (OSError, UnicodeDecodeError):
                 continue
             if literal in text:

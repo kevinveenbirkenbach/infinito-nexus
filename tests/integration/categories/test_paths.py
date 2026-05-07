@@ -1,8 +1,6 @@
-import os
 import unittest
-from pathlib import Path
 
-import yaml
+from utils.cache.yaml import load_yaml_any
 
 from . import PROJECT_ROOT
 
@@ -11,12 +9,11 @@ class TestCategoryPaths(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         file_path = str(PROJECT_ROOT / "roles" / "categories.yml")
-        with Path(file_path).open() as f:
-            data = yaml.safe_load(f)
+        data = load_yaml_any(file_path)
         cls.roles_def = data["roles"]
 
-        roles_dir = str(PROJECT_ROOT / "roles")
-        cls.existing_dirs = os.listdir(roles_dir)
+        roles_dir = PROJECT_ROOT / "roles"
+        cls.existing_dirs = [p.name for p in roles_dir.iterdir()]
 
     def test_all_category_paths_exist(self):
         expected = set()

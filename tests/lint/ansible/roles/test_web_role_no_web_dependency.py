@@ -20,16 +20,11 @@ violates req-009 / req-010 expectations around per-role inclusion.
 """
 
 import unittest
-from pathlib import Path
 from typing import Any
 
 from utils.cache.yaml import load_yaml
 
 from . import PROJECT_ROOT
-
-
-def repo_root() -> Path:
-    return PROJECT_ROOT
 
 
 def _extract_dependency_role_names(raw: Any) -> list[str]:
@@ -88,7 +83,7 @@ class TestWebRoleNoWebDependency(unittest.TestCase):
     """`web-*` MUST NOT depend on another `web-*` via meta/main.yml."""
 
     def test_no_web_role_in_web_role_dependencies(self):
-        root = repo_root()
+        root = PROJECT_ROOT
         roles_dir = root / "roles"
         self.assertTrue(
             roles_dir.is_dir(), f"'roles' directory not found at: {roles_dir}"

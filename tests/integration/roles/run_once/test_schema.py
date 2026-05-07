@@ -1,10 +1,9 @@
-import glob
 import re
 import unittest
 from pathlib import Path
 
 from utils.annotations.suppress import is_suppressed_anywhere, line_has_rule
-from utils.cache.files import read_text
+from utils.cache.files import iter_project_files, read_text
 from utils.cache.yaml import load_yaml_str
 
 
@@ -57,8 +56,13 @@ class RunOnceSchemaTest(unittest.TestCase):
         project_root = str(PROJECT_ROOT)
         violations = []
 
-        pattern = str(Path(project_root) / "roles" / "*" / "tasks" / "main.yml")
-        for filepath in glob.glob(pattern):
+        roles_prefix = str(Path(project_root) / "roles") + "/"
+        main_files = (
+            p
+            for p in iter_project_files(extensions=(".yml",))
+            if p.startswith(roles_prefix) and p.endswith("/tasks/main.yml")
+        )
+        for filepath in main_files:
             role_name = Path(filepath).parts[-3]
             expected_suffix = role_name.lower().replace("-", "_")
 

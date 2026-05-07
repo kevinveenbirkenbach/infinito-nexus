@@ -1,10 +1,11 @@
-import glob
 import unittest
 from pathlib import Path
 
 from utils.annotations.suppress import line_has_rule
-from utils.cache.files import read_text
+from utils.cache.files import iter_project_files, read_text
 from utils.cache.yaml import load_yaml_any
+
+from . import PROJECT_ROOT
 
 
 class TestServiceSharedConsistency(unittest.TestCase):
@@ -56,12 +57,14 @@ class TestServiceSharedConsistency(unittest.TestCase):
         return exceptions
 
     def test_service_shared_consistency(self):
-        roles_dir = Path(__file__).resolve().parent.parent.parent.parent / "roles"
-        pattern = str(roles_dir / "*" / "meta" / "services.yml")
-        files = glob.glob(pattern)
-        self.assertTrue(
-            files, f"No config/main.yml files found with pattern: {pattern}"
+        roles_dir = PROJECT_ROOT / "roles"
+        roles_prefix = str(roles_dir) + "/"
+        files = sorted(
+            p
+            for p in iter_project_files(extensions=(".yml",))
+            if p.startswith(roles_prefix) and p.endswith("/meta/services.yml")
         )
+        self.assertTrue(files, f"No meta/services.yml files found under {roles_dir}")
 
         errors = []
 

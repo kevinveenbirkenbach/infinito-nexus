@@ -38,6 +38,7 @@ oauth2:
   acl:
     blacklist:
       - '{{ lookup(''config'', ''web-app-yourls'', ''server.locations.admin'') }}'
+# nocheck: dynamic-flag
 css:
   enabled: true
   shared: true

@@ -25,6 +25,9 @@ from __future__ import annotations
 
 import re
 import unittest
+from pathlib import Path
+
+from utils.cache.files import iter_project_files, read_text
 
 from . import PROJECT_ROOT
 
@@ -61,13 +64,20 @@ def _is_jinja_control_line(line: str) -> bool:
 class TestEnvPasswordsQuotedAndFiltered(unittest.TestCase):
     def test_password_env_vars_are_dotenv_quoted_without_double_quoting(self):
         root = PROJECT_ROOT
-        env_templates = sorted(root.rglob("env.j2"))
+        env_templates = sorted(
+            Path(p)
+            for p in iter_project_files(extensions=(".j2",))
+            if Path(p).name == "env.j2"
+        )
 
         failures: list[str] = []
 
         for path in env_templates:
             rel = path.relative_to(root)
-            lines = path.read_text(encoding="utf-8", errors="replace").splitlines()
+            try:
+                lines = read_text(str(path)).splitlines()
+            except (OSError, UnicodeDecodeError):
+                continue
 
             for lineno, line in enumerate(lines, start=1):
                 if not line.strip():

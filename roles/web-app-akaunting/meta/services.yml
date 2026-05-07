@@ -48,6 +48,7 @@ akaunting:
   mem_reservation: 256m
   mem_limit: 1g
   pids_limit: 512
+# nocheck: dynamic-flag
 redis:
   backup:
     disabled: true

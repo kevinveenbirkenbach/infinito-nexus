@@ -20,6 +20,8 @@ import re
 import unittest
 from pathlib import Path
 
+from utils.cache.files import read_text
+
 from . import PROJECT_ROOT
 
 _REPO_ROOT = PROJECT_ROOT
@@ -40,7 +42,7 @@ def _collect_dockerfiles() -> list[Path]:
 def _undeclared_from_args(dockerfile: Path) -> list[tuple[int, str, str]]:
     """Return a list of (line_no, from_line, var_name) for each ARG used in a
     FROM instruction that was not declared in the global scope."""
-    lines = dockerfile.read_text(encoding="utf-8").splitlines()
+    lines = read_text(str(dockerfile)).splitlines()
 
     # Pass 1 — collect ARGs declared before the first FROM (global scope)
     global_args: set[str] = set()

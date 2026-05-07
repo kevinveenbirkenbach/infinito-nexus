@@ -2,8 +2,6 @@ import sys
 import unittest
 from pathlib import Path
 
-import yaml
-
 sys.path.insert(
     0,
     str(
@@ -17,6 +15,8 @@ sys.path.insert(
 )
 
 from compose_mods import compose_mods
+
+from utils.cache.yaml import load_yaml_str
 
 
 def sort_dict(obj):
@@ -139,10 +139,10 @@ volumes:
 """
 
     def test_full_file_semantic_match(self):
-        actual_data = yaml.safe_load(
+        actual_data = load_yaml_str(
             compose_mods(self.original, self.docker_repository_path, self.env_file)
         )
-        expected_data = yaml.safe_load(self.expected)
+        expected_data = load_yaml_str(self.expected)
         for key in expected_data:
             self.assertIn(key, actual_data)
             self.assertEqual(sort_dict(actual_data[key]), sort_dict(expected_data[key]))

@@ -1,8 +1,7 @@
-import glob
 import unittest
 from pathlib import Path
 
-import yaml
+from utils.cache.yaml import load_yaml_any
 
 from . import PROJECT_ROOT
 
@@ -14,31 +13,29 @@ class TestDependencyApplicationId(unittest.TestCase):
         if both A and B have vars/main.yml with application_id defined,
         then application_id must equal the role's folder name for both.
         """
-        roles_dir = str(PROJECT_ROOT / "roles")
+        roles_dir = PROJECT_ROOT / "roles"
 
         violations = []
 
         # Helper to load application_id if present
         def load_app_id(role_path):
-            vars_file = str(Path(role_path) / "vars" / "main.yml")
-            if not Path(vars_file).is_file():
+            vars_file = Path(role_path) / "vars" / "main.yml"
+            if not vars_file.is_file():
                 return None
-            with Path(vars_file).open(encoding="utf-8") as f:
-                data = yaml.safe_load(f) or {}
+            data = load_yaml_any(str(vars_file)) or {}
             return data.get("application_id")
 
         # Iterate all roles
-        for role_path in glob.glob(str(Path(roles_dir) / "*")):
-            if not Path(role_path).is_dir():
+        for role_path in roles_dir.iterdir():
+            if not role_path.is_dir():
                 continue
 
-            role_name = Path(role_path).name
-            meta_file = str(Path(role_path) / "meta" / "main.yml")
-            if not Path(meta_file).is_file():
+            role_name = role_path.name
+            meta_file = role_path / "meta" / "main.yml"
+            if not meta_file.is_file():
                 continue
 
-            with Path(meta_file).open(encoding="utf-8") as f:
-                meta = yaml.safe_load(f) or {}
+            meta = load_yaml_any(str(meta_file)) or {}
 
             deps = meta.get("dependencies", [])
             if not isinstance(deps, list):
@@ -55,8 +52,8 @@ class TestDependencyApplicationId(unittest.TestCase):
             # load application_id for this role once
             app_id_role = load_app_id(role_path)
             for dep_name in dep_names:
-                dep_path = str(Path(roles_dir) / dep_name)
-                if not Path(dep_path).is_dir():
+                dep_path = roles_dir / dep_name
+                if not dep_path.is_dir():
                     continue
 
                 app_id_dep = load_app_id(dep_path)

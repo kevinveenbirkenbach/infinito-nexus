@@ -4,7 +4,8 @@ from typing import Any
 
 import yaml
 
-from utils.cache.yaml import load_yaml_all_str
+from utils.cache.files import iter_project_files
+from utils.cache.yaml import load_yaml_all
 
 from . import PROJECT_ROOT
 
@@ -34,7 +35,7 @@ Yaml = dict[str, Any] | list[Any] | Any
 
 
 def _iter_yaml_files(root: Path) -> list[Path]:
-    """Return all *.yml files in the repository (excluding common junk dirs)."""
+    """Return all ``*.yml`` files in the repository (excluding common junk dirs)."""
     ignore_dirs = {
         ".git",
         ".venv",
@@ -44,19 +45,22 @@ def _iter_yaml_files(root: Path) -> list[Path]:
         ".pytest_cache",
         "__pycache__",
     }
+    root_prefix = str(root) + "/"
     files: list[Path] = []
-    for p in root.rglob("*.yml"):
-        if any(part in ignore_dirs for part in p.parts):
+    for path_str in iter_project_files(extensions=(".yml",)):
+        if not path_str.startswith(root_prefix):
             continue
-        files.append(p)
+        path = Path(path_str)
+        if any(part in ignore_dirs for part in path.parts):
+            continue
+        files.append(path)
     return files
 
 
 def _safe_load_all(path: Path) -> list[Yaml]:
     """Load all YAML documents from a file, tolerating Ansible tags; return list of docs."""
     try:
-        with path.open("r", encoding="utf-8") as fh:
-            return list(load_yaml_all_str(fh))
+        return list(load_yaml_all(str(path)))
     except Exception:
         # If a file is completely unparsable, treat as empty (so test won't crash).
         return []

@@ -24,7 +24,7 @@ from typing import ClassVar
 
 import yaml
 
-from utils.cache.files import read_text
+from utils.cache.files import iter_project_files, read_text
 from utils.cache.yaml import load_yaml_str
 
 from . import PROJECT_ROOT
@@ -120,37 +120,28 @@ class TestNoLegacyPathReferences(unittest.TestCase):
 
     def test_no_legacy_path_strings(self):
         offenders: list[str] = []
-        for sub in self.SCAN_DIRS:
-            root = PROJECT_ROOT / sub
-            if not root.is_dir():
+        scan_prefixes = tuple(f"{sub}/" for sub in self.SCAN_DIRS)
+        scan_suffixes = (".py", ".yml", ".yaml", ".j2", ".jinja", ".jinja2")
+        for path_str in iter_project_files(extensions=scan_suffixes):
+            path = Path(path_str)
+            try:
+                rel_str = path.relative_to(PROJECT_ROOT).as_posix()
+            except ValueError:
                 continue
-            for path in root.rglob("*"):
-                if not path.is_file():
-                    continue
-                str_path = str(path)
-                if any(frag in str_path for frag in self.SKIP_FRAGMENTS):
-                    continue
-                if path in self.EXEMPT_FILES:
-                    continue
-                if path.suffix not in {
-                    ".py",
-                    ".yml",
-                    ".yaml",
-                    ".j2",
-                    ".jinja",
-                    ".jinja2",
-                }:
-                    continue
-                try:
-                    text = path.read_text(encoding="utf-8")
-                except (UnicodeDecodeError, PermissionError):
-                    continue
-                for token in self.LEGACY_TOKENS:
-                    if token in text:
-                        offenders.append(
-                            f"{path.relative_to(PROJECT_ROOT)} contains {token!r}"
-                        )
-                        break
+            if not rel_str.startswith(scan_prefixes):
+                continue
+            if any(frag in path_str for frag in self.SKIP_FRAGMENTS):
+                continue
+            if path in self.EXEMPT_FILES:
+                continue
+            try:
+                text = read_text(path_str)
+            except (UnicodeDecodeError, PermissionError):
+                continue
+            for token in self.LEGACY_TOKENS:
+                if token in text:
+                    offenders.append(f"{rel_str} contains {token!r}")
+                    break
         if offenders:
             self.fail(
                 "Legacy path tokens present (req-008 forbids these):\n"

@@ -223,9 +223,8 @@ def load_yaml_all_str(text: str) -> list:
     symmetry with :func:`load_yaml_str` so callers never need
     ``import yaml`` for the parse.
     """
-    return list(
-        yaml.safe_load_all(text)
-    )  # nocheck: direct-yaml — this module IS the cache.
+    # This module IS the cache; calling itself would recurse.
+    return list(yaml.safe_load_all(text))  # nocheck: direct-yaml
 
 
 def _drop_path(path) -> None:

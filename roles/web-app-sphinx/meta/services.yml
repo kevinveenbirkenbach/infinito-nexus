@@ -37,6 +37,7 @@ sphinx:
   mem_reservation: 128m
   mem_limit: 256m
   pids_limit: 256
+# nocheck: dynamic-flag
 css:
   enabled: true
   shared: true

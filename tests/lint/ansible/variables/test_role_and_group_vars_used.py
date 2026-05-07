@@ -26,7 +26,11 @@ from collections.abc import Iterable
 from pathlib import Path
 
 from utils.annotations.suppress import is_suppressed_at
-from utils.cache.files import iter_project_files_with_content, read_text
+from utils.cache.files import (
+    iter_project_files,
+    iter_project_files_with_content,
+    read_text,
+)
 from utils.cache.yaml import load_yaml_any
 
 # Rule key consumed by this lint via `nocheck`-keyword suppression
@@ -88,10 +92,10 @@ def _iter_definition_files(repo_root: Path) -> Iterable[Path]:
                     yield f
     gv = repo_root / "group_vars"
     if gv.is_dir():
-        for f in sorted(gv.rglob("*.yml")):
-            yield f
-        for f in sorted(gv.rglob("*.yaml")):
-            yield f
+        gv_prefix = str(gv) + "/"
+        for path_str in sorted(iter_project_files(extensions=(".yml", ".yaml"))):
+            if path_str.startswith(gv_prefix):
+                yield Path(path_str)
 
 
 def _collect_top_level_keys(file: Path) -> list[tuple[str, int]]:

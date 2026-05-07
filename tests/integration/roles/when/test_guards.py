@@ -1,13 +1,14 @@
-import glob
 import unittest
 from pathlib import Path
 from typing import Any
 
 try:
-    import yaml
+    import yaml  # noqa: F401  # imported only to assert pyyaml is installed
 except ImportError:  # pragma: no cover
     raise SystemExit("Please `pip install pyyaml` to run this test.") from None
 
+from utils.cache.files import iter_project_files
+from utils.cache.yaml import load_yaml_all
 
 # ---------- Helpers: repo + YAML parsing ----------
 
@@ -33,9 +34,7 @@ def _load_yaml_file(path: str) -> list[dict[str, Any]]:
     Returns a list of top-level task dicts. If the file is empty, returns [].
     Supports multi-doc YAML.
     """
-    with Path(path).open(encoding="utf-8") as f:
-        content = f.read()
-    docs = list(yaml.safe_load_all(content)) or []
+    docs = list(load_yaml_all(path)) or []
     tasks: list[dict[str, Any]] = []
     for doc in docs:
         if doc is None:
@@ -97,23 +96,19 @@ def _is_pure_guarded_tasks_file(tasks: list[dict[str, Any]]) -> tuple[list[str],
 
 def _iter_all_tasks_files(repo_root: str) -> list[str]:
     """
-    Return all tasks/*.yml|*.yaml files in the project (recursively).
+    Return all tasks/*.yml|*.yaml files in the project tree.
+    Filenames must sit directly inside a 'tasks' directory.
     """
-    patterns = [
-        str(Path(repo_root) / "**" / "tasks" / "*.yml"),
-        str(Path(repo_root) / "**" / "tasks" / "*.yaml"),
-    ]
     files: list[str] = []
-    for pat in patterns:
-        files.extend(glob.glob(pat, recursive=True))  # nocheck: project-walk
-    # Deduplicate while keeping order
-    seen = set()
-    ordered: list[str] = []
-    for p in files:
-        if p not in seen:
-            ordered.append(p)
-            seen.add(p)
-    return ordered
+    seen: set[str] = set()
+    for p in iter_project_files(extensions=(".yml", ".yaml")):
+        if Path(p).parent.name != "tasks":
+            continue
+        if p in seen:
+            continue
+        seen.add(p)
+        files.append(p)
+    return files
 
 
 def _get_include_role_name(task: dict[str, Any]) -> str | None:
@@ -197,11 +192,15 @@ class PureGuardedIncludeTest(unittest.TestCase):
         # Map pure guarded roles: role_name -> (guards, main_path)
         cls.pure_guarded_roles: dict[str, tuple[list[str], str]] = {}
 
-        role_main_glob = str(Path(cls.repo_root) / "roles" / "*" / "tasks" / "main.yml")
-        for main_path in glob.glob(role_main_glob):
-            role_name = Path(
-                str(Path(str(Path(main_path).parent)).parent)
-            ).name  # roles/<role>/tasks/main.yml
+        roles_dir = Path(cls.repo_root) / "roles"
+        for role_dir in roles_dir.iterdir():
+            if not role_dir.is_dir():
+                continue
+            main_path = role_dir / "tasks" / "main.yml"
+            if not main_path.is_file():
+                continue
+            main_path = str(main_path)
+            role_name = role_dir.name
             try:
                 tasks = _load_yaml_file(main_path)
                 guards, pure = _is_pure_guarded_tasks_file(tasks)

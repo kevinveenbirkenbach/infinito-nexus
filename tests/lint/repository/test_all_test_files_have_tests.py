@@ -4,7 +4,7 @@ import os
 import unittest
 from pathlib import Path
 
-from utils.cache.files import read_text
+from utils.cache.files import iter_project_files, read_text
 
 from . import PROJECT_ROOT
 
@@ -18,14 +18,12 @@ class TestTestFilesContainUnittestTests(unittest.TestCase):
         )
 
     def _iter_test_files(self) -> list[str]:
-        out: list[str] = []
-        for root, _dirs, files in os.walk(self.tests_dir):
-            out.extend(
-                str(Path(root) / fn)
-                for fn in files
-                if fn.startswith("test_") and fn.endswith(".py")
-            )
-        return sorted(out)
+        tests_prefix = str(self.tests_dir) + os.sep
+        return sorted(
+            p
+            for p in iter_project_files(extensions=(".py",))
+            if p.startswith(tests_prefix) and Path(p).name.startswith("test_")
+        )
 
     def _file_contains_runnable_unittest_test(self, path: str) -> bool:
         """

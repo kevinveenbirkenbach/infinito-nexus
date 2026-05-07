@@ -1,12 +1,15 @@
 import logging
 import re
 import unittest
-from glob import glob
 from pathlib import Path
 
 import yaml
 
-from utils.cache.files import iter_project_files_with_content, read_text
+from utils.cache.files import (
+    iter_project_files,
+    iter_project_files_with_content,
+    read_text,
+)
 from utils.cache.yaml import load_yaml_str
 
 logger = logging.getLogger(__name__)
@@ -17,13 +20,28 @@ class TestTopLevelVariableUsage(unittest.TestCase):
         from . import PROJECT_ROOT
 
         self.project_root = str(PROJECT_ROOT)
-        # Braces werden von glob nicht unterstützt – also einzeln sammeln:
-        self.roles_vars_paths = glob(
-            str(Path(self.project_root) / "roles/*/vars/main.yml")
-        ) + glob(str(Path(self.project_root) / "roles/*/defaults/main.yml"))
-        self.group_vars_paths = glob(
-            str(Path(self.project_root) / "group_vars/all/*.yml")
-        )
+
+        roles_prefix = str(Path(self.project_root) / "roles") + "/"
+        group_vars_prefix = str(Path(self.project_root) / "group_vars" / "all") + "/"
+
+        roles_vars: list[str] = []
+        roles_defaults: list[str] = []
+        group_vars: list[str] = []
+        for path_str in iter_project_files(extensions=(".yml",)):
+            if path_str.startswith(roles_prefix):
+                tail = path_str[len(roles_prefix) :]
+                if tail.endswith("/vars/main.yml") and tail.count("/") == 2:
+                    roles_vars.append(path_str)
+                elif tail.endswith("/defaults/main.yml") and tail.count("/") == 2:
+                    roles_defaults.append(path_str)
+            elif (
+                path_str.startswith(group_vars_prefix)
+                and "/" not in path_str[len(group_vars_prefix) :]
+            ):
+                group_vars.append(path_str)
+
+        self.roles_vars_paths = roles_vars + roles_defaults
+        self.group_vars_paths = group_vars
         self.all_variable_files = self.roles_vars_paths + self.group_vars_paths
         self.valid_extensions = (
             ".yml",

@@ -41,10 +41,6 @@ from utils.service_registry import build_service_registry_from_roles_dir
 from . import PROJECT_ROOT
 
 
-def repo_root() -> Path:
-    return PROJECT_ROOT
-
-
 def _role_slug(role_name: str) -> str:
     return role_name.replace("-", "_")
 
@@ -92,7 +88,7 @@ def _self_declared_provider_roles_from_registry(registry: dict) -> set[str]:
 
 class TestSharedServiceRunOnceGuard(unittest.TestCase):
     def test_every_shared_service_role_has_run_once_guard(self):
-        root = repo_root()
+        root = PROJECT_ROOT
         roles_dir = root / "roles"
         self.assertTrue(
             roles_dir.is_dir(), f"'roles' directory not found at: {roles_dir}"
