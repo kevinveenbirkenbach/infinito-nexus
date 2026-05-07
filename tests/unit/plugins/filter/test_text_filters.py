@@ -10,7 +10,7 @@ class TestTextFilters(unittest.TestCase):
     def test_collapse_whitespace(self):
         s = """Line one
 
-    Line   two		
+    Line   two
 Line three"""
         expected = "Line one Line two Line three"
         self.assertEqual(to_one_liner(s), expected)

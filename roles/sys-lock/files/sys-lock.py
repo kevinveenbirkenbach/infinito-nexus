@@ -117,6 +117,6 @@ if __name__ == "__main__":
     )
     args = parser.parse_args()
     services = args.services
-    ignored_services = args.ignore if args.ignore else []
+    ignored_services = args.ignore or []
     timeout_seconds = parse_time_to_seconds(args.timeout)
     main(services, ignored_services, timeout_seconds)

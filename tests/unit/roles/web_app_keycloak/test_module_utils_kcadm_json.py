@@ -37,23 +37,11 @@ class TestJsonFromNoisyStdout(unittest.TestCase):
         )
 
     def test_parses_with_leading_noise_then_object(self):
-        noisy = "\n".join(
-            [
-                "[0.001s][warning][os] something something",
-                "Java HotSpot(TM) warning blah",
-                '{"ok": true, "n": 3}',
-            ]
-        )
+        noisy = '[0.001s][warning][os] something something\nJava HotSpot(TM) warning blah\n{"ok": true, "n": 3}'
         self.assertEqual(json_from_noisy_stdout(noisy), {"ok": True, "n": 3})
 
     def test_parses_with_leading_noise_then_array(self):
-        noisy = "\n".join(
-            [
-                "[0.001s][warning][os] something something",
-                "[0.002s][warning][gc] other warning",
-                '[{"name":"a"},{"name":"b"}]',
-            ]
-        )
+        noisy = '[0.001s][warning][os] something something\n[0.002s][warning][gc] other warning\n[{"name":"a"},{"name":"b"}]'
         self.assertEqual(json_from_noisy_stdout(noisy), [{"name": "a"}, {"name": "b"}])
 
     def test_raises_on_none(self):
@@ -69,12 +57,7 @@ class TestJsonFromNoisyStdout(unittest.TestCase):
             json_from_noisy_stdout("no json here, just text")
 
     def test_raises_when_candidates_exist_but_invalid_json(self):
-        noisy = "\n".join(
-            [
-                "[0.001s][warning] definitely not json",
-                "{not: json}",
-            ]
-        )
+        noisy = "[0.001s][warning] definitely not json\n{not: json}"
         with self.assertRaises(ValueError):
             json_from_noisy_stdout(noisy)
 

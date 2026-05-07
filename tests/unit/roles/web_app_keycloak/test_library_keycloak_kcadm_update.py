@@ -81,12 +81,7 @@ class TestKeycloakKcadmUpdate(unittest.TestCase):
         m = self.mod
         dummy = DummyModule()
 
-        scopes_json = "\n".join(
-            [
-                "[0.001s][warning][os] noise before json",
-                '[{"id":"s1","name":"a"},{"id":"s2","name":"rbac"}]',
-            ]
-        )
+        scopes_json = '[0.001s][warning][os] noise before json\n[{"id":"s1","name":"a"},{"id":"s2","name":"rbac"}]'
 
         with patch.object(m, "run_kcadm", return_value=(0, scopes_json, "")):
             obj_id, exists = m.resolve_object_id(
@@ -105,12 +100,7 @@ class TestKeycloakKcadmUpdate(unittest.TestCase):
         m = self.mod
         dummy = DummyModule()
 
-        clients_json = "\n".join(
-            [
-                "[0.001s][warning] noise",
-                '[{"id":"c1","clientId":"foo"},{"id":"c2","clientId":"bar"}]',
-            ]
-        )
+        clients_json = '[0.001s][warning] noise\n[{"id":"c1","clientId":"foo"},{"id":"c2","clientId":"bar"}]'
 
         with patch.object(m, "run_kcadm", return_value=(0, clients_json, "")):
             obj_id, exists = m.resolve_object_id(
@@ -129,12 +119,7 @@ class TestKeycloakKcadmUpdate(unittest.TestCase):
         m = self.mod
         dummy = DummyModule()
 
-        comps_json = "\n".join(
-            [
-                "[0.001s][warning] noise",
-                '[{"id":"x1","name":"ldap"},{"id":"x2","name":"oidc"}]',
-            ]
-        )
+        comps_json = '[0.001s][warning] noise\n[{"id":"x1","name":"ldap"},{"id":"x2","name":"oidc"}]'
 
         with patch.object(m, "run_kcadm", return_value=(0, comps_json, "")):
             obj_id, exists = m.resolve_object_id(
@@ -153,12 +138,7 @@ class TestKeycloakKcadmUpdate(unittest.TestCase):
         m = self.mod
         dummy = DummyModule()
 
-        noisy_obj = "\n".join(
-            [
-                "[0.001s][warning] noise",
-                '{"id":"abc","name":"thing"}',
-            ]
-        )
+        noisy_obj = '[0.001s][warning] noise\n{"id":"abc","name":"thing"}'
         with patch.object(m, "run_kcadm", return_value=(0, noisy_obj, "")):
             cur = m.get_current_object(
                 dummy,

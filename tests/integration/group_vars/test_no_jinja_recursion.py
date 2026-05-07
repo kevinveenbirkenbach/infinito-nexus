@@ -27,8 +27,7 @@ def load_all_yaml():
         for k, v in data.items():
             base = k
             for p in ("defaults_", "default_"):
-                if base.startswith(p):
-                    base = base[len(p) :]
+                base = base.removeprefix(p)
             if (
                 base in result
                 and isinstance(result[base], dict)

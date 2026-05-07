@@ -114,7 +114,7 @@ def discover_role_services(
         key: _as_mapping(entry)
         for key, entry in services.items()
         if isinstance(entry, dict)
-        and _normalized_name(_as_mapping(entry).get("canonical")) in {entity_name}
+        and _normalized_name(_as_mapping(entry).get("canonical")) == entity_name
     }
     provides = _normalized_name(primary_entry.get("provides"))
     if provides == entity_name:

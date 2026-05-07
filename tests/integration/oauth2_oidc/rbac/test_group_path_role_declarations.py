@@ -111,7 +111,9 @@ def _role_application_id(role_dir):
     vars_dir = str(Path(role_dir) / "vars")
     if not Path(vars_dir).is_dir():
         return None
-    pattern = re.compile(r"""^application_id:\s*["']?([^"'\s#]+)["']?\s*$""", re.M)
+    pattern = re.compile(
+        r"""^application_id:\s*["']?([^"'\s#]+)["']?\s*$""", re.MULTILINE
+    )
     for entry in sorted(os.listdir(vars_dir)):
         if not entry.endswith((".yml", ".yaml")):
             continue

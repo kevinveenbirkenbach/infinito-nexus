@@ -93,7 +93,7 @@ class OAuthLoginHTTPS(OAuthLogin):
         if not redirect.startswith(("//", "http://", "https://")):
             redirect = "{}{}".format(
                 base_url.rstrip("/") + "/",
-                redirect[1:] if redirect.startswith("/") else redirect,
+                redirect.removeprefix("/"),
             )
 
         state = {

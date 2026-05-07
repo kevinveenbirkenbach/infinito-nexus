@@ -185,7 +185,7 @@ class LookupModule(LookupBase):
                     f"tenant '{tenant}' was passed. Omit the tenant "
                     f"argument for global roles."
                 )
-            return ["/".join([group_root, application_id, role])]
+            return [f"{group_root}/{application_id}/{role}"]
 
         if axis != _TENANCY_AXIS_DOMAIN:
             raise AnsibleError(
@@ -205,4 +205,4 @@ class LookupModule(LookupBase):
                 "rbac_group_path: 'tenant' argument must be a non-empty "
                 "domain after normalisation."
             )
-        return ["/".join([group_root, application_id, tenant_norm, role])]
+        return [f"{group_root}/{application_id}/{tenant_norm}/{role}"]

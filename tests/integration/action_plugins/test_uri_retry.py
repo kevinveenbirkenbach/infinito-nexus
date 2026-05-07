@@ -33,7 +33,7 @@ class TestUriRetryActionPluginIntegration(unittest.TestCase):
                 self.end_headers()
                 self.wfile.write(b"ok")
 
-            def log_message(self, format, *args):
+            def log_message(self, format, *args):  # noqa: A002  override of BaseHTTPRequestHandler signature
                 return
 
         server = ThreadingHTTPServer(("127.0.0.1", 0), FlakyHandler)

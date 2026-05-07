@@ -506,8 +506,8 @@ def render_override(
             img_ep = normalize_entrypoint(img_ep)
             img_cmd = normalize_cmd(img_cmd)
 
-        final_ep = svc_ep if svc_ep else img_ep
-        final_cmd = svc_cmd if svc_cmd else img_cmd
+        final_ep = svc_ep or img_ep
+        final_cmd = svc_cmd or img_cmd
 
         if _is_shell_form(final_ep):
             final_cmd = [_shell_payload(final_cmd)]
@@ -618,7 +618,7 @@ def main() -> int:
     compose_base_cmd = _compose_base_cmd(
         project=str(args.project),
         parts=parts,
-        env_file=env_file if env_file else "",
+        env_file=env_file or "",
     )
 
     # Discover all profiles referenced in compose files so we can include profile-only services too.

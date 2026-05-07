@@ -163,7 +163,7 @@ def main() -> int:
         )
         return 2
 
-    project = args.project if args.project else project_dir.name
+    project = args.project or project_dir.name
 
     passthrough = args.args
     if passthrough and passthrough[0] == "--":

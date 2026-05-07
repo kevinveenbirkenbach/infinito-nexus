@@ -29,7 +29,7 @@ class TestSysRolesApplicationId(unittest.TestCase):
     def test_sys_roles_application_id(self):
         for role_dir in self.actual_dirs:
             name = Path(role_dir).name
-            prefix = f"sys-{name[len('sys-') :] if name.startswith('sys-') else name}"
+            prefix = f"sys-{name.removeprefix('sys-')}"
             vars_file = str(Path(role_dir) / "vars" / "main.yml")
             if prefix in self.invokable_prefixes:
                 # must exist with id

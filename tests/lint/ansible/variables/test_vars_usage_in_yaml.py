@@ -211,7 +211,7 @@ class TestVarsPassedAreUsed(unittest.TestCase):
             used = self._used_in_jinja_blocks(
                 var_name, all_text
             ) or self._used_in_ansible_exprs(var_name, ansible_exprs)
-            if not used and var_name not in ["ansible_python_interpreter"]:
+            if not used and var_name != "ansible_python_interpreter":
                 unused.append(var_name)
 
         if unused:

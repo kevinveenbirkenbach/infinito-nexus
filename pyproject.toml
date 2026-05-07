@@ -84,12 +84,21 @@ exclude = [
 # - `G`    (flake8-logging-format) — f-strings inside `logging.x()` calls (defeats lazy-format)
 # - `S`    (flake8-bandit)      — security (hardcoded creds, weak hashes, subprocess(shell=True), …)
 # - `PTH`  (flake8-use-pathlib) — modernise `os.path.*` calls to `pathlib.Path`
+# - `FURB` (refurb)             — modern Python idioms beyond UP/SIM/PIE/PERF
+# - `W`    (pycodestyle warnings) — natural pair with `E`; trailing whitespace etc.
+# - `FA`   (flake8-future-annotations) — consistent `from __future__ import annotations`
+# - `YTT`  (flake8-2020)        — correct `sys.version` / `sys.version_info` checks
+# - `A`    (flake8-builtins)    — shadowing built-in names
+# - `ISC`  (flake8-implicit-str-concat) — accidental `"foo" "bar"` typos
+# - `SLOT` (flake8-slots)       — require `__slots__` on `str`/`tuple`/`namedtuple` subclasses
+# - `FLY`  (flynt)              — `"{}".format(x)` → f-string
 select = [
     "E", "F", "I", "B", "UP", "RUF", "SIM", "C4", "PERF", "RET", "PIE",
     "T10", "PGH", "EXE", "RSE", "ICN", "DTZ",
     "TID", "LOG", "G",
     "S",
     "PTH",
+    "FURB", "W", "FA", "YTT", "A", "ISC", "SLOT", "FLY",
 ]
 
 # `ruff format` (run via `make autoformat`) reflows whatever it can.

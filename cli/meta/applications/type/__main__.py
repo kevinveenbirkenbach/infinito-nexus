@@ -68,7 +68,7 @@ def main() -> None:
         print(f"[{t}]")
         for app_id in apps:
             print(app_id)
-        print("")
+        print()
 
 
 if __name__ == "__main__":

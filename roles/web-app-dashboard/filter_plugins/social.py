@@ -16,8 +16,7 @@ def fediverse_url(handle, protocol="https", path_prefix="@"):
     value = str(handle).strip()
 
     # Optional leading '@'
-    if value.startswith("@"):
-        value = value[1:]
+    value = value.removeprefix("@")
 
     parts = value.split("@")
     if len(parts) != 2:
