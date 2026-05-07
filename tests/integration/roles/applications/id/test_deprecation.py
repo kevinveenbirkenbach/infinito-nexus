@@ -2,7 +2,7 @@ import os
 import unittest
 from pathlib import Path
 
-import yaml
+from utils.cache.yaml import load_yaml_any
 
 from . import PROJECT_ROOT
 
@@ -22,12 +22,11 @@ class TestApplicationIdDeprecation(unittest.TestCase):
             vars_main_yml = str(Path(role_path) / "vars" / "main.yml")
             if not Path(vars_main_yml).is_file():
                 continue
-            with Path(vars_main_yml).open(encoding="utf-8") as f:
-                try:
-                    data = yaml.safe_load(f)
-                except Exception as e:
-                    errors.append(f"Could not parse {vars_main_yml}: {e}")
-                    continue
+            try:
+                data = load_yaml_any(vars_main_yml)
+            except Exception as e:
+                errors.append(f"Could not parse {vars_main_yml}: {e}")
+                continue
             if not isinstance(data, dict):
                 continue
             app_id = data.get("application_id")

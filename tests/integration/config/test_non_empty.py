@@ -1,8 +1,12 @@
 import glob
+import os
 import unittest
 from pathlib import Path
 
 import yaml
+
+from utils.cache.files import iter_project_files
+from utils.cache.yaml import load_yaml_any
 
 from . import PROJECT_ROOT
 
@@ -47,14 +51,23 @@ class TestConfigurationNoNone(unittest.TestCase):
         self.assertTrue(
             files, f"No roles/*/meta/*.yml files found with pattern: {pattern}"
         )
+        roles_prefix = roles_root + os.sep
+        meta_segment = os.sep + "meta" + os.sep
+        files = [
+            p
+            for p in iter_project_files(extensions=(".yml",))
+            if p.startswith(roles_prefix)
+            and meta_segment in p[len(roles_prefix) :]
+            and p[len(roles_prefix) :].count(os.sep) == 2  # roles/<role>/meta/<file>
+        ]
+        self.assertTrue(files, f"No roles/*/meta/*.yml files found under {roles_root}")
 
         all_errors = []
         for filepath in files:
-            with Path(filepath).open() as f:
-                try:
-                    data = yaml.safe_load(f)
-                except yaml.YAMLError as e:
-                    self.fail(f"Failed to parse YAML in {filepath}: {e}")
+            try:
+                data = load_yaml_any(filepath)
+            except yaml.YAMLError as e:
+                self.fail(f"Failed to parse YAML in {filepath}: {e}")
             errors = find_none_values(data)
             for path, _value in errors:
                 all_errors.append(f"{filepath}: Key '{path}' is None")

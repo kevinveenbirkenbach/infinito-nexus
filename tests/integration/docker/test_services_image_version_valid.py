@@ -6,8 +6,7 @@ from collections.abc import Iterable
 from pathlib import Path
 from typing import Any
 
-import yaml
-
+from utils.cache.yaml import load_yaml_str
 from utils.docker.image.ref import is_valid_image_name
 
 from . import PROJECT_ROOT
@@ -79,7 +78,7 @@ class TestDockerServicesImageVersionValid(unittest.TestCase):
 
         for cfg_path in config_files:
             with cfg_path.open("r", encoding="utf-8") as f:
-                data = yaml.safe_load(f) or {}
+                data = load_yaml_str(f) or {}
 
             cfg = _safe_mapping(data)
             services = _extract_services(cfg)

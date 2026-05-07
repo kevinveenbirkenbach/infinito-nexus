@@ -3,9 +3,8 @@ from collections.abc import Iterable
 from pathlib import Path
 from typing import Any
 
-import yaml
-
 from utils.cache.files import read_text
+from utils.cache.yaml import load_yaml_all_str
 
 from . import PROJECT_ROOT
 
@@ -23,7 +22,7 @@ def _safe_yaml_load_all(path: Path) -> list[Any]:
     if not text.strip():
         return []
     try:
-        docs = list(yaml.safe_load_all(text))
+        docs = list(load_yaml_all_str(text))
         return [d for d in docs if d is not None]
     except Exception:
         # Some Ansible task files can contain Jinja that breaks YAML parsing;
@@ -155,6 +154,7 @@ def _find_task_files(repo_root: Path) -> list[Path]:
     All YAML files under:
       - roles/*/tasks/
       - tasks/
+    Routed through the cached project walk in `utils.cache.files`.
     """
     task_files: list[Path] = []
 

@@ -15,6 +15,7 @@ from dataclasses import dataclass
 from pathlib import Path
 
 from utils.annotations.message import in_github_actions, warning
+from utils.cache.files import iter_project_files, read_text
 
 from . import PROJECT_ROOT
 
@@ -86,7 +87,7 @@ def tracked_files(root: Path) -> list[Path]:
         rel_paths = [p for p in out.decode("utf-8", errors="replace").split("\0") if p]
         return [root / rel for rel in rel_paths]
     except Exception:
-        return [p for p in root.rglob("*") if p.is_file()]
+        return [Path(p) for p in iter_project_files()]
 
 
 def is_todo_file(path: Path) -> bool:
@@ -106,8 +107,8 @@ def finding_sort_key(item: TodoFinding) -> tuple[str, int, str]:
 def scan_todo_file(path: Path) -> list[TodoFinding]:
     findings: list[TodoFinding] = []
     try:
-        lines = path.read_text(encoding="utf-8", errors="replace").splitlines()
-    except OSError:
+        lines = read_text(str(path)).splitlines()
+    except (OSError, UnicodeDecodeError):
         return findings
 
     for line_no, line in enumerate(lines, start=1):
@@ -136,8 +137,8 @@ def scan_todo_file(path: Path) -> list[TodoFinding]:
 def scan_inline_markers(path: Path) -> list[TodoFinding]:
     findings: list[TodoFinding] = []
     try:
-        lines = path.read_text(encoding="utf-8", errors="replace").splitlines()
-    except OSError:
+        lines = read_text(str(path)).splitlines()
+    except (OSError, UnicodeDecodeError):
         return findings
 
     for line_no, line in enumerate(lines, start=1):

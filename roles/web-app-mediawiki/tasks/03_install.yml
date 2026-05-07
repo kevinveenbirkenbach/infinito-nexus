@@ -1,46 +1,13 @@
 - name: "MEDIAWIKI | Bootstrap DB (install if empty) then update"
-  shell: |
-    set -euo pipefail
-
-    # Check if MediaWiki tables exist using a MariaDB client container
-    has_tables=0
-    if container run --rm --network {{ MEDIAWIKI_NETWORK_DATABASE }} mariadb:{{ lookup('database', application_id, 'version') | default('latest') }} \
-      mariadb -h "{{ lookup('database', application_id, 'host') }}" -P "{{ lookup('database', application_id, 'port') }}" -u "{{ lookup('database', application_id, 'username') }}" -p{{ lookup('database', application_id, 'password') | quote }} \
-      -N -e "SELECT COUNT(*) FROM information_schema.tables WHERE table_schema='{{ lookup('database', application_id, 'name') }}';" 2>/dev/null | grep -q -v '^0$'; then
-      has_tables=1
-    fi
-
-    if [ "$has_tables" -eq 0 ]; then
-      echo "[mw] Fresh DB detected -> running install (one-shot)"
-      container run --rm \
-        --network {{ MEDIAWIKI_NETWORK_DATABASE }} \
-        -u {{ MEDIAWIKI_USER }} \
-        {{ MEDIAWIKI_IMAGE }}:{{ MEDIAWIKI_VERSION }} \
-        bash -lc '
-          set -euo pipefail
-          php {{ MEDIAWIKI_HTML_DIR }}/maintenance/run.php install \
-            --confpath /tmp \
-            --dbtype mysql \
-            --dbserver "{{ lookup('database', application_id, 'host') }}:{{ lookup('database', application_id, 'port') }}" \
-            --dbname "{{ lookup('database', application_id, 'name') }}" \
-            --dbuser "{{ lookup('database', application_id, 'username') }}" \
-            --dbpass {{ lookup('database', application_id, 'password') | quote }} \
-            --server "{{ MEDIAWIKI_URL }}" \
-            --scriptpath "" \
-            "{{ MEDIAWIKI_SITENAME }}" \
-            "{{ MEDIAWIKI_ADMINISTRATOR_NAME }}" \
-            --pass {{ MEDIAWIKI_ADMINISTRATOR_PASSWORD | quote }}
-        '
-    else
-      echo "[mw] DB already initialized -> skipping install"
-    fi
-
-    # Always run update in the real container (managed LocalSettings)
-    container exec -u {{ MEDIAWIKI_USER }} {{ MEDIAWIKI_CONTAINER }} bash -lc '
-      set -euo pipefail
-      php {{ MEDIAWIKI_HTML_DIR }}/maintenance/run.php update --quick
-    '
-  args:
-    executable: /bin/bash
+  script: >-
+    install_or_update.sh
+    "{{ MEDIAWIKI_NETWORK_DATABASE }}" "{{ lookup('database', application_id, 'version') | default('latest') }}"
+    "{{ lookup('database', application_id, 'host') }}" "{{ lookup('database', application_id, 'port') }}"
+    "{{ lookup('database', application_id, 'username') }}" "{{ lookup('database', application_id, 'password') }}"
+    "{{ lookup('database', application_id, 'name') }}"
+    "{{ MEDIAWIKI_USER }}" "{{ MEDIAWIKI_IMAGE }}" "{{ MEDIAWIKI_VERSION }}" "{{ MEDIAWIKI_HTML_DIR }}"
+    "{{ MEDIAWIKI_URL }}" "{{ MEDIAWIKI_SITENAME }}"
+    "{{ MEDIAWIKI_ADMINISTRATOR_NAME }}" "{{ MEDIAWIKI_ADMINISTRATOR_PASSWORD }}"
+    "{{ MEDIAWIKI_CONTAINER }}"
   changed_when: false
   no_log: "{{ MASK_CREDENTIALS_IN_LOGS | bool }}"

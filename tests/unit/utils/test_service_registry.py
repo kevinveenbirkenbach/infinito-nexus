@@ -4,6 +4,7 @@ import tempfile
 import unittest
 from pathlib import Path
 
+from utils.cache.yaml import dump_yaml_str
 from utils.service_registry import (
     ServiceRegistryError,
     build_service_registry_from_applications,
@@ -113,7 +114,6 @@ class TestServiceRegistryOrdering(unittest.TestCase):
         *,
         run_after: list[str] | None = None,
     ) -> None:
-        import yaml
 
         role_dir = root / role
         meta_dir = role_dir / "meta"
@@ -128,7 +128,7 @@ class TestServiceRegistryOrdering(unittest.TestCase):
             services[primary_entity] = primary
 
         meta_dir.joinpath("services.yml").write_text(
-            yaml.safe_dump(services, sort_keys=False),
+            dump_yaml_str(services),
             encoding="utf-8",
         )
         # meta/main.yml MUST NOT carry run_after anymore (req-010).

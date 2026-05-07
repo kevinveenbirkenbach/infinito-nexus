@@ -10,6 +10,9 @@
     email:
       enabled: true
       shared: true
+    ldap:
+      enabled: true
+      shared: true
     logout:
       enabled: true
       shared: true
@@ -25,6 +28,16 @@
       enabled: true
       shared: true
 
+# LDAP-only variant per docs/requirements/015-moodle-self-built.md:
+# auth_ldap only, auth_oidc disabled.
+- services:
+    ldap:
+      enabled: true
+      shared: true
+    oidc:
+      enabled: false
+      shared: false
+
 # variant pinning every dynamic services.yml flag to false so the
 # matrix also exercises the out-of-group_names branch.
 - services:
@@ -32,6 +45,9 @@
       enabled: false
       shared: false
     email:
+      enabled: false
+      shared: false
+    ldap:
       enabled: false
       shared: false
     logout:

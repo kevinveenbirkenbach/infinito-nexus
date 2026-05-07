@@ -79,8 +79,8 @@ GITLAB_OMNIBUS_SMTP:
   - "gitlab_rails['smtp_password']={{ GITLAB_EMAIL.password | ruby_dq }}"
   - "gitlab_rails['smtp_domain']={{ GITLAB_EMAIL.domain | ruby_dq }}"
   - "gitlab_rails['smtp_authentication']={{ (GITLAB_EMAIL.auth | bool) | ternary(\"'login'\", 'nil') }}"
-  - "gitlab_rails['smtp_enable_starttls_auto']={{ (GITLAB_EMAIL.start_tls | bool) | ternary('true', 'false') }}"
-  - "gitlab_rails['smtp_tls']={{ (GITLAB_EMAIL.tls | bool) | ternary('true', 'false') }}"
+  - "gitlab_rails['smtp_enable_starttls_auto']={{ GITLAB_EMAIL.start_tls | bool | string | lower }}"
+  - "gitlab_rails['smtp_tls']={{ GITLAB_EMAIL.tls | bool | string | lower }}"
   - "gitlab_rails['gitlab_email_from']={{ GITLAB_EMAIL['from'] | ruby_dq }}"
   - "gitlab_rails['gitlab_email_reply_to']={{ GITLAB_EMAIL['from'] | ruby_dq }}"
 

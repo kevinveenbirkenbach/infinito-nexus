@@ -1,21 +1,21 @@
 ---
-# Update the Declarative User Profile provider using the configuration
-# from KEYCLOAK_DICTIONARY_REALM.components (same pattern as LDAP).
+# Update the realm's Declarative User Profile.
+#
+# The generic /admin/realms/{realm}/components/{id} endpoint (used by
+# keycloak_kcadm_update for client/component/scope) silently drops the
+# kc.user.profile.config payload — Keycloak persists only the 4
+# default standard attributes. The realm-scoped /admin/realms/{realm}/
+# users/profile endpoint accepts the inner attributes/groups payload
+# directly and writes through correctly. We piping the JSON via
+# kcadm.sh update users/profile -f -.
 
-- name: "Update UserProfileProvider component (merge kc.user.profile.config)"
-  keycloak_kcadm_update:
-    object_kind: "component"                     # <-- singular, as in your module choices
-    lookup_field: "providerId"                   # or "name", both are "declarative-user-profile"
-    lookup_value: "declarative-user-profile"
-    desired: "{{ KEYCLOAK_USER_PROFILE_CONFIG_PAYLOAD }}"   # <-- REQUIRED
-    merge_path: "config"
-    kcadm_exec: "{{ KEYCLOAK_EXEC_KCADM }}"
-    realm: "{{ KEYCLOAK_REALM }}"
-    assert_mode: "{{ MODE_ASSERT }}"
-    force_attrs:
-      parentId: "{{ KEYCLOAK_REALM }}"
-      providerType: "org.keycloak.userprofile.UserProfileProvider"
-      providerId: "declarative-user-profile"
+- name: "Push UserProfileProvider config via realms/{{ KEYCLOAK_REALM }}/users/profile"
+  ansible.builtin.shell: >
+    {{ KEYCLOAK_EXEC_KCADM }}
+    update users/profile -r {{ KEYCLOAK_REALM | quote }} -f -
+  args:
+    stdin: "{{ KEYCLOAK_USER_PROFILE_OBJECT | to_json }}"
+  changed_when: true
   no_log: "{{ MASK_CREDENTIALS_IN_LOGS | bool }}"
   async: "{{ ASYNC_TIME if ASYNC_ENABLED | bool else omit }}"
   poll: "{{ ASYNC_POLL if ASYNC_ENABLED | bool else omit }}"

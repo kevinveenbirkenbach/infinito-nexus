@@ -69,27 +69,11 @@
     - "'not populated' not in (friendica_db_ready.stderr | default(''))"
 
 - name: Ensure Friendica addons are in sync
-  # `bin/console addon enable/disable` returns rc=0 even when it refuses to
-  # act ("Database isn't ready or populated yet") AND occasionally returns
-  # rc=0 on a fresh stack without registering the addon's hooks in the DB or
-  # writing the `addons.<name>` config entry. The end result is an addon
-  # that `list all` reports as enabled/disabled inconsistently and whose
-  # `_install` hooks (e.g. ldapauth's authenticate hook) are silently
-  # absent, so every LDAP login is rejected. Running the console command a
-  # second time inside the same container reliably registers the hooks, so
-  # we verify the effective state after each call against `addon list
-  # enabled` and retry the whole enable/verify cycle until it matches.
-  # Idempotent "Addon already enabled/disabled" errors are swallowed with
-  # `|| true` — the subsequent verify step is authoritative.
-  shell: |-
-    cmd="{{ BIN_COMPOSE }} exec -T --user {{ FRIENDICA_USER }} --workdir {{ FRIENDICA_APPLICATION_DIR }} {{ FRIENDICA_SERVICE }} {{ FRIENDICA_APPLICATION_DIR }}/bin/console"
-    $cmd addon {{ 'enable' if item.enabled else 'disable' }} {{ item.name }} 2>&1 || true
-    if $cmd addon list enabled | grep -qE '^\| +{{ item.name }} +\|$'; then
-      is_enabled=1
-    else
-      is_enabled=0
-    fi
-    test "$is_enabled" = "{{ 1 if item.enabled else 0 }}"
+  script: >-
+    sync_addon.sh
+    "{{ BIN_COMPOSE }} exec -T --user {{ FRIENDICA_USER }} --workdir {{ FRIENDICA_APPLICATION_DIR }} {{ FRIENDICA_SERVICE }} {{ FRIENDICA_APPLICATION_DIR }}/bin/console"
+    "{{ item.name }}"
+    "{{ 'true' if item.enabled else 'false' }}"
   args:
     chdir: "{{ lookup('container', application_id, 'directories.instance') }}"
     executable: /bin/bash

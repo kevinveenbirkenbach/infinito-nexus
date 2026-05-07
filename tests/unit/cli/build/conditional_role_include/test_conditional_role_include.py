@@ -3,8 +3,9 @@ import os
 import unittest
 import tempfile
 import shutil
-import yaml
 from cli.build.role_include import build_dependency_graph, topological_sort, gen_condi_role_incl
+
+from utils.cache.yaml import dump_yaml
 
 class TestGeneratePlaybook(unittest.TestCase):
     def setUp(self):
@@ -38,16 +39,13 @@ class TestGeneratePlaybook(unittest.TestCase):
                 'application_id': meta['application_id']
             }
 
-            with open(os.path.join(role_path, 'meta', 'services.yml'), 'w') as f:
-                yaml.dump(meta_services, f)
+            dump_yaml(os.path.join(role_path, 'meta', 'services.yml'), meta_services)
 
             # find_roles() still uses meta/main.yml as a marker file to
             # detect roles, so we create an empty one here.
-            with open(os.path.join(role_path, 'meta', 'main.yml'), 'w') as f:
-                yaml.dump({}, f)
+            dump_yaml(os.path.join(role_path, 'meta', 'main.yml'), {})
 
-            with open(os.path.join(role_path, 'vars', 'main.yml'), 'w') as f:
-                yaml.dump(vars_file, f)
+            dump_yaml(os.path.join(role_path, 'vars', 'main.yml'), vars_file)
 
     def tearDown(self):
         # Clean up the temporary directory

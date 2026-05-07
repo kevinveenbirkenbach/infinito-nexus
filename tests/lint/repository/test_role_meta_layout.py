@@ -24,6 +24,9 @@ from typing import ClassVar
 
 import yaml
 
+from utils.cache.files import read_text
+from utils.cache.yaml import load_yaml_str
+
 from . import PROJECT_ROOT
 
 ROLES_DIR = PROJECT_ROOT / "roles"
@@ -56,10 +59,13 @@ LEGACY_PORT_ALLOWLIST = {
 def _load_yaml(path: Path):
     if not path.is_file():
         return None
-    text = path.read_text(encoding="utf-8")
+    try:
+        text = read_text(str(path))
+    except UnicodeDecodeError:
+        return None
     if not text.strip():
         return None
-    return yaml.safe_load(text)
+    return load_yaml_str(text)
 
 
 class TestNoLegacyRoleDirs(unittest.TestCase):
@@ -404,9 +410,12 @@ class TestNoComposeWrapperInVariants(unittest.TestCase):
             variants_path = role_dir / "meta" / "variants.yml"
             if not variants_path.is_file():
                 continue
-            text = variants_path.read_text(encoding="utf-8")
             try:
-                docs = yaml.safe_load(text)
+                text = read_text(str(variants_path))
+            except UnicodeDecodeError:
+                continue
+            try:
+                docs = load_yaml_str(text)
             except yaml.YAMLError:
                 continue
             if not isinstance(docs, list):

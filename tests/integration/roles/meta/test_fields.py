@@ -2,7 +2,7 @@ import os
 import unittest
 from pathlib import Path
 
-import yaml
+from utils.cache.yaml import load_yaml_str
 
 from . import PROJECT_ROOT
 
@@ -36,7 +36,7 @@ class TestAnsibleRolesMetadata(unittest.TestCase):
 
                 with Path(meta_file).open(encoding="utf-8") as f:
                     raw = f.read()
-                    meta_data = yaml.safe_load(raw) or {}
+                    meta_data = load_yaml_str(raw) or {}
 
                 # meta_data must be a dict
                 self.assertIsInstance(

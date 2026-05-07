@@ -22,7 +22,8 @@ This test scans: roles/*/handlers/main.yml
 import glob
 import re
 import unittest
-from pathlib import Path
+
+from utils.cache.yaml import load_yaml_all
 
 try:
     import yaml  # PyYAML
@@ -68,11 +69,10 @@ class StaticHandlerNamesTest(unittest.TestCase):
 
         violations = []
 
-        for handler_path in sorted(glob.glob(pattern)):
+        for handler_path in sorted(glob.glob(pattern)):  # nocheck: project-walk
             # Load possibly multi-document YAML safely
             try:
-                with Path(handler_path).open(encoding="utf-8") as f:
-                    docs = list(yaml.safe_load_all(f))
+                docs = list(load_yaml_all(handler_path))
             except FileNotFoundError:
                 continue
             except yaml.YAMLError as e:

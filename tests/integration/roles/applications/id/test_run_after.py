@@ -1,8 +1,7 @@
 #!/usr/bin/env python3
 import unittest
-from pathlib import Path
 
-import yaml
+from utils.cache.yaml import load_yaml_any
 
 from . import PROJECT_ROOT
 
@@ -21,8 +20,7 @@ class TestRunAfterRoles(unittest.TestCase):
                 continue
 
             try:
-                with Path(meta_path).open(encoding="utf-8") as f:
-                    data = yaml.safe_load(f) or {}
+                data = load_yaml_any(meta_path) or {}
             except Exception as e:
                 self.fail(f"Failed to parse {meta_path}: {e}")
                 continue

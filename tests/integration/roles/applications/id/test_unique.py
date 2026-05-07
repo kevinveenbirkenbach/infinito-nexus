@@ -1,8 +1,7 @@
 import glob
 import unittest
-from pathlib import Path
 
-import yaml
+from utils.cache.yaml import load_yaml_any
 
 from . import PROJECT_ROOT
 
@@ -15,9 +14,8 @@ def find_application_ids():
     ids = {}
     pattern = str(PROJECT_ROOT / "roles" / "*" / "vars" / "main.yml")
 
-    for file_path in glob.glob(pattern):
-        with Path(file_path).open() as f:
-            data = yaml.safe_load(f) or {}
+    for file_path in glob.glob(pattern):  # nocheck: project-walk
+        data = load_yaml_any(file_path) or {}
         app_id = data.get("application_id")
         if app_id is not None:
             ids.setdefault(app_id, []).append(file_path)

@@ -4,6 +4,8 @@ from typing import Any
 
 import yaml
 
+from utils.cache.yaml import load_yaml_all_str
+
 from . import PROJECT_ROOT
 
 
@@ -54,7 +56,7 @@ def _safe_load_all(path: Path) -> list[Yaml]:
     """Load all YAML documents from a file, tolerating Ansible tags; return list of docs."""
     try:
         with path.open("r", encoding="utf-8") as fh:
-            return list(yaml.load_all(fh, Loader=AnsibleTolerantLoader))
+            return list(load_yaml_all_str(fh))
     except Exception:
         # If a file is completely unparsable, treat as empty (so test won't crash).
         return []

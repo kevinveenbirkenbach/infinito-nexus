@@ -4,7 +4,6 @@ import sys
 import unittest
 from typing import Any
 
-import yaml
 from ansible.errors import AnsibleFilterError
 
 from . import PROJECT_ROOT
@@ -18,12 +17,13 @@ def _ensure_repo_root_on_syspath() -> None:
 _ensure_repo_root_on_syspath()
 
 from plugins.filter.compose_volumes import compose_volumes  # noqa: E402
+from utils.cache.yaml import load_yaml_str  # noqa: E402
 
 
 class TestComposeVolumes(unittest.TestCase):
     def _parse_yaml(self, rendered: str) -> dict[str, Any]:
         self.assertIsInstance(rendered, str)
-        data = yaml.safe_load(rendered) if rendered.strip() else {}
+        data = load_yaml_str(rendered) if rendered.strip() else {}
         self.assertIsInstance(data, dict)
         self.assertIn("volumes", data)
         self.assertIsInstance(data["volumes"], dict)

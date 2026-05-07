@@ -20,6 +20,8 @@ from collections.abc import Iterable
 from dataclasses import dataclass
 from pathlib import Path
 
+from utils.cache.files import read_text
+
 from . import PROJECT_ROOT
 
 TASK_FILES_GLOB = "roles/*/tasks/**/*.yml"
@@ -190,7 +192,10 @@ class TestSedEscapeUsage(unittest.TestCase):
         violations: list[str] = []
 
         for file in iter_task_files():
-            text = file.read_text(encoding="utf-8", errors="replace")
+            try:
+                text = read_text(str(file))
+            except UnicodeDecodeError:
+                continue
             sed_matches = find_sed_substitutions(text, file)
 
             for sm in sed_matches:

@@ -7,3 +7,4 @@ openresty:
   image: openresty/openresty
   version: alpine
   lifecycle: beta
+  pids_limit: 256

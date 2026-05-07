@@ -33,7 +33,7 @@ def _iter_roles_yml_files(repo_root: Path) -> Iterable[Path]:
     roles_dir = repo_root / "roles"
     if not roles_dir.is_dir():
         return []
-    return roles_dir.rglob("*.yml")
+    return roles_dir.rglob("*.yml")  # nocheck: project-walk
 
 
 def _indent_level(s: str) -> int:

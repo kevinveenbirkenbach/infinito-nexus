@@ -4,6 +4,8 @@ from urllib.parse import urlparse
 
 import yaml
 
+from utils.cache.yaml import load_yaml_any
+
 from . import PROJECT_ROOT
 
 
@@ -75,7 +77,7 @@ class TestCspConfigurationConsistency(unittest.TestCase):
 
             # Parse YAML (collect role + file path on error)
             try:
-                cfg = yaml.safe_load(cfg_file.read_text(encoding="utf-8")) or {}
+                cfg = load_yaml_any(cfg_file) or {}
             except yaml.YAMLError as e:
                 errors.append(f"{role_path.name}: YAML parse error in {cfg_file}: {e}")
                 continue

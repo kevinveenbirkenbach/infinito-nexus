@@ -12,4 +12,6 @@ prometheus:
   enabled: "{{ 'web-app-prometheus' in group_names }}"
   shared: "{{ 'web-app-prometheus' in group_names }}"
 html:
+  shared: true
+  enabled: false
   lifecycle: beta

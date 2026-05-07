@@ -5,7 +5,7 @@ import tempfile
 import unittest
 from pathlib import Path
 
-import yaml
+from utils.cache.yaml import dump_yaml
 
 
 class TestGetEntityNameFilter(unittest.TestCase):
@@ -37,8 +37,7 @@ class TestGetEntityNameFilter(unittest.TestCase):
                 "svc": {"db": {"title": "Databases", "invokable": True}},
             }
         }
-        with Path(self.categories_file).open("w", encoding="utf-8") as f:
-            yaml.safe_dump(categories, f, default_flow_style=False)
+        dump_yaml(self.categories_file, categories)
 
         # Patch working directory so plugin finds the test categories.yml
         self._cwd = str(Path.cwd())

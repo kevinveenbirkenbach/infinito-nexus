@@ -7,6 +7,7 @@ from pathlib import Path
 import yaml
 
 from utils.cache.files import iter_project_files_with_content, read_text
+from utils.cache.yaml import load_yaml_str
 
 logger = logging.getLogger(__name__)
 
@@ -45,7 +46,7 @@ class TestTopLevelVariableUsage(unittest.TestCase):
 
     def get_top_level_keys(self, file_path):
         try:
-            data = yaml.safe_load(read_text(file_path))
+            data = load_yaml_str(read_text(file_path))
         except yaml.YAMLError as e:
             logger.warning("Failed to parse YAML file '%s': %s", file_path, e)
             return []

@@ -53,24 +53,10 @@
 # Install dependencies per extension (only if vendor is missing)
 # Use /tmp/composer for HOME/CACHE to avoid /var/www permission issues.
 - name: "EXT | composer install in each extension when needed"
-  shell: |
-    container exec -u {{ MEDIAWIKI_USER }} {{ MEDIAWIKI_CONTAINER }} bash -lc '
-      set -e
-      d="{{ MEDIAWIKI_HTML_DIR }}/extensions/{{ ext.name }}"
-      if [ -f "$d/composer.json" ] && [ ! -f "$d/vendor/autoload.php" ]; then
-        install -d -m 0775 /tmp/composer/cache
-        export COMPOSER_HOME=/tmp/composer
-        export COMPOSER_CACHE_DIR=/tmp/composer/cache
-        export COMPOSER_ROOT_VERSION=dev-{{ MEDIAWIKI_EXT_BRANCH }}
-        cd "$d"
-        composer install --no-dev -n --prefer-dist
-        echo COMPOSER_INSTALLED:{{ ext.name }}
-      else
-        echo COMPOSER_PRESENT:{{ ext.name }}
-      fi
-    '
-  args:
-    executable: /bin/bash
+  script: >-
+    composer_install_extension.sh
+    "{{ MEDIAWIKI_CONTAINER }}" "{{ MEDIAWIKI_USER }}" "{{ MEDIAWIKI_HTML_DIR }}"
+    "{{ ext.name }}" "{{ MEDIAWIKI_EXT_BRANCH }}"
   loop: "{{ MEDIAWIKI_EXT_LIST }}"
   loop_control:
     loop_var: ext

@@ -4,13 +4,14 @@ from pathlib import Path
 
 import yaml
 
+from utils.cache.yaml import load_yaml_any
 from utils.service_registry import is_explicit_truth
 
 PROMETHEUS_APP_ID = "web-app-prometheus"
 
 
 def _load_config(file_path: str) -> dict:
-    return yaml.safe_load(Path(file_path).read_text(encoding="utf-8")) or {}
+    return load_yaml_any(Path(file_path)) or {}
 
 
 class TestPrometheusServicePresence(unittest.TestCase):
@@ -31,7 +32,7 @@ class TestPrometheusServicePresence(unittest.TestCase):
         pattern = str(roles_dir / "*" / "meta" / "services.yml")
         return [
             p
-            for p in sorted(glob.glob(pattern))
+            for p in sorted(glob.glob(pattern))  # nocheck: project-walk
             if (
                 Path(p).parts[-3].startswith(("web-app-", "web-svc-"))
                 and Path(p).parts[-3] != PROMETHEUS_APP_ID

@@ -20,7 +20,7 @@ class TestNoApplicationsVariableUsage(unittest.TestCase):
         roles_dir = str(PROJECT_ROOT / "roles")
         found = []
 
-        for root, dirs, files in os.walk(roles_dir):
+        for root, dirs, files in os.walk(roles_dir):  # nocheck: project-walk
             # Skip __pycache__ folders
             dirs[:] = [d for d in dirs if d != "__pycache__"]
             for file in files:

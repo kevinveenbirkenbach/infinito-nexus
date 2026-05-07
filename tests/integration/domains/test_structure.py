@@ -4,6 +4,8 @@ from pathlib import Path
 
 import yaml
 
+from utils.cache.yaml import load_yaml_any
+
 ROLES_DIR = Path(__file__).resolve().parent.parent.parent.parent / "roles"
 
 
@@ -25,8 +27,7 @@ class TestDomainsStructure(unittest.TestCase):
 
             for vars_file in vars_dir.glob("*.yml"):
                 try:
-                    with Path(vars_file).open() as f:
-                        data = yaml.safe_load(f) or {}
+                    data = load_yaml_any(vars_file) or {}
                 except yaml.YAMLError as e:
                     failed_roles.append(
                         (role_path.name, vars_file.name, f"YAML error: {e}")

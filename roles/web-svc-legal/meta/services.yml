@@ -3,6 +3,9 @@ legal:
   enabled: false
   shared: false
   lifecycle: beta
+html:
+  enabled: true
+  shared: true
 prometheus:
   enabled: "{{ 'web-app-prometheus' in group_names }}"
   shared: "{{ 'web-app-prometheus' in group_names }}"

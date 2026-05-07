@@ -4,6 +4,8 @@ from pathlib import Path
 
 import yaml
 
+from utils.cache.yaml import load_yaml_any
+
 
 class TestNoStopRequiredIntegrity(unittest.TestCase):
     def setUp(self):
@@ -25,13 +27,12 @@ class TestNoStopRequiredIntegrity(unittest.TestCase):
             if not Path(docker_config_path).is_file():
                 continue
 
-            with Path(docker_config_path).open() as f:
-                try:
-                    # Ensure config is at least an empty dict if YAML is empty or null
-                    config = yaml.safe_load(f) or {}
-                except yaml.YAMLError as e:
-                    self.fail(f"YAML parsing failed for {docker_config_path}: {e}")
-                    continue
+            try:
+                # Ensure config is at least an empty dict if YAML is empty or null
+                config = load_yaml_any(docker_config_path) or {}
+            except yaml.YAMLError as e:
+                self.fail(f"YAML parsing failed for {docker_config_path}: {e}")
+                continue
 
             # Per req-008 the file root of meta/services.yml IS the
             # services map (no `compose.services` wrapper).

@@ -22,8 +22,10 @@ import unittest
 from collections import defaultdict
 from pathlib import Path
 
+from utils.cache.yaml import load_yaml_all
+
 try:
-    import yaml
+    pass
 except Exception as e:  # pragma: no cover
     raise SystemExit(
         "PyYAML is required for this test. Install with: pip install pyyaml"
@@ -43,7 +45,7 @@ def _iter_yaml_files():
     ]
     seen = set()
     for pattern in patterns:
-        for path in glob.glob(pattern, recursive=True):
+        for path in glob.glob(pattern, recursive=True):  # nocheck: project-walk
             norm = os.path.normpath(path)
             if norm not in seen and Path(norm).is_file():
                 seen.add(norm)
@@ -75,8 +77,7 @@ class TestUppercaseConstantVarsUnique(unittest.TestCase):
         yaml_files = list(_iter_yaml_files())
         for yml in yaml_files:
             try:
-                with Path(yml).open(encoding="utf-8") as f:
-                    docs = list(yaml.safe_load_all(f))
+                docs = list(load_yaml_all(yml))
             except Exception as e:
                 parse_errors.append(f"{yml}: {e}")
                 continue

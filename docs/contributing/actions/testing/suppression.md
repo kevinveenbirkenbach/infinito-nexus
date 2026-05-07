@@ -35,6 +35,7 @@ Implementation: [utils/annotations/suppress.py](../../../../utils/annotations/su
 The placement rule is per check. The catalog column "Position" uses these labels:
 
 - **same line**: the marker MUST be on the same line as the construct it suppresses.
+- **same line / span**: the marker MUST be on the construct's own line or, for multi-line call expressions, any physical line spanned by that call.
 - **line above**: the marker MUST be on the immediately preceding non-empty line. Blank lines between the marker and the construct break the association.
 - **same or above**: either of the above is accepted.
 - **comment block above**: the marker may sit on any line in a contiguous comment block above the construct (no blank line between marker and construct).
@@ -48,6 +49,8 @@ The placement rule is per check. The catalog column "Position" uses these labels
 | `url`               | same or above       | [test_urls_reachable.py](../../../../tests/external/repository/test_urls_reachable.py)                                       | Skips probing the literal HTTP(S) URL. Use for CDN roots and API base URLs that return 4xx without a path.       |
 | `docker-version`    | line above          | [test_image_versions.py](../../../../tests/external/docker/test_image_versions.py)                                           | Skips the live version-update warning for that image's `version:` key.                                          |
 | `direct-yaml`       | same line / span    | [test_no_direct_yaml_calls.py](../../../../tests/lint/repository/test_no_direct_yaml_calls.py)                               | Allows the marked `yaml.safe_load` / `safe_dump` call to bypass `utils.cache.yaml`. This rule's checker hard-rejects `noqa:` and accepts only `nocheck:` (ruff parses `noqa:` as flake8 and warns on non-flake8 codes). |
+| `redundant-bool-ternary` | same line      | [test_no_redundant_bool_patterns.py](../../../../tests/lint/repository/test_no_redundant_bool_patterns.py)                  | Allows the redundant `\| bool \| ternary('true','false')` pattern on the marked line — only when a consumer really requires the lowercase `true`/`false` tokens. |
+| `redundant-bool-comparison` | same line   | [test_no_redundant_bool_patterns.py](../../../../tests/lint/repository/test_no_redundant_bool_patterns.py)                  | Allows `... \| bool == True/False/true/false` on the marked line — only when a real tri-state guard is intended (e.g. distinguishing `None` from `False`).  |
 | `shared`            | comment block above | [test_service_shared_consistency.py](../../../../tests/lint/ansible/test_service_shared_consistency.py)                     | Marks a service whose `enabled: true` legitimately does not require `shared: true`.                              |
 | `email`             | line above          | [test_email.py](../../../../tests/lint/ansible/roles/web-app/integration/test_email.py)                 | Suppresses the missing-email-integration warning when paired with `enabled: false` and `shared: false`.          |
 | `logout`            | line above          | [test_logout_dashboard.py](../../../../tests/lint/ansible/roles/web-app/integration/test_logout_dashboard.py) | Opts a `web-app-*` role out of the universal-logout integration. Marker MUST be on the line directly above `logout:`, paired with `enabled: false` and `shared: false`. |
@@ -55,6 +58,8 @@ The placement rule is per check. The catalog column "Position" uses these labels
 | `oidc`              | line above          | [test_sso.py](../../../../tests/lint/ansible/roles/web-app/integration/test_sso.py)                     | Opts the role's native OIDC path out (so that `oauth2` must take over, OR — if `oauth2` is also opted out — the role legitimately has no login flow). Same shape as `email`. |
 | `oauth2`            | line above          | [test_sso.py](../../../../tests/lint/ansible/roles/web-app/integration/test_sso.py)                     | Opts the role's oauth2-proxy path out. In combination with `# nocheck: oidc` it declares "this role has no login flow at all". Same shape as `email`. |
 | `file-size`         | head (first 30 lines) | [test_python_file_size.py](../../../../tests/lint/repository/test_python_file_size.py)                                     | Opts the entire `.py` file out of the 500-line cap.                                                              |
+| `project-walk`      | same line / span    | [test_no_raw_project_walk.py](../../../../tests/lint/repository/test_no_raw_project_walk.py)                               | Allows a raw `Path.rglob`, `os.walk`, or `glob.glob` call when the walk is intentionally outside the cached project-tree helper contract. |
+| `cache-read`        | same line / span    | [test_no_uncached_file_reads.py](../../../../tests/lint/repository/test_no_uncached_file_reads.py)                           | Allows a raw `Path.read_text` / `Path.read_bytes` call in a `tests/lint/` test when the read is intentionally outside the LRU-cached `utils.cache.files.read_text` contract. |
 | `run-once`          | anywhere            | [test_run_once_tags.py](../../../../tests/lint/ansible/test_run_once_tags.py), [test_schema.py](../../../../tests/integration/roles/run_once/test_schema.py) | Marks a role's `tasks/main.yml` as intentionally re-runnable; skips both the run-once tag check and the suffix check. |
 | `run-once-suffix`   | same line           | [test_schema.py](../../../../tests/integration/roles/run_once/test_schema.py)                                                | Allows a single `when:` item to reference a `run_once_<other>` flag whose suffix differs from the current role.   |
 | `raw-docker`        | same or above; head (first 30 lines) | [test_no_raw_docker.py](../../../../tests/integration/docker/test_no_raw_docker.py)                       | Marks a single line or a whole file under `roles/` as legitimately calling `docker` / `docker compose` / `docker-compose` directly. The check is scoped to `roles/`; bootstrap scripts and CI workflows outside `roles/` are not scanned and need no marker. |
@@ -117,6 +122,32 @@ email:
 """Module docstring."""
 # nocheck: file-size  (single-host orchestration script ships as one file)
 ```
+
+`project-walk`, on the raw walk call or on any line spanned by the call:
+
+```python
+for path in temp_dir.rglob("*"):  # noqa: project-walk
+    ...
+```
+
+Use `project-walk` only for scans that genuinely do not fit
+`utils.cache.files.iter_project_files`, such as temporary directories,
+`.git` metadata, or a deliberately tiny fixed path probe. Broad scans of the
+repository tree SHOULD use the cached helpers instead.
+
+`cache-read`, on the raw read call or on any line spanned by the call:
+
+```python
+text = tmp_path.read_text()  # noqa: cache-read  (synthetic fixture written above)
+```
+
+Use `cache-read` only when the file legitimately does not belong to the
+project-tree LRU cache — e.g. a tempdir written and read inside the same
+test, a file outside the repository root, or an in-memory `io.StringIO`-
+backed `Path`. Reads of project files (under `roles/`, `tasks/`,
+`docs/`, `tests/`, etc.) MUST go through
+`utils.cache.files.read_text` so the LRU cache is shared across the
+pytest session.
 
 `run-once`, at the top of a role's `tasks/main.yml`:
 
@@ -202,6 +233,18 @@ upstreams = {{ lookup('config', application_id, 'services.oauth2.origin.host') }
 ```text
 forward . 1.1.1.1 8.8.8.8  # nocheck: hardcoded-dns-resolver
 ```
+
+## Tool-Native `noqa` Codes 🧹
+
+Some Python files also use Ruff-compatible uppercase `# noqa` codes. These codes are handled by Ruff and related Python linters, not by [utils/annotations/suppress.py](../../../../utils/annotations/suppress.py). They MAY appear in Python files when the local exception is intentional and clear from context.
+
+| Code     | Tool meaning                 | Typical allowed use in this repository |
+| -------- | ---------------------------- | -------------------------------------- |
+| `BLE001` | Blind exception caught       | Narrow command-wrapper boundaries that must convert any underlying failure into a domain-specific error. |
+| `E402`   | Module import not at top     | Tests that MUST adjust `sys.path` or load fixtures before importing the module under test. |
+| `E731`   | Lambda assigned to variable  | Small test-local callbacks or path formatters where a named function would add noise. |
+| `F401`   | Imported but unused          | Re-export modules or import-probe tests where import success is the assertion. |
+| `SLF001` | Private member access        | Test-only introspection of parser or object internals when the public surface does not expose the needed state. |
 
 ## Adding a new rule 🆕
 

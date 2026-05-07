@@ -3,15 +3,9 @@ from collections.abc import Iterable
 from pathlib import Path
 from typing import Any
 
+from utils.cache.yaml import load_yaml_all_str
+
 from . import PROJECT_ROOT
-
-try:
-    import yaml  # PyYAML
-except ImportError as e:
-    raise SystemExit(
-        "PyYAML is required to run this test. Install with: pip install pyyaml"
-    ) from e
-
 
 THRESHOLD = 3  # fail if the same when-condition occurs on more than this many tasks
 
@@ -88,7 +82,7 @@ def _load_yaml_documents(path: Path) -> list[Any]:
       should be fixed in the repo.
     """
     text = path.read_text(encoding="utf-8")
-    return list(yaml.safe_load_all(text))  # may return [None] if empty
+    return list(load_yaml_all_str(text))  # may return [None] if empty
 
 
 def _collect_when_counts(yaml_docs: list[Any]) -> dict[str, list[tuple[str, str]]]:

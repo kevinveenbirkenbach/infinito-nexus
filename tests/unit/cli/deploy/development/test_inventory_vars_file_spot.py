@@ -76,18 +76,11 @@ class TestInventoryVarsFileSpotDriftGuard(unittest.TestCase):
             rel = path.relative_to(PROJECT_ROOT).as_posix()
             if rel in allowed_relative:
                 continue
-            # Skip vendored/build/cache directories.
-            if any(
-                rel.startswith(prefix + "/")
-                for prefix in (
-                    ".git",
-                    ".venv",
-                    "node_modules",
-                    "__pycache__",
-                    ".pytest_cache",
-                    ".mypy_cache",
-                )
-            ):
+            # `iter_project_files` already prunes `.git`, `.venv`,
+            # `node_modules`, `__pycache__`, `.pytest_cache` etc., but
+            # `.mypy_cache` is not in the default skip set — keep the
+            # explicit fragment-prefix check for that one.
+            if any(rel.startswith(prefix + "/") for prefix in (".mypy_cache",)):
                 continue
             if path.suffix not in {".py", ".sh", ".yml", ".yaml", ".j2", ".md"}:
                 continue

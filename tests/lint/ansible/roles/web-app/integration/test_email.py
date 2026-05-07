@@ -27,7 +27,7 @@ _SILENCER_HINT = (
 
 
 def _role_uses_email_lookup(role_path: Path) -> bool:
-    for path in role_path.rglob("*"):
+    for path in role_path.rglob("*"):  # nocheck: project-walk
         if not path.is_file() or path.suffix not in _SCAN_EXTENSIONS:
             continue
         try:

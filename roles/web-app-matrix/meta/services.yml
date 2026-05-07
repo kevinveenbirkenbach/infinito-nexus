@@ -28,6 +28,11 @@ synapse:
       http: 8021
     public:
       federation: 8448
+  min_storage: 10GB
+  cpus: '1.0'
+  mem_reservation: 1g
+  mem_limit: 2g
+  pids_limit: 1024
 element:
   version: latest
   image: vectorim/element-web
@@ -35,10 +40,19 @@ element:
   ports:
     local:
       http: 8022
+  min_storage: 1GB
+  cpus: '0.2'
+  mem_reservation: 128m
+  mem_limit: 256m
+  pids_limit: 256
 matrix-chatgpt-bot:
   version: latest
   image: ghcr.io/matrixgpt/matrix-chatgpt-bot
-# nocheck: dynamic-flag
+  min_storage: 1GB
+  cpus: '0.2'
+  mem_reservation: 128m
+  mem_limit: 256m
+  pids_limit: 256
 css:
   enabled: true
   shared: true
@@ -65,6 +79,7 @@ matrix:
     telegram: false
     whatsapp: false
   run_after:
-  - web-app-keycloak
-  - web-app-mailu
+    - web-app-matomo
+    - web-app-keycloak
+    - web-app-mailu
   lifecycle: beta

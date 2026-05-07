@@ -5,9 +5,8 @@ import unittest
 from pathlib import Path
 from unittest.mock import patch
 
-import yaml
-
 from plugins.filter.get_all_invokable_apps import get_all_invokable_apps
+from utils.cache.yaml import dump_yaml
 
 
 class TestGetAllInvokableApps(unittest.TestCase):
@@ -35,8 +34,7 @@ class TestGetAllInvokableApps(unittest.TestCase):
                 },
             }
         }
-        with self.categories_file.open("w", encoding="utf-8") as f:
-            yaml.safe_dump(categories, f)
+        dump_yaml(self.categories_file, categories)
 
         # Create roles: some should match invokable paths, some shouldn't
         roles = [
@@ -52,8 +50,7 @@ class TestGetAllInvokableApps(unittest.TestCase):
             data = {}
             if appid:
                 data["application_id"] = appid
-            with vars_path.open("w", encoding="utf-8") as f:
-                yaml.safe_dump(data, f)
+            dump_yaml(vars_path, data)
 
     def tearDown(self):
         """Clean up the temporary test directory after each test."""
@@ -75,8 +72,7 @@ class TestGetAllInvokableApps(unittest.TestCase):
 
     def test_empty_when_no_invokable(self):
         """Should raise RuntimeError if there are no invokable paths in categories.yml."""
-        with self.categories_file.open("w", encoding="utf-8") as f:
-            yaml.safe_dump({"roles": {"foo": {"invokable": False}}}, f)
+        dump_yaml(self.categories_file, {"roles": {"foo": {"invokable": False}}})
 
         with (
             patch("utils.invokable.PROJECT_ROOT", self.test_dir),
@@ -90,8 +86,9 @@ class TestGetAllInvokableApps(unittest.TestCase):
         self.roles_dir.mkdir(parents=True, exist_ok=True)
 
         # Recreate categories.yml after removing roles_dir
-        with self.categories_file.open("w", encoding="utf-8") as f:
-            yaml.safe_dump({"roles": {"web": {"app": {"invokable": True}}}}, f)
+        dump_yaml(
+            self.categories_file, {"roles": {"web": {"app": {"invokable": True}}}}
+        )
 
         with patch("utils.invokable.PROJECT_ROOT", self.test_dir):
             result = get_all_invokable_apps()

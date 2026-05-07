@@ -105,7 +105,7 @@ def _iter_all_tasks_files(repo_root: str) -> list[str]:
     ]
     files: list[str] = []
     for pat in patterns:
-        files.extend(glob.glob(pat, recursive=True))
+        files.extend(glob.glob(pat, recursive=True))  # nocheck: project-walk
     # Deduplicate while keeping order
     seen = set()
     ordered: list[str] = []

@@ -1,18 +1,81 @@
 {% include 'roles/sys-svc-compose/templates/base.yml.j2' %}
 
   moodle:
-{% set container_port = 8080 %}
+{% set container_port = MOODLE_FPM_PORT %}
     container_name: {{ MOODLE_CONTAINER }}
-    {{ lookup('template', 'roles/sys-svc-container/templates/build.yml.j2') | indent(4) }}
+    pull_policy: never
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        MOODLE_BASE_IMAGE: "{{ MOODLE_IMAGE }}"
+        MOODLE_BASE_TAG: "{{ MOODLE_VERSION }}"
+        MOODLE_CODE_DIR: "{{ MOODLE_CODE_DIR }}"
+        MOODLE_DATA_DIR: "{{ MOODLE_DATA_DIR }}"
+        MOODLE_SOURCE_DIR: "{{ MOODLE_SOURCE_DIR }}"
+        MOODLE_RUNTIME_USER: "{{ MOODLE_RUNTIME_USER }}"
+        MOODLE_OIDC_ENABLED: "{{ MOODLE_OIDC_ENABLED | bool | ternary('1','0') }}"
+        MOODLE_OIDC_PLUGIN_RELPATH: "{{ MOODLE_OIDC_PLUGIN_RELPATH }}"
+        MOODLE_RELEASE: "{{ MOODLE_RELEASE }}"
+        MOODLE_TARBALL_URL: "{{ MOODLE_TARBALL_URL }}"
+        MOODLE_TARBALL_FILENAME: "{{ MOODLE_TARBALL_FILENAME }}"
+        MOODLE_VERSION_FILE: "{{ MOODLE_VERSION_FILE }}"
+        MOODLE_AUTH_SUBDIR: "{{ MOODLE_AUTH_SUBDIR }}"
     image: {{ MOODLE_IMAGE_CUSTOM }}
-    ports:
-      - {{ DOCKER_BIND_HOST }}:{{ lookup('config', application_id, 'services.moodle.ports.local.http') }}:{{ container_port }}
 {% include 'roles/sys-svc-container/templates/base.yml.j2' %}
     volumes:
-      - 'code:{{ BITNAMI_CODE_LINK }}'
-      - 'data:{{ BITNAMI_DATA_DIR }}'
-{% include 'roles/sys-svc-container/templates/healthcheck/tcp.yml.j2' %}
+      - 'code:{{ MOODLE_CODE_DIR }}'
+      - 'data:{{ MOODLE_DATA_DIR }}'
+      - {{ MOODLE_MSMTP_ABS }}:/etc/msmtprc:ro
+    # FPM speaks FastCGI, not HTTP — bare TCP probe instead of curl.
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - bash -c '</dev/tcp/127.0.0.1/{{ MOODLE_FPM_PORT }}'
+      interval: 1m
+      timeout: 20s
+      retries: 5
+      start_period: 60s
 {% include 'roles/sys-svc-container/templates/depends_on/dmbs_excl.yml.j2' %}
+{% include 'roles/sys-svc-container/templates/networks.yml.j2' %}
+
+  nginx:
+    container_name: {{ MOODLE_NGINX_CONTAINER }}
+    image: {{ MOODLE_NGINX_IMAGE }}:{{ MOODLE_NGINX_VERSION }}
+    depends_on:
+      moodle:
+        condition: service_healthy
+    ports:
+      - {{ DOCKER_BIND_HOST }}:{{ lookup('config', application_id, 'services.moodle.ports.local.http') }}:{{ MOODLE_NGINX_PORT }}
+    volumes:
+      - 'code:{{ MOODLE_CODE_DIR }}:ro'
+      - './nginx.conf:/etc/nginx/conf.d/default.conf:ro'
+    restart: {{ DOCKER_RESTART_POLICY }}
+{% include 'roles/sys-svc-container/templates/networks.yml.j2' %}
+
+  cron:
+    container_name: {{ MOODLE_CRON_CONTAINER }}
+    image: {{ MOODLE_IMAGE_CUSTOM }}
+    pull_policy: never
+    depends_on:
+      moodle:
+        condition: service_healthy
+    volumes:
+      - 'code:{{ MOODLE_CODE_DIR }}'
+      - 'data:{{ MOODLE_DATA_DIR }}'
+      - {{ MOODLE_MSMTP_ABS }}:/etc/msmtprc:ro
+    env_file:
+      - .env/env
+    entrypoint: ["{{ MOODLE_ENTRYPOINT_PATH }}"]
+    command:
+      - bash
+      - -c
+      - |
+        while true; do
+          php {{ MOODLE_CLI_DIR }}/cron.php >/proc/1/fd/1 2>/proc/1/fd/2 || true
+          sleep 60
+        done
+    restart: {{ DOCKER_RESTART_POLICY }}
 {% include 'roles/sys-svc-container/templates/networks.yml.j2' %}
 
 {{ lookup('applications') | compose_volumes(

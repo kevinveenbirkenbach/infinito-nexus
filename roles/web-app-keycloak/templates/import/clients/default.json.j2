@@ -56,5 +56,8 @@
     "offline_access",
     "microprofile-jwt",
     "{{ lookup('config', application_id, 'services.keycloak.scopes.nextcloud') }}"
+{% if KEYCLOAK_MOODLE_ENABLED | bool %}
+    ,"{{ lookup('config', application_id, 'services.keycloak.scopes.moodle') }}"
+{% endif %}
   ]
 }

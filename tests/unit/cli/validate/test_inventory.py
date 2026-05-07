@@ -5,7 +5,7 @@ import tempfile
 import unittest
 from pathlib import Path
 
-import yaml
+from utils.cache.yaml import dump_yaml_str
 
 SCRIPT_PATH = str(
     Path(
@@ -27,14 +27,14 @@ class TestValidateInventory(unittest.TestCase):
         self.inventory_dir.mkdir()
 
         (self.roles_dir / "app1" / "meta" / "services.yml").write_text(
-            yaml.safe_dump(
+            dump_yaml_str(
                 {"port": 8080, "enabled": True, "settings": {"theme": "dark"}}
             ),
             encoding="utf-8",
         )
         # Per req-008 the file root IS the users map (no `users:` wrapper).
         (self.roles_dir / "identity" / "meta" / "users.yml").write_text(
-            yaml.safe_dump({"alice": {"email": "alice@example.com"}}),
+            dump_yaml_str({"alice": {"email": "alice@example.com"}}),
             encoding="utf-8",
         )
 
@@ -68,7 +68,7 @@ class TestValidateInventory(unittest.TestCase):
         # therefore appear as services entries in the defaults dict, and
         # the inventory side must mirror that shape.
         (self.inventory_dir / "group_vars.yml").write_text(
-            yaml.dump(
+            dump_yaml_str(
                 {
                     "applications": {
                         "app1": {
@@ -95,7 +95,7 @@ class TestValidateInventory(unittest.TestCase):
 
     def test_unknown_user_warning(self):
         (self.inventory_dir / "invalid_users.yml").write_text(
-            yaml.dump({"users": {"bob": {"email": "bob@example.com"}}}),
+            dump_yaml_str({"users": {"bob": {"email": "bob@example.com"}}}),
             encoding="utf-8",
         )
 
@@ -104,7 +104,7 @@ class TestValidateInventory(unittest.TestCase):
 
     def test_missing_user_key_fails(self):
         (self.inventory_dir / "invalid_key.yml").write_text(
-            yaml.dump(
+            dump_yaml_str(
                 {
                     "users": {
                         "alice": {
@@ -122,7 +122,7 @@ class TestValidateInventory(unittest.TestCase):
 
     def test_missing_application_key_fails(self):
         (self.inventory_dir / "missing_key.yml").write_text(
-            yaml.dump(
+            dump_yaml_str(
                 {
                     "applications": {
                         "app1": {

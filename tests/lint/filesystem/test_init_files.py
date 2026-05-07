@@ -10,7 +10,7 @@ class TestInitFiles(unittest.TestCase):
         """
         tests_root = PROJECT_ROOT / "tests"
 
-        for path in tests_root.rglob("*"):
+        for path in tests_root.rglob("*"):  # nocheck: project-walk
             if path.is_dir() and "__pycache__" not in path.parts:
                 init_file = path / "__init__.py"
                 with self.subTest(directory=str(path.relative_to(tests_root))):

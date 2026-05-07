@@ -1,0 +1,12 @@
+-- Grant USAGE/CREATE on schema public to the per-app database role and
+-- set ALTER DEFAULT PRIVILEGES so future tables created by other roles
+-- still grant ALL to the app role.
+--
+-- Identifier substitution is done via Jinja at render time because
+-- Postgres prepared-statement bindings ($1, %(name)s) only substitute
+-- values, not identifiers. `database_username` is inventory-sourced,
+-- so there is no untrusted-input path here.
+GRANT USAGE ON SCHEMA public TO "{{ database_username }}";
+GRANT CREATE ON SCHEMA public TO "{{ database_username }}";
+ALTER DEFAULT PRIVILEGES IN SCHEMA public
+  GRANT ALL PRIVILEGES ON TABLES TO "{{ database_username }}";
