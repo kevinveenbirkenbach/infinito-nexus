@@ -1,11 +1,10 @@
 import sys
 import unittest
-from pathlib import Path
 
-sys.path.insert(
-    0,
-    str(Path(str(Path(str(Path(__file__).parent)) / "../../../../")).resolve()),
-)
+from . import PROJECT_ROOT
+
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
 
 from plugins.filter.redirect_filters import FilterModule
 

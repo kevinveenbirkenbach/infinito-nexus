@@ -62,10 +62,9 @@ class StaticHandlerNamesTest(unittest.TestCase):
     """
 
     def test_no_templated_names_in_handlers(self):
-        project_root = str(
-            Path(str(Path(str(Path(__file__).parent)) / ".." / ".." / "..")).resolve()
-        )
-        pattern = str(Path(project_root) / "roles" / "*" / "handlers" / "main.yml")
+        from . import PROJECT_ROOT
+
+        pattern = str(PROJECT_ROOT / "roles" / "*" / "handlers" / "main.yml")
 
         violations = []
 

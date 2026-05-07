@@ -63,22 +63,32 @@ SUPPRESS_RULE: str = "project-root-import"
 # legitimately need to walk to the repo root (sys.path bootstrap shims,
 # standalone scripts without a package container) MUST mark the line
 # with `# nocheck: project-root-import` and document why.
-_FORBIDDEN_PATTERNS: tuple[tuple[str, re.Pattern[str]], ...] = (
+_FORBIDDEN_PATTERNS: tuple[tuple[str, re.Pattern[str], str], ...] = (
     (
         "`parents[N]` index expression",
         re.compile(r"\.parents\[\s*\d+\s*\]"),
+        "stripped",
     ),
     (
         "`os.pardir` reference",
         re.compile(r"\bos\.pardir\b"),
+        "stripped",
     ),
+    # Catches ``".."``, ``"../.."``, ``"../../../"`` (any number of
+    # ``..`` segments separated by ``/``, with optional trailing
+    # ``/``). Runs against the *no-docs* view of the source so a
+    # docstring or ``# comment`` mentioning ``..`` does NOT trip it,
+    # while a real ``Path(... / ".." / ...)`` callsite does.
     (
+        # nocheck: project-root-import  catalog entry mentions the literal pattern by design
         '".." path segment in a path-construction context',
-        re.compile(r"""["']\.\.["']"""),
+        re.compile(r"""["']\.\.(?:/+\.\.)*/?["']"""),
+        "no_docs",
     ),
     (
         "function searching upward for pyproject.toml",
         re.compile(r"^\s*def\s+(?:repo_root|project_root)\s*\("),
+        "stripped",
     ),
 )
 
@@ -118,6 +128,23 @@ def _strip_strings_and_comments(text: str) -> str:
     rule definitions in this very file, the dictionary docstring of
     `utils/cache/__init__.py`, etc.).
     """
+    return _strip(text, keep_inline_strings=False)
+
+
+def _strip_docs_and_comments(text: str) -> str:
+    """Like :func:`_strip_strings_and_comments`, but preserve regular
+    single-line ``"…"`` and ``'…'`` literals.
+
+    Used by the ``".."`` rule, which deliberately scans the *content*
+    of path strings: with the inline strings stripped (the default
+    behaviour above) the regex would never match a real
+    ``Path(… / ".." / …)`` callsite, while a docstring or
+    ``# comment`` mentioning ``..`` should still be ignored.
+    """
+    return _strip(text, keep_inline_strings=True)
+
+
+def _strip(text: str, *, keep_inline_strings: bool) -> str:
     out: list[str] = []
     i = 0
     n = len(text)
@@ -144,7 +171,10 @@ def _strip_strings_and_comments(text: str) -> str:
                     break
                 j += 1
             block = text[i : j + 1]
-            out.append("".join("\n" if c == "\n" else " " for c in block))
+            if keep_inline_strings:
+                out.append(block)
+            else:
+                out.append("".join("\n" if c == "\n" else " " for c in block))
             i = j + 1
             continue
         if ch == "#":
@@ -175,20 +205,24 @@ def _scan_file(path: Path) -> list[str]:
 
     raw_lines = text.splitlines()
     code_lines = _strip_strings_and_comments(text).splitlines()
+    no_docs_lines = _strip_docs_and_comments(text).splitlines()
     failures: list[str] = []
 
     is_init = _is_init_file(path)
 
-    for lineno, line in enumerate(code_lines, start=1):
-        for label, pattern in _FORBIDDEN_PATTERNS:
-            if not pattern.search(line):
+    for lineno in range(1, len(raw_lines) + 1):
+        stripped = code_lines[lineno - 1] if lineno - 1 < len(code_lines) else ""
+        no_docs = no_docs_lines[lineno - 1] if lineno - 1 < len(no_docs_lines) else ""
+        for label, pattern, scan_mode in _FORBIDDEN_PATTERNS:
+            target = stripped if scan_mode == "stripped" else no_docs
+            if not pattern.search(target):
                 continue
             # Inside __init__.py the canonical PROJECT_ROOT definition
             # is allowed; the per-init `pyproject.toml` integrity check
             # below validates that one. Other forbidden shapes
             # (pardir chains, def repo_root) MUST still fail even in
             # __init__.py, because there is no reason to use them there.
-            if is_init and _INIT_PROJECT_ROOT_RE.match(line):
+            if is_init and _INIT_PROJECT_ROOT_RE.match(stripped):
                 continue
             if is_suppressed_at(raw_lines, lineno, SUPPRESS_RULE, mode="same-or-above"):
                 continue
@@ -198,7 +232,7 @@ def _scan_file(path: Path) -> list[str]:
         # Anywhere else the constant MUST be imported from the package.
         if (
             not is_init
-            and _PROJECT_ROOT_ASSIGN_RE.match(line)
+            and _PROJECT_ROOT_ASSIGN_RE.match(stripped)
             and not is_suppressed_at(
                 raw_lines, lineno, SUPPRESS_RULE, mode="same-or-above"
             )

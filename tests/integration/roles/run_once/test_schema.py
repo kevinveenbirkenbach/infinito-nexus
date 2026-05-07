@@ -52,11 +52,9 @@ class RunOnceSchemaTest(unittest.TestCase):
         )
 
     def test_run_once_suffix_matches_role(self):
-        project_root = str(
-            Path(
-                str(Path(str(Path(__file__).parent)) / ".." / ".." / ".." / "..")
-            ).resolve()
-        )
+        from . import PROJECT_ROOT
+
+        project_root = str(PROJECT_ROOT)
         violations = []
 
         pattern = str(Path(project_root) / "roles" / "*" / "tasks" / "main.yml")

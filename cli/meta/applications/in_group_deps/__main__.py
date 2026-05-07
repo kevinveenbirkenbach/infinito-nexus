@@ -11,6 +11,8 @@ from pathlib import Path
 from utils.applications.in_group_deps import applications_if_group_and_all_deps
 from utils.cache.yaml import dump_yaml_str, load_yaml
 
+from . import PROJECT_ROOT
+
 __all__ = [
     "find_role_dirs_by_app_id",
     "main",
@@ -18,8 +20,7 @@ __all__ = [
 
 
 def _project_root() -> str:
-    script_dir = str(Path(__file__).parent)
-    return str(Path(str(Path(script_dir) / ".." / ".." / ".." / "..")).resolve())
+    return str(PROJECT_ROOT)
 
 
 def find_role_dirs_by_app_id(app_ids: list[str], roles_dir: str) -> list[str]:

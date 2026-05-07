@@ -3,6 +3,8 @@ from pathlib import Path
 
 import yaml
 
+from . import PROJECT_ROOT
+
 
 class TestCategoriesInvokableExclusion(unittest.TestCase):
     def test_no_child_invokable_if_any_parent_is_invokable(self):
@@ -10,13 +12,7 @@ class TestCategoriesInvokableExclusion(unittest.TestCase):
         Verify that if any ancestor in the hierarchy is invokable,
         none of its descendants may be invokable.
         """
-        # locate roles/categories.yml
-        base_dir = str(Path(__file__).parent)
-        yaml_path = str(
-            Path(
-                str(Path(base_dir) / ".." / ".." / ".." / "roles" / "categories.yml")
-            ).resolve()
-        )
+        yaml_path = str(PROJECT_ROOT / "roles" / "categories.yml")
 
         with Path(yaml_path).open(encoding="utf-8") as f:
             data = yaml.safe_load(f)

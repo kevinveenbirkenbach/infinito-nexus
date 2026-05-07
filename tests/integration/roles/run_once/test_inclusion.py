@@ -30,12 +30,9 @@ class RunOnceInclusionTest(unittest.TestCase):
     )
 
     def test_run_once_blocks(self):
-        # tests/integration/roles/run_once -> tests/integration/roles -> tests/integration -> tests -> project root
-        project_root = str(
-            Path(
-                str(Path(str(Path(__file__).parent)) / ".." / ".." / ".." / "..")
-            ).resolve()
-        )
+        from . import PROJECT_ROOT
+
+        project_root = str(PROJECT_ROOT)
         violations = []
 
         for filepath in find_role_task_yml_files(project_root):

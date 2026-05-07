@@ -4,6 +4,8 @@ from pathlib import Path
 
 import yaml
 
+from . import PROJECT_ROOT
+
 
 def find_application_ids():
     """
@@ -11,13 +13,7 @@ def find_application_ids():
     Returns a dict mapping application_id to list of file paths where it appears.
     """
     ids = {}
-    # Wenn der Test unter tests/integration liegt, gehen wir zwei Ebenen hoch zum Projekt-Root
-    base_dir = str(
-        Path(
-            str(Path(str(Path(__file__).parent)) / ".." / ".." / ".." / ".." / "..")
-        ).resolve()
-    )
-    pattern = str(Path(base_dir) / "roles" / "*" / "vars" / "main.yml")
+    pattern = str(PROJECT_ROOT / "roles" / "*" / "vars" / "main.yml")
 
     for file_path in glob.glob(pattern):
         with Path(file_path).open() as f:

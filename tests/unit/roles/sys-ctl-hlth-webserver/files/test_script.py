@@ -17,13 +17,10 @@ def load_module_from_path(mod_name: str, path: str):
 class TestStandaloneCheckerScript(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        # Compute repo root: tests/unit/roles/sys-ctl-hlth-webserver/files/test_script.py → 5 levels up
-        here = str(Path(str(Path(__file__).parent)).resolve())
-        repo_root = str(
-            Path(str(Path(here) / ".." / ".." / ".." / ".." / "..")).resolve()
-        )
+        from . import PROJECT_ROOT
+
         cls.script_path = str(
-            Path(repo_root) / "roles" / "sys-ctl-hlth-webserver" / "files" / "script.py"
+            PROJECT_ROOT / "roles" / "sys-ctl-hlth-webserver" / "files" / "script.py"
         )
         if not Path(cls.script_path).is_file():
             raise FileNotFoundError(f"Cannot find script.py at {cls.script_path}")

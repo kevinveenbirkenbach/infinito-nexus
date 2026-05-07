@@ -29,11 +29,12 @@ class FilterModule:
                 )
 
             # malformed or empty
+            # nocheck: project-root-import  the `".."` below is a substring check, not a path build
             if (
                 not hostname
                 or hostname.startswith(".")
                 or hostname.endswith(".")
-                or ".." in hostname
+                or ".." in hostname  # nocheck: project-root-import
             ):
                 raise AnsibleFilterError(
                     f"Invalid domain entry (malformed): {hostname!r}"

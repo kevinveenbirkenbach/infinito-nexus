@@ -13,9 +13,10 @@ import yaml
 class TestComposeRolesHaveLocalNetwork(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        base_dir = str(Path(__file__).parent)
-        cls.repo_root = str(Path(str(Path(base_dir) / ".." / ".." / "..")).resolve())
-        cls.roles_dir = str(Path(cls.repo_root) / "roles")
+        from . import PROJECT_ROOT
+
+        cls.repo_root = str(PROJECT_ROOT)
+        cls.roles_dir = str(PROJECT_ROOT / "roles")
 
     def test_every_compose_role_with_application_id_has_local_network(self):
         missing = []

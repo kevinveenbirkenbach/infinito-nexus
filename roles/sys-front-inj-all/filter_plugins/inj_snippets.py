@@ -15,10 +15,12 @@ Usage in a template:
 
 from pathlib import Path
 
-# This file lives at: roles/sys-front-inj-all/filter_plugins/inj_snippets.py
-_THIS_DIR = str(Path(__file__).parent)
-_ROLE_DIR = str(Path(str(Path(_THIS_DIR) / "..")).resolve())  # roles/sys-front-inj-all
-_ROLES_DIR = str(Path(str(Path(_ROLE_DIR) / "..")).resolve())  # roles
+# Role-bundled plugin: Ansible loads this file by file path with no
+# package context, so `from . import PROJECT_ROOT` cannot resolve here.
+# nocheck: project-root-import
+_ROLE_DIR = str(Path(__file__).resolve().parents[1])
+# nocheck: project-root-import
+_ROLES_DIR = str(Path(__file__).resolve().parents[2])
 
 
 def _feature_role_dir(feature: str) -> str:

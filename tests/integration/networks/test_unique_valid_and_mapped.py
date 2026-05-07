@@ -15,9 +15,10 @@ import yaml
 class TestNetworksUniqueValidAndMapped(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        base_dir = str(Path(__file__).parent)
-        cls.repo_root = str(Path(str(Path(base_dir) / ".." / ".." / "..")).resolve())
-        cls.roles_dir = str(Path(cls.repo_root) / "roles")
+        from . import PROJECT_ROOT
+
+        cls.repo_root = str(PROJECT_ROOT)
+        cls.roles_dir = str(PROJECT_ROOT / "roles")
 
         cls.role_to_subnet: dict[str, ipaddress.IPv4Network] = {}
         for role_path in sorted(glob.glob(str(Path(cls.roles_dir) / "*"))):

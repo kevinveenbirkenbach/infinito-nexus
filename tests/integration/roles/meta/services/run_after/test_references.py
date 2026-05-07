@@ -14,11 +14,9 @@ class TestRunAfterReferences(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
-        here = str(Path(str(Path(__file__).parent)).resolve())
-        repo_root = str(
-            Path(str(Path(here) / ".." / ".." / ".." / ".." / ".." / "..")).resolve()
-        )
-        cls.roles_dir = str(Path(repo_root) / "roles")
+        from . import PROJECT_ROOT
+
+        cls.roles_dir = str(PROJECT_ROOT / "roles")
         # collect all role names (folder names) in roles/
         cls.existing_roles = {
             name

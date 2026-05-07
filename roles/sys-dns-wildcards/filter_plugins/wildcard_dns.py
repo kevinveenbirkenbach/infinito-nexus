@@ -10,7 +10,7 @@ def _validate(d: str) -> None:
         or not d.strip()
         or d.startswith(".")
         or d.endswith(".")
-        or ".." in d
+        or ".." in d  # nocheck: project-root-import  substring check, not a path build
     ):
         raise AnsibleFilterError(f"Invalid domain: {d!r}")
 

@@ -1,5 +1,6 @@
 from pathlib import Path
 
+from utils import PROJECT_ROOT
 from utils.cache.yaml import load_yaml
 
 
@@ -27,7 +28,7 @@ def get_entity_name(role_name):
     """
     possible_locations = [
         str(Path(str(Path.cwd())) / "roles" / "categories.yml"),
-        str(Path(str(Path(__file__).parent)) / ".." / "roles" / "categories.yml"),
+        str(PROJECT_ROOT / "roles" / "categories.yml"),
         "roles/categories.yml",
     ]
     categories_file = None

@@ -2,22 +2,17 @@ from __future__ import annotations
 
 import sys
 import unittest
-from pathlib import Path
 from typing import Any
 
 import yaml
 from ansible.errors import AnsibleFilterError
 
+from . import PROJECT_ROOT
+
 
 def _ensure_repo_root_on_syspath() -> None:
-    this_file = str(Path(__file__).resolve())
-    repo_root = str(
-        Path(
-            str(Path(str(Path(this_file).parent)) / ".." / ".." / ".." / "..")
-        ).resolve()
-    )
-    if repo_root not in sys.path:
-        sys.path.insert(0, repo_root)
+    if str(PROJECT_ROOT) not in sys.path:
+        sys.path.insert(0, str(PROJECT_ROOT))
 
 
 _ensure_repo_root_on_syspath()

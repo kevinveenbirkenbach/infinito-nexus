@@ -11,12 +11,9 @@ class TestRolesFolderNames(unittest.TestCase):
         Integration test that verifies none of the folders under 'roles' contain an underscore in their name,
         ignoring the '__pycache__' folder.
         """
-        # Determine the absolute path to the 'roles' directory
-        roles_dir = str(
-            Path(
-                str(Path(str(Path(__file__).parent)) / ".." / ".." / ".." / "roles")
-            ).resolve()
-        )
+        from . import PROJECT_ROOT
+
+        roles_dir = str(PROJECT_ROOT / "roles")
 
         # List all entries in the roles directory
         entries = []

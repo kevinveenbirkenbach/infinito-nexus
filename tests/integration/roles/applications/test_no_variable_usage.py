@@ -15,18 +15,9 @@ class TestNoApplicationsVariableUsage(unittest.TestCase):
     )
 
     def test_no_applications_variable_usage(self):
-        roles_dir = str(
-            Path(
-                str(
-                    Path(str(Path(__file__).parent))
-                    / ".."
-                    / ".."
-                    / ".."
-                    / ".."
-                    / "roles"
-                )
-            ).resolve()
-        )
+        from . import PROJECT_ROOT
+
+        roles_dir = str(PROJECT_ROOT / "roles")
         found = []
 
         for root, dirs, files in os.walk(roles_dir):

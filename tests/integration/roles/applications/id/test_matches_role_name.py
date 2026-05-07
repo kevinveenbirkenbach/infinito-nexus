@@ -12,13 +12,9 @@ from plugins.filter.invokable_paths import get_invokable_paths, get_non_invokabl
 class TestApplicationIdAndInvocability(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        # locate roles dir (two levels up)
-        base_dir = str(Path(__file__).parent)
-        cls.roles_dir = str(
-            Path(
-                str(Path(base_dir) / ".." / ".." / ".." / ".." / ".." / "roles")
-            ).resolve()
-        )
+        from . import PROJECT_ROOT
+
+        cls.roles_dir = str(PROJECT_ROOT / "roles")
 
         # get lists of invokable and non-invokable role *names*
         # filters return dash-joined paths; for top-level roles names are just the basename

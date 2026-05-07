@@ -9,6 +9,8 @@ import os
 import json
 import argparse
 
+from . import PROJECT_ROOT
+
 
 def find_roles(roles_dir: str):
     """Return sorted list of role names under roles_dir."""
@@ -27,11 +29,7 @@ def write_roles_list(roles, out_file):
 
 
 def main():
-    # Determine default roles_dir relative to this script: ../../.. -> roles
-    script_dir = os.path.dirname(os.path.abspath(__file__))
-    default_roles_dir = os.path.abspath(
-        os.path.join(script_dir, '..', '..', '..', 'roles')
-    )
+    default_roles_dir = str(PROJECT_ROOT / "roles")
     default_output = os.path.join(default_roles_dir, 'list.json')
 
     parser = argparse.ArgumentParser(description='Generate roles/list.json')

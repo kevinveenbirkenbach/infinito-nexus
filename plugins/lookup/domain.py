@@ -1,14 +1,13 @@
 # lookup_plugins/domain.py
 from __future__ import annotations
 
-import sys
-from pathlib import Path
 from typing import Any
 
 from ansible.errors import AnsibleError
 from ansible.plugins.lookup import LookupBase
 
 from utils.cache.domains import get_merged_domains
+from utils.domains.primary_domain import get_domain
 
 
 class LookupModule(LookupBase):
@@ -41,18 +40,6 @@ class LookupModule(LookupBase):
             roles_dir=kwargs.get("roles_dir"),
             templar=getattr(self, "_templar", None),
         )
-
-        plugin_dir = str(Path(str(Path(__file__).resolve())).parent)
-        project_root = str(Path(str(Path(plugin_dir) / ".." / "..")).resolve())
-        if project_root not in sys.path:
-            sys.path.append(project_root)
-
-        try:
-            from utils.domains.primary_domain import get_domain
-        except Exception as e:
-            raise AnsibleError(
-                f"lookup('domain'): could not import utils.domains.primary_domain.get_domain: {e}"
-            ) from e
 
         try:
             domain = get_domain(domains, application_id.strip())

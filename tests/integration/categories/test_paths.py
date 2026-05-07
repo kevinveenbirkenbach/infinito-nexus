@@ -4,33 +4,18 @@ from pathlib import Path
 
 import yaml
 
+from . import PROJECT_ROOT
+
 
 class TestCategoryPaths(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        # Load categories.yml
-        file_path = str(
-            Path(
-                str(
-                    Path(str(Path(__file__).parent))
-                    / ".."
-                    / ".."
-                    / ".."
-                    / "roles"
-                    / "categories.yml"
-                )
-            ).resolve()
-        )
+        file_path = str(PROJECT_ROOT / "roles" / "categories.yml")
         with Path(file_path).open() as f:
             data = yaml.safe_load(f)
         cls.roles_def = data["roles"]
 
-        # List of actual directories under roles/
-        roles_dir = str(
-            Path(
-                str(Path(str(Path(__file__).parent)) / ".." / ".." / ".." / "roles")
-            ).resolve()
-        )
+        roles_dir = str(PROJECT_ROOT / "roles")
         cls.existing_dirs = os.listdir(roles_dir)
 
     def test_all_category_paths_exist(self):

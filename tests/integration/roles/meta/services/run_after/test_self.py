@@ -13,11 +13,9 @@ class TestSelfDependency(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
-        here = str(Path(str(Path(__file__).parent)).resolve())
-        repo_root = str(
-            Path(str(Path(here) / ".." / ".." / ".." / ".." / ".." / "..")).resolve()
-        )
-        cls.roles_dir = str(Path(repo_root) / "roles")
+        from . import PROJECT_ROOT
+
+        cls.roles_dir = str(PROJECT_ROOT / "roles")
 
     def test_no_self_in_run_after(self):
         for entry in os.listdir(self.roles_dir):

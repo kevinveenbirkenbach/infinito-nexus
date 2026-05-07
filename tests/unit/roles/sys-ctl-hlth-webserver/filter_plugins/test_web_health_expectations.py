@@ -15,15 +15,11 @@ def load_module_from_path(mod_name: str, path: str):
 class TestWebHealthExpectationsFilter(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        # Compute repo root from this test file location
-        here = str(Path(str(Path(__file__).parent)).resolve())
-        # tests/unit/roles/sys-ctl-hlth-webserver/filter_plugins/ -> repo root is 5 levels up
-        cls.ROOT = str(
-            Path(str(Path(here) / ".." / ".." / ".." / ".." / "..")).resolve()
-        )
+        from . import PROJECT_ROOT
 
+        cls.ROOT = str(PROJECT_ROOT)
         cls.module_path = str(
-            Path(cls.ROOT)
+            PROJECT_ROOT
             / "roles"
             / "sys-ctl-hlth-webserver"
             / "filter_plugins"

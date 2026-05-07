@@ -231,10 +231,9 @@ class TestHandlersInvoked(unittest.TestCase):
     """
 
     def setUp(self):
-        repo_root = str(
-            Path(str(Path(str(Path(__file__).parent)) / "../../..")).resolve()
-        )
-        self.roles_dir = str(Path(repo_root) / "roles")
+        from . import PROJECT_ROOT
+
+        self.roles_dir = str(PROJECT_ROOT / "roles")
 
         # Handlers: only main.yml/main.yaml define handlers.
         # Other files under handlers/ are typically include_tasks/import_tasks

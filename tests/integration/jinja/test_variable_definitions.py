@@ -24,10 +24,9 @@ class TestVariableDefinitions(unittest.TestCase):
     """
 
     def setUp(self):
-        # Project root = repo root (tests/integration/<cluster>/.. -> ../../../)
-        self.project_root = str(
-            Path(str(Path(str(Path(__file__).parent)) / "../../../")).resolve()
-        )
+        from . import PROJECT_ROOT
+
+        self.project_root = str(PROJECT_ROOT)
 
         # Collect all variable definition files: roles/*/{vars,defaults}/**/*.yml and group_vars/all/*.yml
         self.var_files = []

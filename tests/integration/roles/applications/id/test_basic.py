@@ -17,12 +17,10 @@ class TestSysRolesApplicationId(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
-        cls.base_dir = str(
-            Path(
-                str(Path(str(Path(__file__).parent)) / ".." / ".." / ".." / ".." / "..")
-            ).resolve()
-        )
-        cat_file = str(Path(cls.base_dir) / "roles" / "categories.yml")
+        from . import PROJECT_ROOT
+
+        cls.base_dir = str(PROJECT_ROOT)
+        cat_file = str(PROJECT_ROOT / "roles" / "categories.yml")
         cls.invokable_prefixes = set(get_invokable_paths(cat_file))
         # collect actual sys dirs
         pattern = str(Path(cls.base_dir) / "roles" / "sys-*")

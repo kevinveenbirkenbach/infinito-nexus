@@ -8,11 +8,11 @@ from pathlib import Path
 class CLIHelpIntegrationTest(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        cls.project_root = str(
-            Path(str(Path(str(Path(__file__).parent)) / ".." / ".." / "..")).resolve()
-        )
-        cls.cli_dir = str(Path(cls.project_root) / "cli")
-        cls.main_py = str(Path(cls.cli_dir) / "__main__.py")
+        from . import PROJECT_ROOT
+
+        cls.project_root = str(PROJECT_ROOT)
+        cls.cli_dir = str(PROJECT_ROOT / "cli")
+        cls.main_py = str(PROJECT_ROOT / "cli" / "__main__.py")
         cls.python = sys.executable
 
     def _discover_command_dirs(self):

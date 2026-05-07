@@ -9,11 +9,10 @@ import yaml
 
 class TestSystemServiceIdMatchesRole(unittest.TestCase):
     def setUp(self):
-        # Repo root = three levels up from this file: tests/integration/<cluster>/<this_file>.py
-        self.repo_root = str(
-            Path(str(Path(str(Path(__file__).parent)) / ".." / ".." / "..")).resolve()
-        )
-        self.roles_dir = str(Path(self.repo_root) / "roles")
+        from . import PROJECT_ROOT
+
+        self.repo_root = str(PROJECT_ROOT)
+        self.roles_dir = str(PROJECT_ROOT / "roles")
         self.assertTrue(
             Path(self.roles_dir).is_dir(),
             f"'roles' directory not found at: {self.roles_dir}",

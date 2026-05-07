@@ -13,9 +13,9 @@ logger = logging.getLogger(__name__)
 
 class TestTopLevelVariableUsage(unittest.TestCase):
     def setUp(self):
-        self.project_root = str(
-            Path(str(Path(str(Path(__file__).parent)) / "../../../")).resolve()
-        )
+        from . import PROJECT_ROOT
+
+        self.project_root = str(PROJECT_ROOT)
         # Braces werden von glob nicht unterstützt – also einzeln sammeln:
         self.roles_vars_paths = glob(
             str(Path(self.project_root) / "roles/*/vars/main.yml")

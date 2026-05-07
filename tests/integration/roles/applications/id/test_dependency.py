@@ -4,6 +4,8 @@ from pathlib import Path
 
 import yaml
 
+from . import PROJECT_ROOT
+
 
 class TestDependencyApplicationId(unittest.TestCase):
     def test_application_id_matches_folder_for_dependent_roles(self):
@@ -12,12 +14,7 @@ class TestDependencyApplicationId(unittest.TestCase):
         if both A and B have vars/main.yml with application_id defined,
         then application_id must equal the role's folder name for both.
         """
-        base_dir = str(Path(__file__).parent)
-        roles_dir = str(
-            Path(
-                str(Path(base_dir) / ".." / ".." / ".." / ".." / ".." / "roles")
-            ).resolve()
-        )
+        roles_dir = str(PROJECT_ROOT / "roles")
 
         violations = []
 

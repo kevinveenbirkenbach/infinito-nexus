@@ -4,20 +4,9 @@ from pathlib import Path
 
 import yaml
 
-# Dynamically determine the path to the roles directory
-ROLES_DIR = str(
-    Path(
-        str(
-            Path(str(Path(__file__).parent))
-            / ".."
-            / ".."
-            / ".."
-            / ".."
-            / ".."
-            / "roles"
-        )
-    ).resolve()
-)
+from . import PROJECT_ROOT
+
+ROLES_DIR = str(PROJECT_ROOT / "roles")
 
 
 class TestApplicationIdDeprecation(unittest.TestCase):

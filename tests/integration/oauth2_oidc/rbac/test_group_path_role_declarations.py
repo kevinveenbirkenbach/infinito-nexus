@@ -150,6 +150,7 @@ def _enclosing_role_dir(file_path):
     return the absolute path to that role directory, or None."""
     rel = os.path.relpath(file_path, ROLES_DIR)
     head = rel.split(os.sep, 1)[0]
+    # nocheck: project-root-import  string-prefix check, not a path build
     if not head or head.startswith(".."):
         return None
     candidate = str(Path(ROLES_DIR) / head)

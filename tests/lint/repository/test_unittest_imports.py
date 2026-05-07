@@ -4,9 +4,11 @@ from pathlib import Path
 
 from utils.cache.files import iter_project_files_with_content
 
+from . import PROJECT_ROOT
+
 
 class TestUnittestImports(unittest.TestCase):
-    TEST_ROOT = str(Path(str(Path(str(Path(__file__).parent)) / ".." / "..")).resolve())
+    TEST_ROOT = str(PROJECT_ROOT / "tests")
 
     def test_all_test_files_import_unittest(self):
         missing = []

@@ -6,6 +6,7 @@ from typing import Any
 from ansible.errors import AnsibleError
 from ansible.plugins.lookup import LookupBase
 
+from plugins.lookup import PROJECT_ROOT
 from utils.applications.in_group_deps import applications_if_group_and_all_deps
 from utils.cache.applications import get_merged_applications
 from utils.cache.base import (
@@ -79,8 +80,7 @@ class LookupModule(LookupBase):
     # ------------------------------------------------------------------
 
     def _get_project_root(self) -> str:
-        plugin_dir = str(Path(__file__).parent)
-        return str(Path(str(Path(plugin_dir) / ".." / "..")).resolve())
+        return str(PROJECT_ROOT)
 
     def _meta_deps(self, role: str, roles_dir: str) -> list[str]:
         meta_file = str(Path(roles_dir) / role / "meta" / "main.yml")

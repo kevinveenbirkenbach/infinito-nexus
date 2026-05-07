@@ -9,6 +9,8 @@ from typing import List, Dict, Any, Set
 from utils.roles.dependency_resolver import RoleDependencyResolver
 from utils.cache.yaml import load_yaml, load_yaml_any
 
+from . import PROJECT_ROOT
+
 # Regex used to ignore Jinja expressions inside include/import statements
 JINJA_PATTERN = re.compile(r'{{.*}}')
 
@@ -343,8 +345,7 @@ def output_graph(graph_data: Any, fmt: str, start: str, key: str):
 # ------------------------------------------------------------
 
 def main():
-    script_dir = os.path.dirname(os.path.abspath(__file__))
-    default_roles_dir = os.path.abspath(os.path.join(script_dir, "..", "..", "roles"))
+    default_roles_dir = str(PROJECT_ROOT / "roles")
 
     parser = argparse.ArgumentParser(description="Generate dependency graphs")
     parser.add_argument("-r", "--role", required=True, help="Starting role name")

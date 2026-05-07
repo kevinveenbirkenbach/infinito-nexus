@@ -3,10 +3,11 @@ from pathlib import Path
 
 from utils.applications.config import get
 
-# Allow imports from utils (same trick as your config filter)
-_BASE_DIR = str(
-    Path(str(Path(str(Path(__file__).parent)) / ".." / ".." / "..")).resolve()
-)
+# Allow imports from utils (same trick as your config filter).
+# Role-bundled plugin: Ansible loads by file path with no package
+# context, so `from . import PROJECT_ROOT` cannot resolve here.
+# nocheck: project-root-import
+_BASE_DIR = str(Path(__file__).resolve().parents[3])
 _MODULE_UTILS_DIR = str(Path(_BASE_DIR) / "utils")
 for _p in (_BASE_DIR, _MODULE_UTILS_DIR):
     if _p not in sys.path:

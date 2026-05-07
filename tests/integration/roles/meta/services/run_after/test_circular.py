@@ -1,5 +1,4 @@
 import unittest
-from pathlib import Path
 
 # import the functions from your CLI script
 from cli.build.role_include import build_dependency_graph, find_cycle
@@ -13,12 +12,9 @@ class TestCircularDependencies(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
-        # Determine the path to the repo root and the roles directory
-        here = str(Path(str(Path(__file__).parent)).resolve())
-        repo_root = str(
-            Path(str(Path(here) / ".." / ".." / ".." / ".." / ".." / "..")).resolve()
-        )
-        cls.roles_dir = str(Path(repo_root) / "roles")
+        from . import PROJECT_ROOT
+
+        cls.roles_dir = str(PROJECT_ROOT / "roles")
 
     def test_no_circular_dependencies(self):
         # Build the dependency graph using the real roles/

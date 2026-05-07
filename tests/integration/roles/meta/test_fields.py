@@ -4,14 +4,12 @@ from pathlib import Path
 
 import yaml
 
+from . import PROJECT_ROOT
+
 
 class TestAnsibleRolesMetadata(unittest.TestCase):
-    ROOT_DIR = str(
-        Path(
-            str(Path(str(Path(__file__).parent)) / ".." / ".." / ".." / "..")
-        ).resolve()
-    )
-    ROLES_DIR = str(Path(ROOT_DIR) / "roles")
+    ROOT_DIR = str(PROJECT_ROOT)
+    ROLES_DIR = str(PROJECT_ROOT / "roles")
 
     @classmethod
     def setUpClass(cls):

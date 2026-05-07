@@ -203,12 +203,9 @@ class TestUnnecessaryRoleDependencies(unittest.TestCase):
     """
 
     def setUp(self):
-        # project root = two levels up from this test file
-        self.project_root = str(
-            Path(
-                str(Path(str(Path(__file__).parent)) / ".." / ".." / ".." / ".." / "..")
-            ).resolve()
-        )
+        from . import PROJECT_ROOT
+
+        self.project_root = str(PROJECT_ROOT)
         self.roles = iter_role_dirs(self.project_root)
 
         # Index provider data
