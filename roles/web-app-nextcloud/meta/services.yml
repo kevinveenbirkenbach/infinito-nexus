@@ -79,8 +79,12 @@ nextcloud:
       enabled: true
     external:
       enabled: true
-    files_bpm:
-      enabled: true
+    # Marketplace upstream lags Nextcloud version: deploy fails with
+    # `App "BPM Files" cannot be installed because it is not compatible
+    # with this version of the server.` Re-enable when the plugin
+    # ships a release matching the pinned Nextcloud major.
+    # files_bpm:
+    #   enabled: true
     files_linkeditor:
       enabled: true
     fileslibreofficeedit:
