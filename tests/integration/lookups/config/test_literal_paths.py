@@ -1,31 +1,54 @@
 """Validate every literal `lookup('config', '<app_id>', '<path>')` call
-resolves against the role's application defaults / schema."""
+resolves against the role's application defaults / schema.
+
+The classifier here owns the rule "literal app id + complete path
+(does NOT end with `.`)" — partial paths and variable-app calls are
+handled by the sibling tests."""
 
 import unittest
+from typing import Dict, Iterable, List, Tuple
 
 from utils.applications.config import ConfigEntryNotSetError, get
 
-from ._scan import get_scan
+from ._scan import LookupMatch, get_context, iter_matches
 from ._validate import PathNotFound, validate_app_path
+
+
+def _build_literal_paths(
+    matches: Iterable[LookupMatch],
+) -> Dict[str, Dict[str, List[Tuple]]]:
+    out: Dict[str, Dict[str, List[Tuple]]] = {}
+    for m in matches:
+        if m.kind != "literal":
+            continue
+        if m.app_literal is None:
+            continue
+        if m.path_arg.endswith("."):
+            continue
+        out.setdefault(m.app_literal, {}).setdefault(m.path_arg, []).append(
+            (m.file, m.lineno)
+        )
+    return out
 
 
 class TestLiteralPaths(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        cls.scan = get_scan()
+        cls.ctx = get_context()
+        cls.literal_paths = _build_literal_paths(iter_matches())
 
     def test_literal_paths(self):
-        scan = self.scan
-        failures: list[str] = []
-        missing_apps: list[str] = []
-        for app_id, paths in scan.literal_paths.items():
-            if app_id not in scan.application_defaults:
+        ctx = self.ctx
+        failures: List[str] = []
+        missing_apps: List[str] = []
+        for app_id, paths in self.literal_paths.items():
+            if app_id not in ctx.application_defaults:
                 missing_apps.append(app_id)
                 continue
             for dotted, occs in paths.items():
                 try:
                     get(
-                        applications=scan.application_defaults,
+                        applications=ctx.application_defaults,
                         application_id=app_id,
                         config_path=dotted,
                         strict=True,
@@ -36,9 +59,9 @@ class TestLiteralPaths(unittest.TestCase):
                     pass
                 try:
                     validate_app_path(
-                        scan.application_defaults,
-                        scan.role_schemas,
-                        scan.user_defaults,
+                        ctx.application_defaults,
+                        ctx.role_schemas,
+                        ctx.user_defaults,
                         app_id,
                         dotted,
                     )
@@ -46,7 +69,7 @@ class TestLiteralPaths(unittest.TestCase):
                     file_path, lineno = occs[0]
                     failures.append(f"{exc}; called at {file_path}:{lineno}")
 
-        report: list[str] = []
+        report: List[str] = []
         if missing_apps:
             report.append(
                 f"{len(missing_apps)} application id(s) referenced by literal "

@@ -8,6 +8,11 @@ role, which is all :mod:`test_variable_paths` guarantees.
 `roles/<role>/vars/main.yml`), so the file-path-derived role is the
 correct lookup context.
 
+The classifier owns two rules: variable-app + complete literal path,
+AND the file must live in a role that declares ``application_id`` in
+``vars/main.yml`` (otherwise the runtime-inherited app id is
+ambiguous from a static-analysis standpoint).
+
 Mirrors the resolution logic of `plugins/lookup/config.py`:
 - `users.<canonical>.<sub>`: requires the role's `meta/users.yml` to
   declare `<canonical>` AND the global `user_defaults[<canonical>]` to
@@ -19,25 +24,48 @@ Mirrors the resolution logic of `plugins/lookup/config.py`:
 
 import unittest
 from collections.abc import Mapping
+from typing import Dict, FrozenSet, Iterable, List, Tuple
 
-from ._scan import get_scan
+from ._scan import LookupMatch, get_context, iter_matches, role_id_from_path
 from ._validate import PathNotFound, assert_nested, validate_app_path
+
+
+def _build_role_local_paths(
+    matches: Iterable[LookupMatch],
+    roles_with_application_id: FrozenSet[str],
+) -> Dict[Tuple[str, str], List[Tuple]]:
+    out: Dict[Tuple[str, str], List[Tuple]] = {}
+    for m in matches:
+        if m.kind != "literal":
+            continue
+        if m.app_literal is not None:
+            continue  # variable app argument only
+        if m.path_arg.endswith("."):
+            continue
+        role_id = role_id_from_path(m.file)
+        if role_id is None or role_id not in roles_with_application_id:
+            continue
+        out.setdefault((role_id, m.path_arg), []).append((m.file, m.lineno))
+    return out
 
 
 class TestRoleLocalLiteralPaths(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        cls.scan = get_scan()
+        cls.ctx = get_context()
+        cls.role_local_paths = _build_role_local_paths(
+            iter_matches(), cls.ctx.roles_with_application_id
+        )
 
     def test_role_local_literal_paths(self):
-        scan = self.scan
-        if not scan.role_local_paths:
+        if not self.role_local_paths:
             self.skipTest("No role-local lookup('config', <var>, 'literal') calls")
-        failures: list[str] = []
-        for (role_id, dotted), occs in scan.role_local_paths.items():
-            if role_id not in scan.application_defaults:
+        ctx = self.ctx
+        failures: List[str] = []
+        for (role_id, dotted), occs in self.role_local_paths.items():
+            if role_id not in ctx.application_defaults:
                 continue
-            cfg = scan.application_defaults[role_id]
+            cfg = ctx.application_defaults[role_id]
             if dotted.startswith("users."):
                 err = self._check_users_path(role_id, cfg, dotted, occs)
                 if err:
@@ -45,9 +73,9 @@ class TestRoleLocalLiteralPaths(unittest.TestCase):
                 continue
             try:
                 validate_app_path(
-                    scan.application_defaults,
-                    scan.role_schemas,
-                    scan.user_defaults,
+                    ctx.application_defaults,
+                    ctx.role_schemas,
+                    ctx.user_defaults,
                     role_id,
                     dotted,
                 )
@@ -82,7 +110,7 @@ class TestRoleLocalLiteralPaths(unittest.TestCase):
         if len(sub_parts) == 3:
             try:
                 assert_nested(
-                    self.scan.user_defaults,
+                    self.ctx.user_defaults,
                     f"{canonical}.{sub_parts[2]}",
                     "user_defaults",
                 )

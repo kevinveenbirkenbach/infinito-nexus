@@ -1,11 +1,21 @@
-"""Single-pass project scanner for `lookup('config', ...)` calls.
+"""Project-wide scanner for `lookup('config', ...)` calls.
 
-Each `test_*.py` in this package consumes :func:`get_scan` to grab the
-shared, lazily-built :class:`ScanResult`. Building the scan walks every
-project file once and resolves application defaults / user defaults /
-per-role schemas; caching it via ``functools.lru_cache`` keeps the
-test-suite total well under the legacy single-class ``setUpClass`` cost
-even though we now have one class per check.
+Two cached entry points:
+
+* :func:`iter_matches` — returns the deduplicated stream of qualifying
+  :class:`LookupMatch` records (regex-parsed, comment-stripped,
+  suppression-filtered). Knows nothing about how each test classifies
+  the matches.
+* :func:`get_context` — returns the :class:`ScanContext` carrying the
+  application defaults, user defaults, per-role schemas, and the
+  ``application_id``-declaring role set. Built from
+  ``utils.cache.{applications,users,yaml}`` so every YAML read goes
+  through the process-wide caches.
+
+Per-test classification (literal / variable / wildcard / role-local)
+is intentionally NOT done here — each test owns its own builder, so
+a change to one classification cannot leak into the others. See the
+sibling ``test_*.py`` files.
 """
 
 from __future__ import annotations
@@ -14,7 +24,7 @@ import functools
 import re
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Any, Dict, List, Tuple
+from typing import Any, Dict, FrozenSet, List, Tuple
 
 from utils.annotations.suppress import is_suppressed_at
 from utils.cache.applications import get_application_defaults
@@ -25,7 +35,7 @@ from utils.cache.yaml import load_yaml_any
 
 # Rule key consumed by every `tests/integration/lookups/config/test_*.py`.
 # A marker in `same-or-above` position skips the call from all four
-# scanners (literal / variable / wildcard / role-local). See
+# downstream classifications. See
 # docs/contributing/actions/testing/suppression.md.
 SUPPRESS_RULE: str = "lookup-config-path"
 
@@ -34,8 +44,8 @@ PATTERN = re.compile(
     r"lookup\(\s*['\"]config['\"]\s*,\s*([^,]+?)\s*,\s*['\"]([^'\"]+)['\"]"
 )
 # Captures the entire `<path-expr>` of a `lookup('config', <app>, <expr>)`
-# call up to the closing paren so we can rebuild the wildcard template
-# from `~`-concatenations of literals and barewords.
+# call up to the closing paren so callers can rebuild the wildcard
+# template from `~`-concatenations of literals and barewords.
 CONCAT_PATTERN = re.compile(
     r"lookup\(\s*['\"]config['\"]\s*,\s*([^,]+?)\s*,\s*(.+?)\s*\)"
 )
@@ -104,22 +114,46 @@ def expr_to_wildcard_path(expr: str) -> str | None:
     return ".".join(segments) if segments else None
 
 
-Occurrence = Tuple[Path, int]
+@dataclass(frozen=True)
+class LookupMatch:
+    """One qualifying `lookup('config', <app>, <path>)` occurrence.
+
+    `kind` distinguishes the regex that produced the match:
+    * ``"literal"`` — `path_arg` is the FIRST quoted string between the
+      app argument and any subsequent comma. May end with ``"."`` for
+      partial paths that get a `~ var` suffix elsewhere on the line.
+    * ``"concat"`` — `path_arg` is the full expression up to the closing
+      paren and is guaranteed to contain at least one ``~``.
+
+    `app_literal` is set iff `app_arg` is a quoted string literal; it
+    is the unquoted application id. When `app_literal is None`, the
+    application argument is a variable (typically ``application_id``).
+    """
+
+    file: Path
+    lineno: int
+    app_arg: str
+    app_literal: str | None
+    path_arg: str
+    kind: str  # "literal" | "concat"
 
 
 @dataclass(frozen=True)
-class ScanResult:
+class ScanContext:
+    """Repo-derived context the four classifications validate against."""
+
     root: Path
     application_defaults: Dict[str, Any]
     user_defaults: Dict[str, Any]
     role_schemas: Dict[str, Dict[str, Any]]
     role_for_app: Dict[str, str]
-    literal_paths: Dict[str, Dict[str, List[Occurrence]]] = field(default_factory=dict)
-    variable_paths: Dict[str, List[Occurrence]] = field(default_factory=dict)
-    wildcard_paths: Dict[Tuple[str, str], List[Occurrence]] = field(default_factory=dict)
-    role_local_paths: Dict[Tuple[str, str], List[Occurrence]] = field(
-        default_factory=dict
-    )
+    # Role directories that declare `application_id:` in
+    # `vars/main.yml`. Consumed by the role-local classifier; a role
+    # without an `application_id` is not an "application" in the
+    # lookup-config sense and its `lookup('config', application_id, …)`
+    # calls would resolve against an inherited application_id at
+    # runtime that the static scan cannot pin down to a single role.
+    roles_with_application_id: FrozenSet[str] = field(default_factory=frozenset)
 
 
 def _is_quoted(token: str) -> bool:
@@ -144,11 +178,11 @@ def _line_is_commented(text: str, match_start: int) -> bool:
 def _build_role_for_app_map(roles_root: Path) -> Dict[str, str]:
     """Walk ``roles/`` once and return ``{application_id: role_dir_name}``.
 
-    Replaces the per-app ``plugins.filter.get_role.get_role`` call which is
-    O(n) per lookup (it scans every role's vars/main.yml). Calling it once
-    per application id makes role-schema preload O(n²); doing the walk
-    once here keeps it O(n) and routes every YAML read through the
-    process-wide ``utils.cache.yaml.load_yaml_any`` cache.
+    Replaces the per-app ``plugins.filter.get_role.get_role`` call which
+    is O(n) per lookup (it scans every role's vars/main.yml). Calling
+    it once per application id makes role-schema preload O(n²); doing
+    the walk once here keeps it O(n) and routes every YAML read
+    through the process-wide ``utils.cache.yaml.load_yaml_any`` cache.
     """
     mapping: Dict[str, str] = {}
     if not roles_root.is_dir():
@@ -169,10 +203,11 @@ def _build_role_for_app_map(roles_root: Path) -> Dict[str, str]:
 
 
 def _build_role_schemas(
-    application_defaults: Dict[str, Any], roles_root: Path
-) -> Tuple[Dict[str, Dict[str, Any]], Dict[str, str]]:
+    application_defaults: Dict[str, Any],
+    role_for_app: Dict[str, str],
+    roles_root: Path,
+) -> Dict[str, Dict[str, Any]]:
     role_schemas: Dict[str, Dict[str, Any]] = {}
-    role_for_app = _build_role_for_app_map(roles_root)
     for app_id in application_defaults:
         role = role_for_app.get(app_id)
         if role is None:
@@ -183,74 +218,7 @@ def _build_role_schemas(
         schema = load_yaml_any(schema_file, default_if_missing={}) or {}
         if isinstance(schema, dict):
             role_schemas[app_id] = schema
-    return role_schemas, role_for_app
-
-
-def _scan_literal_match(
-    result: ScanResult,
-    file_path: Path,
-    text: str,
-    lines: List[str],
-    match: re.Match[str],
-) -> None:
-    if _line_is_commented(text, match.start()):
-        return
-    lineno = text.count("\n", 0, match.start()) + 1
-    if is_suppressed_at(lines, lineno, SUPPRESS_RULE, mode="same-or-above"):
-        return
-    app_arg = match.group(1).strip()
-    path_arg = match.group(2).strip()
-    if "{%" in path_arg:
-        return
-    if _is_quoted(app_arg):
-        app_id = app_arg.strip("'\"")
-        if path_arg.endswith("."):
-            # Partial path — concatenated with a `~ var` suffix elsewhere.
-            # Validated through variable_paths' wildcard-prefix branch.
-            result.variable_paths.setdefault(path_arg, []).append((file_path, lineno))
-        else:
-            result.literal_paths.setdefault(app_id, {}).setdefault(
-                path_arg, []
-            ).append((file_path, lineno))
-        return
-    # Variable app argument (typically `application_id`).
-    result.variable_paths.setdefault(path_arg, []).append((file_path, lineno))
-    if not path_arg.endswith("."):
-        role_id = role_id_from_path(file_path)
-        if role_id is not None:
-            result.role_local_paths.setdefault((role_id, path_arg), []).append(
-                (file_path, lineno)
-            )
-
-
-def _scan_concat_match(
-    result: ScanResult,
-    file_path: Path,
-    text: str,
-    lines: List[str],
-    match: re.Match[str],
-) -> None:
-    if _line_is_commented(text, match.start()):
-        return
-    app_arg = match.group(1).strip()
-    expr = match.group(2).strip()
-    if "~" not in expr or "{%" in expr:
-        return
-    wildcard_path = expr_to_wildcard_path(expr)
-    if wildcard_path is None:
-        return
-    lineno = text.count("\n", 0, match.start()) + 1
-    if is_suppressed_at(lines, lineno, SUPPRESS_RULE, mode="same-or-above"):
-        return
-    if _is_quoted(app_arg):
-        role_id = app_arg.strip("'\"")
-    else:
-        role_id = role_id_from_path(file_path)
-    if role_id is None:
-        return
-    result.wildcard_paths.setdefault((role_id, wildcard_path), []).append(
-        (file_path, lineno)
-    )
+    return role_schemas
 
 
 # Extensions that may legitimately host `lookup('config', ...)` calls in
@@ -261,33 +229,83 @@ _SCANNED_EXTENSIONS: Tuple[str, ...] = (".yml", ".yaml", ".j2")
 
 
 @functools.lru_cache(maxsize=1)
-def get_scan() -> ScanResult:
-    """Return the cached project-wide scan of `lookup('config', ...)` calls.
-
-    Performance notes
-    -----------------
-    The walk is bounded both by file extension (``_SCANNED_EXTENSIONS``)
-    and by a literal substring pre-filter ("lookup"). The pre-filter is
-    O(len(text)) and cuts out every file that cannot match either regex
-    before we pay the full ``re.finditer`` cost.
-    The underlying ``iter_project_files`` and ``read_text`` helpers are
-    already process-cached (``functools.lru_cache``), so subsequent test
-    classes in the same run hit the cache for free.
-    """
+def get_context() -> ScanContext:
+    """Return the cached :class:`ScanContext` for the current repo."""
     root = Path(__file__).resolve().parents[4]
     roles_root = root / "roles"
     application_defaults = get_application_defaults(roles_dir=roles_root)
     user_defaults = get_user_defaults(roles_dir=roles_root)
-    role_schemas, role_for_app = _build_role_schemas(application_defaults, roles_root)
-
-    result = ScanResult(
+    role_for_app = _build_role_for_app_map(roles_root)
+    role_schemas = _build_role_schemas(application_defaults, role_for_app, roles_root)
+    return ScanContext(
         root=root,
         application_defaults=application_defaults,
         user_defaults=user_defaults,
         role_schemas=role_schemas,
         role_for_app=role_for_app,
+        roles_with_application_id=frozenset(role_for_app.values()),
     )
 
+
+def _emit_literal_match(
+    text: str, lines: List[str], file_path: Path, m: re.Match[str]
+) -> LookupMatch | None:
+    if _line_is_commented(text, m.start()):
+        return None
+    lineno = text.count("\n", 0, m.start()) + 1
+    if is_suppressed_at(lines, lineno, SUPPRESS_RULE, mode="same-or-above"):
+        return None
+    app_arg = m.group(1).strip()
+    path_arg = m.group(2).strip()
+    if "{%" in path_arg:
+        return None
+    app_literal = app_arg.strip("'\"") if _is_quoted(app_arg) else None
+    return LookupMatch(
+        file=file_path,
+        lineno=lineno,
+        app_arg=app_arg,
+        app_literal=app_literal,
+        path_arg=path_arg,
+        kind="literal",
+    )
+
+
+def _emit_concat_match(
+    text: str, lines: List[str], file_path: Path, m: re.Match[str]
+) -> LookupMatch | None:
+    if _line_is_commented(text, m.start()):
+        return None
+    lineno = text.count("\n", 0, m.start()) + 1
+    if is_suppressed_at(lines, lineno, SUPPRESS_RULE, mode="same-or-above"):
+        return None
+    app_arg = m.group(1).strip()
+    expr = m.group(2).strip()
+    # Only emit concat matches that actually carry a `~` — otherwise
+    # the literal pass already covered the call.
+    if "~" not in expr or "{%" in expr:
+        return None
+    app_literal = app_arg.strip("'\"") if _is_quoted(app_arg) else None
+    return LookupMatch(
+        file=file_path,
+        lineno=lineno,
+        app_arg=app_arg,
+        app_literal=app_literal,
+        path_arg=expr,
+        kind="concat",
+    )
+
+
+@functools.lru_cache(maxsize=1)
+def iter_matches() -> Tuple[LookupMatch, ...]:
+    """Return the deduplicated tuple of qualifying lookup matches.
+
+    Each project file is read at most once (via the
+    ``utils.cache.files`` content cache). The substring pre-filter
+    (``"lookup" in text``) and the extension allow-list
+    (``_SCANNED_EXTENSIONS``) skip the bulk of files before the regex
+    passes ever run.
+    """
+    matches: List[LookupMatch] = []
     for path_str, text in iter_project_files_with_content(
         extensions=_SCANNED_EXTENSIONS,
         exclude_tests=True,
@@ -300,8 +318,11 @@ def get_scan() -> ScanResult:
         # both regex passes without re-splitting.
         lines = text.splitlines()
         for m in PATTERN.finditer(text):
-            _scan_literal_match(result, file_path, text, lines, m)
+            match = _emit_literal_match(text, lines, file_path, m)
+            if match is not None:
+                matches.append(match)
         for m in CONCAT_PATTERN.finditer(text):
-            _scan_concat_match(result, file_path, text, lines, m)
-
-    return result
+            match = _emit_concat_match(text, lines, file_path, m)
+            if match is not None:
+                matches.append(match)
+    return tuple(matches)
