@@ -436,6 +436,7 @@
       "allowWrite": [
         ".",
         "/tmp",
+        "/var/cache/infinito/core/cache",
         "~/.ansible",
         "~/.cache/gh",
         "~/.cache/pip",
