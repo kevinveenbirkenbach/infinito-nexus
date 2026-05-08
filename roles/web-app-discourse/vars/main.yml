@@ -36,7 +36,7 @@ DISCOURSE_LDAP_ENABLED:             "{{ lookup('config', application_id, 'servic
 
 # Don't use variable HOST_LL_CC, because this isn't available in the container. 
 # With this setup you have an minimalistic default setup
-DISCOURSE_LOCAL:                    "C.UTF-8"
+DISCOURSE_LOCAL:                    "C.{{ HOST_CS }}"
 
 DISCOURSE_OIDC_ENABLED:             "{{ lookup('config', application_id, 'services.oidc.enabled') }}"
 DISCOURSE_OIDC_LOGOUT_REDIRECT_URL: "{{ lookup('tls', 'web-svc-logout', 'url.base') }}"

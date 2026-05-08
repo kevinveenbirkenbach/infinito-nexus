@@ -22,6 +22,8 @@ HOST_TIMEZONE:            "UTC"
 # https://en.wikipedia.org/wiki/ISO_639
 HOST_LL:                  "en"          # Some applications are case sensitive
 HOST_LL_CC:               "{{HOST_LL}}_GB"
+HOST_CS:                  "UTF-8"
+HOST_LANG:                "{{HOST_LL_CC}}.{{HOST_CS}}"
 
 HOST_DATE_FORMAT:         "YYYY-MM-DD"
 HOST_TIME_FORMAT:         "HH:mm"
