@@ -5,6 +5,56 @@ default_install_hook_types:
 repos:
   - repo: local
     hooks:
+      # ---- per-file-type lint stages -----------------------------------
+      # Each hook only runs when files matching its `files:` pattern are
+      # staged. This replaces the aggregated `make lint` step that used
+      # to fan out from `make test`; running them as individual pre-commit
+      # hooks keeps fast commits fast (a markdown-only edit no longer
+      # triggers ansible-lint, etc.).
+      - id: make-lint-action
+        name: Run make lint-action
+        entry: make lint-action
+        language: system
+        pass_filenames: false
+        files: ^\.github/(workflows|actions)/.*\.ya?ml$
+        stages: [pre-commit]
+      - id: make-lint-ansible
+        name: Run make lint-ansible
+        entry: make lint-ansible
+        language: system
+        pass_filenames: false
+        files: ^(roles/.*\.(ya?ml|j2)|playbook\.yml|group_vars/.*\.ya?ml|host_vars/.*\.ya?ml|tasks/.*\.ya?ml|requirements/.*\.ya?ml|\.ansible-lint(-ignore)?)$
+        stages: [pre-commit]
+      - id: make-lint-python
+        name: Run make lint-python
+        entry: make lint-python
+        language: system
+        pass_filenames: false
+        files: \.py$|^pyproject\.toml$
+        stages: [pre-commit]
+      - id: make-lint-shellcheck
+        name: Run make lint-shellcheck
+        entry: make lint-shellcheck
+        language: system
+        pass_filenames: false
+        files: \.sh$
+        stages: [pre-commit]
+      - id: make-lint-markdown
+        name: Run make lint-markdown
+        entry: make lint-markdown
+        language: system
+        pass_filenames: false
+        files: \.md$|^\.markdownlint-cli2\.jsonc$
+        stages: [pre-commit]
+      - id: make-lint-galaxy
+        name: Run make lint-galaxy
+        entry: make lint-galaxy
+        language: system
+        pass_filenames: false
+        files: ^roles/[^/]+/meta/main\.yml$
+        stages: [pre-commit]
+
+      # ---- aggregate test runs -----------------------------------------
       - id: make-test
         name: Run make test
         entry: make test

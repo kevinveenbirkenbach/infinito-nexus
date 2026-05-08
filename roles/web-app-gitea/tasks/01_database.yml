@@ -5,7 +5,8 @@
 - name: Patch Gitea DB host in app.ini
   command: >
     container exec -i --user {{ GITEA_USER }} {{ GITEA_CONTAINER }}
-    sed -ri "s|^(HOST\s*=\s*).*$|\1{{ lookup('database', application_id, 'host') | sed_escape('|') }}:{{ lookup('database', application_id, 'port') | sed_escape('|') }}|" {{ GITEA_CONFIG }}
+    sed -ri "s|^(HOST\s*=\s*).*$|\1{{ lookup('database', application_id, 'host') | sed_escape('|') }}:{{ lookup('database', application_id, 'port') | sed_escape('|')
+    }}|" {{ GITEA_CONFIG }}
   notify: compose up
 
 - name: Patch Gitea DB name in app.ini

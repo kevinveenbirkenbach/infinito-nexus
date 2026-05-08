@@ -38,6 +38,22 @@ else
 	skipped+=("shfmt")
 fi
 
+# ── markdownlint-cli2 (Markdown auto-fixer for MD022/MD031/MD032/etc.) ───────
+if command -v markdownlint-cli2 &>/dev/null; then
+	markdownlint-cli2 --fix >/dev/null 2>&1 || true
+	ran+=("markdownlint-cli2")
+else
+	skipped+=("markdownlint-cli2")
+fi
+
+# ── ansible-lint (Ansible auto-fixer where rules support --fix) ──────────────
+if command -v ansible-lint &>/dev/null; then
+	ansible-lint --fix >/dev/null 2>&1 || true
+	ran+=("ansible-lint")
+else
+	skipped+=("ansible-lint")
+fi
+
 # ── shellcheck (shell script linter with autofix via diff) ───────────────────
 if command -v shellcheck &>/dev/null; then
 	mapfile -t shellcheck_files < <(find . -type f -name '*.sh' 2>/dev/null | sort)

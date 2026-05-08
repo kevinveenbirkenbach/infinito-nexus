@@ -1,3 +1,4 @@
+---
 logout:
   enabled: "{{ 'web-svc-logout' in group_names }}"
   shared: "{{ 'web-svc-logout' in group_names }}"
@@ -14,7 +15,7 @@ oauth2:
     host: flowise
     port: 3000
   allowed_groups:
-  - '{{ lookup(''rbac_group_path'', application_id=''web-app-flowise'', role=''administrator'') }}'
+    - "{{ lookup('rbac_group_path', application_id='web-app-flowise', role='administrator') }}"
 ldap:
   enabled: "{{ 'svc-db-openldap' in group_names }}"
   shared: "{{ 'svc-db-openldap' in group_names }}"
@@ -24,7 +25,7 @@ litellm:
   image: ghcr.io/berriai/litellm
   version: main-v1.77.3.dynamic_rates
   name: litellm
-  cpus: '1.0'
+  cpus: "1.0"
   mem_reservation: 0.5g
   mem_limit: 1g
   pids_limit: 1024
@@ -35,7 +36,7 @@ qdrant:
   image: qdrant/qdrant
   version: latest
   name: qdrant
-  cpus: '2.0'
+  cpus: "2.0"
   mem_reservation: 2g
   mem_limit: 4g
   pids_limit: 2048
@@ -47,7 +48,7 @@ flowise:
   version: latest
   name: flowise
   min_storage: 10GB
-  cpus: '1.0'
+  cpus: "1.0"
   mem_reservation: 1g
   mem_limit: 2g
   pids_limit: 1024

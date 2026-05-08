@@ -1,3 +1,4 @@
+---
 galaxy_info:
   author: Kevin Veen-Birkenbach
   description: Generic role to manage reverse DNS (PTR) for Hetzner Cloud resources (server, primary_ip, floating_ip, load_balancer).
@@ -12,7 +13,7 @@ galaxy_info:
     - ptr
     - mail
   issue_tracker_url: https://s.infinito.nexus/issues
-  min_ansible_version: '2.9'
+  min_ansible_version: "2.9"
   platforms:
     - name: ArchLinux
       versions:

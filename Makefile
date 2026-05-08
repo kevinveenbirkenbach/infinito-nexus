@@ -306,7 +306,7 @@ autoformat:
 	@bash scripts/lint/autoformat.sh
 
 # Run the full test suite.
-test: lint test-lint test-unit test-integration test-deploy
+test: test-lint test-unit test-integration test-deploy
 	@echo "✅ Full test (setup + tests) executed."
 
 # Run the lint test suite.
