@@ -6,6 +6,7 @@ from dataclasses import dataclass
 from pathlib import Path
 
 from utils.cache.yaml import load_yaml_any
+from utils.roles.mapping import ROLE_FILE_VARS_MAIN
 
 from . import PROJECT_ROOT
 
@@ -82,7 +83,7 @@ def _is_role_invokable(role_name: str, invokable_paths: Iterable[str]) -> bool:
 
 
 def _role_to_app_id(role_dir: Path) -> str:
-    vars_file = role_dir / "vars" / "main.yml"
+    vars_file = role_dir / ROLE_FILE_VARS_MAIN
     if not vars_file.is_file():
         return role_dir.name
 

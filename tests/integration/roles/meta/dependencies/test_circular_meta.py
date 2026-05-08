@@ -3,6 +3,7 @@ import unittest
 from pathlib import Path
 
 from utils.cache.yaml import load_yaml_any
+from utils.roles.mapping import ROLE_FILE_META_MAIN
 
 
 def load_yaml_file(file_path):
@@ -12,7 +13,7 @@ def load_yaml_file(file_path):
 
 def get_meta_info(role_path):
     """Extract dependencies from the meta/main.yml of a role."""
-    meta_file = str(Path(role_path) / "meta" / "main.yml")
+    meta_file = str(Path(role_path) / ROLE_FILE_META_MAIN)
     if not Path(meta_file).is_file():
         return []
     meta_data = load_yaml_file(meta_file)

@@ -75,6 +75,7 @@ from utils.roles.applications.services.registry import (
     build_service_registry_from_roles_dir,
 )
 from utils.roles.entity_name import get_entity_name
+from utils.roles.mapping import ROLE_FILE_META_SERVICES
 
 from . import PROJECT_ROOT
 
@@ -160,7 +161,7 @@ class TestServicesDynamicFlags(unittest.TestCase):
         offenders: list[str] = []
         for role_dir in sorted(p for p in ROLES_DIR.iterdir() if p.is_dir()):
             role_name = role_dir.name
-            services_file = role_dir / "meta" / "services.yml"
+            services_file = role_dir / ROLE_FILE_META_SERVICES
             if not services_file.is_file():
                 continue
             try:

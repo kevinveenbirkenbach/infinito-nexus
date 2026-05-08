@@ -3,6 +3,7 @@ import unittest
 from pathlib import Path
 
 from utils.cache.yaml import load_yaml_any
+from utils.roles.mapping import ROLE_FILE_META_SERVICES
 
 from . import PROJECT_ROOT
 
@@ -73,7 +74,7 @@ class TestMailuServiceDependency(unittest.TestCase):
             }:
                 continue
 
-            config_path = role_path / "meta" / "services.yml"
+            config_path = role_path / ROLE_FILE_META_SERVICES
             if not config_path.is_file():
                 continue
 

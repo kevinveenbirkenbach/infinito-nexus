@@ -5,6 +5,7 @@ from pathlib import Path
 import yaml
 
 from utils.cache.yaml import load_yaml_any
+from utils.roles.mapping import ROLE_FILE_META_SERVICES
 
 
 class TestNoStopRequiredIntegrity(unittest.TestCase):
@@ -22,7 +23,7 @@ class TestNoStopRequiredIntegrity(unittest.TestCase):
         """
         for role in os.listdir(self.roles_dir):
             docker_config_path = str(
-                Path(self.roles_dir) / role / "meta" / "services.yml"
+                Path(self.roles_dir) / role / ROLE_FILE_META_SERVICES
             )
             if not Path(docker_config_path).is_file():
                 continue

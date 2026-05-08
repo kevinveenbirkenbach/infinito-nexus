@@ -5,6 +5,7 @@ from pathlib import Path
 from ansible.errors import AnsibleFilterError
 
 from utils.cache.yaml import load_yaml_any
+from utils.roles.mapping import ROLE_FILE_VARS_MAIN
 
 
 def abs_role_path_by_application_id(application_id):
@@ -14,7 +15,7 @@ def abs_role_path_by_application_id(application_id):
     zero or more than one match is found.
     """
     base_dir = str(Path.cwd())
-    pattern = str(Path(base_dir) / "roles" / "*" / "vars" / "main.yml")
+    pattern = str(Path(base_dir) / "roles" / "*" / ROLE_FILE_VARS_MAIN)
     matches = []
 
     for filepath in glob.glob(pattern):
@@ -50,7 +51,7 @@ def rel_role_path_by_application_id(application_id):
     Raises an error if zero or more than one match is found.
     """
     base_dir = str(Path.cwd())
-    pattern = str(Path(base_dir) / "roles" / "*" / "vars" / "main.yml")
+    pattern = str(Path(base_dir) / "roles" / "*" / ROLE_FILE_VARS_MAIN)
     matches = []
 
     for filepath in glob.glob(pattern):

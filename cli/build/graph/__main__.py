@@ -7,6 +7,7 @@ from typing import List, Dict, Any, Set
 
 
 from utils.roles.dependency_resolver import RoleDependencyResolver
+from utils.roles.mapping import ROLE_FILE_META_MAIN, ROLE_FILE_TASKS_MAIN
 from utils.cache.yaml import load_yaml, load_yaml_any
 
 from . import PROJECT_ROOT
@@ -37,7 +38,7 @@ ALL_KEYS = [f"{dep}_{direction}" for dep in ALL_DEP_TYPES for direction in ALL_D
 
 def find_role_meta(roles_dir: str, role: str) -> str:
     """Return path to meta/main.yml of a role or raise FileNotFoundError."""
-    path = os.path.join(roles_dir, role, "meta", "main.yml")
+    path = os.path.join(roles_dir, role, ROLE_FILE_META_MAIN)
     if not os.path.isfile(path):
         raise FileNotFoundError(f"Metadata not found for role: {role}")
     return path
@@ -45,7 +46,7 @@ def find_role_meta(roles_dir: str, role: str) -> str:
 
 def find_role_tasks(roles_dir: str, role: str) -> str:
     """Return path to tasks/main.yml of a role or raise FileNotFoundError."""
-    path = os.path.join(roles_dir, role, "tasks", "main.yml")
+    path = os.path.join(roles_dir, role, ROLE_FILE_TASKS_MAIN)
     if not os.path.isfile(path):
         raise FileNotFoundError(f"Tasks not found for role: {role}")
     return path

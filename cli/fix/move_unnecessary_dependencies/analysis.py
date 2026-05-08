@@ -5,6 +5,13 @@ from __future__ import annotations
 import re
 from pathlib import Path
 
+from utils.roles.mapping import (
+    ROLE_FILE_DEFAULTS_MAIN,
+    ROLE_FILE_HANDLERS_MAIN,
+    ROLE_FILE_META_MAIN,
+    ROLE_FILE_VARS_MAIN,
+)
+
 from .yaml_io import (
     gather_yaml_files,
     load_yaml_rt,
@@ -30,7 +37,7 @@ def collect_role_defined_vars(role_dir: str) -> set[str]:
     """Vars a role 'provides': defaults/vars keys + set_fact keys in tasks."""
     provided: set[str] = set()
 
-    for rel in ("defaults/main.yml", "vars/main.yml"):
+    for rel in (ROLE_FILE_DEFAULTS_MAIN, ROLE_FILE_VARS_MAIN):
         p = path_if_exists(role_dir, rel)
         if p:
             provided |= flatten_keys(load_yaml_rt(p))
@@ -49,7 +56,7 @@ def collect_role_defined_vars(role_dir: str) -> set[str]:
 
 
 def collect_role_handler_names(role_dir: str) -> set[str]:
-    handler_file = path_if_exists(role_dir, "handlers/main.yml")
+    handler_file = path_if_exists(role_dir, ROLE_FILE_HANDLERS_MAIN)
     if not handler_file:
         return set()
     data = load_yaml_rt(handler_file)
@@ -109,7 +116,7 @@ def find_notify_offsets_for_handlers(text: str, handler_names: set[str]) -> list
 
 
 def parse_meta_dependencies(role_dir: str) -> list[str]:
-    meta = path_if_exists(role_dir, "meta/main.yml")
+    meta = path_if_exists(role_dir, ROLE_FILE_META_MAIN)
     if not meta:
         return []
     data = load_yaml_rt(meta)
@@ -137,9 +144,9 @@ def dependency_is_unnecessary(
     early_files = [
         p
         for p in (
-            path_if_exists(consumer_dir, "defaults/main.yml"),
-            path_if_exists(consumer_dir, "vars/main.yml"),
-            path_if_exists(consumer_dir, "handlers/main.yml"),
+            path_if_exists(consumer_dir, ROLE_FILE_DEFAULTS_MAIN),
+            path_if_exists(consumer_dir, ROLE_FILE_VARS_MAIN),
+            path_if_exists(consumer_dir, ROLE_FILE_HANDLERS_MAIN),
         )
         if p
     ]

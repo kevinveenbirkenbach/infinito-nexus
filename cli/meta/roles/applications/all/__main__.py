@@ -24,7 +24,7 @@ def find_application_ids():
 
 def main():
     parser = argparse.ArgumentParser(
-        description="Output a list of all application_id values defined in roles/*/vars/main.yml"
+        description="Output a list of all application_id values defined in roles/*/vars/main.yml"  # nocheck: role-file-spot
     )
     parser.parse_args()
 

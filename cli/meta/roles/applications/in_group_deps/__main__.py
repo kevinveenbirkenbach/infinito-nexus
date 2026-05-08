@@ -10,6 +10,7 @@ from pathlib import Path
 
 from utils.cache.yaml import dump_yaml_str, load_yaml
 from utils.roles.applications.in_group_deps import applications_if_group_and_all_deps
+from utils.roles.mapping import ROLE_FILE_VARS_MAIN
 
 from . import PROJECT_ROOT
 
@@ -26,7 +27,7 @@ def find_role_dirs_by_app_id(app_ids: list[str], roles_dir: str) -> list[str]:
     mapping: dict[str, str] = {}
     for role in os.listdir(roles_dir):
         role_path = str(Path(roles_dir) / role)
-        vars_file = str(Path(role_path) / "vars" / "main.yml")
+        vars_file = str(Path(role_path) / ROLE_FILE_VARS_MAIN)
         if not Path(vars_file).is_file():
             continue
         try:

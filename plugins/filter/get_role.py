@@ -11,6 +11,7 @@ from pathlib import Path
 from ansible.errors import AnsibleFilterError
 
 from utils.cache.yaml import load_yaml_any
+from utils.roles.mapping import ROLE_FILE_VARS_MAIN
 
 
 def get_role(application_id, roles_path="roles"):
@@ -27,7 +28,7 @@ def get_role(application_id, roles_path="roles"):
 
     for role in os.listdir(roles_path):
         role_dir = str(Path(roles_path) / role)
-        vars_file = str(Path(role_dir) / "vars" / "main.yml")
+        vars_file = str(Path(role_dir) / ROLE_FILE_VARS_MAIN)
         if Path(vars_file).is_file():
             try:
                 data = load_yaml_any(vars_file, default_if_missing={}) or {}

@@ -6,6 +6,7 @@ from utils.roles.applications.services.registry import (
     load_applications_from_roles_dir,
     ordered_primary_service_entries,
 )
+from utils.roles.mapping import ROLE_FILE_TASKS_MAIN
 
 from . import PROJECT_ROOT
 
@@ -47,7 +48,7 @@ class TestFrontendServiceSpot(unittest.TestCase):
         self.assertLess(self._index("web-app-mailu"), self._index("web-app-keycloak"))
 
     def test_front_proxy_falls_back_to_canonical_port_and_domain(self):
-        content = Path("roles/sys-stk-front-proxy/tasks/main.yml").read_text(
+        content = Path(f"roles/sys-stk-front-proxy/{ROLE_FILE_TASKS_MAIN}").read_text(
             encoding="utf-8"
         )
         self.assertIn(

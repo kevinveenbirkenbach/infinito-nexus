@@ -11,6 +11,7 @@ from utils.cache.files import (
     read_text,
 )
 from utils.cache.yaml import load_yaml_str
+from utils.roles.mapping import ROLE_FILE_DEFAULTS_MAIN, ROLE_FILE_VARS_MAIN
 
 logger = logging.getLogger(__name__)
 
@@ -30,9 +31,12 @@ class TestTopLevelVariableUsage(unittest.TestCase):
         for path_str in iter_project_files(extensions=(".yml",)):
             if path_str.startswith(roles_prefix):
                 tail = path_str[len(roles_prefix) :]
-                if tail.endswith("/vars/main.yml") and tail.count("/") == 2:
+                if tail.endswith(f"/{ROLE_FILE_VARS_MAIN}") and tail.count("/") == 2:
                     roles_vars.append(path_str)
-                elif tail.endswith("/defaults/main.yml") and tail.count("/") == 2:
+                elif (
+                    tail.endswith(f"/{ROLE_FILE_DEFAULTS_MAIN}")
+                    and tail.count("/") == 2
+                ):
                     roles_defaults.append(path_str)
             elif (
                 path_str.startswith(group_vars_prefix)

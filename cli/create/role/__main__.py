@@ -26,6 +26,7 @@ from cli.meta.ports.suggest.__main__ import (
     suggest_single_ports,
 )
 from utils.roles.entity_name import get_entity_name
+from utils.roles.mapping import ROLE_FILE_META_SERVER, ROLE_FILE_META_SERVICES
 
 from . import PROJECT_ROOT
 
@@ -136,7 +137,7 @@ def _allocate_subnet(clients: int):
 
 
 def _write_subnet(role_dir: Path, subnet) -> None:
-    server_path = role_dir / "meta" / "server.yml"
+    server_path = role_dir / ROLE_FILE_META_SERVER
     server_data = _load_yaml(server_path) or {}
     networks = server_data.get("networks") or {}
     local = networks.get("local") if isinstance(networks, dict) else None
@@ -165,7 +166,7 @@ def _allocate_relay_range(length: int):
 def _write_port(
     role_dir: Path, entity: str, scope: str, category: str, port_value
 ) -> None:
-    services_path = role_dir / "meta" / "services.yml"
+    services_path = role_dir / ROLE_FILE_META_SERVICES
     services = _load_yaml(services_path) or {}
     if not isinstance(services, dict):
         services = {}
@@ -263,7 +264,7 @@ def main() -> int:
 
             subnet = ipaddress.IPv4Network(override)
     _write_subnet(role_dir, subnet)
-    print(f"→ Wrote subnet {subnet} to {role_dir}/meta/server.yml")
+    print(f"→ Wrote subnet {subnet} to {role_dir}/{ROLE_FILE_META_SERVER}")
 
     # Single-int ports
     for category in args.ports:
@@ -279,7 +280,7 @@ def main() -> int:
         _write_port(role_dir, primary_entity, scope, category, port_value)
         print(
             f"→ Wrote {primary_entity}.ports.{scope}.{category} = "
-            f"{port_value} to {role_dir}/meta/services.yml"
+            f"{port_value} to {role_dir}/{ROLE_FILE_META_SERVICES}"
         )
 
     # Optional relay range
@@ -293,7 +294,7 @@ def main() -> int:
             if override:
                 a, b = override.split("-", 1)
                 start, end = int(a), int(b)
-        services_path = role_dir / "meta" / "services.yml"
+        services_path = role_dir / ROLE_FILE_META_SERVICES
         services = _load_yaml(services_path) or {}
         if not isinstance(services, dict):
             services = {}
@@ -314,7 +315,7 @@ def main() -> int:
         print(
             f"→ Wrote {primary_entity}.ports.public.relay = "
             f"{{start: {start}, end: {end}}} to "
-            f"{role_dir}/meta/services.yml"
+            f"{role_dir}/{ROLE_FILE_META_SERVICES}"
         )
 
     print(f"\n✓ Role {role} scaffolded.")

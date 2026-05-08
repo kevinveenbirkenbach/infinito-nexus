@@ -16,7 +16,7 @@ from utils.roles.validation.resources import filter_roles_by_min_storage
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
         description=(
-            "Validate roles by services.<entity>.min_storage in roles/*/meta/services.yml"
+            "Validate roles by services.<entity>.min_storage in roles/*/meta/services.yml"  # nocheck: role-file-spot
         )
     )
 

@@ -14,6 +14,7 @@ import sys
 from pathlib import Path
 
 from utils.cache.yaml import load_yaml
+from utils.roles.mapping import ROLE_FILE_VARS_MAIN
 
 from . import PROJECT_ROOT
 
@@ -32,7 +33,7 @@ def get_role(application_id, roles_path):
 
     for role in sorted(os.listdir(roles_path)):
         role_dir = str(Path(roles_path) / role)
-        vars_file = str(Path(role_dir) / "vars" / "main.yml")
+        vars_file = str(Path(role_dir) / ROLE_FILE_VARS_MAIN)
         if Path(vars_file).is_file():
             try:
                 data = load_yaml(vars_file)

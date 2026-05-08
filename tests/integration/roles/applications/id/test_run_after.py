@@ -2,6 +2,7 @@
 import unittest
 
 from utils.cache.yaml import load_yaml_any
+from utils.roles.mapping import ROLE_FILE_META_MAIN
 
 from . import PROJECT_ROOT
 
@@ -15,7 +16,7 @@ class TestRunAfterRoles(unittest.TestCase):
         invalid_refs = []
 
         for role in self.valid_role_names:
-            meta_path = self.roles_dir / role / "meta" / "main.yml"
+            meta_path = self.roles_dir / role / ROLE_FILE_META_MAIN
             if not meta_path.exists():
                 continue
 

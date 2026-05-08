@@ -5,6 +5,11 @@ from unittest import TestCase, main, mock
 from utils.handler.vault import VaultScalar
 from utils.manager.inventory import InventoryManager
 from utils.manager.value_generator import ValueGenerator
+from utils.roles.mapping import (
+    ROLE_FILE_META_SCHEMA,
+    ROLE_FILE_META_SERVICES,
+    ROLE_FILE_VARS_MAIN,
+)
 
 
 class TestInventoryManager(TestCase):
@@ -23,9 +28,9 @@ class TestInventoryManager(TestCase):
             (role_path / "config").mkdir(parents=True, exist_ok=True)
 
             # IMPORTANT: ensure files exist for .exists() checks
-            (role_path / "meta" / "schema.yml").write_text("{}", encoding="utf-8")
-            (role_path / "vars" / "main.yml").write_text("{}", encoding="utf-8")
-            (role_path / "meta" / "services.yml").write_text("{}", encoding="utf-8")
+            (role_path / ROLE_FILE_META_SCHEMA).write_text("{}", encoding="utf-8")
+            (role_path / ROLE_FILE_VARS_MAIN).write_text("{}", encoding="utf-8")
+            (role_path / ROLE_FILE_META_SERVICES).write_text("{}", encoding="utf-8")
             inv_path.write_text("{}", encoding="utf-8")
 
             inventory_path = inv_path
@@ -34,11 +39,11 @@ class TestInventoryManager(TestCase):
                 p = Path(path)
                 if p == inventory_path:
                     return {}
-                if p == role_path / "meta" / "schema.yml":
+                if p == role_path / ROLE_FILE_META_SCHEMA:
                     return {}
-                if p == role_path / "vars" / "main.yml":
+                if p == role_path / ROLE_FILE_VARS_MAIN:
                     return {}  # missing application_id on purpose
-                if p == role_path / "meta" / "services.yml":
+                if p == role_path / ROLE_FILE_META_SERVICES:
                     # Per req-008: meta/services.yml file root IS the
                     # services map (no `compose.services` envelope).
                     return {}
@@ -76,9 +81,9 @@ class TestInventoryManager(TestCase):
             inv_path.write_text("{}", encoding="utf-8")
 
             # IMPORTANT: ensure files exist for .exists() checks
-            (role_path / "meta" / "schema.yml").write_text("{}", encoding="utf-8")
-            (role_path / "vars" / "main.yml").write_text("{}", encoding="utf-8")
-            (role_path / "meta" / "services.yml").write_text("{}", encoding="utf-8")
+            (role_path / ROLE_FILE_META_SCHEMA).write_text("{}", encoding="utf-8")
+            (role_path / ROLE_FILE_VARS_MAIN).write_text("{}", encoding="utf-8")
+            (role_path / ROLE_FILE_META_SERVICES).write_text("{}", encoding="utf-8")
 
             inventory_path = inv_path
 
@@ -96,11 +101,11 @@ class TestInventoryManager(TestCase):
                 p = Path(path)
                 if p == inventory_path:
                     return {"applications": {}}
-                if p == role_path / "meta" / "schema.yml":
+                if p == role_path / ROLE_FILE_META_SCHEMA:
                     return schema_data
-                if p == role_path / "vars" / "main.yml":
+                if p == role_path / ROLE_FILE_VARS_MAIN:
                     return {"application_id": "app_test"}
-                if p == role_path / "meta" / "services.yml":
+                if p == role_path / ROLE_FILE_META_SERVICES:
                     # Per req-008: meta/services.yml file root IS the
                     # services map (no `compose.services` envelope).
                     return {}
@@ -140,9 +145,9 @@ class TestInventoryManager(TestCase):
             inv_path.write_text("{}", encoding="utf-8")
 
             # IMPORTANT: ensure files exist for .exists() checks
-            (role_path / "meta" / "schema.yml").write_text("{}", encoding="utf-8")
-            (role_path / "vars" / "main.yml").write_text("{}", encoding="utf-8")
-            (role_path / "meta" / "services.yml").write_text("{}", encoding="utf-8")
+            (role_path / ROLE_FILE_META_SCHEMA).write_text("{}", encoding="utf-8")
+            (role_path / ROLE_FILE_VARS_MAIN).write_text("{}", encoding="utf-8")
+            (role_path / ROLE_FILE_META_SERVICES).write_text("{}", encoding="utf-8")
 
             inventory_path = inv_path
 
@@ -160,11 +165,11 @@ class TestInventoryManager(TestCase):
                 p = Path(path)
                 if p == inventory_path:
                     return {"applications": {}}
-                if p == role_path / "meta" / "schema.yml":
+                if p == role_path / ROLE_FILE_META_SCHEMA:
                     return schema_data
-                if p == role_path / "vars" / "main.yml":
+                if p == role_path / ROLE_FILE_VARS_MAIN:
                     return {"application_id": "app_test"}
-                if p == role_path / "meta" / "services.yml":
+                if p == role_path / ROLE_FILE_META_SERVICES:
                     # Per req-008: meta/services.yml file root IS the
                     # services map (no `compose.services` envelope).
                     return {}
@@ -212,9 +217,9 @@ class TestInventoryManager(TestCase):
             (role_path / "config").mkdir(parents=True, exist_ok=True)
             inv_path.write_text("{}", encoding="utf-8")
 
-            (role_path / "meta" / "schema.yml").write_text("{}", encoding="utf-8")
-            (role_path / "vars" / "main.yml").write_text("{}", encoding="utf-8")
-            (role_path / "meta" / "services.yml").write_text("{}", encoding="utf-8")
+            (role_path / ROLE_FILE_META_SCHEMA).write_text("{}", encoding="utf-8")
+            (role_path / ROLE_FILE_VARS_MAIN).write_text("{}", encoding="utf-8")
+            (role_path / ROLE_FILE_META_SERVICES).write_text("{}", encoding="utf-8")
 
             inventory_path = inv_path
 
@@ -232,11 +237,11 @@ class TestInventoryManager(TestCase):
                 p = Path(path)
                 if p == inventory_path:
                     return {"applications": {}}
-                if p == role_path / "meta" / "schema.yml":
+                if p == role_path / ROLE_FILE_META_SCHEMA:
                     return schema_data
-                if p == role_path / "vars" / "main.yml":
+                if p == role_path / ROLE_FILE_VARS_MAIN:
                     return {"application_id": "app_test"}
-                if p == role_path / "meta" / "services.yml":
+                if p == role_path / ROLE_FILE_META_SERVICES:
                     # Per req-008 the file root IS the services map
                     # (no `compose.services` envelope).
                     return {"oauth2": {"enabled": True}}
@@ -277,9 +282,9 @@ class TestInventoryManager(TestCase):
             (role_path / "vars").mkdir(parents=True, exist_ok=True)
             (role_path / "config").mkdir(parents=True, exist_ok=True)
             inv_path.write_text("{}", encoding="utf-8")
-            (role_path / "meta" / "schema.yml").write_text("{}", encoding="utf-8")
-            (role_path / "vars" / "main.yml").write_text("{}", encoding="utf-8")
-            (role_path / "meta" / "services.yml").write_text("{}", encoding="utf-8")
+            (role_path / ROLE_FILE_META_SCHEMA).write_text("{}", encoding="utf-8")
+            (role_path / ROLE_FILE_VARS_MAIN).write_text("{}", encoding="utf-8")
+            (role_path / ROLE_FILE_META_SERVICES).write_text("{}", encoding="utf-8")
 
             schema_data = {
                 "credentials": {
@@ -295,11 +300,11 @@ class TestInventoryManager(TestCase):
                 p = Path(path)
                 if p == inv_path:
                     return {"applications": {}}
-                if p == role_path / "meta" / "schema.yml":
+                if p == role_path / ROLE_FILE_META_SCHEMA:
                     return schema_data
-                if p == role_path / "vars" / "main.yml":
+                if p == role_path / ROLE_FILE_VARS_MAIN:
                     return {"application_id": "app_test"}
-                if p == role_path / "meta" / "services.yml":
+                if p == role_path / ROLE_FILE_META_SERVICES:
                     return {
                         "oauth2": {
                             "enabled": "{{ 'web-app-keycloak' in group_names }}",
@@ -338,19 +343,19 @@ class TestInventoryManager(TestCase):
             (role_path / "vars").mkdir(parents=True, exist_ok=True)
             (role_path / "config").mkdir(parents=True, exist_ok=True)
             inv_path.write_text("{}", encoding="utf-8")
-            (role_path / "meta" / "schema.yml").write_text("{}", encoding="utf-8")
-            (role_path / "vars" / "main.yml").write_text("{}", encoding="utf-8")
-            (role_path / "meta" / "services.yml").write_text("{}", encoding="utf-8")
+            (role_path / ROLE_FILE_META_SCHEMA).write_text("{}", encoding="utf-8")
+            (role_path / ROLE_FILE_VARS_MAIN).write_text("{}", encoding="utf-8")
+            (role_path / ROLE_FILE_META_SERVICES).write_text("{}", encoding="utf-8")
 
             def fake_load_yaml(path):
                 p = Path(path)
                 if p == inv_path:
                     return {"applications": {}}
-                if p == role_path / "meta" / "schema.yml":
+                if p == role_path / ROLE_FILE_META_SCHEMA:
                     return {"credentials": {}}
-                if p == role_path / "vars" / "main.yml":
+                if p == role_path / ROLE_FILE_VARS_MAIN:
                     return {"application_id": "app_test"}
-                if p == role_path / "meta" / "services.yml":
+                if p == role_path / ROLE_FILE_META_SERVICES:
                     return {"oauth2": {"enabled": False}, "oidc": {"enabled": False}}
                 return {}
 
@@ -395,9 +400,9 @@ class TestInventoryManager(TestCase):
             inv_path.write_text("{}", encoding="utf-8")
 
             # IMPORTANT: ensure files exist for .exists() checks
-            (role_path / "meta" / "schema.yml").write_text("{}", encoding="utf-8")
-            (role_path / "vars" / "main.yml").write_text("{}", encoding="utf-8")
-            (role_path / "meta" / "services.yml").write_text("{}", encoding="utf-8")
+            (role_path / ROLE_FILE_META_SCHEMA).write_text("{}", encoding="utf-8")
+            (role_path / ROLE_FILE_VARS_MAIN).write_text("{}", encoding="utf-8")
+            (role_path / ROLE_FILE_META_SERVICES).write_text("{}", encoding="utf-8")
 
             inventory_path = inv_path
 
@@ -415,11 +420,11 @@ class TestInventoryManager(TestCase):
                 p = Path(path)
                 if p == inventory_path:
                     return {"applications": {}}
-                if p == role_path / "meta" / "schema.yml":
+                if p == role_path / ROLE_FILE_META_SCHEMA:
                     return schema_data
-                if p == role_path / "vars" / "main.yml":
+                if p == role_path / ROLE_FILE_VARS_MAIN:
                     return {"application_id": "app_test"}
-                if p == role_path / "meta" / "services.yml":
+                if p == role_path / ROLE_FILE_META_SERVICES:
                     # Per req-008: meta/services.yml file root IS the
                     # services map (no `compose.services` envelope).
                     return {}
@@ -480,9 +485,9 @@ class TestInventoryManager(TestCase):
             inv_path.write_text("{}", encoding="utf-8")
 
             # IMPORTANT: ensure files exist for .exists() checks
-            (role_path / "meta" / "schema.yml").write_text("{}", encoding="utf-8")
-            (role_path / "vars" / "main.yml").write_text("{}", encoding="utf-8")
-            (role_path / "meta" / "services.yml").write_text("{}", encoding="utf-8")
+            (role_path / ROLE_FILE_META_SCHEMA).write_text("{}", encoding="utf-8")
+            (role_path / ROLE_FILE_VARS_MAIN).write_text("{}", encoding="utf-8")
+            (role_path / ROLE_FILE_META_SERVICES).write_text("{}", encoding="utf-8")
 
             inventory_path = inv_path
 
@@ -519,11 +524,11 @@ class TestInventoryManager(TestCase):
                 p = Path(path)
                 if p == inventory_path:
                     return inventory_data
-                if p == role_path / "meta" / "schema.yml":
+                if p == role_path / ROLE_FILE_META_SCHEMA:
                     return schema_data
-                if p == role_path / "vars" / "main.yml":
+                if p == role_path / ROLE_FILE_VARS_MAIN:
                     return {"application_id": "app_test"}
-                if p == role_path / "meta" / "services.yml":
+                if p == role_path / ROLE_FILE_META_SERVICES:
                     # No provider resolution / no special rules
                     # Per req-008: meta/services.yml file root IS the
                     # services map (no `compose.services` envelope).

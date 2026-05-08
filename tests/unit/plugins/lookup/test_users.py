@@ -11,11 +11,12 @@ from ansible.errors import AnsibleError
 from plugins.lookup.users import LookupModule, _reset_cache_for_tests
 from utils.cache import base as runtime_data_base
 from utils.cache.yaml import dump_yaml_str
+from utils.roles.mapping import ROLE_FILE_META_USERS
 
 
 def _write_users(base_dir: Path, role_name: str, users: dict) -> None:
     """Write meta/users.yml — file root IS the users map (req-008)."""
-    users_path = base_dir / "roles" / role_name / "meta" / "users.yml"
+    users_path = base_dir / "roles" / role_name / ROLE_FILE_META_USERS
     users_path.parent.mkdir(parents=True, exist_ok=True)
     users_path.write_text(dump_yaml_str(users), encoding="utf-8")
 

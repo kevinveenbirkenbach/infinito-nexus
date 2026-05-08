@@ -17,6 +17,11 @@ from cli.meta.roles.applications.resolution.combined.role_introspection import (
     load_shared_service_roles_for_app,
     require_role_exists,
 )
+from utils.roles.mapping import (
+    ROLE_FILE_META_MAIN,
+    ROLE_FILE_META_SERVICES,
+    ROLE_FILE_VARS_MAIN,
+)
 
 
 def _write(p: Path, text: str) -> None:
@@ -38,7 +43,7 @@ class TestCombinedRoleIntrospection(unittest.TestCase):
     def test_has_application_id(self) -> None:
         with tempfile.TemporaryDirectory() as td:
             root = Path(td)
-            _write(root / "roles" / "a" / "vars" / "main.yml", "application_id: a\n")
+            _write(root / "roles" / "a" / ROLE_FILE_VARS_MAIN, "application_id: a\n")
             (root / "roles" / "b").mkdir(parents=True)
 
             with patch.object(repo_paths, "PROJECT_ROOT", root):
@@ -51,7 +56,7 @@ class TestCombinedRoleIntrospection(unittest.TestCase):
             # Per req-010 run_after lives under meta/services.yml.<entity>.
             # Entity for plain "a" is "a" itself.
             _write(
-                root / "roles" / "a" / "meta" / "services.yml",
+                root / "roles" / "a" / ROLE_FILE_META_SERVICES,
                 "a:\n  run_after:\n    - web-app-x\n    - web-app-y\n",
             )
             (root / "roles" / "web-app-x").mkdir(parents=True)
@@ -66,16 +71,16 @@ class TestCombinedRoleIntrospection(unittest.TestCase):
 
             # start role is app
             _write(
-                root / "roles" / "start" / "vars" / "main.yml",
+                root / "roles" / "start" / ROLE_FILE_VARS_MAIN,
                 "application_id: start\n",
             )
             _write(
-                root / "roles" / "start" / "meta" / "main.yml",
+                root / "roles" / "start" / ROLE_FILE_META_MAIN,
                 "dependencies:\n  - app-dep\n  - non-app-dep\n",
             )
             # app-dep has application_id
             _write(
-                root / "roles" / "app-dep" / "vars" / "main.yml",
+                root / "roles" / "app-dep" / ROLE_FILE_VARS_MAIN,
                 "application_id: app-dep\n",
             )
             (root / "roles" / "app-dep").mkdir(parents=True, exist_ok=True)
@@ -92,13 +97,13 @@ class TestCombinedRoleIntrospection(unittest.TestCase):
 
             # wordpress is app
             _write(
-                root / "roles" / "web-app-wordpress" / "vars" / "main.yml",
+                root / "roles" / "web-app-wordpress" / ROLE_FILE_VARS_MAIN,
                 "application_id: wordpress\n",
             )
             # Per req-008 the file root IS the services map (no
             # `compose.services` envelope).
             _write(
-                root / "roles" / "web-app-wordpress" / "meta" / "services.yml",
+                root / "roles" / "web-app-wordpress" / ROLE_FILE_META_SERVICES,
                 "oidc:\n"
                 "  enabled: true\n"
                 "  shared: true\n"

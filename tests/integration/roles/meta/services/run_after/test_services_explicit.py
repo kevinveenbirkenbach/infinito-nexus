@@ -36,6 +36,7 @@ from utils.roles.applications.services.registry import (
     build_service_registry_from_roles_dir,
     is_explicit_truth,
 )
+from utils.roles.mapping import ROLE_FILE_META_SERVICES
 from utils.roles.meta_lookup import get_role_run_after
 
 from . import PROJECT_ROOT
@@ -44,7 +45,7 @@ ROLES_DIR = PROJECT_ROOT / "roles"
 
 
 def _load_services(role_dir: Path) -> dict:
-    services_file = role_dir / "meta" / "services.yml"
+    services_file = role_dir / ROLE_FILE_META_SERVICES
     if not services_file.is_file():
         return {}
     data = load_yaml_any(services_file, default_if_missing={})

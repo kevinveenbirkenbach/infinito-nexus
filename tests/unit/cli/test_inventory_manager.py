@@ -8,6 +8,11 @@ from utils.handler.vault import VaultHandler, VaultScalar
 from utils.handler.yaml import YamlHandler
 from utils.manager.inventory import InventoryManager
 from utils.manager.value_generator import ValueGenerator
+from utils.roles.mapping import (
+    ROLE_FILE_META_SCHEMA,
+    ROLE_FILE_META_SERVICES,
+    ROLE_FILE_VARS_MAIN,
+)
 
 
 class TestInventoryManager(unittest.TestCase):
@@ -37,7 +42,7 @@ class TestInventoryManager(unittest.TestCase):
         path = Path(path)
 
         # Return schema for meta/schema.yml
-        if path.match("*/meta/schema.yml"):
+        if path.match(f"*/{ROLE_FILE_META_SCHEMA}"):
             return {
                 "credentials": {
                     "plain_cred": {
@@ -56,12 +61,12 @@ class TestInventoryManager(unittest.TestCase):
             }
 
         # Return application_id for vars/main.yml
-        if path.match("*/vars/main.yml"):
+        if path.match(f"*/{ROLE_FILE_VARS_MAIN}"):
             return {"application_id": "testapp"}
 
         # Return docker service flags for meta/services.yml. Per req-008 the
         # file root IS the services map (no `compose.services` wrapper).
-        if path.match("*/meta/services.yml"):
+        if path.match(f"*/{ROLE_FILE_META_SERVICES}"):
             return {
                 "mariadb": {"enabled": True, "shared": True},
             }
@@ -75,7 +80,7 @@ class TestInventoryManager(unittest.TestCase):
         """Loading application_id without it should raise SystemExit."""
         role_dir = self.tmpdir / "role"
         (role_dir / "vars").mkdir(parents=True)
-        (role_dir / "vars" / "main.yml").write_text("{}", encoding="utf-8")
+        (role_dir / ROLE_FILE_VARS_MAIN).write_text("{}", encoding="utf-8")
 
         with (
             patch.object(YamlHandler, "load_yaml", return_value={}),
@@ -139,9 +144,9 @@ class TestInventoryManager(unittest.TestCase):
         (role_dir / "vars").mkdir(parents=True, exist_ok=True)
 
         # IMPORTANT: files must exist because InventoryManager checks .exists()
-        (role_dir / "meta" / "schema.yml").write_text("{}", encoding="utf-8")
-        (role_dir / "meta" / "services.yml").write_text("{}", encoding="utf-8")
-        (role_dir / "vars" / "main.yml").write_text("{}", encoding="utf-8")
+        (role_dir / ROLE_FILE_META_SCHEMA).write_text("{}", encoding="utf-8")
+        (role_dir / ROLE_FILE_META_SERVICES).write_text("{}", encoding="utf-8")
+        (role_dir / ROLE_FILE_VARS_MAIN).write_text("{}", encoding="utf-8")
 
         # Create empty inventory.yml
         inv_file = self.tmpdir / "inventory.yml"

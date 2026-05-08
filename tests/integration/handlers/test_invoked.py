@@ -7,6 +7,7 @@ import yaml
 
 from utils.cache.files import iter_project_files
 from utils.cache.yaml import load_yaml_all
+from utils.roles.mapping import ROLE_FILE_HANDLERS_MAIN
 
 # ---------- YAML helpers ----------
 
@@ -239,7 +240,7 @@ class TestHandlersInvoked(unittest.TestCase):
         # Handlers: only main.yml/main.yaml define handlers.
         # Other files under handlers/ are typically include_tasks/import_tasks
         # and contain regular tasks, not handler definitions.
-        handler_suffixes = ("/handlers/main.yml", "/handlers/main.yaml")
+        handler_suffixes = (f"/{ROLE_FILE_HANDLERS_MAIN}", "/handlers/main.yaml")
         self.handler_files = [
             p
             for p in iter_project_files(extensions=(".yml", ".yaml"))

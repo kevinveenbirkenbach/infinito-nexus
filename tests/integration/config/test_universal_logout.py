@@ -4,10 +4,11 @@ import unittest
 import yaml
 
 from utils.cache.yaml import load_yaml_any
+from utils.roles.mapping import ROLE_FILE_META_SERVICES
 
 
 class TestUniversalLogoutSetting(unittest.TestCase):
-    ROLES_PATH = "roles/web-app-*/meta/services.yml"
+    ROLES_PATH = f"roles/web-app-*/{ROLE_FILE_META_SERVICES}"
 
     def test_logout_defined(self):
         files = glob.glob(self.ROLES_PATH)  # nocheck: project-walk

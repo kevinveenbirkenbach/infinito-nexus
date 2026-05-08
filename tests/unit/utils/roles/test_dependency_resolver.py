@@ -11,6 +11,11 @@ if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
 
 from utils.roles.dependency_resolver import RoleDependencyResolver
+from utils.roles.mapping import (
+    ROLE_FILE_META_MAIN,
+    ROLE_FILE_META_SERVICES,
+    ROLE_FILE_TASKS_MAIN,
+)
 
 
 def write(path: str, content: str):
@@ -48,7 +53,7 @@ class TestRoleDependencyResolver(unittest.TestCase):
         make_role(self.roles_dir, "C")
 
         write(
-            str(Path(self.roles_dir) / "A" / "tasks" / "main.yml"),
+            str(Path(self.roles_dir) / "A" / ROLE_FILE_TASKS_MAIN),
             """
             - name: include B
               include_role:
@@ -74,7 +79,7 @@ class TestRoleDependencyResolver(unittest.TestCase):
             make_role(self.roles_dir, rn)
 
         write(
-            str(Path(self.roles_dir) / "A" / "tasks" / "main.yml"),
+            str(Path(self.roles_dir) / "A" / ROLE_FILE_TASKS_MAIN),
             """
             - name: loop over strings → D, E
               include_role:
@@ -105,7 +110,7 @@ class TestRoleDependencyResolver(unittest.TestCase):
             make_role(self.roles_dir, rn)
 
         write(
-            str(Path(self.roles_dir) / "A" / "tasks" / "main.yml"),
+            str(Path(self.roles_dir) / "A" / ROLE_FILE_TASKS_MAIN),
             """
             - name: pure var ignored
               include_role:
@@ -130,7 +135,7 @@ class TestRoleDependencyResolver(unittest.TestCase):
         make_role(self.roles_dir, "I")
 
         write(
-            str(Path(self.roles_dir) / "A" / "meta" / "main.yml"),
+            str(Path(self.roles_dir) / "A" / ROLE_FILE_META_MAIN),
             """
             ---
             dependencies:
@@ -155,7 +160,7 @@ class TestRoleDependencyResolver(unittest.TestCase):
         # meta/services.yml.<primary_entity>.run_after; for "A" the entity
         # name equals the role name.
         write(
-            str(Path(self.roles_dir) / "A" / "meta" / "services.yml"),
+            str(Path(self.roles_dir) / "A" / ROLE_FILE_META_SERVICES),
             """
             ---
             A:
@@ -165,7 +170,7 @@ class TestRoleDependencyResolver(unittest.TestCase):
             """,
         )
         write(
-            str(Path(self.roles_dir) / "A" / "meta" / "main.yml"),
+            str(Path(self.roles_dir) / "A" / ROLE_FILE_META_MAIN),
             """
             ---
             dependencies: []
@@ -199,14 +204,14 @@ class TestRoleDependencyResolver(unittest.TestCase):
         make_role(self.roles_dir, "B")
 
         write(
-            str(Path(self.roles_dir) / "A" / "tasks" / "main.yml"),
+            str(Path(self.roles_dir) / "A" / ROLE_FILE_TASKS_MAIN),
             """
             - include_role:
                 name: B
             """,
         )
         write(
-            str(Path(self.roles_dir) / "B" / "tasks" / "main.yml"),
+            str(Path(self.roles_dir) / "B" / ROLE_FILE_TASKS_MAIN),
             """
             - import_role:
                 name: A
@@ -232,14 +237,14 @@ class TestRoleDependencyResolver(unittest.TestCase):
             make_role(self.roles_dir, rn)
 
         write(
-            str(Path(self.roles_dir) / "ROOT" / "tasks" / "main.yml"),
+            str(Path(self.roles_dir) / "ROOT" / ROLE_FILE_TASKS_MAIN),
             """
             - include_role: { name: C1 }
             - import_role:  { name: C2 }
             """,
         )
         write(
-            str(Path(self.roles_dir) / "ROOT" / "meta" / "main.yml"),
+            str(Path(self.roles_dir) / "ROOT" / ROLE_FILE_META_MAIN),
             """
             ---
             dependencies:
@@ -250,7 +255,7 @@ class TestRoleDependencyResolver(unittest.TestCase):
         # Per req-010 run_after lives at
         # meta/services.yml.<primary_entity>.run_after.
         write(
-            str(Path(self.roles_dir) / "ROOT" / "meta" / "services.yml"),
+            str(Path(self.roles_dir) / "ROOT" / ROLE_FILE_META_SERVICES),
             """
             ---
             ROOT:

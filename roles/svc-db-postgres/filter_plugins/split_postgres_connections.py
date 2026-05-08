@@ -4,6 +4,7 @@ from pathlib import Path
 from ansible.errors import AnsibleFilterError
 
 from utils.cache.yaml import load_yaml_any
+from utils.roles.mapping import ROLE_FILE_VARS_MAIN
 
 
 def _iter_role_vars_files(roles_dir):
@@ -13,7 +14,7 @@ def _iter_role_vars_files(roles_dir):
         role_path = str(Path(roles_dir) / name)
         if not Path(role_path).is_dir():
             continue
-        vars_main = str(Path(role_path) / "vars" / "main.yml")
+        vars_main = str(Path(role_path) / ROLE_FILE_VARS_MAIN)
         if Path(vars_main).is_file():
             yield vars_main
 

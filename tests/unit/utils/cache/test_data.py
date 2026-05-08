@@ -23,6 +23,7 @@ from utils.cache.users import (
     _merge_users,
     get_user_defaults,
 )
+from utils.roles.mapping import ROLE_FILE_META_SERVER, ROLE_FILE_META_USERS
 
 
 def _write(path: Path, content: str) -> None:
@@ -156,14 +157,14 @@ class TestLoadUserDefs(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmp:
             roles = Path(tmp)
             _write(
-                roles / "role-a/meta/users.yml",
+                roles / f"role-a/{ROLE_FILE_META_USERS}",
                 """
                 alice:
                   username: alice
                 """,
             )
             _write(
-                roles / "role-b/meta/users.yml",
+                roles / f"role-b/{ROLE_FILE_META_USERS}",
                 """
                 alice:
                   email: alice@x
@@ -179,14 +180,14 @@ class TestLoadUserDefs(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmp:
             roles = Path(tmp)
             _write(
-                roles / "role-a/meta/users.yml",
+                roles / f"role-a/{ROLE_FILE_META_USERS}",
                 """
                 alice:
                   uid: 1001
                 """,
             )
             _write(
-                roles / "role-b/meta/users.yml",
+                roles / f"role-b/{ROLE_FILE_META_USERS}",
                 """
                 alice:
                   uid: 2002
@@ -199,7 +200,7 @@ class TestLoadUserDefs(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmp:
             roles = Path(tmp)
             _write(
-                roles / "role-a/meta/users.yml",
+                roles / f"role-a/{ROLE_FILE_META_USERS}",
                 """
                 alice: "not-a-dict"
                 """,
@@ -330,7 +331,7 @@ class TestGetApplicationDefaults(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmp:
             roles = Path(tmp)
             _write(
-                roles / "web-app-alpha/meta/server.yml",
+                roles / f"web-app-alpha/{ROLE_FILE_META_SERVER}",
                 """
                 domains:
                   canonical:
@@ -338,7 +339,7 @@ class TestGetApplicationDefaults(unittest.TestCase):
                 """,
             )
             _write(
-                roles / "web-app-beta/meta/server.yml",
+                roles / f"web-app-beta/{ROLE_FILE_META_SERVER}",
                 """
                 domains:
                   canonical:
@@ -357,13 +358,13 @@ class TestGetApplicationDefaults(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmp:
             roles = Path(tmp)
             _write(
-                roles / "web-app-alpha/meta/server.yml",
+                roles / f"web-app-alpha/{ROLE_FILE_META_SERVER}",
                 """
                 {}
                 """,
             )
             _write(
-                roles / "web-app-alpha/meta/users.yml",
+                roles / f"web-app-alpha/{ROLE_FILE_META_USERS}",
                 """
                 administrator:
                   username: administrator
@@ -379,7 +380,7 @@ class TestGetApplicationDefaults(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmp:
             roles = Path(tmp)
             _write(
-                roles / "web-app-alpha/meta/server.yml",
+                roles / f"web-app-alpha/{ROLE_FILE_META_SERVER}",
                 """
                 domains:
                   canonical:
@@ -403,7 +404,7 @@ class TestGetUserDefaults(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmp:
             roles = Path(tmp)
             _write(
-                roles / "web-app-alpha/meta/users.yml",
+                roles / f"web-app-alpha/{ROLE_FILE_META_USERS}",
                 """
                 administrator:
                   username: administrator
@@ -428,7 +429,7 @@ class TestGetUserDefaults(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmp:
             roles = Path(tmp)
             _write(
-                roles / "web-app-alpha/meta/users.yml",
+                roles / f"web-app-alpha/{ROLE_FILE_META_USERS}",
                 """
                 administrator:
                   username: administrator

@@ -17,6 +17,7 @@ import argparse
 from pathlib import Path
 
 from utils.cache.yaml import load_yaml
+from utils.roles.mapping import ROLE_FILE_META_MAIN, ROLE_FILE_VARS_MAIN
 
 from . import PROJECT_ROOT
 
@@ -30,11 +31,11 @@ def roles_dir() -> Path:
 
 
 def role_meta_path(role_name: str) -> Path:
-    return roles_dir() / role_name / "meta" / "main.yml"
+    return roles_dir() / role_name / ROLE_FILE_META_MAIN
 
 
 def role_vars_path(role_name: str) -> Path:
-    return roles_dir() / role_name / "vars" / "main.yml"
+    return roles_dir() / role_name / ROLE_FILE_VARS_MAIN
 
 
 def has_application_id(role_name: str) -> bool:

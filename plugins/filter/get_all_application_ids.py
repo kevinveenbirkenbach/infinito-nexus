@@ -5,6 +5,7 @@ import glob
 from pathlib import Path
 
 from utils.cache.yaml import load_yaml_any
+from utils.roles.mapping import ROLE_FILE_VARS_MAIN
 
 
 def get_all_application_ids(roles_dir="roles"):
@@ -15,7 +16,7 @@ def get_all_application_ids(roles_dir="roles"):
     :param roles_dir: Base directory for Ansible roles (default: 'roles')
     :return: Sorted list of unique application_id strings
     """
-    pattern = str(Path(roles_dir) / "*" / "vars" / "main.yml")
+    pattern = str(Path(roles_dir) / "*" / ROLE_FILE_VARS_MAIN)
     app_ids = []
 
     for filepath in glob.glob(pattern):

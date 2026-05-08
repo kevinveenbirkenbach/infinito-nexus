@@ -10,6 +10,7 @@ from unittest.mock import patch
 
 from cli.meta.roles.applications.resolution.combined import repo_paths
 from cli.meta.roles.applications.resolution.combined.tree import print_tree
+from utils.roles.mapping import ROLE_FILE_META_SERVICES, ROLE_FILE_VARS_MAIN
 
 
 def _write(p: Path, text: str) -> None:
@@ -36,11 +37,11 @@ class TestCombinedTree(unittest.TestCase):
             # meta/services.yml.<primary_entity>.run_after.
             # For "start" (no category prefix) the entity name = role name.
             _write(
-                root / "roles" / "start" / "vars" / "main.yml",
+                root / "roles" / "start" / ROLE_FILE_VARS_MAIN,
                 "application_id: start\n",
             )
             _write(
-                root / "roles" / "start" / "meta" / "services.yml",
+                root / "roles" / "start" / ROLE_FILE_META_SERVICES,
                 (
                     "start:\n"
                     "  run_after:\n"
@@ -54,7 +55,7 @@ class TestCombinedTree(unittest.TestCase):
             # keycloak exists, and points back to start to force a visible cycle
             # entity name for web-app-keycloak is "keycloak"
             _write(
-                root / "roles" / "web-app-keycloak" / "meta" / "services.yml",
+                root / "roles" / "web-app-keycloak" / ROLE_FILE_META_SERVICES,
                 "keycloak:\n  run_after:\n    - start\n",
             )
 

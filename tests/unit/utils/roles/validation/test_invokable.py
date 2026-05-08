@@ -9,6 +9,7 @@ from unittest.mock import patch
 
 import utils.roles.validation.invokable as inv
 from utils.cache.yaml import dump_yaml
+from utils.roles.mapping import ROLE_FILE_VARS_MAIN
 
 
 class TestInvokable(TestCase):
@@ -29,9 +30,9 @@ class TestInvokable(TestCase):
             rd = self.roles_dir / name
             (rd / "vars").mkdir(parents=True, exist_ok=True)
             if application_id is not None:
-                dump_yaml(rd / "vars" / "main.yml", {"application_id": application_id})
+                dump_yaml(rd / ROLE_FILE_VARS_MAIN, {"application_id": application_id})
             else:
-                dump_yaml(rd / "vars" / "main.yml", {})
+                dump_yaml(rd / ROLE_FILE_VARS_MAIN, {})
 
         mk_role("web-app-nextcloud", "web-app-nextcloud")
         mk_role("web-app-matomo", "matomo-app")
@@ -84,7 +85,7 @@ class TestInvokable(TestCase):
         # Ensure exclude regex is honored
         rd = self.roles_dir / "web-app-oauth2-proxy"
         (rd / "vars").mkdir(parents=True, exist_ok=True)
-        dump_yaml(rd / "vars" / "main.yml", {})
+        dump_yaml(rd / ROLE_FILE_VARS_MAIN, {})
 
         with (
             patch.object(inv, "PROJECT_ROOT", self.tmp),

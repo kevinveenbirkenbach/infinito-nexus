@@ -3,6 +3,7 @@ import unittest
 from pathlib import Path
 
 from utils.cache.yaml import load_yaml_any
+from utils.roles.mapping import ROLE_FILE_META_MAIN
 
 
 class TestRunAfterReferences(unittest.TestCase):
@@ -27,7 +28,7 @@ class TestRunAfterReferences(unittest.TestCase):
     def test_run_after_points_to_existing_roles(self):
         errors = []
         for role in sorted(self.existing_roles):
-            meta_path = str(Path(self.roles_dir) / role / "meta" / "main.yml")
+            meta_path = str(Path(self.roles_dir) / role / ROLE_FILE_META_MAIN)
             if not Path(meta_path).is_file():
                 # skip roles without a meta/main.yml
                 continue

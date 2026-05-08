@@ -7,6 +7,7 @@ from unittest.mock import patch
 import cli.mirror.resolver.__main__ as resolver_main
 from cli.mirror.model import ImageRef
 from utils.cache.yaml import load_yaml_str
+from utils.roles.mapping import ROLE_FILE_DEFAULTS_MAIN, ROLE_FILE_META_SERVICES
 
 
 class TestResolverOutputFormat(unittest.TestCase):
@@ -44,7 +45,7 @@ class TestResolverOutputFormat(unittest.TestCase):
             version="31.0.0",
             source="docker.io/library/nextcloud:31.0.0",
             registry="docker.io",
-            source_file="meta/services.yml",
+            source_file=ROLE_FILE_META_SERVICES,
         )
         out = self._run_resolver([image])
 
@@ -63,7 +64,7 @@ class TestResolverOutputFormat(unittest.TestCase):
             version="v1.58.2-noble",
             source="mcr.microsoft.com/playwright:v1.58.2-noble",
             registry="mcr.microsoft.com",
-            source_file="defaults/main.yml",
+            source_file=ROLE_FILE_DEFAULTS_MAIN,
         )
         out = self._run_resolver([image])
 
@@ -84,7 +85,7 @@ class TestResolverOutputFormat(unittest.TestCase):
                 version="31.0.0",
                 source="docker.io/library/nextcloud:31.0.0",
                 registry="docker.io",
-                source_file="meta/services.yml",
+                source_file=ROLE_FILE_META_SERVICES,
             ),
             ImageRef(
                 role="web-app-nextcloud",
@@ -93,7 +94,7 @@ class TestResolverOutputFormat(unittest.TestCase):
                 version="alpine",
                 source="docker.io/library/nginx:alpine",
                 registry="docker.io",
-                source_file="meta/services.yml",
+                source_file=ROLE_FILE_META_SERVICES,
             ),
             ImageRef(
                 role="web-app-nextcloud",
@@ -102,7 +103,7 @@ class TestResolverOutputFormat(unittest.TestCase):
                 version="latest",
                 source="docker.io/restic/restic:latest",
                 registry="docker.io",
-                source_file="defaults/main.yml",
+                source_file=ROLE_FILE_DEFAULTS_MAIN,
             ),
         ]
         out = self._run_resolver(images)

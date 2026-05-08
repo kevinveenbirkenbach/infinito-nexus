@@ -10,6 +10,7 @@ from utils.roles.applications.services.registry import (
     is_explicit_truth,
     resolve_service_dependency_roles_from_config,
 )
+from utils.roles.mapping import ROLE_FILE_META_SERVICES
 
 from . import PROJECT_ROOT
 from .errors import ServicesResolutionError
@@ -92,7 +93,7 @@ class ServicesResolver:
     def _role_services_path(self, role_name: str) -> Path:
         # Per req-008 the services manifest moved to meta/services.yml. The
         # file root IS the services map (no `compose.services` wrapper).
-        return self._role_dir(role_name) / "meta" / "services.yml"
+        return self._role_dir(role_name) / ROLE_FILE_META_SERVICES
 
     def _load_role_config(self, role_name: str) -> dict:
         services_path = self._role_services_path(role_name)

@@ -20,6 +20,7 @@ from utils.annotations.suppress import is_suppressed_at
 from utils.cache.files import read_text
 from utils.cache.yaml import load_yaml_any, load_yaml_str
 from utils.roles.applications.services.registry import is_explicit_truth
+from utils.roles.mapping import ROLE_FILE_META_SERVICES
 
 from . import PROJECT_ROOT
 
@@ -91,7 +92,7 @@ class TestWebAppLogoutDashboardIntegration(unittest.TestCase):
     def _check_service_activated(self, role_path: Path, key: str) -> str | None:
         """Return an error string if ``services.<key>`` is neither
         activated nor opted out; else ``None``."""
-        config = role_path / "meta" / "services.yml"
+        config = role_path / ROLE_FILE_META_SERVICES
         svc = _service_conf(config, key)
         if is_explicit_truth(svc.get("enabled")) and is_explicit_truth(
             svc.get("shared")

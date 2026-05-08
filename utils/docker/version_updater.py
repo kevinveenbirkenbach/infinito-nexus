@@ -19,6 +19,7 @@ from utils.docker.image.ref import (
     GHCR_REGISTRY,
     split_registry_and_name,
 )
+from utils.roles.mapping import ROLE_FILE_META_SERVICES
 
 _SEMVER_CORE = r"v?\d+(?:\.\d+){0,3}"
 # Tags that extend a semver with a `-<flavor>` suffix, e.g. the Docker
@@ -233,12 +234,12 @@ def collect_entries(repo_root: Path) -> list[DockerImageVersionEntry]:
     for ref in iter_role_images(repo_root):
         if not ref.role.startswith("web-"):
             continue
-        if ref.source_file != "meta/services.yml":
+        if ref.source_file != ROLE_FILE_META_SERVICES:
             continue
         if not is_semver(ref.version):
             continue
 
-        config_path = roles_root / ref.role / "meta" / "services.yml"
+        config_path = roles_root / ref.role / ROLE_FILE_META_SERVICES
         if ref.service in suppressed_services(config_path):
             continue
 

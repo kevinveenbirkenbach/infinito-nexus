@@ -6,6 +6,7 @@ import unittest
 from pathlib import Path
 
 from utils.cache.yaml import dump_yaml_str
+from utils.roles.mapping import ROLE_FILE_META_SERVICES, ROLE_FILE_META_USERS
 
 SCRIPT_PATH = str(
     Path(
@@ -26,14 +27,14 @@ class TestValidateInventory(unittest.TestCase):
         self.inventory_dir = Path(self.temp_dir) / "inventory"
         self.inventory_dir.mkdir()
 
-        (self.roles_dir / "app1" / "meta" / "services.yml").write_text(
+        (self.roles_dir / "app1" / ROLE_FILE_META_SERVICES).write_text(
             dump_yaml_str(
                 {"port": 8080, "enabled": True, "settings": {"theme": "dark"}}
             ),
             encoding="utf-8",
         )
         # Per req-008 the file root IS the users map (no `users:` wrapper).
-        (self.roles_dir / "identity" / "meta" / "users.yml").write_text(
+        (self.roles_dir / "identity" / ROLE_FILE_META_USERS).write_text(
             dump_yaml_str({"alice": {"email": "alice@example.com"}}),
             encoding="utf-8",
         )

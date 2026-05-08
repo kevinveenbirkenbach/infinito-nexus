@@ -7,6 +7,7 @@ from utils.annotations.suppress import is_suppressed_at
 from utils.cache.files import read_text
 from utils.cache.yaml import load_yaml_any, load_yaml_str
 from utils.roles.applications.services.registry import is_explicit_truth
+from utils.roles.mapping import ROLE_FILE_META_SERVICES
 
 from . import PROJECT_ROOT
 
@@ -92,7 +93,7 @@ def _has_opt_out(config_path: Path) -> bool:
 
 
 def _emit_missing_email_warning(root: Path, role_path: Path) -> None:
-    config_file = role_path / "meta" / "services.yml"
+    config_file = role_path / ROLE_FILE_META_SERVICES
     if config_file.is_file():
         relative = config_file.relative_to(root).as_posix()
     else:
@@ -128,7 +129,7 @@ class TestWebAppRolesIntegrateEmail(unittest.TestCase):
                 continue
             if role_path.name == _MAILU_ROLE:
                 continue
-            config = role_path / "meta" / "services.yml"
+            config = role_path / ROLE_FILE_META_SERVICES
 
             if _role_uses_email_lookup(role_path):
                 svc = _email_service_conf(config)
@@ -165,7 +166,7 @@ class TestOptOutDetection(unittest.TestCase):
     """Verify _has_opt_out semantics in isolation."""
 
     def _write(self, tmp_path: Path, text: str) -> Path:
-        config = tmp_path / "meta" / "services.yml"
+        config = tmp_path / ROLE_FILE_META_SERVICES
         config.parent.mkdir(parents=True, exist_ok=True)
         config.write_text(text, encoding="utf-8")
         return config

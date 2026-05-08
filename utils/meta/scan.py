@@ -15,6 +15,7 @@ from collections.abc import Iterable
 from pathlib import Path
 
 from utils.cache.yaml import load_yaml_any
+from utils.roles.mapping import ROLE_FILE_META_SERVER, ROLE_FILE_META_SERVICES
 
 from . import PROJECT_ROOT
 
@@ -43,7 +44,7 @@ def iter_port_assignments() -> Iterable[tuple[str, str, str, str, int]]:
     per-container network namespaces and never collide.
     """
     for role_dir in iter_role_dirs():
-        services = _load_yaml(role_dir / "meta" / "services.yml")
+        services = _load_yaml(role_dir / ROLE_FILE_META_SERVICES)
         if not isinstance(services, dict):
             continue
         for entity_name, entity in services.items():
@@ -72,7 +73,7 @@ def iter_port_assignments() -> Iterable[tuple[str, str, str, str, int]]:
 def iter_relay_ranges() -> Iterable[tuple[str, str, int, int]]:
     """Yield ``(role, entity, start, end)`` for every public relay range."""
     for role_dir in iter_role_dirs():
-        services = _load_yaml(role_dir / "meta" / "services.yml")
+        services = _load_yaml(role_dir / ROLE_FILE_META_SERVICES)
         if not isinstance(services, dict):
             continue
         for entity_name, entity in services.items():
@@ -96,7 +97,7 @@ def iter_relay_ranges() -> Iterable[tuple[str, str, int, int]]:
 def iter_subnets() -> Iterable[tuple[str, ipaddress.IPv4Network]]:
     """Yield ``(role, subnet)`` for every role that declares a local subnet."""
     for role_dir in iter_role_dirs():
-        server = _load_yaml(role_dir / "meta" / "server.yml")
+        server = _load_yaml(role_dir / ROLE_FILE_META_SERVER)
         if not isinstance(server, dict):
             continue
         networks = server.get("networks")

@@ -28,6 +28,7 @@ import yaml
 
 from utils.cache.yaml import load_yaml_any
 from utils.roles.entity_name import get_entity_name
+from utils.roles.mapping import ROLE_FILE_META_SERVICES
 
 from . import PROJECT_ROOT
 
@@ -39,7 +40,7 @@ class MetaServicesShapeError(ValueError):
 
 
 def _read_meta_services(role_dir: Path) -> dict | None:
-    services_path = role_dir / "meta" / "services.yml"
+    services_path = role_dir / ROLE_FILE_META_SERVICES
     if not services_path.is_file():
         return None
     try:

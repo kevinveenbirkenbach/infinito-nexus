@@ -3,6 +3,7 @@ import unittest
 from pathlib import Path
 
 from utils.cache.yaml import load_yaml_any
+from utils.roles.mapping import ROLE_FILE_VARS_MAIN
 
 from . import PROJECT_ROOT
 
@@ -19,7 +20,7 @@ class TestApplicationIdDeprecation(unittest.TestCase):
 
         for role in os.listdir(ROLES_DIR):
             role_path = str(Path(ROLES_DIR) / role)
-            vars_main_yml = str(Path(role_path) / "vars" / "main.yml")
+            vars_main_yml = str(Path(role_path) / ROLE_FILE_VARS_MAIN)
             if not Path(vars_main_yml).is_file():
                 continue
             try:

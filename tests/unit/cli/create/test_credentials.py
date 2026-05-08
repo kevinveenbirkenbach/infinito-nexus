@@ -8,6 +8,11 @@ from pathlib import Path
 from cli.create.credentials import ask_for_confirmation, main
 from utils.cache.yaml import dump_yaml, load_yaml_any
 from utils.handler.vault import VaultHandler
+from utils.roles.mapping import (
+    ROLE_FILE_META_SCHEMA,
+    ROLE_FILE_META_SERVICES,
+    ROLE_FILE_VARS_MAIN,
+)
 
 
 class TestCreateCredentials(unittest.TestCase):
@@ -51,10 +56,10 @@ class TestCreateCredentials(unittest.TestCase):
             Path(str(Path(role_path) / "vars")).mkdir(parents=True)
             # Create vars/main.yml with application_id
             main_vars = {"application_id": "app_test"}
-            dump_yaml(str(Path(role_path) / "vars" / "main.yml"), main_vars)
+            dump_yaml(str(Path(role_path) / ROLE_FILE_VARS_MAIN), main_vars)
             # Create config/main.yml with features disabled
             config = {"features": {"central_database": False}}
-            dump_yaml(str(Path(role_path) / "meta" / "services.yml"), config)
+            dump_yaml(str(Path(role_path) / ROLE_FILE_META_SERVICES), config)
             # Create schema.yml defining plain credential
             schema = {
                 "credentials": {
@@ -65,7 +70,7 @@ class TestCreateCredentials(unittest.TestCase):
                     }
                 }
             }
-            dump_yaml(str(Path(role_path) / "meta" / "schema.yml"), schema)
+            dump_yaml(str(Path(role_path) / ROLE_FILE_META_SCHEMA), schema)
             # Prepare inventory file
             inventory_file = str(Path(tmpdir) / "inventory.yml")
             dump_yaml(inventory_file, {})
@@ -116,11 +121,11 @@ class TestCreateCredentials(unittest.TestCase):
 
             # vars/main.yml with application_id
             main_vars = {"application_id": "app_empty_plain"}
-            dump_yaml(str(Path(role_path) / "vars" / "main.yml"), main_vars)
+            dump_yaml(str(Path(role_path) / ROLE_FILE_VARS_MAIN), main_vars)
 
             # config/main.yml
             config = {"features": {"central_database": False}}
-            dump_yaml(str(Path(role_path) / "meta" / "services.yml"), config)
+            dump_yaml(str(Path(role_path) / ROLE_FILE_META_SERVICES), config)
 
             # schema/main.yml: plain credential *without* overrides
             schema = {
@@ -132,7 +137,7 @@ class TestCreateCredentials(unittest.TestCase):
                     }
                 }
             }
-            dump_yaml(str(Path(role_path) / "meta" / "schema.yml"), schema)
+            dump_yaml(str(Path(role_path) / ROLE_FILE_META_SCHEMA), schema)
 
             # Empty inventory file
             inventory_file = str(Path(tmpdir) / "inventory.yml")

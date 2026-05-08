@@ -4,6 +4,7 @@ from pathlib import Path
 from typing import Any
 
 from utils.cache.yaml import load_yaml as _load_yaml_cached
+from utils.roles.mapping import ROLE_FILE_META_SERVER, ROLE_FILE_VARS_MAIN
 
 from . import PROJECT_ROOT
 
@@ -68,8 +69,8 @@ def build_applications_from_roles(
     applications: dict[str, dict[str, Any]] = {}
 
     for role_dir in sorted(roles_dir.iterdir()):
-        vars_main = role_dir / "vars" / "main.yml"
-        server_meta = role_dir / "meta" / "server.yml"
+        vars_main = role_dir / ROLE_FILE_VARS_MAIN
+        server_meta = role_dir / ROLE_FILE_META_SERVER
         if not vars_main.exists() or not server_meta.exists():
             continue
 

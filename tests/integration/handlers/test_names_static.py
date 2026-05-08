@@ -24,6 +24,7 @@ import re
 import unittest
 
 from utils.cache.yaml import load_yaml_all
+from utils.roles.mapping import ROLE_FILE_HANDLERS_MAIN
 
 try:
     import yaml  # PyYAML
@@ -65,7 +66,7 @@ class StaticHandlerNamesTest(unittest.TestCase):
     def test_no_templated_names_in_handlers(self):
         from . import PROJECT_ROOT
 
-        pattern = str(PROJECT_ROOT / "roles" / "*" / "handlers" / "main.yml")
+        pattern = str(PROJECT_ROOT / "roles" / "*" / ROLE_FILE_HANDLERS_MAIN)
 
         violations = []
 

@@ -2,6 +2,8 @@ import os
 import unittest
 from pathlib import Path
 
+from utils.roles.mapping import ROLE_FILE_META_MAIN
+
 ROLES_DIR = str(
     Path(str(Path(str(Path(__file__).parent)) / "../../../../roles")).resolve()
 )
@@ -20,7 +22,7 @@ class TestRolesHaveMetaMain(unittest.TestCase):
             if not Path(role_path).is_dir():
                 continue
 
-            meta_main = str(Path(role_path) / "meta" / "main.yml")
+            meta_main = str(Path(role_path) / ROLE_FILE_META_MAIN)
             if not Path(meta_main).is_file():
                 missing_meta.append(role)
 

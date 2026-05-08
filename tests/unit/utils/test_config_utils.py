@@ -9,6 +9,7 @@ from utils.roles.applications.config import (
     ConfigEntryNotSetError,
     get,
 )
+from utils.roles.mapping import ROLE_FILE_META_SCHEMA
 
 
 class TestGetAppConf(unittest.TestCase):
@@ -23,7 +24,7 @@ class TestGetAppConf(unittest.TestCase):
         Path(str(Path("roles") / "web-app-demo" / "meta")).mkdir(
             parents=True, exist_ok=True
         )
-        with Path(str(Path("roles") / "web-app-demo" / "meta" / "schema.yml")).open(
+        with Path(str(Path("roles") / "web-app-demo" / ROLE_FILE_META_SCHEMA)).open(
             "w"
         ) as f:
             f.write(

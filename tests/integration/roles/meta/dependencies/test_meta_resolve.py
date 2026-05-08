@@ -3,6 +3,7 @@ from pathlib import Path
 
 from utils.cache.files import iter_project_files
 from utils.cache.yaml import load_yaml_any
+from utils.roles.mapping import ROLE_FILE_META_MAIN
 
 from . import PROJECT_ROOT
 
@@ -16,7 +17,7 @@ class TestRoleDependencies(unittest.TestCase):
         meta_files = sorted(
             p
             for p in iter_project_files(extensions=(".yml",))
-            if p.startswith(roles_prefix) and p.endswith("/meta/main.yml")
+            if p.startswith(roles_prefix) and p.endswith(f"/{ROLE_FILE_META_MAIN}")
         )
         self.assertTrue(
             meta_files,

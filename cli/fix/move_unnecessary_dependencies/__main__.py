@@ -31,6 +31,8 @@ import argparse
 import sys
 from pathlib import Path
 
+from utils.roles.mapping import ROLE_FILE_META_MAIN, ROLE_FILE_TASKS_MAIN
+
 from .analysis import (
     collect_role_defined_vars,
     collect_role_handler_names,
@@ -90,11 +92,11 @@ def process_role(
         return False
 
     update_meta_remove_deps(
-        str(Path(role_dir) / "meta" / "main.yml"), moved, dry_run=dry_run
+        str(Path(role_dir) / ROLE_FILE_META_MAIN), moved, dry_run=dry_run
     )
 
     target_tasks = path_if_exists(role_dir, "tasks/01_core.yml") or str(
-        Path(role_dir) / "tasks" / "main.yml"
+        Path(role_dir) / ROLE_FILE_TASKS_MAIN
     )
     prepend_tasks(
         target_tasks,

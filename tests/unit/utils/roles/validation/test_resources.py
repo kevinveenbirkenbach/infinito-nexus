@@ -7,6 +7,7 @@ from pathlib import Path
 from tempfile import TemporaryDirectory
 from unittest.mock import patch
 
+from utils.roles.mapping import ROLE_FILE_META_SERVICES
 from utils.roles.validation import resources as rrv
 
 
@@ -21,7 +22,7 @@ class TestFilterRolesByMinStorage(unittest.TestCase):
     def _write_role_config(self, role_name: str, *, yaml_text: str) -> Path:
         role_dir = self.roles_root / role_name
         (role_dir / "meta").mkdir(parents=True, exist_ok=True)
-        cfg_path = role_dir / "meta" / "services.yml"
+        cfg_path = role_dir / ROLE_FILE_META_SERVICES
         cfg_path.write_text(yaml_text, encoding="utf-8")
         return cfg_path
 

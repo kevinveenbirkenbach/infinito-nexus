@@ -17,6 +17,7 @@ from pathlib import Path
 from typing import Any
 
 from plugins.filter.merge_with_defaults import merge_with_defaults
+from utils.roles.mapping import ROLE_FILE_META_VARIANTS
 
 from .base import (
     _RENDER_GUARD,
@@ -225,7 +226,7 @@ def _build_variants(roles_dir: Path) -> dict[str, list[Any]]:
     for role_dir in _iter_application_role_dirs(roles_dir):
         application_id = role_dir.name
         base_config = _build_role_base_config(role_dir, roles_dir)
-        meta_path = role_dir / "meta" / "variants.yml"
+        meta_path = role_dir / ROLE_FILE_META_VARIANTS
         override_list = _load_variants_overrides(meta_path)
         role_variants: list[Any] = []
         for override in override_list:

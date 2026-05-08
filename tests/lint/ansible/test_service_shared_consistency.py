@@ -4,6 +4,7 @@ from pathlib import Path
 from utils.annotations.suppress import line_has_rule
 from utils.cache.files import iter_project_files, read_text
 from utils.cache.yaml import load_yaml_any
+from utils.roles.mapping import ROLE_FILE_META_SERVICES
 
 from . import PROJECT_ROOT
 
@@ -62,7 +63,7 @@ class TestServiceSharedConsistency(unittest.TestCase):
         files = sorted(
             p
             for p in iter_project_files(extensions=(".yml",))
-            if p.startswith(roles_prefix) and p.endswith("/meta/services.yml")
+            if p.startswith(roles_prefix) and p.endswith(f"/{ROLE_FILE_META_SERVICES}")
         )
         self.assertTrue(files, f"No meta/services.yml files found under {roles_dir}")
 

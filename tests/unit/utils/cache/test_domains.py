@@ -18,6 +18,7 @@ from unittest.mock import patch
 
 from utils.cache import _reset_cache_for_tests
 from utils.cache import domains as cache_domains
+from utils.roles.mapping import ROLE_FILE_META_SERVICES, ROLE_FILE_META_USERS
 
 from . import PROJECT_ROOT
 
@@ -30,7 +31,7 @@ def _write(path: Path, content: str) -> None:
 def _seed_minimal_role(tmp: Path) -> Path:
     role = tmp / "roles" / "web-app-foo"
     _write(
-        role / "meta" / "services.yml",
+        role / ROLE_FILE_META_SERVICES,
         """
         server:
           domains:
@@ -39,7 +40,7 @@ def _seed_minimal_role(tmp: Path) -> Path:
             aliases: []
         """,
     )
-    _write(role / "meta" / "users.yml", "users: {}\n")
+    _write(role / ROLE_FILE_META_USERS, "users: {}\n")
     return tmp / "roles"
 
 

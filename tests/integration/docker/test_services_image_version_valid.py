@@ -8,6 +8,7 @@ from typing import Any
 
 from utils.cache.yaml import load_yaml_str
 from utils.docker.image.ref import is_valid_image_name
+from utils.roles.mapping import ROLE_FILE_META_SERVICES
 
 from . import PROJECT_ROOT
 
@@ -23,7 +24,7 @@ def _iter_role_config_files(repo_root: Path) -> list[Path]:
     roles_dir = repo_root / "roles"
     if not roles_dir.is_dir():
         return []
-    return sorted(roles_dir.glob("*/meta/services.yml"))
+    return sorted(roles_dir.glob(f"*/{ROLE_FILE_META_SERVICES}"))
 
 
 def _extract_services(cfg: dict[str, Any]) -> dict[str, Any]:
@@ -73,7 +74,7 @@ class TestDockerServicesImageVersionValid(unittest.TestCase):
         config_files = _iter_role_config_files(repo_root)
         self.assertTrue(
             config_files,
-            f"No role config files found under: {repo_root / 'roles' / '*/meta/services.yml'}",
+            f"No role config files found under: {repo_root / 'roles' / f'*/{ROLE_FILE_META_SERVICES}'}",
         )
 
         for cfg_path in config_files:

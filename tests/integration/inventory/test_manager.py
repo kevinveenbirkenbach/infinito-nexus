@@ -5,6 +5,11 @@ from unittest.mock import patch
 
 from utils.handler.vault import VaultScalar
 from utils.manager.inventory import InventoryManager
+from utils.roles.mapping import (
+    ROLE_FILE_META_SCHEMA,
+    ROLE_FILE_META_SERVICES,
+    ROLE_FILE_VARS_MAIN,
+)
 
 
 class _FakeVaultHandler:
@@ -56,17 +61,17 @@ class TestInventoryManagerIntegration(TestCase):
             (provider_role / "vars").mkdir(parents=True, exist_ok=True)
             (provider_role / "config").mkdir(parents=True, exist_ok=True)
 
-            (provider_role / "vars" / "main.yml").write_text(
+            (provider_role / ROLE_FILE_VARS_MAIN).write_text(
                 'application_id: "svc-db-mariadb"\n',
                 encoding="utf-8",
             )
 
-            (provider_role / "meta" / "services.yml").write_text(
+            (provider_role / ROLE_FILE_META_SERVICES).write_text(
                 "mariadb:\n  enabled: false\n  shared: true\n",
                 encoding="utf-8",
             )
 
-            (provider_role / "meta" / "schema.yml").write_text(
+            (provider_role / ROLE_FILE_META_SCHEMA).write_text(
                 "credentials:\n"
                 "  root_password:\n"
                 "    description: MariaDB root password\n"
@@ -90,17 +95,17 @@ class TestInventoryManagerIntegration(TestCase):
             inv_path = tmp / "inventory.yml"
             inv_path.write_text("applications: {}\n", encoding="utf-8")
 
-            (role_path / "vars" / "main.yml").write_text(
+            (role_path / ROLE_FILE_VARS_MAIN).write_text(
                 'application_id: "web-app-demo"\n',
                 encoding="utf-8",
             )
 
-            (role_path / "meta" / "services.yml").write_text(
+            (role_path / ROLE_FILE_META_SERVICES).write_text(
                 "mariadb:\n  enabled: true\n  shared: true\noidc:\n  enabled: true\n",
                 encoding="utf-8",
             )
 
-            (role_path / "meta" / "schema.yml").write_text(
+            (role_path / ROLE_FILE_META_SCHEMA).write_text(
                 "credentials:\n"
                 "  api_key:\n"
                 "    description: API key\n"
@@ -204,11 +209,11 @@ class TestInventoryManagerIntegration(TestCase):
             (provider_role / "vars").mkdir(parents=True, exist_ok=True)
             (provider_role / "config").mkdir(parents=True, exist_ok=True)
 
-            (provider_role / "vars" / "main.yml").write_text(
+            (provider_role / ROLE_FILE_VARS_MAIN).write_text(
                 'application_id: "web-svc-asset"\n',
                 encoding="utf-8",
             )
-            (provider_role / "meta" / "services.yml").write_text(
+            (provider_role / ROLE_FILE_META_SERVICES).write_text(
                 "asset:\n  enabled: false\n  shared: true\n",
                 encoding="utf-8",
             )
@@ -221,15 +226,15 @@ class TestInventoryManagerIntegration(TestCase):
             inv_path = tmp / "inventory.yml"
             inv_path.write_text("applications: {}\n", encoding="utf-8")
 
-            (role_path / "vars" / "main.yml").write_text(
+            (role_path / ROLE_FILE_VARS_MAIN).write_text(
                 'application_id: "web-app-demo"\n',
                 encoding="utf-8",
             )
-            (role_path / "meta" / "services.yml").write_text(
+            (role_path / ROLE_FILE_META_SERVICES).write_text(
                 "asset:\n  enabled: true\n  shared: true\n",
                 encoding="utf-8",
             )
-            (role_path / "meta" / "schema.yml").write_text(
+            (role_path / ROLE_FILE_META_SCHEMA).write_text(
                 "credentials:\n"
                 "  api_key:\n"
                 "    description: API key\n"

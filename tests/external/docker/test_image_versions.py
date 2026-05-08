@@ -43,6 +43,7 @@ from utils.docker.version_updater import (
     version_flavor,
     version_key,
 )
+from utils.roles.mapping import ROLE_FILE_META_SERVICES
 
 from . import PROJECT_ROOT
 
@@ -58,12 +59,12 @@ def _collect_entries() -> list[dict]:
         if not ref.role.startswith("web-"):
             continue
         # Only services from meta/services.yml, not defaults/main.yml.
-        if ref.source_file != "meta/services.yml":
+        if ref.source_file != ROLE_FILE_META_SERVICES:
             continue
         # Only semver versions (pure or `<semver>-<flavor>`)
         if not is_semver(ref.version):
             continue
-        cfg_path = _ROLES_ROOT / ref.role / "meta" / "services.yml"
+        cfg_path = _ROLES_ROOT / ref.role / ROLE_FILE_META_SERVICES
         # Check nocheck suppression
         if ref.service in suppressed_services(cfg_path):
             continue

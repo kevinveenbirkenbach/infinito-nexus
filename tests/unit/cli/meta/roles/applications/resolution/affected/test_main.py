@@ -10,13 +10,18 @@ from unittest.mock import patch
 from cli.meta.roles.applications.resolution.affected import __main__ as affected_main
 from cli.meta.roles.applications.resolution.combined import repo_paths
 from utils.cache.yaml import dump_yaml
+from utils.roles.mapping import (
+    ROLE_FILE_META_MAIN,
+    ROLE_FILE_META_SERVICES,
+    ROLE_FILE_VARS_MAIN,
+)
 
 
 def _mk_app_role(root: Path, role: str, app_id: str) -> None:
     role_dir = root / "roles" / role
     (role_dir / "meta").mkdir(parents=True, exist_ok=True)
     (role_dir / "vars").mkdir(parents=True, exist_ok=True)
-    (role_dir / "vars" / "main.yml").write_text(
+    (role_dir / ROLE_FILE_VARS_MAIN).write_text(
         f"application_id: {app_id}\n", encoding="utf-8"
     )
 
@@ -28,14 +33,14 @@ def _mk_non_app_role(root: Path, role: str) -> None:
 
 def _write_run_after(root: Path, role: str, run_after: list[str]) -> None:
     dump_yaml(
-        root / "roles" / role / "meta" / "services.yml",
+        root / "roles" / role / ROLE_FILE_META_SERVICES,
         {role: {"run_after": run_after}},
     )
 
 
 def _write_dependencies(root: Path, role: str, deps: list[str]) -> None:
     dump_yaml(
-        root / "roles" / role / "meta" / "main.yml",
+        root / "roles" / role / ROLE_FILE_META_MAIN,
         {"dependencies": deps},
     )
 
@@ -87,7 +92,7 @@ class TestAffected(unittest.TestCase):
             _mk_app_role(root, "web-app-keycloak", "keycloak")
             _mk_app_role(root, "web-app-consumer", "consumer")
             dump_yaml(
-                root / "roles" / "web-app-consumer" / "meta" / "services.yml",
+                root / "roles" / "web-app-consumer" / ROLE_FILE_META_SERVICES,
                 {
                     "consumer": {},
                     "oidc": {"enabled": True, "shared": True, "flavor": ""},

@@ -31,6 +31,7 @@ from utils.cache.applications import get_application_defaults
 from utils.cache.files import iter_project_files_with_content
 from utils.cache.users import get_user_defaults
 from utils.cache.yaml import load_yaml_any
+from utils.roles.mapping import ROLE_FILE_META_SCHEMA, ROLE_FILE_VARS_MAIN
 
 from . import PROJECT_ROOT
 
@@ -220,7 +221,7 @@ def _build_role_for_app_map(roles_root: Path) -> dict[str, str]:
     for role_dir in roles_root.iterdir():
         if not role_dir.is_dir():
             continue
-        vars_file = role_dir / "vars" / "main.yml"
+        vars_file = role_dir / ROLE_FILE_VARS_MAIN
         if not vars_file.is_file():
             continue
         data = load_yaml_any(vars_file, default_if_missing={}) or {}
@@ -242,7 +243,7 @@ def _build_role_schemas(
         role = role_for_app.get(app_id)
         if role is None:
             continue
-        schema_file = roles_root / role / "meta" / "schema.yml"
+        schema_file = roles_root / role / ROLE_FILE_META_SCHEMA
         if not schema_file.is_file():
             continue
         schema = load_yaml_any(schema_file, default_if_missing={}) or {}

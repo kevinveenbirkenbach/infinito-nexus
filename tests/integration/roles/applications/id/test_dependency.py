@@ -2,6 +2,7 @@ import unittest
 from pathlib import Path
 
 from utils.cache.yaml import load_yaml_any
+from utils.roles.mapping import ROLE_FILE_META_MAIN, ROLE_FILE_VARS_MAIN
 
 from . import PROJECT_ROOT
 
@@ -19,7 +20,7 @@ class TestDependencyApplicationId(unittest.TestCase):
 
         # Helper to load application_id if present
         def load_app_id(role_path):
-            vars_file = Path(role_path) / "vars" / "main.yml"
+            vars_file = Path(role_path) / ROLE_FILE_VARS_MAIN
             if not vars_file.is_file():
                 return None
             data = load_yaml_any(str(vars_file)) or {}
@@ -31,7 +32,7 @@ class TestDependencyApplicationId(unittest.TestCase):
                 continue
 
             role_name = role_path.name
-            meta_file = role_path / "meta" / "main.yml"
+            meta_file = role_path / ROLE_FILE_META_MAIN
             if not meta_file.is_file():
                 continue
 

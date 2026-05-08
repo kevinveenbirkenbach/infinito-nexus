@@ -36,7 +36,11 @@ import unittest
 from pathlib import Path
 
 from utils.cache.yaml import load_yaml_any
-from utils.roles.mapping import ROLE_TYPE_APPLICATION
+from utils.roles.mapping import (
+    ROLE_FILE_META_SERVICES,
+    ROLE_FILE_META_VARIANTS,
+    ROLE_TYPE_APPLICATION,
+)
 from utils.roles.type import get_role_types
 
 from . import PROJECT_ROOT
@@ -102,7 +106,7 @@ class TestVariantsCoverage(unittest.TestCase):
             role_name = role_dir.name
             if ROLE_TYPE_APPLICATION not in get_role_types(role_dir):
                 continue
-            services_path = role_dir / "meta" / "services.yml"
+            services_path = role_dir / ROLE_FILE_META_SERVICES
             services = _load_yaml(services_path)
             if not isinstance(services, dict):
                 continue
@@ -111,7 +115,7 @@ class TestVariantsCoverage(unittest.TestCase):
             if not pairs:
                 continue
 
-            variants_path = role_dir / "meta" / "variants.yml"
+            variants_path = role_dir / ROLE_FILE_META_VARIANTS
             variants = _load_yaml(variants_path)
             if not isinstance(variants, list):
                 offenders.append(

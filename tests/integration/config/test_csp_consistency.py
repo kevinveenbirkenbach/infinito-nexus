@@ -5,6 +5,7 @@ from urllib.parse import urlparse
 import yaml
 
 from utils.cache.yaml import load_yaml_any
+from utils.roles.mapping import ROLE_FILE_META_SERVICES
 
 from . import PROJECT_ROOT
 
@@ -71,7 +72,7 @@ class TestCspConfigurationConsistency(unittest.TestCase):
             if not role_path.is_dir():
                 continue
 
-            cfg_file = role_path / "meta" / "services.yml"
+            cfg_file = role_path / ROLE_FILE_META_SERVICES
             if not cfg_file.exists():
                 continue
 

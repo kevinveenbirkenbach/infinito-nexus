@@ -2,6 +2,12 @@ from __future__ import annotations
 
 from pathlib import Path
 
+from utils.roles.mapping import (
+    ROLE_FILE_META_MAIN,
+    ROLE_FILE_META_SERVICES,
+    ROLE_FILE_VARS_MAIN,
+)
+
 from . import PROJECT_ROOT
 
 
@@ -14,16 +20,16 @@ def role_dir(role_name: str) -> Path:
 
 
 def role_meta_path(role_name: str) -> Path:
-    return role_dir(role_name) / "meta" / "main.yml"
+    return role_dir(role_name) / ROLE_FILE_META_MAIN
 
 
 def role_vars_path(role_name: str) -> Path:
-    return role_dir(role_name) / "vars" / "main.yml"
+    return role_dir(role_name) / ROLE_FILE_VARS_MAIN
 
 
 def role_services_path(role_name: str) -> Path:
     """Return the post-req-008 services manifest path."""
-    return role_dir(role_name) / "meta" / "services.yml"
+    return role_dir(role_name) / ROLE_FILE_META_SERVICES
 
 
 def role_config_path(role_name: str) -> Path:

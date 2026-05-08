@@ -6,6 +6,7 @@ from __future__ import annotations
 import unittest
 
 from utils.cache.yaml import load_yaml_any
+from utils.roles.mapping import ROLE_FILE_META_SERVER, ROLE_FILE_VARS_MAIN
 
 
 class TestComposeRolesHaveLocalNetwork(unittest.TestCase):
@@ -28,7 +29,7 @@ class TestComposeRolesHaveLocalNetwork(unittest.TestCase):
             if not compose_template.is_file():
                 continue
 
-            vars_file = role_path / "vars" / "main.yml"
+            vars_file = role_path / ROLE_FILE_VARS_MAIN
             if not vars_file.is_file():
                 continue
 
@@ -37,7 +38,7 @@ class TestComposeRolesHaveLocalNetwork(unittest.TestCase):
             if not application_id:
                 continue
 
-            server_file = role_path / "meta" / "server.yml"
+            server_file = role_path / ROLE_FILE_META_SERVER
             subnet = None
             if server_file.is_file():
                 server_data = load_yaml_any(str(server_file)) or {}

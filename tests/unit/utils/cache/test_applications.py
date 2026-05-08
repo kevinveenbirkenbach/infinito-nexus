@@ -19,6 +19,11 @@ from pathlib import Path
 
 from utils.cache import _reset_cache_for_tests
 from utils.cache import applications as cache_apps
+from utils.roles.mapping import (
+    ROLE_FILE_META_SERVICES,
+    ROLE_FILE_META_USERS,
+    ROLE_FILE_META_VARIANTS,
+)
 
 from . import PROJECT_ROOT
 
@@ -35,7 +40,7 @@ def _seed_minimal_roles(tmp: Path) -> Path:
     roles = tmp / "roles"
     role = roles / "web-app-foo"
     _write(
-        role / "meta" / "services.yml",
+        role / ROLE_FILE_META_SERVICES,
         """
         foo:
           image: foo
@@ -43,7 +48,7 @@ def _seed_minimal_roles(tmp: Path) -> Path:
         """,
     )
     _write(
-        role / "meta" / "users.yml",
+        role / ROLE_FILE_META_USERS,
         """
         administrator: {}
         """,
@@ -97,7 +102,7 @@ class TestGetVariants(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmp:
             roles = _seed_minimal_roles(Path(tmp))
             _write(
-                roles / "web-app-foo" / "meta" / "variants.yml",
+                roles / "web-app-foo" / ROLE_FILE_META_VARIANTS,
                 """
                 - {}
                 - services:

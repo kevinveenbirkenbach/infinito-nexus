@@ -39,6 +39,7 @@ from utils.cache.yaml import load_yaml
 from utils.roles.applications.services.registry import (
     build_service_registry_from_roles_dir,
 )
+from utils.roles.mapping import ROLE_FILE_META_SERVICES, ROLE_FILE_TASKS_MAIN
 
 from . import PROJECT_ROOT
 
@@ -55,7 +56,7 @@ def _consumer_activated_provider_roles(roles_dir: Path, registry: dict) -> set[s
     for role_path in sorted(roles_dir.iterdir()):
         if not role_path.is_dir():
             continue
-        services_file = role_path / "meta" / "services.yml"
+        services_file = role_path / ROLE_FILE_META_SERVICES
         if not services_file.is_file():
             continue
         data = load_yaml(services_file, default_if_missing={}) or {}
@@ -114,7 +115,7 @@ class TestSharedServiceRunOnceGuard(unittest.TestCase):
                 )
                 continue
 
-            main_yml = role_path / "tasks" / "main.yml"
+            main_yml = role_path / ROLE_FILE_TASKS_MAIN
             if not main_yml.is_file():
                 violations.append(
                     f"{role_name}: registered as a service provider but "

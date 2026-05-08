@@ -28,6 +28,7 @@ from utils.annotations.message import in_github_actions, warning
 from utils.cache.files import read_text
 from utils.cache.yaml import load_yaml_any
 from utils.roles.entity_name import get_entity_name
+from utils.roles.mapping import ROLE_FILE_META_SERVICES
 
 from . import PROJECT_ROOT
 
@@ -79,7 +80,7 @@ def _collect_findings(root: Path) -> list[MissingKeyFinding]:
     for role_dir in sorted(roles_dir.iterdir()):
         if not role_dir.is_dir():
             continue
-        config_path = role_dir / "meta" / "services.yml"
+        config_path = role_dir / ROLE_FILE_META_SERVICES
         if not config_path.is_file():
             continue
 

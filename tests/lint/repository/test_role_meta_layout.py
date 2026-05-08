@@ -26,6 +26,11 @@ import yaml
 
 from utils.cache.files import iter_project_files, read_text
 from utils.cache.yaml import load_yaml_str
+from utils.roles.mapping import (
+    ROLE_FILE_META_MAIN,
+    ROLE_FILE_META_SERVICES,
+    ROLE_FILE_META_VARIANTS,
+)
 
 from . import PROJECT_ROOT
 
@@ -155,7 +160,7 @@ class TestMetaMainHasNoRunAfterOrLifecycle(unittest.TestCase):
         for role_dir in sorted(ROLES_DIR.iterdir()):
             if not role_dir.is_dir():
                 continue
-            meta_main = role_dir / "meta" / "main.yml"
+            meta_main = role_dir / ROLE_FILE_META_MAIN
             data = _load_yaml(meta_main)
             if not isinstance(data, dict):
                 continue
@@ -184,7 +189,7 @@ class TestLifecycleAllowedValues(unittest.TestCase):
         for role_dir in sorted(ROLES_DIR.iterdir()):
             if not role_dir.is_dir():
                 continue
-            services = _load_yaml(role_dir / "meta" / "services.yml")
+            services = _load_yaml(role_dir / ROLE_FILE_META_SERVICES)
             if not isinstance(services, dict):
                 continue
             for entity_name, entity in services.items():
@@ -210,7 +215,7 @@ class TestPortShape(unittest.TestCase):
     def test_local_and_public_ports_are_category_keyed_maps(self):
         offenders: list[str] = []
         for role_dir in sorted(ROLES_DIR.iterdir()):
-            services = _load_yaml(role_dir / "meta" / "services.yml")
+            services = _load_yaml(role_dir / ROLE_FILE_META_SERVICES)
             if not isinstance(services, dict):
                 continue
             for entity_name, entity in services.items():
@@ -398,7 +403,7 @@ class TestNoComposeWrapperInVariants(unittest.TestCase):
         for role_dir in sorted(ROLES_DIR.iterdir()):
             if not role_dir.is_dir():
                 continue
-            variants_path = role_dir / "meta" / "variants.yml"
+            variants_path = role_dir / ROLE_FILE_META_VARIANTS
             if not variants_path.is_file():
                 continue
             try:
@@ -429,7 +434,7 @@ class TestRunAfterNotEmpty(unittest.TestCase):
     def test_no_empty_run_after_lists(self):
         offenders: list[str] = []
         for role_dir in sorted(ROLES_DIR.iterdir()):
-            services = _load_yaml(role_dir / "meta" / "services.yml")
+            services = _load_yaml(role_dir / ROLE_FILE_META_SERVICES)
             if not isinstance(services, dict):
                 continue
             for entity_name, entity in services.items():

@@ -5,6 +5,15 @@ from pathlib import Path
 from typing import Any
 
 from utils.roles.entity_name import get_entity_name
+from utils.roles.mapping import (
+    ROLE_FILE_META_MAIN,
+    ROLE_FILE_META_RBAC,
+    ROLE_FILE_META_SCHEMA,
+    ROLE_FILE_META_SERVER,
+    ROLE_FILE_META_SERVICES,
+    ROLE_FILE_META_USERS,
+    ROLE_FILE_META_VOLUMES,
+)
 
 from . import yaml_io
 from .credentials import convert_runtime_to_schema, detect_collision
@@ -33,7 +42,7 @@ def build(
     config = _load_mapping(role_dir / "config" / "main.yml", role_name)
     schema = _load_mapping(role_dir / "schema" / "main.yml", role_name)
     users_data = _load_mapping(role_dir / "users" / "main.yml", role_name)
-    meta_main = _load_mapping(role_dir / "meta" / "main.yml", role_name)
+    meta_main = _load_mapping(role_dir / ROLE_FILE_META_MAIN, role_name)
 
     _emit_credentials(role_dir, role_name, schema, config)
     _emit_users(role_dir, users_data)
@@ -49,9 +58,9 @@ def build(
     )
 
     if services:
-        yaml_io.dump(role_dir / "meta" / "services.yml", dict(services))
+        yaml_io.dump(role_dir / ROLE_FILE_META_SERVICES, dict(services))
     if galaxy_changed:
-        yaml_io.dump(role_dir / "meta" / "main.yml", meta_main)
+        yaml_io.dump(role_dir / ROLE_FILE_META_MAIN, meta_main)
 
     for legacy in ("config", "schema", "users"):
         yaml_io.empty_dir(role_dir / legacy)
@@ -81,13 +90,13 @@ def _emit_credentials(
     detect_collision(schema_creds, converted, role_name)
     merged = yaml_io.deep_merge(schema_creds, converted)
     if merged:
-        yaml_io.dump(role_dir / "meta" / "schema.yml", {"credentials": merged})
+        yaml_io.dump(role_dir / ROLE_FILE_META_SCHEMA, {"credentials": merged})
 
 
 def _emit_users(role_dir: Path, users_data: dict[str, Any]) -> None:
     users_block = users_data.get("users")
     if isinstance(users_block, dict) and users_block:
-        yaml_io.dump(role_dir / "meta" / "users.yml", users_block)
+        yaml_io.dump(role_dir / ROLE_FILE_META_USERS, users_block)
 
 
 def _emit_server(
@@ -100,10 +109,10 @@ def _emit_server(
         payload = dict(server_block)
         if networks_for_role:
             payload["networks"] = {"local": networks_for_role}
-        yaml_io.dump(role_dir / "meta" / "server.yml", payload)
+        yaml_io.dump(role_dir / ROLE_FILE_META_SERVER, payload)
     elif networks_for_role:
         yaml_io.dump(
-            role_dir / "meta" / "server.yml",
+            role_dir / ROLE_FILE_META_SERVER,
             {"networks": {"local": networks_for_role}},
         )
 
@@ -111,7 +120,7 @@ def _emit_server(
 def _emit_rbac(role_dir: Path, config: dict[str, Any]) -> None:
     rbac_block = config.get("rbac")
     if isinstance(rbac_block, dict) and rbac_block:
-        yaml_io.dump(role_dir / "meta" / "rbac.yml", rbac_block)
+        yaml_io.dump(role_dir / ROLE_FILE_META_RBAC, rbac_block)
 
 
 def _emit_volumes(role_dir: Path, config: dict[str, Any]) -> None:
@@ -120,7 +129,7 @@ def _emit_volumes(role_dir: Path, config: dict[str, Any]) -> None:
         return
     volumes_block = compose.get("volumes")
     if isinstance(volumes_block, dict) and volumes_block:
-        yaml_io.dump(role_dir / "meta" / "volumes.yml", volumes_block)
+        yaml_io.dump(role_dir / ROLE_FILE_META_VOLUMES, volumes_block)
 
 
 def _build_services(

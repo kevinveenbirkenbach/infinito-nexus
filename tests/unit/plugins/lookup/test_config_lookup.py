@@ -12,23 +12,28 @@ from plugins.lookup.config import LookupModule
 from utils.cache import _reset_cache_for_tests
 from utils.cache.yaml import dump_yaml_str
 from utils.roles.applications.config import AppConfigKeyError, ConfigEntryNotSetError
+from utils.roles.mapping import (
+    ROLE_FILE_META_SCHEMA,
+    ROLE_FILE_META_SERVICES,
+    ROLE_FILE_META_USERS,
+)
 
 
 def _write_schema(base_dir: Path, application_id: str, schema: dict) -> None:
-    schema_path = base_dir / "roles" / application_id / "meta" / "schema.yml"
+    schema_path = base_dir / "roles" / application_id / ROLE_FILE_META_SCHEMA
     schema_path.parent.mkdir(parents=True, exist_ok=True)
     schema_path.write_text(dump_yaml_str(schema), encoding="utf-8")
 
 
 def _write_config(base_dir: Path, application_id: str, config: dict) -> None:
-    config_path = base_dir / "roles" / application_id / "meta" / "services.yml"
+    config_path = base_dir / "roles" / application_id / ROLE_FILE_META_SERVICES
     config_path.parent.mkdir(parents=True, exist_ok=True)
     config_path.write_text(dump_yaml_str(config), encoding="utf-8")
 
 
 def _write_users(base_dir: Path, application_id: str, users: dict) -> None:
     """Write meta/users.yml — file root IS the users map (req-008)."""
-    users_path = base_dir / "roles" / application_id / "meta" / "users.yml"
+    users_path = base_dir / "roles" / application_id / ROLE_FILE_META_USERS
     users_path.parent.mkdir(parents=True, exist_ok=True)
     users_path.write_text(dump_yaml_str(users), encoding="utf-8")
 

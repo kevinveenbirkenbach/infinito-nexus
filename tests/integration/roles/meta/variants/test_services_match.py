@@ -28,6 +28,7 @@ import unittest
 from pathlib import Path
 
 from utils.cache.yaml import load_yaml_any
+from utils.roles.mapping import ROLE_FILE_META_SERVICES, ROLE_FILE_META_VARIANTS
 
 from . import PROJECT_ROOT
 
@@ -49,12 +50,12 @@ class TestVariantsServicesMatch(unittest.TestCase):
 
         for role_dir in sorted(p for p in ROLES_DIR.iterdir() if p.is_dir()):
             role_name = role_dir.name
-            services = _load_yaml(role_dir / "meta" / "services.yml")
+            services = _load_yaml(role_dir / ROLE_FILE_META_SERVICES)
             if not isinstance(services, dict):
                 continue
             declared_keys = {k for k in services if isinstance(k, str)}
 
-            variants_raw = _load_yaml(role_dir / "meta" / "variants.yml")
+            variants_raw = _load_yaml(role_dir / ROLE_FILE_META_VARIANTS)
             if not isinstance(variants_raw, list):
                 continue
 

@@ -13,6 +13,7 @@ from utils.roles.applications.services.registry import (
     is_explicit_truth,
     resolve_service_dependency_roles_from_config,
 )
+from utils.roles.mapping import ROLE_FILE_META_SCHEMA, ROLE_FILE_VARS_MAIN
 
 # Marker fields that identify a credential schema leaf (per req-008). Any
 # `default:` value is preserved verbatim; algorithm defaults to `plain` when
@@ -75,7 +76,7 @@ class InventoryManager:
 
     def load_application_id(self, role_path: Path) -> str:
         """Load the application ID from the role's vars/main.yml file."""
-        vars_file = role_path / "vars" / "main.yml"
+        vars_file = role_path / ROLE_FILE_VARS_MAIN
         data = YamlHandler.load_yaml(vars_file) or {}
         app_id = data.get("application_id")
         if not app_id:
@@ -85,7 +86,7 @@ class InventoryManager:
 
     @staticmethod
     def _load_role_schema_by_path(role_path: Path) -> dict[str, Any]:
-        schema_path = role_path / "meta" / "schema.yml"
+        schema_path = role_path / ROLE_FILE_META_SCHEMA
         if not schema_path.exists():
             return {}
         return YamlHandler.load_yaml(schema_path) or {}

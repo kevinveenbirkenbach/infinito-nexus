@@ -2,6 +2,7 @@ import glob
 import unittest
 
 from utils.cache.yaml import load_yaml_any
+from utils.roles.mapping import ROLE_FILE_VARS_MAIN
 
 from . import PROJECT_ROOT
 
@@ -12,7 +13,7 @@ def find_application_ids():
     Returns a dict mapping application_id to list of file paths where it appears.
     """
     ids = {}
-    pattern = str(PROJECT_ROOT / "roles" / "*" / "vars" / "main.yml")
+    pattern = str(PROJECT_ROOT / "roles" / "*" / ROLE_FILE_VARS_MAIN)
 
     for file_path in glob.glob(pattern):  # nocheck: project-walk
         data = load_yaml_any(file_path) or {}

@@ -5,6 +5,8 @@ import re
 from collections.abc import Iterable
 from pathlib import Path
 
+from utils.roles.mapping import ROLE_FILE_META_MAIN, ROLE_FILE_META_SERVICES
+
 logger = logging.getLogger(__name__)
 
 
@@ -226,7 +228,7 @@ class RoleDependencyResolver:
 
     def _extract_meta_dependencies(self, role_path: str) -> set[str]:
         deps: set[str] = set()
-        meta_main = str(Path(role_path) / "meta" / "main.yml")
+        meta_main = str(Path(role_path) / ROLE_FILE_META_MAIN)
         if not Path(meta_main).is_file():
             return deps
         try:
@@ -257,7 +259,9 @@ class RoleDependencyResolver:
             entries = get_role_run_after(role_path)
         except Exception:
             logger.exception(
-                "Failed to parse run_after from %s/meta/services.yml", role_path
+                "Failed to parse run_after from %s/%s",
+                role_path,
+                ROLE_FILE_META_SERVICES,
             )
             return set()
         return {dep for dep in entries if dep}

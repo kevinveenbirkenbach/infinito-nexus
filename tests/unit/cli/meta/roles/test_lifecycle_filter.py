@@ -6,6 +6,7 @@ from pathlib import Path
 from tempfile import TemporaryDirectory
 
 from cli.meta.roles.lifecycle_filter.__main__ import filter_roles
+from utils.roles.mapping import ROLE_FILE_META_SERVICES
 from utils.roles.meta_lookup import get_role_lifecycle
 
 
@@ -44,7 +45,7 @@ class TestLifecycleFilter(unittest.TestCase):
         with TemporaryDirectory() as td:
             role_dir = Path(td) / "role-a"
             (role_dir / "meta").mkdir(parents=True)
-            (role_dir / "meta" / "services.yml").write_text(
+            (role_dir / ROLE_FILE_META_SERVICES).write_text(
                 'role-a:\n  lifecycle: "  StAbLe  "\n', encoding="utf-8"
             )
             self.assertEqual(get_role_lifecycle(role_dir, role_name="role-a"), "stable")
@@ -53,7 +54,7 @@ class TestLifecycleFilter(unittest.TestCase):
         with TemporaryDirectory() as td:
             role_dir = Path(td) / "role-a"
             (role_dir / "meta").mkdir(parents=True)
-            (role_dir / "meta" / "services.yml").write_text(
+            (role_dir / ROLE_FILE_META_SERVICES).write_text(
                 "role-a:\n  lifecycle:\n    stage: RC\n", encoding="utf-8"
             )
             self.assertEqual(get_role_lifecycle(role_dir, role_name="role-a"), "rc")

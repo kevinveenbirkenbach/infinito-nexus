@@ -8,6 +8,11 @@ from cli.meta.roles.applications.resolution.services.resolver import (
     ServicesResolver,
     resolve_direct_service_roles_from_config,
 )
+from utils.roles.mapping import (
+    ROLE_FILE_META_MAIN,
+    ROLE_FILE_META_SERVICES,
+    ROLE_FILE_VARS_MAIN,
+)
 
 from . import PROJECT_ROOT
 
@@ -69,13 +74,13 @@ class TestServicesResolverTransitive(unittest.TestCase):
         (role_dir / "meta").mkdir(parents=True, exist_ok=True)
         (role_dir / "vars").mkdir(parents=True, exist_ok=True)
         # Per req-008 the file root IS the services map (no compose envelope).
-        (role_dir / "meta" / "services.yml").write_text(config, encoding="utf-8")
-        (role_dir / "vars" / "main.yml").write_text(
+        (role_dir / ROLE_FILE_META_SERVICES).write_text(config, encoding="utf-8")
+        (role_dir / ROLE_FILE_VARS_MAIN).write_text(
             f"application_id: {role}\n",
             encoding="utf-8",
         )
         if meta is not None:
-            (role_dir / "meta" / "main.yml").write_text(meta, encoding="utf-8")
+            (role_dir / ROLE_FILE_META_MAIN).write_text(meta, encoding="utf-8")
 
     def test_transitive_bfs_uses_role_local_discovery(self) -> None:
         with tempfile.TemporaryDirectory() as td:

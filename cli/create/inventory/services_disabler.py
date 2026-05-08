@@ -12,6 +12,7 @@ from utils.roles.applications.services.registry import (
     canonical_service_key,
     equivalent_service_keys,
 )
+from utils.roles.mapping import ROLE_FILE_META_SERVICES
 
 
 def _load_yaml_mapping_tolerant(path: Path) -> dict:
@@ -59,7 +60,7 @@ def find_roles_with_service(service_name: str, roles_dir: Path) -> set[str]:
     for role_dir in sorted(roles_dir.iterdir()):
         if not role_dir.is_dir():
             continue
-        services_file = role_dir / "meta" / "services.yml"
+        services_file = role_dir / ROLE_FILE_META_SERVICES
         if not services_file.exists():
             continue
         services = _load_yaml_mapping_tolerant(services_file)

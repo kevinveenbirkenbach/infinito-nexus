@@ -7,6 +7,7 @@ from utils.cache.yaml import load_yaml_str
 from utils.roles.applications.services.registry import (
     build_service_registry_from_roles_dir,
 )
+from utils.roles.mapping import ROLE_FILE_TASKS_MAIN
 
 from . import PROJECT_ROOT
 
@@ -66,7 +67,7 @@ class TestServiceCoreFirstTaskRunOnce(unittest.TestCase):
         return self.project_root / "roles" / role / "tasks" / "01_core.yml"
 
     def _main_path(self, role):
-        return self.project_root / "roles" / role / "tasks" / "main.yml"
+        return self.project_root / "roles" / role / ROLE_FILE_TASKS_MAIN
 
     def test_01_core_exists(self):
         missing = []

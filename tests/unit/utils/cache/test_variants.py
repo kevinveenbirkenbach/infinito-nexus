@@ -23,6 +23,11 @@ from utils.cache.applications import (
 from utils.cache.applications import (
     _load_variants_overrides as _load_yaml_variant_list,
 )
+from utils.roles.mapping import (
+    ROLE_FILE_META_SERVER,
+    ROLE_FILE_META_SERVICES,
+    ROLE_FILE_META_VARIANTS,
+)
 
 
 def _write_role(
@@ -43,11 +48,11 @@ def _write_role(
     role = roles_dir / name
     (role / "meta").mkdir(parents=True, exist_ok=True)
     if config is not None:
-        (role / "meta" / "services.yml").write_text(textwrap.dedent(config))
+        (role / ROLE_FILE_META_SERVICES).write_text(textwrap.dedent(config))
     if server is not None:
-        (role / "meta" / "server.yml").write_text(textwrap.dedent(server))
+        (role / ROLE_FILE_META_SERVER).write_text(textwrap.dedent(server))
     if meta is not None:
-        (role / "meta" / "variants.yml").write_text(textwrap.dedent(meta))
+        (role / ROLE_FILE_META_VARIANTS).write_text(textwrap.dedent(meta))
 
 
 class TestLoadYamlVariantList(unittest.TestCase):
@@ -114,7 +119,7 @@ class TestApplicationVariants(unittest.TestCase):
         # assembled payload (top-level keys: server, services, ...).
         role = self.roles_dir / "web-app-bar"
         (role / "meta").mkdir(parents=True, exist_ok=True)
-        (role / "meta" / "services.yml").write_text(
+        (role / ROLE_FILE_META_SERVICES).write_text(
             textwrap.dedent(
                 """
                 bar:
@@ -122,7 +127,7 @@ class TestApplicationVariants(unittest.TestCase):
                 """
             )
         )
-        (role / "meta" / "server.yml").write_text(
+        (role / ROLE_FILE_META_SERVER).write_text(
             textwrap.dedent(
                 """
                 domains:
@@ -130,7 +135,7 @@ class TestApplicationVariants(unittest.TestCase):
                 """
             )
         )
-        (role / "meta" / "variants.yml").write_text(
+        (role / ROLE_FILE_META_VARIANTS).write_text(
             textwrap.dedent(
                 """
                 - {}

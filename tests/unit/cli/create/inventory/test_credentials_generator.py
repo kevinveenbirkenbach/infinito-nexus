@@ -6,6 +6,7 @@ from unittest.mock import patch
 from ruamel.yaml import YAML
 
 from cli.create.inventory.credentials_generator import generate_credentials_for_roles
+from utils.roles.mapping import ROLE_FILE_META_SCHEMA
 
 
 class TestCredentialsGenerator(unittest.TestCase):
@@ -24,7 +25,7 @@ class TestCredentialsGenerator(unittest.TestCase):
             # Create a fake role path that resolver returns
             role_path = roles_dir / "web-app-nextcloud"
             (role_path / "meta").mkdir(parents=True)
-            (role_path / "meta" / "schema.yml").write_text("x: 1\n", encoding="utf-8")
+            (role_path / ROLE_FILE_META_SCHEMA).write_text("x: 1\n", encoding="utf-8")
 
             host_vars_file = tmp / "host_vars.yml"
             host_vars_file.write_text("", encoding="utf-8")
@@ -139,7 +140,7 @@ ansible_become_password: !vault |
 
             role_path = roles_dir / "web-app-taiga"
             (role_path / "meta").mkdir(parents=True)
-            (role_path / "meta" / "schema.yml").write_text("x: 1\n", encoding="utf-8")
+            (role_path / ROLE_FILE_META_SCHEMA).write_text("x: 1\n", encoding="utf-8")
 
             host_vars_file = tmp / "host_vars.yml"
             host_vars_file.write_text(

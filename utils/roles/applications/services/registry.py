@@ -6,6 +6,7 @@ from typing import Any
 
 from utils.cache.yaml import load_yaml_any
 from utils.roles.entity_name import get_entity_name
+from utils.roles.mapping import ROLE_FILE_VARS_MAIN
 from utils.roles.meta_lookup import get_role_run_after
 from utils.roles.validation.invokable import types_from_group_names
 
@@ -80,7 +81,7 @@ def read_yaml_file(path: Path) -> dict[str, Any]:
 def load_applications_from_roles_dir(roles_dir: Path) -> dict[str, dict[str, Any]]:
     applications: dict[str, dict[str, Any]] = {}
     for role_dir in sorted(p for p in roles_dir.iterdir() if p.is_dir()):
-        vars_file = role_dir / "vars" / "main.yml"
+        vars_file = role_dir / ROLE_FILE_VARS_MAIN
         if not vars_file.is_file():
             continue
         vars_data = read_yaml_file(vars_file)

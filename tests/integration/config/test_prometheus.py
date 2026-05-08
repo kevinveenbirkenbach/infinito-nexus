@@ -6,6 +6,7 @@ import yaml
 
 from utils.cache.yaml import load_yaml_any
 from utils.roles.applications.services.registry import is_explicit_truth
+from utils.roles.mapping import ROLE_FILE_META_SERVICES
 
 PROMETHEUS_APP_ID = "web-app-prometheus"
 
@@ -29,7 +30,7 @@ class TestPrometheusServicePresence(unittest.TestCase):
 
     def _web_role_configs(self):
         roles_dir = Path(__file__).resolve().parent.parent.parent.parent / "roles"
-        pattern = str(roles_dir / "*" / "meta" / "services.yml")
+        pattern = str(roles_dir / "*" / ROLE_FILE_META_SERVICES)
         return [
             p
             for p in sorted(glob.glob(pattern))  # nocheck: project-walk
@@ -92,7 +93,7 @@ class TestPrometheusServicePresence(unittest.TestCase):
     def test_prometheus_role_has_image_config(self):
         """web-app-prometheus must define image, version, and name for its service."""
         roles_dir = Path(__file__).resolve().parent.parent.parent.parent / "roles"
-        config_path = roles_dir / PROMETHEUS_APP_ID / "meta" / "services.yml"
+        config_path = roles_dir / PROMETHEUS_APP_ID / ROLE_FILE_META_SERVICES
 
         self.assertTrue(config_path.exists(), f"Missing: {config_path}")
 
@@ -469,7 +470,7 @@ class TestPrometheusNginxEndpoints(unittest.TestCase):
         # Mailu is excluded — it is an email server, not a webhook channel.
         for app_id in ("web-app-mattermost", "web-app-matrix"):
             with self.subTest(app_id=app_id):
-                cfg = _load_config(str(roles_dir / app_id / "meta" / "services.yml"))
+                cfg = _load_config(str(roles_dir / app_id / ROLE_FILE_META_SERVICES))
                 prometheus_cfg = cfg.get("prometheus", {})
                 self.assertTrue(
                     (prometheus_cfg.get("communication") or {}).get("channel") is True,
@@ -751,7 +752,7 @@ class TestNativeAppMetrics(unittest.TestCase):
         roles_dir = Path(__file__).resolve().parent.parent.parent.parent / "roles"
         for app_id in ("web-app-gitea", "web-app-mattermost", "web-app-matrix"):
             with self.subTest(app_id=app_id):
-                cfg = _load_config(str(roles_dir / app_id / "meta" / "services.yml"))
+                cfg = _load_config(str(roles_dir / app_id / ROLE_FILE_META_SERVICES))
                 native_metrics_cfg = cfg.get("prometheus", {}).get("native_metrics", {})
                 self.assertTrue(
                     bool(native_metrics_cfg),

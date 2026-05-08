@@ -5,6 +5,7 @@ from pathlib import Path
 from ansible.errors import AnsibleFilterError, AnsibleUndefinedVariable
 
 from utils.cache.yaml import load_yaml_any
+from utils.roles.mapping import ROLE_FILE_META_SCHEMA
 
 try:
     from ansible.utils.unsafe_proxy import AnsibleUndefined
@@ -36,7 +37,7 @@ def get(
     skip_missing_app=False,
 ):
     # Path to the schema file for this application
-    schema_path = str(Path("roles") / application_id / "meta" / "schema.yml")
+    schema_path = str(Path("roles") / application_id / ROLE_FILE_META_SCHEMA)
 
     def schema_defines(path):
         if not Path(schema_path).is_file():

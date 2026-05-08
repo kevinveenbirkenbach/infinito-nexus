@@ -4,6 +4,7 @@ from pathlib import Path
 import yaml
 
 from utils.cache.yaml import load_yaml_any
+from utils.roles.mapping import ROLE_FILE_META_SERVICES, ROLE_FILE_VARS_MAIN
 
 
 class TestDockerRoleServicesConfiguration(unittest.TestCase):
@@ -19,13 +20,13 @@ class TestDockerRoleServicesConfiguration(unittest.TestCase):
             if not (role_path.is_dir() and role_path.name.startswith("web-app-")):
                 continue
 
-            services_file = role_path / "meta" / "services.yml"
+            services_file = role_path / ROLE_FILE_META_SERVICES
             if not services_file.exists():
                 continue  # No services manifest to check
 
             try:
                 services = load_yaml_any(services_file) or {}
-                main_file = role_path / "vars" / "main.yml"
+                main_file = role_path / ROLE_FILE_VARS_MAIN
                 load_yaml_any(main_file) or {}
             except yaml.YAMLError as e:
                 errors.append(f"{role_path.name}: YAML parse error: {e}")

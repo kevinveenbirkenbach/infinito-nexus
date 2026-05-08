@@ -7,6 +7,7 @@ from pathlib import Path
 from cli.mirror.providers import GHCRProvider
 from utils.cache.yaml import dump_yaml_str
 from utils.docker.image.discovery import iter_role_images
+from utils.roles.mapping import ROLE_FILE_DEFAULTS_MAIN
 
 
 def main() -> int:
@@ -23,7 +24,7 @@ def main() -> int:
     images: dict = {}
 
     for img in iter_role_images(repo_root):
-        if img.source_file == "defaults/main.yml":
+        if img.source_file == ROLE_FILE_DEFAULTS_MAIN:
             role_images = images.setdefault(img.role, {})
             role_images[str(img.service)] = {
                 "image": provider.image_base(img),

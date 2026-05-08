@@ -5,6 +5,7 @@ from dataclasses import dataclass
 from pathlib import Path
 
 from utils.cache.yaml import load_yaml_any as _load_yaml_cached
+from utils.roles.mapping import ROLE_FILE_DEFAULTS_MAIN, ROLE_FILE_META_SERVICES
 
 DOCKER_HUB_PREFIXES = (
     "docker.io/",
@@ -43,7 +44,9 @@ class ImageRef:
     registry: str = (
         "docker.io"  # source registry hostname, e.g. docker.io, quay.io, ghcr.io
     )
-    source_file: str = "meta/services.yml"  # "meta/services.yml" or "defaults/main.yml"
+    source_file: str = (
+        ROLE_FILE_META_SERVICES  # ROLE_FILE_META_SERVICES or ROLE_FILE_DEFAULTS_MAIN
+    )
 
 
 def load_yaml(path: Path) -> dict:
@@ -183,7 +186,7 @@ def iter_role_images(repo_root: Path) -> Iterable[ImageRef]:
 
     # 1. Images from meta/services.yml. The file root IS the services map
     # (per req-008 file-root convention) keyed by <entity_name>.
-    for services_file in roles_dir.glob("**/meta/services.yml"):
+    for services_file in roles_dir.glob(f"**/{ROLE_FILE_META_SERVICES}"):
         role_name = services_file.parent.parent.name
         services = load_yaml(services_file)
 
@@ -210,11 +213,11 @@ def iter_role_images(repo_root: Path) -> Iterable[ImageRef]:
                 version=version,
                 source=image_source(image, version),
                 registry=_detect_registry(image),
-                source_file="meta/services.yml",
+                source_file=ROLE_FILE_META_SERVICES,
             )
 
     # 2. Images from defaults/main.yml → images.<name>.{image,version}
-    for vars_file in roles_dir.glob("**/defaults/main.yml"):
+    for vars_file in roles_dir.glob(f"**/{ROLE_FILE_DEFAULTS_MAIN}"):
         role_name = vars_file.parent.parent.name
         data = load_yaml(vars_file)
 
@@ -242,5 +245,5 @@ def iter_role_images(repo_root: Path) -> Iterable[ImageRef]:
                 version=version,
                 source=image_source(image, version),
                 registry=_detect_registry(image),
-                source_file="defaults/main.yml",
+                source_file=ROLE_FILE_DEFAULTS_MAIN,
             )

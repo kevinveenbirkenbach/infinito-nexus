@@ -12,10 +12,11 @@ from plugins.lookup.email import LookupModule
 from utils.cache import _reset_cache_for_tests
 from utils.cache import users as cache_users
 from utils.cache.yaml import dump_yaml_str
+from utils.roles.mapping import ROLE_FILE_META_SERVICES
 
 
 def _write_role_config(base_dir: Path, role_name: str, payload: dict) -> None:
-    config_path = base_dir / "roles" / role_name / "meta" / "services.yml"
+    config_path = base_dir / "roles" / role_name / ROLE_FILE_META_SERVICES
     config_path.parent.mkdir(parents=True, exist_ok=True)
     config_path.write_text(dump_yaml_str(payload), encoding="utf-8")
 

@@ -4,6 +4,7 @@ import unittest
 from pathlib import Path
 
 from cli.build import tree
+from utils.roles.mapping import ROLE_FILE_META_MAIN
 
 
 class TestTreeMain(unittest.TestCase):
@@ -14,7 +15,7 @@ class TestTreeMain(unittest.TestCase):
         self.role_path = str(Path(self.temp_dir) / self.role_name)
         Path(str(Path(self.role_path) / "meta")).mkdir(parents=True)
 
-        meta_path = str(Path(self.role_path) / "meta" / "main.yml")
+        meta_path = str(Path(self.role_path) / ROLE_FILE_META_MAIN)
         with Path(meta_path).open("w") as f:
             f.write("galaxy_info:\n  author: test\n  run_after: []\ndependencies: []\n")
 

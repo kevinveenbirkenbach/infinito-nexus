@@ -6,6 +6,7 @@ import argparse
 from collections import defaultdict, deque
 
 from utils.cache.yaml import load_yaml
+from utils.roles.mapping import ROLE_FILE_META_MAIN, ROLE_FILE_VARS_MAIN
 
 def find_roles(roles_dir, prefixes=None):
     """
@@ -18,7 +19,7 @@ def find_roles(roles_dir, prefixes=None):
             if not any(entry.startswith(pref) for pref in prefixes):
                 continue
         path = os.path.join(roles_dir, entry)
-        meta_file = os.path.join(path, 'meta', 'main.yml')
+        meta_file = os.path.join(path, ROLE_FILE_META_MAIN)
         if os.path.isdir(path) and os.path.isfile(meta_file):
             yield path, meta_file
 
@@ -35,7 +36,7 @@ def load_run_after(meta_file):
 
 def load_application_id(role_path):
     """Load the application_id from the vars/main.yml of the role."""
-    vars_file = os.path.join(role_path, 'vars', 'main.yml')
+    vars_file = os.path.join(role_path, ROLE_FILE_VARS_MAIN)
     if os.path.exists(vars_file):
         data = load_yaml(vars_file)
         return data.get('application_id')
@@ -173,7 +174,7 @@ def gen_condi_role_incl(roles_dir, prefixes=None):
         role = roles[role_name]
 
         if role.get('application_id') is None:
-            vars_file = os.path.join(role['path'], 'vars', 'main.yml')
+            vars_file = os.path.join(role['path'], ROLE_FILE_VARS_MAIN)
             raise ValueError(f"'application_id' missing in {vars_file}")
 
         app_id = role['application_id']

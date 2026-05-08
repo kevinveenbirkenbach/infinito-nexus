@@ -51,6 +51,7 @@ import yaml
 
 from utils.cache.files import iter_project_files
 from utils.cache.yaml import load_yaml_any
+from utils.roles.mapping import ROLE_FILE_META_RBAC
 
 from . import PROJECT_ROOT
 
@@ -137,7 +138,7 @@ def _declared_roles(application_id):
     if not Path(role_dir).is_dir():
         return None
     declared = {IMPLICIT_ADMIN_ROLE}
-    rbac_yml = str(Path(role_dir) / "meta" / "rbac.yml")
+    rbac_yml = str(Path(role_dir) / ROLE_FILE_META_RBAC)
     if Path(rbac_yml).is_file():
         try:
             data = load_yaml_any(rbac_yml) or {}

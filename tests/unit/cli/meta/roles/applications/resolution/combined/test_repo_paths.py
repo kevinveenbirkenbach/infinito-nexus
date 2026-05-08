@@ -5,6 +5,11 @@ from pathlib import Path
 from unittest.mock import patch
 
 from cli.meta.roles.applications.resolution.combined import repo_paths
+from utils.roles.mapping import (
+    ROLE_FILE_META_MAIN,
+    ROLE_FILE_META_SERVICES,
+    ROLE_FILE_VARS_MAIN,
+)
 
 
 class TestCombinedRepoPaths(unittest.TestCase):
@@ -18,15 +23,15 @@ class TestCombinedRepoPaths(unittest.TestCase):
             )
             self.assertEqual(
                 repo_paths.role_meta_path("web-app-x"),
-                root / "roles" / "web-app-x" / "meta" / "main.yml",
+                root / "roles" / "web-app-x" / ROLE_FILE_META_MAIN,
             )
             self.assertEqual(
                 repo_paths.role_vars_path("web-app-x"),
-                root / "roles" / "web-app-x" / "vars" / "main.yml",
+                root / "roles" / "web-app-x" / ROLE_FILE_VARS_MAIN,
             )
             self.assertEqual(
                 repo_paths.role_config_path("web-app-x"),
-                root / "roles" / "web-app-x" / "meta" / "services.yml",
+                root / "roles" / "web-app-x" / ROLE_FILE_META_SERVICES,
             )
 
 

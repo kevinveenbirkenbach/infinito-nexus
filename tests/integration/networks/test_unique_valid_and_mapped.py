@@ -8,6 +8,7 @@ import ipaddress
 import unittest
 
 from utils.cache.yaml import load_yaml_any
+from utils.roles.mapping import ROLE_FILE_META_SERVER
 
 
 class TestNetworksUniqueValidAndMapped(unittest.TestCase):
@@ -22,7 +23,7 @@ class TestNetworksUniqueValidAndMapped(unittest.TestCase):
         for role_path in sorted(cls.roles_dir.iterdir()):
             if not role_path.is_dir():
                 continue
-            server_file = role_path / "meta" / "server.yml"
+            server_file = role_path / ROLE_FILE_META_SERVER
             if not server_file.is_file():
                 continue
             server_data = load_yaml_any(str(server_file)) or {}

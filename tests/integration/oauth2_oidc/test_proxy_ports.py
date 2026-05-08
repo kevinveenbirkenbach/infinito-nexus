@@ -34,6 +34,7 @@ import unittest
 from pathlib import Path
 
 from utils.cache.yaml import load_yaml
+from utils.roles.mapping import ROLE_FILE_META_SERVICES
 
 ROOT = Path(__file__).resolve().parent.parent.parent.parent
 ROLES_DIR = ROOT / "roles"
@@ -61,7 +62,7 @@ class TestOAuth2ProxyPorts(unittest.TestCase):
         for role_path in sorted(ROLES_DIR.iterdir()):
             if not role_path.is_dir():
                 continue
-            services_file = role_path / "meta" / "services.yml"
+            services_file = role_path / ROLE_FILE_META_SERVICES
             if not services_file.exists():
                 continue
 

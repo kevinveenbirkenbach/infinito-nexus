@@ -4,6 +4,7 @@ from pathlib import Path
 import yaml
 
 from utils.cache.yaml import load_yaml_str
+from utils.roles.mapping import ROLE_FILE_META_SERVICES
 
 ROLES_DIR = Path(__file__).resolve().parent.parent.parent.parent / "roles"
 
@@ -13,7 +14,7 @@ class TestOidcOauth2MutualExclusion(unittest.TestCase):
         failures = []
 
         for role_path in sorted(ROLES_DIR.iterdir()):
-            config_file = role_path / "meta" / "services.yml"
+            config_file = role_path / ROLE_FILE_META_SERVICES
             if not config_file.exists():
                 continue
 

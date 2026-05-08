@@ -7,6 +7,7 @@ from unittest.mock import patch
 
 from utils.cache.yaml import load_yaml_str
 from utils.docker.image.discovery import iter_role_images
+from utils.roles.mapping import ROLE_FILE_DEFAULTS_MAIN, ROLE_FILE_META_SERVICES
 
 
 def _make_fs(files: dict[str, str]) -> dict[Path, str]:
@@ -36,7 +37,7 @@ class TestIterRoleImagesVarsImages(unittest.TestCase):
     def test_mcr_playwright_image(self):
         refs = self._run(
             {
-                "roles/test-e2e-playwright/defaults/main.yml": """
+                f"roles/test-e2e-playwright/{ROLE_FILE_DEFAULTS_MAIN}": """
                 images:
                   playwright:
                     image: mcr.microsoft.com/playwright
@@ -52,12 +53,12 @@ class TestIterRoleImagesVarsImages(unittest.TestCase):
         self.assertEqual(ref.version, "v1.58.2-noble")
         self.assertEqual(ref.registry, "mcr.microsoft.com")
         self.assertEqual(ref.source, "mcr.microsoft.com/playwright:v1.58.2-noble")
-        self.assertEqual(ref.source_file, "defaults/main.yml")
+        self.assertEqual(ref.source_file, ROLE_FILE_DEFAULTS_MAIN)
 
     def test_ghcr_image_strips_registry_from_name(self):
         refs = self._run(
             {
-                "roles/web-app-matrix/defaults/main.yml": """
+                f"roles/web-app-matrix/{ROLE_FILE_DEFAULTS_MAIN}": """
                 images:
                   matrix-chatgpt-bot:
                     image: ghcr.io/matrixgpt/matrix-chatgpt-bot
@@ -70,12 +71,12 @@ class TestIterRoleImagesVarsImages(unittest.TestCase):
         self.assertEqual(ref.name, "matrixgpt/matrix-chatgpt-bot")
         self.assertEqual(ref.registry, "ghcr.io")
         self.assertEqual(ref.source, "ghcr.io/matrixgpt/matrix-chatgpt-bot:latest")
-        self.assertEqual(ref.source_file, "defaults/main.yml")
+        self.assertEqual(ref.source_file, ROLE_FILE_DEFAULTS_MAIN)
 
     def test_missing_image_or_version_is_skipped(self):
         refs = self._run(
             {
-                "roles/some-role/defaults/main.yml": """
+                f"roles/some-role/{ROLE_FILE_DEFAULTS_MAIN}": """
                 images:
                   no-version:
                     image: ghcr.io/foo/bar
@@ -89,7 +90,7 @@ class TestIterRoleImagesVarsImages(unittest.TestCase):
     def test_no_images_key_yields_nothing(self):
         refs = self._run(
             {
-                "roles/some-role/defaults/main.yml": """
+                f"roles/some-role/{ROLE_FILE_DEFAULTS_MAIN}": """
                 some_var: value
             """,
             }
@@ -101,7 +102,7 @@ class TestIterRoleImagesVarsImages(unittest.TestCase):
         # and source_file reports the new path.
         refs = self._run(
             {
-                "roles/web-app-matrix/meta/services.yml": """
+                f"roles/web-app-matrix/{ROLE_FILE_META_SERVICES}": """
                 matrix-chatgpt-bot:
                   image: ghcr.io/matrixgpt/matrix-chatgpt-bot
                   version: latest
@@ -115,7 +116,7 @@ class TestIterRoleImagesVarsImages(unittest.TestCase):
         self.assertEqual(ref.name, "matrixgpt/matrix-chatgpt-bot")
         self.assertEqual(ref.registry, "ghcr.io")
         self.assertEqual(ref.source, "ghcr.io/matrixgpt/matrix-chatgpt-bot:latest")
-        self.assertEqual(ref.source_file, "meta/services.yml")
+        self.assertEqual(ref.source_file, ROLE_FILE_META_SERVICES)
 
 
 if __name__ == "__main__":  # pragma: no cover

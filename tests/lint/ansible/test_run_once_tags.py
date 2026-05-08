@@ -6,6 +6,7 @@ from pathlib import Path
 
 from utils.annotations.suppress import is_suppressed_anywhere
 from utils.cache.files import iter_project_files, read_text
+from utils.roles.mapping import ROLE_FILE_TASKS_MAIN
 
 from . import PROJECT_ROOT
 
@@ -89,7 +90,7 @@ class TestRunOnceTag(unittest.TestCase):
         for key, usages in role_to_locations.items():
             # Only check the role's own tasks/main.yml instead of the includer file
             _, line, role_name = usages[0]
-            role_tasks = str(Path(ROLES_DIR) / role_name / "tasks" / "main.yml")
+            role_tasks = str(Path(ROLES_DIR) / role_name / ROLE_FILE_TASKS_MAIN)
             try:
                 content = read_text(role_tasks)
             except (FileNotFoundError, OSError):

@@ -28,6 +28,7 @@ from pathlib import Path
 
 from utils.cache.files import iter_project_files, read_text
 from utils.cache.yaml import load_yaml_all_str
+from utils.roles.mapping import ROLE_FILE_TASKS_MAIN
 
 from . import PROJECT_ROOT
 
@@ -190,7 +191,7 @@ class RunOnceGlobalUsageFastTest(unittest.TestCase):
 
         if Path(rroot).is_dir():
             for entry in os.listdir(rroot):
-                main_yml = str(Path(rroot) / entry / "tasks" / "main.yml")
+                main_yml = str(Path(rroot) / entry / ROLE_FILE_TASKS_MAIN)
                 if Path(main_yml).is_file():
                     roles.append(entry)
                     suffix = entry.replace("-", "_")

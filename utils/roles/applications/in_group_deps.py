@@ -10,6 +10,7 @@ from utils.roles.applications.services.registry import (
     build_service_registry_from_roles_dir,
     resolve_service_dependency_roles_from_config,
 )
+from utils.roles.mapping import ROLE_FILE_META_MAIN
 
 MetaDepsResolver = Callable[[str, str], list[str]]
 
@@ -25,7 +26,7 @@ def load_service_registry(project_root: str) -> dict[str, Any]:
 
 
 def meta_deps_from_disk(role: str, roles_dir: str) -> list[str]:
-    meta_file = str(Path(roles_dir) / role / "meta" / "main.yml")
+    meta_file = str(Path(roles_dir) / role / ROLE_FILE_META_MAIN)
     if not Path(meta_file).is_file():
         return []
 

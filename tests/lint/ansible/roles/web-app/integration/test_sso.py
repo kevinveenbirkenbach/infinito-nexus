@@ -28,6 +28,7 @@ from utils.annotations.suppress import is_suppressed_at
 from utils.cache.files import read_text
 from utils.cache.yaml import load_yaml_any, load_yaml_str
 from utils.roles.applications.services.registry import is_explicit_truth
+from utils.roles.mapping import ROLE_FILE_META_SERVICES
 
 from . import PROJECT_ROOT
 
@@ -97,7 +98,7 @@ class TestWebAppSsoIntegration(unittest.TestCase):
             if role_path.name in _PROVIDER_EXEMPT:
                 continue
 
-            config = role_path / "meta" / "services.yml"
+            config = role_path / ROLE_FILE_META_SERVICES
             if not config.is_file():
                 errors.append(f"[{role_path.name}] missing meta/services.yml")
                 continue

@@ -3,6 +3,7 @@ import unittest
 from pathlib import Path
 
 from utils.cache.yaml import load_yaml_str
+from utils.roles.mapping import ROLE_FILE_META_MAIN
 
 from . import PROJECT_ROOT
 
@@ -28,7 +29,7 @@ class TestAnsibleRolesMetadata(unittest.TestCase):
         for role in self.roles:
             with self.subTest(role=role):
                 role_path = str(Path(self.ROLES_DIR) / role)
-                meta_file = str(Path(role_path) / "meta" / "main.yml")
+                meta_file = str(Path(role_path) / ROLE_FILE_META_MAIN)
                 self.assertTrue(
                     Path(meta_file).exists(),
                     msg=f"Missing meta/main.yml in role '{role}'",

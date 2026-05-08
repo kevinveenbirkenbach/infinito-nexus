@@ -20,6 +20,12 @@ sys.path.insert(
 import docker_cards as docker_cards_module
 from docker_cards import LookupModule
 
+from utils.roles.mapping import (
+    ROLE_FILE_META_INFO,
+    ROLE_FILE_META_MAIN,
+    ROLE_FILE_VARS_MAIN,
+)
+
 
 def _ansible_bool(value):
     """
@@ -135,7 +141,7 @@ class TestDockerCardsLookup(unittest.TestCase):
         Path(str(Path(self.role_dir) / "meta")).mkdir(parents=True)
         Path(str(Path(self.role_dir) / "vars")).mkdir(parents=True)
 
-        vars_main = str(Path(self.role_dir) / "vars" / "main.yml")
+        vars_main = str(Path(self.role_dir) / ROLE_FILE_VARS_MAIN)
         with Path(vars_main).open("w", encoding="utf-8") as f:
             f.write("application_id: portfolio\n")
 
@@ -147,7 +153,7 @@ class TestDockerCardsLookup(unittest.TestCase):
         # Create a sample meta/main.yml in the meta folder. Per req-011
         # the icon class lives in meta/info.yml (file-root convention),
         # not under galaxy_info.
-        meta_main_path = str(Path(self.role_dir) / "meta" / "main.yml")
+        meta_main_path = str(Path(self.role_dir) / ROLE_FILE_META_MAIN)
         meta_yaml = """
 galaxy_info:
   description: "A role for deploying a portfolio application."
@@ -155,7 +161,7 @@ galaxy_info:
         with Path(meta_main_path).open("w", encoding="utf-8") as f:
             f.write(meta_yaml)
 
-        meta_info_path = str(Path(self.role_dir) / "meta" / "info.yml")
+        meta_info_path = str(Path(self.role_dir) / ROLE_FILE_META_INFO)
         info_yaml = """
 logo:
   class: fa-solid fa-briefcase

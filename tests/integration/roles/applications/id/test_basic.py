@@ -3,6 +3,7 @@ from pathlib import Path
 
 from plugins.filter.invokable_paths import get_invokable_paths
 from utils.cache.yaml import load_yaml_any
+from utils.roles.mapping import ROLE_FILE_VARS_MAIN
 
 
 class TestSysRolesApplicationId(unittest.TestCase):
@@ -32,7 +33,7 @@ class TestSysRolesApplicationId(unittest.TestCase):
         for role_dir in self.actual_dirs:
             name = Path(role_dir).name
             prefix = f"sys-{name.removeprefix('sys-')}"
-            vars_file = str(Path(role_dir) / "vars" / "main.yml")
+            vars_file = str(Path(role_dir) / ROLE_FILE_VARS_MAIN)
             if prefix in self.invokable_prefixes:
                 # must exist with id
                 self.assertTrue(

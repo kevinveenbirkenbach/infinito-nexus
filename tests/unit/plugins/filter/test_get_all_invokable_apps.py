@@ -6,6 +6,7 @@ from unittest.mock import patch
 
 from plugins.filter.get_all_invokable_apps import get_all_invokable_apps
 from utils.cache.yaml import dump_yaml
+from utils.roles.mapping import ROLE_FILE_VARS_MAIN
 
 
 class TestGetAllInvokableApps(unittest.TestCase):
@@ -45,7 +46,7 @@ class TestGetAllInvokableApps(unittest.TestCase):
         for rolename, appid in roles:
             role_dir = self.roles_dir / rolename
             (role_dir / "vars").mkdir(parents=True, exist_ok=True)
-            vars_path = role_dir / "vars" / "main.yml"
+            vars_path = role_dir / ROLE_FILE_VARS_MAIN
             data = {}
             if appid:
                 data["application_id"] = appid

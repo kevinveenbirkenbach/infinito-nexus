@@ -1,6 +1,8 @@
 import pathlib
 import unittest
 
+from utils.roles.mapping import ROLE_FILE_VARS_MAIN
+
 
 class TestKeycloakImportFlowSpot(unittest.TestCase):
     def test_keycloak_service_does_not_use_startup_import_flag(self):
@@ -36,9 +38,9 @@ class TestKeycloakImportFlowSpot(unittest.TestCase):
         self.assertIn("KEYCLOAK_USER_PROFILE_CONFIG_PAYLOAD", content)
 
     def test_keycloak_vars_use_runtime_application_lookup_for_redirects(self):
-        content = pathlib.Path("roles/web-app-keycloak/vars/main.yml").read_text(
-            encoding="utf-8"
-        )
+        content = pathlib.Path(
+            f"roles/web-app-keycloak/{ROLE_FILE_VARS_MAIN}"
+        ).read_text(encoding="utf-8")
 
         self.assertIn("redirect_uris(lookup('applications')", content)
         self.assertIn("regex_replace('/+$', '')", content)

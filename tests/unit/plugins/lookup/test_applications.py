@@ -9,10 +9,11 @@ from ansible.errors import AnsibleError
 
 from plugins.lookup.applications import LookupModule, _reset_cache_for_tests
 from utils.cache.yaml import dump_yaml_str
+from utils.roles.mapping import ROLE_FILE_META_SERVICES
 
 
 def _write_config(base_dir: Path, application_id: str, config: dict) -> None:
-    config_path = base_dir / "roles" / application_id / "meta" / "services.yml"
+    config_path = base_dir / "roles" / application_id / ROLE_FILE_META_SERVICES
     config_path.parent.mkdir(parents=True, exist_ok=True)
     config_path.write_text(dump_yaml_str(config), encoding="utf-8")
 

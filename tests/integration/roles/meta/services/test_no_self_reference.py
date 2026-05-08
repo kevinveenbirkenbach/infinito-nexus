@@ -27,6 +27,7 @@ import unittest
 
 from utils.cache.yaml import load_yaml_any
 from utils.roles.entity_name import get_entity_name
+from utils.roles.mapping import ROLE_FILE_META_SERVICES
 
 from . import PROJECT_ROOT
 
@@ -47,7 +48,7 @@ class TestServicesNoSelfReference(unittest.TestCase):
 
         for role_dir in sorted(p for p in ROLES_DIR.iterdir() if p.is_dir()):
             role_name = role_dir.name
-            services_path = role_dir / "meta" / "services.yml"
+            services_path = role_dir / ROLE_FILE_META_SERVICES
             if not services_path.is_file():
                 continue
             data = load_yaml_any(str(services_path), default_if_missing=None)

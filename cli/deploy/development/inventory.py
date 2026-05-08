@@ -28,6 +28,7 @@ from typing import TYPE_CHECKING, Any
 from utils.cache.applications import get_variants
 from utils.cache.base import _deep_merge
 from utils.cache.yaml import load_yaml_any
+from utils.roles.mapping import ROLE_FILE_META_SERVICES
 
 from .common import DEV_INVENTORY_VARS_FILE
 from .mirrors import generate_ci_mirrors_file, should_use_mirrors_on_ci
@@ -75,7 +76,7 @@ def _build_services_overrides_for_round(
         variant_services = variant_payload.get("services", {})
         if not isinstance(variant_services, Mapping):
             continue
-        services_path = roles_path / role_name / "meta" / "services.yml"
+        services_path = roles_path / role_name / ROLE_FILE_META_SERVICES
         if not services_path.exists():
             continue
         try:

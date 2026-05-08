@@ -9,6 +9,7 @@ from humanfriendly import parse_size
 from utils.annotations.message import warning
 from utils.cache.yaml import load_yaml_any
 from utils.roles.entity_name import get_entity_name
+from utils.roles.mapping import ROLE_FILE_META_SERVICES
 
 from . import PROJECT_ROOT
 
@@ -73,7 +74,7 @@ def filter_roles_by_min_storage(
                 )
             continue
 
-        cfg_path = role_dir / "meta" / "services.yml"
+        cfg_path = role_dir / ROLE_FILE_META_SERVICES
         if not cfg_path.is_file():
             continue
 

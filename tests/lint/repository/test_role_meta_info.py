@@ -27,6 +27,7 @@ import yaml as _yaml
 
 from utils.cache.files import PROJECT_ROOT
 from utils.cache.yaml import load_yaml_any
+from utils.roles.mapping import ROLE_FILE_META_INFO, ROLE_FILE_META_MAIN
 
 ROLES_DIR = PROJECT_ROOT / "roles"
 
@@ -41,9 +42,9 @@ def _meta_main_paths() -> list[Path]:
     if not ROLES_DIR.is_dir():
         return []
     return sorted(
-        role_dir / "meta" / "main.yml"
+        role_dir / ROLE_FILE_META_MAIN
         for role_dir in ROLES_DIR.iterdir()
-        if role_dir.is_dir() and (role_dir / "meta" / "main.yml").is_file()
+        if role_dir.is_dir() and (role_dir / ROLE_FILE_META_MAIN).is_file()
     )
 
 
@@ -51,9 +52,9 @@ def _meta_info_paths() -> list[Path]:
     if not ROLES_DIR.is_dir():
         return []
     return sorted(
-        role_dir / "meta" / "info.yml"
+        role_dir / ROLE_FILE_META_INFO
         for role_dir in ROLES_DIR.iterdir()
-        if role_dir.is_dir() and (role_dir / "meta" / "info.yml").is_file()
+        if role_dir.is_dir() and (role_dir / ROLE_FILE_META_INFO).is_file()
     )
 
 

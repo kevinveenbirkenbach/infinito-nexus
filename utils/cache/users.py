@@ -17,6 +17,8 @@ from pathlib import Path
 from typing import Any
 from urllib.parse import urlparse
 
+from utils.roles.mapping import ROLE_FILE_META_USERS
+
 from . import base as _base
 from .base import (
     _RENDER_GUARD,
@@ -56,7 +58,7 @@ def _compute_reserved_usernames(roles_dir: Path) -> list[str]:
 
 
 def _load_user_defs(roles_dir: Path) -> OrderedDict[str, dict[str, Any]]:
-    pattern = str(Path(str(roles_dir)) / "*/meta/users.yml")
+    pattern = str(Path(str(roles_dir)) / f"*/{ROLE_FILE_META_USERS}")
     files = sorted(glob.glob(pattern))
     merged: OrderedDict[str, dict[str, Any]] = OrderedDict()
 

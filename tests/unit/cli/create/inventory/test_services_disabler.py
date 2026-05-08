@@ -18,6 +18,7 @@ from cli.create.inventory.services_disabler import (
     remove_roles_from_inventory,
 )
 from utils.cache.yaml import dump_yaml
+from utils.roles.mapping import ROLE_FILE_META_SERVICES, ROLE_FILE_VARS_MAIN
 
 
 class TestParseServicesDisabled(unittest.TestCase):
@@ -51,8 +52,8 @@ class TestFindProviderRoles(unittest.TestCase):
         (role_dir / "meta").mkdir(parents=True)
         (role_dir / "vars").mkdir(parents=True)
         # New layout (req-008): meta/services.yml is the services map directly
-        dump_yaml(role_dir / "meta" / "services.yml", services)
-        dump_yaml(role_dir / "vars" / "main.yml", {"application_id": role_name})
+        dump_yaml(role_dir / ROLE_FILE_META_SERVICES, services)
+        dump_yaml(role_dir / ROLE_FILE_VARS_MAIN, {"application_id": role_name})
 
     def test_finds_shared_provider_role(self):
         self._make_role(
@@ -188,8 +189,8 @@ class TestApplyServicesDisabled(unittest.TestCase):
         (role_dir / "meta").mkdir(parents=True)
         (role_dir / "vars").mkdir(parents=True)
         # New layout (req-008): meta/services.yml is the services map directly
-        dump_yaml(role_dir / "meta" / "services.yml", services)
-        dump_yaml(role_dir / "vars" / "main.yml", {"application_id": role_name})
+        dump_yaml(role_dir / ROLE_FILE_META_SERVICES, services)
+        dump_yaml(role_dir / ROLE_FILE_VARS_MAIN, {"application_id": role_name})
 
     def test_disables_service_in_host_vars_and_removes_from_inventory(self):
         self._write_host_vars(
@@ -374,8 +375,8 @@ class TestApplyServicesDisabledFromEnv(unittest.TestCase):
         (role_dir / "meta").mkdir(parents=True)
         (role_dir / "vars").mkdir(parents=True)
         # New layout (req-008): meta/services.yml is the services map directly
-        dump_yaml(role_dir / "meta" / "services.yml", services)
-        dump_yaml(role_dir / "vars" / "main.yml", {"application_id": role_name})
+        dump_yaml(role_dir / ROLE_FILE_META_SERVICES, services)
+        dump_yaml(role_dir / ROLE_FILE_VARS_MAIN, {"application_id": role_name})
 
     def test_reads_env_var(self):
         self._write(
@@ -424,8 +425,8 @@ class TestServicesDisabledConflicts(unittest.TestCase):
         (role_dir / "meta").mkdir(parents=True)
         (role_dir / "vars").mkdir(parents=True)
         # New layout (req-008): meta/services.yml is the services map directly
-        dump_yaml(role_dir / "meta" / "services.yml", services)
-        dump_yaml(role_dir / "vars" / "main.yml", {"application_id": role_name})
+        dump_yaml(role_dir / ROLE_FILE_META_SERVICES, services)
+        dump_yaml(role_dir / ROLE_FILE_VARS_MAIN, {"application_id": role_name})
 
     def _write_inventory(self, data: dict) -> None:
         with self.inventory_file.open("w") as f:

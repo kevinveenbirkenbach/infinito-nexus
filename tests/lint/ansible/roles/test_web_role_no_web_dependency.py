@@ -23,6 +23,7 @@ import unittest
 from typing import Any
 
 from utils.cache.yaml import load_yaml
+from utils.roles.mapping import ROLE_FILE_META_MAIN
 
 from . import PROJECT_ROOT
 
@@ -94,7 +95,7 @@ class TestWebRoleNoWebDependency(unittest.TestCase):
             if not (role_path.is_dir() and role_path.name.startswith("web-")):
                 continue
 
-            meta_main = role_path / "meta" / "main.yml"
+            meta_main = role_path / ROLE_FILE_META_MAIN
             if not meta_main.is_file():
                 continue
 

@@ -9,6 +9,7 @@ except ImportError:  # pragma: no cover
 
 from utils.cache.files import iter_project_files
 from utils.cache.yaml import load_yaml_all
+from utils.roles.mapping import ROLE_FILE_TASKS_MAIN
 
 # ---------- Helpers: repo + YAML parsing ----------
 
@@ -196,7 +197,7 @@ class PureGuardedIncludeTest(unittest.TestCase):
         for role_dir in roles_dir.iterdir():
             if not role_dir.is_dir():
                 continue
-            main_path = role_dir / "tasks" / "main.yml"
+            main_path = role_dir / ROLE_FILE_TASKS_MAIN
             if not main_path.is_file():
                 continue
             main_path = str(main_path)

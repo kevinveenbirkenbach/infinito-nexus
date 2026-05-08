@@ -3,6 +3,7 @@ import unittest
 from pathlib import Path
 
 from utils.cache.yaml import load_yaml_any
+from utils.roles.mapping import ROLE_FILE_META_MAIN
 
 
 class TestSelfDependency(unittest.TestCase):
@@ -20,7 +21,7 @@ class TestSelfDependency(unittest.TestCase):
     def test_no_self_in_run_after(self):
         for entry in os.listdir(self.roles_dir):
             role_path = str(Path(self.roles_dir) / entry)
-            meta_file = str(Path(role_path) / "meta" / "main.yml")
+            meta_file = str(Path(role_path) / ROLE_FILE_META_MAIN)
             if not Path(role_path).is_dir() or not Path(meta_file).is_file():
                 continue
 

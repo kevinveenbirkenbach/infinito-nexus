@@ -18,6 +18,7 @@ from utils.roles.applications.in_group_deps import applications_if_group_and_all
 from utils.roles.applications.services.registry import (
     build_service_registry_from_applications,
 )
+from utils.roles.mapping import ROLE_FILE_META_MAIN
 
 _CURRENT_PLAY_CACHE: dict[tuple, dict[str, Any]] = {}
 
@@ -85,7 +86,7 @@ class LookupModule(LookupBase):
         return str(PROJECT_ROOT)
 
     def _meta_deps(self, role: str, roles_dir: str) -> list[str]:
-        meta_file = str(Path(roles_dir) / role / "meta" / "main.yml")
+        meta_file = str(Path(roles_dir) / role / ROLE_FILE_META_MAIN)
         if not Path(meta_file).is_file():
             return []
         try:

@@ -11,6 +11,11 @@ from utils.cache.domains import get_merged_domains
 from utils.cache.files import read_text
 from utils.cache.yaml import load_yaml_any
 from utils.roles.applications.config import get
+from utils.roles.mapping import (
+    ROLE_FILE_META_INFO,
+    ROLE_FILE_META_MAIN,
+    ROLE_FILE_VARS_MAIN,
+)
 
 
 class LookupModule(LookupBase):
@@ -61,7 +66,7 @@ class LookupModule(LookupBase):
                 continue
 
             # Load application_id from role's vars/main.yml (cached parse).
-            vars_path = str(Path(role_dir) / "vars" / "main.yml")
+            vars_path = str(Path(role_dir) / ROLE_FILE_VARS_MAIN)
             try:
                 if not Path(vars_path).is_file():
                     # nocheck (TRY301): wrapped with role context by the
@@ -95,8 +100,8 @@ class LookupModule(LookupBase):
             # meta/info.yml is the project-internal store for descriptive
             # role-level metadata (logo, display) per req-011.
             readme_path = str(Path(role_dir) / "README.md")
-            meta_path = str(Path(role_dir) / "meta" / "main.yml")
-            info_path = str(Path(role_dir) / "meta" / "info.yml")
+            meta_path = str(Path(role_dir) / ROLE_FILE_META_MAIN)
+            info_path = str(Path(role_dir) / ROLE_FILE_META_INFO)
 
             # Skip role if required files are missing
             if not Path(readme_path).exists() or not Path(meta_path).exists():

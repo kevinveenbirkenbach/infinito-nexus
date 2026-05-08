@@ -1,12 +1,14 @@
 import pathlib
 import unittest
 
+from utils.roles.mapping import ROLE_FILE_VARS_MAIN
+
 
 class TestDashboardOidcSpot(unittest.TestCase):
     def test_dashboard_oidc_uses_canonical_base_url(self):
-        vars_content = pathlib.Path("roles/web-app-dashboard/vars/main.yml").read_text(
-            encoding="utf-8"
-        )
+        vars_content = pathlib.Path(
+            f"roles/web-app-dashboard/{ROLE_FILE_VARS_MAIN}"
+        ).read_text(encoding="utf-8")
         js_content = pathlib.Path(
             "roles/web-app-dashboard/templates/javascript/oidc.js.j2"
         ).read_text(encoding="utf-8")
