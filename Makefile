@@ -139,7 +139,7 @@ system-purge:
 
 # Restart the development stack.
 restart:
-	@"$${PYTHON}" -m cli.deploy.development restart
+	@"$${PYTHON}" -m cli.administration.deploy.development restart
 
 # Refresh the running development stack only when it already exists.
 refresh:
@@ -153,15 +153,15 @@ exec:
 
 # Start the development stack.
 up: install
-	@"$${PYTHON}" -m cli.deploy.development up
+	@"$${PYTHON}" -m cli.administration.deploy.development up
 
 # Stop the development stack.
 down:
-	@"$${PYTHON}" -m cli.deploy.development down
+	@"$${PYTHON}" -m cli.administration.deploy.development down
 
 # Stop the development stack without removing volumes.
 stop:
-	@"$${PYTHON}" -m cli.deploy.development stop
+	@"$${PYTHON}" -m cli.administration.deploy.development stop
 
 # Mark all shell scripts under scripts/ as executable.
 chmod-scripts:

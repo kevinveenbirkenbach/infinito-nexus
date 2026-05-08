@@ -3,7 +3,7 @@
 #
 # Called from the host wrapper at
 # scripts/tests/deploy/local/deploy/fresh-kept-all.sh via
-# `cli.deploy.development exec --env KEY=VAL`, which injects the env-vars
+# `cli.administration.deploy.development exec --env KEY=VAL`, which injects the env-vars
 # asserted below. Performs entry bootstrap, creates the inventory and
 # runs the dedicated deploy in one in-container session. The repo is
 # mounted at /opt/src/infinito by the dev compose stack.
@@ -53,7 +53,7 @@ infinito administration inventory provision "${inv_dir}" \
 
 echo ">>> Deploying against ${INVENTORY_FILE}"
 
-infinito deploy dedicated "${INVENTORY_FILE}" \
+infinito administration deploy dedicated "${INVENTORY_FILE}" \
 	--skip-backup \
 	--debug \
 	--log /opt/src/infinito/logs \

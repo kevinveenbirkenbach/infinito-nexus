@@ -35,7 +35,7 @@ echo
 # 1) Bring up development stack (no build) on host
 # ---------------------------------------------------------------------------
 echo ">>> Starting development compose stack (no build)"
-"${PYTHON}" -m cli.deploy.development up \
+"${PYTHON}" -m cli.administration.deploy.development up \
 	--skip-entry-init
 
 # ---------------------------------------------------------------------------
@@ -102,7 +102,7 @@ echo
 # ---------------------------------------------------------------------------
 echo ">>> Running entry/init + inventory + deploy inside infinito container via development exec"
 
-"${PYTHON}" -m cli.deploy.development exec \
+"${PYTHON}" -m cli.administration.deploy.development exec \
 	--env "INVENTORY_DIR=${INVENTORY_DIR}" \
 	--env "INVENTORY_FILE=${INVENTORY_FILE}" \
 	--env "INVENTORY_VARS_FILE=${INVENTORY_VARS_FILE}" \

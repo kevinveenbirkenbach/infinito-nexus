@@ -90,7 +90,7 @@ Those images MUST be declared under `defaults/main.yml` and MUST be consumed via
 ### Image Discovery 🔍
 
 [image_discovery.py](../../../../../utils/docker/image/discovery.py) enumerates all role images from both sources above.
-It is used by the mirror pipeline (`cli/mirror/`) and the external version-check test
+It is used by the mirror pipeline (`cli/contributing/mirror/`) and the external version-check test
 ([`tests/external/docker/test_image_versions.py`](../../../../../tests/external/docker/test_image_versions.py)).
 
 ## When `Dockerfile.j2` Is Acceptable 🤔

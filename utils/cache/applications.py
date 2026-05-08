@@ -4,7 +4,7 @@ Owns `_APPLICATIONS_DEFAULTS_CACHE`, `_VARIANTS_CACHE`, and
 `_MERGED_APPLICATIONS_CACHE`. Public API: `get_application_defaults`,
 `get_variants`, `get_merged_applications`. Strictly ansible-free at
 import time so the GitHub Actions runner-host CLI path
-(`cli.deploy.development.init` -> `plan_dev_inventory_matrix` ->
+(`cli.administration.deploy.development.init` -> `plan_dev_inventory_matrix` ->
 `get_variants`) keeps working without ansible installed.
 """
 
@@ -128,7 +128,7 @@ def _build_role_base_config(
     # Pure-Python GID resolver — does NOT pull ansible. The previous
     # `ApplicationGidLookup().run([...])` call dragged
     # `ansible.plugins.lookup.LookupBase` into this code path and broke
-    # `cli.deploy.development init` on the GitHub Actions runner host
+    # `cli.administration.deploy.development init` on the GitHub Actions runner host
     # (CI run 24935979190) where the runner Python ships without
     # ansible. The split lives in plugins/lookup/application_gid.py:
     # `compute_application_gid` is the pure helper, `LookupModule` is
@@ -310,7 +310,7 @@ def get_merged_applications(
     # Defaults always come from variant 0 (= the legacy `meta/services.yml`
     # payload, deep-merged with the empty `{}` entry). Per-round variant
     # overrides are baked into the inventory's `applications.<app>` block at
-    # init time (see `cli.deploy.development.inventory.build_dev_inventory`)
+    # init time (see `cli.administration.deploy.development.inventory.build_dev_inventory`)
     # and applied below as overrides on top of these defaults, so the deploy
     # stage needs no runtime variant selector: the inventory itself is
     # variant-resolved.

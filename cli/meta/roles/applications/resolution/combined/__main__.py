@@ -13,7 +13,7 @@ def _load_services_overrides(path: str | None) -> dict[str, dict]:
     """Load `{role_name: services_dict}` overrides from a JSON file.
 
     The file is produced by the variant-aware planner in
-    `cli.deploy.development.inventory` to feed each round's
+    `cli.administration.deploy.development.inventory` to feed each round's
     variant-merged services map back into the resolver running inside
     the infinito container. Missing or empty path returns `{}` so
     non-variant-aware callers keep the legacy disk-only behaviour.

@@ -228,10 +228,10 @@ The following consumers read `run_after` and/or `lifecycle` from
 - [ ] `cli/build/tree/__main__.py`
 - [ ] `cli/build/graph/__main__.py`
 - [ ] `cli/build/role_include/__main__.py`
-- [ ] `cli/deploy/development/common.py`
-- [ ] `cli/deploy/development/init.py`
-- [ ] `cli/deploy/development/deps.py`
-- [ ] `cli/deploy/development/deploy.py`
+- [ ] `cli/administration/deploy/development/common.py`
+- [ ] `cli/administration/deploy/development/init.py`
+- [ ] `cli/administration/deploy/development/deps.py`
+- [ ] `cli/administration/deploy/development/deploy.py`
 - [ ] `plugins/filter/canonical_domains_map.py`
 - [ ] any other consumer discovered during migration that reads
       `run_after` or `lifecycle` from `meta/main.yml`.

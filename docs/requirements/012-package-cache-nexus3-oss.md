@@ -20,7 +20,7 @@ introduced for `registry-cache`:
 
 - the `cache` compose profile,
 - the `Profile` gate in
-  [cli/deploy/development/profile.py](../../cli/deploy/development/profile.py),
+  [cli/administration/deploy/development/profile.py](../../cli/administration/deploy/development/profile.py),
 - the strict `${VAR:?…}` env-var contract documented under the
   cache section of
   [docs/contributing/artefact/files/compose.yml.md](../contributing/artefact/files/compose.yml.md),
@@ -82,7 +82,7 @@ Therefore:
       Nexus's REST API responds 200 on `/service/rest/v1/status`.
 - [ ] `package-cache` and `registry-cache` can be active concurrently
       in the same override without port or volume conflict.
-- [ ] The `Profile` class in `cli/deploy/development/profile.py`
+- [ ] The `Profile` class in `cli/administration/deploy/development/profile.py`
       activates the `cache` stack for local dev (status quo) and
       inactivates it for CI; the same gate applies to all cache
       services.

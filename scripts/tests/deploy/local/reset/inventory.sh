@@ -25,7 +25,7 @@ echo
 
 # 1) Bring up development stack (no build)
 echo ">>> Starting development compose stack (no build)"
-"${PYTHON}" -m cli.deploy.development up \
+"${PYTHON}" -m cli.administration.deploy.development up \
 	--skip-entry-init
 
 # 2) Discover apps on HOST (same as local/deploy/fresh-kept-all.sh)
@@ -72,7 +72,7 @@ echo
 # 3) Run entry.sh + create inventory INSIDE container
 echo ">>> Initializing inventory inside container"
 
-"${PYTHON}" -m cli.deploy.development exec \
+"${PYTHON}" -m cli.administration.deploy.development exec \
 	-- \
 	bash -c "
     set -euo pipefail

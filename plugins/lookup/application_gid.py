@@ -60,7 +60,7 @@ def compute_application_gid(application_id, roles_dir="roles", base_gid=10000):
 # when an Ansible process actually loads this module via the lookup
 # loader, and that always happens inside a process that has ansible
 # installed (the playbook runner). Pure-Python importers (e.g.
-# `utils.cache.applications._build_variants` running inside `cli.deploy.
+# `utils.cache.applications._build_variants` running inside `cli.administration.deploy.
 # development init` on the GitHub Actions runner host) want
 # `compute_application_gid` only and MUST NOT pay the ansible-import
 # cost — see CI run 24935979190 for the regression that motivated this

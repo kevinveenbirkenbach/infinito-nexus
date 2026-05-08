@@ -9,7 +9,7 @@ Two layers exist for invoking a local deploy:
 | Layer | When to use |
 |---|---|
 | `make deploy-*` targets in the [Makefile](../../../Makefile) | Default. Stable, opinionated wrappers tuned for the local-dev / CI-on-laptop flow. |
-| `infinito deploy development <subcommand>` (Python CLI) | Direct invocation when you need a flag the make targets do not expose, or when you script multi-step flows yourself. |
+| `infinito administration deploy development <subcommand>` (Python CLI) | Direct invocation when you need a flag the make targets do not expose, or when you script multi-step flows yourself. |
 
 The make targets ultimately call the same CLI, so any behaviour described here applies to both.
 
@@ -65,8 +65,8 @@ Pinning is sticky: when iterating with `VARIANT=<idx>`, you MUST set it on every
 When you need a flag the make wrappers do not expose, call the dev CLI directly:
 
 ```bash
-infinito deploy development init   --inventory-dir "${INVENTORY_DIR}" --apps "<role>"
-infinito deploy development deploy --inventory-dir "${INVENTORY_DIR}" --apps "<role>" [--variant <idx>] [--debug]
+infinito administration deploy development init   --inventory-dir "${INVENTORY_DIR}" --apps "<role>"
+infinito administration deploy development deploy --inventory-dir "${INVENTORY_DIR}" --apps "<role>" [--variant <idx>] [--debug]
 ```
 
 - `--inventory-dir` is always the BASE path. The wrapper appends the `-<round>` suffix internally for matrix folders.
@@ -84,7 +84,7 @@ For TLS-enabled local sites, run [`make trust-ca`](../../../Makefile) once after
 | File | Purpose |
 |---|---|
 | [Makefile](../../../Makefile) | All `deploy-*` and `make exec` / `make trust-ca` targets. |
-| [dev CLI tree](../../../cli/deploy/development/) | Python CLI for init, deploy, up, down, exec, etc. |
+| [dev CLI tree](../../../cli/administration/deploy/development/) | Python CLI for init, deploy, up, down, exec, etc. |
 | [inventory.sh](../../../scripts/meta/env/inventory.sh) | Resolves `INVENTORY_DIR`, `INVENTORY_FILE`, and `INVENTORY_VARS_FILE` for the dev CLI. |
 | [local deploy scripts](../../../scripts/tests/deploy/local/) | Bash glue behind the make targets (fresh / reuse / purge variants). |
 | [variants.md](../design/variants.md) | Matrix-variant deep dive. |

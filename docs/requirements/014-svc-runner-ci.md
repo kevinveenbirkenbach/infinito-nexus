@@ -6,7 +6,7 @@ As a developer, I want to run the Infinito.Nexus CI on a dedicated server so tha
 
 ## Idea
 
-Add an `svc-runner` role that provisions a dedicated machine as an Infinito.Nexus CI runner, plus a CLI entry point under `cli/deploy/runner/` (path to be created) that drives an Infinito.Nexus deploy against that runner from a developer workstation.
+Add an `svc-runner` role that provisions a dedicated machine as an Infinito.Nexus CI runner, plus a CLI entry point under `cli/administration/deploy/runner/` (path to be created) that drives an Infinito.Nexus deploy against that runner from a developer workstation.
 
 ## Acceptance Criteria
 
@@ -14,21 +14,21 @@ Add an `svc-runner` role that provisions a dedicated machine as an Infinito.Nexu
 
 - [ ] A new role at `roles/svc-runner/` (path to be created) exists and follows the role-meta layout in [layout.md](../contributing/design/role/services/layout.md) (including `meta/services.yml` with a `lifecycle` key, `meta/schema.yml`, and `tasks/main.yml`).
 - [ ] When applied to a host, `svc-runner` brings up an Infinito.Nexus-capable CI runner on that host (the runner is the execution environment in which subsequent Infinito.Nexus deploys and tests run).
-- [ ] The role is compatible with, and exercised by, the CLI script described under **CLI: `cli/deploy/runner/`** below. Deploying through that script against a fresh host MUST yield a working runner without manual post-steps.
+- [ ] The role is compatible with, and exercised by, the CLI script described under **CLI: `cli/administration/deploy/runner/`** below. Deploying through that script against a fresh host MUST yield a working runner without manual post-steps.
 - [ ] `make test` passes with the new role in place.
 
-### CLI: `cli/deploy/runner/`
+### CLI: `cli/administration/deploy/runner/`
 
-- [ ] A new CLI entry point at `cli/deploy/runner/` (path to be created) is wired into the `infinito` CLI tree the same way the existing [`cli/deploy/dedicated/`](../../cli/deploy/dedicated/) and [`cli/deploy/development/`](../../cli/deploy/development/) commands are.
-- [ ] Argument parsing MUST use Python's standard-library `argparse` module, matching the convention used by [cli/deploy/dedicated/command.py](../../cli/deploy/dedicated/command.py). Hand-rolled `sys.argv` parsing or third-party CLI frameworks (`click`, `typer`, etc.) MUST NOT be introduced.
+- [ ] A new CLI entry point at `cli/administration/deploy/runner/` (path to be created) is wired into the `infinito` CLI tree the same way the existing [`cli/administration/deploy/dedicated/`](../../cli/administration/deploy/dedicated/) and [`cli/administration/deploy/development/`](../../cli/administration/deploy/development/) commands are.
+- [ ] Argument parsing MUST use Python's standard-library `argparse` module, matching the convention used by [cli/administration/deploy/dedicated/command.py](../../cli/administration/deploy/dedicated/command.py). Hand-rolled `sys.argv` parsing or third-party CLI frameworks (`click`, `typer`, etc.) MUST NOT be introduced.
 - [ ] The script accepts the following parameters:
   - `hostname` (**required**) is the target server that will host the runner.
   - `port` (**optional**, MAY be omitted) is the SSH/connection port for the target host.
-  - `roles` (**required**) is the set of roles to deploy onto the runner (accepts space- and comma-separated lists, matching the normalisation used by [cli/deploy/dedicated/command.py](../../cli/deploy/dedicated/command.py)).
+  - `roles` (**required**) is the set of roles to deploy onto the runner (accepts space- and comma-separated lists, matching the normalisation used by [cli/administration/deploy/dedicated/command.py](../../cli/administration/deploy/dedicated/command.py)).
   - `distribution` (**required**) is the target OS distribution of the runner (used to pick distro-specific tasks inside `svc-runner`).
   - `output stream file` (**optional**, with a documented default value) is the file path the deploy's stdout/stderr stream is written to. The default MUST be a stable, documented path under `/tmp/`.
 - [ ] Running the script against a clean host deploys `svc-runner` (plus any additional `roles` passed in) onto that host, and the runner is reachable / healthy at the end of the run.
-- [ ] `--help` documents every parameter above, including the default value of the output stream file, in the same style as [cli/deploy/dedicated/command.py](../../cli/deploy/dedicated/command.py).
+- [ ] `--help` documents every parameter above, including the default value of the output stream file, in the same style as [cli/administration/deploy/dedicated/command.py](../../cli/administration/deploy/dedicated/command.py).
 
 ### Tests & Documentation
 

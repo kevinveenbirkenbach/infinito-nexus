@@ -305,7 +305,7 @@ the old `compose.…` or top-level paths.
       - `plugins/lookup/application_gid.py`
       - `plugins/lookup/rbac_group_path.py`
       - `cli/contributing/docker/update_versions/__main__.py`
-      - `cli/deploy/development/inventory.py`
+      - `cli/administration/deploy/development/inventory.py`
       - `cli/meta/roles/applications/resolution/combined/role_introspection.py`
       - `cli/meta/roles/applications/resolution/services/resolver.py`
       - `cli/meta/roles/applications/ressources/__main__.py`

@@ -35,7 +35,7 @@ export HOST_VARS_FILE
 # `infinito administration inventory provision --vars-file <...>` consumes. Anything that
 # would otherwise hard-code "inventories/development/default.yml" MUST
 # read this variable instead. The Python side mirrors this default in
-# cli.deploy.development.common.DEV_INVENTORY_VARS_FILE; a unit test
+# cli.administration.deploy.development.common.DEV_INVENTORY_VARS_FILE; a unit test
 # locks both literals together so they cannot silently drift.
 INVENTORY_VARS_FILE="${INVENTORY_VARS_FILE:-inventories/development/default.yml}"
 export INVENTORY_VARS_FILE

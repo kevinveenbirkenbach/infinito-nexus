@@ -31,7 +31,7 @@ FLAT_STRUCTURE_WHITELIST = {
     ".github/workflows",
     "cli",
     "cli/administration/inventory/provision",
-    "cli/deploy/development",
+    "cli/administration/deploy/development",
     "group_vars/all",
     "plugins/filter",
     "plugins/lookup",

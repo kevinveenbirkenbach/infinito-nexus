@@ -36,11 +36,11 @@ Example: `ghcr.io/kevinveenbirkenbach/infinito-nexus-core/mirror/docker.io/nextc
 
 ### GHCRProvider 🐳
 
-`cli/mirror/providers.py` contains the `GHCRProvider` class, which computes the destination image name via `image_base(img)` and provides `add_args` / `from_args` so all CLI tools share a single argument definition (SPOT).
+`cli/contributing/mirror/providers.py` contains the `GHCRProvider` class, which computes the destination image name via `image_base(img)` and provides `add_args` / `from_args` so all CLI tools share a single argument definition (SPOT).
 
 ### Resolver 🗺️
 
-`cli/mirror/resolver/__main__.py` reads all role images and outputs a `mirrors.yml` file with separate sections for compose images and role-local flat images:
+`cli/contributing/mirror/resolver/__main__.py` reads all role images and outputs a `mirrors.yml` file with separate sections for compose images and role-local flat images:
 
 ```yaml
 applications:
@@ -65,7 +65,7 @@ This file is consumed by the inventory creator to substitute mirror URLs into ho
 
 ### Sync 🔄
 
-`cli/mirror/sync/__main__.py` copies each image from the upstream source to the GHCR mirror destination using `skopeo copy`. Supports `--only-missing` to skip already-mirrored images and `--images-per-hour` for throttling.
+`cli/contributing/mirror/sync/__main__.py` copies each image from the upstream source to the GHCR mirror destination using `skopeo copy`. Supports `--only-missing` to skip already-mirrored images and `--images-per-hour` for throttling.
 
 ### Wait Script ⏳
 
@@ -78,7 +78,7 @@ The mirror workflow runs as stage 8 of the CI pipeline. See [ci.md](../git/pipel
 ### CI Flow 📋
 
 1. Image discovery scans role declarations in `meta/services.yml` and `defaults/main.yml`.
-2. [images-mirror-missing.yml](../../../../.github/workflows/images-mirror-missing.yml) copies only missing upstream refs into GHCR via `cli.mirror.sync --only-missing`. Optional Docker Hub credentials reduce source-side rate limits during that sync.
+2. [images-mirror-missing.yml](../../../../.github/workflows/images-mirror-missing.yml) copies only missing upstream refs into GHCR via `cli.contributing.mirror.sync --only-missing`. Optional Docker Hub credentials reduce source-side rate limits during that sync.
 3. Fork PRs cannot publish packages themselves, so their untrusted `pull_request` runs wait in `scripts/meta/wait/mirrors.sh` until a trusted producer run has published the required refs.
 4. Inventory generation writes the resulting mirror refs from `mirrors.yml` back into host vars.
 5. Deploy and test jobs resolve images from `ghcr.io/{namespace}/{repository}/mirror/...` instead of pulling directly from Docker Hub, MCR, or other upstream registries.

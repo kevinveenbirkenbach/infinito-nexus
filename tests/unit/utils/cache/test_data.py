@@ -521,7 +521,7 @@ class TestImportableWithoutAnsible(unittest.TestCase):
     """Pin: `utils.cache.applications` MUST be importable AND its
     hot-path callables MUST run without `ansible` on sys.path.
 
-    Why pin: the `cli.deploy.development` CLI runs on the GitHub Actions
+    Why pin: the `cli.administration.deploy.development` CLI runs on the GitHub Actions
     runner host (see scripts/tests/deploy/ci/dedicated.sh) where the
     runner Python has no `ansible` package. The original CI failure
     (run 24934007615) was at *import* time. The follow-up CI failure
@@ -547,10 +547,10 @@ class TestImportableWithoutAnsible(unittest.TestCase):
 
     def test_inventory_module_importable_without_ansible(self):
         # The actual call chain that broke in CI run 24934007615:
-        #   cli.deploy.development.init -> .inventory ->
+        #   cli.administration.deploy.development.init -> .inventory ->
         #   utils.cache.applications
         rc, out, err = _run_in_ansible_blocked_subprocess(
-            "from cli.deploy.development.inventory import "
+            "from cli.administration.deploy.development.inventory import "
             "plan_dev_inventory_matrix\n"
             "assert callable(plan_dev_inventory_matrix)\n"
             "print('OK')\n"
@@ -581,12 +581,12 @@ class TestImportableWithoutAnsible(unittest.TestCase):
 
     def test_plan_dev_inventory_matrix_callable_without_ansible(self):
         # Same exhaustive shape as above, one level higher: the actual
-        # CLI path is `cli.deploy.development.init.handler` ->
+        # CLI path is `cli.administration.deploy.development.init.handler` ->
         # `plan_dev_inventory_matrix(...)` -> `get_variants(...)`. We
         # invoke the planner so a future regression at any layer of
         # this chain trips here.
         rc, out, err = _run_in_ansible_blocked_subprocess(
-            "from cli.deploy.development.inventory import "
+            "from cli.administration.deploy.development.inventory import "
             "plan_dev_inventory_matrix\n"
             "from utils.cache.applications import get_variants\n"
             "from utils.cache.base import ROLES_DIR\n"

@@ -193,7 +193,7 @@ class TestApplicationVariants(unittest.TestCase):
 class TestMergedApplicationsAlwaysVariantZero(unittest.TestCase):
     """The runtime loader no longer reads any active-variant selector.
     Variant N data is baked into the inventory by
-    `cli.deploy.development.inventory.build_dev_inventory` at init time
+    `cli.administration.deploy.development.inventory.build_dev_inventory` at init time
     and reaches the merged payload as an `applications.<app>` override.
     These tests pin that contract: the loader's defaults are ALWAYS
     variant 0, and inventory-level overrides win as before."""

@@ -27,5 +27,5 @@ For the canonical Make target index that invokes these helpers, see [make.md](..
 | `fresh-kept-all.sh` | Discovers apps, creates `devices.yml`, and deploys all discovered apps. | `INFINITO_DISTRO`, `TEST_DEPLOY_TYPE`, `INVENTORY_DIR` | Fresh all-app inventory path. |
 | `reuse-kept-all.sh` | Deploys every app from an existing inventory. | `INFINITO_DISTRO`, `TEST_DEPLOY_TYPE`, `INVENTORY_DIR` | Requires `${INVENTORY_DIR}/devices.yml` and `.password`. |
 | `fresh-kept-app.sh <app-id>` | Creates `devices.yml` for one or more apps and deploys them. | `APPS=<app-id>` | Init and deploy path for a specific app set. |
-| `reuse-kept-app.sh` | Runs a targeted `infinito deploy dedicated` for one or more apps. | `APPS`, `TEST_DEPLOY_TYPE`, `INFINITO_CONTAINER`, `DEBUG`, `INVENTORY_DIR` | Reuses `devices.yml`. |
+| `reuse-kept-app.sh` | Runs a targeted `infinito administration deploy dedicated` for one or more apps. | `APPS`, `TEST_DEPLOY_TYPE`, `INFINITO_CONTAINER`, `DEBUG`, `INVENTORY_DIR` | Reuses `devices.yml`. |
 | `fresh-purged-app.sh` | Recreates `devices.yml` and deploys one or more apps twice with `ASYNC_ENABLED=false` and `ASYNC_ENABLED=true`. | `INFINITO_DISTRO`, `INVENTORY_DIR`, `TEST_DEPLOY_TYPE`, `APPS` | Baseline and recovery path. |

@@ -2,7 +2,11 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from cli.core.discovery import discover_commands, resolve_command_module
+from cli.core.discovery import (
+    discover_commands,
+    iter_dir_entries,
+    resolve_command_module,
+)
 
 
 class TestDiscovery(unittest.TestCase):
@@ -116,6 +120,52 @@ class TestDiscovery(unittest.TestCase):
             module, remaining = resolve_command_module(cli_dir, argv)
             self.assertEqual(module, "cli.build.tree")
             self.assertEqual(remaining, [blob])
+
+
+class TestIterDirEntries(unittest.TestCase):
+    def _touch(self, path: Path, content: str = "") -> None:
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_text(content, encoding="utf-8")
+
+    def test_returns_immediate_subdirs_split_by_command_vs_folder(self):
+        with tempfile.TemporaryDirectory() as td:
+            cli_dir = Path(td) / "cli"
+            cli_dir.mkdir(parents=True, exist_ok=True)
+
+            # Runnable command at top level.
+            self._touch(cli_dir / "make" / "__main__.py", "# cmd\n")
+            # Category folder (no own __main__.py) with a command underneath.
+            self._touch(cli_dir / "meta" / "j2" / "__main__.py", "# cmd\n")
+            # Empty support package — must NOT show up.
+            self._touch(cli_dir / "core" / "__init__.py", "")
+            # __pycache__ must be ignored.
+            (cli_dir / "__pycache__").mkdir(parents=True, exist_ok=True)
+
+            entries = iter_dir_entries(cli_dir, ())
+
+            names = [(e.name, e.is_command) for e in entries]
+            self.assertIn(("make", True), names)
+            self.assertIn(("meta", False), names)
+            self.assertNotIn(("core", False), [(n, c) for n, c in names])
+            self.assertNotIn(("__pycache__", False), [(n, c) for n, c in names])
+
+    def test_descends_into_named_path(self):
+        with tempfile.TemporaryDirectory() as td:
+            cli_dir = Path(td) / "cli"
+            cli_dir.mkdir(parents=True, exist_ok=True)
+            self._touch(cli_dir / "meta" / "j2" / "__main__.py", "# cmd\n")
+            self._touch(cli_dir / "meta" / "callorder" / "__main__.py", "# cmd\n")
+            self._touch(cli_dir / "meta" / "roles" / "__init__.py", "")
+            # `meta/roles/all` is a runnable command underneath the otherwise
+            # empty `meta/roles` folder; the folder MUST surface as a category.
+            self._touch(cli_dir / "meta" / "roles" / "all" / "__main__.py", "# cmd\n")
+
+            entries = iter_dir_entries(cli_dir, ("meta",))
+            names = sorted((e.name, e.is_command) for e in entries)
+            self.assertEqual(
+                names,
+                [("callorder", True), ("j2", True), ("roles", False)],
+            )
 
 
 if __name__ == "__main__":

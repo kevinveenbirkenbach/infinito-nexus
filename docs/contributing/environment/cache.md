@@ -1,6 +1,6 @@
 # Local Caches 📦
 
-Three local cache services accelerate re-deploys, reduce upstream traffic, and harden the development workflow against transient upstream outages. They share one compose profile (`cache`) and one override file ([compose/cache.override.yml](../../../compose/cache.override.yml)) and are gated together by [profile.py](../../../cli/deploy/development/profile.py): active on developer machines, inactive on CI runners.
+Three local cache services accelerate re-deploys, reduce upstream traffic, and harden the development workflow against transient upstream outages. They share one compose profile (`cache`) and one override file ([compose/cache.override.yml](../../../compose/cache.override.yml)) and are gated together by [profile.py](../../../cli/administration/deploy/development/profile.py): active on developer machines, inactive on CI runners.
 
 ## Services 🧩
 
@@ -40,15 +40,15 @@ Cert generation runs in a throw-away alpine container driven by [package-fronten
 
 ## Activation 🎚️
 
-The `cache` decision is exposed via `Profile.registry_cache_active()` in [profile.py](../../../cli/deploy/development/profile.py). When active:
+The `cache` decision is exposed via `Profile.registry_cache_active()` in [profile.py](../../../cli/administration/deploy/development/profile.py). When active:
 
-- [compose/cache.override.yml](../../../compose/cache.override.yml) is layered on top of the base [compose.yml](../../../compose.yml) by [compose.py](../../../cli/deploy/development/compose.py) and [down.py](../../../cli/deploy/development/down.py) via [common.py](../../../cli/deploy/development/common.py)`compose_file_args`.
+- [compose/cache.override.yml](../../../compose/cache.override.yml) is layered on top of the base [compose.yml](../../../compose.yml) by [compose.py](../../../cli/administration/deploy/development/compose.py) and [down.py](../../../cli/administration/deploy/development/down.py) via [common.py](../../../cli/administration/deploy/development/common.py)`compose_file_args`.
 - The cache services are added.
 - The runner's `infinito` service receives:
   - bind-mounts for the registry-cache CA, the package-cache client snippets (`pip.conf`, `npmrc`, `apt.list`), and the frontend CA file
   - `extra_hosts` entries DNS-hijacking the HTTPS upstream hostnames to the frontend's static IP
   - `INFINITO_PACKAGE_CACHE_FRONTEND_IP` env var for the inner compose wrapper
-- Cert generation, Nexus repo bootstrap, and runner trust-store install run from [compose.py](../../../cli/deploy/development/compose.py).
+- Cert generation, Nexus repo bootstrap, and runner trust-store install run from [compose.py](../../../cli/administration/deploy/development/compose.py).
 
 When inactive, the override is omitted: cache services do not exist, the runner has no cache mounts or DNS-hijack, package managers go direct to upstream.
 
@@ -120,4 +120,4 @@ When a new package manager or upstream needs caching:
 
 - Compose-file env-var contract: [compose.yml.md](../artefact/files/compose.yml.md)
 - Original requirement and acceptance criteria: [docs/requirements/012-package-cache-nexus3-oss.md](../../requirements/012-package-cache-nexus3-oss.md)
-- Profile gating mechanics: [profile.py](../../../cli/deploy/development/profile.py)
+- Profile gating mechanics: [profile.py](../../../cli/administration/deploy/development/profile.py)

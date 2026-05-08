@@ -38,7 +38,7 @@ echo ">>> Starting rapid deploy"
 # proper array instead of relying on shell word-splitting at expansion time
 # (which shellcheck SC2206 rightly flags as fragile).
 read -ra app_ids <<<"${APPS}"
-cmd=(infinito deploy dedicated "${INVENTORY_FILE}"
+cmd=(infinito administration deploy dedicated "${INVENTORY_FILE}"
 	--skip-backup
 	--skip-cleanup
 	--id "${app_ids[@]}"

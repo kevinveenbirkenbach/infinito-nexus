@@ -43,14 +43,14 @@ echo "inventory_dir=${INVENTORY_DIR}"
 echo
 
 echo ">>> Ensuring stack is up for distro ${INFINITO_DISTRO}"
-"${PYTHON}" -m cli.deploy.development up \
+"${PYTHON}" -m cli.administration.deploy.development up \
 	--when-down
 
 echo ">>> Pre-cleanup shared entities (host docker context)"
 APPS='matomo' scripts/tests/deploy/local/purge/entity.sh
 
 echo ">>> Running entry.sh inside container"
-"${PYTHON}" -m cli.deploy.development exec \
+"${PYTHON}" -m cli.administration.deploy.development exec \
 	-- bash /opt/src/infinito/scripts/tests/deploy/local/utils/entry-bootstrap.sh
 
 deploy_args=(
@@ -81,17 +81,17 @@ if [[ -n "${INIT_VARS_EXTRA:-}" ]]; then
 else
 	INIT_VARS="{${INIT_VARS_BASE}}"
 fi
-"${PYTHON}" -m cli.deploy.development init \
+"${PYTHON}" -m cli.administration.deploy.development init \
 	--apps "${APPS}" \
 	--inventory-dir "${INVENTORY_DIR}" \
 	--vars "${INIT_VARS}"
 
 if [[ "${FULL_CYCLE}" == "true" ]]; then
 	echo ">>> deploy (PASS 1 sync + PASS 2 async per variant, FULL_CYCLE=true)"
-	"${PYTHON}" -m cli.deploy.development deploy "${deploy_args[@]}" --full-cycle
+	"${PYTHON}" -m cli.administration.deploy.development deploy "${deploy_args[@]}" --full-cycle
 else
 	echo ">>> deploy (PASS 1 sync only, FULL_CYCLE=false)"
-	"${PYTHON}" -m cli.deploy.development deploy "${deploy_args[@]}"
+	"${PYTHON}" -m cli.administration.deploy.development deploy "${deploy_args[@]}"
 fi
 
 echo

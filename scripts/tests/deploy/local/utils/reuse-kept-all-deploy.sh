@@ -3,7 +3,7 @@
 #
 # Called from the host wrapper at
 # scripts/tests/deploy/local/deploy/reuse-kept-all.sh via
-# `cli.deploy.development exec --env KEY=VAL`, which injects the env-vars
+# `cli.administration.deploy.development exec --env KEY=VAL`, which injects the env-vars
 # asserted below. The repo is mounted at /opt/src/infinito by the dev
 # compose stack.
 #
@@ -23,7 +23,7 @@ cd /opt/src/infinito
 echo ">>> entry.sh bootstrap"
 ./scripts/docker/entry.sh true
 
-cmd=(infinito deploy dedicated "${INVENTORY_FILE}"
+cmd=(infinito administration deploy dedicated "${INVENTORY_FILE}"
 	--skip-backup
 	--skip-cleanup
 	-l "${LIMIT_HOST}"

@@ -97,11 +97,11 @@ echo "debug         = ${DEBUG}"
 echo
 
 echo ">>> Ensuring development stack is up (when-down)"
-"${PYTHON}" -m cli.deploy.development up \
+"${PYTHON}" -m cli.administration.deploy.development up \
 	--when-down
 
 echo ">>> Running entry.sh bootstrap inside container"
-"${PYTHON}" -m cli.deploy.development exec \
+"${PYTHON}" -m cli.administration.deploy.development exec \
 	-- bash /opt/src/infinito/scripts/tests/deploy/local/utils/entry-bootstrap.sh
 
 echo ">>> Creating inventory for app '${APPS}'"
@@ -111,13 +111,13 @@ echo ">>> Creating inventory for app '${APPS}'"
 # `RUNTIME=host` into host_vars and the Playwright E2E gate
 # (RUNTIME in [dev, act, github]) would never fire — kept-deploys would
 # silently skip the test stage. Mirrors fresh-purged-app.sh.
-"${PYTHON}" -m cli.deploy.development init \
+"${PYTHON}" -m cli.administration.deploy.development init \
 	--apps "${APPS}" \
 	--inventory-dir "${INVENTORY_DIR}" \
 	--vars '{"ASYNC_ENABLED": false, "RUNTIME": "dev"}'
 
 deploy_cmd=(
-	"${PYTHON}" -m cli.deploy.development deploy
+	"${PYTHON}" -m cli.administration.deploy.development deploy
 	--apps "${APPS}"
 	--inventory-dir "${INVENTORY_DIR}"
 )

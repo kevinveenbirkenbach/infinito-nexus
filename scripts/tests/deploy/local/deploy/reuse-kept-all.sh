@@ -64,7 +64,7 @@ echo "inv_file      = ${inv_file}"
 echo
 
 # Ensure stack is up
-"${PYTHON}" -m cli.deploy.development up \
+"${PYTHON}" -m cli.administration.deploy.development up \
 	--when-down \
 	--skip-entry-init
 
@@ -92,7 +92,7 @@ echo "apps_sample=$(
 echo
 
 # Run deploy inside container
-"${PYTHON}" -m cli.deploy.development exec \
+"${PYTHON}" -m cli.administration.deploy.development exec \
 	--env "INVENTORY_FILE=${inv_file}" \
 	--env "PW_FILE=${pw_file}" \
 	--env "LIMIT_HOST=${LIMIT_HOST}" \

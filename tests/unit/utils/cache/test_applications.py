@@ -179,7 +179,7 @@ class TestGetMergedApplicationsRespectsOverrides(unittest.TestCase):
 
 class TestApplicationsImportableWithoutAnsible(unittest.TestCase):
     """The CI runner-host CLI path
-    (`cli.deploy.development.init` -> `plan_dev_inventory_matrix` ->
+    (`cli.administration.deploy.development.init` -> `plan_dev_inventory_matrix` ->
     `get_variants`) MUST stay ansible-free. CI run 24935979190 broke
     because `_build_variants` instantiated `ApplicationGidLookup`,
     pulling `ansible.plugins.lookup.LookupBase` at call time. This

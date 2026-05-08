@@ -187,10 +187,10 @@ ignore = [
 # its formulas (``R if R < count else 0``) and the variable name
 # ``include_R`` reads as "round R's include set" right next to those
 # formulas. The uppercase R here is documentation, not a constant.
-"cli/deploy/development/deploy.py" = ["N806"]
-"cli/deploy/development/init.py" = ["N806"]
-"cli/deploy/development/inventory.py" = ["N806"]
-"tests/unit/cli/deploy/development/test_inventory.py" = ["N806"]
+"cli/administration/deploy/development/deploy.py" = ["N806"]
+"cli/administration/deploy/development/init.py" = ["N806"]
+"cli/administration/deploy/development/inventory.py" = ["N806"]
+"tests/unit/cli/administration/deploy/development/test_inventory.py" = ["N806"]
 
 # Lazy-loaded class binding: ``ValueGenerator = _value_generator_cls()``
 # rebinds the imported class inside the function. PEP 8 keeps the

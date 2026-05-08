@@ -82,7 +82,7 @@ cleanup() {
 		"${_playwright_host_dir}" 2>/dev/null || true
 
 	echo ">>> Removing stack for distro ${INFINITO_DISTRO} (fresh start for next distro)"
-	"${PYTHON}" -m cli.deploy.development down || true
+	"${PYTHON}" -m cli.administration.deploy.development down || true
 
 	echo ">>> HARD cleanup (containers/volumes/networks/images/build-cache)"
 	echo ">>> Docker disk usage before HARD cleanup"
@@ -147,7 +147,7 @@ trap cleanup EXIT
 echo ">>> Ensuring stack is up for distro ${INFINITO_DISTRO}"
 # Always reconcile the stack to the requested distro.
 # This avoids reusing a pre-started stack with a different INFINITO_DISTRO.
-"${PYTHON}" -m cli.deploy.development up
+"${PYTHON}" -m cli.administration.deploy.development up
 
 deploy_args=(
 	--apps "${APPS}"
@@ -161,7 +161,7 @@ docker system df || true
 echo ">>> END STATE BEFORE DEPLOY"
 
 echo ">>> init inventory (ASYNC_ENABLED=false baked into host_vars)"
-"${PYTHON}" -m cli.deploy.development init \
+"${PYTHON}" -m cli.administration.deploy.development init \
 	--apps "${APPS}" \
 	--inventory-dir "${INVENTORY_DIR}" \
 	--vars '{"ASYNC_ENABLED": false}'
@@ -173,7 +173,7 @@ echo ">>> init inventory (ASYNC_ENABLED=false baked into host_vars)"
 # deploy just produced and avoids the matrix-twice race the previous
 # split passes had on multi-variant roles.
 echo ">>> deploy (PASS 1 sync + PASS 2 async per variant, --full-cycle)"
-"${PYTHON}" -m cli.deploy.development deploy "${deploy_args[@]}" --full-cycle
+"${PYTHON}" -m cli.administration.deploy.development deploy "${deploy_args[@]}" --full-cycle
 
 echo ">>> DISK / DOCKER STATE AFTER DEPLOY (before cleanup, distro=${INFINITO_DISTRO})"
 df -h || true

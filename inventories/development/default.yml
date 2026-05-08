@@ -2,7 +2,7 @@
 #
 # Per-application overrides MUST live in the role itself under
 # `roles/<role>/meta/variants.yml` (one entry per matrix-deploy
-# variant). The dev init step at `cli/deploy/development/init.py`
+# variant). The dev init step at `cli/administration/deploy/development/init.py`
 # materialises one inventory folder per round (`<dir>-0`, `<dir>-1`,
 # ...; or just `<dir>` when there is a single round) with the active
 # variant baked into each folder's host_vars. The matching deploy step

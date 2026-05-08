@@ -20,7 +20,7 @@ infinito administration inventory provision /etc/infinito.nexus/inventories/prod
 ### Run the Deploy 🛠️
 
 ```bash
-infinito deploy dedicated /etc/infinito.nexus/inventories/prod/devices.yml \
+infinito administration deploy dedicated /etc/infinito.nexus/inventories/prod/devices.yml \
   --password-file /etc/infinito.nexus/inventories/prod/.password \
   --log /etc/infinito.nexus/logs \
   --diff \
@@ -32,7 +32,7 @@ infinito deploy dedicated /etc/infinito.nexus/inventories/prod/devices.yml \
 When you need to redeploy after changes, repeat the same two `infinito` commands:
 
 1. Re-run `infinito administration inventory provision ...` to refresh the inventory file and included app list.
-2. Re-run `infinito deploy dedicated ...` against the same inventory file.
+2. Re-run `infinito administration deploy dedicated ...` against the same inventory file.
 
 ## Inventory Notes 📒
 
