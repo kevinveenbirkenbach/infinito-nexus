@@ -1,22 +1,21 @@
-"""Lint guard: variants of an application MUST agree on the recursive
-set of dep roles they pull in.
+"""Lint guard: variant 0 is the role's baseline closure, every other
+variant's closure MUST be a subset of it.
 
 Background
 ==========
 The matrix-deploy mechanism (docs/contributing/design/variants.md)
-keeps prior-round state alive between rounds: a role whose variant did
-not change is left running at whatever state the previous round
-produced. If variant 0 of role A pulls in role B via shared-service
-auto-include but variant 1 of A does not, then a later round running
-A's variant 1 inherits a leftover B from the previous round — host
-state contradicts the variant's intent and tasks like
-``sys-svc-mail/01_core.yml`` make wrong decisions because their gating
-(``email.external``, group_names) reflects the per-play view while the
-host carries cross-play residue.
+treats variant 0 as the all-flags-true baseline and lets later
+variants pin individual dynamic flags to ``false`` to exercise the
+out-of-group_names branch (see ``test_coverage.py``). The closure
+of a "minimal" variant therefore SHRINKS relative to variant 0 —
+it drops deps that the disabled flags would otherwise auto-include.
+That shrinkage is by design.
 
-This lint forces every variant of an application to agree on its
-recursive dep closure (run_after + shared-service auto-include) so
-round-to-round transitions stay state-consistent.
+What is NOT acceptable is a non-baseline variant that adds a dep
+variant 0 does not have, because that breaks the "v0 is the maximal
+deploy footprint" contract every other tooling layer relies on
+(round-0 baseline include, deploy planner, dep-aware purge between
+rounds, etc.).
 
 Detection
 =========
@@ -27,11 +26,9 @@ For each application with ``len(variants) > 1``:
    (``services.<svc>.enabled is True AND shared is True``), using
    variant ``v`` for the application's own services and variant 0 for
    every recursive dep (deps don't track the parent's variant).
-2. Drop variants whose closure is empty (minimal/standalone variants
-   that intentionally disable every dep-pulling service drop out of
-   the dep ordering and cannot disagree with anything).
-3. If any two of the remaining (non-empty) closures differ, record
-   the divergence as an offender.
+2. If any non-baseline closure (``v > 0``) is NOT a subset of the
+   baseline closure (``v = 0``), record the divergence as an offender.
+   Empty closures trivially satisfy subset and are accepted.
 """
 
 from __future__ import annotations
@@ -90,9 +87,9 @@ def _closure(
 
 
 class TestVariantDepConsistency(unittest.TestCase):
-    """All variants of an application MUST resolve to the same dep closure."""
+    """Non-baseline variant closures MUST be subsets of variant 0's closure."""
 
-    def test_variants_agree_on_dep_closure(self) -> None:
+    def test_non_baseline_variant_closures_are_subsets_of_baseline(self) -> None:
         variants_by_app = get_variants(roles_dir=str(ROLES_DIR))
 
         # Service registry is built from variant 0 of every app — this
@@ -112,12 +109,12 @@ class TestVariantDepConsistency(unittest.TestCase):
                 _closure(app, variant, registry, ROLES_DIR, variants_by_app)
                 for variant in variants
             ]
-            # Variants whose closure is empty intentionally drop out of
-            # the dep ordering (minimal/standalone variants that disable
-            # every dep-pulling service). They cannot disagree with
-            # anything, so only non-empty closures are compared.
-            non_empty = [closure for closure in closures if closure]
-            if non_empty and any(closure != non_empty[0] for closure in non_empty[1:]):
+            baseline = closures[0]
+            # A non-baseline variant may shrink the closure (minimal /
+            # standalone variants pin dynamic flags to false) but it
+            # MUST NOT introduce a dep that the baseline lacks. Empty
+            # closures are subsets of anything and pass trivially.
+            if any(not closure.issubset(baseline) for closure in closures[1:]):
                 offenders[app] = [
                     (index, sorted(closure)) for index, closure in enumerate(closures)
                 ]
@@ -126,11 +123,12 @@ class TestVariantDepConsistency(unittest.TestCase):
             return
 
         lines = [
-            f"{len(offenders)} application(s) carry variants that disagree on "
-            "their recursive dep closure (run_after + shared-service "
-            "auto-include). Variants MUST resolve to the same set of "
-            "transitively-included roles, otherwise round-to-round "
-            "matrix-deploy transitions leave inconsistent host state.",
+            f"{len(offenders)} application(s) carry non-baseline variants "
+            "whose recursive dep closure is NOT a subset of variant 0's "
+            "closure. Variant 0 is the role's maximal deploy footprint; "
+            "later variants may only DROP deps, never introduce new ones, "
+            "so the round-0 baseline include and the dep-aware purge "
+            "logic stay consistent across the matrix.",
             "",
             "Background: docs/contributing/design/variants.md",
             "",
