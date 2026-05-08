@@ -27,15 +27,19 @@ A higher count is fine for short bursts of releases, but the active changelog SH
 ## Cutting a Release ✂️
 
 1. Update [CHANGELOG.md](../../../CHANGELOG.md): prepend a new `## [<version>] - <YYYY-MM-DD>` section with the change set, written in the same style as the existing entries.
-2. Trim the active changelog and emit fresh archive files:
+   When the release ships package metadata, also update [packaging/debian/changelog](../../../packaging/debian/changelog) and the `%changelog` section of [packaging/fedora/infinito-nexus.spec](../../../packaging/fedora/infinito-nexus.spec) with the corresponding entries.
+2. Trim [CHANGELOG.md](../../../CHANGELOG.md) and mirror its kept entries into the package changelogs:
 
    ```bash
    python -m cli.contributing.changelog.archive
    ```
 
-   The CLI reads [CHANGELOG.md](../../../CHANGELOG.md), keeps the most recent 7 entries, and writes every older entry to its own file under [docs/changelog/](../../changelog/) named `<padded-semver>-<release-date>.md`.
-   It then rebuilds the `## Older Releases` index at the bottom of the active changelog from the archive directory listing, so the index never drifts away from what is on disk.
-   Pass `--keep N` to override the retention count, or `--dry-run` to preview without writing.
+   The CLI keeps the most recent 7 entries (override with `--keep N`) and processes each of the following files:
+
+   - [CHANGELOG.md](../../../CHANGELOG.md) is trimmed; every older entry is written to its own file under [docs/changelog/](../../changelog/) named `<padded-semver>-<release-date>.md`, and the `## Older Releases` index at the bottom of the active changelog is rebuilt from the archive directory listing so it never drifts away from what is on disk.
+   - [packaging/debian/changelog](../../../packaging/debian/changelog) and the `%changelog` section of [packaging/fedora/infinito-nexus.spec](../../../packaging/fedora/infinito-nexus.spec) are regenerated from the kept CHANGELOG.md entries, with a trailing notice that points at [docs.infinito.nexus](https://docs.infinito.nexus/) for further releases and a plain-text list of the archived versions and their dates (no links).
+
+   Pass `--dry-run` to preview without writing.
 3. Run `make test` locally and confirm everything is green.
 4. Commit the changelog and any archive additions in a single commit with subject `Release version <MAJOR>.<MINOR>.<PATCH>` (matching the historical convention).
 5. Tag the commit: `git tag -a v<MAJOR>.<MINOR>.<PATCH> -m "Release version <MAJOR>.<MINOR>.<PATCH>"`.
@@ -54,8 +58,8 @@ Both run from the trusted workflow ref and check out the version tag for the act
 
 ## Idempotence 🔁
 
-The archive CLI is idempotent.
-Re-running it on an already-trimmed changelog is a no-op, and existing archive files are NOT overwritten.
+The archive CLI is byte-idempotent.
+Re-running it on an already-processed tree leaves every file unchanged: CHANGELOG.md is rewritten only when its target content differs from disk, the per-release archive files are never overwritten, and the package changelogs are only rewritten when the regenerated content differs from disk.
 This makes it safe to run from a pre-commit hook, a release script, or by hand without keeping track of state.
 
 ## Related Pages 🔗
