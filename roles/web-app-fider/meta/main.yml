@@ -2,13 +2,10 @@ galaxy_info:
   author: Alejandro Roman Ibanez
   description: Deploy Fider, an open-source community feedback platform where users submit proposals and vote on them — producing a transparent, automatically ranked list of the most supported ideas and organizations.
   license: Infinito.Nexus Community License (Non-Commercial)
-  company: 'Kevin Veen-Birkenbach
-
+  company: |
+    Kevin Veen-Birkenbach
     Consulting & Coaching Solutions
-
     https://www.veen.world
-
-    '
   galaxy_tags:
     - fider
     - docker

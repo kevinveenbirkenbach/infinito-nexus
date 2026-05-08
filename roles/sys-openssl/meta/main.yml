@@ -2,13 +2,10 @@ galaxy_info:
   author: Kevin Veen-Birkenbach
   description: Ensures OpenSSL is installed once as a shared host dependency for roles that invoke the `openssl` CLI.
   license: Infinito.Nexus Community License (Non-Commercial)
-  company: 'Kevin Veen-Birkenbach
-
+  company: |
+    Kevin Veen-Birkenbach
     Consulting & Coaching Solutions
-
     https://www.veen.world
-
-    '
   min_ansible_version: '2.9'
   platforms:
     - name: Linux

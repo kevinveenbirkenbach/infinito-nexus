@@ -2,13 +2,10 @@ galaxy_info:
   author: Kevin Veen-Birkenbach
   description: Installs Intel media drivers (VA-API) for the current distribution.
   license: Infinito.Nexus Community License (Non-Commercial)
-  company: 'Kevin Veen-Birkenbach
-
+  company: |
+    Kevin Veen-Birkenbach
     Consulting & Coaching Solutions
-
     https://www.veen.world
-
-    '
   galaxy_tags:
     - intel
     - media

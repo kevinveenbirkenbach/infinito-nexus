@@ -2,13 +2,10 @@ galaxy_info:
   author: Kevin Veen-Birkenbach
   description: Provides a Docker Compose snippet for a Memcached service (`memcached`) with optional volume, healthcheck, and logging.
   license: Infinito.Nexus Community License (Non-Commercial)
-  company: 'Kevin Veen-Birkenbach
-
+  company: |
+    Kevin Veen-Birkenbach
     Consulting & Coaching Solutions
-
     https://www.veen.world
-
-    '
   galaxy_tags:
     - memcached
     - docker

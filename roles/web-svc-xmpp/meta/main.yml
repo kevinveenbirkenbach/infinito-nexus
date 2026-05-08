@@ -2,7 +2,10 @@ galaxy_info:
   author: Kevin Veen-Birchenbach
   description: Stub role for deploying an XMPP server/container—implementation pending.
   license: Infinito.Nexus Community License (Non-Commercial)
-  company: Kevin Veen-Birchenbach Consulting & Coaching Solutions https://www.veen.world
+  company: |
+    Kevin Veen-Birkenbach
+    Consulting & Coaching Solutions
+    https://www.veen.world
   galaxy_tags:
     - xmpp
     - chat

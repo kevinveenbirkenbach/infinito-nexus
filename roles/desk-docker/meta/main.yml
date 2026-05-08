@@ -2,7 +2,10 @@ galaxy_info:
   author: Kevin Veen-Birchenbach
   description: Installs Docker and Docker Compose, and adds a user to the Docker group for non-root usage on development machines.
   license: Infinito.Nexus Community License (Non-Commercial)
-  company: Kevin Veen-Birchenbach Consulting & Coaching Solutions https://www.veen.world
+  company: |
+    Kevin Veen-Birkenbach
+    Consulting & Coaching Solutions
+    https://www.veen.world
   galaxy_tags:
     - docker
     - development

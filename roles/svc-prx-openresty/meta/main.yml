@@ -4,7 +4,10 @@ galaxy_info:
 
     '
   license: Infinito.Nexus Community License (Non-Commercial)
-  company: "Kevin Veen‑Birkenbach  \nConsulting & Coaching Solutions  \nhttps://www.veen.world\n"
+  company: |
+    Kevin Veen-Birkenbach
+    Consulting & Coaching Solutions
+    https://www.veen.world
   galaxy_tags:
     - openresty
     - nginx

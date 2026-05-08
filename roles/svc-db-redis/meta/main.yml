@@ -2,7 +2,10 @@ galaxy_info:
   author: Kevin Veen-Birchenbach
   description: Provides a Docker Compose snippet for a Redis service (redis:alpine) with volume, healthcheck and logging.
   license: Infinito.Nexus Community License (Non-Commercial)
-  company: Kevin Veen-Birchenbach Consulting & Coaching Solutions https://www.veen.world
+  company: |
+    Kevin Veen-Birkenbach
+    Consulting & Coaching Solutions
+    https://www.veen.world
   galaxy_tags:
     - redis
     - docker

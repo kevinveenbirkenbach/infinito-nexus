@@ -2,7 +2,10 @@ galaxy_info:
   author: Kevin Veen-Birkenbach
   description: Installs CA trust injection assets for compose (wrapper + inject script) and validates CA cert presence.
   license: Infinito.Nexus Community License (Non-Commercial)
-  company: "Kevin Veen-Birkenbach Consulting & Coaching Solutions https://www.veen.world"
+  company: |
+    Kevin Veen-Birkenbach
+    Consulting & Coaching Solutions
+    https://www.veen.world
   galaxy_tags:
     - docker
     - compose

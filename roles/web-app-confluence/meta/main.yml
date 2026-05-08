@@ -2,13 +2,10 @@ galaxy_info:
   author: Kevin Veen-Birkenbach
   description: Confluence is an enterprise wiki and collaboration platform by Atlassian. This role deploys Confluence in Docker, adds support for OIDC authentication, and integrates with the Infinito.Nexus ecosystem.
   license: Infinito.Nexus Community License (Non-Commercial)
-  company: 'Kevin Veen-Birkenbach
-
+  company: |
+    Kevin Veen-Birkenbach
     Consulting & Coaching Solutions
-
     https://www.veen.world
-
-    '
   galaxy_tags:
     - wiki
     - documentation
