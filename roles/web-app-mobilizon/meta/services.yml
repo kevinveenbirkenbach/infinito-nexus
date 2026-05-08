@@ -1,3 +1,4 @@
+---
 oidc:
   enabled: "{{ 'web-app-keycloak' in group_names }}"
   shared: "{{ 'web-app-keycloak' in group_names }}"
@@ -14,7 +15,7 @@ email:
   enabled: "{{ 'web-app-mailu' in group_names }}"
   shared: "{{ 'web-app-mailu' in group_names }}"
 postgres:
-  enabled: true  # nocheck: dynamic-flag
+  enabled: true # nocheck: dynamic-flag
   shared: "{{ 'svc-db-postgres' in group_names }}"
 mobilizon:
   image: docker.io/kaihuri/mobilizon
@@ -30,7 +31,7 @@ mobilizon:
     - web-app-keycloak
     - web-app-mailu
   lifecycle: beta
-  cpus: '0.2'
+  cpus: "0.2"
   mem_reservation: 128m
   mem_limit: 256m
   pids_limit: 256

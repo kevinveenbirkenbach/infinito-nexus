@@ -1,3 +1,4 @@
+---
 galaxy_info:
   author: Kevin Veen-Birkenbach
   description: Manages Docker Compose project structure and execution logic on Arch Linux.
@@ -5,7 +6,7 @@ galaxy_info:
   company: |
     Kevin Veen-Birkenbach
     https://www.veen.world
-  min_ansible_version: '2.9'
+  min_ansible_version: "2.9"
   platforms:
     - name: ArchLinux
       versions:

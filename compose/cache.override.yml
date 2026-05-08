@@ -1,3 +1,4 @@
+---
 # Layered on compose.yml by the dev tooling when the cache stack is
 # active. See docs/contributing/environment/cache.md.
 
@@ -38,7 +39,9 @@ services:
     # Run as root: fresh bind-mount is root:root and Nexus aborts otherwise.
     user: "0:0"
     environment:
-      INSTALL4J_ADD_VM_PARAMS: "-Xms${INFINITO_PACKAGE_CACHE_HEAP:?Source scripts/meta/env/cache/package.sh before running docker compose} -Xmx${INFINITO_PACKAGE_CACHE_HEAP:?Source scripts/meta/env/cache/package.sh before running docker compose} -XX:MaxDirectMemorySize=${INFINITO_PACKAGE_CACHE_DIRECT_MEM:?Source scripts/meta/env/cache/package.sh before running docker compose}"
+      INSTALL4J_ADD_VM_PARAMS: "-Xms${INFINITO_PACKAGE_CACHE_HEAP:?Source scripts/meta/env/cache/package.sh before running docker compose} -Xmx${INFINITO_PACKAGE_CACHE_HEAP:?Source
+        scripts/meta/env/cache/package.sh before running docker compose} -XX:MaxDirectMemorySize=${INFINITO_PACKAGE_CACHE_DIRECT_MEM:?Source scripts/meta/env/cache/package.sh
+        before running docker compose}"
       # Random-password mode leaves no readable secret for the bootstrap.
       NEXUS_SECURITY_RANDOMPASSWORD: "false"
     volumes:
@@ -123,7 +126,8 @@ services:
         read_only: true
         bind:
           create_host_path: true
-      - ${INFINITO_REGISTRY_CACHE_PROXY_CONF:?Source scripts/meta/env/cache/registry.sh before running docker compose}:/etc/systemd/system/docker.service.d/registry-cache-proxy.conf:ro
+      - ${INFINITO_REGISTRY_CACHE_PROXY_CONF:?Source scripts/meta/env/cache/registry.sh before running docker
+        compose}:/etc/systemd/system/docker.service.d/registry-cache-proxy.conf:ro
       - ./scripts/docker/cache/registry-ca.sh:/usr/local/bin/registry-cache-ca.sh:ro
       - ${INFINITO_PACKAGE_CACHE_PIP_CONF:?Source scripts/meta/env/cache/package.sh before running docker compose}:/etc/pip.conf:ro
       - ${INFINITO_PACKAGE_CACHE_NPMRC:?Source scripts/meta/env/cache/package.sh before running docker compose}:/root/.npmrc:ro

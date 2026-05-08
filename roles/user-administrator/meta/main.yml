@@ -1,11 +1,13 @@
+---
 galaxy_info:
   author: Kevin Veen-Birkenbach
-  description: Creates a dedicated administrator user with secure privilege escalation. Configures the account, home directory, SSH settings, and grants sudo privileges with password authentication.
+  description: Creates a dedicated administrator user with secure privilege escalation. Configures the account, home directory, SSH settings, and grants sudo
+    privileges with password authentication.
   license: Infinito.Nexus Community License (Non-Commercial)
   company: |
     Kevin Veen-Birkenbach
     https://www.veen.world
-  min_ansible_version: '2.9'
+  min_ansible_version: "2.9"
   platforms:
     - name: ArchLinux
       versions:

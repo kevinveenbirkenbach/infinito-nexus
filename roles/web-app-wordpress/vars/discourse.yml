@@ -1,3 +1,4 @@
+---
 # Defines WP Discourse plugin settings
 # @see https://github.com/discourse/wp-discourse
 
@@ -15,7 +16,7 @@
 # commented-out default below.
 
 discourse_settings:
-  #- name: wpdc_discourse_domain
+  # - name: wpdc_discourse_domain
   #  key: wpdc_discourse_domain
   #  value: ""
 
@@ -84,7 +85,7 @@ discourse_settings:
   #- name: discourse_publish
   #  key: discourse-username-editable
   #  value: false
-#
+  #
   #- name: discourse_comment
   #  key: enable-discourse-comments
   #  value: false
@@ -139,7 +140,7 @@ discourse_settings:
   #- name: discourse_comment
   #  key: load-comment-css
   #  value: false
-#
+  #
   #- name: discourse_configurable_text
   #  key: discourse-link-text
   #  value: ""
@@ -191,7 +192,7 @@ discourse_settings:
   #- name: discourse_configurable_text
   #  key: linked-to-discourse-text
   #  value: "Your account is linked with Discourse!"
-#
+  #
   #- name: discourse_webhook
   #  key: use-discourse-webhook
   #  value: false
@@ -207,11 +208,11 @@ discourse_settings:
   #- name: discourse_webhook
   #  key: webhook-match-user-email
   #  value: false
-#
+  #
   #- name: discourse_sso_common
   #  key: sso-secret
   #  value: ""
-#
+  #
   #- name: discourse_sso_provider
   #  key: enable-sso
   #  value: false
@@ -230,7 +231,7 @@ discourse_settings:
   #- name: discourse_sso_provider
   #  key: redirect-without-login
   #  value: false
-#
+  #
   #- name: discourse_sso_client
   #  key: sso-desktop-enabled
   #  value: false
@@ -249,7 +250,7 @@ discourse_settings:
   #- name: discourse_sso_client
   #  key: sso-desktop-sync-logout
   #  value: false
-#
+  #
   - name: discourse_logs
     key: logs-enabled
     value: "{{ MODE_DEBUG }}"

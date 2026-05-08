@@ -1,3 +1,4 @@
+---
 galaxy_info:
   author: Kevin Veen-Birchenbach
   description: Self-signed TLS provider for sys-front-tls (SAN aware). Generates and stores self-signed certificates
@@ -13,7 +14,7 @@ galaxy_info:
     - certificates
     - openssl
   issue_tracker_url: https://s.infinito.nexus/issues
-  min_ansible_version: '2.9'
+  min_ansible_version: "2.9"
   platforms:
     - name: ArchLinux
       versions:

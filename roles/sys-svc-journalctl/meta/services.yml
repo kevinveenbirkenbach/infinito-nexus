@@ -1,2 +1,3 @@
+---
 svc-journalctl:
   lifecycle: beta

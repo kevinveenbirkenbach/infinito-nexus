@@ -1,3 +1,4 @@
+---
 libretranslate:
   enabled: true
   shared: true
@@ -9,7 +10,7 @@ libretranslate:
       http: 8045
       oauth2: 16493
   lifecycle: beta
-  cpus: '0.2'
+  cpus: "0.2"
   mem_reservation: 128m
   mem_limit: 256m
   pids_limit: 256
@@ -28,7 +29,7 @@ oauth2:
       - /frontend/settings
       - /api
   allowed_groups:
-  - '{{ lookup(''rbac_group_path'', application_id=''web-svc-libretranslate'', role=''administrator'') }}'
+    - "{{ lookup('rbac_group_path', application_id='web-svc-libretranslate', role='administrator') }}"
 # nocheck: dynamic-flag
 logout:
   enabled: false

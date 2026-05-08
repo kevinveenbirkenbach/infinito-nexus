@@ -1,6 +1,7 @@
+---
 domains:
   canonical:
-  - joomla.cms.{{ DOMAIN_PRIMARY }}
+    - joomla.cms.{{ DOMAIN_PRIMARY }}
   aliases: []
 csp:
   flags:

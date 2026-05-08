@@ -3,14 +3,14 @@
   include_role:
     name: sys-stk-backend
   vars:
-    docker_compose_flush_handlers:        true
-    docker_git_repository_pull:           false
+    docker_compose_flush_handlers: true
+    docker_git_repository_pull: false
 
 - name: "Include role sys-stk-front-proxy for '{{ application_id }}'"
   include_role:
     name: sys-stk-front-proxy
   vars:
-    domain:    "{{ minio_proxy.domain }}"
+    domain: "{{ minio_proxy.domain }}"
     http_port: "{{ minio_proxy.http_port }}"
   loop: "{{ MINIO_FRONT_PROXY_MATRIX }}"
   loop_control:

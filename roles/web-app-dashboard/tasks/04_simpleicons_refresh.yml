@@ -1,3 +1,4 @@
+---
 - name: Wait for a known Simple Icons asset before rebuilding dashboard cards
   uri_retry:
     url: "{{ DASHBOARD_SIMPLEICONS_SYNC_URL_BASE }}keycloak.svg"
@@ -21,7 +22,7 @@
   get_url_retry:
     url: "{{ DASHBOARD_SIMPLEICONS_SYNC_URL_BASE }}{{ item.icon.source | basename }}"
     dest: "{{ [DASHBOARD_SIMPLEICONS_STATIC_DIR_HOST, (item.icon.source | basename)] | path_join }}"
-    mode: '0644'
+    mode: "0644"
     validate_certs: false
   loop: "{{ portfolio_cards }}"
   loop_control:

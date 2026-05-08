@@ -54,6 +54,15 @@ else
 	skipped+=("ansible-lint")
 fi
 
+# ── mbake (Makefile auto-formatter, idempotent after 2 passes) ───────────────
+if command -v mbake &>/dev/null; then
+	mbake format Makefile >/dev/null 2>&1 || true
+	mbake format Makefile >/dev/null 2>&1 || true
+	ran+=("mbake")
+else
+	skipped+=("mbake")
+fi
+
 # ── shellcheck (shell script linter with autofix via diff) ───────────────────
 if command -v shellcheck &>/dev/null; then
 	mapfile -t shellcheck_files < <(find . -type f -name '*.sh' 2>/dev/null | sort)

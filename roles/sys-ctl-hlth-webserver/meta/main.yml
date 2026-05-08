@@ -1,3 +1,4 @@
+---
 galaxy_info:
   author: Kevin Veen-Birkenbach
   description: Checks that each Nginx domain returns its expected HTTP status and alerts on unexpected codes.
@@ -5,7 +6,7 @@ galaxy_info:
     Kevin Veen-Birkenbach
     https://www.veen.world
   license: Infinito.Nexus Community License (Non-Commercial)
-  min_ansible_version: '2.9'
+  min_ansible_version: "2.9"
   platforms:
     - name: ArchLinux
       versions:

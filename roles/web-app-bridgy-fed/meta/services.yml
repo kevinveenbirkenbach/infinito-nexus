@@ -1,3 +1,4 @@
+---
 # nocheck: dynamic-flag
 # nocheck: logout
 logout:
@@ -26,7 +27,7 @@ application:
   repository: https://github.com/snarfed/bridgy-fed.git
   branch: main
   min_storage: 5GB
-  cpus: '0.5'
+  cpus: "0.5"
   mem_reservation: 256m
   mem_limit: 1g
   pids_limit: 512
@@ -43,7 +44,7 @@ bridgy-fed:
       http: 8053
   lifecycle: beta
   min_storage: 1GB
-  cpus: '0.2'
+  cpus: "0.2"
   mem_reservation: 128m
   mem_limit: 256m
   pids_limit: 256

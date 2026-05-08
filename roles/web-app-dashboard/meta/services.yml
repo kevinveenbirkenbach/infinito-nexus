@@ -1,3 +1,4 @@
+---
 oidc:
   enabled: "{{ 'web-app-keycloak' in group_names }}"
   shared: "{{ 'web-app-keycloak' in group_names }}"
@@ -23,7 +24,7 @@ dashboard:
   image: ghcr.io/kevinveenbirkenbach/port-ui
   version: 1.1.0
   min_storage: 1GB
-  cpus: '0.3'
+  cpus: "0.3"
   mem_reservation: 256m
   mem_limit: 512m
   pids_limit: 256
@@ -31,7 +32,7 @@ dashboard:
     local:
       http: 8029
   run_after:
-  - web-app-matomo
+    - web-app-matomo
   lifecycle: beta
 # nocheck: dynamic-flag
 css:

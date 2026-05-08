@@ -1,11 +1,13 @@
+---
 galaxy_info:
   author: Kevin Veen-Birkenbach
-  description: Manages the generation and handling of an SSH key for the root user. This role ensures secure remote access by generating a new RSA 4096-bit key pair if one does not exist, and displays the public key for further use.
+  description: Manages the generation and handling of an SSH key for the root user. This role ensures secure remote access by generating a new RSA 4096-bit key
+    pair if one does not exist, and displays the public key for further use.
   license: Infinito.Nexus Community License (Non-Commercial)
   company: |
     Kevin Veen-Birkenbach
     https://www.veen.world
-  min_ansible_version: '2.9'
+  min_ansible_version: "2.9"
   platforms:
     - name: ArchLinux
       versions:

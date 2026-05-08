@@ -16,25 +16,24 @@ else
 $(error Missing env file: $(ENV_SH))
 endif
 
-.PHONY: \
-	setup setup-clean install install-ansible install-lint install-venv install-python install-system-python install-skills update-skills agent-install \
-	test lint lint-action lint-ansible lint-python lint-shellcheck lint-markdown lint-galaxy autoformat test-lint test-unit test-integration test-external test-deploy test-deploy-app \
-	clean clean-sudo down cache-clean \
-	system-purge system-disk-usage \
-	list tree mig dockerignore chmod-scripts \
-	print-python \
-	dns-setup dns-remove \
-	environment-bootstrap environment-teardown \
-	wsl2-systemd-check wsl2-dns-setup wsl2-trust-windows \
-	apparmor-teardown apparmor-restore \
-	disable-ipv6 restore-ipv6 \
-	trust-ca \
-	restart refresh exec up down stop \
-	build build-missing build-no-cache build-no-cache-all build-cleanup \
-	act-all act-app act-workflow \
-	deploy-fresh-kept-apps container-refresh-inventory deploy-reuse-kept-all container-purge-entity container-purge-system \
-	deploy-fresh-purged-apps deploy-reuse-kept-apps deploy-reuse-purged-apps deploy-fresh-kept-all \
-	bootstrap mark-development
+.PHONY: setup setup-clean install install-ansible install-lint install-venv install-python install-python-dev install-system-python install-skills update-skills agent-install
+.PHONY: test lint lint-action lint-ansible lint-python lint-shellcheck lint-markdown lint-galaxy lint-makefile autoformat test-lint test-unit test-integration test-external test-deploy test-deploy-app
+.PHONY: clean clean-sudo down cache-clean
+.PHONY: system-purge system-disk-usage
+.PHONY: list tree mig dockerignore chmod-scripts
+.PHONY: print-python
+.PHONY: dns-setup dns-remove
+.PHONY: environment-bootstrap environment-teardown
+.PHONY: wsl2-systemd-check wsl2-dns-setup wsl2-trust-windows
+.PHONY: apparmor-teardown apparmor-restore
+.PHONY: disable-ipv6 restore-ipv6
+.PHONY: trust-ca
+.PHONY: restart refresh exec up down stop
+.PHONY: build build-missing build-no-cache build-no-cache-all build-cleanup build-dependency
+.PHONY: act-all act-app act-workflow
+.PHONY: deploy-fresh-kept-apps container-refresh-inventory deploy-reuse-kept-all container-purge-entity container-purge-system
+.PHONY: deploy-fresh-purged-apps deploy-reuse-kept-apps deploy-reuse-purged-apps deploy-fresh-kept-all
+.PHONY: bootstrap mark-development
 
 # Bootstrap the local development environment.
 environment-bootstrap: wsl2-systemd-check install-python-dev install-lint apparmor-teardown dns-setup disable-ipv6
@@ -204,8 +203,8 @@ build-no-cache: build-dependency
 build-no-cache-all:
 	@set -euo pipefail; \
 	for d in $${DISTROS}; do \
-	  echo "=== build-no-cache: $$d ==="; \
-	  INFINITO_DISTRO="$$d" "$(MAKE)" build-no-cache; \
+		echo "=== build-no-cache: $$d ==="; \
+		INFINITO_DISTRO="$$d" "$(MAKE)" build-no-cache; \
 	done
 
 # Clean up image artifacts.
@@ -275,7 +274,7 @@ setup-clean: clean setup
 	@echo "Full build with cleanup before was executed."
 
 # Run all lint checks.
-lint: lint-action lint-ansible lint-python lint-shellcheck lint-markdown lint-galaxy
+lint: lint-action lint-ansible lint-python lint-shellcheck lint-markdown lint-galaxy lint-makefile
 
 # Run the GitHub Actions lint checks.
 lint-action:
@@ -300,6 +299,10 @@ lint-markdown:
 # Run galaxy-importer schema validation across roles/.
 lint-galaxy:
 	@bash scripts/lint/galaxy.sh
+
+# Run checkmake against the Makefile.
+lint-makefile:
+	@bash scripts/lint/makefile.sh
 
 # Auto-format all source files (skips tools that are not installed).
 autoformat:
@@ -384,4 +387,3 @@ deploy-reuse-kept-all:
 # Purge one or more app entities, then redeploy them on existing inventory.
 deploy-reuse-purged-apps: container-purge-entity
 	@$(MAKE) deploy-reuse-kept-apps
-

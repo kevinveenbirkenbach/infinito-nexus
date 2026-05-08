@@ -53,6 +53,13 @@ repos:
         pass_filenames: false
         files: ^roles/[^/]+/meta/main\.yml$
         stages: [pre-commit]
+      - id: make-lint-makefile
+        name: Run make lint-makefile
+        entry: make lint-makefile
+        language: system
+        pass_filenames: false
+        files: ^Makefile$
+        stages: [pre-commit]
 
       # ---- aggregate test runs -----------------------------------------
       - id: make-test

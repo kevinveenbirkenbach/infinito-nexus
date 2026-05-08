@@ -1,3 +1,4 @@
+---
 oidc:
   enabled: "{{ 'web-app-keycloak' in group_names }}"
   shared: "{{ 'web-app-keycloak' in group_names }}"
@@ -17,14 +18,14 @@ email:
   enabled: "{{ 'web-app-mailu' in group_names }}"
   shared: "{{ 'web-app-mailu' in group_names }}"
 postgres:
-  enabled: true  # nocheck: dynamic-flag
+  enabled: true # nocheck: dynamic-flag
   shared: "{{ 'svc-db-postgres' in group_names }}"
 odoo:
   image: odoo
-  version: '19.0'
+  version: "19.0"
   name: odoo
   min_storage: 20GB
-  cpus: '2.0'
+  cpus: "2.0"
   mem_reservation: 2g
   mem_limit: 4g
   pids_limit: 1024
@@ -34,27 +35,27 @@ odoo:
     from_name: ERP ({{ DOMAIN_PRIMARY }})
   modules:
     core:
-    - crm
-    - contacts
-    - sale_management
-    - account
-    - website
-    - project
-    - stock
+      - crm
+      - contacts
+      - sale_management
+      - account
+      - website
+      - project
+      - stock
     optional: []
   ports:
     local:
       websocket: 4003
       http: 8068
   run_after:
-  - web-app-keycloak
-  - web-app-mailu
+    - web-app-keycloak
+    - web-app-mailu
   lifecycle: beta
 # nocheck: dynamic-flag
 redis:
   enabled: true
   shared: false
-  cpus: '0.5'
+  cpus: "0.5"
   mem_reservation: 256m
   mem_limit: 512m
   pids_limit: 256

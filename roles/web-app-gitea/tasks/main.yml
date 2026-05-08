@@ -44,7 +44,7 @@
     url: "http://{{ DOCKER_REACH_HOST }}:{{ lookup('config', application_id, 'services.gitea.ports.local.http') }}/api/v1/version"
     method: GET
     status_code: 200
-    return_content: no
+    return_content: false
   register: gitea_ready
   until: gitea_ready.status == 200
   retries: 20
@@ -55,7 +55,7 @@
   include_tasks: 02_setup.yml
 
 - name: Execute Cleanup Routines
-  include_tasks: 03_cleanup.yml 
+  include_tasks: 03_cleanup.yml
   when: MODE_CLEANUP | bool
 
 - name: Include DNS role to register Gitea domain(s)
@@ -63,9 +63,9 @@
     name: sys-dns-cloudflare-records
   vars:
     cloudflare_records:
-      - zone:     "{{ lookup('domain',application_id) | to_zone }}"
-        type:     A
-        name:    "{{ lookup('domain',application_id) }}"
+      - zone: "{{ lookup('domain',application_id) | to_zone }}"
+        type: A
+        name: "{{ lookup('domain',application_id) }}"
         content: "{{ networks.internet.ip4 }}"
-        proxied: false  # Necessary for SSH port
+        proxied: false # Necessary for SSH port
   when: DNS_PROVIDER == 'cloudflare'

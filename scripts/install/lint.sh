@@ -375,6 +375,23 @@ ensure_actionlint() {
 	}
 }
 
+install_mbake_with_pip() {
+	install_pip_pkg "${MBAKE_PIP_SPEC:-mbake}"
+}
+
+ensure_mbake() {
+	if command -v mbake >/dev/null 2>&1; then
+		return 0
+	fi
+	log "Missing command 'mbake'. Installing via pip."
+	install_mbake_with_pip || return 1
+	hash -r
+	command -v mbake >/dev/null 2>&1 || {
+		warn "Command 'mbake' is still unavailable after installation."
+		return 1
+	}
+}
+
 detect_python_scripts_dir() {
 	local python_bin="$1"
 
@@ -755,6 +772,10 @@ install_markdown_tools() {
 	ensure_markdownlint_cli2
 }
 
+install_makefile_tools() {
+	ensure_mbake
+}
+
 install_requested_group() {
 	local group="$1"
 
@@ -765,6 +786,7 @@ install_requested_group() {
 		install_python_tools
 		install_shellcheck_tools
 		install_markdown_tools
+		install_makefile_tools
 		;;
 	action)
 		install_action_tools
@@ -781,8 +803,11 @@ install_requested_group() {
 	markdown)
 		install_markdown_tools
 		;;
+	makefile)
+		install_makefile_tools
+		;;
 	*)
-		warn "Usage: $0 [all|action|ansible|python|shellcheck|markdown]..."
+		warn "Usage: $0 [all|action|ansible|python|shellcheck|markdown|makefile]..."
 		return 2
 		;;
 	esac
