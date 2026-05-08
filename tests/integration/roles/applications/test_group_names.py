@@ -8,7 +8,7 @@ from . import PROJECT_ROOT
 ROOT = str(PROJECT_ROOT)
 sys.path.insert(0, ROOT)
 
-from cli.meta.applications.all import find_application_ids  # noqa: E402
+from cli.meta.roles.applications.all import find_application_ids  # noqa: E402
 from utils.cache.files import iter_project_files_with_content  # noqa: E402
 
 

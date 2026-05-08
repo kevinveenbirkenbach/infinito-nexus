@@ -33,7 +33,7 @@ ROLES_DIR = PROJECT_ROOT / "roles"
 
 ALLOWED_LIFECYCLES = {
     # Linear lifecycle axis. See
-    # docs/contributing/design/services/lifecycle.md for the criteria each
+    # docs/contributing/design/role/services/lifecycle.md for the criteria each
     # value commits the role to.
     "planned",
     "pre-alpha",

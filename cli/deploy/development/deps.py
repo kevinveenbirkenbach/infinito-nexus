@@ -15,7 +15,7 @@ def resolve_run_after(
 ) -> list[str]:
     """
     Calls resolver inside the infinito container:
-      python -m cli.meta.applications.resolution.combined <role_name>
+      python -m cli.meta.roles.applications.resolution.combined <role_name>
         [--services-overrides <path-inside-container>]
 
     `services_overrides_container_path` is the in-container path to a
@@ -24,7 +24,12 @@ def resolve_run_after(
     (variant-aware planner) write the file to a path that is shared
     with the container before calling.
     """
-    cmd = ["python3", "-m", "cli.meta.applications.resolution.combined", role_name]
+    cmd = [
+        "python3",
+        "-m",
+        "cli.meta.roles.applications.resolution.combined",
+        role_name,
+    ]
     if services_overrides_container_path:
         cmd.extend(["--services-overrides", services_overrides_container_path])
     r = compose.exec(cmd, check=False, workdir="/opt/src/infinito", capture=True)

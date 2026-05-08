@@ -84,7 +84,7 @@ lifecycles_args=(--lifecycles alpha beta rc stable)
 # ------------------------------------------------------------
 apps_json="$(
 	compose_ci_exec \
-		"${PYTHON}" -m cli.meta.applications.type \
+		"${PYTHON}" -m cli.meta.roles.applications.type \
 		--format json \
 		--type "${TEST_DEPLOY_TYPE}" \
 		"${lifecycles_args[@]}" |
@@ -110,7 +110,7 @@ if [[ -n "${GITHUB_ACTIONS:-}" && -z "${ACT:-}" ]]; then
 	if [[ "${#roles[@]}" -gt 0 ]]; then
 		# Warnings pass (best-effort)
 		compose_ci_exec \
-			"${PYTHON}" -m cli.meta.applications.sufficient_storage \
+			"${PYTHON}" -m cli.meta.roles.applications.sufficient_storage \
 			--roles "${roles[@]}" \
 			--required-storage "${required_storage}" \
 			--warnings \
@@ -120,7 +120,7 @@ if [[ -n "${GITHUB_ACTIONS:-}" && -z "${ACT:-}" ]]; then
 		# Real filter (JSON output)
 		apps_json="$(
 			compose_ci_exec \
-				"${PYTHON}" -m cli.meta.applications.sufficient_storage \
+				"${PYTHON}" -m cli.meta.roles.applications.sufficient_storage \
 				--roles "${roles[@]}" \
 				--required-storage "${required_storage}" \
 				--format json |

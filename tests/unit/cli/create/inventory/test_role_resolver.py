@@ -33,7 +33,7 @@ class TestRoleResolver(unittest.TestCase):
             self.assertEqual(p, roles_dir / "web-app-nextcloud")
             cmd = rs.call_args[0][0]
             self.assertIn("-m", cmd)
-            self.assertIn("cli.meta.applications.role_name", cmd)
+            self.assertIn("cli.meta.roles.applications.role_name", cmd)
 
     def test_resolve_role_path_falls_back_to_project_root(self):
         with tempfile.TemporaryDirectory() as tmpdir:

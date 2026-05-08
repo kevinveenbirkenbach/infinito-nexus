@@ -2,7 +2,7 @@
 
 How an Ansible inventory is assembled from the per-role `meta/services.yml` declarations, what gets resolved at build time, and what stays as an unrendered Jinja template until play runtime.
 For general documentation rules such as links, writing style, RFC 2119 keywords, and Sphinx behavior, see [documentation.md](../documentation.md).
-For the matrix-variant folder-per-round model that wraps this pipeline, see [variants.md](variants.md). For the on-disk shape of a role's metadata see [layout.md](services/layout.md).
+For the matrix-variant folder-per-round model that wraps this pipeline, see [variants.md](variants.md). For the on-disk shape of a role's metadata see [layout.md](role/services/layout.md).
 
 ## Pipeline overview 🛤️
 

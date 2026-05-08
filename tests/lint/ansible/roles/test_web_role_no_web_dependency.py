@@ -30,7 +30,7 @@ from . import PROJECT_ROOT
 def _extract_dependency_role_names(raw: Any) -> list[str]:
     """Normalize meta/main.yml `dependencies:` into a flat list of role
     names. Mirrors the loader at
-    `cli/meta/applications/resolution/combined/role_introspection.py`.
+    `cli/meta/roles/applications/resolution/combined/role_introspection.py`.
     """
     if not raw:
         return []

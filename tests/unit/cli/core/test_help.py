@@ -60,7 +60,7 @@ class TestHelp(unittest.TestCase):
                 ),
                 Command(
                     parts=("meta", "applications", "all"),
-                    module="cli.meta.applications.all",
+                    module="cli.meta.roles.applications.all",
                     main_path=cli_dir / "meta" / "applications" / "all" / "__main__.py",
                 ),
             ]
@@ -70,7 +70,7 @@ class TestHelp(unittest.TestCase):
 
             invoked_modules = {call.args[0][2] for call in mock_run.call_args_list}
             self.assertEqual(
-                {"cli.deploy", "cli.meta.applications.all"}, invoked_modules
+                {"cli.deploy", "cli.meta.roles.applications.all"}, invoked_modules
             )
 
             for call in mock_run.call_args_list:
@@ -102,7 +102,7 @@ class TestHelp(unittest.TestCase):
                 ),
                 Command(
                     parts=("meta", "applications", "all"),
-                    module="cli.meta.applications.all",
+                    module="cli.meta.roles.applications.all",
                     main_path=cli_dir / "meta" / "applications" / "all" / "__main__.py",
                 ),
             ]

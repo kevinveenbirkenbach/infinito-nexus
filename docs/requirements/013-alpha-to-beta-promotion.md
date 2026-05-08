@@ -41,7 +41,7 @@ The OIDC and LDAP columns reflect how the role's `beta` step would
 wire up authentication against
 [web-app-keycloak](../../roles/web-app-keycloak/) and
 [svc-db-openldap](../../roles/svc-db-openldap/) respectively (see the
-`beta` criteria in [lifecycle.md](../contributing/design/services/lifecycle.md)).
+`beta` criteria in [lifecycle.md](../contributing/design/role/services/lifecycle.md)).
 The RBAC column reflects whether the role supports mapping a
 Keycloak role / OIDC role-claim or an LDAP group onto the role's
 own permission model (admin vs. user, workspaces, ACLs, S3
@@ -56,7 +56,7 @@ one of:
   a commercial license, paid edition, or paid plugin (no free
   upstream path). The `beta` promotion MUST configure it; operators
   who do not buy the license MUST instead carry the documented SSO
-  exception per [lifecycle.md](../contributing/design/services/lifecycle.md).
+  exception per [lifecycle.md](../contributing/design/role/services/lifecycle.md).
 - 🛠️ **glue**. The upstream software has no first-party adapter, but
   the integration is reachable with project-supplied scaffolding at
   no extra cost. Examples include a sidecar `web-app-oauth2-proxy`,
@@ -70,7 +70,7 @@ one of:
 - ❌ **not feasible**. The upstream software has no compatible auth
   model (DID-only, no local user accounts, federation-only). The
   `beta` promotion MUST instead carry the documented SSO exception
-  per [lifecycle.md](../contributing/design/services/lifecycle.md).
+  per [lifecycle.md](../contributing/design/role/services/lifecycle.md).
 
 The same four markers apply to the RBAC column, where the
 "adapter" is the role-claim or LDAP-group mapping mechanism (a
@@ -88,7 +88,7 @@ configure the paid mapping or carry the documented SSO/RBAC
 exception; 🛠️ rows MAY ship the glue layer but MUST document
 it in the role's `README.md` if they do; ❌ rows MUST carry the
 documented SSO/RBAC exception per
-[lifecycle.md](../contributing/design/services/lifecycle.md). A
+[lifecycle.md](../contributing/design/role/services/lifecycle.md). A
 role MUST NOT be flipped to `lifecycle: beta` while its RBAC
 column is non-❌ and the corresponding mapping is unconfigured.
 
@@ -122,7 +122,7 @@ notes plus the testing requirements have been satisfied.
 
 The notes below capture role-specific concerns the contributor MUST
 address as part of the `beta` promotion, on top of the generic
-[lifecycle.md](../contributing/design/services/lifecycle.md) checklist.
+[lifecycle.md](../contributing/design/role/services/lifecycle.md) checklist.
 Each note is intentionally tight; deeper acceptance criteria belong in
 follow-up requirements once the first promotions land. Each bullet is
 a checkbox that MUST be ticked once the corresponding action has been
@@ -133,10 +133,10 @@ executed and verified.
 - [x] **OIDC (🛠️):** `web-app-oauth2-proxy` sidecar (perimeter gate)
   in front of the Akaunting web UI. Native Laravel auth middleware
   with per-user provisioning is deferred to follow-up issue
-  [#221](https://github.com/infinito-nexus/core/issues/221) — the
+  [#221](https://github.com/infinito-nexus/core/issues/221). The
   oauth2-proxy gate covers SSO at the edge for the `beta`
-  promotion, the in-app user mapping is a multi-day Composer +
-  DB-migration task that benefits from its own review cycle.
+  promotion, while the in-app user mapping is a multi-day
+  Composer + DB-migration task that benefits from its own review cycle.
 - [x] **LDAP (🛠️):** Same oauth2-proxy path with Keycloak federating
   LDAP. Variant 1 exercises the LDAP-backed user storage end-to-end.
 - [x] **RBAC (🛠️):** Edge-level allowlist via the
@@ -144,18 +144,18 @@ executed and verified.
   (admin / manager / employee / customer) tracked under
   follow-up issue [#221](https://github.com/infinito-nexus/core/issues/221).
 - [x] **Watch:** Per-company isolation tracking deferred to issue
-  [#221](https://github.com/infinito-nexus/core/issues/221) — the
-  oauth2-proxy gate authenticates at the perimeter; tenant routing
-  needs the native middleware that the follow-up will introduce.
+  [#221](https://github.com/infinito-nexus/core/issues/221). The
+  oauth2-proxy gate authenticates at the perimeter, while tenant
+  routing needs the native middleware that the follow-up will introduce.
 
 ### web-app-baserow 🐣
 
 - [x] **OIDC (🛠️):** `web-app-oauth2-proxy` sidecar (perimeter gate)
   in front of the Baserow web UI. Native `mozilla-django-oidc`
   integration is deferred to follow-up issue
-  [#219](https://github.com/infinito-nexus/core/issues/219) — out-of-tree
-  Django settings overlay carries a maintenance burden that warrants
-  its own review cycle separate from this promotion.
+  [#219](https://github.com/infinito-nexus/core/issues/219). The
+  out-of-tree Django settings overlay carries a maintenance burden
+  that warrants its own review cycle separate from this promotion.
 - [x] **LDAP (🛠️):** Same oauth2-proxy path with Keycloak federating
   LDAP. Variant 1 exercises the LDAP-backed user storage end-to-end.
 - [x] **RBAC (🛠️):** Edge-level allowlist via the
@@ -184,7 +184,7 @@ executed and verified.
   subsequent direct-OIDC logins for the same user against other
   realm clients; in-memory cache restores invariance and a broker
   restart simply triggers a fresh `createAccount` on the next
-  SSO visit — the orphan app-password remains valid in PDS until
+  SSO visit. The orphan app-password remains valid in PDS until
   rotated.) Subsequent visits decrypt the cached password in-broker,
   exchange it for a PDS session via `com.atproto.server.createSession`,
   and drop the resulting JWTs into `localStorage["BSKY_STORAGE"]`
@@ -219,9 +219,9 @@ executed and verified.
 - [x] **OIDC (🛠️):** `web-app-oauth2-proxy` sidecar (perimeter gate)
   in front of the BookWyrm web UI. Native `mozilla-django-oidc`
   integration is deferred to follow-up issue
-  [#220](https://github.com/infinito-nexus/core/issues/220) — out-of-tree
-  Django settings overlay + invitation-bypass logic warrant their own
-  review cycle.
+  [#220](https://github.com/infinito-nexus/core/issues/220). The
+  out-of-tree Django settings overlay and invitation-bypass logic
+  warrant their own review cycle.
 - [x] **LDAP (🛠️):** Same oauth2-proxy path with Keycloak federating
   LDAP. Variant 1 exercises the LDAP-backed user storage end-to-end.
 - [x] **RBAC (🛠️):** Edge-level allowlist via the
@@ -230,7 +230,7 @@ executed and verified.
   [#220](https://github.com/infinito-nexus/core/issues/220).
 - [x] **Watch:** Invitation-only registration bypass and federated
   handle policy choice tracked under follow-up issue
-  [#220](https://github.com/infinito-nexus/core/issues/220) — the
+  [#220](https://github.com/infinito-nexus/core/issues/220). The
   oauth2-proxy gate at the edge does not require either to deliver
   SSO at the perimeter.
 
@@ -247,15 +247,15 @@ executed and verified.
   [README.md](../../roles/web-app-bridgy-fed/README.md).
 - [x] **Watch:** Documented in the role's
   [README.md](../../roles/web-app-bridgy-fed/README.md) per
-  [lifecycle.md](../contributing/design/services/lifecycle.md).
+  [lifecycle.md](../contributing/design/role/services/lifecycle.md).
 
 ### web-app-flowise 🐣
 
 - [x] **OIDC (🛠️):** `web-app-oauth2-proxy` sidecar in front of
-  Flowise. Native `FLOWISE_OIDC_*` integration is deferred — the
-  free Flowise tier does not consistently expose the OIDC env vars
-  across versions, so the universal oauth2-proxy glue path is the
-  reliable choice for the `beta` promotion.
+  Flowise. Native `FLOWISE_OIDC_*` integration is deferred because
+  the free Flowise tier does not consistently expose the OIDC env
+  vars across versions, so the universal oauth2-proxy glue path is
+  the reliable choice for the `beta` promotion.
 - [x] **LDAP (🛠️):** Same oauth2-proxy path with Keycloak federating
   LDAP. Variant 1 exercises the LDAP-backed user storage end-to-end.
 - [x] **RBAC (🛠️):** Edge-level allowlist via the
@@ -263,13 +263,13 @@ executed and verified.
   is dependent on Flowise version-specific OIDC env vars and tracked
   for a future iteration.
 - [x] **Watch:** Local-account admin bootstrap stays disabled in the
-  beta config — the oauth2-proxy gate is the only entry path.
+  beta config, so the oauth2-proxy gate is the only entry path.
 
 ### web-app-fusiondirectory 🛣️
 
 - [x] **OIDC (🛠️):** `web-app-oauth2-proxy` sidecar in front of FD.
   The first-party FusionDirectory OIDC plugin (Composer) is deferred
-  to a follow-up — the universal oauth2-proxy glue path is reliable
+  to a follow-up. The universal oauth2-proxy glue path is reliable
   across FD release cadences and avoids a Composer pin treadmill.
 - [x] **LDAP (✅):** LDAP IS FusionDirectory's storage backend; the
   compose file points `LDAP_HOST`/`LDAP_ADMIN_DN`/`LDAP_BASE_DN` at
@@ -337,14 +337,14 @@ executed and verified.
   Keycloak group → MinIO policy mapping happens via the policy
   claim. LDAP-side policy attachment via `mc admin policy attach`
   is documented in the role's deploy tasks.
-- [x] **Watch:** Documented in the role README — the Keycloak client
+- [x] **Watch:** Documented in the role README. The Keycloak client
   MUST map a `policy` claim listing the MinIO policy name(s).
 
 ### web-app-postmarks 🐣
 
 - [x] **OIDC (🛠️):** Sidecar `web-app-oauth2-proxy` in front of the
-  Postmarks web UI. Verified V0 standalone — Playwright spec
-  confirms the OAuth2 redirect to Keycloak.
+  Postmarks web UI. Verified V0 standalone, with the Playwright spec
+  confirming the OAuth2 redirect to Keycloak.
 - [x] **LDAP (🛠️):** Same oauth2-proxy path with Keycloak federating
   LDAP. Verified V1 standalone.
 - [x] **RBAC (❌):** Postmarks has no in-app authorisation tier
@@ -353,7 +353,7 @@ executed and verified.
   exception in the role README.
 - [x] **Watch:** Postmarks runs as a single-user bookmarking app in
   this deploy; the SSO documented exception is recorded in the role
-  README per [lifecycle.md](../contributing/design/services/lifecycle.md).
+  README per [lifecycle.md](../contributing/design/role/services/lifecycle.md).
 
 ### web-app-socialhome 🐣
 
@@ -375,20 +375,20 @@ executed and verified.
   web UI; the meta `services.oauth2.acl.whitelist` allows
   `/translate`, `/detect`, `/languages`, `/spec`, `/frontend/settings`,
   `/api` so programmatic API endpoints stay reachable.
-- [x] **LDAP (❌):** Not feasible — LibreTranslate has no per-user
+- [x] **LDAP (❌):** Not feasible because LibreTranslate has no per-user
   state to bind. Documented in the role README.
 - [x] **RBAC (❌):** API-key-tier only inside the app. Documented
   in the role README per
-  [lifecycle.md](../contributing/design/services/lifecycle.md).
+  [lifecycle.md](../contributing/design/role/services/lifecycle.md).
 - [x] **Watch:** The whitelist proves machine clients keep working
-  in V0 — the Playwright spec verifies `/languages` API responds
-  without auth even when the web UI is gated.
+  in V0. The Playwright spec verifies that the `/languages` API
+  responds without auth even when the web UI is gated.
 
 ### web-svc-xmpp 🛣️
 
 - [x] **OIDC (🛠️):** Indirectly via Keycloak's LDAP federation.
   The OIDC variant exposes the same SASL PLAIN over c2s as the
-  LDAP variant — Keycloak users land in the federated LDAP tree
+  LDAP variant: Keycloak users land in the federated LDAP tree
   that ejabberd reads from. Native `mod_oauth2_client` is a
   contrib module requiring `install_contrib_modules` (network
   fetch on every boot, fragile in air-gapped envs); deferred to
@@ -438,8 +438,8 @@ complete:
   `make deploy-fresh-kept-apps APPS=<role>` standalone, V0 and V1
   where applicable, all Playwright scenarios green. (The deploy
   command is the kept-app variant which mirrors `fresh-purged-apps`
-  on a clean stack — same matrix-init logic, same Playwright gate
-  with `RUNTIME=dev` baked into host vars.)
+  on a clean stack with the same matrix-init logic and the same
+  Playwright gate, and with `RUNTIME=dev` baked into host vars.)
 - [x] **Multi-app fresh deploy.** Single
   `make deploy-fresh-purged-apps APPS="<13 in-scope roles>"
   FULL_CYCLE=true` run brought up every role on one host
@@ -483,7 +483,7 @@ that MUST be ticked before the next step starts:
   capstone full-cycle all completed.
 - [x] **Final capstone.** Multi-app FULL_CYCLE=true Pass 1 + Pass 2
   both finished `failed=0` with all Playwright suites green.
-- [ ] **Single commit at the end.** Pending — to be created next.
+- [ ] **Single commit at the end.** Pending: to be created next.
 - [x] **Autonomous execution.** Whole procedure executed without
   `ask` prompts.
 
@@ -543,7 +543,7 @@ This requirement is satisfied when every checkbox below is ticked:
 
 ## References 🔗
 
-- [Role-meta layout](../contributing/design/services/layout.md). On-disk
+- [Role-meta layout](../contributing/design/role/services/layout.md). On-disk
   shape of `meta/services.yml`.
 - [Variants](../contributing/design/variants.md). Matrix-deploy
   background.

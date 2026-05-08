@@ -14,7 +14,7 @@ def resolve_role_path(
 ) -> Path | None:
     """
     Resolve role path by calling:
-      python -m cli.meta.applications.role_name <app_id> -r <roles_dir>
+      python -m cli.meta.roles.applications.role_name <app_id> -r <roles_dir>
 
     The helper may print:
       - bare folder name (e.g. web-app-nextcloud)
@@ -24,7 +24,7 @@ def resolve_role_path(
     cmd = [
         sys.executable,
         "-m",
-        "cli.meta.applications.role_name",
+        "cli.meta.roles.applications.role_name",
         application_id,
         "-r",
         str(roles_dir),

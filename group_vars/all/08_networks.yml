@@ -26,7 +26,7 @@
 #                                            → per-entity ports under
 #                                               roles/<role>/meta/services.yml.<entity>.ports.{inter,local,public}
 #
-# See docs/contributing/design/services/layout.md for the full per-role meta
+# See docs/contributing/design/role/services/layout.md for the full per-role meta
 # layout.
 NETWORK_IPV6_ENABLED: false
 # Public DNS resolvers used wherever a role needs to look up external

@@ -51,7 +51,7 @@ also not feasible because authorisation in LibreTranslate is
 API-key-tier only and decoupled from any IDP. The OIDC gate
 protects the UI but does not grant differential authorisation
 inside the app. These LDAP and RBAC exceptions are documented per
-[lifecycle.md](../../docs/contributing/design/services/lifecycle.md)
+[lifecycle.md](../../docs/contributing/design/role/services/lifecycle.md)
 and [requirement 013](../../docs/requirements/013-alpha-to-beta-promotion.md).
 
 ## Configuration

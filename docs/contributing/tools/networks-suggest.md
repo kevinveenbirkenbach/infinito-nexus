@@ -20,9 +20,9 @@ blocks.
 
 | Flag                | Required | Default | Description                                                                                       |
 |---------------------|:--------:|:-------:|---------------------------------------------------------------------------------------------------|
-| `--clients N`       | yes      | —       | Minimum number of usable client IPs the role's subnet MUST hold.                                 |
+| `--clients N`       | yes      | n/a     | Minimum number of usable client IPs the role's subnet MUST hold.                                 |
 | `--count K`         | no       | `1`     | How many free subnets to return.                                                                  |
-| `--block <cidr>`    | no       | —       | Force suggestions inside a specific umbrella block (e.g. `--block 192.168.101.0/24`). Default is the union of currently used /24 umbrella blocks for the chosen prefix length. |
+| `--block <cidr>`    | no       | n/a     | Force suggestions inside a specific umbrella block (e.g. `--block 192.168.101.0/24`). Default is the union of currently used /24 umbrella blocks for the chosen prefix length. |
 
 ## Behaviour 🧮
 
@@ -46,8 +46,8 @@ blocks.
 
 ## Output 📤
 
-- **stdout** — one subnet per line.
-- **stderr** — per-suggestion capacity and a human-readable summary noting
+- **stdout** prints one subnet per line.
+- **stderr** prints per-suggestion capacity and a human-readable summary noting
   which umbrella block(s) were scanned.
 
 ## Examples 💡
@@ -89,6 +89,6 @@ override the suggestion interactively. See
 
 ## Related Pages 📚
 
-- [ports-suggest.md](ports-suggest.md) — sibling helper for host-bound ports.
-- [layout.md](../design/services/layout.md) — the per-role `networks:` shape in `meta/server.yml`.
-- [req-009](../../requirements/009-per-role-networks-and-ports.md) — full spec.
+- [ports-suggest.md](ports-suggest.md) is the sibling helper for host-bound ports.
+- [layout.md](../design/role/services/layout.md) describes the per-role `networks:` shape in `meta/server.yml`.
+- [req-009](../../requirements/009-per-role-networks-and-ports.md) is the full spec.

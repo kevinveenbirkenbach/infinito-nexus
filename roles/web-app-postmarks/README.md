@@ -2,7 +2,7 @@
 
 ## Description
 
-Run **Postmarks**, a small mail-service client, via Docker Compose—ideal as a utility component for apps that need SMTP interactions in your stack.
+Run **Postmarks**, a small mail-service client, via Docker Compose; it serves as a utility component for apps that need SMTP interactions in your stack.
 
 ## Overview
 
@@ -26,7 +26,7 @@ RBAC is not feasible: Postmarks has no in-app authorisation tier
 beyond "logged in or not". When multi-tier authorisation is needed,
 gate at the oauth2-proxy level. This RBAC exception is documented
 per
-[lifecycle.md](../../docs/contributing/design/services/lifecycle.md)
+[lifecycle.md](../../docs/contributing/design/role/services/lifecycle.md)
 and [requirement 013](../../docs/requirements/013-alpha-to-beta-promotion.md).
 
 ## Further Resources

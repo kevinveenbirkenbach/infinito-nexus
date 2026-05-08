@@ -2,7 +2,7 @@
 #
 # Compute which roles are affected by the current branch's diff against
 # `origin/main`, expanded transitively over run_after + dependencies +
-# services edges via cli.meta.applications.resolution.affected.
+# services edges via cli.meta.roles.applications.resolution.affected.
 #
 # Output (single line on stdout):
 #   __ALL__                          full deploy needed. Emitted when:
@@ -94,7 +94,7 @@ mapfile -t seed_list < <(printf '%s\n' "${!seed_roles[@]}" | sort)
 set +e
 resolved="$(
 	compose_ci_exec \
-		"${PYTHON}" -m cli.meta.applications.resolution.affected \
+		"${PYTHON}" -m cli.meta.roles.applications.resolution.affected \
 		--changed-roles "${seed_list[@]}"
 )"
 resolver_rc=$?

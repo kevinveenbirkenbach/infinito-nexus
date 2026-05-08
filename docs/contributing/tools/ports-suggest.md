@@ -16,7 +16,7 @@ It walks every `roles/*/meta/services.yml`, collects occupied
 `<entity>.ports.{local,public}.<category>` assignments across all roles and
 all entities, and proposes free slots gap-first then by increment.
 
-`inter` ports are NOT supported by the suggester — they are dictated by
+`inter` ports are NOT supported by the suggester; they are dictated by
 upstream container images (`gitea=3000`, `postgres=5432`, …) and not
 allocated from a project-managed pool. Inter ports are recorded in
 `services.<entity>.ports.inter` directly by the contributor.
@@ -25,11 +25,11 @@ allocated from a project-managed pool. Inter ports are recorded in
 
 | Flag                      | Required | Default | Description                                                                                       |
 |---------------------------|:--------:|:-------:|---------------------------------------------------------------------------------------------------|
-| `--scope local\|public`   | yes      | —       | Which scope to allocate from. `inter` is NOT a supported value.                                  |
-| `--category <name>`       | yes      | —       | Band category (`http`, `ssh`, `oauth2`, `relay`, …). Looked up in `PORT_BANDS.<scope>.<category>`. |
+| `--scope local\|public`   | yes      | n/a     | Which scope to allocate from. `inter` is NOT a supported value.                                  |
+| `--category <name>`       | yes      | n/a     | Band category (`http`, `ssh`, `oauth2`, `relay`, …). Looked up in `PORT_BANDS.<scope>.<category>`. |
 | `--count N`               | no       | `1`     | How many free ports (or relay ranges) to return.                                                  |
-| `--range <start>-<end>`   | no       | —       | Override the band from `PORT_BANDS` for ad-hoc allocations.                                      |
-| `--length N`              | yes for `relay` | — | Inclusive port count of the contiguous range; the produced span is `{start, end = start + N - 1}`. |
+| `--range <start>-<end>`   | no       | n/a     | Override the band from `PORT_BANDS` for ad-hoc allocations.                                      |
+| `--length N`              | yes for `relay` | n/a | Inclusive port count of the contiguous range. The produced span is `{start, end = start + N - 1}`. |
 
 ## Behaviour 🧮
 
@@ -58,9 +58,9 @@ allocated from a project-managed pool. Inter ports are recorded in
 
 ## Output 📤
 
-- **stdout** — machine-readable list (one port per line for single-port
+- **stdout** prints a machine-readable list (one port per line for single-port
   categories, one `<start>-<end>` pair per line for `relay`).
-- **stderr** — human-readable summary noting which band was used and how
+- **stderr** prints a human-readable summary noting which band was used and how
   many gaps were filled vs. appended.
 
 ## Examples 💡
@@ -108,6 +108,6 @@ suggestion interactively. See
 
 ## Related Pages 📚
 
-- [networks-suggest.md](networks-suggest.md) — sibling helper for subnets.
-- [layout.md](../design/services/layout.md) — the per-entity `ports` shape.
-- [req-009](../../requirements/009-per-role-networks-and-ports.md) — full spec.
+- [networks-suggest.md](networks-suggest.md) is the sibling helper for subnets.
+- [layout.md](../design/role/services/layout.md) describes the per-entity `ports` shape.
+- [req-009](../../requirements/009-per-role-networks-and-ports.md) is the full spec.

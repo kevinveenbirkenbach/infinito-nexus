@@ -36,7 +36,8 @@ import unittest
 from pathlib import Path
 
 from utils.cache.yaml import load_yaml_any
-from utils.roles.applications.files import is_application_role
+from utils.roles.mapping import ROLE_TYPE_APPLICATION
+from utils.roles.type import get_role_types
 
 from . import PROJECT_ROOT
 
@@ -92,13 +93,14 @@ class TestVariantsCoverage(unittest.TestCase):
     def test_every_dynamic_flag_has_true_and_false_variant(self):
         offenders: list[str] = []
 
-        # Matrix-deploy only iterates roles that declare an ``application_id``
-        # (per :func:`utils.roles.applications.files.is_application_role`),
-        # so non-app roles never reach the variant planner and a
-        # ``meta/variants.yml`` stub on them would be dead weight.
+        # Matrix-deploy only iterates roles that include
+        # ``ROLE_TYPE_APPLICATION`` in their type set (per
+        # :func:`utils.roles.type.get_role_types`), so other roles
+        # never reach the variant planner and a ``meta/variants.yml``
+        # stub on them would be dead weight.
         for role_dir in sorted(p for p in ROLES_DIR.iterdir() if p.is_dir()):
             role_name = role_dir.name
-            if not is_application_role(role_dir):
+            if ROLE_TYPE_APPLICATION not in get_role_types(role_dir):
                 continue
             services_path = role_dir / "meta" / "services.yml"
             services = _load_yaml(services_path)

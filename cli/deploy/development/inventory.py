@@ -102,7 +102,9 @@ def _resolve_round_include(
     """
     # Late import keeps the host-side import surface lean for callers
     # that never need the variant-aware planner (e.g. lint/validation).
-    from cli.meta.applications.resolution.combined.resolver import CombinedResolver
+    from cli.meta.roles.applications.resolution.combined.resolver import (
+        CombinedResolver,
+    )
 
     resolver = CombinedResolver(services_overrides=services_overrides)
     out: list[str] = []
