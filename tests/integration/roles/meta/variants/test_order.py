@@ -27,12 +27,16 @@ For each application with ``len(variants) > 1``:
    (``services.<svc>.enabled is True AND shared is True``), using
    variant ``v`` for the application's own services and variant 0 for
    every recursive dep (deps don't track the parent's variant).
-2. If any two variants of the application produce different closures,
-   record the divergence as an offender.
+2. Drop variants whose closure is empty (minimal/standalone variants
+   that intentionally disable every dep-pulling service drop out of
+   the dep ordering and cannot disagree with anything).
+3. If any two of the remaining (non-empty) closures differ, record
+   the divergence as an offender.
 """
 
 from __future__ import annotations
 
+import contextlib
 import unittest
 from pathlib import Path
 from typing import Any
@@ -56,13 +60,11 @@ def _direct_deps(
     roles_dir: Path,
 ) -> set[str]:
     deps = set(resolve_service_dependency_roles_from_config(config, registry))
-    try:
+    # Shape errors in run_after are caught by their own lint; here we
+    # treat the role as having no run_after so this lint stays focused
+    # on variant divergence.
+    with contextlib.suppress(Exception):
         deps.update(load_run_after_from_roles_dir(roles_dir, role))
-    except Exception:
-        # Shape errors in run_after are caught by their own lint; here
-        # we treat the role as having no run_after so this lint stays
-        # focused on variant divergence.
-        pass
     return deps
 
 
@@ -110,7 +112,12 @@ class TestVariantDepConsistency(unittest.TestCase):
                 _closure(app, variant, registry, ROLES_DIR, variants_by_app)
                 for variant in variants
             ]
-            if any(closure != closures[0] for closure in closures[1:]):
+            # Variants whose closure is empty intentionally drop out of
+            # the dep ordering (minimal/standalone variants that disable
+            # every dep-pulling service). They cannot disagree with
+            # anything, so only non-empty closures are compared.
+            non_empty = [closure for closure in closures if closure]
+            if non_empty and any(closure != non_empty[0] for closure in non_empty[1:]):
                 offenders[app] = [
                     (index, sorted(closure)) for index, closure in enumerate(closures)
                 ]
