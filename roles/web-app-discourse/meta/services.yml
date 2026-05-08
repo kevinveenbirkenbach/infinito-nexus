@@ -57,6 +57,7 @@ discourse:
   mem_reservation: 1g
   mem_limit: 2g
   pids_limit: 1024
+  disable_local_logins: "{{ ('web-app-keycloak' in group_names) and not ('svc-db-openldap' in group_names) }}"
 # nocheck: dynamic-flag
 css:
   enabled: true
