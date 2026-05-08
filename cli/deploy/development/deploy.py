@@ -105,8 +105,8 @@ def _run_deploy(
 
 
 def _purge_app_entities(*, container: str, app_ids: list[str]) -> None:
-    """Run the per-app cleanup script for every app whose variant just
-    changed between matrix-deploy rounds.
+    """Run the per-app cleanup script for every app from the previous
+    matrix-deploy round before the next round starts.
 
     `scripts/tests/deploy/local/purge/entity.sh` removes the
     application's containers, networks, and Ansible-managed state on
@@ -239,10 +239,11 @@ def handler(args: argparse.Namespace) -> int:
     # (`<dir>-0`, `<dir>-1`, ...; or just `<dir>` when there is a single
     # round) with the per-app variant data already baked into each folder's
     # `host_vars`. Here we just iterate the same plan and deploy against
-    # each folder. Between rounds we purge exactly the apps whose target
-    # variant changed; apps that stayed on variant 0 are NOT purged. The
-    # final round is followed by no purge so the last state remains
-    # available for inspection / follow-up specs.
+    # each folder. Between rounds we purge the previous round's full
+    # include set so round R starts from a clean host; every round then
+    # redeploys its own full include. The final round is followed by no
+    # purge so the last state remains available for inspection /
+    # follow-up specs.
     #
     # Matrix planning is variant-aware (see inventory.py): for each round
     # the planner consults the variant-merged services map of every
@@ -265,52 +266,33 @@ def handler(args: argparse.Namespace) -> int:
     container_name = resolve_container()
 
     rc = 0
-    previous_round_variants: dict[str, int] = {}
+    previous_round_include: list[str] = []
     for round_index, inv_dir, round_variants, include_R in plan:
         # Apply SERVICES_DISABLED filter to the round's include set so
         # disabled provider roles are not handed to ansible just because
         # the variant-aware resolver pulled them in via service edges.
         round_include = [role for role in include_R if role not in disabled_app_ids]
-        # Round 0 always deploys the full (filtered) include set — the
-        # baseline state of every primary app + its dependencies.
-        # Rounds R>0 only re-deploy apps that ACTUALLY have a variant N
-        # for that round (`round_variants[app] == round_index`); apps
-        # that fall back to variant 0 are left at whatever state the
-        # previous round produced. This avoids wasted re-deploys of
-        # apps that have no real variant for the current round.
-        if round_index == 0:
-            round_deploy_ids = round_include
-        else:
-            allowed = set(round_include)
-            round_deploy_ids = sorted(
-                app_id
-                for app_id, idx in round_variants.items()
-                if idx == round_index and app_id in allowed
-            )
-            if not round_deploy_ids:
-                print(
-                    f"=== matrix-deploy: round {round_index + 1}/{len(plan)} "
-                    f"skipped (no apps with a real variant {round_index}) ==="
-                )
-                previous_round_variants = round_variants
-                continue
+        # Every round deploys the full include set — the round's
+        # variant-aware closure. Round R starts from a clean host
+        # (the previous round's include is fully purged below) so
+        # every dep that round R needs MUST be redeployed; there is
+        # no "skip variant-unchanged apps" optimisation any more, the
+        # old optimisation left cross-round state residue when a
+        # variant dropped a dep that the previous round had pulled in.
+        round_deploy_ids = round_include
 
-        # Cleanup applies only to apps we are about to re-deploy this
-        # round AND whose variant changed since the previous round.
-        # `previous_round_variants` only becomes truthy after the first
-        # iteration completes, so single-folder modes (N=1 or `--variant`
-        # pinned) skip the purge entirely. Apps that are not being
-        # re-deployed retain their state from earlier rounds, so purging
-        # them would leave the host in an inconsistent half-applied state.
-        if previous_round_variants:
-            changed = sorted(
-                app_id
-                for app_id in round_deploy_ids
-                if previous_round_variants.get(app_id, 0)
-                != round_variants.get(app_id, 0)
+        # Between rounds the wrapper purges every app from the previous
+        # round's include set, so the next round boots from an empty
+        # host. This is the SPOT for cross-round state coherence:
+        # nothing the previous round deployed (whether it stayed in the
+        # current round's closure or fell out) can leak into round R.
+        # `previous_round_include` only becomes truthy after the first
+        # iteration completes, so single-folder modes (N=1 or
+        # `--variant` pinned) skip the purge entirely.
+        if previous_round_include:
+            _purge_app_entities(
+                container=container_name, app_ids=previous_round_include
             )
-            if changed:
-                _purge_app_entities(container=container_name, app_ids=changed)
 
         pass_label = (
             f"matrix-deploy: round {round_index + 1}/{len(plan)} "
@@ -345,6 +327,6 @@ def handler(args: argparse.Namespace) -> int:
             if rc != 0:
                 return rc
 
-        previous_round_variants = round_variants
+        previous_round_include = round_include
 
     return rc

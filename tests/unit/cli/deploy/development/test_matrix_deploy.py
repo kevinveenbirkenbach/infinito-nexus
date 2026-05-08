@@ -101,17 +101,18 @@ class TestHandlerMatrixDeploy(unittest.TestCase):
     @patch("cli.deploy.development.deploy._run_deploy", autospec=True)
     @patch("cli.deploy.development.deploy.plan_dev_inventory_matrix", autospec=True)
     @patch("cli.deploy.development.deploy.make_compose", autospec=True)
-    def test_round_one_only_deploys_apps_with_real_variant_one(
+    def test_every_round_redeploys_full_include_after_purge(
         self,
         make_compose_mock: MagicMock,
         plan_mock: MagicMock,
         run_deploy_mock: MagicMock,
         purge_mock: MagicMock,
     ) -> None:
-        # User-spec example: variant 0 covers ALL apps, variant 1 only
-        # exists for WordPress. Round 1 MUST therefore deploy ONLY
-        # web-app-wordpress, NOT keycloak (which has no variant 1 and
-        # would only fall back to variant 0 -- already deployed in round 0).
+        # Variant 0 covers BOTH apps, variant 1 only exists for WordPress.
+        # Each round starts from a clean host (the previous round's full
+        # include is purged), so round 1 redeploys the full round-1 include
+        # — Keycloak included, even though it stays on variant 0 — because
+        # the round-0 baseline was just purged away.
         make_compose_mock.return_value = _make_compose_mock()
         plan_mock.return_value = [
             _entry(0, "/srv/inv-0", {"web-app-wordpress": 0, "web-app-keycloak": 0}),
@@ -124,14 +125,17 @@ class TestHandlerMatrixDeploy(unittest.TestCase):
         self.assertEqual(rc, 0)
         self.assertEqual(run_deploy_mock.call_count, 2)
         round_one_deploy_ids = run_deploy_mock.call_args_list[1].kwargs["deploy_ids"]
-        self.assertEqual(round_one_deploy_ids, ["web-app-wordpress"])
-        # Keycloak MUST NOT be in the round-1 deploy_ids; it stays at the
-        # state round 0 produced.
-        self.assertNotIn("web-app-keycloak", round_one_deploy_ids)
-        # Purge mirrors the deploy filter: only WP gets purged before
-        # round 1 (Keycloak is not being re-deployed).
+        self.assertEqual(
+            sorted(round_one_deploy_ids),
+            ["web-app-keycloak", "web-app-wordpress"],
+        )
+        # Purge runs once between rounds with the FULL previous round
+        # include, not just variant-changed apps.
         purge_mock.assert_called_once()
-        self.assertEqual(purge_mock.call_args.kwargs["app_ids"], ["web-app-wordpress"])
+        self.assertEqual(
+            sorted(purge_mock.call_args.kwargs["app_ids"]),
+            ["web-app-keycloak", "web-app-wordpress"],
+        )
 
     @patch("cli.deploy.development.deploy._purge_app_entities", autospec=True)
     @patch("cli.deploy.development.deploy._run_deploy", autospec=True)
@@ -159,17 +163,20 @@ class TestHandlerMatrixDeploy(unittest.TestCase):
             [c.kwargs["inventory_dir"] for c in run_deploy_mock.call_args_list],
             ["/srv/inv-0", "/srv/inv-1"],
         )
-        # Per the spec ("der 1. eintrag auch im 2. durchlauf"): keycloak
-        # stays on variant 0 in round 2, so it MUST NOT be purged. Only
-        # `web-app-multi` flipped variants between rounds.
+        # Between rounds the FULL previous-round include is purged so
+        # round 1 starts from a clean host — keycloak too, even though
+        # it stays on variant 0.
         purge_mock.assert_called_once()
-        self.assertEqual(purge_mock.call_args.kwargs["app_ids"], ["web-app-multi"])
+        self.assertEqual(
+            sorted(purge_mock.call_args.kwargs["app_ids"]),
+            ["web-app-keycloak", "web-app-multi"],
+        )
 
     @patch("cli.deploy.development.deploy._purge_app_entities", autospec=True)
     @patch("cli.deploy.development.deploy._run_deploy", autospec=True)
     @patch("cli.deploy.development.deploy.plan_dev_inventory_matrix", autospec=True)
     @patch("cli.deploy.development.deploy.make_compose", autospec=True)
-    def test_three_round_plan_only_re_deploys_apps_with_real_variant(
+    def test_three_round_plan_redeploys_full_include_each_round(
         self,
         make_compose_mock: MagicMock,
         plan_mock: MagicMock,
@@ -177,11 +184,9 @@ class TestHandlerMatrixDeploy(unittest.TestCase):
         purge_mock: MagicMock,
     ) -> None:
         # WordPress 2 variants, Discourse 3 variants, Keycloak 1 variant.
-        # Round 0 deploys the full include set as the baseline.
-        # Round 1: WP and Discourse have a real variant 1 -> both re-deploy.
-        # Round 2: only Discourse has a real variant 2 -> only it re-deploys.
-        # WordPress stays at variant 1 from round 1 (it has no variant 2);
-        # Keycloak stays at variant 0 from round 0 (no later variants).
+        # Each round starts from a clean host (full-include purge) and
+        # therefore redeploys ITS OWN full include — keycloak too, even
+        # though it has no later variants.
         make_compose_mock.return_value = _make_compose_mock()
         plan_mock.return_value = [
             _entry(
@@ -215,34 +220,63 @@ class TestHandlerMatrixDeploy(unittest.TestCase):
         self.assertEqual(rc, 0)
         self.assertEqual(run_deploy_mock.call_count, 3)
 
+        full_include = ["web-app-discourse", "web-app-keycloak", "web-app-wordpress"]
         per_round_deploy_ids = [
-            c.kwargs["deploy_ids"] for c in run_deploy_mock.call_args_list
+            sorted(c.kwargs["deploy_ids"]) for c in run_deploy_mock.call_args_list
         ]
-        # Round 0: full baseline (mirrors `--id` order from _args).
-        self.assertEqual(
-            per_round_deploy_ids[0],
-            ["web-app-wordpress", "web-app-discourse", "web-app-keycloak"],
-        )
-        # Round 1: WP + Discourse (their real variant index for the round).
-        self.assertEqual(
-            per_round_deploy_ids[1],
-            ["web-app-discourse", "web-app-wordpress"],
-        )
-        # Round 2: only Discourse has variant 2.
-        self.assertEqual(per_round_deploy_ids[2], ["web-app-discourse"])
+        for round_index, deploy_ids in enumerate(per_round_deploy_ids):
+            self.assertEqual(
+                deploy_ids, full_include, f"round {round_index} deploy_ids drifted"
+            )
 
-        # Purge mirrors the per-round deploy filter:
-        # Round 1 -> purge {WP, Discourse} (both flipped 0->1).
-        # Round 2 -> purge {Discourse} (1->2). WP is NOT purged because it
-        # is not being re-deployed this round; its round-1 state stays.
+        # Purge runs between rounds with the FULL previous-round include.
         self.assertEqual(purge_mock.call_count, 2)
+        for call in purge_mock.call_args_list:
+            self.assertEqual(sorted(call.kwargs["app_ids"]), full_include)
+
+    @patch("cli.deploy.development.deploy._purge_app_entities", autospec=True)
+    @patch("cli.deploy.development.deploy._run_deploy", autospec=True)
+    @patch("cli.deploy.development.deploy.plan_dev_inventory_matrix", autospec=True)
+    @patch("cli.deploy.development.deploy.make_compose", autospec=True)
+    def test_round_transition_purges_previous_include_even_when_dep_falls_out(
+        self,
+        make_compose_mock: MagicMock,
+        plan_mock: MagicMock,
+        run_deploy_mock: MagicMock,
+        purge_mock: MagicMock,
+    ) -> None:
+        # Round 0 pulls a dep (web-svc-coturn) via the variant-0 closure,
+        # round 1 disables that dep so it falls out of the include set.
+        # The purge MUST cover the previous round's full include — coturn
+        # included — so round 1 boots from a host that does not carry
+        # leftover coturn state.
+        make_compose_mock.return_value = _make_compose_mock()
+        plan_mock.return_value = [
+            _entry(
+                0,
+                "/srv/inv-0",
+                {"web-app-nextcloud": 0},
+                include=("web-app-nextcloud", "web-svc-coturn"),
+            ),
+            _entry(
+                1,
+                "/srv/inv-1",
+                {"web-app-nextcloud": 1},
+                include=("web-app-nextcloud",),
+            ),
+        ]
+        run_deploy_mock.return_value = 0
+
+        rc = handler(_args(apps=["web-app-nextcloud"]))
+
+        self.assertEqual(rc, 0)
+        self.assertEqual(run_deploy_mock.call_count, 2)
+        round_one_deploy_ids = run_deploy_mock.call_args_list[1].kwargs["deploy_ids"]
+        self.assertEqual(round_one_deploy_ids, ["web-app-nextcloud"])
+        purge_mock.assert_called_once()
         self.assertEqual(
-            purge_mock.call_args_list[0].kwargs["app_ids"],
-            ["web-app-discourse", "web-app-wordpress"],
-        )
-        self.assertEqual(
-            purge_mock.call_args_list[1].kwargs["app_ids"],
-            ["web-app-discourse"],
+            sorted(purge_mock.call_args.kwargs["app_ids"]),
+            ["web-app-nextcloud", "web-svc-coturn"],
         )
 
     @patch("cli.deploy.development.deploy._purge_app_entities", autospec=True)
@@ -371,8 +405,10 @@ class TestHandlerFullCycle(unittest.TestCase):
                 ("/srv/inv-1", {"ASYNC_ENABLED": True}),
             ],
         )
-        # Cleanup still runs once between rounds (variant changed 0->1).
+        # Cleanup still runs once between rounds with the full
+        # previous-round include.
         purge_mock.assert_called_once()
+        self.assertEqual(purge_mock.call_args.kwargs["app_ids"], ["web-app-multi"])
 
     @patch("cli.deploy.development.deploy._purge_app_entities", autospec=True)
     @patch("cli.deploy.development.deploy._run_deploy", autospec=True)
