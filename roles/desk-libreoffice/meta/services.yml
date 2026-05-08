@@ -1,5 +1,6 @@
+---
 libreoffice:
   flavor: fresh
   languages:
-  - '{{ HOST_LL_CC | lower | replace(''_'', ''-'') }}'
+    - "{{ HOST_LL_CC | lower | replace('_', '-') }}"
   lifecycle: pre-alpha

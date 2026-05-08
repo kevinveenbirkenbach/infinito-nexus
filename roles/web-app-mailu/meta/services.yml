@@ -1,3 +1,4 @@
+---
 oidc:
   enabled: "{{ 'web-app-keycloak' in group_names }}"
   shared: "{{ 'web-app-keycloak' in group_names }}"
@@ -16,17 +17,17 @@ mailu:
   enabled: true
   shared: true
   provides: email
-  version: '2024.06'
+  version: "2024.06"
   name: mailu
   min_storage: 20GB
-  domain: '{{ lookup(''email'').domain }}'
+  domain: "{{ lookup('email').domain }}"
   ports:
     local:
       http: 8007
   run_after:
     - web-app-matomo
   lifecycle: beta
-  cpus: '1.0'
+  cpus: "1.0"
   mem_reservation: 1g
   mem_limit: 2g
   pids_limit: 1024
@@ -36,14 +37,14 @@ redis:
   backup:
     disabled: true
   enabled: true
-  cpus: '0.2'
+  cpus: "0.2"
   mem_reservation: 256m
   mem_limit: 512m
   pids_limit: 256
 mariadb:
-  enabled: true  # nocheck: dynamic-flag
+  enabled: true # nocheck: dynamic-flag
   shared: "{{ 'svc-db-mariadb' in group_names }}"
-  cpus: '0.8'
+  cpus: "0.8"
   mem_reservation: 1g
   mem_limit: 2g
   pids_limit: 512
@@ -51,7 +52,7 @@ mariadb:
 admin:
   enabled: true
   shared: false
-  cpus: '0.3'
+  cpus: "0.3"
   mem_reservation: 512m
   mem_limit: 1g
   pids_limit: 512
@@ -59,7 +60,7 @@ admin:
 imap:
   enabled: true
   shared: false
-  cpus: '0.5'
+  cpus: "0.5"
   mem_reservation: 1g
   mem_limit: 1.5g
   pids_limit: 512
@@ -67,7 +68,7 @@ imap:
 smtp:
   enabled: true
   shared: false
-  cpus: '0.5'
+  cpus: "0.5"
   mem_reservation: 1g
   mem_limit: 1.5g
   pids_limit: 512
@@ -75,7 +76,7 @@ smtp:
 antispam:
   enabled: true
   shared: false
-  cpus: '0.6'
+  cpus: "0.6"
   mem_reservation: 1g
   mem_limit: 1.5g
   pids_limit: 512
@@ -83,7 +84,7 @@ antispam:
 antivirus:
   enabled: true
   shared: false
-  cpus: '0.6'
+  cpus: "0.6"
   mem_reservation: 2g
   mem_limit: 3g
   pids_limit: 512
@@ -91,7 +92,7 @@ antivirus:
 oletools:
   enabled: true
   shared: false
-  cpus: '0.2'
+  cpus: "0.2"
   mem_reservation: 256m
   mem_limit: 512m
   pids_limit: 256
@@ -99,7 +100,7 @@ oletools:
 webdav:
   enabled: true
   shared: false
-  cpus: '0.2'
+  cpus: "0.2"
   mem_reservation: 256m
   mem_limit: 512m
   pids_limit: 256
@@ -107,7 +108,7 @@ webdav:
 fetchmail:
   enabled: true
   shared: false
-  cpus: '0.2'
+  cpus: "0.2"
   mem_reservation: 256m
   mem_limit: 512m
   pids_limit: 256
@@ -115,7 +116,7 @@ fetchmail:
 webmail:
   enabled: true
   shared: false
-  cpus: '0.3'
+  cpus: "0.3"
   mem_reservation: 512m
   mem_limit: 1g
   pids_limit: 512
@@ -123,7 +124,7 @@ webmail:
 resolver:
   enabled: true
   shared: false
-  cpus: '0.2'
+  cpus: "0.2"
   mem_reservation: 256m
   mem_limit: 512m
   pids_limit: 256
@@ -131,7 +132,7 @@ resolver:
 front:
   enabled: true
   shared: false
-  cpus: '0.3'
+  cpus: "0.3"
   mem_reservation: 512m
   mem_limit: 1g
   pids_limit: 512

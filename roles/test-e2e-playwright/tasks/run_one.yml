@@ -1,3 +1,4 @@
+---
 - name: Define per-role paths
   ansible.builtin.set_fact:
     _playwright_env_template: "{{ playbook_dir }}/roles/{{ application_id }}/templates/playwright.env.j2"

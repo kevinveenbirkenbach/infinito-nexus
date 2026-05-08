@@ -10,8 +10,7 @@
     login_host: "{{ lookup('database', application_id, 'reach_host') }}"
     login_port: "{{ ODOO_DB_PORT }}"
     query: >
-      SELECT 1 FROM information_schema.tables 
-      WHERE table_schema = 'public' AND table_name = 'ir_module_module';
+      SELECT 1 FROM information_schema.tables  WHERE table_schema = 'public' AND table_name = 'ir_module_module';
   register: odoo_schema_exists
   ignore_errors: true
 

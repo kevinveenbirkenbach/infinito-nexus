@@ -1,3 +1,4 @@
+---
 x-ci-defaults: &ci_defaults
   dns:
     - ${DNS_IP}
@@ -108,7 +109,6 @@ volumes:
   docker:
   infinito:
   letsencrypt:
-
 networks:
   default:
     driver: bridge

@@ -1,3 +1,4 @@
+---
 openldap:
   enabled: true
   shared: true

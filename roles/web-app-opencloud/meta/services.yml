@@ -1,7 +1,8 @@
+---
 oidc:
   enabled: "{{ 'web-app-keycloak' in group_names }}"
   shared: "{{ 'web-app-keycloak' in group_names }}"
-  flavor: ''
+  flavor: ""
 ldap:
   enabled: "{{ 'svc-db-openldap' in group_names }}"
   shared: "{{ 'svc-db-openldap' in group_names }}"
@@ -24,7 +25,7 @@ opencloud:
   min_storage: 20GB
   backup:
     no_stop_required: true
-  cpus: '2.0'
+  cpus: "2.0"
   mem_reservation: 1g
   mem_limit: 4g
   pids_limit: 1024

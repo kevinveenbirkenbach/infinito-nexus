@@ -1,3 +1,4 @@
+---
 # Matrix-deploy variant overrides for this role (requirement 013
 # alpha-to-beta promotion). Variant 0 is the canonical OIDC variant
 # (default), where Joomla speaks OIDC natively via the `plg_system_keycloak`

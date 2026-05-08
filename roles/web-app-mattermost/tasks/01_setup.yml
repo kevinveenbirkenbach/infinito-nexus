@@ -36,7 +36,8 @@
     chdir: "{{ lookup('container', application_id, 'directories.instance') }}"
   register: mm_create_team
   changed_when: mm_create_team.rc == 0
-  failed_when: mm_create_team.rc != 0 and 'already exists' not in (mm_create_team.stdout + mm_create_team.stderr) and 'existing team' not in (mm_create_team.stdout + mm_create_team.stderr)
+  failed_when: mm_create_team.rc != 0 and 'already exists' not in (mm_create_team.stdout + mm_create_team.stderr) and 'existing team' not in
+    (mm_create_team.stdout + mm_create_team.stderr)
 
 - name: "Mattermost | Enable open invite on default team"
   shell: |
@@ -108,4 +109,3 @@
   when:
     - MATTERMOST_OIDC_ENABLED | bool
     - mm_admin_authservice.stdout | trim != 'gitlab'
-

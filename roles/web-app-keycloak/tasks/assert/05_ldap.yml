@@ -1,3 +1,4 @@
+---
 #
 # Read-only assertions for LDAP configuration in Keycloak.
 # Ensures:

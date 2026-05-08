@@ -1,3 +1,4 @@
+---
 - name: Install & configure OIDC plugin (if enabled)
   include_tasks: setup/oidc.yml
   when: SHOPWARE_OIDC_ENABLED | bool

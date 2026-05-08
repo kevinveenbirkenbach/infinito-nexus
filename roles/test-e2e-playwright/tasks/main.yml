@@ -1,3 +1,4 @@
+---
 - name: Apply role include/exclude filters
   ansible.builtin.set_fact:
     _playwright_apps: >-

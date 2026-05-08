@@ -1,3 +1,4 @@
+---
 asset:
   enabled: "{{ 'web-svc-asset' in group_names }}"
   shared: "{{ 'web-svc-asset' in group_names }}"
@@ -17,7 +18,7 @@ email:
   enabled: "{{ 'web-app-mailu' in group_names }}"
   shared: "{{ 'web-app-mailu' in group_names }}"
 postgres:
-  enabled: true  # nocheck: dynamic-flag
+  enabled: true # nocheck: dynamic-flag
   shared: "{{ 'svc-db-postgres' in group_names }}"
 listmonk:
   cpus: 1.0
@@ -36,9 +37,9 @@ listmonk:
       http: 8019
   public_api_activated: false
   run_after:
-  - web-app-matomo
-  - web-app-keycloak
-  - web-app-mailu
+    - web-app-matomo
+    - web-app-keycloak
+    - web-app-mailu
   lifecycle: beta
 # nocheck: dynamic-flag
 css:
@@ -46,7 +47,7 @@ css:
   shared: true
 # nocheck: dynamic-flag
 hcaptcha:
-  enabled: '{{ HCAPTCHA_ENABLED | bool }}'
+  enabled: "{{ HCAPTCHA_ENABLED | bool }}"
 prometheus:
   enabled: "{{ 'web-app-prometheus' in group_names }}"
   shared: "{{ 'web-app-prometheus' in group_names }}"

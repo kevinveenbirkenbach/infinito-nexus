@@ -1,3 +1,4 @@
+---
 # Matrix-deploy variant overrides for this role (requirement 005
 # verification). Variant 0 keeps the canonical Single-Site flow;
 # variant 1 flips the role into Multisite mode against three canonical

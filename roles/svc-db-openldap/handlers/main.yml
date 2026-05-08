@@ -1,3 +1,4 @@
+---
 - name: Load memberof module in OpenLDAP (cn=config via EXTERNAL)
   ansible.builtin.shell: >-
     container exec -i {{ lookup('config', 'svc-db-openldap', 'services.openldap.name') }}

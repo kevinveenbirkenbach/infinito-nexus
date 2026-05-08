@@ -36,7 +36,7 @@ class TestClaudeSettingsSorted(unittest.TestCase):
                     obj,
                     sorted(obj),
                     f"{label} is not ASCII-sorted ascending in {SETTINGS_PATH}. "
-                    f"Fix: run `bash scripts/lint/sort_claude_settings.sh` "
+                    f"Fix: run `bash scripts/lint/claude.sh` "
                     f"(also wired into `scripts/lint/autoformat.sh`).",
                 )
 

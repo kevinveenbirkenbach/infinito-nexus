@@ -1,6 +1,7 @@
+---
 domains:
   canonical:
-  - hugo.{{ DOMAIN_PRIMARY }}
+    - hugo.{{ DOMAIN_PRIMARY }}
   aliases: []
 csp:
   flags:

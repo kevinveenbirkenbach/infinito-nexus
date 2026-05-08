@@ -1,3 +1,4 @@
+---
 - name: Ensure Nextcloud administrator is in the 'admin' group
   command: >
     container exec -u {{ NEXTCLOUD_DOCKER_USER }} {{ NEXTCLOUD_CONTAINER }}
@@ -11,4 +12,4 @@
       (add_admin_to_group.stderr | default('')) ~ (add_admin_to_group.stdout | default(''))
     ))
   async: "{{ ASYNC_TIME if ASYNC_ENABLED | bool else omit }}"
-  poll:  "{{ ASYNC_POLL if ASYNC_ENABLED | bool else omit }}"
+  poll: "{{ ASYNC_POLL if ASYNC_ENABLED | bool else omit }}"

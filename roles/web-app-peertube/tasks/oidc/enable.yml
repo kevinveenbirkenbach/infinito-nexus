@@ -13,7 +13,6 @@
 - name: "Install auth-openid-connect plugin for Peertube (with temp mem_limit bump + diagnostics on failure)"
   when: peertube_oidc_plugin_check.rc != 0
   block:
-
     # Raise the container cgroup ceiling for the duration of the install.
     # The install node process and the long-running main peertube node
     # process share this cgroup (install runs via `container exec`), and
@@ -61,7 +60,6 @@
       changed_when: true
 
   rescue:
-
     - name: "PEERTUBE | Dump diagnostics after install failure"
       ansible.builtin.script: "{{ role_path }}/files/diagnostics.sh {{ PEERTUBE_CONTAINER }}"
       environment:

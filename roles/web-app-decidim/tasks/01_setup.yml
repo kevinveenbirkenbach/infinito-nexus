@@ -51,7 +51,6 @@
   register: decidim_admin_result
   changed_when: "'Admin user ready' in decidim_admin_result.stdout"
 
-
 - name: "Decidim | Configure OIDC omniauth settings in organization"
   community.docker.docker_container_exec:
     container: "{{ DECIDIM_CONTAINER }}"

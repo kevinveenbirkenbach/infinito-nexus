@@ -1,8 +1,10 @@
+---
 - name: Update DB host (idempotent)
   command: >
     container exec --user root {{ ESPOCRM_CONTAINER }} sh -lc
     "grep -q \"'host' *=> *'{{ lookup('database', application_id, 'host') }}',\" {{ ESPOCRM_CONFIG_FILE_PRIVATE }} ||
-     { sed -i \"s/'host'\\s*=>\\s*[^,]*,/'host' => '{{ lookup('database', application_id, 'host') | sed_escape('/') }}',/\" {{ ESPOCRM_CONFIG_FILE_PRIVATE }} && echo CHANGED; }"
+     { sed -i \"s/'host'\\s*=>\\s*[^,]*,/'host' => '{{ lookup('database', application_id, 'host') | sed_escape('/') }}',/\" {{ ESPOCRM_CONFIG_FILE_PRIVATE }} && echo
+    CHANGED; }"
   register: db_host_set
   changed_when: "'CHANGED' in db_host_set.stdout"
   notify: compose up
@@ -11,7 +13,8 @@
   command: >
     container exec --user root {{ ESPOCRM_CONTAINER }} sh -lc
     "grep -q \"'dbname' *=> *'{{ lookup('database', application_id, 'name') }}',\" {{ ESPOCRM_CONFIG_FILE_PRIVATE }} ||
-     { sed -i \"s/'dbname'\\s*=>\\s*[^,]*,/'dbname' => '{{ lookup('database', application_id, 'name') | sed_escape('/') }}',/\" {{ ESPOCRM_CONFIG_FILE_PRIVATE }} && echo CHANGED; }"
+     { sed -i \"s/'dbname'\\s*=>\\s*[^,]*,/'dbname' => '{{ lookup('database', application_id, 'name') | sed_escape('/') }}',/\" {{ ESPOCRM_CONFIG_FILE_PRIVATE }}
+    && echo CHANGED; }"
   register: db_name_set
   changed_when: "'CHANGED' in db_name_set.stdout"
   notify: compose up
@@ -20,7 +23,8 @@
   command: >
     container exec --user root {{ ESPOCRM_CONTAINER }} sh -lc
     "grep -q \"'user' *=> *'{{ lookup('database', application_id, 'username') }}',\" {{ ESPOCRM_CONFIG_FILE_PRIVATE }} ||
-     { sed -i \"s/'user'\\s*=>\\s*[^,]*,/'user' => '{{ lookup('database', application_id, 'username') | sed_escape('/') }}',/\" {{ ESPOCRM_CONFIG_FILE_PRIVATE }} && echo CHANGED; }"
+     { sed -i \"s/'user'\\s*=>\\s*[^,]*,/'user' => '{{ lookup('database', application_id, 'username') | sed_escape('/') }}',/\" {{ ESPOCRM_CONFIG_FILE_PRIVATE }}
+    && echo CHANGED; }"
   register: db_user_set
   changed_when: "'CHANGED' in db_user_set.stdout"
   notify: compose up
@@ -29,7 +33,8 @@
   command: >
     container exec --user root {{ ESPOCRM_CONTAINER }} sh -lc
     "grep -q \"'password' *=> *'{{ lookup('database', application_id, 'password') }}',\" {{ ESPOCRM_CONFIG_FILE_PRIVATE }} ||
-     { sed -i \"s/'password'\\s*=>\\s*[^,]*,/'password' => '{{ lookup('database', application_id, 'password') | sed_escape('/') }}',/\" {{ ESPOCRM_CONFIG_FILE_PRIVATE }} && echo CHANGED; }"
+     { sed -i \"s/'password'\\s*=>\\s*[^,]*,/'password' => '{{ lookup('database', application_id, 'password') | sed_escape('/') }}',/\" {{ ESPOCRM_CONFIG_FILE_PRIVATE
+    }} && echo CHANGED; }"
   register: db_pass_set
   changed_when: "'CHANGED' in db_pass_set.stdout"
   notify: compose up

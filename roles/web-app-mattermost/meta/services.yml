@@ -1,3 +1,4 @@
+---
 oidc:
   enabled: "{{ 'web-app-keycloak' in group_names }}"
   shared: "{{ 'web-app-keycloak' in group_names }}"
@@ -17,7 +18,7 @@ email:
   enabled: "{{ 'web-app-mailu' in group_names }}"
   shared: "{{ 'web-app-mailu' in group_names }}"
 postgres:
-  enabled: true  # nocheck: dynamic-flag
+  enabled: true # nocheck: dynamic-flag
   shared: "{{ 'svc-db-postgres' in group_names }}"
 mattermost:
   image: mattermost/mattermost-team-edition
@@ -26,7 +27,7 @@ mattermost:
   backup:
     no_stop_required: true
   name: mattermost
-  cpus: '1.0'
+  cpus: "1.0"
   mem_reservation: 512m
   mem_limit: 1g
   pids_limit: 512
@@ -34,8 +35,8 @@ mattermost:
     local:
       http: 8065
   run_after:
-  - web-app-keycloak
-  - web-app-mailu
+    - web-app-keycloak
+    - web-app-mailu
   lifecycle: beta
 # nocheck: dynamic-flag
 oauth2:

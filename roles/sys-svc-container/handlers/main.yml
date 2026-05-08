@@ -2,8 +2,8 @@
 - name: Ensure Docker daemon is running on host
   ansible.builtin.service:
     name: docker.service
-    state:  restarted
-    enabled: yes
+    state: restarted
+    enabled: true
   listen: container manager restart
 
 - name: Ensure Docker-In-Docker DNS works

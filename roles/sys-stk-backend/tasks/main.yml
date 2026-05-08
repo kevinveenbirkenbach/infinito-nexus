@@ -1,3 +1,4 @@
+---
 # run_once_sys_stk_backend: disabled
 
 - name: "Resolve backend context for '{{ application_id }}'"
@@ -31,8 +32,8 @@
   include_role:
     name: sys-svc-compose
   vars:
-    docker_compose_flush_handlers:  false
-    database_consumer_id:           "{{ _sys_stk_backend_database_consumer_id }}"
+    docker_compose_flush_handlers: false
+    database_consumer_id: "{{ _sys_stk_backend_database_consumer_id }}"
 
 - block:
     - name: "set oauth2_proxy_application_id (Needed due to lazzy loading issue)"

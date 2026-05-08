@@ -1,7 +1,8 @@
 ---
 galaxy_info:
   author: Kevin Veen-Birkenbach
-  description: Unleash the potential of centralized identity management with our robust LDAP Directory solution, powered by OpenLDAP. Manage users, groups, and schemas securely with extensive customization options and integrated TLS support.
+  description: Unleash the potential of centralized identity management with our robust LDAP Directory solution, powered by OpenLDAP. Manage users, groups, and
+    schemas securely with extensive customization options and integrated TLS support.
   license: Infinito.Nexus Community License (Non-Commercial)
   company: |
     Kevin Veen-Birkenbach

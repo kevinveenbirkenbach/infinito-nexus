@@ -1,3 +1,4 @@
+---
 - name: Remove OIDC plugin if disabled
   include_tasks: cleanup/oidc.yml
   when: not (SHOPWARE_OIDC_ENABLED | bool)

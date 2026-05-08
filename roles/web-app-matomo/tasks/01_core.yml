@@ -1,3 +1,4 @@
+---
 # Required to be set on the top so global frontend service loading can rely on run_once guards.
 - include_tasks: utils/once/flag.yml
 
@@ -15,8 +16,8 @@
   template:
     src: "templates/bootstrap.env.j2"
     dest: "{{ MATOMO_BOOTSTRAP_ENV_FILE }}"
-    mode: '0640'
-    force: yes
+    mode: "0640"
+    force: true
   notify: compose up
 
 - name: flush docker service

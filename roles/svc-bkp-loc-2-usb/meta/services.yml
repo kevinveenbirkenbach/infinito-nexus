@@ -1,5 +1,6 @@
+---
 loc-2-usb:
-  mount: ''
-  target: ''
-  source: ''
+  mount: ""
+  target: ""
+  source: ""
   lifecycle: pre-alpha

@@ -1,3 +1,4 @@
+---
 mariadb:
   enabled: true
   shared: true
@@ -7,7 +8,7 @@ mariadb:
   min_storage: 10GB
   backup:
     database_routine: true
-  cpus: '2.0'
+  cpus: "2.0"
   mem_reservation: 2g
   mem_limit: 4g
   pids_limit: 1024

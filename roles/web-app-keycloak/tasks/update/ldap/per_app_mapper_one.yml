@@ -45,7 +45,8 @@
     kc_app_group_id: "{{ (per_app_group_id_out.stdout | default('')) | trim }}"
   changed_when: false
 
-- name: "per-app mapper [{{ kc_app_id }}]: purge ALL subgroups under /{{ KEYCLOAK_RBAC_GROUP_NAME | trim('/') }}/{{ kc_app_id }} so the next mapper sync rebuilds them cleanly"
+- name: "per-app mapper [{{ kc_app_id }}]: purge ALL subgroups under /{{ KEYCLOAK_RBAC_GROUP_NAME | trim('/') }}/{{ kc_app_id }} so the next mapper sync rebuilds
+    them cleanly"
   ansible.builtin.script:
     cmd: "files/scripts/per_app_mapper/purge_app_subgroups.sh"
     executable: /bin/bash

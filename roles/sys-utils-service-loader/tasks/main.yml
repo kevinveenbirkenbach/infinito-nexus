@@ -1,3 +1,4 @@
+---
 # SPOT: global loader for all shared services.
 #
 # Called from tasks/stages/01_constructor.yml before the normal server app pass.

@@ -1,3 +1,4 @@
+---
 # @See https://docs.nextcloud.com/server/latest/admin_manual/configuration_user/user_auth_ldap.html
 # @See 
 - name: Resolve desired Nextcloud LDAP config ID from plugin configuration
@@ -69,4 +70,4 @@
   command: >
     {{ NEXTCLOUD_DOCKER_EXEC_OCC }} ldap:search ""
   async: "{{ ASYNC_TIME if ASYNC_ENABLED | bool else omit }}"
-  poll:  "{{ ASYNC_POLL if ASYNC_ENABLED | bool else omit }}"
+  poll: "{{ ASYNC_POLL if ASYNC_ENABLED | bool else omit }}"

@@ -1,8 +1,9 @@
+---
 logout:
   enabled: "{{ 'web-svc-logout' in group_names }}"
   shared: "{{ 'web-svc-logout' in group_names }}"
 ldap:
-  enabled: true  # nocheck: dynamic-flag
+  enabled: true # nocheck: dynamic-flag
   shared: "{{ 'svc-db-openldap' in group_names }}"
 dashboard:
   enabled: "{{ 'web-app-dashboard' in group_names }}"
@@ -21,7 +22,7 @@ lam:
   run_after:
     - web-app-keycloak
   lifecycle: beta
-  cpus: '0.2'
+  cpus: "0.2"
   mem_reservation: 128m
   mem_limit: 256m
   pids_limit: 256
@@ -32,7 +33,7 @@ oauth2:
     host: application
     port: 80
   allowed_groups:
-    - '{{ lookup(''rbac_group_path'', application_id=''web-app-lam'', role=''administrator'') }}'
+    - "{{ lookup('rbac_group_path', application_id='web-app-lam', role='administrator') }}"
 # nocheck: dynamic-flag
 css:
   enabled: true

@@ -1,3 +1,4 @@
+---
 - include_tasks: utils/once/flag.yml
 
 - name: "Recursively copy files from local '{{ source_directory }}' to '{{ target_directory }}'"

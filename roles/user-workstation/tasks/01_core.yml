@@ -1,3 +1,4 @@
+---
 - name: Validate WORKSTATION_USER is defined
   ansible.builtin.fail:
     msg: "WORKSTATION_USER must be defined (e.g. WORKSTATION_USER: biber)."
@@ -34,7 +35,7 @@
   ansible.builtin.include_role:
     name: user
   vars:
-     user_key: "{{ USER_WORKSTATION_KEY }}"
+    user_key: "{{ USER_WORKSTATION_KEY }}"
 
 - name: Enable sudo via sudoers drop-in (optional)
   ansible.builtin.template:

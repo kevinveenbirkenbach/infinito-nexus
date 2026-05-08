@@ -1,3 +1,4 @@
+---
 asset:
   enabled: "{{ 'web-svc-asset' in group_names }}"
   shared: "{{ 'web-svc-asset' in group_names }}"
@@ -21,7 +22,7 @@ email:
   enabled: "{{ 'web-app-mailu' in group_names }}"
   shared: "{{ 'web-app-mailu' in group_names }}"
 postgres:
-  enabled: true  # nocheck: dynamic-flag
+  enabled: true # nocheck: dynamic-flag
   shared: "{{ 'svc-db-postgres' in group_names }}"
 # nocheck: shared
 # nocheck: dynamic-flag
@@ -54,11 +55,12 @@ discourse:
     local:
       http: 8020
   lifecycle: beta
-  cpus: '1.0'
+  cpus: "1.0"
   mem_reservation: 1g
   mem_limit: 2g
   pids_limit: 1024
-  disable_local_logins: "{{ (lookup('config', 'web-app-discourse', 'services.oidc.enabled') | bool) and not (lookup('config', 'web-app-discourse', 'services.ldap.enabled') | bool) }}"
+  disable_local_logins: "{{ (lookup('config', 'web-app-discourse', 'services.oidc.enabled') | bool) and not (lookup('config', 'web-app-discourse', 'services.ldap.enabled')
+    | bool) }}"
 # nocheck: dynamic-flag
 css:
   enabled: true

@@ -1,3 +1,4 @@
+---
 oauth2:
   enabled: "{{ 'web-app-keycloak' in group_names }}"
   shared: "{{ 'web-app-keycloak' in group_names }}"
@@ -5,7 +6,7 @@ oauth2:
     host: application
     port: 8000
   allowed_groups:
-  - '{{ lookup(''rbac_group_path'', application_id=''web-app-bookwyrm'', role=''administrator'') }}'
+    - "{{ lookup('rbac_group_path', application_id='web-app-bookwyrm', role='administrator') }}"
 oidc:
   enabled: "{{ 'web-app-keycloak' in group_names }}"
   shared: "{{ 'web-app-keycloak' in group_names }}"
@@ -25,7 +26,7 @@ email:
   enabled: "{{ 'web-app-mailu' in group_names }}"
   shared: "{{ 'web-app-mailu' in group_names }}"
 postgres:
-  enabled: true  # nocheck: dynamic-flag
+  enabled: true # nocheck: dynamic-flag
   shared: "{{ 'svc-db-postgres' in group_names }}"
 # nocheck: shared
 # nocheck: dynamic-flag
@@ -51,7 +52,7 @@ bookwyrm:
     - web-app-keycloak
     - web-app-mailu
   lifecycle: beta
-  cpus: '0.5'
+  cpus: "0.5"
   mem_reservation: 256m
   mem_limit: 1g
   pids_limit: 512

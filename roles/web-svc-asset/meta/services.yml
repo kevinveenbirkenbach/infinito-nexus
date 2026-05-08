@@ -1,14 +1,15 @@
+---
 asset:
   enabled: true
   shared: true
-  cpus: '0.2'
+  cpus: "0.2"
   mem_reservation: 128m
   mem_limit: 256m
   pids_limit: 128
-  source_directory: '{{ playbook_dir }}/assets'
+  source_directory: "{{ playbook_dir }}/assets"
   url: //{{ lookup('domain', 'web-svc-file') }}/assets
   run_after:
-  - web-svc-file
+    - web-svc-file
   lifecycle: beta
 file:
   enabled: "{{ 'web-svc-file' in group_names }}"

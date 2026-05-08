@@ -1,3 +1,4 @@
+---
 # nocheck: dynamic-flag
 logout:
   enabled: false
@@ -15,7 +16,7 @@ redis:
     disabled: true
   enabled: true
 postgres:
-  enabled: true  # nocheck: dynamic-flag
+  enabled: true # nocheck: dynamic-flag
   shared: "{{ 'svc-db-postgres' in group_names }}"
 onlyoffice:
   enabled: true

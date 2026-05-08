@@ -9,7 +9,7 @@
   ansible.builtin.template:
     src: controller.toml.j2
     dest: "{{ [lookup('container', application_id, 'directories.volumes'), 'controller.toml'] | path_join }}"
-    mode: '0644'
+    mode: "0644"
   notify:
     - compose up
 
@@ -17,7 +17,7 @@
   ansible.builtin.template:
     src: livekit.yaml.j2
     dest: "{{ [lookup('container', application_id, 'directories.volumes'), 'livekit.yaml'] | path_join }}"
-    mode: '0644'
+    mode: "0644"
   notify:
     - compose up
 
@@ -25,7 +25,7 @@
   ansible.builtin.template:
     src: recorder.toml.j2
     dest: "{{ [lookup('container', application_id, 'directories.volumes'), 'recorder.toml'] | path_join }}"
-    mode: '0644'
+    mode: "0644"
   notify:
     - compose up
 

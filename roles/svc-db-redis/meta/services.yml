@@ -1,3 +1,4 @@
+---
 redis:
   image: redis
   version: alpine

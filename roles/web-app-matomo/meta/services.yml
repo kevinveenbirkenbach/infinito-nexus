@@ -1,3 +1,4 @@
+---
 # nocheck: dynamic-flag
 # nocheck: oidc
 oidc:
@@ -12,7 +13,7 @@ oauth2:
 # nocheck: dynamic-flag
 logout:
   enabled: "{{ 'web-svc-logout' in group_names }}"
-  shared:  "{{ 'web-svc-logout' in group_names }}"
+  shared: "{{ 'web-svc-logout' in group_names }}"
 # nocheck: dynamic-flag
 # nocheck: dashboard
 dashboard:
@@ -34,7 +35,7 @@ matomo:
   site_name: Matomo on {{ DOMAIN_PRIMARY }}
   token:
     description: Created by {{ SOFTWARE_NAME }}
-  excluded_ips: '{{ networks.internet.values() | list }}'
+  excluded_ips: "{{ networks.internet.values() | list }}"
   ports:
     local:
       http: 8018
@@ -52,7 +53,7 @@ bootstrap:
   pids_limit: 512
   min_storage: 1GB
 mariadb:
-  enabled: true  # nocheck: dynamic-flag
+  enabled: true # nocheck: dynamic-flag
   shared: "{{ 'svc-db-mariadb' in group_names }}"
 # nocheck: dynamic-flag
 redis:

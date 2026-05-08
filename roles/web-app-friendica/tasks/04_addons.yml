@@ -1,3 +1,4 @@
+---
 - name: flush handlers to ensure that friendica is up before friendica addon configuration
   meta: flush_handlers
 

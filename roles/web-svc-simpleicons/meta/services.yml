@@ -1,3 +1,4 @@
+---
 # nocheck: dynamic-flag
 oauth2:
   enabled: false

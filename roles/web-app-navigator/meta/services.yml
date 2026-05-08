@@ -1,3 +1,4 @@
+---
 # nocheck: dynamic-flag
 # nocheck: logout
 logout:
@@ -32,7 +33,7 @@ navigator:
       http: 8039
   lifecycle: pre-alpha
   min_storage: 1GB
-  cpus: '0.2'
+  cpus: "0.2"
   mem_reservation: 128m
   mem_limit: 256m
   pids_limit: 256

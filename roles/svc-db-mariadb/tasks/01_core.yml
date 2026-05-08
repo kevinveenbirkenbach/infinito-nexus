@@ -1,11 +1,12 @@
+---
 - include_tasks: utils/once/flag.yml
 
 - name: "Setup container network for {{ application_id }}"
   include_tasks: "{{ [playbook_dir, 'roles/sys-svc-compose/tasks/utils/network.yml' ] | path_join }}"
   vars:
-    docker_network_name:            "{{ MARIADB_NETWORK }}"
-    docker_network_subnet:          "{{ MARIADB_SUBNET }}"
-    docker_compose_flush_handlers:  true
+    docker_network_name: "{{ MARIADB_NETWORK }}"
+    docker_network_subnet: "{{ MARIADB_SUBNET }}"
+    docker_compose_flush_handlers: true
 
 - name: Install MySQL Python client library via pip
   include_role:
@@ -31,7 +32,6 @@
   delay: 5
 
 - block:
-
     - name: "Root password reset | Check login with desired password (inside container)"
       community.docker.docker_container_exec:
         container: "{{ MARIADB_NAME }}"

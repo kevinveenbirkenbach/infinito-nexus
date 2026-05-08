@@ -1,3 +1,4 @@
+---
 oidc:
   enabled: "{{ 'web-app-keycloak' in group_names }}"
   shared: "{{ 'web-app-keycloak' in group_names }}"
@@ -14,7 +15,7 @@ email:
   enabled: "{{ 'web-app-mailu' in group_names }}"
   shared: "{{ 'web-app-mailu' in group_names }}"
 postgres:
-  enabled: true  # nocheck: dynamic-flag
+  enabled: true # nocheck: dynamic-flag
   shared: "{{ 'svc-db-postgres' in group_names }}"
 synapse:
   version: latest
@@ -28,7 +29,7 @@ synapse:
     public:
       federation: 8448
   min_storage: 10GB
-  cpus: '1.0'
+  cpus: "1.0"
   mem_reservation: 1g
   mem_limit: 2g
   pids_limit: 1024
@@ -40,7 +41,7 @@ element:
     local:
       http: 8022
   min_storage: 1GB
-  cpus: '0.2'
+  cpus: "0.2"
   mem_reservation: 128m
   mem_limit: 256m
   pids_limit: 256
@@ -48,7 +49,7 @@ matrix-chatgpt-bot:
   version: latest
   image: ghcr.io/matrixgpt/matrix-chatgpt-bot
   min_storage: 1GB
-  cpus: '0.2'
+  cpus: "0.2"
   mem_reservation: 128m
   mem_limit: 256m
   pids_limit: 256
@@ -67,7 +68,7 @@ prometheus:
     channel: true
 matrix:
   playbook_tags: setup-all,start
-  server_name: '{{ DOMAIN_PRIMARY }}'
+  server_name: "{{ DOMAIN_PRIMARY }}"
   setup: false
   plugins:
     chatgpt: false

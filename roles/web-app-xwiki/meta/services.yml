@@ -1,3 +1,4 @@
+---
 oidc:
   enabled: "{{ 'web-app-keycloak' in group_names }}"
   shared: "{{ 'web-app-keycloak' in group_names }}"
@@ -24,7 +25,7 @@ redis:
   backup:
     disabled: true
 postgres:
-  enabled: true  # nocheck: dynamic-flag
+  enabled: true # nocheck: dynamic-flag
   shared: "{{ 'svc-db-postgres' in group_names }}"
 xwiki:
   image: xwiki
@@ -42,25 +43,25 @@ xwiki:
       enabled: true
       shared: true
       items:
-      - id: org.xwiki.contrib.oidc:oidc-authenticator
-        version: 2.19.6
+        - id: org.xwiki.contrib.oidc:oidc-authenticator
+          version: 2.19.6
     ldap:
       enabled: false
       items:
-      - id: org.xwiki.contrib.ldap:ldap-authenticator
-        version: 9.15.7
+        - id: org.xwiki.contrib.ldap:ldap-authenticator
+          version: 9.15.7
     matomo:
       enabled: false
       items:
-      - id: org.xwiki.contrib:matomo
-        version: '1.0'
+        - id: org.xwiki.contrib:matomo
+          version: "1.0"
   ports:
     local:
       http: 8054
   run_after:
-  - web-app-matomo
-  - web-app-keycloak
-  - web-app-mailu
+    - web-app-matomo
+    - web-app-keycloak
+    - web-app-mailu
   lifecycle: beta
 # nocheck: dynamic-flag
 css:

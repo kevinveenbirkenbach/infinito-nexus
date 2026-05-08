@@ -19,13 +19,13 @@
   template:
     src: upload.ini.j2
     dest: "{{ WORDPRESS_CONFIG_UPLD_ABS }}"
-  notify: 
+  notify:
     - compose up
     - compose build
 
 - name: "Transfering msmtprc to {{ WORDPRESS_MSMTP_ABS }}"
   template:
-    src:  "{{ WORDPRESS_MSMTP_SRC }}"
+    src: "{{ WORDPRESS_MSMTP_SRC }}"
     dest: "{{ WORDPRESS_MSMTP_ABS }}"
   notify: compose up
 
@@ -82,4 +82,3 @@
   vars:
     # Target URL to switch to (uses your helper)
     wp_new_url: "{{ WORDPRESS_URL }}"
-  

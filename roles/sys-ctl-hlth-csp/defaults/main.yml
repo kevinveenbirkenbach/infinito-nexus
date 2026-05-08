@@ -1,3 +1,4 @@
+---
 images:
   csp-checker:
     image: ghcr.io/kevinveenbirkenbach/csp-checker
@@ -8,7 +9,6 @@ images:
 # (e.g., third-party CDNs) that cannot be influenced but otherwise cause
 # unnecessary alerts in the crawler reports.
 HEALTH_CSP_IGNORE_NETWORK_BLOCKS_FROM: []
-
 # Docker image to run
 HEALTH_CSP_IMAGE: "{{ lookup('image', 'csp-checker', 'ref') }}"
 

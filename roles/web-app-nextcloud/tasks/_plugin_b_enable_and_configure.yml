@@ -1,3 +1,4 @@
+---
 - name: enable {{ plugin_key }} nextcloud plugin
   command: "{{ NEXTCLOUD_DOCKER_EXEC_OCC }} app:enable {{ plugin_key }}"
   register: enable_result
@@ -21,7 +22,7 @@
     {% for item in (plugin_configuration | default([])) %}
     {{ NEXTCLOUD_DOCKER_EXEC_OCC }} \
       config:app:set {{ item.appid }} {{ item.configkey }} \
-      --value '{{ ( (item.configvalue | to_json) if (item.configvalue is mapping) else (item.configvalue | string) ) 
+      --value '{{ ( (item.configvalue | to_json) if (item.configvalue is mapping) else (item.configvalue | string) )
             | regex_replace("'", "'" ~ '"' ~ "'" ~ '"' ~ "'") }}'
     {% endfor %}
   args:
@@ -33,7 +34,7 @@
     (config_set_shell.stdout | default('')) is search(' set to ')
   failed_when: not ASYNC_ENABLED and config_set_shell.rc != 0
   async: "{{ ASYNC_TIME if ASYNC_ENABLED | bool else omit }}"
-  poll:  "{{ ASYNC_POLL if ASYNC_ENABLED | bool else omit }}"
+  poll: "{{ ASYNC_POLL if ASYNC_ENABLED | bool else omit }}"
   no_log: "{{ MASK_CREDENTIALS_IN_LOGS | bool }}"
 
 - name: Check if {{ plugin_task_path }} exists

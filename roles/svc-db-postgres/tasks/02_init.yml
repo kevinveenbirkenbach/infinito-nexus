@@ -14,7 +14,6 @@
 
 - name: Wait until postgres TCP auth works
   block:
-
     - name: Wait for Postgres TCP auth
       ansible.builtin.shell: >
         {{ POSTGRES_EXEC_SHELL }}
@@ -27,7 +26,6 @@
       changed_when: false
 
   rescue:
-
     - name: "POSTGRES | container logs (last 200 lines)"
       ansible.builtin.command: "container logs --tail 200 {{ POSTGRES_CONTAINER }}"
       register: dbg_docker_logs
@@ -65,14 +63,14 @@
 # 2) Create the database user (with password)
 - name: "Create database user: {{ database_username }}"
   community.postgresql.postgresql_user:
-    name:           "{{ database_username }}"
-    password:       "{{ postgres_database_password_string }}"
-    db:             "{{ database_name }}"
-    state:          present
-    login_user:     postgres
+    name: "{{ database_username }}"
+    password: "{{ postgres_database_password_string }}"
+    db: "{{ database_name }}"
+    state: present
+    login_user: postgres
     login_password: "{{ postgres_login_password_string }}"
-    login_host:     "{{ POSTGRES_LOCAL_HOST }}"
-    login_port:     "{{ POSTGRES_PORT }}"
+    login_host: "{{ POSTGRES_LOCAL_HOST }}"
+    login_port: "{{ POSTGRES_PORT }}"
   register: postgresql_result
   until: postgresql_result is succeeded
   retries: "{{ POSTGRES_RETRIES }}"
@@ -81,7 +79,6 @@
 # 3) Enable LOGIN for the role (removes NOLOGIN)
 - name: "POSTGRES | Ensure LOGIN for role {{ database_username }} (with debug on failure)"
   block:
-
     - name: "POSTGRES | Enable login for role {{ database_username }}"
       community.postgresql.postgresql_query:
         db: postgres
@@ -99,7 +96,6 @@
       no_log: "{{ MASK_CREDENTIALS_IN_LOGS | bool }}"
 
   rescue:
-
     # --- High-signal Ansible context -----------------------------------------
     - name: "POSTGRES | Debug context (vars, without secrets)"
       ansible.builtin.debug:
@@ -252,17 +248,17 @@
 # 4) Grant ALL privileges on all tables in the public schema
 - name: "Grant ALL privileges on tables in public schema to {{ database_username }}"
   community.postgresql.postgresql_privs:
-    db:     "{{ database_name }}"
-    roles:   "{{ database_username }}"
-    objs:   ALL_IN_SCHEMA
-    privs:  ALL
-    type:   table
+    db: "{{ database_name }}"
+    roles: "{{ database_username }}"
+    objs: ALL_IN_SCHEMA
+    privs: ALL
+    type: table
     schema: public
-    state:  present
-    login_user:     postgres
+    state: present
+    login_user: postgres
     login_password: "{{ postgres_login_password_string }}"
-    login_host:     "{{ POSTGRES_LOCAL_HOST }}"
-    login_port:     "{{ POSTGRES_PORT }}"
+    login_host: "{{ POSTGRES_LOCAL_HOST }}"
+    login_port: "{{ POSTGRES_PORT }}"
   register: postgresql_result
   until: postgresql_result is succeeded
   retries: "{{ POSTGRES_RETRIES }}"
@@ -271,15 +267,15 @@
 # 5) Grant ALL privileges at the database level
 - name: "Grant all privileges on database {{ database_name }} to {{ database_username }}"
   community.postgresql.postgresql_privs:
-    db:    "{{ database_name }}"
-    roles:  "{{ database_username }}"
-    type:  database
+    db: "{{ database_name }}"
+    roles: "{{ database_username }}"
+    type: database
     privs: ALL
     state: present
-    login_user:     postgres
+    login_user: postgres
     login_password: "{{ postgres_login_password_string }}"
-    login_host:     "{{ POSTGRES_LOCAL_HOST }}"
-    login_port:     "{{ POSTGRES_PORT }}"
+    login_host: "{{ POSTGRES_LOCAL_HOST }}"
+    login_port: "{{ POSTGRES_PORT }}"
   register: postgresql_result
   until: postgresql_result is succeeded
   retries: "{{ POSTGRES_RETRIES }}"
@@ -302,13 +298,13 @@
 # 7) Ensure PostGIS and related extensions are installed (if enabled)
 - name: "Ensure PostGIS-related extensions are installed"
   community.postgresql.postgresql_ext:
-    db:         "{{ database_name }}"
-    ext:        "{{ item }}"
-    state:      present
-    login_user:     postgres
+    db: "{{ database_name }}"
+    ext: "{{ item }}"
+    state: present
+    login_user: postgres
     login_password: "{{ postgres_login_password_string }}"
-    login_host:     "{{ POSTGRES_LOCAL_HOST }}"
-    login_port:     "{{ POSTGRES_PORT }}"
+    login_host: "{{ POSTGRES_LOCAL_HOST }}"
+    login_port: "{{ POSTGRES_PORT }}"
   loop:
     - postgis
     - pg_trgm
@@ -322,13 +318,13 @@
 # 8) Ensure pgvector (vector) extension is installed
 - name: "Ensure pgvector (vector) extension is installed"
   community.postgresql.postgresql_ext:
-    db:           "{{ database_name }}"
-    ext:          vector
-    state:        present
-    login_user:   postgres
+    db: "{{ database_name }}"
+    ext: vector
+    state: present
+    login_user: postgres
     login_password: "{{ postgres_login_password_string }}"
-    login_host:   "{{ POSTGRES_LOCAL_HOST }}"
-    login_port:   "{{ POSTGRES_PORT }}"
+    login_host: "{{ POSTGRES_LOCAL_HOST }}"
+    login_port: "{{ POSTGRES_PORT }}"
   register: postgresql_result
   until: postgresql_result is succeeded
   retries: "{{ POSTGRES_RETRIES }}"

@@ -1,10 +1,11 @@
+---
 # nocheck: dynamic-flag
 # nocheck: logout
 logout:
   enabled: false
   shared: false
 ldap:
-  enabled: true  # nocheck: dynamic-flag
+  enabled: true # nocheck: dynamic-flag
   shared: "{{ 'svc-db-openldap' in group_names }}"
   sync:
     period:
@@ -24,12 +25,12 @@ keycloak:
   shared: true
   provides: oidc
   covers:
-  - oauth2
+    - oauth2
   image: quay.io/keycloak/keycloak
   version: latest
   name: keycloak
   min_storage: 5GB
-  cpus: '2.0'
+  cpus: "2.0"
   mem_reservation: 2g
   mem_limit: 4g
   pids_limit: 1024
@@ -45,16 +46,16 @@ keycloak:
     bootstrap:
       username: administrator
     system:
-      username: '{{ SOFTWARE_NAME | replace(''.'', ''_'') | lower }}'
+      username: "{{ SOFTWARE_NAME | replace('.', '_') | lower }}"
   ports:
     local:
       http: 8032
   run_after:
-  - web-app-matomo
-  - web-app-mailu
+    - web-app-matomo
+    - web-app-mailu
   lifecycle: beta
 postgres:
-  enabled: true  # nocheck: dynamic-flag
+  enabled: true # nocheck: dynamic-flag
   shared: "{{ 'svc-db-postgres' in group_names }}"
 # nocheck: dynamic-flag
 css:
@@ -62,7 +63,7 @@ css:
   shared: true
 # nocheck: dynamic-flag
 recaptcha:
-  enabled: '{{ RECAPTCHA_ENABLED | bool }}'
+  enabled: "{{ RECAPTCHA_ENABLED | bool }}"
 prometheus:
   enabled: "{{ 'web-app-prometheus' in group_names }}"
   shared: "{{ 'web-app-prometheus' in group_names }}"

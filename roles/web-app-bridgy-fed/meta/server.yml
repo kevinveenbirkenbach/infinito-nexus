@@ -1,6 +1,7 @@
+---
 domains:
   canonical:
-  - bridgyfed.{{ DOMAIN_PRIMARY }}
+    - bridgyfed.{{ DOMAIN_PRIMARY }}
   aliases: []
 csp:
   whitelist: {}

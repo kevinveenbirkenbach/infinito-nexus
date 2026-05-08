@@ -1,3 +1,4 @@
+---
 oidc:
   enabled: "{{ 'web-app-keycloak' in group_names }}"
   shared: "{{ 'web-app-keycloak' in group_names }}"
@@ -19,12 +20,12 @@ redis:
   backup:
     disabled: true
   enabled: true
-  cpus: '0.3'
+  cpus: "0.3"
   mem_reservation: 256m
   mem_limit: 512m
   pids_limit: 256
 postgres:
-  enabled: true  # nocheck: dynamic-flag
+  enabled: true # nocheck: dynamic-flag
   shared: "{{ 'svc-db-postgres' in group_names }}"
 mastodon:
   shared: true
@@ -35,7 +36,7 @@ mastodon:
   backup:
     no_stop_required: true
   name: mastodon
-  cpus: '1.0'
+  cpus: "1.0"
   mem_reservation: 1.5g
   mem_limit: 2g
   pids_limit: 512
@@ -51,13 +52,13 @@ streaming:
   image: ghcr.io/mastodon/mastodon-streaming
   version: latest
   name: mastodon-streaming
-  cpus: '0.3'
+  cpus: "0.3"
   mem_reservation: 256m
   mem_limit: 512m
   pids_limit: 256
   min_storage: 5GB
 sidekiq:
-  cpus: '0.8'
+  cpus: "0.8"
   mem_reservation: 1g
   mem_limit: 1.5g
   pids_limit: 512

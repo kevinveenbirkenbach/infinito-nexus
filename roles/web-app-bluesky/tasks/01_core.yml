@@ -1,3 +1,4 @@
+---
 - include_tasks: utils/once/flag.yml
 
 # The Bluesky web container is built from a checked-out social-app repo at
@@ -61,21 +62,22 @@
     domain: "{{ BLUESKY_API_DOMAIN }}"
     http_port: "{{ BLUESKY_API_PORT }}"
 
-- name: "Include front proxy for {{ BLUESKY_WEB_DOMAIN }}:{{ BLUESKY_BROKER_PORT }} (broker is the upstream so the variant-A+ handoff fires for every authenticated request)"
+- name: "Include front proxy for {{ BLUESKY_WEB_DOMAIN }}:{{ BLUESKY_BROKER_PORT }} (broker is the upstream so the variant-A+ handoff fires for every authenticated
+    request)"
   include_role:
     name: sys-stk-front-proxy
   vars:
-    domain:                         "{{ BLUESKY_WEB_DOMAIN }}"
-    http_port:                      "{{ BLUESKY_BROKER_PORT }}"
-    webserver_extra_configuration:  "{{ BLUESKY_FRONT_PROXY_CONTENT }}"
+    domain: "{{ BLUESKY_WEB_DOMAIN }}"
+    http_port: "{{ BLUESKY_BROKER_PORT }}"
+    webserver_extra_configuration: "{{ BLUESKY_FRONT_PROXY_CONTENT }}"
   when: BLUESKY_WEB_ENABLED | bool
 
 - name: "Include front proxy for {{ BLUESKY_VIEW_DOMAIN_FINAL }}:{{ BLUESKY_VIEW_PORT }}"
   include_role:
     name: sys-stk-front-proxy
   vars:
-    domain:     "{{ BLUESKY_VIEW_DOMAIN_FINAL }}"
-    http_port:  "{{ BLUESKY_VIEW_PORT }}"
+    domain: "{{ BLUESKY_VIEW_DOMAIN_FINAL }}"
+    http_port: "{{ BLUESKY_VIEW_PORT }}"
   when: BLUESKY_VIEW_ENABLED | bool
 
 - name: "Execute PDS routines"
@@ -99,8 +101,8 @@
 - name: "Redirect deactivated BlueSky Services to {{ BLUESKY_API_DOMAIN }}"
   include_tasks: "utils/load_app.yml"
   vars:
-    load_app_id:                        "web-opt-rdr-domains"
-    redirect_domain_mappings:           "{{ BLUESKY_REDIRECT_DOMAIN_MAPPINGS }}"
+    load_app_id: "web-opt-rdr-domains"
+    redirect_domain_mappings: "{{ BLUESKY_REDIRECT_DOMAIN_MAPPINGS }}"
     web_opt_rdr_domains_logout_enabled: true
 
 - name: "Flush handlers for '{{ role_name }}'"

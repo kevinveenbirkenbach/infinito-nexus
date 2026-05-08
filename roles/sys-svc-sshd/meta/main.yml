@@ -1,3 +1,4 @@
+---
 galaxy_info:
   author: Kevin Veen-Birkenbach
   description: Configures a secure SSH daemon environment by deploying a templated sshd_config file and restarting the SSH service as needed.
@@ -5,7 +6,7 @@ galaxy_info:
   company: |
     Kevin Veen-Birkenbach
     https://www.veen.world
-  min_ansible_version: '2.9'
+  min_ansible_version: "2.9"
   platforms:
     - name: ArchLinux
       versions:

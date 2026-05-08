@@ -1,3 +1,4 @@
+---
 funkwhale:
   image: funkwhale/front
   version: 2.0.2
@@ -11,7 +12,7 @@ funkwhale:
     - web-app-keycloak
     - web-app-mailu
   lifecycle: beta
-  cpus: '1.0'
+  cpus: "1.0"
   mem_reservation: 1g
   mem_limit: 2g
   pids_limit: 1024
@@ -19,15 +20,15 @@ api:
   image: funkwhale/api
   version: 2.0.2
   min_storage: 5GB
-  cpus: '0.5'
+  cpus: "0.5"
   mem_reservation: 256m
   mem_limit: 1g
   pids_limit: 512
 typesense:
   image: typesense/typesense
-  version: '30.2'
+  version: "30.2"
   min_storage: 1GB
-  cpus: '0.2'
+  cpus: "0.2"
   mem_reservation: 128m
   mem_limit: 256m
   pids_limit: 256
@@ -35,7 +36,7 @@ logout:
   enabled: "{{ 'web-svc-logout' in group_names }}"
   shared: "{{ 'web-svc-logout' in group_names }}"
 ldap:
-  enabled: true  # nocheck: dynamic-flag
+  enabled: true # nocheck: dynamic-flag
   shared: "{{ 'svc-db-openldap' in group_names }}"
 dashboard:
   enabled: "{{ 'web-app-dashboard' in group_names }}"
@@ -53,15 +54,15 @@ redis:
     disabled: true
   enabled: true
 postgres:
-  enabled: true  # nocheck: dynamic-flag
+  enabled: true # nocheck: dynamic-flag
   shared: "{{ 'svc-db-postgres' in group_names }}"
 oauth2:
   origin:
     host: front
-    port: '80'
+    port: "80"
   acl:
     blacklist:
-    - /login
+      - /login
   enabled: "{{ 'web-app-keycloak' in group_names }}"
   shared: "{{ 'web-app-keycloak' in group_names }}"
 # nocheck: dynamic-flag

@@ -1,6 +1,7 @@
+---
 - name: Include dependencies
   include_role:
-    name: '{{ dependency_role }}'
+    name: "{{ dependency_role }}"
   loop:
     - dev-git
     - dev-make
@@ -10,7 +11,7 @@
 
 - name: "Include SSH"
   include_role:
-    name: 'sys-svc-ssh'
+    name: "sys-svc-ssh"
   when: not (run_once_sys_svc_ssh | default(false) | bool)
 
 - name: Ensure GitHub host key is in known_hosts
@@ -48,7 +49,6 @@
 
 - name: "PKGMGR | Update pkgmgr (non-interactive) with safe debug on failure"
   block:
-
     - name: update pkgmgr (non-interactive)
       ansible.builtin.shell: |
         set -euo pipefail
@@ -66,7 +66,6 @@
       until: pkgmgr_update.rc == 0
 
   rescue:
-  
     - name: "PKGMGR | Failure report (sanitized)"
       ansible.builtin.debug:
         msg:
