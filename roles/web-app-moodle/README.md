@@ -15,7 +15,7 @@ This role deploys Moodle using Docker, automating the setup of both the Moodle a
 - **Scalable Deployment:** Leverage Docker for a portable and scalable installation that adapts as your user base grows.
 - **Robust Data Management:** Secure and reliable storage of both the Moodle application and user data through Docker volumes.
 - **Secure Web Access:** Configured to work seamlessly behind an NGINX reverse proxy for enhanced security and performance.
-* **Single Sign-On (SSO) / OpenID Connect (OIDC):** Seamless integration with external identity providers for centralized authentication.
+- **Single Sign-On (SSO) / OpenID Connect (OIDC):** Seamless integration with external identity providers for centralized authentication.
 
 ## Image source
 

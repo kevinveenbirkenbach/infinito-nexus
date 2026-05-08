@@ -286,7 +286,7 @@ executed and verified.
 
 - [x] **OIDC (✅):** `oic-auth` plugin installed via
   [files/plugins.txt](../../roles/web-app-jenkins/files/plugins.txt)
-  + [files/Dockerfile](../../roles/web-app-jenkins/files/Dockerfile).
+  - [files/Dockerfile](../../roles/web-app-jenkins/files/Dockerfile).
   Realm + client + user-claim mapping configured via JCasC at
   [templates/casc.yaml.j2](../../roles/web-app-jenkins/templates/casc.yaml.j2);
   the runtime imports the project CA into the JVM cacerts via
@@ -473,7 +473,7 @@ that MUST be ticked before the next step starts:
   [#221](https://github.com/infinito-nexus/core/issues/221)).
 - [x] **Fix every bug at its root.** All deploy failures
   encountered (Bluesky 4-bug chain, fusiondirectory env.j2 leftover
-  + LDAP.DN.ADMIN typo, jenkins JCasC schema + plugins.txt + JVM
+  - LDAP.DN.ADMIN typo, jenkins JCasC schema + plugins.txt + JVM
   cacerts CA trust, xmpp auth_method + mod_oauth2_client, scripts/
   fresh-kept-app.sh missing RUNTIME=dev, oauth2-proxy header
   propagation) were fixed at the root, not worked around.

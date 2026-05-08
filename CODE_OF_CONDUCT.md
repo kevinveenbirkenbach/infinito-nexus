@@ -23,7 +23,7 @@ We are committed to creating a friendly, safe, and inclusive environment for all
 
 ## Reporting and Enforcement
 
-If you experience or witness any behavior that violates this Code of Conduct, please report it promptly. Reports should be sent to kevin@veen.world. All reports will be treated with discretion and confidentiality.
+If you experience or witness any behavior that violates this Code of Conduct, please report it promptly. Reports should be sent to <kevin@veen.world>. All reports will be treated with discretion and confidentiality.
 
 Our project maintainers and community leaders will review all reports and take appropriate action, which may include warnings, temporary suspension, or permanent expulsion from the community if necessary.
 

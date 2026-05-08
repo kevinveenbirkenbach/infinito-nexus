@@ -415,16 +415,19 @@ pip_supports_break_system_packages() {
 	"${python_bin}" -m pip install --help 2>/dev/null | grep -q -- '--break-system-packages'
 }
 
-install_ruff_with_pip() {
+install_pip_pkg() {
+	# Generic venv-aware / sudo-aware / --user fallback pip installer.
+	# $1: pip spec (e.g. "ruff>=0.4.0", "ansible-lint", "galaxy-importer").
+	local pip_spec="$1"
 	local python_bin
 	local scripts_dir=""
 	local user_scripts_dir=""
-	local -a pip_args=(install --upgrade "${RUFF_PIP_SPEC}")
+	local -a pip_args=(install --upgrade "${pip_spec}")
 
 	python_bin="$(detect_python_bin)" || return 1
 	scripts_dir="$(detect_python_scripts_dir "${python_bin}" || true)"
 
-	log "Installing Python package '${RUFF_PIP_SPEC}' via ${python_bin} -m pip"
+	log "Installing Python package '${pip_spec}' via ${python_bin} -m pip"
 
 	if python_runs_in_venv "${python_bin}"; then
 		if ! "${python_bin}" -m pip "${pip_args[@]}"; then
@@ -437,12 +440,12 @@ install_ruff_with_pip() {
 			fi
 
 			log "Retrying Python package install with --break-system-packages"
-			if ! "${python_bin}" -m pip install --break-system-packages --upgrade "${RUFF_PIP_SPEC}"; then
+			if ! "${python_bin}" -m pip install --break-system-packages --upgrade "${pip_spec}"; then
 				return 1
 			fi
 		fi
 	else
-		if ! "${python_bin}" -m pip install --user --upgrade "${RUFF_PIP_SPEC}"; then
+		if ! "${python_bin}" -m pip install --user --upgrade "${pip_spec}"; then
 			return 1
 		fi
 		user_scripts_dir="$(detect_python_user_scripts_dir "${python_bin}" || true)"
@@ -457,6 +460,69 @@ install_ruff_with_pip() {
 	fi
 
 	hash -r
+}
+
+install_ruff_with_pip() {
+	install_pip_pkg "${RUFF_PIP_SPEC}"
+}
+
+install_ansible_lint_with_pip() {
+	install_pip_pkg "${ANSIBLE_LINT_PIP_SPEC:-ansible-lint}"
+}
+
+install_galaxy_importer_with_pip() {
+	install_pip_pkg "${GALAXY_IMPORTER_PIP_SPEC:-galaxy-importer}"
+}
+
+install_markdownlint_with_npm() {
+	if ! command -v npm >/dev/null 2>&1; then
+		warn "npm not found; install Node.js/npm first to get markdownlint-cli2."
+		return 1
+	fi
+	log "Installing 'markdownlint-cli2' via npm (global)"
+	if install_with_optional_sudo npm install -g markdownlint-cli2; then
+		hash -r
+		return 0
+	fi
+	# Per-user fallback
+	local prefix="${HOME}/.npm-global"
+	mkdir -p "${prefix}"
+	if ! npm install -g --prefix "${prefix}" markdownlint-cli2; then
+		return 1
+	fi
+	ensure_dir_on_path "${prefix}/bin"
+	hash -r
+}
+
+ensure_ansible_lint() {
+	command -v ansible-lint >/dev/null 2>&1 && return 0
+	log "Missing command 'ansible-lint'. Installing via pip."
+	install_ansible_lint_with_pip || return 1
+	hash -r
+	command -v ansible-lint >/dev/null 2>&1 || {
+		warn "Command 'ansible-lint' is still unavailable after installation."
+		return 1
+	}
+}
+
+ensure_galaxy_importer() {
+	python3 -c 'import galaxy_importer' >/dev/null 2>&1 && return 0
+	log "Missing Python module 'galaxy_importer'. Installing via pip."
+	install_galaxy_importer_with_pip || return 1
+	python3 -c 'import galaxy_importer' >/dev/null 2>&1 || {
+		warn "Module 'galaxy_importer' is still unimportable after installation."
+		return 1
+	}
+}
+
+ensure_markdownlint_cli2() {
+	command -v markdownlint-cli2 >/dev/null 2>&1 && return 0
+	log "Missing command 'markdownlint-cli2'. Installing via npm."
+	install_markdownlint_with_npm || return 1
+	command -v markdownlint-cli2 >/dev/null 2>&1 || {
+		warn "Command 'markdownlint-cli2' is still unavailable after installation."
+		return 1
+	}
 }
 
 detect_package_manager() {
@@ -672,6 +738,8 @@ install_ansible_tools() {
 	ensure_command ansible-playbook
 	ensure_command ansible-galaxy
 	ensure_required_ansible_collections
+	ensure_ansible_lint
+	ensure_galaxy_importer
 }
 
 install_python_tools() {
@@ -683,6 +751,10 @@ install_shellcheck_tools() {
 	ensure_command shellcheck
 }
 
+install_markdown_tools() {
+	ensure_markdownlint_cli2
+}
+
 install_requested_group() {
 	local group="$1"
 
@@ -692,6 +764,7 @@ install_requested_group() {
 		install_ansible_tools
 		install_python_tools
 		install_shellcheck_tools
+		install_markdown_tools
 		;;
 	action)
 		install_action_tools
@@ -705,8 +778,11 @@ install_requested_group() {
 	shellcheck)
 		install_shellcheck_tools
 		;;
+	markdown)
+		install_markdown_tools
+		;;
 	*)
-		warn "Usage: $0 [all|action|ansible|python|shellcheck]..."
+		warn "Usage: $0 [all|action|ansible|python|shellcheck|markdown]..."
 		return 2
 		;;
 	esac

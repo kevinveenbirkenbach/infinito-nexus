@@ -7,6 +7,7 @@ This role manages [Wireguard](https://www.wireguard.com/) on the host. It instal
 ## Overview
 
 Optimized for both [Arch Linux](https://wiki.archlinux.org/index.php/WireGuard) and [Ubuntu/Debian](https://wireguard.com/install/), this role performs the following tasks:
+
 - Installs Wireguard tools using the appropriate package manager.
 - Copies a sysctl configuration file to enable IP forwarding and proper IPv6 settings.
 - Deploys a host-specific Wireguard configuration file to `/etc/wireguard/wg0.infinito.conf`.
@@ -24,6 +25,7 @@ The primary purpose of this role is to set up and manage a Wireguard VPN configu
 - **Service Management:** Provides handlers to restart the Wireguard service and reload sysctl settings.
 
 ## Administration
+
 For detailed client setup instructions, please see the [Administration](./Administration.md) file.
 
 ## Credits

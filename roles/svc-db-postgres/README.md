@@ -7,6 +7,7 @@ This Ansible role deploys and configures a PostgreSQL database in a Docker conta
 ## Overview
 
 Built for environments that demand reliability and ease of management, this role:
+
 - Sets up a dedicated Docker network for PostgreSQL.
 - Deploys a PostgreSQL container with secure configurations and automated healthchecks.
 - Automates tasks like database creation, user setup, and privilege assignments to streamline your workflows.

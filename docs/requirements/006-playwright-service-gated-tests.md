@@ -21,8 +21,8 @@ for reference.
 
 As a contributor who runs `make deploy-*` with a subset of shared
 services disabled (for example `SERVICES_DISABLED=matomo,email`), I want
-Playwright specs to **skip** the individual tests that depend on a
-disabled service instead of **failing** them, so that a deliberately
+Playwright specs to __skip__ the individual tests that depend on a
+disabled service instead of __failing__ them, so that a deliberately
 reduced deployment stays green and only real regressions surface in the
 test output.
 
@@ -35,15 +35,15 @@ without breaking the rest of the stack. The per-role Playwright specs
 under `roles/<role>/files/playwright.spec.js` mix three classes of
 tests:
 
-1. **Baseline tests** that exercise the app's own behaviour (front-page
+1. __Baseline tests__ that exercise the app's own behaviour (front-page
    reachability, CSP enforcement, canonical domain, static content).
    These MUST always run, because they are the minimum viable
    regression guard for the role.
-2. **Shared-service integration tests** that assert the wiring between
+2. __Shared-service integration tests__ that assert the wiring between
    the app and another Infinito.Nexus service (OIDC round-trip,
    Matomo tracking snippet, outgoing email, Mastodon federation round-
    trip, Nextcloud search index, etc.).
-3. **Composite tests** that combine several shared services in a single
+3. __Composite tests__ that combine several shared services in a single
    flow (for example the RBAC cycle from
    [004-generic-rbac-ldap-auto-provisioning.md](004-generic-rbac-ldap-auto-provisioning.md),
    which assumes OIDC plus LDAP plus the RBAC client scope).
@@ -122,7 +122,7 @@ and retroactively migrates the existing specs onto it.
   env (for example during local iteration via
   [rerun-spec.sh](../../scripts/tests/e2e/rerun-spec.sh) against an
   older staged `.env` that predates this requirement), the helper
-  MUST treat that service as **enabled**. This preserves the current
+  MUST treat that service as __enabled__. This preserves the current
   behaviour for iterative spec development against a fully-featured
   deploy.
 - [x] An explicit `<SERVICE>_SERVICE_ENABLED=false` MUST be the only
@@ -143,7 +143,7 @@ Each of the checkboxes below MUST be closed individually by reading
 the role's spec, pruning gates that the scenarios do not actually
 exercise, adding gates that the audit discovers, and updating both
 the spec and the role's `templates/playwright.env.j2` in lockstep.
-The listed gates are the **best-effort pre-audit baseline** derived
+The listed gates are the __best-effort pre-audit baseline__ derived
 from a grep scan; they are a starting point for each audit, not an
 authoritative final list. The audit MUST be driven by reading each
 scenario end to end. Baseline scenarios MUST stay ungated in every
@@ -301,7 +301,7 @@ accidental proxy with an explicit intent variable.
     therefore include the `test-e2e-playwright` stage.
   - A [nektos/act](https://nektos.com/) local run MUST produce the
     same truthy result via the `ACT` marker and include the stage.
-  - **Every** `make deploy-*` target on a developer workstation MUST
+  - __Every__ `make deploy-*` target on a developer workstation MUST
     produce `MODE_CI=true` via `INFINITO_MAKE_DEPLOY=1` and
     include the stage. This applies to the full family without
     exception: `deploy-fresh-purged-apps`, `deploy-reuse-kept-apps`,

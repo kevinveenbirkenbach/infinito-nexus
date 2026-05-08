@@ -3,6 +3,7 @@
 ## Description
 
 This role aggregates various GNOME desktop components to ensure a cohesive and fully functional GNOME environment on Arch Linux. It includes the installation and configuration of several sub-roles:
+
 - **desk-gnome-caffeine:** Prevents the system from sleeping or locking automatically.
 - **desk-gnome-extensions:** Manages GNOME Shell extensions and installs the CLI GNOME Extension Manager.
 - **desk-gnome-terminal:** Installs GNOME Terminal, the official terminal emulator for GNOME.

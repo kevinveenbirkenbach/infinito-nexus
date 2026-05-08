@@ -19,6 +19,7 @@ User data is resolved via `lookup('users', user_key)` and referenced via `user_k
 Callers may pass `user_config` to override the resolved lookup result for one invocation.
 
 Resolution rules:
+
 - `user_username` is resolved from `lookup('users', user_key).username` (fallback: `user_key`)
 - Home path and ownership are based on `user_username`
 - SSH keys are read from `lookup('users', user_key).authorized_keys`

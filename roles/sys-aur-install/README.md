@@ -1,6 +1,5 @@
 # sys-aur-install
 
-
 ## Description
 
 Installs one or more AUR packages using `kewlfft.aur.aur` and the `yay` helper.

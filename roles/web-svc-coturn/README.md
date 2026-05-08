@@ -11,6 +11,7 @@ Without TURN/STUN, video calls, conferencing, and peer-to-peer connections often
 Coturn solves this by acting as a **relay server** and/or **discovery service** for public IP addresses.
 
 More background:  
+
 * Wikipedia: [Traversal Using Relays around NAT](https://en.wikipedia.org/wiki/Traversal_Using_Relays_around_NAT)  
 * Wikipedia: [Session Traversal Utilities for NAT](https://en.wikipedia.org/wiki/STUN)  
 * Official Coturn Docs: [https://github.com/coturn/coturn/wiki](https://github.com/coturn/coturn/wiki)
@@ -19,16 +20,18 @@ More background:
 
 This role deploys Coturn via Docker Compose using the `sys-stk-semi-stateless` stack.  
 It automatically configures:
-- TURN and STUN listening ports
-- Relay port ranges
-- TLS certificates (via Let’s Encrypt integration)
-- Long-term credentials and/or REST API secrets
+
+* TURN and STUN listening ports
+* Relay port ranges
+* TLS certificates (via Let’s Encrypt integration)
+* Long-term credentials and/or REST API secrets
 
 Typical use cases:
-- Nextcloud Talk
-- Jitsi
-- BigBlueButton
-- Any WebRTC-based application
+
+* Nextcloud Talk
+* Jitsi
+* BigBlueButton
+* Any WebRTC-based application
 
 ## Features
 

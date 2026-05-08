@@ -1,7 +1,9 @@
 # Front Base (HTTPS + Cloudflare + Handlers)
 
 ## Description
+
 **sys-stk-front-base** bootstraps the front layer that most web-facing apps need:
+
 - Ensures the HTTPS base via `sys-svc-webserver-https`
 - (Optional) Cloudflare bootstrap (zone lookup, dev mode, purge)
 - Wires OpenResty/NGINX handlers
@@ -18,12 +20,14 @@ This role front bootstrap for web apps: HTTPS base, optional Cloudflare setup, a
 - **Automated provisioning:** Configured by Ansible without manual steps.
 
 ## Responsibilities
+
 - Include `sys-svc-webserver-https` (once per host)
 - Include Cloudflare tasks when `DNS_PROVIDER == "cloudflare"`
 - Load handler utilities (e.g., `svc-prx-openresty`)
 - Stay domain-agnostic: expect `domain` to be provided by the consumer
 
 ## Outputs
+
 - Handler wiring completed
 - HTTPS base ready (NGINX, ACME webroot)
 - Cloudflare prepared (optional)

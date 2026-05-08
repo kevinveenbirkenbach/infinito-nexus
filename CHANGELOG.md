@@ -1,3 +1,5 @@
+# Changelog
+
 ## [7.0.0] - 2026-05-08
 
 This major release migrates every role to the new meta/ layout with explicit per-role networks, ports, run_after, and info.yml metadata, introduces a variant-aware matrix-deploy planner, ships a process-wide YAML / file / registry caching stack, promotes 13+ apps from alpha to beta, and adds a lint corpus that pins the new conventions in CI.
@@ -44,7 +46,7 @@ This major release migrates every role to the new meta/ layout with explicit per
 * Fixed env-test suites: dynamic Fedora release resolution in the cache probe, compose-network discovery for the DiD probe, and oauth2-proxy allowed_groups slash normalization
 * Fixed meta drift: req-008 sweep gaps (lost suppressions, silent test breakage, one prod bug), host-bound port collisions on 8071/8072, subnet collisions on 192.168.105.{48,64}/28, and Moodle resource limits
 * Fixed utils.cache Ansible coupling: data is importable without ansible, the GID resolver works without ansible, and the YAML cache invalidates per-path entries when mtime/size changes
-* Fixed the sys-svc-container package selection on Ubuntu; the Makefile clean target is resilient to container-owned __pycache__ files
+* Fixed the sys-svc-container package selection on Ubuntu; the Makefile clean target is resilient to container-owned **pycache** files
 * Fixed Bluesky cross-variant recovery + URL-test failures (req-013)
 
 **CI and Tests**
@@ -60,7 +62,6 @@ This major release migrates every role to the new meta/ layout with explicit per
 **Contributors**
 
 * [Kevin Veen-Birkenbach](https://www.veen.world/)
-
 
 ## [6.0.0] - 2026-04-25
 
@@ -120,11 +121,12 @@ This release expands the application portfolio with new civic, ERP, feedback, an
 * [Evangelos Tsakoudis](https://github.com/evangelostsak)
 * [Prageeth Panicker](https://github.com/pragepani)
 
-
 ## [5.2.0] - 2026-03-21
+
 This minor release adds Mattermost deployment support, improves release image automation, and hardens CI, Ansible plugin handling, and application deployment reliability across the stack.
 
 **Added**
+
 * Added *web-app-mattermost* with Docker Compose deployment, PostgreSQL support, Keycloak-based SSO via the GitLab OAuth2 provider, and optional Mailu integration
 * Added retry-capable *uri_retry* and *get_url_retry* action plugins with dedicated unit and integration test coverage
 * Added a scheduled/manual workflow to backfill the highest missing release image tag in GHCR
@@ -155,9 +157,11 @@ This minor release adds Mattermost deployment support, improves release image au
 * [Alejandro Roman](https://github.com/AlejandroRomanIbanez)
 
 ## [5.1.0] - 2026-02-28
+
 This minor release improves cross-distro package handling, hardens CI reliability, fixes Ansible compatibility issues, and adds clearer contributor and local test workflows.
 
 **Added**
+
 * Introduced *docs/guides/developer/CONTRIBUTION_WORKFLOW.md* with fork-based workflow, mandatory green fork CI before PRs, and merge policy guidance
 * Added the single-app local deploy wrapper and related local test documentation
 * Added *min_storage* entries for warned roles
@@ -181,6 +185,7 @@ This minor release improves cross-distro package handling, hardens CI reliabilit
 * Removed deprecated buildx install input
 
 ## [5.0.0] - 2026-02-25
+
 * **Supported distributions:** *Fedora*, *CentOS*, *Ubuntu*, *Debian*
 * **Breaking Changes:** Migration from *util-* to bundle inventories under *inventories/bundles/*; deployments must migrate to new bundle and role names. Central package and AUR model via *SYS_PACKAGES* and *SYS_AUR_PACKAGES*; new roles *sys-aur* and *sys-aur-install*; renames including *util-desk-dev-core* to *dev-core*, *util-desk-dev-python* to *dev-python*, *util-desk-dev-arduino* to *dev-arduino*; *util-srv-corporate-identity* removed.
 * **Added:** New workstation bundles (*admin*, *admin-network*, *browser*, *design*, *dev-arduino*, *dev-core*, *dev-java*, *dev-php*, *dev-python*, *dev-shell*, *game-compose*, *game-os*, *game-windows*, *office*). Inventory driven *sys-package* role with constructor auto load when *SYS_PACKAGES* is set. New roles *sys-openssl* and *sys-aur-install*. New lookup plugin *command_path*. New variable *SOFTWARE_URL* and updated login banner.
@@ -189,7 +194,9 @@ This minor release improves cross-distro package handling, hardens CI reliabilit
 * **CI and Tests:** New integration tests for portable python shebangs, forbid *sh -lc* with *pipefail*, and improved variable checks. CI stability improvements for per distro stacks and mirror resolver via venv Python, plus more robust package manager retries.
 
 ## [4.1.0] - 2026-02-17
+
 **Added**
+
 * Controller-side *version* lookup plugin reading from *pyproject.toml* (with Poetry fallback)
 * New *unit_name* lookup plugin for consistent versioned systemd unit generation
 * Automatic prune phase in *sys-service* (stop/disable outdated units, remove old unit files, trigger daemon-reload)
@@ -205,45 +212,47 @@ This minor release improves cross-distro package handling, hardens CI reliabilit
 * Legacy *FILE_VERSION* mechanism
 * Deprecated *get_service_name* filter
 * Legacy *simpleicons_host_* variables
+
 ## [4.0.3] - 2026-02-16
+
 * Try Matomo Boostrap 7 times if errors occure
 
 ## Older Releases
 
-- [004.000.002-2026-02-15.md](docs/changelog/004.000.002-2026-02-15.md)
-- [004.000.001-2026-02-15.md](docs/changelog/004.000.001-2026-02-15.md)
-- [004.000.000-2026-02-13.md](docs/changelog/004.000.000-2026-02-13.md)
-- [003.000.000-2026-02-11.md](docs/changelog/003.000.000-2026-02-11.md)
-- [002.001.009-2026-02-10.md](docs/changelog/002.001.009-2026-02-10.md)
-- [002.001.008-2026-02-09.md](docs/changelog/002.001.008-2026-02-09.md)
-- [002.001.007-2026-02-09.md](docs/changelog/002.001.007-2026-02-09.md)
-- [002.001.006-2026-02-09.md](docs/changelog/002.001.006-2026-02-09.md)
-- [002.001.005-2026-02-09.md](docs/changelog/002.001.005-2026-02-09.md)
-- [002.001.004-2026-02-08.md](docs/changelog/002.001.004-2026-02-08.md)
-- [002.001.003-2026-02-08.md](docs/changelog/002.001.003-2026-02-08.md)
-- [002.001.002-2026-02-08.md](docs/changelog/002.001.002-2026-02-08.md)
-- [002.001.001-2026-02-08.md](docs/changelog/002.001.001-2026-02-08.md)
-- [002.001.000-2026-02-08.md](docs/changelog/002.001.000-2026-02-08.md)
-- [002.000.000-2026-02-08.md](docs/changelog/002.000.000-2026-02-08.md)
-- [001.000.000-2026-02-03.md](docs/changelog/001.000.000-2026-02-03.md)
-- [000.012.000-2026-01-25.md](docs/changelog/000.012.000-2026-01-25.md)
-- [000.011.000-2026-01-10.md](docs/changelog/000.011.000-2026-01-10.md)
-- [000.010.000-2026-01-08.md](docs/changelog/000.010.000-2026-01-08.md)
-- [000.009.000-2026-01-07.md](docs/changelog/000.009.000-2026-01-07.md)
-- [000.008.000-2026-01-06.md](docs/changelog/000.008.000-2026-01-06.md)
-- [000.007.002-2026-01-06.md](docs/changelog/000.007.002-2026-01-06.md)
-- [000.007.001-2026-01-06.md](docs/changelog/000.007.001-2026-01-06.md)
-- [000.007.000-2026-01-05.md](docs/changelog/000.007.000-2026-01-05.md)
-- [000.006.000-2025-12-31.md](docs/changelog/000.006.000-2025-12-31.md)
-- [000.005.000-2025-12-30.md](docs/changelog/000.005.000-2025-12-30.md)
-- [000.004.000-2025-12-29.md](docs/changelog/000.004.000-2025-12-29.md)
-- [000.003.005-2025-12-21.md](docs/changelog/000.003.005-2025-12-21.md)
-- [000.003.004-2025-12-21.md](docs/changelog/000.003.004-2025-12-21.md)
-- [000.003.003-2025-12-21.md](docs/changelog/000.003.003-2025-12-21.md)
-- [000.003.002-2025-12-19.md](docs/changelog/000.003.002-2025-12-19.md)
-- [000.003.001-2025-12-18.md](docs/changelog/000.003.001-2025-12-18.md)
-- [000.003.000-2025-12-17.md](docs/changelog/000.003.000-2025-12-17.md)
-- [000.002.001-2025-12-10.md](docs/changelog/000.002.001-2025-12-10.md)
-- [000.002.000-2025-12-10.md](docs/changelog/000.002.000-2025-12-10.md)
-- [000.001.001-2025-12-10.md](docs/changelog/000.001.001-2025-12-10.md)
-- [000.001.000-2025-12-09.md](docs/changelog/000.001.000-2025-12-09.md)
+* [004.000.002-2026-02-15.md](docs/changelog/004.000.002-2026-02-15.md)
+* [004.000.001-2026-02-15.md](docs/changelog/004.000.001-2026-02-15.md)
+* [004.000.000-2026-02-13.md](docs/changelog/004.000.000-2026-02-13.md)
+* [003.000.000-2026-02-11.md](docs/changelog/003.000.000-2026-02-11.md)
+* [002.001.009-2026-02-10.md](docs/changelog/002.001.009-2026-02-10.md)
+* [002.001.008-2026-02-09.md](docs/changelog/002.001.008-2026-02-09.md)
+* [002.001.007-2026-02-09.md](docs/changelog/002.001.007-2026-02-09.md)
+* [002.001.006-2026-02-09.md](docs/changelog/002.001.006-2026-02-09.md)
+* [002.001.005-2026-02-09.md](docs/changelog/002.001.005-2026-02-09.md)
+* [002.001.004-2026-02-08.md](docs/changelog/002.001.004-2026-02-08.md)
+* [002.001.003-2026-02-08.md](docs/changelog/002.001.003-2026-02-08.md)
+* [002.001.002-2026-02-08.md](docs/changelog/002.001.002-2026-02-08.md)
+* [002.001.001-2026-02-08.md](docs/changelog/002.001.001-2026-02-08.md)
+* [002.001.000-2026-02-08.md](docs/changelog/002.001.000-2026-02-08.md)
+* [002.000.000-2026-02-08.md](docs/changelog/002.000.000-2026-02-08.md)
+* [001.000.000-2026-02-03.md](docs/changelog/001.000.000-2026-02-03.md)
+* [000.012.000-2026-01-25.md](docs/changelog/000.012.000-2026-01-25.md)
+* [000.011.000-2026-01-10.md](docs/changelog/000.011.000-2026-01-10.md)
+* [000.010.000-2026-01-08.md](docs/changelog/000.010.000-2026-01-08.md)
+* [000.009.000-2026-01-07.md](docs/changelog/000.009.000-2026-01-07.md)
+* [000.008.000-2026-01-06.md](docs/changelog/000.008.000-2026-01-06.md)
+* [000.007.002-2026-01-06.md](docs/changelog/000.007.002-2026-01-06.md)
+* [000.007.001-2026-01-06.md](docs/changelog/000.007.001-2026-01-06.md)
+* [000.007.000-2026-01-05.md](docs/changelog/000.007.000-2026-01-05.md)
+* [000.006.000-2025-12-31.md](docs/changelog/000.006.000-2025-12-31.md)
+* [000.005.000-2025-12-30.md](docs/changelog/000.005.000-2025-12-30.md)
+* [000.004.000-2025-12-29.md](docs/changelog/000.004.000-2025-12-29.md)
+* [000.003.005-2025-12-21.md](docs/changelog/000.003.005-2025-12-21.md)
+* [000.003.004-2025-12-21.md](docs/changelog/000.003.004-2025-12-21.md)
+* [000.003.003-2025-12-21.md](docs/changelog/000.003.003-2025-12-21.md)
+* [000.003.002-2025-12-19.md](docs/changelog/000.003.002-2025-12-19.md)
+* [000.003.001-2025-12-18.md](docs/changelog/000.003.001-2025-12-18.md)
+* [000.003.000-2025-12-17.md](docs/changelog/000.003.000-2025-12-17.md)
+* [000.002.001-2025-12-10.md](docs/changelog/000.002.001-2025-12-10.md)
+* [000.002.000-2025-12-10.md](docs/changelog/000.002.000-2025-12-10.md)
+* [000.001.001-2025-12-10.md](docs/changelog/000.001.001-2025-12-10.md)
+* [000.001.000-2025-12-09.md](docs/changelog/000.001.000-2025-12-09.md)

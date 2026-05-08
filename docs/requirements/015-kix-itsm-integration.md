@@ -35,4 +35,3 @@ A truly transparent SPA-side SSO (login form skipped) requires a
 small KIX frontend modification — wired to the existing
 `Auth::HTTPBasicAuth` endpoint — and is tracked as a follow-on
 iteration, not part of req-015.
-

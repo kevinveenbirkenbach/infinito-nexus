@@ -94,8 +94,8 @@ all:
 
 Deploy target is derived from the parent folder:
 
-* inventories/server → server bundle
-* inventories/workstation → workstation bundle
+- inventories/server → server bundle
+- inventories/workstation → workstation bundle
 
 Do not define deploy_target inside the inventory file.
 
@@ -131,11 +131,11 @@ all.vars.infinito.bundle
 
 Required fields:
 
-* title
-* description
-* logo.class
-* tags
-* categories
+- title
+- description
+- logo.class
+- tags
+- categories
 
 The logo must use a valid Font Awesome class string, e.g.:
 
@@ -157,9 +157,9 @@ Role configuration belongs inside roles or runtime overlays.
 
 An inventory in Infinito.Nexus is:
 
-* a bundle definition
-* a role activation map
-* a deployable unit
+- a bundle definition
+- a role activation map
+- a deployable unit
 
 No additional bundle file format is required.
 

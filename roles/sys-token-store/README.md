@@ -77,15 +77,15 @@ This is the **canonical way** to store tokens.
 
 **Input**
 
-* `sys_token_store_user_key`
-* `sys_token_store_app`
-* `sys_token_store_token` (must be non-empty)
+- `sys_token_store_user_key`
+- `sys_token_store_app`
+- `sys_token_store_token` (must be non-empty)
 
 **Effects**
 
-* Updates the token store file (idempotent)
-* Makes the token available via `lookup('users', '<user>').tokens['<app>']`
-* Exports `sys_token_store_token`
+- Updates the token store file (idempotent)
+- Makes the token available via `lookup('users', '<user>').tokens['<app>']`
+- Exports `sys_token_store_token`
 
 Empty tokens are rejected explicitly.
 
@@ -117,10 +117,10 @@ lookup('users', 'administrator').tokens['web-app-matomo']
 
 ## What This Role Does *Not* Do
 
-* ❌ No token generation
-* ❌ No encryption
-* ❌ No user management
-* ❌ No application-specific logic
+- ❌ No token generation
+- ❌ No encryption
+- ❌ No user management
+- ❌ No application-specific logic
 
 It is a **generic infrastructure helper**.
 
@@ -128,10 +128,10 @@ It is a **generic infrastructure helper**.
 
 ## Best Practices
 
-* Keep all user and application keys lowercase
-* Use stable `application_id` values
-* Let application roles create tokens
-* Let `sys-token-store` handle persistence
+- Keep all user and application keys lowercase
+- Use stable `application_id` values
+- Let application roles create tokens
+- Let `sys-token-store` handle persistence
 
 ---
 

@@ -11,12 +11,14 @@ Tailored for creative professionals and developers, this role streamlines the pr
 ## Purpose
 
 The purpose of tthis role is to simplify the deployment and management of a personal or professional portfolio. By focusing on usability and a clean presentation, the role helps you:
+
 - Quickly launch a professional-looking website.
 - Customize and update your portfolio content effortlessly.
 - Integrate seamlessly with complementary roles for Docker Compose and web server management.
 - Reduce manual configuration and maintenance tasks.
 
 ## Features
+
 - **Unified Navigation**: Central menu bar with dynamic categories for all registered applications.
 - **Customizable Tiles**: Showcase applications with title, description, and icons—fully configurable via YAML.
 - **Responsive Design**: Optimized for desktop, tablet & mobile, built on Bootstrap.

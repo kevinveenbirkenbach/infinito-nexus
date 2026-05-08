@@ -9,6 +9,7 @@ This Ansible role automates the installation and configuration of [Certbot](http
 Optimized for Archlinux, this role ensures secure SSL/TLS certificate generation with minimal manual intervention. It supports both `webroot` and `DNS-01` validation methods, providing flexibility based on your infrastructure needs.
 
 ### Key Features
+
 - **Automatic Installation:** Installs `certbot` and the necessary DNS plugin via pacman.
 - **Dynamic DNS Plugin Support:** Automatically installs the correct `certbot-dns-<provider>` package based on your selected challenge method.
 - **Credential Management:** Creates secure credential files for DNS API tokens when using DNS-01 validation.

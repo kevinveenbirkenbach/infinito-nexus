@@ -1,11 +1,11 @@
 # sys-svc-dns
 
-
 ## Description
 
 Bootstrap and maintain **DNS prerequisites** for your web stack on Cloudflare.
 
 This role validates credentials and (by default) ensures:
+
 - **A (and optional AAAA) records** on the **apex** (`@`) for all **base SLD domains**
 - **Wildcard A/AAAA records** (`*.parent`) for parent hosts via `sys-dns-wildcards`
 - *(Optional)* **CAA** records for Let’s Encrypt (kept as a commented block you can re-enable)
@@ -31,7 +31,7 @@ This role cloudflare DNS bootstrap: parent host A/AAAA (and optional CAA), runs 
 3. *(Optional)* **CAA records** for all base SLDs (commented in the tasks; enable if you want CAA managed here).
 4. **Ensure wildcard parent DNS exists** (`*.parent` derived from children):
    - Delegates to [`sys-dns-wildcards`](../sys-dns-wildcards/README.md)
-   - Creates `A` (and `AAAA` if enabled) wildcard records on the Cloudflare zone, optionally proxied. 
+   - Creates `A` (and `AAAA` if enabled) wildcard records on the Cloudflare zone, optionally proxied.
 
 > Parent hosts example:  
 > `c.wiki.example.com` → **parent** `wiki.example.com` (plus `example.com` apex)

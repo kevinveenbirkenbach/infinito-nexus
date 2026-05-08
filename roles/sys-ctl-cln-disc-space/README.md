@@ -7,6 +7,7 @@ This role frees disk space by executing a script that cleans up temporary files,
 ## Overview
 
 Optimized for efficient storage management, this role:
+
 - Creates a directory for disk cleanup scripts.
 - Deploys a Bash script that frees disk space by cleaning up /tmp, Docker resources, and pacman cache.
 - Configures a systemd service to run the disk cleanup script.

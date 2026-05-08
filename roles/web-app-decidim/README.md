@@ -1,6 +1,5 @@
 # Decidim
 
-
 ## Description
 
 Deploys [Decidim](https://decidim.org/) (a free, open-source participatory democracy platform) as part of the Infinito.Nexus stack.

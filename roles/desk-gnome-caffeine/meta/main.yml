@@ -4,7 +4,6 @@ galaxy_info:
   license: Infinito.Nexus Community License (Non-Commercial)
   company: |
     Kevin Veen-Birkenbach
-    Consulting & Coaching Solutions
     https://www.veen.world
   min_ansible_version: '2.4'
   platforms:

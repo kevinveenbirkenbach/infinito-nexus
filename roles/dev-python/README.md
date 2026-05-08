@@ -22,6 +22,7 @@ To simplify and standardize the provisioning of Python-ready environments for de
 - **Foundation for Further Stacks:** Ideal starting point for Flask, Django, scientific computing, and automation.
 
 Supported distro families in the installer script:
+
 - Arch Linux
 - Debian
 - Ubuntu
@@ -31,6 +32,7 @@ Supported distro families in the installer script:
 ## Customization
 
 Easily extend this role with:
+
 - Python virtualenv tools (`python-virtualenv`, `pyenv`)
 - Popular libraries (`numpy`, `requests`, `flask`)
 - Framework-specific roles (e.g., `dev-python-django`)

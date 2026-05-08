@@ -8,7 +8,6 @@ Dive into a world of rhythm and sound with [Funkwhale](https://www.funkwhale.aud
 
 This role deploys Funkwhale using Docker. It orchestrates multiple services—including the API, Frontend, Celery Worker, Celery Beat, and Typesense—integrating with centralized PostgreSQL and Redis services for a fully containerized music sharing experience.
 
-
 ## Features
 
 - **Self-hosted Music Sharing:** Enjoy a secure and private platform to share and stream your favorite tunes.

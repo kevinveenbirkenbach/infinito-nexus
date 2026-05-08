@@ -1,6 +1,5 @@
 # Webserver
 
-
 ## Description
 
 This Ansible role installs and configures **NGINX** as a core HTTP/stream server on Arch Linux systems. It provides:
@@ -22,7 +21,6 @@ This role installs and configures Nginx HTTP and stream modules with performance
 * **Custom `NGINX.conf`** template with sensible defaults for performance and security.
 * **Stream proxy support**: includes `stream` block for TCP/UDP proxies.
 * **Cache directory management**: cleanup and recreation based on `MODE_CLEANUP`.
-
 
 ## Debugging Tips
 

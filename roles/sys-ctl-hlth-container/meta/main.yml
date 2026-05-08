@@ -3,7 +3,6 @@ galaxy_info:
   description: Checks Docker containers for unhealthy or exited states and alerts on any issues.
   company: |
     Kevin Veen-Birkenbach
-    Consulting & Coaching Solutions
     https://www.veen.world
   license: Infinito.Nexus Community License (Non-Commercial)
   min_ansible_version: '2.9'

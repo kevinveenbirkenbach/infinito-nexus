@@ -21,6 +21,7 @@ Playwright inside a Docker image derived from the central Playwright package ver
 ## Overview
 
 This role:
+
 - Discovers Playwright-enabled roles by scanning `roles/*/templates/playwright.env.j2`
 - Supports allow-/deny-lists via `TEST_E2E_PLAYWRIGHT_ONLY_ROLES` and `TEST_E2E_PLAYWRIGHT_SKIP_ROLES`
 - Stages each Playwright project into `TEST_E2E_PLAYWRIGHT_STAGE_BASE_DIR/<application_id>`
@@ -58,6 +59,7 @@ roles/<application_id>/
 For the file-level contract, use [Contributing `playwright.env.j2`](../../docs/agents/files/role/playwright.env.j2.md) and [Contributing `playwright.spec.js`](../../docs/contributing/artefact/files/role/playwright.specs.js.md).
 
 `package.json` and `playwright.config.js` are provided centrally by this role:
+
 - `roles/test-e2e-playwright/templates/package.json.j2` (rendered per-deploy; pins `@playwright/test` from `images.playwright.version`)
 - `roles/test-e2e-playwright/files/playwright.config.js` (copied as-is)
 
@@ -73,20 +75,24 @@ Both are used as central defaults for every app role.
 ## Variables
 
 ### Staging & reports
+
 - `TEST_E2E_PLAYWRIGHT_STAGE_BASE_DIR` (default: `/tmp/test-e2e-playwright`)
 - `TEST_E2E_PLAYWRIGHT_REPORTS_BASE_DIR` (default: `/var/lib/infinito/logs/test-e2e-playwright`)
 
 ### Playwright runtime
+
 - `TEST_E2E_PLAYWRIGHT_IMAGE` (default: empty; optional full image override. When empty, derived from `images.playwright.image` + `images.playwright.version`)
 - `TEST_E2E_PLAYWRIGHT_IMAGE_DISTRO` (default: `noble`)
 - `TEST_E2E_PLAYWRIGHT_COMMAND` (default: `npm install --no-fund --no-audit && npx playwright test`)
 
 ### Readiness wait
+
 - `TEST_E2E_PLAYWRIGHT_WAIT_ENABLED` (default: `true`)
 - `TEST_E2E_PLAYWRIGHT_WAIT_RETRIES` (default: `30`)
 - `TEST_E2E_PLAYWRIGHT_WAIT_DELAY` (default: `5`)
 
 ### Discovery filters
+
 - `TEST_E2E_PLAYWRIGHT_ONLY_ROLES` (default: `allowed_applications`)
 - `TEST_E2E_PLAYWRIGHT_SKIP_ROLES` (default: `[]`)
 

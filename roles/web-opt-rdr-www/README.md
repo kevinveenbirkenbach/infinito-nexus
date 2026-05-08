@@ -1,10 +1,13 @@
 # NGINX WWW Redirect
 
 ## Description
+
 Automates the creation of NGINX server blocks that redirect all `www.` subdomains to their non-www equivalents. Simple, idempotent, and SEO-friendly! 🚀
 
 ## Overview
+
 This role will:
+
 - **Discover** existing `*.conf` vhosts in your NGINX servers directory  
 - **Filter** domains with or without your `DOMAIN_PRIMARY`  
 - **Generate** redirect rules via the `web-opt-rdr-domains` role  
@@ -14,9 +17,11 @@ This role will:
 All tasks are guarded by “run once” facts and `MODE_CLEANUP` flags to avoid unintended re-runs or stale files.
 
 ## Purpose
+
 Ensure that any request to `www.example.com` automatically and permanently redirects to `https://example.com`, improving user experience, SEO, and certificate management. 🎯
 
 ## Features
+
 - **Auto-Discovery**: Scans your NGINX `servers` directory for `.conf` files. 🔍  
 - **Dynamic Redirects**: Builds `source: "www.domain"` → `target: "domain"` mappings on the fly. 🔧  
 - **Wildcard Redirect**: Includes a templated wildcard server block for `www.*` domains (toggleable). ✨  

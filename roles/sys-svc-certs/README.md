@@ -9,6 +9,7 @@ This role automates the retrieval of [Let's Encrypt](https://letsencrypt.org/) S
 Designed for Archlinux systems, this role handles issuing certificates per domain and optionally cleans up redundant certificates if wildcard certificates are used. It intelligently decides whether to issue a standard or wildcard certificate based on the domain structure and your configuration.
 
 ### Key Features
+
 - **Single Domain and Wildcard Support:** Handles both individual domains and wildcard domains (`*.example.com`).
 - **DNS and Webroot Challenges:** Dynamically selects the correct ACME challenge method.
 - **Certificate Renewal Logic:** Skips renewal if the certificate is still valid.

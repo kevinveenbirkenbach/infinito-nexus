@@ -5,6 +5,7 @@ This page documents the contract of the `cli meta networks suggest` helper
 the rules contributors MUST follow when calling it.
 
 Primary file:
+
 - [cli/meta/networks/suggest/__main__.py](../../../cli/meta/networks/suggest/__main__.py)
 
 ## Purpose 🎯
@@ -33,21 +34,21 @@ blocks.
 3. Within each umbrella `/24` block already in use for the chosen prefix
    length: enumerate all sub-blocks of that prefix length, mark occupied vs.
    free.
-4. **Gap-first:** propose the lowest unoccupied sub-block.
-5. **Increment fallback:** if all sub-blocks of the active `/24` blocks are
+4. __Gap-first:__ propose the lowest unoccupied sub-block.
+5. __Increment fallback:__ if all sub-blocks of the active `/24` blocks are
    used, propose the next `/24` block in the established sequence
    (currently `192.168.101–105` for `/28`, `192.168.200–203` for `/24`).
-6. **No established sequence:** if the requested prefix size has no umbrella
+6. __No established sequence:__ if the requested prefix size has no umbrella
    block established yet (e.g. `--clients 1000` → `/22` and no `/22` is in
    use), exit non-zero with a clear error suggesting that the operator pass
    `--block <cidr>` to bootstrap a new umbrella block manually.
-7. For each suggestion, also print the **client capacity**
+7. For each suggestion, also print the __client capacity__
    (`/28 → 14`, `/24 → 254`, …).
 
 ## Output 📤
 
-- **stdout** prints one subnet per line.
-- **stderr** prints per-suggestion capacity and a human-readable summary noting
+- __stdout__ prints one subnet per line.
+- __stderr__ prints per-suggestion capacity and a human-readable summary noting
   which umbrella block(s) were scanned.
 
 ## Examples 💡

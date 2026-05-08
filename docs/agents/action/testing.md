@@ -22,5 +22,6 @@
 - Keep the follow-up limited to the roles touched by staged files so the change stays focused.
 
 ## On Failure
+
 - If that validation fails, you MUST run `make clean` and rerun it.
 - If the failure says `service "infinito" is not running`, restart the stack with [Development Environment Setup](../../contributing/environment/setup.md) and retry the validation.

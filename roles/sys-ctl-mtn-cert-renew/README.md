@@ -9,6 +9,7 @@ This role automates the setup of an automatic [Let's Encrypt](https://letsencryp
 Optimized for Archlinux systems, this role installs the `certbot-NGINX` package, configures a dedicated `systemd` service for certificate renewal, and integrates with a `sys-timer` to schedule periodic renewals. After a renewal, NGINX is reloaded to apply the updated certificates immediately.
 
 ### Key Features
+
 - **Automatic Renewal:** Schedules unattended certificate renewals using sys-timers.
 - **Seamless NGINX Reload:** Reloads the NGINX service automatically after successful renewals.
 - **Systemd Integration:** Manages renewal operations reliably with `systemd` and `sys-ctl-alm-compose`.

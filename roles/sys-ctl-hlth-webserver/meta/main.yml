@@ -3,7 +3,6 @@ galaxy_info:
   description: Checks that each Nginx domain returns its expected HTTP status and alerts on unexpected codes.
   company: |
     Kevin Veen-Birkenbach
-    Consulting & Coaching Solutions
     https://www.veen.world
   license: Infinito.Nexus Community License (Non-Commercial)
   min_ansible_version: '2.9'

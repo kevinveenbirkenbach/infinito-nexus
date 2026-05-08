@@ -11,6 +11,7 @@ This role provides a standardized, reproducible deployment with optional extensi
 such as Redis caching, database persistence, and Matomo tracking.
 
 The role follows Infinito.Nexus conventions:
+
 - container abstraction (`container`, `compose`)
 - per-role meta configuration under `meta/services.yml` and `meta/server.yml`
 - CSP-aware reverse proxy integration
@@ -59,6 +60,7 @@ and [requirement 013](../../docs/requirements/013-alpha-to-beta-promotion.md).
 All configuration is handled via `meta/services.yml` (services map at file root) and `meta/server.yml` (server block at file root).
 
 Key sections include:
+
 - `services.libretranslate`: image and version
 - `services.redis`: enable Redis backend
 - `services.matomo`: enable analytics

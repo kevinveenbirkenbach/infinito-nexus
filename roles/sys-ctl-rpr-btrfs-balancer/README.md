@@ -7,6 +7,7 @@ This role automates the management and balancing of Btrfs file systems. It clone
 ## Overview
 
 Optimized for automated file system management, this role:
+
 - Clones the auto-btrfs-balancer repository.
 - Configures a systemd service to run the balancing script.
 - Integrates a systemd timer for regular execution.

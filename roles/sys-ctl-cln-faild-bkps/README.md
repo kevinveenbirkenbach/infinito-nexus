@@ -1,6 +1,5 @@
 # Cleanup Failed Backups
 
-
 ## Description
 
 This role installs and runs the **cleanback** tool to automatically detect and remove **failed Docker backups**.
@@ -43,8 +42,8 @@ CLEANUP_FAILED_BACKUPS_FORCE_KEEP: 3
 
 This means:
 
-* For each `backup-docker-to-local` directory, the newest 3 timestamp subdirectories are skipped
-* Older backup subdirectories are validated and cleaned if they are invalid
+- For each `backup-docker-to-local` directory, the newest 3 timestamp subdirectories are skipped
+- Older backup subdirectories are validated and cleaned if they are invalid
 
 The value can be adjusted or overridden via inventory, group vars, or host vars if needed.
 
@@ -69,9 +68,9 @@ This role focuses on **safe automation and scheduling**, while the linked projec
 
 This role is intended for servers that create regular Docker backups and need a reliable way to:
 
-* Keep storage usage under control
-* Automatically remove broken or incomplete backups
-* Ensure recent backups are never touched
+- Keep storage usage under control
+- Automatically remove broken or incomplete backups
+- Ensure recent backups are never touched
 
 No manual interaction is required once the role is deployed.
 

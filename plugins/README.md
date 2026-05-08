@@ -46,6 +46,7 @@ The table below summarizes common Ansible plugin types and their conventional di
 Use when task execution behavior itself must be changed or wrapped.
 
 Examples:
+
 - centralized retry logic (`uri_retry.py`),
 - argument normalization before module dispatch,
 - pre/post task orchestration.
@@ -55,6 +56,7 @@ Examples:
 Use for pure data transformation in Jinja2 expressions.
 
 Examples:
+
 - mapping/normalizing dictionaries,
 - deriving computed fields for templates,
 - deterministic formatting helpers.
@@ -64,6 +66,7 @@ Examples:
 Use when a value must be dynamically resolved at runtime.
 
 Examples:
+
 - computing IDs from role metadata,
 - resolving paths/version data,
 - reading structured project data for templates/tasks.

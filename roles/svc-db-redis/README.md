@@ -11,7 +11,7 @@ The role’s `service.yml.j2` template includes:
 - An Alpine-based Redis image (`redis:alpine`)
 - Container naming based on `application_id` (defaults to `redis`)
 - Restart policy
- 
+
 - Journald logging driver
 - A named volume (`redis:/data`) for persistence
 - A basic healthcheck using `redis-cli ping`

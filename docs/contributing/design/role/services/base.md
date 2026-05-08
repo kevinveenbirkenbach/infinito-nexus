@@ -9,6 +9,7 @@ A service is a reusable dependency that an application enables via
 `services.<service_key>`.
 
 Examples:
+
 - `web-svc-cdn` provides the primary service key `cdn`
 - `web-app-keycloak` provides `oidc`
 - `svc-db-mariadb` provides `mariadb`
@@ -21,6 +22,7 @@ keyed by `<entity_name>` (no `compose:` and no `services:` wrapper). See
 ## Role-Local Service Metadata 🏷️
 
 Service providers are self-describing. The provider role owns:
+
 - `enabled`
 - `shared`
 - optional `provides`
@@ -52,6 +54,7 @@ javascript:
 ```
 
 Rules:
+
 - The primary service entry is the role entity name returned by `get_entity_name`.
 - `provides:` is only used when the public service name differs from the entity name.
 - `canonical:` is only used on alias entries that resolve back to the primary service key.
@@ -62,10 +65,12 @@ Rules:
 Service discovery is built from role configs, not from a central registry file.
 
 Primary implementation files:
+
 - [service_registry.py](../../../../../utils/roles/applications/services/registry.py)
 - [service_registry.py lookup plugin](../../../../../plugins/lookup/service_registry.py)
 
 The discovery layer:
+
 - scans role configs from [roles/](../../../../../roles)
 - discovers provider entries from `services`
 - derives deploy type and loader bucket from the role name
@@ -81,6 +86,7 @@ It runs from [01_constructor.yml](../../../../../tasks/stages/01_constructor.yml
 before the normal application stage.
 
 Global bucket order:
+
 1. `universal`
 2. `workstation`
 3. `server`
@@ -93,6 +99,7 @@ provider role's primary entity in
 per [req-010](../../../../requirements/010-role-meta-runafter-lifecycle-migration.md)).
 
 Rules:
+
 - `run_after:` entries are role names, not service keys.
 - Cross-type `run_after:` is invalid and fails hard.
 - Later-bucket dependencies are invalid and fail hard.
@@ -108,12 +115,14 @@ Service loading and frontend injection are separate mechanisms.
 Loading decides whether the provider role is deployed at all.
 
 [main.yml](../../../../../roles/sys-utils-service-loader/tasks/main.yml):
+
 - queries the ordered discovered service list
 - checks `lookup('service', service_key).required`
 - skips roles already protected by `run_once_*`
 - loads services through [load_app.yml](../../../../../tasks/utils/load_app.yml)
 
 Frontend service probe/load helper:
+
 - [load_service.yml](../../../../../roles/sys-utils-service-loader/tasks/load_service.yml)
 
 ### Injection 🔌
@@ -122,6 +131,7 @@ Injection decides whether a deployed app gets extra nginx integration such as
 dashboard, logout, CSS, or JavaScript hooks.
 
 This stays in:
+
 - [main.yml](../../../../../roles/sys-front-inj-all/tasks/main.yml)
 - [inj_enabled.py](../../../../../roles/sys-front-inj-all/filter_plugins/inj_enabled.py)
 
@@ -144,6 +154,7 @@ lookup('service', 'web-svc-cdn')
 ```
 
 Returns:
+
 - `id`
 - `role`
 - `enabled`
@@ -157,6 +168,7 @@ Returns:
   contractually required by anyone.
 
 Behavior:
+
 - accepts either a service key or a provider role name
 - resolves aliases through `canonical`
 - resolves provider roles through discovered primary service keys
@@ -175,6 +187,7 @@ query('service_registry', 'ordered') | first
 ```
 
 Modes:
+
 - default: full discovered registry mapping
 - `ordered`: ordered primary service entries for the service loader
 
@@ -184,6 +197,7 @@ File:
 [applications_current_play.py](../../../../../plugins/lookup/applications_current_play.py)
 
 Builds the current-play application set including:
+
 - group-selected roles
 - transitive shared service dependencies
 - meta dependencies
@@ -191,6 +205,7 @@ Builds the current-play application set including:
 ## Database Services 🗄️
 
 Relational databases are regular services now:
+
 - `svc-db-mariadb` provides `mariadb`
 - `svc-db-postgres` provides `postgres`
 

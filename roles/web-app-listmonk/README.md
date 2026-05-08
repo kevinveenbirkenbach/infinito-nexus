@@ -7,6 +7,7 @@ Elevate your email marketing with Listmonk, a high-performance, self-hosted news
 ## Overview
 
 This role deploys Listmonk using Docker, ensuring a robust and scalable setup for your newsletter management needs. Listmonk’s architecture supports a dedicated PostgreSQL database and integration with an NGINX reverse proxy for secure access. To configure and manage your instance, use the provided configuration files:
+
 - [Installation.md](./Installation.md)
 - [Upgrade.md](./Upgrade.md)
 

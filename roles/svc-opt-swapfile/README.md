@@ -7,6 +7,7 @@ This role automates the creation of a swapfile on the target system by cloning a
 ## Overview
 
 The role performs the following tasks:
+
 - Clones the swapfile creation script from the Git repository.
 - Executes the script with the provided swapfile size to create a swapfile.
 - Helps ensure that the system has adequate swap space for improved performance and stability.

@@ -6,6 +6,7 @@ For administrator-facing configuration (keys, override variables, precedence),
 see [email.md](../../../../administration/configuration/email.md).
 
 Primary files:
+
 - [email.py](../../../../../plugins/lookup/email.py) for the plugin.
 - [test_email.py](../../../../../tests/unit/plugins/lookup/test_email.py) for unit tests.
 

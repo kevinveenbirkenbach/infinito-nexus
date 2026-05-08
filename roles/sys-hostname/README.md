@@ -18,9 +18,9 @@ This Ansible role ensures that the target host’s system hostname is set to the
 
 ## Features
 
-* Simple and lightweight
-* Automatically adapts to your inventory names
-* Safe to run repeatedly
+- Simple and lightweight
+- Automatically adapts to your inventory names
+- Safe to run repeatedly
 
 ## Credits
 

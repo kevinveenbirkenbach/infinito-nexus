@@ -290,6 +290,7 @@ allocated from a project-managed pool. Inter ports are recorded in
 **Single-port categories** (everything except `relay`):
 
 Inputs (CLI args):
+
 - `--scope local | public` (required)
 - `--category <name>` (required; e.g. `http`, `oauth2`, `ssh`, …)
 - `--count N` (default 1) sets how many free ports to return.
@@ -297,6 +298,7 @@ Inputs (CLI args):
   for ad-hoc allocations.
 
 Behaviour:
+
 1. Read the band for `<scope>.<category>` from `PORT_BANDS` in
    `group_vars/all/08_networks.yml`. If absent and no `--range` is given,
    exit non-zero with a clear error.
@@ -314,6 +316,7 @@ gaps were filled vs. appended.
 **Range category `relay`:**
 
 Inputs (CLI args):
+
 - `--scope public --category relay` (required)
 - `--length N` (required) is the **inclusive port count** of the contiguous
   range, so the span produced is `{start, end = start + N - 1}`. For example,
@@ -321,6 +324,7 @@ Inputs (CLI args):
 - `--count K` (default 1) sets how many independent free ranges to return.
 
 Behaviour:
+
 1. Read the relay band from `PORT_BANDS.public.relay`.
 2. Walk every `roles/*/meta/services.yml` and collect every
    `<entity>.ports.public.relay.{start,end}` pair as an occupied span.
@@ -335,6 +339,7 @@ Output: one `<start>-<end>` pair per line on stdout, summary on stderr.
 ### `cli meta networks suggest`
 
 Inputs (CLI args):
+
 - `--clients N` (required) is the minimum number of usable client IPs.
 - `--count K` (default 1) sets how many free subnets to return.
 - `--block <cidr>` (optional) forces suggestions inside a specific umbrella
@@ -342,6 +347,7 @@ Inputs (CLI args):
   currently used /24 umbrella blocks for the chosen prefix length.
 
 Behaviour:
+
 1. Translate `--clients N` to the smallest CIDR prefix that fits
    (≤14 → /28, ≤30 → /27, ≤62 → /26, ≤126 → /25, ≤254 → /24, …).
 2. Walk every `roles/*/meta/server.yml` and collect occupied CIDRs from
@@ -364,6 +370,7 @@ Output: one subnet per line, plus per-suggestion capacity on stderr.
 ### Integration with `cli create role`
 
 When `cli create role` scaffolds a new role, it MUST:
+
 - Prompt for `--clients N` and call `cli meta networks suggest --clients N --count 1`
   to fill in `meta/server.yml.networks.local.subnet` automatically.
 - Prompt for required port categories per service entity and call

@@ -27,7 +27,6 @@ With this role, you get a production-ready CRM environment that plugs into your 
 - **Health Checks & Logging:** Integrates with Infinito.Nexus health checking and journald logging 📈  
 - **Modular Role Composition:** Uses shared roles for DB, proxy and monitoring to keep your stack consistent 🔄  
 
-
 ## Further Resources
 
 - [SuiteCRM Official Website](https://suitecrm.com/) 🌍  

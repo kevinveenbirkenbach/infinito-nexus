@@ -62,6 +62,7 @@ See [readme_md.md](artefact/files/role/readme_md.md) for the requirement, requir
 See [Docs README](artefact/files/docs/readme_md.md) for the purpose, scope, and navigation rules for `README.md` files stored inside `docs/` directories.
 
 ### Markdown 📋
+
 - You SHOULD prefer `README.md` for directory-level documentation when a human-facing entry point already exists.
 - You MUST keep core information inside the repository, either in code or in `.md` files.
 - You MUST use `.md` files for commands, workflows, setup, and contributor guidance.

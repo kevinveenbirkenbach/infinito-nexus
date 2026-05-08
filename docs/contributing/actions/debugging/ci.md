@@ -66,4 +66,3 @@ INFINITO_MEM_LIMIT=4g INFINITO_MEMSWAP_LIMIT=4g INFINITO_CPUS=2 make <target>
 ```
 
 Verify the caps applied with `docker compose -f compose.yml --profile ci config | grep -E 'mem_limit|memswap_limit|cpus'` before starting the deploy.
-

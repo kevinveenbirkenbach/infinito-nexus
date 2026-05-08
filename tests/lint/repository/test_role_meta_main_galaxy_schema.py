@@ -21,12 +21,14 @@ the Galaxy slot.
 
 On top of the generic schema this lint also enforces two project-wide
 canonical exact-values to stop drift: ``galaxy_info.company`` is one
-specific block-scalar string (Kevin Veen-Birkenbach / Consulting &
-Coaching Solutions / https://www.veen.world) and ``galaxy_info.platforms``
-is one specific 5-distro list (ArchLinux/Debian/EL/Fedora/Ubuntu, each
-``versions: [all]``). Both fields had accumulated ~10 variants each
-(quoting style, Unicode hyphen, typos, ``Linux``/``GenericLinux``/``Any``
-platform names) before standardisation.
+specific block-scalar string (Kevin Veen-Birkenbach /
+https://www.veen.world) and ``galaxy_info.platforms`` is one specific
+5-distro list (ArchLinux/Debian/EL/Fedora/Ubuntu, each ``versions:
+[all]``). Both fields had accumulated ~10 variants each (quoting style,
+Unicode hyphen, typos, ``Linux``/``GenericLinux``/``Any`` platform names)
+before standardisation. The two-line company form keeps the parsed value
+under Galaxy's 50-character limit on ``company`` so galaxy-importer
+accepts it.
 
 This lint fails as soon as any role's ``meta/main.yml`` carries a key the
 Galaxy schema does not define, omits a required field, or drifts from one
@@ -104,9 +106,7 @@ _REQUIRED_GALAXY_INFO: frozenset[str] = frozenset(
 
 # Project canonical exact-value for `galaxy_info.company`. Block-scalar with
 # a trailing newline (`|` style → 'clip' chomping).
-_CANONICAL_COMPANY: str = (
-    "Kevin Veen-Birkenbach\nConsulting & Coaching Solutions\nhttps://www.veen.world\n"
-)
+_CANONICAL_COMPANY: str = "Kevin Veen-Birkenbach\nhttps://www.veen.world\n"
 
 # Project canonical exact-value for `galaxy_info.platforms`. `EL` is the
 # Galaxy umbrella name covering RHEL/CentOS/Rocky/Alma.
@@ -219,7 +219,7 @@ def _validate_meta_main(path: Path) -> list[str]:
     if "company" in galaxy_info and galaxy_info["company"] != _CANONICAL_COMPANY:
         problems.append(
             "galaxy_info.company differs from canonical block-scalar value "
-            "(Kevin Veen-Birkenbach / Consulting & Coaching Solutions / "
+            "(Kevin Veen-Birkenbach / "
             f"https://www.veen.world); got {galaxy_info['company']!r}"
         )
 

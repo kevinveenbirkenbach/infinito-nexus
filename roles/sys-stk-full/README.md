@@ -1,6 +1,5 @@
 # Database Docker with Web Proxy
 
-
 ## Description
 
 This role builds on `sys-stk-backend` by adding a reverse-proxy frontend for HTTP access to your database service.

@@ -9,6 +9,7 @@ This role configures an [NGINX](https://NGINX.org/) server to host a static HTML
 Optimized for Archlinux environments, this role provides a lightweight, reliable solution for serving static websites. It automatically configures NGINX to serve files from a predefined directory, sets up secure HTTPS connections, and includes support for `.well-known` paths required by ACME challenges.
 
 ### Key Features
+
 - **Static Site Hosting:** Serves HTML, CSS, JavaScript, and other static files.
 - **Let's Encrypt Integration:** Automatically requests and installs SSL/TLS certificates.
 - **Simple Root Configuration:** Defines a clean webroot with `index.html` support.

@@ -1,6 +1,5 @@
 # sys-ca-selfsigned
 
-
 ## Description
 
 Creates (once) a local Root CA (self-signed) for the Infinito.Nexus environment.

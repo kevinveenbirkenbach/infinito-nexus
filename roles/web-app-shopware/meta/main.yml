@@ -1,10 +1,9 @@
 galaxy_info:
   author: Kevin Veen-Birkenbach
-  description: Shopware is a modern open-source eCommerce platform built on PHP and Symfony. It enables businesses to create scalable online stores with flexible product management, intuitive administration, customizable storefronts, and powerful APIs for headless and omnichannel commerce.
+  description: Deploys Shopware, a modern open-source eCommerce platform built on PHP and Symfony for scalable online stores with flexible product management and headless/omnichannel APIs.
   license: Infinito.Nexus Community License (Non-Commercial)
   company: |
     Kevin Veen-Birkenbach
-    Consulting & Coaching Solutions
     https://www.veen.world
   galaxy_tags:
     - shopware

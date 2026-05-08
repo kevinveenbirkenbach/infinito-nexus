@@ -18,7 +18,7 @@ endif
 
 .PHONY: \
 	setup setup-clean install install-ansible install-lint install-venv install-python install-system-python install-skills update-skills agent-install \
-	test lint lint-action lint-ansible lint-python lint-shellcheck autoformat test-lint test-unit test-integration test-external test-deploy test-deploy-app \
+	test lint lint-action lint-ansible lint-python lint-shellcheck lint-markdown lint-galaxy autoformat test-lint test-unit test-integration test-external test-deploy test-deploy-app \
 	clean clean-sudo down cache-clean \
 	system-purge system-disk-usage \
 	list tree mig dockerignore chmod-scripts \
@@ -275,13 +275,13 @@ setup-clean: clean setup
 	@echo "Full build with cleanup before was executed."
 
 # Run all lint checks.
-lint: lint-action lint-ansible lint-python lint-shellcheck
+lint: lint-action lint-ansible lint-python lint-shellcheck lint-markdown lint-galaxy
 
 # Run the GitHub Actions lint checks.
 lint-action:
 	@bash scripts/lint/action.sh
 
-# Run Ansible lint checks.
+# Run Ansible lint checks (syntax-check + ansible-lint).
 lint-ansible:
 	@bash scripts/lint/ansible.sh
 
@@ -292,6 +292,14 @@ lint-python:
 # Run shellcheck lint checks.
 lint-shellcheck:
 	@bash scripts/lint/shellcheck.sh
+
+# Run Markdown lint checks via markdownlint-cli2.
+lint-markdown:
+	@bash scripts/lint/markdown.sh
+
+# Run galaxy-importer schema validation across roles/.
+lint-galaxy:
+	@bash scripts/lint/galaxy.sh
 
 # Auto-format all source files (skips tools that are not installed).
 autoformat:

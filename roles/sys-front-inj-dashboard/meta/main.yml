@@ -3,7 +3,6 @@ galaxy_info:
   description: Injects a JS snippet into HTML to notify parent windows of iframe location changes and force external links to new tabs.
   company: |
     Kevin Veen-Birkenbach
-    Consulting & Coaching Solutions
     https://www.veen.world
   license: Infinito.Nexus Community License (Non-Commercial)
   issue_tracker_url: https://s.infinito.nexus/issues

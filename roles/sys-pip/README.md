@@ -7,6 +7,7 @@ This role installs the [python-pip](https://en.wikipedia.org/wiki/Pip_(package_m
 ## Overview
 
 Optimized for simplicity and idempotency, this role:
+
 - Installs the python-pip package using [pacman](https://wiki.archlinux.org/title/Pacman).
 - Sets a flag to ensure the installation tasks run only once.
 

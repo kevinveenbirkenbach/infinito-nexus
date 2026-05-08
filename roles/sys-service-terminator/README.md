@@ -27,7 +27,7 @@ This role runs a collected list of systemd services at the end of a play.
 
 ## Further Resources
 
-- https://www.freedesktop.org/software/systemd/man/systemctl.html
+- <https://www.freedesktop.org/software/systemd/man/systemctl.html>
 
 ## Credits
 

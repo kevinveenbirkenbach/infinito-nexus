@@ -1,6 +1,5 @@
 # sys-openssl
 
-
 ## Description
 
 Ensures that the `openssl` CLI is installed on the host.

@@ -11,6 +11,7 @@ Ideal for developers and content creators, the role simplifies deploying a dedic
 ## Purpose
 
 The Docker-SimpleIcons role streamlines the deployment and management of a simple, efficient icon server. It helps you:
+
 - Quickly deploy a lightweight, dedicated icon server.
 - Serve icons consistently and reliably across multiple projects.
 - Reduce manual maintenance of icon assets.

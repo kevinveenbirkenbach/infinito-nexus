@@ -7,6 +7,7 @@ This role manages the generation and handling of an SSH key for the [root user](
 ## Overview
 
 Optimized for secure system administration, this role performs the following tasks:
+
 - Verifies the existence of a root SSH public key.
 - Generates a new [RSA 4096-bit](https://en.wikipedia.org/wiki/RSA_(cryptosystem)) SSH key pair for the root user if one is missing.
 - Displays and outputs the generated public SSH key.

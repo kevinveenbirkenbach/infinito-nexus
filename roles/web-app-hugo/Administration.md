@@ -17,14 +17,18 @@ The Hugo site is built into the custom Docker image at `compose build` time. The
 
 1. Pick the new tag/commit in the upstream repository (default: [gohugoio/hugoDocs releases](https://github.com/gohugoio/hugoDocs/releases)).
 2. Update `roles/web-app-hugo/meta/services.yml`:
+
    ```yaml
    hugo:
      source_version: <new-tag>
    ```
+
 3. Re-deploy:
+
    ```bash
    make deploy-reuse-kept-apps APPS=web-app-hugo
    ```
+
 4. Verify in the browser that the content reflects the new version.
 
 ## Debugging a failed Hugo build

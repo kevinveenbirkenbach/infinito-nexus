@@ -7,6 +7,7 @@ This role sets up a systemd timer to schedule the periodic cleanup of old backup
 ## Overview
 
 Optimized for automated maintenance, this role:
+
 - Sets a fact for the service name.
 - Integrates with the [sys-timer](../sys-timer/README.md) role to schedule sys-ctl-cln-bkps tasks at defined intervals.
 

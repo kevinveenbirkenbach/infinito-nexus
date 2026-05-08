@@ -5,6 +5,7 @@ This page documents the contract of the `cli meta ports suggest` helper
 the rules contributors MUST follow when calling it.
 
 Primary file:
+
 - [cli/meta/ports/suggest/__main__.py](../../../cli/meta/ports/suggest/__main__.py)
 
 ## Purpose 🎯
@@ -40,8 +41,8 @@ allocated from a project-managed pool. Inter ports are recorded in
    available categories.
 2. Walk every `roles/*/meta/services.yml` and collect ints under
    `<entity>.ports.<scope>.<category>` (across ALL entities and ALL roles).
-3. **Gap-first:** propose the lowest unoccupied port in the band.
-4. **Increment fallback:** if the band has no internal gaps, propose
+3. __Gap-first:__ propose the lowest unoccupied port in the band.
+4. __Increment fallback:__ if the band has no internal gaps, propose
    `max(used) + 1` (clamped to the band's upper bound).
 5. Exit non-zero if the requested count cannot be satisfied within the band.
 
@@ -50,17 +51,17 @@ allocated from a project-managed pool. Inter ports are recorded in
 1. Read the relay band from `PORT_BANDS.public.relay`.
 2. Collect every `<entity>.ports.public.relay.{start,end}` pair as an
    occupied span.
-3. **Gap-first:** propose the lowest unoccupied contiguous span of size
+3. __Gap-first:__ propose the lowest unoccupied contiguous span of size
    `--length N` within the band.
-4. **Increment fallback:** if no internal gap fits, propose
+4. __Increment fallback:__ if no internal gap fits, propose
    `max(end) + 1` to `max(end) + N` (clamped to the band's upper bound).
 5. Exit non-zero if `K` ranges of size `N` cannot be fit within the band.
 
 ## Output 📤
 
-- **stdout** prints a machine-readable list (one port per line for single-port
+- __stdout__ prints a machine-readable list (one port per line for single-port
   categories, one `<start>-<end>` pair per line for `relay`).
-- **stderr** prints a human-readable summary noting which band was used and how
+- __stderr__ prints a human-readable summary noting which band was used and how
   many gaps were filled vs. appended.
 
 ## Examples 💡

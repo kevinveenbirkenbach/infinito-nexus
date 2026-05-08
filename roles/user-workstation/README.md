@@ -19,10 +19,12 @@ This role creates the workstation user selected via WORKSTATION_USER and configu
 User data must be defined under `users.<name>` and selected via `WORKSTATION_USER`.
 
 Minimum required fields:
+
 - `WORKSTATION_USER`
 - `users.<WORKSTATION_USER>.username` (defaults to WORKSTATION_USER if missing)
 
 Optional fields:
+
 - `users.<WORKSTATION_USER>.uid`
 - `users.<WORKSTATION_USER>.gid`
 - `users.<WORKSTATION_USER>.shell`

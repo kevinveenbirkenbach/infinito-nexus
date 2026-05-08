@@ -76,9 +76,9 @@ checksum.
 
 ## Further Resources
 
-- Nix project: https://nixos.org
-- Nix releases: https://releases.nixos.org
-- Infinito.Nexus License: https://s.infinito.nexus/license
+- Nix project: <https://nixos.org>
+- Nix releases: <https://releases.nixos.org>
+- Infinito.Nexus License: <https://s.infinito.nexus/license>
 
 ## Credits
 
