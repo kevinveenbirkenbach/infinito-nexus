@@ -14,6 +14,7 @@ The purpose of this role is to enforce a consistent and predictable lid switch b
 - **Power-aware Configuration:** Differentiates between battery, AC power, and docked state.
 - **Idempotent Design:** Ensures safe re-runs and minimal unnecessary restarts.
 ## Credits
+
 Developed and maintained by **Kevin Veen-Birkenbach**.
 Learn more at [veen.world](https://www.veen.world).
 Part of the [Infinito.Nexus Project](https://s.infinito.nexus/code).

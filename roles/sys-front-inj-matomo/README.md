@@ -17,5 +17,9 @@ This Ansible role automates the integration of Matomo tracking code into NGINX-s
 ## Customization
 You can customize the tracking script and the noscript image tracker by editing the `matomo-tracking.js.j2` and `matomo.subfilter.conf.j2` templates.
 
-## Author Information
-This role was created in 2023 by [Kevin Veen Birkenbach](https://www.veen.world/), providing a seamless way to add Matomo analytics to any website served via NGINX.
+## Credits
+
+Developed and maintained by **Kevin Veen-Birkenbach**.
+Learn more at [veen.world](https://www.veen.world).
+Part of the [Infinito.Nexus Project](https://s.infinito.nexus/code).
+Licensed under the [Infinito.Nexus Community License (Non-Commercial)](https://s.infinito.nexus/license).

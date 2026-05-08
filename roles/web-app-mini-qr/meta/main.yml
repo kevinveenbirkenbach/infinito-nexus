@@ -16,7 +16,19 @@ galaxy_info:
   issue_tracker_url: https://github.com/lyqht/mini-qr/issues
   min_ansible_version: '2.9'
   platforms:
-    - name: Linux
+    - name: ArchLinux
+      versions:
+        - all
+    - name: Debian
+      versions:
+        - all
+    - name: EL
+      versions:
+        - all
+    - name: Fedora
+      versions:
+        - all
+    - name: Ubuntu
       versions:
         - all
 dependencies: []

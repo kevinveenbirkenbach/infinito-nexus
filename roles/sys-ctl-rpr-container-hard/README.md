@@ -16,6 +16,7 @@ The primary purpose of this role is to ensure that all Docker Compose services a
 ## Context
 This role was implemented to address the classic issue: ["Have you tried turning it off and on again?"](https://www.youtube.com/watch?v=rksCTVFtjM4). The problem initially arose with the `fetchmail` container in Mailu, which fails if only some containers, and not the full compose composition, are restarted.
 ## Credits
+
 Developed and maintained by **Kevin Veen-Birkenbach**.
 Learn more at [veen.world](https://www.veen.world).
 Part of the [Infinito.Nexus Project](https://s.infinito.nexus/code).

@@ -1,4 +1,4 @@
-# Webserver HTTPS Provisioning 🚀
+# Webserver HTTPS Provisioning
 
 ## Description
 The **sys-svc-webserver-https** role extends a basic NGINX installation by wiring in everything you need to serve content over HTTPS:
@@ -47,8 +47,9 @@ See [https://s.infinito.nexus/license](https://s.infinito.nexus/license) for det
 
 ---
 
-## Author
+## Credits
 
-Developed and maintained by **Kevin Veen-Birkenbach**
-Consulting & Coaching Solutions
-[https://www.veen.world](https://www.veen.world)
+Developed and maintained by **Kevin Veen-Birkenbach**.
+Learn more at [veen.world](https://www.veen.world).
+Part of the [Infinito.Nexus Project](https://s.infinito.nexus/code).
+Licensed under the [Infinito.Nexus Community License (Non-Commercial)](https://s.infinito.nexus/license).

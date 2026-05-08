@@ -20,3 +20,10 @@ The primary purpose of this role is to automate the process of swapfile creation
 - **Script Cloning:** Retrieves the latest swapfile creation script from a Git repository.
 - **Swapfile Creation:** Executes the script to create a swapfile of a specified size.
 - **Performance Enhancement:** Ensures adequate swap space for optimal system performance.
+
+## Credits
+
+Developed and maintained by **Kevin Veen-Birkenbach**.
+Learn more at [veen.world](https://www.veen.world).
+Part of the [Infinito.Nexus Project](https://s.infinito.nexus/code).
+Licensed under the [Infinito.Nexus Community License (Non-Commercial)](https://s.infinito.nexus/license).

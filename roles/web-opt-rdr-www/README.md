@@ -1,4 +1,4 @@
-# NGINX WWW Redirect 🌐
+# NGINX WWW Redirect
 
 ## Description
 Automates the creation of NGINX server blocks that redirect all `www.` subdomains to their non-www equivalents. Simple, idempotent, and SEO-friendly! 🚀
@@ -22,3 +22,10 @@ Ensure that any request to `www.example.com` automatically and permanently redir
 - **Wildcard Redirect**: Includes a templated wildcard server block for `www.*` domains (toggleable). ✨  
 - **Cleanup Mode**: Removes the wildcard config file when `CERTBOT_FLAVOR` is set to `dedicated` and `MODE_CLEANUP` is enabled. 🗑️
 - **Debug Output**: Optional `MODE_DEBUG` gives detailed variable dumps for troubleshooting. 🐛  
+
+## Credits
+
+Developed and maintained by **Kevin Veen-Birkenbach**.
+Learn more at [veen.world](https://www.veen.world).
+Part of the [Infinito.Nexus Project](https://s.infinito.nexus/code).
+Licensed under the [Infinito.Nexus Community License (Non-Commercial)](https://s.infinito.nexus/license).

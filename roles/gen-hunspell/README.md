@@ -28,3 +28,10 @@ Users are encouraged to customize the `{{hunspell_languages}}` variable based on
 
 ## Support and Contributions
 For any support requests, suggestions, or contributions, please open an issue or a pull request in the `infinito` repository. Contributions, especially those that enhance the playbook's functionality or extend its language support, are highly welcomed.
+
+## Credits
+
+Developed and maintained by **Kevin Veen-Birkenbach**.
+Learn more at [veen.world](https://www.veen.world).
+Part of the [Infinito.Nexus Project](https://s.infinito.nexus/code).
+Licensed under the [Infinito.Nexus Community License (Non-Commercial)](https://s.infinito.nexus/license).

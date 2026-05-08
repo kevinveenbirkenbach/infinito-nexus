@@ -11,3 +11,10 @@ Scans `journalctl` over the last day for “error” entries and alerts if any a
 
 ## Usage
 Include the role; set `on_calendar_health_journalctl` for your preferred schedule.
+
+## Credits
+
+Developed and maintained by **Kevin Veen-Birkenbach**.
+Learn more at [veen.world](https://www.veen.world).
+Part of the [Infinito.Nexus Project](https://s.infinito.nexus/code).
+Licensed under the [Infinito.Nexus Community License (Non-Commercial)](https://s.infinito.nexus/license).

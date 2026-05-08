@@ -48,4 +48,7 @@ V1 supports **exactly one canonical domain** per role deploy. The play asserts t
 
 ## Credits
 
-Hugo is developed and maintained by [Bjørn Erik Pedersen, Steve Francia](https://github.com/gohugoio/hugo) and the Hugo community. This role is developed and maintained by **Kevin Veen-Birkenbach**. Learn more at [veen.world](https://www.veen.world). Licensed under the [Infinito.Nexus Community License (Non-Commercial)](https://s.infinito.nexus/license).
+Developed and maintained by **Kevin Veen-Birkenbach**.
+Learn more at [veen.world](https://www.veen.world).
+Part of the [Infinito.Nexus Project](https://s.infinito.nexus/code).
+Licensed under the [Infinito.Nexus Community License (Non-Commercial)](https://s.infinito.nexus/license).

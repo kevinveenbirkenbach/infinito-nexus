@@ -44,3 +44,10 @@ Typical use cases:
 * Coturn Wiki — [https://github.com/coturn/coturn/wiki](https://github.com/coturn/coturn/wiki)  
 * TURN on Wikipedia — [https://en.wikipedia.org/wiki/Traversal_Using_Relays_around_NAT](https://en.wikipedia.org/wiki/Traversal_Using_Relays_around_NAT)  
 * STUN on Wikipedia — [https://en.wikipedia.org/wiki/STUN](https://en.wikipedia.org/wiki/STUN)  
+
+## Credits
+
+Developed and maintained by **Kevin Veen-Birkenbach**.
+Learn more at [veen.world](https://www.veen.world).
+Part of the [Infinito.Nexus Project](https://s.infinito.nexus/code).
+Licensed under the [Infinito.Nexus Community License (Non-Commercial)](https://s.infinito.nexus/license).

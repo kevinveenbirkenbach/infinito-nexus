@@ -24,3 +24,10 @@ The primary purpose of this role is to enhance the security of the system by ens
 - **Public Key Output:** Displays and outputs the generated public SSH key.
 - **Idempotency:** Ensures that key generation and output tasks execute only once.
 - **Secure Remote Access:** Facilitates secure remote access by providing a verified public key for use with [SSH](https://en.wikipedia.org/wiki/Secure_Shell).
+
+## Credits
+
+Developed and maintained by **Kevin Veen-Birkenbach**.
+Learn more at [veen.world](https://www.veen.world).
+Part of the [Infinito.Nexus Project](https://s.infinito.nexus/code).
+Licensed under the [Infinito.Nexus Community License (Non-Commercial)](https://s.infinito.nexus/license).

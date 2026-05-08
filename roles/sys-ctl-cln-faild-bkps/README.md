@@ -63,3 +63,10 @@ This role is intended for servers that create regular Docker backups and need a 
 * Ensure recent backups are never touched
 
 No manual interaction is required once the role is deployed.
+
+## Credits
+
+Developed and maintained by **Kevin Veen-Birkenbach**.
+Learn more at [veen.world](https://www.veen.world).
+Part of the [Infinito.Nexus Project](https://s.infinito.nexus/code).
+Licensed under the [Infinito.Nexus Community License (Non-Commercial)](https://s.infinito.nexus/license).

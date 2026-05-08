@@ -22,3 +22,10 @@ This Ansible role installs and configures **NGINX** as a core HTTP/stream server
 * **General logs**: `journalctl -f -u NGINX`
 * **Filter by host**: `journalctl -u NGINX -f | grep "{{ inventory_hostname }}"`
 * **Enable detailed format**: set `MODE_DEBUG: true` and reload NGINX.
+
+## Credits
+
+Developed and maintained by **Kevin Veen-Birkenbach**.
+Learn more at [veen.world](https://www.veen.world).
+Part of the [Infinito.Nexus Project](https://s.infinito.nexus/code).
+Licensed under the [Infinito.Nexus Community License (Non-Commercial)](https://s.infinito.nexus/license).

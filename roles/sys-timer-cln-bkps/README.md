@@ -19,3 +19,10 @@ The primary purpose of this role is to automate the scheduling of backup cleanup
 - **Timer Scheduling:** Configures a systemd timer to trigger the backup cleanup service.
 - **Role Integration:** Works in conjunction with the sys-ctl-cln-bkps role.
 - **Idempotency:** Ensures the timer tasks execute only once per playbook run.
+
+## Credits
+
+Developed and maintained by **Kevin Veen-Birkenbach**.
+Learn more at [veen.world](https://www.veen.world).
+Part of the [Infinito.Nexus Project](https://s.infinito.nexus/code).
+Licensed under the [Infinito.Nexus Community License (Non-Commercial)](https://s.infinito.nexus/license).

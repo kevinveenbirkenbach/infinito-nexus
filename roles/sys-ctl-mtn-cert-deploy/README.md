@@ -16,3 +16,10 @@ Installs a small script and a systemd unit that copy certificates into your Comp
 - [Wildcard Certificate Setup (SETUP.md)](./SETUP.md)
 - [Role Documentation](https://s.infinito.nexus/code/tree/main/roles/sys-ctl-mtn-cert-deploy)
 - [Issue Tracker](https://s.infinito.nexus/issues)
+
+## Credits
+
+Developed and maintained by **Kevin Veen-Birkenbach**.
+Learn more at [veen.world](https://www.veen.world).
+Part of the [Infinito.Nexus Project](https://s.infinito.nexus/code).
+Licensed under the [Infinito.Nexus Community License (Non-Commercial)](https://s.infinito.nexus/license).

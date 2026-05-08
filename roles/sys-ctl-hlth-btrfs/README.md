@@ -14,3 +14,10 @@ Just include this role in your playbook; it will:
 1. Deploy a small shell script 
 2. Install a `.service` and `.timer` unit.
 3. Send alerts via `sys-ctl-alm-compose` if any filesystem shows errors.
+
+## Credits
+
+Developed and maintained by **Kevin Veen-Birkenbach**.
+Learn more at [veen.world](https://www.veen.world).
+Part of the [Infinito.Nexus Project](https://s.infinito.nexus/code).
+Licensed under the [Infinito.Nexus Community License (Non-Commercial)](https://s.infinito.nexus/license).

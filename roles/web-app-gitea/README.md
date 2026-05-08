@@ -13,6 +13,7 @@ This role deploys Gitea using Docker. It automates the setup and update processe
 - [Gitea Official Website](https://gitea.io/)
 - [Gitea LDAP integration](https://docs.gitea.com/usage/authentication)
 ## Credits
+
 Developed and maintained by **Kevin Veen-Birkenbach**.
 Learn more at [veen.world](https://www.veen.world).
 Part of the [Infinito.Nexus Project](https://s.infinito.nexus/code).

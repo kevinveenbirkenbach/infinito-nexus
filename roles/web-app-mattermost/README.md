@@ -37,3 +37,10 @@ Key settings in `meta/services.yml` and `meta/server.yml`:
 - [Mattermost Docker Install](https://docs.mattermost.com/install/install-docker.html)
 - [Mattermost Configuration Settings](https://docs.mattermost.com/configure/configuration-settings.html)
 - [GitLab SSO in Mattermost](https://docs.mattermost.com/deployment/sso-gitlab.html)
+
+## Credits
+
+Developed and maintained by **Kevin Veen-Birkenbach**.
+Learn more at [veen.world](https://www.veen.world).
+Part of the [Infinito.Nexus Project](https://s.infinito.nexus/code).
+Licensed under the [Infinito.Nexus Community License (Non-Commercial)](https://s.infinito.nexus/license).

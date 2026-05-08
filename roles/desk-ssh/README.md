@@ -13,6 +13,7 @@ The purpose of this role is to automate the provisioning of SSH agent capabiliti
 - **Fails gracefully** with an optional debug message if the Git repository is unreachable.
 - **KeePassXC ready**: Ensures compatibility with password managers that support SSH agent integration.
 ## Credits
+
 Developed and maintained by **Kevin Veen-Birkenbach**.
 Learn more at [veen.world](https://www.veen.world).
 Part of the [Infinito.Nexus Project](https://s.infinito.nexus/code).

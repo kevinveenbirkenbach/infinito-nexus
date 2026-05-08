@@ -1,4 +1,4 @@
-# System Version 🏷️
+# System Version ️
 
 ## Description
 
@@ -17,10 +17,9 @@ and writes it as a system-wide environment variable into `/etc/environment` on t
 - `FILE_ENVIRONMENT` (default: `/etc/environment`)
 - `INFINITO_VERSION_ENV_NAME` (default: `INFINITO_VERSION`)
 
-## Credits 📝
+## Credits
 
-Developed and maintained by **Kevin Veen-Birkenbach**.  
-Learn more at [www.veen.world](https://www.veen.world)
-
-Part of the [Infinito.Nexus Project](https://s.infinito.nexus/code)  
-License: [Infinito.Nexus Community License (Non-Commercial)](https://s.infinito.nexus/license)
+Developed and maintained by **Kevin Veen-Birkenbach**.
+Learn more at [veen.world](https://www.veen.world).
+Part of the [Infinito.Nexus Project](https://s.infinito.nexus/code).
+Licensed under the [Infinito.Nexus Community License (Non-Commercial)](https://s.infinito.nexus/license).

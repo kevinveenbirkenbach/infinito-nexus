@@ -17,8 +17,7 @@ The purpose of this role is to automate the installation and configuration of Gi
 
 ## Credits
 
-Developed and maintained by **Kevin Veen-Birkenbach**.  
-Learn more at [www.veen.world](https://www.veen.world)  
-For Git configuration details, see [git-configurator on GitHub](https://github.com/kevinveenbirkenbach/git-configurator).
-
-License: [Infinito.Nexus Community License (Non-Commercial)](https://s.infinito.nexus/license)
+Developed and maintained by **Kevin Veen-Birkenbach**.
+Learn more at [veen.world](https://www.veen.world).
+Part of the [Infinito.Nexus Project](https://s.infinito.nexus/code).
+Licensed under the [Infinito.Nexus Community License (Non-Commercial)](https://s.infinito.nexus/license).

@@ -24,7 +24,6 @@ The purpose of this role is to provide a reliable, idempotent solution for local
 ## Credits
 
 Developed and maintained by **Kevin Veen-Birkenbach**.
-Visit [veen.world](https://www.veen.world) for more information.
-
-Part of the [Infinito.Nexus Project](https://s.infinito.nexus/code)
-License: [Infinito.Nexus Community License (Non-Commercial)](https://s.infinito.nexus/license)
+Learn more at [veen.world](https://www.veen.world).
+Part of the [Infinito.Nexus Project](https://s.infinito.nexus/code).
+Licensed under the [Infinito.Nexus Community License (Non-Commercial)](https://s.infinito.nexus/license).

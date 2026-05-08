@@ -37,3 +37,10 @@ By automating the Sphinx build process and containerized deployment, this role m
 For more information about Sphinx and its capabilities, please visit the [Sphinx Official Website](https://www.sphinx-doc.org/).
 
 For detailed Sphinx documentation, see the [Sphinx Documentation](https://www.sphinx-doc.org/en/master/).
+
+## Credits
+
+Developed and maintained by **Kevin Veen-Birkenbach**.
+Learn more at [veen.world](https://www.veen.world).
+Part of the [Infinito.Nexus Project](https://s.infinito.nexus/code).
+Licensed under the [Infinito.Nexus Community License (Non-Commercial)](https://s.infinito.nexus/license).

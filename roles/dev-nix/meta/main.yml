@@ -8,13 +8,10 @@ galaxy_info:
     https://www.veen.world
   min_ansible_version: '2.9'
   platforms:
-    - name: Archlinux
-      versions:
-        - rolling
-    - name: Debian
+    - name: ArchLinux
       versions:
         - all
-    - name: Ubuntu
+    - name: Debian
       versions:
         - all
     - name: EL
@@ -23,7 +20,7 @@ galaxy_info:
     - name: Fedora
       versions:
         - all
-    - name: GenericLinux
+    - name: Ubuntu
       versions:
         - all
   galaxy_tags:

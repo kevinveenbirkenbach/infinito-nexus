@@ -33,3 +33,10 @@ and [requirement 013](../../docs/requirements/013-alpha-to-beta-promotion.md).
 
 - [Postmarks (GitHub)](https://github.com/ckolderup/postmarks)
 - [Simple Mail Transfer Protocol (RFC 5321)](https://www.rfc-editor.org/rfc/rfc5321)
+
+## Credits
+
+Developed and maintained by **Kevin Veen-Birkenbach**.
+Learn more at [veen.world](https://www.veen.world).
+Part of the [Infinito.Nexus Project](https://s.infinito.nexus/code).
+Licensed under the [Infinito.Nexus Community License (Non-Commercial)](https://s.infinito.nexus/license).

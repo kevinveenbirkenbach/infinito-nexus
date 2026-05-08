@@ -29,3 +29,10 @@ A detailled documentation for the use and administration of Nextcloud on Infinit
 - [LDAP Integration Guide](https://docs.nextcloud.com/server/latest/admin_manual/configuration_user/user_auth_ldap.html)
 - [OIDC Login Plugin (pulsejet)](https://github.com/pulsejet/nextcloud-oidc-login)
 - [Sociallogin Plugin (Official)](https://apps.nextcloud.com/apps/sociallogin)
+
+## Credits
+
+Developed and maintained by **Kevin Veen-Birkenbach**.
+Learn more at [veen.world](https://www.veen.world).
+Part of the [Infinito.Nexus Project](https://s.infinito.nexus/code).
+Licensed under the [Infinito.Nexus Community License (Non-Commercial)](https://s.infinito.nexus/license).

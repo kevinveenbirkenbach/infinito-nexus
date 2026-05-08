@@ -24,3 +24,10 @@ The app runs as a single Docker container and requires no database or backend se
 - 🧩 Upstream project: [lyqht/mini-qr](https://github.com/lyqht/mini-qr)
 - 📦 Upstream Dockerfile: [View on GitHub](https://github.com/lyqht/mini-qr/blob/main/Dockerfile)
 - 🌐 Docker Image: `ghcr.io/lyqht/mini-qr:latest`
+
+## Credits
+
+Developed and maintained by **Kevin Veen-Birkenbach**.
+Learn more at [veen.world](https://www.veen.world).
+Part of the [Infinito.Nexus Project](https://s.infinito.nexus/code).
+Licensed under the [Infinito.Nexus Community License (Non-Commercial)](https://s.infinito.nexus/license).

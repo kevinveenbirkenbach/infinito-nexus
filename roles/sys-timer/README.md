@@ -21,3 +21,10 @@ The primary purpose of this role is to provide a reusable mechanism for scheduli
 - **Automated Service Management:** Automatically reloads the systemd daemon and restarts the timer when changes are detected.
 - **Flexible Scheduling:** Supports configuration of parameters such as OnCalendar and RandomizedDelaySec for precise control over task timing.
 - **Persistent Timers:** Optionally enables persistent timer behavior to ensure missed activations are handled.
+
+## Credits
+
+Developed and maintained by **Kevin Veen-Birkenbach**.
+Learn more at [veen.world](https://www.veen.world).
+Part of the [Infinito.Nexus Project](https://s.infinito.nexus/code).
+Licensed under the [Infinito.Nexus Community License (Non-Commercial)](https://s.infinito.nexus/license).

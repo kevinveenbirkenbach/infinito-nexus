@@ -1,4 +1,4 @@
-# NGINX Global Matomo & Theming Modifier Role 🚀
+# NGINX Global Matomo & Theming Modifier Role
 
 This role enhances your NGINX configuration by conditionally injecting global Matomo tracking and theming elements into your HTML responses. It uses NGINX sub-filters to seamlessly add tracking scripts and CSS links to your web pages.
 
@@ -20,10 +20,9 @@ This will automatically activate Matomo tracking and/or global theming based on 
 
 ---
 
-## Author
+## Credits
 
-Developed by [Kevin Veen-Birkenbach](https://www.veen.world) 😎
-
----
-
-Happy automating! 🎉
+Developed and maintained by **Kevin Veen-Birkenbach**.
+Learn more at [veen.world](https://www.veen.world).
+Part of the [Infinito.Nexus Project](https://s.infinito.nexus/code).
+Licensed under the [Infinito.Nexus Community License (Non-Commercial)](https://s.infinito.nexus/license).

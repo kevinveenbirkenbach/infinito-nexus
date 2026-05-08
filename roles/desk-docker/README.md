@@ -30,3 +30,10 @@ To run this playbook:
 
 ## Support & Contribution
 For support, suggestions, or contributions, please raise an issue or a pull request in the `infinito` repository. This project welcomes contributions from the developer community.
+
+## Credits
+
+Developed and maintained by **Kevin Veen-Birkenbach**.
+Learn more at [veen.world](https://www.veen.world).
+Part of the [Infinito.Nexus Project](https://s.infinito.nexus/code).
+Licensed under the [Infinito.Nexus Community License (Non-Commercial)](https://s.infinito.nexus/license).

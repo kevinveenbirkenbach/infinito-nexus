@@ -18,7 +18,19 @@ galaxy_info:
     - webapp
   issue_tracker_url: https://github.com/defnull/fediwall/issues
   platforms:
-    - name: Linux
+    - name: ArchLinux
+      versions:
+        - all
+    - name: Debian
+      versions:
+        - all
+    - name: EL
+      versions:
+        - all
+    - name: Fedora
+      versions:
+        - all
+    - name: Ubuntu
       versions:
         - all
 dependencies: []

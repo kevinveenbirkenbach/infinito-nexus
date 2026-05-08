@@ -1,5 +1,6 @@
 """Lint guard: roles/<role>/meta/main.yml MUST conform to the Ansible Galaxy
-schema.
+schema AND to the project's canonical exact-values for ``company`` and
+``platforms``.
 
 Background
 ==========
@@ -18,8 +19,18 @@ req-010, plus ``logo`` / ``video`` / ``homepage`` / ``repository`` /
 fields belong in project-owned files (``meta/services.yml.<entity>``), not in
 the Galaxy slot.
 
+On top of the generic schema this lint also enforces two project-wide
+canonical exact-values to stop drift: ``galaxy_info.company`` is one
+specific block-scalar string (Kevin Veen-Birkenbach / Consulting &
+Coaching Solutions / https://www.veen.world) and ``galaxy_info.platforms``
+is one specific 5-distro list (ArchLinux/Debian/EL/Fedora/Ubuntu, each
+``versions: [all]``). Both fields had accumulated ~10 variants each
+(quoting style, Unicode hyphen, typos, ``Linux``/``GenericLinux``/``Any``
+platform names) before standardisation.
+
 This lint fails as soon as any role's ``meta/main.yml`` carries a key the
-Galaxy schema does not define.
+Galaxy schema does not define, omits a required field, or drifts from one
+of the two canonical exact-values.
 
 Caching
 =======
@@ -37,7 +48,6 @@ from typing import TYPE_CHECKING, Any
 
 import yaml as _yaml
 
-from utils.annotations.message import warning
 from utils.cache.files import PROJECT_ROOT
 from utils.cache.yaml import load_yaml_any
 from utils.roles.mapping import ROLE_FILE_META_MAIN
@@ -79,28 +89,36 @@ _ALLOWED_GALAXY_INFO: frozenset[str] = frozenset(
 )
 
 # Hard-required galaxy_info fields. Missing any of these fails the lint.
-# Kept tight on purpose: these three carry documentation value for every
-# internal role.
+# `min_ansible_version` and `platforms` are required by Ansible Galaxy when
+# publishing — Infinito.Nexus does not publish, but enforcing them here keeps
+# every role consistent and prevents new roles landing without the fields.
 _REQUIRED_GALAXY_INFO: frozenset[str] = frozenset(
     {
         "author",
         "description",
         "license",
-    }
-)
-
-# Soft-recommended galaxy_info fields. Required by Ansible Galaxy when
-# *publishing* a role, but Infinito.Nexus does not publish to Galaxy, so
-# missing these is reported as a GitHub Actions ::warning:: annotation
-# (via utils.annotations.message) instead of a hard test failure. Roles
-# that DO carry the field are still validated for shape via
-# `_validate_platforms` / the type checks below.
-_RECOMMENDED_GALAXY_INFO: frozenset[str] = frozenset(
-    {
         "min_ansible_version",
         "platforms",
     }
 )
+
+# Project canonical exact-value for `galaxy_info.company`. Block-scalar with
+# a trailing newline (`|` style → 'clip' chomping).
+_CANONICAL_COMPANY: str = (
+    "Kevin Veen-Birkenbach\n"
+    "Consulting & Coaching Solutions\n"
+    "https://www.veen.world\n"
+)
+
+# Project canonical exact-value for `galaxy_info.platforms`. `EL` is the
+# Galaxy umbrella name covering RHEL/CentOS/Rocky/Alma.
+_CANONICAL_PLATFORMS: list[dict[str, Any]] = [
+    {"name": "ArchLinux", "versions": ["all"]},
+    {"name": "Debian", "versions": ["all"]},
+    {"name": "EL", "versions": ["all"]},
+    {"name": "Fedora", "versions": ["all"]},
+    {"name": "Ubuntu", "versions": ["all"]},
+]
 
 
 def _meta_main_paths() -> list[Path]:
@@ -190,18 +208,22 @@ def _validate_meta_main(path: Path) -> list[str]:
             "missing required galaxy_info field(s): " + ", ".join(missing_required)
         )
 
-    missing_recommended = sorted(_RECOMMENDED_GALAXY_INFO - set(galaxy_info.keys()))
-    if missing_recommended:
-        rel_path = path.relative_to(PROJECT_ROOT)
-        warning(
-            "missing Galaxy-publishing recommended field(s): "
-            + ", ".join(missing_recommended),
-            title="meta/main.yml galaxy_info",
-            file=str(rel_path),
-        )
-
     if "platforms" in galaxy_info:
-        problems.extend(_validate_platforms(galaxy_info["platforms"]))
+        platforms_val = galaxy_info["platforms"]
+        problems.extend(_validate_platforms(platforms_val))
+        if platforms_val != _CANONICAL_PLATFORMS:
+            problems.append(
+                "galaxy_info.platforms differs from canonical 5-distro list "
+                "(ArchLinux/Debian/EL/Fedora/Ubuntu, each versions: [all]); "
+                f"got {platforms_val!r}"
+            )
+
+    if "company" in galaxy_info and galaxy_info["company"] != _CANONICAL_COMPANY:
+        problems.append(
+            "galaxy_info.company differs from canonical block-scalar value "
+            "(Kevin Veen-Birkenbach / Consulting & Coaching Solutions / "
+            f"https://www.veen.world); got {galaxy_info['company']!r}"
+        )
 
     if "galaxy_tags" in galaxy_info:
         problems.extend(_validate_galaxy_tags(galaxy_info["galaxy_tags"]))

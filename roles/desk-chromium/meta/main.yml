@@ -8,19 +8,21 @@ galaxy_info:
     https://www.veen.world
   min_ansible_version: '2.9'
   platforms:
+    - name: ArchLinux
+      versions:
+        - all
     - name: Debian
       versions:
-        - stretch
-        - buster
-        - bullseye
+        - all
+    - name: EL
+      versions:
+        - all
+    - name: Fedora
+      versions:
+        - all
     - name: Ubuntu
       versions:
-        - bionic
-        - focal
-        - jammy
-    - name: Archlinux
-      versions:
-        - rolling
+        - all
   galaxy_tags:
     - chromium
     - browser

@@ -44,11 +44,9 @@ By using this role, teams can set up Taiga in minutes on Arch Linux systems — 
 
 ---
 
-## Author
+## Credits
 
-Developed and maintained by **Kevin Veen-Birkenbach**  
-Email: [kevin@veen.world](mailto:kevin@veen.world)  
-Website: [veen.world](https://www.veen.world)
-
-Part of the [Infinito.Nexus Project](https://s.infinito.nexus/code)  
-License: [Infinito.Nexus Community License (Non-Commercial)](https://s.infinito.nexus/license)
+Developed and maintained by **Kevin Veen-Birkenbach**.
+Learn more at [veen.world](https://www.veen.world).
+Part of the [Infinito.Nexus Project](https://s.infinito.nexus/code).
+Licensed under the [Infinito.Nexus Community License (Non-Commercial)](https://s.infinito.nexus/license).

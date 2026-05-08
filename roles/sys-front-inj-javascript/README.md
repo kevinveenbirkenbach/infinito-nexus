@@ -1,4 +1,4 @@
-# 🌐 Global JavaScript Injector for NGINX
+# Global JavaScript Injector for NGINX
 
 ## Description
 
@@ -18,11 +18,9 @@ This Ansible role injects a custom JavaScript snippet into all HTML responses se
 - **Debug Mode**  
   Supports an `MODE_DEBUG` flag that appends optional `console.log` statements for easier troubleshooting in staging or development.
 
-## Author
+## Credits
 
-Developed by **Kevin Veen-Birkenbach**
-Consulting & Coaching Solutions — [veen.world](https://www.veen.world)
-
----
-
-Happy automating! 🎉
+Developed and maintained by **Kevin Veen-Birkenbach**.
+Learn more at [veen.world](https://www.veen.world).
+Part of the [Infinito.Nexus Project](https://s.infinito.nexus/code).
+Licensed under the [Infinito.Nexus Community License (Non-Commercial)](https://s.infinito.nexus/license).

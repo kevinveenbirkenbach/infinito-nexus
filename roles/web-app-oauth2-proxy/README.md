@@ -48,11 +48,9 @@ Before using this role, ensure you have the following:
 
 To learn more about OAuth2 Proxy, check out the [official documentation](https://oauth2-proxy.github.io/oauth2-proxy/).
 
-## Author
+## Credits
 
-This role was created and maintained by **Kevin Veen-Birkenbach**. 🌍 You can learn more about Kevin and his projects at [veen.world](https://www.veen.world).
-
----
-
-Protect your web applications with ease and confidence! ✨
-
+Developed and maintained by **Kevin Veen-Birkenbach**.
+Learn more at [veen.world](https://www.veen.world).
+Part of the [Infinito.Nexus Project](https://s.infinito.nexus/code).
+Licensed under the [Infinito.Nexus Community License (Non-Commercial)](https://s.infinito.nexus/license).

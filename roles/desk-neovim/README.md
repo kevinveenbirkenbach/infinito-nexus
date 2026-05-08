@@ -29,3 +29,10 @@ Contributions are welcome! Please follow standard Ansible role conventions and b
 
 ## Other Resources
 For more context on this role and its development, see the related ChatGPT conversation.
+
+## Credits
+
+Developed and maintained by **Kevin Veen-Birkenbach**.
+Learn more at [veen.world](https://www.veen.world).
+Part of the [Infinito.Nexus Project](https://s.infinito.nexus/code).
+Licensed under the [Infinito.Nexus Community License (Non-Commercial)](https://s.infinito.nexus/license).

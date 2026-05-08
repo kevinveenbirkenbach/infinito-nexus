@@ -26,3 +26,10 @@ Optional fields:
 - Sudo can be enabled via `user_workstation_enable_sudo`.
 - Password handling is intentionally conservative. If you want a password, set
   `users.<WORKSTATION_USER>.password` (plain) and enable `user_workstation_set_password`.
+
+## Credits
+
+Developed and maintained by **Kevin Veen-Birkenbach**.
+Learn more at [veen.world](https://www.veen.world).
+Part of the [Infinito.Nexus Project](https://s.infinito.nexus/code).
+Licensed under the [Infinito.Nexus Community License (Non-Commercial)](https://s.infinito.nexus/license).
