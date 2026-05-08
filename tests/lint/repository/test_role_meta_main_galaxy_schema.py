@@ -105,9 +105,7 @@ _REQUIRED_GALAXY_INFO: frozenset[str] = frozenset(
 # Project canonical exact-value for `galaxy_info.company`. Block-scalar with
 # a trailing newline (`|` style → 'clip' chomping).
 _CANONICAL_COMPANY: str = (
-    "Kevin Veen-Birkenbach\n"
-    "Consulting & Coaching Solutions\n"
-    "https://www.veen.world\n"
+    "Kevin Veen-Birkenbach\nConsulting & Coaching Solutions\nhttps://www.veen.world\n"
 )
 
 # Project canonical exact-value for `galaxy_info.platforms`. `EL` is the
