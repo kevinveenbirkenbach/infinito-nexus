@@ -29,14 +29,17 @@ from __future__ import annotations
 
 import re
 import unittest
-from collections.abc import Iterable
 from dataclasses import dataclass
 from pathlib import Path
+from typing import TYPE_CHECKING
 
 from utils.cache.files import iter_project_files, read_text
 from utils.cache.yaml import load_yaml_any
 
 from . import PROJECT_ROOT
+
+if TYPE_CHECKING:
+    from collections.abc import Iterable
 
 SCAN_DIRS = ("roles", "tasks", "playbooks")
 _SCAN_PREFIXES = tuple(f"{d}/" for d in SCAN_DIRS)

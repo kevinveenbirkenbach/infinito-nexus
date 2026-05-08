@@ -1,9 +1,12 @@
 from __future__ import annotations
 
-from collections.abc import Iterable
 from pathlib import Path
+from typing import TYPE_CHECKING
 
 from ansible.errors import AnsibleFilterError
+
+if TYPE_CHECKING:
+    from collections.abc import Iterable
 
 
 def _to_role_set(raw: Iterable[str] | str | None, var_name: str) -> set[str]:

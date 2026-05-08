@@ -11,10 +11,8 @@ import time so the GitHub Actions runner-host CLI path
 from __future__ import annotations
 
 import copy
-import os
 from collections.abc import Mapping
-from pathlib import Path
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 from plugins.filter.merge_with_defaults import merge_with_defaults
 from utils.roles.mapping import ROLE_FILE_META_VARIANTS
@@ -30,6 +28,10 @@ from .base import (
 )
 from .yaml import load_yaml as _load_yaml_cached
 from .yaml import load_yaml_any as _load_yaml_any_cached
+
+if TYPE_CHECKING:
+    import os
+    from pathlib import Path
 
 _APPLICATIONS_DEFAULTS_CACHE: dict[str, dict[str, Any]] = {}
 _VARIANTS_CACHE: dict[str, dict[str, list[Any]]] = {}

@@ -33,7 +33,7 @@ the two-polarity coverage.
 from __future__ import annotations
 
 import unittest
-from pathlib import Path
+from typing import TYPE_CHECKING
 
 from utils.cache.yaml import load_yaml_any
 from utils.roles.mapping import (
@@ -44,6 +44,9 @@ from utils.roles.mapping import (
 from utils.roles.type import get_role_types
 
 from . import PROJECT_ROOT
+
+if TYPE_CHECKING:
+    from pathlib import Path
 
 ROLES_DIR = PROJECT_ROOT / "roles"
 

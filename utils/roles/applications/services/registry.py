@@ -1,14 +1,16 @@
 from __future__ import annotations
 
 from collections import deque
-from pathlib import Path
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 from utils.cache.yaml import load_yaml_any
 from utils.roles.entity_name import get_entity_name
 from utils.roles.mapping import ROLE_FILE_VARS_MAIN
 from utils.roles.meta_lookup import get_role_run_after
 from utils.roles.validation.invokable import types_from_group_names
+
+if TYPE_CHECKING:
+    from pathlib import Path
 
 
 class ServiceRegistryError(ValueError):

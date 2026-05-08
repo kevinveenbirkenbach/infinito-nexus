@@ -12,9 +12,12 @@ Provides three primitives the rest of the package builds on:
 from __future__ import annotations
 
 import re
-from pathlib import Path
+from typing import TYPE_CHECKING
 
 from cli.contributing.changelog.archive.versioning import unpad_version
+
+if TYPE_CHECKING:
+    from pathlib import Path
 
 _ARCHIVE_FILENAME_RE = re.compile(
     r"^\d{3}\.\d{3}\.\d{3}(?:[-+][^.]+)?-\d{4}-\d{2}-\d{2}\.md$"

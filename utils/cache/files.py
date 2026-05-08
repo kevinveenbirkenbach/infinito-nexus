@@ -29,12 +29,15 @@ view without subprocessing.
 from __future__ import annotations
 
 import os
-from collections.abc import Iterable, Iterator
 from functools import lru_cache
 from pathlib import Path
+from typing import TYPE_CHECKING
 
 from . import PROJECT_ROOT
 from .gitignore import is_path_gitignored, load_gitignore_patterns
+
+if TYPE_CHECKING:
+    from collections.abc import Iterable, Iterator
 
 # Directories never worth descending into during project-tree scans.
 _DEFAULT_SKIP_DIRS: frozenset[str] = frozenset(

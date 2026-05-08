@@ -16,11 +16,10 @@ only when actually invoked.
 from __future__ import annotations
 
 import copy
-import os
 import threading
 from collections.abc import Mapping
 from pathlib import Path
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 # `merge_with_defaults` is a pure-Python helper with no `ansible` dependency,
 # so it stays at module scope.
@@ -29,6 +28,9 @@ from plugins.filter.merge_with_defaults import (
 )
 
 from . import PROJECT_ROOT, ROLES_DIR  # noqa: F401
+
+if TYPE_CHECKING:
+    import os
 
 try:
     from ansible.parsing.vault import EncryptedString as _AnsibleEncryptedString

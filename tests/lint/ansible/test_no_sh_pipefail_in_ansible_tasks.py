@@ -1,9 +1,8 @@
 from __future__ import annotations
 
 import unittest
-from collections.abc import Iterable
 from pathlib import Path
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 import yaml
 
@@ -14,6 +13,9 @@ from utils.cache.files import (  # noqa: F401  read_text retained for parity wit
 from utils.cache.yaml import load_yaml_all_str, load_yaml_any
 
 from . import PROJECT_ROOT
+
+if TYPE_CHECKING:
+    from collections.abc import Iterable
 
 COMMAND_KEYS = frozenset({"command", "ansible.builtin.command"})
 SHELL_KEYS = frozenset({"shell", "ansible.builtin.shell"})

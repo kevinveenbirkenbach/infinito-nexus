@@ -9,19 +9,19 @@ from collections.abc import Mapping
 from typing import Any
 
 
-class PathNotFound(Exception):
+class PathNotFoundError(Exception):
     """Raised by helpers when a dotted path does not resolve."""
 
 
 def assert_nested(mapping: Mapping[str, Any], dotted: str, context: str) -> None:
-    """Walk ``dotted`` through ``mapping``; raise ``PathNotFound`` on miss."""
+    """Walk ``dotted`` through ``mapping``; raise ``PathNotFoundError`` on miss."""
     keys = dotted.split(".")
     cur: Any = mapping
     for k in keys:
         if not isinstance(cur, Mapping):
-            raise PathNotFound(f"{context}: expected dict at {k}")
+            raise PathNotFoundError(f"{context}: expected dict at {k}")
         if k not in cur:
-            raise PathNotFound(f"{context}: missing '{k}' in '{dotted}'")
+            raise PathNotFoundError(f"{context}: missing '{k}' in '{dotted}'")
         cur = cur[k]
 
 
@@ -70,12 +70,12 @@ def validate_app_path(
 ) -> None:
     """Resolve ``dotted`` against the same fallback chain the runtime
     plugin uses: app defaults → users → credentials in defaults →
-    credentials in schema → images presence. Raise ``PathNotFound`` on
+    credentials in schema → images presence. Raise ``PathNotFoundError`` on
     a final miss."""
     cfg = application_defaults.get(app_id, {})
     try:
         assert_nested(cfg, dotted, app_id)
-    except PathNotFound:
+    except PathNotFoundError:
         pass
     else:
         return
@@ -92,7 +92,7 @@ def validate_app_path(
         creds = schema.get("credentials", {}) if isinstance(schema, Mapping) else {}
         if isinstance(creds, Mapping) and key in creds:
             return
-        raise PathNotFound(f"Credential '{key}' missing for app '{app_id}'")
+        raise PathNotFoundError(f"Credential '{key}' missing for app '{app_id}'")
     if dotted.startswith("images.") and isinstance(cfg.get("images"), Mapping):
         return
-    raise PathNotFound(f"'{dotted}' not found for '{app_id}'")
+    raise PathNotFoundError(f"'{dotted}' not found for '{app_id}'")

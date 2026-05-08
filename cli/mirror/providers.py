@@ -1,10 +1,13 @@
 from __future__ import annotations
 
-import argparse
 import subprocess
 from abc import ABC, abstractmethod
+from typing import TYPE_CHECKING
 
-from .model import ImageRef
+if TYPE_CHECKING:
+    import argparse
+
+    from .model import ImageRef
 
 
 class RegistryProvider(ABC):

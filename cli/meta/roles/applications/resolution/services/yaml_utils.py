@@ -1,10 +1,13 @@
 from __future__ import annotations
 
-from pathlib import Path
+from typing import TYPE_CHECKING
 
 from utils.cache.yaml import load_yaml as _cached_load_yaml
 
 from .errors import ServicesResolutionError
+
+if TYPE_CHECKING:
+    from pathlib import Path
 
 
 def load_yaml_file(path: Path) -> dict:

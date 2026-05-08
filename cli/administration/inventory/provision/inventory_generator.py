@@ -1,11 +1,13 @@
 from __future__ import annotations
 
 import sys
-from pathlib import Path
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 from .subprocess_runner import run_subprocess
 from .yaml_io import load_yaml
+
+if TYPE_CHECKING:
+    from pathlib import Path
 
 
 def generate_dynamic_inventory(

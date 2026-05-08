@@ -7,9 +7,12 @@ from __future__ import annotations
 
 import subprocess
 import unittest
-from pathlib import Path
+from typing import TYPE_CHECKING
 
 from . import PROJECT_ROOT
+
+if TYPE_CHECKING:
+    from pathlib import Path
 
 
 def tracked_files(root: Path) -> list[Path]:

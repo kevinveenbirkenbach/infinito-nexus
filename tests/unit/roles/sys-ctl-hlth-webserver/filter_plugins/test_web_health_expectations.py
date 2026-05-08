@@ -90,7 +90,7 @@ class TestWebHealthExpectationsFilter(unittest.TestCase):
         out = self.mod.web_health_expectations(apps, group_names=["app-a"])
         self.assertEqual(out["a.example.org"], [405])
 
-    def test_flat_canonical_invalid_default_falls_back_to_DEFAULT_OK(self):
+    def test_flat_canonical_invalid_default_falls_back_to_default_ok(self):
         apps = {"app-x": {}}
         self._configure_returns(
             {
@@ -414,7 +414,7 @@ class TestWebHealthExpectationsFilter(unittest.TestCase):
         out = self.mod.web_health_expectations(apps, group_names=["app-l6"])
         self.assertEqual(out["api.l6.example.org"], [301, 403])
 
-    def test_invalid_default_list_falls_back_to_DEFAULT_OK(self):
+    def test_invalid_default_list_falls_back_to_default_ok(self):
         apps = {"app-l7": {}}
         # everything invalid → fall back to DEFAULT_OK
         self._configure_returns(
@@ -444,7 +444,7 @@ class TestWebHealthExpectationsFilter(unittest.TestCase):
         out = self.mod.web_health_expectations(apps, group_names=["app-l8"])
         self.assertEqual(out["web.l8.example.org"], [204, 206])
 
-    def test_key_and_default_both_invalid_falls_back_to_DEFAULT_OK(self):
+    def test_key_and_default_both_invalid_falls_back_to_default_ok(self):
         apps = {"app-l9": {}}
         self._configure_returns(
             {

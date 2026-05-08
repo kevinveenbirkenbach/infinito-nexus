@@ -20,7 +20,7 @@ from __future__ import annotations
 import re
 import unittest
 from dataclasses import dataclass
-from pathlib import Path
+from typing import TYPE_CHECKING
 
 import yaml
 
@@ -31,6 +31,9 @@ from utils.roles.entity_name import get_entity_name
 from utils.roles.mapping import ROLE_FILE_META_SERVICES
 
 from . import PROJECT_ROOT
+
+if TYPE_CHECKING:
+    from pathlib import Path
 
 REQUIRED_KEYS = (
     "min_storage",

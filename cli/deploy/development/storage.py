@@ -1,6 +1,9 @@
 from __future__ import annotations
 
-from .compose import Compose
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from .compose import Compose
 
 
 def detect_storage_constrained(compose: Compose, *, threshold_gib: int = 100) -> bool:

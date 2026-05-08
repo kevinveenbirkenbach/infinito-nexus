@@ -2,9 +2,12 @@ from __future__ import annotations
 
 import importlib.util
 import unittest
-from pathlib import Path
+from typing import TYPE_CHECKING
 
 from . import PROJECT_ROOT
+
+if TYPE_CHECKING:
+    from pathlib import Path
 
 ROLE_DIR = PROJECT_ROOT / "roles" / "web-app-keycloak"
 MOD_PATH = ROLE_DIR / "module_utils" / "kcadm_json.py"

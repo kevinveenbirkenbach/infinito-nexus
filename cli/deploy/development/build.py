@@ -1,11 +1,14 @@
 from __future__ import annotations
 
-import argparse
 import os
 import subprocess
+from typing import TYPE_CHECKING
 
 from . import PROJECT_ROOT
 from .common import resolve_distro
+
+if TYPE_CHECKING:
+    import argparse
 
 
 def add_parser(sub: argparse._SubParsersAction) -> None:

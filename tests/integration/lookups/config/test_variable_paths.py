@@ -13,7 +13,7 @@ import unittest
 from collections.abc import Iterable, Mapping
 
 from ._scan import LookupMatch, get_context, iter_matches
-from ._validate import PathNotFound, assert_nested
+from ._validate import PathNotFoundError, assert_nested
 
 
 def _build_variable_paths(
@@ -94,7 +94,7 @@ class TestVariablePaths(unittest.TestCase):
             subpath = dotted.split(".", 1)[1]
             try:
                 assert_nested(ctx.user_defaults, subpath, "user_defaults")
-            except PathNotFound:
+            except PathNotFoundError:
                 pass
             else:
                 return True
@@ -102,7 +102,7 @@ class TestVariablePaths(unittest.TestCase):
         for cfg in ctx.application_defaults.values():
             try:
                 assert_nested(cfg, dotted, "application_defaults")
-            except PathNotFound:
+            except PathNotFoundError:
                 pass
             else:
                 return True

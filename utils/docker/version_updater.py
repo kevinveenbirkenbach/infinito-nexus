@@ -6,7 +6,7 @@ import time
 import urllib.error
 import urllib.request
 from dataclasses import dataclass
-from pathlib import Path
+from typing import TYPE_CHECKING
 from urllib.parse import quote, urlencode
 
 import yaml
@@ -20,6 +20,9 @@ from utils.docker.image.ref import (
     split_registry_and_name,
 )
 from utils.roles.mapping import ROLE_FILE_META_SERVICES
+
+if TYPE_CHECKING:
+    from pathlib import Path
 
 _SEMVER_CORE = r"v?\d+(?:\.\d+){0,3}"
 # Tags that extend a semver with a `-<flavor>` suffix, e.g. the Docker

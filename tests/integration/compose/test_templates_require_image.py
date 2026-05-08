@@ -17,9 +17,12 @@ from __future__ import annotations
 import re
 import unittest
 from dataclasses import dataclass
-from pathlib import Path
+from typing import TYPE_CHECKING
 
 from . import PROJECT_ROOT
+
+if TYPE_CHECKING:
+    from pathlib import Path
 
 BUILD_RE = re.compile(r"^(?P<indent>[ \t]*)build:\s*(#.*)?$")
 IMAGE_RE = re.compile(r"^(?P<indent>[ \t]*)image:\s*(?P<rest>.+)?$")

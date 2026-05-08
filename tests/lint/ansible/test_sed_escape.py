@@ -16,13 +16,16 @@ from __future__ import annotations
 
 import re
 import unittest
-from collections.abc import Iterable
 from dataclasses import dataclass
-from pathlib import Path
+from typing import TYPE_CHECKING
 
 from utils.cache.files import read_text
 
 from . import PROJECT_ROOT
+
+if TYPE_CHECKING:
+    from collections.abc import Iterable
+    from pathlib import Path
 
 TASK_FILES_GLOB = "roles/*/tasks/**/*.yml"
 

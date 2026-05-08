@@ -9,7 +9,10 @@ See: https://docs.github.com/en/actions/writing-workflows/choosing-what-your-wor
 from __future__ import annotations
 
 import os
-from collections.abc import Iterable
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from collections.abc import Iterable
 
 
 def in_github_actions() -> bool:

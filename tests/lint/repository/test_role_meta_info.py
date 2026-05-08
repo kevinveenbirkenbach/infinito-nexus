@@ -21,13 +21,16 @@ read the same ``meta/main.yml`` / ``meta/info.yml`` pay one parse.
 from __future__ import annotations
 
 import unittest
-from pathlib import Path
+from typing import TYPE_CHECKING
 
 import yaml as _yaml
 
 from utils.cache.files import PROJECT_ROOT
 from utils.cache.yaml import load_yaml_any
 from utils.roles.mapping import ROLE_FILE_META_INFO, ROLE_FILE_META_MAIN
+
+if TYPE_CHECKING:
+    from pathlib import Path
 
 ROLES_DIR = PROJECT_ROOT / "roles"
 

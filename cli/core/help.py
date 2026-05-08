@@ -3,10 +3,13 @@ from __future__ import annotations
 import subprocess
 import sys
 import textwrap
-from pathlib import Path
+from typing import TYPE_CHECKING
 
 from cli.core.colors import Fore, Style, color_text
 from cli.core.discovery import discover_commands
+
+if TYPE_CHECKING:
+    from pathlib import Path
 
 
 def format_command_help(

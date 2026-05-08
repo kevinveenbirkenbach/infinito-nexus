@@ -28,7 +28,7 @@ Accepted shapes per ``run_after`` entry ``Y``:
 from __future__ import annotations
 
 import unittest
-from pathlib import Path
+from typing import TYPE_CHECKING
 
 from utils.cache.yaml import load_yaml_any
 from utils.roles.applications.services.registry import (
@@ -40,6 +40,9 @@ from utils.roles.mapping import ROLE_FILE_META_SERVICES
 from utils.roles.meta_lookup import get_role_run_after
 
 from . import PROJECT_ROOT
+
+if TYPE_CHECKING:
+    from pathlib import Path
 
 ROLES_DIR = PROJECT_ROOT / "roles"
 

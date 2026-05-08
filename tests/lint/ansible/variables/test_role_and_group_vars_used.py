@@ -22,8 +22,8 @@ from __future__ import annotations
 
 import re
 import unittest
-from collections.abc import Iterable
 from pathlib import Path
+from typing import TYPE_CHECKING
 
 from utils.annotations.suppress import is_suppressed_at
 from utils.cache.files import (
@@ -34,6 +34,9 @@ from utils.cache.files import (
 from utils.cache.yaml import load_yaml_any
 
 from . import PROJECT_ROOT
+
+if TYPE_CHECKING:
+    from collections.abc import Iterable
 
 # Rule key consumed by this lint via `nocheck`-keyword suppression
 # markers. A `same-or-above` placement on the var declaration line

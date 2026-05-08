@@ -27,7 +27,7 @@ from __future__ import annotations
 
 import argparse
 import sys
-from collections.abc import Iterable
+from typing import TYPE_CHECKING
 
 from cli.meta.roles.applications.resolution.combined.errors import (
     CombinedResolutionError,
@@ -38,6 +38,9 @@ from cli.meta.roles.applications.resolution.combined.role_introspection import (
     has_application_id,
     load_run_after,
 )
+
+if TYPE_CHECKING:
+    from collections.abc import Iterable
 
 EXIT_NON_MODELLABLE_SEED = 2
 

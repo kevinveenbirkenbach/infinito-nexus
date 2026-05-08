@@ -29,12 +29,14 @@ from __future__ import annotations
 import argparse
 import sys
 from dataclasses import dataclass
-from pathlib import Path
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 from utils.cache.yaml import load_yaml_any as _load_yaml_cached
 
 from . import PROJECT_ROOT
+
+if TYPE_CHECKING:
+    from pathlib import Path
 
 
 def eprint(msg: str) -> None:

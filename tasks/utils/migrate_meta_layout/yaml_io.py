@@ -1,10 +1,12 @@
 from __future__ import annotations
 
 import shutil
-from pathlib import Path
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 import yaml
+
+if TYPE_CHECKING:
+    from pathlib import Path
 
 
 def load(path: Path) -> Any:

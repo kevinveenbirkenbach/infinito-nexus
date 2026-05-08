@@ -205,7 +205,7 @@ class TestResolveTokensFile(unittest.TestCase):
             finally:
                 cache_base.DEFAULT_TOKENS_FILE = previous
 
-    def test_explicit_FILE_TOKENS_wins(self):
+    def test_explicit_file_tokens_wins(self):
         with tempfile.TemporaryDirectory() as tmp:
             explicit = Path(tmp) / "tokens.yml"
             explicit.write_text("users: {}\n", encoding="utf-8")
@@ -239,7 +239,7 @@ class TestMaterializeBuiltinUserAliases(unittest.TestCase):
         )
         self.assertEqual(out, users)
 
-    def test_sld_alias_username_resolved_from_DOMAIN_PRIMARY(self):
+    def test_sld_alias_username_resolved_from_domain_primary(self):
         users = {
             "sld": {"username": "{{ DOMAIN_PRIMARY.split('.') | first }}"},
         }

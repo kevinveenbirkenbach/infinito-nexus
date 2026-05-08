@@ -6,10 +6,12 @@ import pty
 import subprocess
 from dataclasses import dataclass
 from datetime import UTC, datetime
-from pathlib import Path
-from typing import TextIO
+from typing import TYPE_CHECKING, TextIO
 
 from cli.core.colors import Fore, color_text
+
+if TYPE_CHECKING:
+    from pathlib import Path
 
 
 @dataclass(frozen=True)

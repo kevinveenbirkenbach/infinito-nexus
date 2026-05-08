@@ -14,7 +14,7 @@ from __future__ import annotations
 
 import re
 import unittest
-from pathlib import Path
+from typing import TYPE_CHECKING
 
 from utils.annotations.suppress import is_suppressed_at
 from utils.cache.files import read_text
@@ -23,6 +23,9 @@ from utils.roles.applications.services.registry import is_explicit_truth
 from utils.roles.mapping import ROLE_FILE_META_SERVICES
 
 from . import PROJECT_ROOT
+
+if TYPE_CHECKING:
+    from pathlib import Path
 
 _ROLE_PREFIX = "web-app-"
 

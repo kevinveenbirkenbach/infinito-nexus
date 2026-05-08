@@ -1,8 +1,6 @@
 from __future__ import annotations
 
-from collections.abc import Iterable
-from pathlib import Path
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 from humanfriendly import parse_size
 
@@ -12,6 +10,10 @@ from utils.roles.entity_name import get_entity_name
 from utils.roles.mapping import ROLE_FILE_META_SERVICES
 
 from . import PROJECT_ROOT
+
+if TYPE_CHECKING:
+    from collections.abc import Iterable
+    from pathlib import Path
 
 
 def _roles_root() -> Path:

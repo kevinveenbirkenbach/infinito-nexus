@@ -4,7 +4,10 @@ import argparse
 import importlib
 import importlib.util
 import sys
-from collections.abc import Iterable
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from collections.abc import Iterable
 
 
 def _module_exists(fullname: str) -> bool:

@@ -9,14 +9,16 @@ through the regular applications-merge pipeline.
 
 from __future__ import annotations
 
-import os
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 from .base import (
     _cache_key,
     _resolve_roles_dir,
     _stable_variables_signature,
 )
+
+if TYPE_CHECKING:
+    import os
 
 _MERGED_DOMAINS_CACHE: dict[tuple, dict[str, Any]] = {}
 

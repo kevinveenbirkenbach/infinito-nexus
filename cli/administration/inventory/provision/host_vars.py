@@ -2,8 +2,7 @@ from __future__ import annotations
 
 import json
 import sys
-from pathlib import Path
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 from ruamel.yaml import YAML
 from ruamel.yaml.comments import CommentedMap
@@ -12,6 +11,9 @@ from utils.cache.yaml import load_yaml_any
 from utils.handler.vault import VaultHandler
 
 from .passwords import generate_random_password
+
+if TYPE_CHECKING:
+    from pathlib import Path
 
 
 def _fatal(msg: str) -> None:

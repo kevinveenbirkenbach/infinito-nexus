@@ -1,8 +1,11 @@
 from __future__ import annotations
 
-import argparse
+from typing import TYPE_CHECKING
 
 from .common import make_compose
+
+if TYPE_CHECKING:
+    import argparse
 
 
 def add_parser(sub: argparse._SubParsersAction) -> None:

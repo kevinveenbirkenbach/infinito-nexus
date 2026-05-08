@@ -4,8 +4,7 @@ import argparse
 import json
 import os
 import subprocess
-from collections.abc import Mapping
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 from cli.administration.inventory.provision.services_disabler import (
     find_provider_roles,
@@ -18,6 +17,9 @@ from .common import (
     resolve_container,
 )
 from .inventory import filter_plan_to_variant, plan_dev_inventory_matrix
+
+if TYPE_CHECKING:
+    from collections.abc import Mapping
 
 
 def _env_variant() -> int | None:

@@ -1,9 +1,8 @@
 from __future__ import annotations
 
-import argparse
 import json
 import os
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 from cli.administration.inventory.provision.services_disabler import (
     find_provider_roles,
@@ -19,6 +18,9 @@ from .inventory import (
     plan_dev_inventory_matrix,
 )
 from .storage import detect_storage_constrained
+
+if TYPE_CHECKING:
+    import argparse
 
 
 def add_parser(sub: argparse._SubParsersAction) -> None:

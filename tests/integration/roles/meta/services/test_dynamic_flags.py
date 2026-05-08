@@ -64,7 +64,7 @@ Two suppression placements are accepted, each with its own scope:
 from __future__ import annotations
 
 import unittest
-from pathlib import Path
+from typing import TYPE_CHECKING
 
 from utils.annotations.suppress import line_has_rule
 from utils.cache.files import read_text
@@ -78,6 +78,9 @@ from utils.roles.entity_name import get_entity_name
 from utils.roles.mapping import ROLE_FILE_META_SERVICES
 
 from . import PROJECT_ROOT
+
+if TYPE_CHECKING:
+    from pathlib import Path
 
 ROLES_DIR = PROJECT_ROOT / "roles"
 

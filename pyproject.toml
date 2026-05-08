@@ -93,6 +93,8 @@ exclude = [
 # - `SLOT` (flake8-slots)       — require `__slots__` on `str`/`tuple`/`namedtuple` subclasses
 # - `FLY`  (flynt)              — `"{}".format(x)` → f-string
 # - `PYI`  (flake8-pyi)         — stub-hygiene rules (also fire on `.py`)
+# - `TC`   (flake8-type-checking) — runtime-only imports out of `if TYPE_CHECKING:` blocks
+# - `N`    (pep8-naming)        — class/function/variable naming consistency
 # - `PLE0605`               — `__all__` must be a `list`/`tuple` (not a single str)
 # - `PLW1510`               — `subprocess.run(...)` without `check=` swallows non-zero exits
 # - `PLW2901`               — loop variable rebound inside the body (typo/bug class)
@@ -114,6 +116,7 @@ select = [
     "PTH",
     "FURB", "W", "FA", "YTT", "A", "ISC", "SLOT", "FLY",
     "PYI",
+    "TC", "N",
     "PLE0605",
     "PLW1510", "PLW2901", "PLW0108", "PLW0603",
     "PLR5501", "PLC0207", "PLR1722", "PLR1714",
@@ -169,7 +172,27 @@ ignore = [
 # ``patch.object(sut, "os")`` replacements). Converting these call
 # sites to ``pathlib.Path`` would require rewriting every coupled
 # test in lockstep — out of scope for the use-pathlib pass.
-"roles/svc-bkp-rmt-2-loc/files/pull-specific-host.py" = ["PTH"]
+"roles/svc-bkp-rmt-2-loc/files/pull-specific-host.py" = ["PTH", "N999"]
 "roles/sys-ctl-rpr-container-hard/files/script.py" = ["PTH"]
 "roles/sys-ctl-rpr-container-soft/files/script.py" = ["PTH"]
 "utils/cert_utils.py" = ["PTH"]
+
+# N999 (invalid module name) on Ansible-invoked role-level scripts
+# whose filenames contain hyphens. Renaming to snake_case would break
+# the Ansible meta references that source them via the literal path,
+# so the hyphenated filename is locked in by the surrounding stack.
+
+# `include_r` would be the canonical lowercase form per N806, but the
+# matrix-deploy code consistently writes the round index as ``R`` in
+# its formulas (``R if R < count else 0``) and the variable name
+# ``include_R`` reads as "round R's include set" right next to those
+# formulas. The uppercase R here is documentation, not a constant.
+"cli/deploy/development/deploy.py" = ["N806"]
+"cli/deploy/development/init.py" = ["N806"]
+"cli/deploy/development/inventory.py" = ["N806"]
+"tests/unit/cli/deploy/development/test_inventory.py" = ["N806"]
+
+# Lazy-loaded class binding: ``ValueGenerator = _value_generator_cls()``
+# rebinds the imported class inside the function. PEP 8 keeps the
+# UpperCamelCase form for class identifiers, including local re-binds.
+"plugins/filter/value_generator.py" = ["N806"]

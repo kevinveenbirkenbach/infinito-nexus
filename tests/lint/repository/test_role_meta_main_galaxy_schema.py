@@ -33,8 +33,7 @@ parse.
 from __future__ import annotations
 
 import unittest
-from pathlib import Path
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 import yaml as _yaml
 
@@ -42,6 +41,9 @@ from utils.annotations.message import warning
 from utils.cache.files import PROJECT_ROOT
 from utils.cache.yaml import load_yaml_any
 from utils.roles.mapping import ROLE_FILE_META_MAIN
+
+if TYPE_CHECKING:
+    from pathlib import Path
 
 ROLES_DIR = PROJECT_ROOT / "roles"
 

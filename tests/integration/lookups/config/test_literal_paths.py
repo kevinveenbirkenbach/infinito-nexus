@@ -11,7 +11,7 @@ from collections.abc import Iterable
 from utils.roles.applications.config import ConfigEntryNotSetError, get
 
 from ._scan import LookupMatch, get_context, iter_matches
-from ._validate import PathNotFound, validate_app_path
+from ._validate import PathNotFoundError, validate_app_path
 
 
 def _build_literal_paths(
@@ -65,7 +65,7 @@ class TestLiteralPaths(unittest.TestCase):
                         app_id,
                         dotted,
                     )
-                except PathNotFound as exc:
+                except PathNotFoundError as exc:
                     file_path, lineno = occs[0]
                     failures.append(f"{exc}; called at {file_path}:{lineno}")
 

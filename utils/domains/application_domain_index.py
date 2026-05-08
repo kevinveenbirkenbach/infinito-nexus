@@ -13,10 +13,12 @@
 
 from __future__ import annotations
 
-from collections.abc import Iterable
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 from ansible.errors import AnsibleError
+
+if TYPE_CHECKING:
+    from collections.abc import Iterable
 
 
 def _norm_domain(value: Any) -> str:

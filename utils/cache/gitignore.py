@@ -22,11 +22,14 @@ because it composes the cached project walk with this matcher.
 from __future__ import annotations
 
 import fnmatch
-from collections.abc import Iterable
 from functools import lru_cache
 from pathlib import Path
+from typing import TYPE_CHECKING
 
 from . import PROJECT_ROOT
+
+if TYPE_CHECKING:
+    from collections.abc import Iterable
 
 
 @lru_cache(maxsize=4)

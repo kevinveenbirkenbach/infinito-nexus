@@ -11,9 +11,12 @@ from __future__ import annotations
 
 import re
 from datetime import date
-from pathlib import Path
+from typing import TYPE_CHECKING
 
 from cli.contributing.changelog.archive.changelog_md import md_body_after_header
+
+if TYPE_CHECKING:
+    from pathlib import Path
 
 DOCS_URL = "https://docs.infinito.nexus/"
 FOOTER_REFERENCE = f"For older releases, see {DOCS_URL}"

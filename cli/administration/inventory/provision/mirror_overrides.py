@@ -1,11 +1,14 @@
 from __future__ import annotations
 
-from pathlib import Path
+from typing import TYPE_CHECKING
 
 from ruamel.yaml import YAML
 from ruamel.yaml.comments import CommentedMap
 
 from utils.cache.yaml import load_yaml_any
+
+if TYPE_CHECKING:
+    from pathlib import Path
 
 
 def _ensure_ruamel_map(node: CommentedMap, key: str) -> CommentedMap:

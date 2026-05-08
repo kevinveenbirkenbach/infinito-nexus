@@ -1,14 +1,17 @@
 from __future__ import annotations
 
-import argparse
 import os
 import shutil
 import subprocess
 from pathlib import Path
+from typing import TYPE_CHECKING
 
 from . import PROJECT_ROOT
 from .common import cache_env_overrides, compose_file_args, resolve_distro
 from .profile import Profile
+
+if TYPE_CHECKING:
+    import argparse
 
 CI_DOCKER_ROOT = Path("/mnt/docker")
 CI_DOCKER_ROOT_STR = str(CI_DOCKER_ROOT)

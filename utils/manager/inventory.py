@@ -1,8 +1,7 @@
 from __future__ import annotations
 
 import sys
-from pathlib import Path
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 from utils.handler.vault import VaultHandler, VaultScalar
 from utils.handler.yaml import YamlHandler
@@ -14,6 +13,9 @@ from utils.roles.applications.services.registry import (
     resolve_service_dependency_roles_from_config,
 )
 from utils.roles.mapping import ROLE_FILE_META_SCHEMA, ROLE_FILE_VARS_MAIN
+
+if TYPE_CHECKING:
+    from pathlib import Path
 
 # Marker fields that identify a credential schema leaf (per req-008). Any
 # `default:` value is preserved verbatim; algorithm defaults to `plain` when

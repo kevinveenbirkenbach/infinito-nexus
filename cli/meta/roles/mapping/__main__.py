@@ -40,13 +40,16 @@ from __future__ import annotations
 import argparse
 import json
 import sys
-from collections.abc import Iterable, Iterator
+from typing import TYPE_CHECKING
 
 from utils.roles.mapping import (
     ROLE_FILES,
     ROLE_TYPE_ALL,
     ROLE_TYPES,
 )
+
+if TYPE_CHECKING:
+    from collections.abc import Iterable, Iterator
 
 _FORMATS = ("text", "json")
 

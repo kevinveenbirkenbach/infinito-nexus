@@ -3,12 +3,15 @@ from __future__ import annotations
 import concurrent.futures
 import subprocess
 import sys
-from pathlib import Path
+from typing import TYPE_CHECKING
 
 from ruamel.yaml import YAML
 from ruamel.yaml.comments import CommentedMap
 
 from .role_resolver import resolve_role_path
+
+if TYPE_CHECKING:
+    from pathlib import Path
 
 
 def _fatal(msg: str) -> None:

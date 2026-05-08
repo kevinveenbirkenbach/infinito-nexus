@@ -48,7 +48,7 @@ class TestMissingPrimaryDomain(unittest.TestCase):
     def setUp(self) -> None:
         _reset_cache_for_tests()
 
-    def test_raises_when_DOMAIN_PRIMARY_missing(self):
+    def test_raises_when_domain_primary_missing(self):
         with tempfile.TemporaryDirectory() as tmp:
             roles = _seed_minimal_role(Path(tmp))
             with self.assertRaisesRegex(ValueError, "DOMAIN_PRIMARY"):
@@ -56,7 +56,7 @@ class TestMissingPrimaryDomain(unittest.TestCase):
                     variables={}, roles_dir=roles, templar=None
                 )
 
-    def test_falls_back_to_SYSTEM_EMAIL_DOMAIN(self):
+    def test_falls_back_to_system_email_domain(self):
         # Pure-python smoke: when DOMAIN_PRIMARY is absent but
         # SYSTEM_EMAIL_DOMAIN is set, the function should NOT raise.
         # The actual canonical-domains-map computation is exercised
@@ -102,7 +102,7 @@ class TestCachingPerVariablesSignature(unittest.TestCase):
             self.assertEqual(mocked.call_count, 1)
             self.assertEqual(first, second)
 
-    def test_different_DOMAIN_PRIMARY_misses_cache(self):
+    def test_different_domain_primary_misses_cache(self):
         with tempfile.TemporaryDirectory() as tmp:
             roles = _seed_minimal_role(Path(tmp))
             with patch(

@@ -17,9 +17,12 @@ from __future__ import annotations
 import argparse
 import ipaddress
 import sys
-from collections.abc import Iterable
+from typing import TYPE_CHECKING
 
 from utils.meta.scan import iter_subnets
+
+if TYPE_CHECKING:
+    from collections.abc import Iterable
 
 # Prefix length thresholds — smallest prefix that still fits N clients.
 # Each entry is (max_clients, prefix_length).

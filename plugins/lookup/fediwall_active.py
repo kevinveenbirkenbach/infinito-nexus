@@ -22,12 +22,14 @@ mirrors the ``tls`` lookup's positional ``want`` API.
 
 from __future__ import annotations
 
-from collections.abc import Callable, Iterable
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 from ansible.errors import AnsibleError
 from ansible.plugins.loader import lookup_loader
 from ansible.plugins.lookup import LookupBase
+
+if TYPE_CHECKING:
+    from collections.abc import Callable, Iterable
 
 _APPLICATION_ID = "web-app-fediwall"
 _SIBLINGS_CONFIG_PATH = "services.fediwall.fediverse_siblings"

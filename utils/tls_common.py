@@ -3,12 +3,14 @@
 
 from __future__ import annotations
 
-from collections.abc import Iterable
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 from ansible.errors import AnsibleError
 
 from utils.domains.application_domain_index import resolve_app_id_for_domain
+
+if TYPE_CHECKING:
+    from collections.abc import Iterable
 
 AVAILABLE_FLAVORS = {"letsencrypt", "self_signed"}
 

@@ -1,12 +1,14 @@
 from __future__ import annotations
 
 from functools import cache
-from pathlib import Path
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 from utils.roles.entity_name import get_entity_name
 
 from . import yaml_io
+
+if TYPE_CHECKING:
+    from pathlib import Path
 
 
 def build_network_index(networks_file: Path) -> dict[str, dict[str, Any]]:

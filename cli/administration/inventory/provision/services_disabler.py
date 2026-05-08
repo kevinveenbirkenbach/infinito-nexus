@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import os
-from pathlib import Path
+from typing import TYPE_CHECKING
 
 from ruamel.yaml import YAML
 from ruamel.yaml.comments import CommentedMap
@@ -13,6 +13,9 @@ from utils.roles.applications.services.registry import (
     equivalent_service_keys,
 )
 from utils.roles.mapping import ROLE_FILE_META_SERVICES
+
+if TYPE_CHECKING:
+    from pathlib import Path
 
 
 def _load_yaml_mapping_tolerant(path: Path) -> dict:

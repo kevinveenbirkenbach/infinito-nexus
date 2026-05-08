@@ -8,7 +8,7 @@ from datetime import UTC, datetime
 BREAK_TIME_SECONDS = 5
 
 
-class AttemptException(Exception):
+class AttemptError(Exception):
     """A custom exception for maximum number of attempts."""
 
 
@@ -63,7 +63,7 @@ def wait_for_all_services_to_stop(filtered_services, max_attempts, attempt):
         while check_service_active(service):
             attempt += 1
             if attempt > max_attempts:
-                raise AttemptException(
+                raise AttemptError(
                     f"Maximum attempts ({max_attempts}) reached. Exiting."
                 )
             print(

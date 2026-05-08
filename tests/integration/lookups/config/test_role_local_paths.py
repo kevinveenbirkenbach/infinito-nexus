@@ -30,7 +30,7 @@ import unittest
 from collections.abc import Iterable, Mapping
 
 from ._scan import LookupMatch, get_context, iter_matches, role_id_from_path
-from ._validate import PathNotFound, assert_nested, validate_app_path
+from ._validate import PathNotFoundError, assert_nested, validate_app_path
 
 
 def _build_role_local_paths(
@@ -86,7 +86,7 @@ class TestRoleLocalLiteralPaths(unittest.TestCase):
                     role_id,
                     dotted,
                 )
-            except PathNotFound as exc:
+            except PathNotFoundError as exc:
                 file_path, lineno = occs[0]
                 failures.append(f"{exc}; called at {file_path}:{lineno}")
         if failures:
@@ -121,7 +121,7 @@ class TestRoleLocalLiteralPaths(unittest.TestCase):
                     f"{canonical}.{sub_parts[2]}",
                     "user_defaults",
                 )
-            except PathNotFound as exc:
+            except PathNotFoundError as exc:
                 return f"role '{role_id}': {exc}; called at {file_path}:{lineno}"
         return None
 

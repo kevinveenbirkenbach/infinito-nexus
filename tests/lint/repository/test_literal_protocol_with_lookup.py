@@ -45,12 +45,15 @@ from __future__ import annotations
 
 import re
 import unittest
-from collections.abc import Iterable
 from functools import lru_cache
 from pathlib import Path
+from typing import TYPE_CHECKING
 
 from utils.annotations.suppress import suppressed_line_numbers
 from utils.cache.files import PROJECT_ROOT, iter_project_files, read_text
+
+if TYPE_CHECKING:
+    from collections.abc import Iterable
 
 # 1. ``https?://{{ ... lookup( ... }}``
 _INTERP_RE: re.Pattern[str] = re.compile(r"https?://\{\{[^}]*\blookup\s*\(")

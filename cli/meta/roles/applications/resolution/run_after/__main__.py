@@ -17,7 +17,7 @@ Output:
 from __future__ import annotations
 
 import argparse
-from pathlib import Path
+from typing import TYPE_CHECKING
 
 from utils.roles.meta_lookup import (
     MetaServicesShapeError,
@@ -25,6 +25,9 @@ from utils.roles.meta_lookup import (
 )
 
 from . import PROJECT_ROOT
+
+if TYPE_CHECKING:
+    from pathlib import Path
 
 
 class RunAfterResolutionError(RuntimeError):

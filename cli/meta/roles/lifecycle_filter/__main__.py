@@ -2,11 +2,14 @@ from __future__ import annotations
 
 import argparse
 import sys
-from collections.abc import Iterable
 from pathlib import Path
+from typing import TYPE_CHECKING
 
 from cli import PROJECT_ROOT
 from utils.roles.meta_lookup import get_role_lifecycle
+
+if TYPE_CHECKING:
+    from collections.abc import Iterable
 
 
 def _iter_role_dirs(roles_dir: Path) -> Iterable[tuple[str, Path]]:

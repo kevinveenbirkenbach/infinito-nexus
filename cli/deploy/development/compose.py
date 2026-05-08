@@ -3,13 +3,16 @@ from __future__ import annotations
 import os
 import subprocess
 import time
-from pathlib import Path
+from typing import TYPE_CHECKING
 
 from .common import cache_env_overrides, compose_file_args
 from .coredns import CoreDNSCorefileRenderer
 from .network import detect_outer_network_mtu
 from .proc import run_streaming
 from .profile import Profile
+
+if TYPE_CHECKING:
+    from pathlib import Path
 
 
 class Compose:

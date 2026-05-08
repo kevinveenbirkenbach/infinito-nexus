@@ -1,10 +1,12 @@
 from __future__ import annotations
 
-from pathlib import Path
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 from utils.cache.yaml import dump_yaml as _cached_dump_yaml
 from utils.cache.yaml import load_yaml as _cached_load_yaml
+
+if TYPE_CHECKING:
+    from pathlib import Path
 
 
 def load_yaml(path: Path) -> dict[str, Any]:

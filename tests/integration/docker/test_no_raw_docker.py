@@ -56,8 +56,8 @@ from __future__ import annotations
 import os
 import re
 import unittest
-from collections.abc import Sequence
 from dataclasses import dataclass
+from typing import TYPE_CHECKING
 
 from utils.annotations.suppress import (
     is_suppressed_at,
@@ -65,6 +65,9 @@ from utils.annotations.suppress import (
 )
 from utils.cache.base import PROJECT_ROOT
 from utils.cache.files import iter_non_ignored_files, read_text
+
+if TYPE_CHECKING:
+    from collections.abc import Sequence
 
 
 @dataclass(frozen=True)

@@ -10,13 +10,13 @@ from unittest.mock import patch
 from . import PROJECT_ROOT
 
 
-class _ExitJson(Exception):
+class _ExitJsonError(Exception):
     def __init__(self, payload: dict):
         super().__init__("exit_json called")
         self.payload = payload
 
 
-class _FailJson(Exception):
+class _FailJsonError(Exception):
     def __init__(self, payload: dict):
         super().__init__("fail_json called")
         self.payload = payload
@@ -34,10 +34,10 @@ class FakeAnsibleModule:
         self.params = params or {}
 
     def exit_json(self, **kwargs):
-        raise _ExitJson(kwargs)
+        raise _ExitJsonError(kwargs)
 
     def fail_json(self, **kwargs):
-        raise _FailJson(kwargs)
+        raise _FailJsonError(kwargs)
 
 
 def _import_module_under_test():
@@ -78,9 +78,9 @@ class TestFileHasContentModule(unittest.TestCase):
         with patch.object(self.mod, "AnsibleModule", return_value=fake):
             try:
                 self.mod.run_module()
-            except _ExitJson as e:
+            except _ExitJsonError as e:
                 return e.payload
-            except _FailJson as e:
+            except _FailJsonError as e:
                 raise AssertionError(
                     f"Expected exit_json, got fail_json: {e.payload}"
                 ) from e
@@ -91,9 +91,9 @@ class TestFileHasContentModule(unittest.TestCase):
         with patch.object(self.mod, "AnsibleModule", return_value=fake):
             try:
                 self.mod.run_module()
-            except _FailJson as e:
+            except _FailJsonError as e:
                 return e.payload
-            except _ExitJson as e:
+            except _ExitJsonError as e:
                 raise AssertionError(
                     f"Expected fail_json, got exit_json: {e.payload}"
                 ) from e

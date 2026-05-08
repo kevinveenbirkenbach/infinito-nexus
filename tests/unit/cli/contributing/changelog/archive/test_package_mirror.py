@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import unittest
-from pathlib import Path
+from typing import TYPE_CHECKING
 
 from cli.contributing.changelog.archive.package_mirror import (
     DEBIAN_SIG_TIME,
@@ -14,6 +14,9 @@ from cli.contributing.changelog.archive.package_mirror import (
 )
 
 from ._helpers import TempRepoMixin, kept_for_mirror
+
+if TYPE_CHECKING:
+    from pathlib import Path
 
 
 class TestMirrorToDebianChangelog(TempRepoMixin, unittest.TestCase):

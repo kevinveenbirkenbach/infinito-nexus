@@ -15,10 +15,13 @@ Three primitives:
 from __future__ import annotations
 
 import re
-from pathlib import Path
+from typing import TYPE_CHECKING
 
 from cli.contributing.changelog.archive.archive_dir import build_index_section
 from cli.contributing.changelog.archive.versioning import archive_filename
+
+if TYPE_CHECKING:
+    from pathlib import Path
 
 _VERSION_HEADER_RE = re.compile(
     r"^## \[(?P<version>[^\]]+)\] - (?P<date>\S+)\s*$",

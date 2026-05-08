@@ -170,8 +170,8 @@ ansible_become_password: !vault |
 
             with patch(
                 "cli.administration.inventory.provision.host_vars.VaultHandler"
-            ) as VH:
-                inst = VH.return_value
+            ) as vh:
+                inst = vh.return_value
                 inst.encrypt_string.return_value = vaulted_snippet
 
                 ensure_become_password(

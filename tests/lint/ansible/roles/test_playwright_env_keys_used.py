@@ -21,12 +21,15 @@ from __future__ import annotations
 
 import re
 import unittest
-from collections.abc import Iterable
-from pathlib import Path
+from typing import TYPE_CHECKING
 
 from utils.cache.files import iter_project_files, read_text
 
 from . import PROJECT_ROOT
+
+if TYPE_CHECKING:
+    from collections.abc import Iterable
+    from pathlib import Path
 
 _KEY_LHS_RE = re.compile(r"^([A-Z_][A-Z0-9_]*)\s*=")
 

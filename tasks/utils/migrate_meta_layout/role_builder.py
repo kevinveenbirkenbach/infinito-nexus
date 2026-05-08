@@ -1,8 +1,7 @@
 from __future__ import annotations
 
 from collections import OrderedDict
-from pathlib import Path
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 from utils.roles.entity_name import get_entity_name
 from utils.roles.mapping import (
@@ -17,6 +16,9 @@ from utils.roles.mapping import (
 
 from . import yaml_io
 from .credentials import convert_runtime_to_schema, detect_collision
+
+if TYPE_CHECKING:
+    from pathlib import Path
 
 ALLOWED_LIFECYCLES = {
     "planned",

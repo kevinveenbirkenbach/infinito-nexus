@@ -46,9 +46,9 @@ stay free.
 
 from __future__ import annotations
 
-from collections.abc import Iterator
 from functools import cache
 from pathlib import Path
+from typing import TYPE_CHECKING
 
 from utils.cache.yaml import load_yaml_any
 from utils.roles.mapping import (
@@ -56,6 +56,9 @@ from utils.roles.mapping import (
     ROLE_TYPE_TOOLING,
     ROLE_TYPE_USER,
 )
+
+if TYPE_CHECKING:
+    from collections.abc import Iterator
 
 
 class RoleTypeError(ValueError):

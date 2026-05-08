@@ -1,8 +1,6 @@
 from __future__ import annotations
 
-from collections.abc import Iterable
-from pathlib import Path
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 from utils.cache.yaml import load_yaml
 from utils.roles.applications.services.registry import (
@@ -14,6 +12,10 @@ from utils.roles.mapping import ROLE_FILE_META_SERVICES
 
 from . import PROJECT_ROOT
 from .errors import ServicesResolutionError
+
+if TYPE_CHECKING:
+    from collections.abc import Iterable
+    from pathlib import Path
 
 _ROLES_ROOT = PROJECT_ROOT / "roles"
 

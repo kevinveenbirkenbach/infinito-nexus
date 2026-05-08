@@ -18,11 +18,14 @@ from __future__ import annotations
 
 import re
 import unittest
-from pathlib import Path
+from typing import TYPE_CHECKING
 
 from utils.cache.files import read_text
 
 from . import PROJECT_ROOT
+
+if TYPE_CHECKING:
+    from pathlib import Path
 
 _REPO_ROOT = PROJECT_ROOT
 _ROLES_ROOT = _REPO_ROOT / "roles"

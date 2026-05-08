@@ -4,10 +4,13 @@ import importlib.util
 import sys
 import types
 import unittest
-from pathlib import Path
+from typing import TYPE_CHECKING
 from unittest.mock import patch
 
 from . import PROJECT_ROOT
+
+if TYPE_CHECKING:
+    from pathlib import Path
 
 ROLE_DIR = PROJECT_ROOT / "roles" / "web-app-keycloak"
 LIB_PATH = ROLE_DIR / "library" / "keycloak_kcadm_update.py"

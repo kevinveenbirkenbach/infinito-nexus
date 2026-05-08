@@ -6,6 +6,11 @@ import yaml
 
 from utils.cache.yaml import load_yaml_any
 
+# Top-level keys in a role node that describe the role itself rather
+# than nested sub-roles. Used to skip metadata when recursing into a
+# role's sub-tree.
+_METADATA_KEYS = frozenset({"title", "description", "icon", "invokable"})
+
 
 def _find_project_root(start: Path) -> Path | None:
     """
@@ -68,7 +73,6 @@ def get_invokable_paths(
     ) -> list[str]:
         parent = parent or []
         found: list[str] = []
-        METADATA = {"title", "description", "icon", "invokable"}
 
         for key, cfg in subroles.items():
             path = [*parent, key]
@@ -81,7 +85,7 @@ def get_invokable_paths(
             children = {
                 ck: cv
                 for ck, cv in cfg.items()
-                if ck not in METADATA and isinstance(cv, dict)
+                if ck not in _METADATA_KEYS and isinstance(cv, dict)
             }
             if children:
                 found.extend(_recurse(children, path))
@@ -119,7 +123,6 @@ def get_non_invokable_paths(
     ) -> list[str]:
         parent = parent or []
         found: list[str] = []
-        METADATA = {"title", "description", "icon", "invokable"}
 
         for key, cfg in subroles.items():
             path = [*parent, key]
@@ -131,7 +134,7 @@ def get_non_invokable_paths(
             children = {
                 ck: cv
                 for ck, cv in cfg.items()
-                if ck not in METADATA and isinstance(cv, dict)
+                if ck not in _METADATA_KEYS and isinstance(cv, dict)
             }
             if children:
                 found.extend(_recurse_non(children, path))

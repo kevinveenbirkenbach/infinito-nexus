@@ -27,11 +27,14 @@ import ast
 import os
 import re
 import unittest
-from pathlib import Path
+from typing import TYPE_CHECKING
 
 from utils.cache.files import iter_project_files, read_text
 
 from . import PROJECT_ROOT
+
+if TYPE_CHECKING:
+    from pathlib import Path
 
 LOOKUP_PLUGINS_DIR = PROJECT_ROOT / "plugins" / "lookup"
 

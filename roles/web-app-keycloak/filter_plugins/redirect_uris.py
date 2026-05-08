@@ -1,8 +1,8 @@
 from __future__ import annotations
 
 import sys
-from collections.abc import Iterable, Sequence
 from pathlib import Path
+from typing import TYPE_CHECKING
 
 from ansible.errors import AnsibleFilterError
 
@@ -12,6 +12,9 @@ from utils.roles.applications.config import (
     ConfigEntryNotSetError,
     get,
 )
+
+if TYPE_CHECKING:
+    from collections.abc import Iterable, Sequence
 
 
 # --- Locate project root that contains `utils/` dynamically (up to 5 levels) ---

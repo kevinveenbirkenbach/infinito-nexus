@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import sys
-from pathlib import Path
+from typing import TYPE_CHECKING
 
 from . import PROJECT_ROOT
 
@@ -18,6 +18,9 @@ from utils.roles.mapping import ROLE_FILE_META_MAIN  # noqa: E402
 from . import yaml_io  # noqa: E402
 from .indices import build_network_index, build_port_index  # noqa: E402
 from .role_builder import build as build_role_meta  # noqa: E402
+
+if TYPE_CHECKING:
+    from pathlib import Path
 
 _PORT_BANDS = {
     "local": {

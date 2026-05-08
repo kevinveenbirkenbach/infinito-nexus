@@ -21,7 +21,10 @@ import sys
 import urllib.error
 import urllib.parse
 import urllib.request
-from collections.abc import Iterator
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from collections.abc import Iterator
 
 
 def _gh_request(method: str, url: str, token: str) -> dict | list | None:

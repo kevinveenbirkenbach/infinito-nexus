@@ -35,8 +35,7 @@ from __future__ import annotations
 
 import contextlib
 import unittest
-from pathlib import Path
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 from utils.cache.applications import get_variants
 from utils.roles.applications.services.registry import (
@@ -46,6 +45,9 @@ from utils.roles.applications.services.registry import (
 )
 
 from . import PROJECT_ROOT
+
+if TYPE_CHECKING:
+    from pathlib import Path
 
 ROLES_DIR: Path = PROJECT_ROOT / "roles"
 
