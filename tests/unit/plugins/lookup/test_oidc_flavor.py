@@ -9,20 +9,20 @@ from . import PROJECT_ROOT
 
 
 def _load_module(rel_path: str, name: str):
-    # Evict any stubbed utils.applications.config injected by sibling tests
+    # Evict any stubbed utils.roles.applications.config injected by sibling tests
     # (notably tests/unit/roles/web-app-keycloak/filter_plugins/test_redirect_uris.py,
     # whose setUpClass registers a stub `get()` with an incompatible signature
     # into sys.modules and never cleans up). Force the plugin to import the
     # real module from the repo.
     for key in (
-        "utils.applications.config",
-        "utils.applications",
+        "utils.roles.applications.config",
+        "utils.roles.applications",
         "utils",
         "utils.cache.applications",
         "utils.cache",
     ):
         sys.modules.pop(key, None)
-    importlib.import_module("utils.applications.config")
+    importlib.import_module("utils.roles.applications.config")
     importlib.import_module("utils.cache.applications")
 
     path = PROJECT_ROOT / rel_path

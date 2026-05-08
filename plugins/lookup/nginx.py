@@ -27,8 +27,8 @@ from ansible.errors import AnsibleError
 from ansible.plugins.loader import lookup_loader
 from ansible.plugins.lookup import LookupBase
 
-from utils.applications.config import get
 from utils.cache.applications import get_merged_applications
+from utils.roles.applications.config import get
 from utils.tls_common import as_str, want_get
 
 

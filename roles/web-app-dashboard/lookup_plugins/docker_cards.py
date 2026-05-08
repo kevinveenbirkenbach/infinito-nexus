@@ -6,11 +6,11 @@ from ansible.errors import AnsibleError
 from ansible.plugins.loader import lookup_loader
 from ansible.plugins.lookup import LookupBase
 
-from utils.applications.config import get
 from utils.cache.applications import get_merged_applications
 from utils.cache.domains import get_merged_domains
 from utils.cache.files import read_text
 from utils.cache.yaml import load_yaml_any
+from utils.roles.applications.config import get
 
 
 class LookupModule(LookupBase):

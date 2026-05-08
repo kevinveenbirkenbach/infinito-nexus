@@ -1,6 +1,6 @@
 # tests/unit/utils/test_jinja_strict.py
 #
-# Unit tests for utils/jinja_strict.py
+# Unit tests for utils/templating/jinja.py
 #
 # Focus:
 # - strict Jinja2 rendering
@@ -12,7 +12,7 @@ import unittest
 
 from ansible.errors import AnsibleError
 
-from utils.jinja_strict import (
+from utils.templating.jinja import (
     build_render_context,
     looks_like_jinja,
     render_jinja2_strict_recursive,

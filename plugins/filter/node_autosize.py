@@ -21,10 +21,10 @@ from ansible.errors import AnsibleFilterError
 
 # Import the shared config resolver from utils
 try:
-    from utils.applications.config import AppConfigKeyError, get
+    from utils.roles.applications.config import AppConfigKeyError, get
 except Exception as e:
     raise AnsibleFilterError(
-        f"Failed to import get from utils.applications.config: {e}"
+        f"Failed to import get from utils.roles.applications.config: {e}"
     ) from e
 
 _SIZE_RE = re.compile(r"^\s*(\d+(?:\.\d+)?)\s*([kmgtp]?i?b?)?\s*$", re.IGNORECASE)

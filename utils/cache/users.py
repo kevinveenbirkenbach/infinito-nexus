@@ -266,7 +266,7 @@ def _materialize_builtin_user_aliases(
 ) -> dict[str, Any]:
     # Lazy import: pulls `ansible.errors.AnsibleError` transitively, see the
     # base module note on why this stays out of the import block.
-    from utils.templating import _templar_render_best_effort
+    from utils.templating.ansible import _templar_render_best_effort
 
     def _normalize_domain_candidate(value: Any) -> str:
         text = str(value or "").strip()

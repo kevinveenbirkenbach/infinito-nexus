@@ -2,12 +2,12 @@ from __future__ import annotations
 
 from ansible.errors import AnsibleFilterError
 
-from utils.applications.config import (
+from utils.roles.applications.config import (
     AppConfigKeyError,
     ConfigEntryNotSetError,
     get,
 )
-from utils.entity_name_utils import get_entity_name
+from utils.roles.entity_name import get_entity_name
 
 
 def resource_filter(

@@ -25,7 +25,7 @@ from cli.meta.ports.suggest.__main__ import (
     suggest_relay_ranges,
     suggest_single_ports,
 )
-from utils.entity_name_utils import get_entity_name
+from utils.roles.entity_name import get_entity_name
 
 from . import PROJECT_ROOT
 

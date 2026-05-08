@@ -7,7 +7,7 @@ from ansible.errors import AnsibleError
 from ansible.plugins.lookup import LookupBase
 
 from utils.cache.applications import get_merged_applications
-from utils.service_registry import (
+from utils.roles.applications.services.registry import (
     build_service_registry_from_applications,
     ordered_primary_service_entries,
 )

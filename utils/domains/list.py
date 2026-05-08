@@ -13,7 +13,7 @@ ROLES_DIR = PROJECT_ROOT / "roles"
 def _render_ansible_strict(
     *, raw: str, var_name: str, variables: dict[str, Any]
 ) -> str:
-    from utils.templating import render_ansible_strict
+    from utils.templating.ansible import render_ansible_strict
 
     return render_ansible_strict(
         templar=None,

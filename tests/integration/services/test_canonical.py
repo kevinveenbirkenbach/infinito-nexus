@@ -1,7 +1,9 @@
 import unittest
 from collections import defaultdict
 
-from utils.service_registry import build_service_registry_from_roles_dir
+from utils.roles.applications.services.registry import (
+    build_service_registry_from_roles_dir,
+)
 
 from . import PROJECT_ROOT
 

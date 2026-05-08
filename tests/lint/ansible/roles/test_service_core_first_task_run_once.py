@@ -4,7 +4,9 @@ import yaml
 
 from utils.cache.files import read_text
 from utils.cache.yaml import load_yaml_str
-from utils.service_registry import build_service_registry_from_roles_dir
+from utils.roles.applications.services.registry import (
+    build_service_registry_from_roles_dir,
+)
 
 from . import PROJECT_ROOT
 

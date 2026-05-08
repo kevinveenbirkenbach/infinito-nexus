@@ -7,7 +7,7 @@ from ruamel.yaml import YAML
 from ruamel.yaml.comments import CommentedMap
 
 from utils.cache.yaml import load_yaml_any
-from utils.service_registry import (
+from utils.roles.applications.services.registry import (
     build_service_registry_from_roles_dir,
     canonical_service_key,
     equivalent_service_keys,

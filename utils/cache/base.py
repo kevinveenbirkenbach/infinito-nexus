@@ -9,8 +9,8 @@ Stays import-cheap so that `utils.cache.applications` (consumed on
 GitHub Actions runner hosts that ship without ansible — see CI runs
 24934007615 / 24935979190) can pull this module without dragging
 ansible in. The single ansible-coupled symbol exposed from here is
-`_render_with_templar`, which lazy-imports `utils.templating` only
-when actually invoked.
+`_render_with_templar`, which lazy-imports `utils.templating.ansible`
+only when actually invoked.
 """
 
 from __future__ import annotations
@@ -214,7 +214,7 @@ def _render_with_templar(
     # `ansible.errors.AnsibleError`. Keeping the import lazy means
     # ansible-less importers of `utils.cache.base` (e.g. the runner-host
     # CLI path) never pay the cost.
-    from utils.templating import _templar_render_best_effort
+    from utils.templating.ansible import _templar_render_best_effort
 
     # Start from whatever the templar already had available so that
     # ansible_facts/hostvars stay accessible during nested renders. Overlay the
@@ -250,7 +250,7 @@ def _render_with_templar(
                 and "{{" not in stripped[2:]
                 and "{%" not in stripped
             ):
-                from utils.templating import _templar_render_preserve_type
+                from utils.templating.ansible import _templar_render_preserve_type
 
                 try:
                     rendered = _templar_render_preserve_type(

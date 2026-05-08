@@ -32,7 +32,7 @@ def validate_application_ids(inventory: str, app_ids: list[str]) -> None:
     if not app_ids:
         return
 
-    from utils.valid_deploy_id import ValidDeployId
+    from utils.roles.validation.deploy_id import ValidDeployId
 
     validator = ValidDeployId()
     invalid = validator.validate(inventory, app_ids)

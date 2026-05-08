@@ -27,7 +27,7 @@ import yaml
 from utils.annotations.message import in_github_actions, warning
 from utils.cache.files import read_text
 from utils.cache.yaml import load_yaml_any
-from utils.entity_name_utils import get_entity_name
+from utils.roles.entity_name import get_entity_name
 
 from . import PROJECT_ROOT
 

@@ -4,7 +4,7 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from utils.applications.config import (
+from utils.roles.applications.config import (
     AppConfigKeyError,
     ConfigEntryNotSetError,
     get,

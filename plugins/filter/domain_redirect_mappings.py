@@ -1,7 +1,7 @@
 from ansible.errors import AnsibleFilterError
 
 from utils.domains.list import render_domain_value
-from utils.entity_name_utils import get_entity_name
+from utils.roles.entity_name import get_entity_name
 
 
 class FilterModule:

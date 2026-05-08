@@ -37,8 +37,8 @@ class RedirectUrisTest(unittest.TestCase):
     def setUpClass(cls):
         # Create stub package: utils, with applications.config and get_url submodules.
         mu = types.ModuleType("utils")
-        mu_apps = types.ModuleType("utils.applications")
-        mu_config = types.ModuleType("utils.applications.config")
+        mu_apps = types.ModuleType("utils.roles.applications")
+        mu_config = types.ModuleType("utils.roles.applications.config")
         mu_geturl = types.ModuleType("utils.get_url")
 
         # Define stub exceptions
@@ -74,8 +74,8 @@ class RedirectUrisTest(unittest.TestCase):
 
         # Register in sys.modules so plugin imports succeed
         sys.modules["utils"] = mu
-        sys.modules["utils.applications"] = mu_apps
-        sys.modules["utils.applications.config"] = mu_config
+        sys.modules["utils.roles.applications"] = mu_apps
+        sys.modules["utils.roles.applications.config"] = mu_config
         sys.modules["utils.get_url"] = mu_geturl
 
         # Load the plugin by path

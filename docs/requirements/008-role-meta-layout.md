@@ -279,7 +279,7 @@ the old `compose.…` or top-level paths.
 - [ ] All Python consumers that hard-code the old paths are updated. At
       minimum:
       - `utils/manager/inventory.py` (`schema/main.yml` → `meta/schema.yml`)
-      - `utils/applications/config.py` (`schema/main.yml` → `meta/schema.yml`)
+      - `utils/roles/applications/config.py` (`schema/main.yml` → `meta/schema.yml`)
       - `utils/cache/users.py` (`*/users/main.yml` → `*/meta/users.yml`)
       - `utils/cache/applications.py` (`*/config/main.yml` →
         per-topic load of `meta/server.yml` → `applications.<app>.server`,
@@ -464,7 +464,7 @@ back-and-forth questions on choices that are already specified above
 1. Read [Role Loop](../agents/action/iteration/role.md) before starting.
 2. Land the refactor in a single atomic branch:
    1. Update the loaders/consumers (`utils/cache/*`, `utils/manager/*`,
-      `utils/applications/*`, `plugins/*`, `cli/*`) to read from the new
+      `utils/roles/applications/*`, `plugins/*`, `cli/*`) to read from the new
       paths and to apply the new schema rules (`default:`, nested keys,
       implicit `algorithm: plain`).
    2. Rename and split files across all roles in one mechanical pass.

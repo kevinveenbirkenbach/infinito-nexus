@@ -22,7 +22,7 @@ The include set passed to stage 2 is built by the deploy CLI in [deploy.py](../.
 
 1. **Ansible meta `dependencies:`** from each role's `meta/main.yml`.
 2. **Per-role `run_after:`** from each role's `meta/services.yml.<entity>.run_after`.
-3. **Shared-service auto-include** from each role's `meta/services.yml.<entity>.<service>` block, when both `enabled is True` AND `shared is True`. The check lives in [service_registry.py](../../../utils/service_registry.py) `resolve_service_dependency_roles_from_config`.
+3. **Shared-service auto-include** from each role's `meta/services.yml.<entity>.<service>` block, when both `enabled is True` AND `shared is True`. The check lives in [service_registry.py](../../../utils/roles/applications/services/registry.py) `resolve_service_dependency_roles_from_config`.
 
 The auto-include uses **strict identity** with Python's `True`. A Jinja-templated string such as `"{{ 'web-app-discourse' in group_names }}"` is NOT the value `True`, so it does NOT trigger auto-include at build time. Only literal booleans (or boolean-typed variant overrides that bake one in) qualify.
 
@@ -80,8 +80,8 @@ The fallback Jinja string in the base `meta/services.yml` is the safety net for 
 | File | Purpose |
 |---|---|
 | [applications.py (cache)](../../../utils/cache/applications.py) | `get_variants`, `get_application_defaults`, `get_merged_applications`. Stage 1 variant loader and the runtime renderer. |
-| [service_registry.py](../../../utils/service_registry.py) | `build_service_registry_from_roles_dir`, `resolve_service_dependency_roles_from_config`. Strict-identity auto-include. |
-| [in_group_deps.py](../../../utils/applications/in_group_deps.py) | `applications_if_group_and_all_deps`. Recursive walk over Ansible meta `dependencies:` plus shared-service deps. |
+| [service_registry.py](../../../utils/roles/applications/services/registry.py) | `build_service_registry_from_roles_dir`, `resolve_service_dependency_roles_from_config`. Strict-identity auto-include. |
+| [in_group_deps.py](../../../utils/roles/applications/in_group_deps.py) | `applications_if_group_and_all_deps`. Recursive walk over Ansible meta `dependencies:` plus shared-service deps. |
 | [inventory.py](../../../cli/deploy/development/inventory.py) | `_resolve_variant_payloads`, `_bake_overrides`, `build_dev_inventory`. Stage 1 variant resolution and stage 3 host-vars baking. |
 | [cli.build.inventory.full](../../../cli/build/inventory/full/command.py) | Stage 2 group materialisation: emits one group per invokable `application_id` for the given host. |
 | [filters.py](../../../cli/create/inventory/filters.py) | `filter_dynamic_inventory`. Restricts the materialised groups to the `--include` set. |

@@ -69,12 +69,12 @@ from pathlib import Path
 from utils.annotations.suppress import line_has_rule
 from utils.cache.files import read_text
 from utils.cache.yaml import load_yaml_any
-from utils.entity_name_utils import get_entity_name
-from utils.service_registry import (
+from utils.roles.applications.services.registry import (
     build_covered_key_to_role,
     build_role_to_primary_service_key,
     build_service_registry_from_roles_dir,
 )
+from utils.roles.entity_name import get_entity_name
 
 from . import PROJECT_ROOT
 

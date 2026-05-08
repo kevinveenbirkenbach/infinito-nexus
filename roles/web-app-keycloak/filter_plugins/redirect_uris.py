@@ -6,12 +6,12 @@ from pathlib import Path
 
 from ansible.errors import AnsibleFilterError
 
-from utils.applications.config import (
+from utils.get_url import get_url  # returns "<protocol>://<domain>"
+from utils.roles.applications.config import (
     AppConfigKeyError,
     ConfigEntryNotSetError,
     get,
 )
-from utils.get_url import get_url  # returns "<protocol>://<domain>"
 
 
 # --- Locate project root that contains `utils/` dynamically (up to 5 levels) ---

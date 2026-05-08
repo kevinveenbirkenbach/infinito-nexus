@@ -3,8 +3,8 @@ import hashlib
 
 from ansible.errors import AnsibleFilterError
 
-from utils.applications.config import get
 from utils.get_url import get_url
+from utils.roles.applications.config import get
 
 
 def _dedup_preserve(seq):

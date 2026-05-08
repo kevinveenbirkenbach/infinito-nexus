@@ -14,7 +14,7 @@ if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
 
 # Import the same module path the plugin uses
-mu_mod = import_module("utils.applications.config")
+mu_mod = import_module("utils.roles.applications.config")
 AppConfigKeyError = mu_mod.AppConfigKeyError
 
 # Load inj_enabled filter plugin from file

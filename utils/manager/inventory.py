@@ -4,11 +4,11 @@ import sys
 from pathlib import Path
 from typing import Any
 
-from utils.database_service import resolve_database_service_key
 from utils.handler.vault import VaultHandler, VaultScalar
 from utils.handler.yaml import YamlHandler
 from utils.manager.value_generator import ValueGenerator
-from utils.service_registry import (
+from utils.roles.applications.services.database import resolve_database_service_key
+from utils.roles.applications.services.registry import (
     build_service_registry_from_roles_dir,
     is_explicit_truth,
     resolve_service_dependency_roles_from_config,

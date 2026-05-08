@@ -7,7 +7,7 @@ from pathlib import Path
 from unittest import TestCase, main
 from unittest.mock import patch
 
-import utils.invokable as inv
+import utils.roles.validation.invokable as inv
 from utils.cache.yaml import dump_yaml
 
 

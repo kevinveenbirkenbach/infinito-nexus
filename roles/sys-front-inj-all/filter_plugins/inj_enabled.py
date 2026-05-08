@@ -1,7 +1,7 @@
 import sys
 from pathlib import Path
 
-from utils.applications.config import get
+from utils.roles.applications.config import get
 
 # Allow imports from utils (same trick as your config filter).
 # Role-bundled plugin: Ansible loads by file path with no package

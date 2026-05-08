@@ -27,7 +27,7 @@ import unittest
 from utils.annotations.suppress import is_suppressed_at
 from utils.cache.files import read_text
 from utils.cache.yaml import load_yaml_any, load_yaml_str
-from utils.service_registry import is_explicit_truth
+from utils.roles.applications.services.registry import is_explicit_truth
 
 from . import PROJECT_ROOT
 

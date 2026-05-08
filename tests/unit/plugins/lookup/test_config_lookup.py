@@ -9,9 +9,9 @@ from pathlib import Path
 from ansible.errors import AnsibleError
 
 from plugins.lookup.config import LookupModule
-from utils.applications.config import AppConfigKeyError, ConfigEntryNotSetError
 from utils.cache import _reset_cache_for_tests
 from utils.cache.yaml import dump_yaml_str
+from utils.roles.applications.config import AppConfigKeyError, ConfigEntryNotSetError
 
 
 def _write_schema(base_dir: Path, application_id: str, schema: dict) -> None:

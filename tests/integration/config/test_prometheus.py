@@ -5,7 +5,7 @@ from pathlib import Path
 import yaml
 
 from utils.cache.yaml import load_yaml_any
-from utils.service_registry import is_explicit_truth
+from utils.roles.applications.services.registry import is_explicit_truth
 
 PROMETHEUS_APP_ID = "web-app-prometheus"
 

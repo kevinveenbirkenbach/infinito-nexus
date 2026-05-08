@@ -13,8 +13,8 @@ try:
         FilterModule as _DockerServiceEnabledFilter,
     )
     from plugins.filter.get_entity_name import get_entity_name
-    from utils.applications.config import get
-    from utils.database_service import (
+    from utils.roles.applications.config import get
+    from utils.roles.applications.services.database import (
         get_database_service_config,
         resolve_database_service_key,
     )
@@ -23,8 +23,8 @@ except ModuleNotFoundError:
     from docker_service_enabled import FilterModule as _DockerServiceEnabledFilter
     from get_entity_name import get_entity_name
 
-    from utils.applications.config import get
-    from utils.database_service import (
+    from utils.roles.applications.config import get
+    from utils.roles.applications.services.database import (
         get_database_service_config,
         resolve_database_service_key,
     )

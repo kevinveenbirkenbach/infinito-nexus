@@ -5,9 +5,9 @@ from typing import Any
 from ansible.errors import AnsibleError
 from ansible.plugins.lookup import LookupBase
 
-from utils.applications.config import get
 from utils.cache.applications import get_merged_applications
-from utils.service_registry import (
+from utils.roles.applications.config import get
+from utils.roles.applications.services.registry import (
     build_role_to_primary_service_key,
     build_service_registry_from_applications,
     canonical_service_key,

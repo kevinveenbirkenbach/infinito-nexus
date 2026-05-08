@@ -11,7 +11,7 @@ from . import PROJECT_ROOT
 
 sys.path.insert(0, str(PROJECT_ROOT))
 
-from utils.roles.resource_validation import filter_roles_by_min_storage
+from utils.roles.validation.resources import filter_roles_by_min_storage
 
 
 def parse_args() -> argparse.Namespace:

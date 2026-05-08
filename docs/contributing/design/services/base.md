@@ -62,7 +62,7 @@ Rules:
 Service discovery is built from role configs, not from a central registry file.
 
 Primary implementation files:
-- [service_registry.py](../../../../utils/service_registry.py)
+- [service_registry.py](../../../../utils/roles/applications/services/registry.py)
 - [service_registry.py lookup plugin](../../../../plugins/lookup/service_registry.py)
 
 The discovery layer:
@@ -219,7 +219,7 @@ role-local keys instead of `services.database.type`.
 
 | File | Purpose |
 |---|---|
-| [service_registry.py](../../../../utils/service_registry.py) | Service discovery, `provides`, `canonical`, bucket detection, `run_after` ordering |
+| [service_registry.py](../../../../utils/roles/applications/services/registry.py) | Service discovery, `provides`, `canonical`, bucket detection, `run_after` ordering |
 | [service_registry.py lookup](../../../../plugins/lookup/service_registry.py) | Exposes the discovered registry and ordered provider list to Ansible |
 | [service.py](../../../../plugins/lookup/service.py) | Resolves service flags and transitive need |
 | [applications_current_play.py](../../../../plugins/lookup/applications_current_play.py) | Builds the current play app graph with shared service deps |
@@ -227,7 +227,7 @@ role-local keys instead of `services.database.type`.
 | [load_service.yml](../../../../roles/sys-utils-service-loader/tasks/load_service.yml) | Per-service load helper used by the central service loader |
 | [01_constructor.yml](../../../../tasks/stages/01_constructor.yml) | Calls the service loader during constructor |
 | [load_app.yml](../../../../tasks/utils/load_app.yml) | Run-once role loader |
-| [test_service_registry.py](../../../../tests/unit/utils/test_service_registry.py) | Unit tests for discovery, buckets, and `run_after` ordering |
+| [test_service_registry.py](../../../../tests/unit/utils/roles/applications/services/test_registry.py) | Unit tests for discovery, buckets, and `run_after` ordering |
 | [test_service.py](../../../../tests/unit/plugins/lookup/test_service.py) | Unit tests for `lookup('service', ...)` |
 | [test_resolvable.py](../../../../tests/integration/services/test_resolvable.py) | Integration checks for discovered service resolution |
 | [test_canonical.py](../../../../tests/integration/services/test_canonical.py) | Canonical alias consistency checks |

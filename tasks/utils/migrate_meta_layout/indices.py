@@ -4,7 +4,7 @@ from functools import cache
 from pathlib import Path
 from typing import Any
 
-from utils.entity_name_utils import get_entity_name
+from utils.roles.entity_name import get_entity_name
 
 from . import yaml_io
 

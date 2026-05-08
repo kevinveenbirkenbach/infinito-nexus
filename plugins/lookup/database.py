@@ -6,13 +6,13 @@ from typing import Any
 from ansible.errors import AnsibleError
 from ansible.plugins.lookup import LookupBase
 
-from utils.applications.config import get
 from utils.cache.applications import get_merged_applications
-from utils.database_service import (
+from utils.roles.applications.config import get
+from utils.roles.applications.services.database import (
     get_database_service_config,
     resolve_database_service_key,
 )
-from utils.entity_name_utils import get_entity_name
+from utils.roles.entity_name import get_entity_name
 
 
 class LookupModule(LookupBase):

@@ -8,7 +8,7 @@ holds:
   (a) Self-declared shared: its primary entity in ``meta/services.yml``
       carries ``shared: true``.
   (b) Self-declared via ``provides:`` or alias entries that point at the
-      primary entity (mirrors ``utils.service_registry``).
+      primary entity (mirrors ``utils.roles.applications.services.registry``).
   (c) Consumer-activated: at least one other role's ``meta/services.yml``
       declares ``services.<provider-key>.enabled: true; shared: true``,
       which the variant-aware deploy planner resolves to this role.
@@ -36,7 +36,9 @@ from pathlib import Path
 
 from utils.cache.files import read_text
 from utils.cache.yaml import load_yaml
-from utils.service_registry import build_service_registry_from_roles_dir
+from utils.roles.applications.services.registry import (
+    build_service_registry_from_roles_dir,
+)
 
 from . import PROJECT_ROOT
 

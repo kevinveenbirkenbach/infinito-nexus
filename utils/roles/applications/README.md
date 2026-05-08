@@ -1,16 +1,16 @@
-# Application Utilities (`utils/applications/`) 🧩
+# Application Utilities (`utils/roles/applications/`) 🧩
 
 This package contains shared Python helpers that operate on the central `applications` configuration dictionary.
 
 ## Purpose 🎯
 
-Modules in `utils/applications/` MUST provide reusable helpers for reading, resolving, and validating application configuration.
+Modules in `utils/roles/applications/` MUST provide reusable helpers for reading, resolving, and validating application configuration.
 Helpers MUST stay independent of Ansible plugin entrypoints so the same code can be imported from filter plugins, lookup plugins, and library modules.
 
 ## Example Import ✍️
 
 ```python
-from utils.applications import config
+from utils.roles.applications import config
 
 value = config.get(
     applications,

@@ -8,8 +8,8 @@ import os
 import sys
 from pathlib import Path
 
-from utils.applications.in_group_deps import applications_if_group_and_all_deps
 from utils.cache.yaml import dump_yaml_str, load_yaml
+from utils.roles.applications.in_group_deps import applications_if_group_and_all_deps
 
 from . import PROJECT_ROOT
 

@@ -17,7 +17,7 @@ from ansible.plugins.lookup import LookupBase
 
 from utils.cache.applications import get_merged_applications
 from utils.cache.domains import get_merged_domains
-from utils.jinja_strict import render_strict
+from utils.templating.jinja import render_strict
 from utils.tls_common import (
     AVAILABLE_FLAVORS,
     as_str,

@@ -5,9 +5,9 @@ from pathlib import Path
 from typing import Any
 
 from utils.cache.yaml import load_yaml_any
-from utils.entity_name_utils import get_entity_name
-from utils.invokable import types_from_group_names
+from utils.roles.entity_name import get_entity_name
 from utils.roles.meta_lookup import get_role_run_after
+from utils.roles.validation.invokable import types_from_group_names
 
 
 class ServiceRegistryError(ValueError):

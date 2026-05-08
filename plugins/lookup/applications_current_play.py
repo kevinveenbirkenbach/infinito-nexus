@@ -7,7 +7,6 @@ from ansible.errors import AnsibleError
 from ansible.plugins.lookup import LookupBase
 
 from plugins.lookup import PROJECT_ROOT
-from utils.applications.in_group_deps import applications_if_group_and_all_deps
 from utils.cache.applications import get_merged_applications
 from utils.cache.base import (
     _cache_key,
@@ -15,7 +14,10 @@ from utils.cache.base import (
     _stable_variables_signature,
 )
 from utils.cache.yaml import load_yaml_any
-from utils.service_registry import build_service_registry_from_applications
+from utils.roles.applications.in_group_deps import applications_if_group_and_all_deps
+from utils.roles.applications.services.registry import (
+    build_service_registry_from_applications,
+)
 
 _CURRENT_PLAY_CACHE: dict[tuple, dict[str, Any]] = {}
 
@@ -27,7 +29,7 @@ def _reset_cache_for_tests() -> None:
 class LookupModule(LookupBase):
     """
     Return the current play application mapping using the shared resolver from
-    utils/applications/in_group_deps.
+    utils/roles/applications/in_group_deps.
     """
 
     def run(

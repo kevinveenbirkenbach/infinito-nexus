@@ -1,6 +1,6 @@
 from ansible.errors import AnsibleFilterError
 
-from utils.applications.config import get
+from utils.roles.applications.config import get
 
 
 class FilterModule:

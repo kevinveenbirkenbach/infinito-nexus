@@ -10,7 +10,7 @@ Both fields used to live nested inside `meta/main.yml.galaxy_info`:
 After req-010 they live at
 ``meta/services.yml.<primary_entity>.{run_after,lifecycle}`` where
 ``<primary_entity>`` is the value returned by
-:func:`utils.entity_name_utils.get_entity_name` for the role's directory
+:func:`utils.roles.entity_name.get_entity_name` for the role's directory
 name.
 
 Both helpers degrade gracefully:
@@ -27,7 +27,7 @@ from pathlib import Path
 import yaml
 
 from utils.cache.yaml import load_yaml_any
-from utils.entity_name_utils import get_entity_name
+from utils.roles.entity_name import get_entity_name
 
 from . import PROJECT_ROOT
 

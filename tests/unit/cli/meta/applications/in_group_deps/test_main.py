@@ -7,7 +7,7 @@ from pathlib import Path
 from unittest.mock import patch
 
 from cli.meta.applications.in_group_deps import __main__ as mod
-from utils.applications import in_group_deps as deps_mod
+from utils.roles.applications import in_group_deps as deps_mod
 
 SERVICE_REGISTRY = {
     "matomo": {"role": "web-app-matomo"},

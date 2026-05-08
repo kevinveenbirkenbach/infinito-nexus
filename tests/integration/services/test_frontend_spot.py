@@ -1,7 +1,7 @@
 import unittest
 from pathlib import Path
 
-from utils.service_registry import (
+from utils.roles.applications.services.registry import (
     build_service_registry_from_roles_dir,
     load_applications_from_roles_dir,
     ordered_primary_service_entries,

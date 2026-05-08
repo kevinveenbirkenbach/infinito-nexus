@@ -31,12 +31,12 @@ import unittest
 from pathlib import Path
 
 from utils.cache.yaml import load_yaml_any
-from utils.roles.meta_lookup import get_role_run_after
-from utils.service_registry import (
+from utils.roles.applications.services.registry import (
     build_role_to_covered_keys,
     build_service_registry_from_roles_dir,
     is_explicit_truth,
 )
+from utils.roles.meta_lookup import get_role_run_after
 
 from . import PROJECT_ROOT
 

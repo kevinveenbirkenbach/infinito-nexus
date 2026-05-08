@@ -6,7 +6,7 @@ import unittest
 from pathlib import Path
 
 from utils.cache.yaml import dump_yaml
-from utils.valid_deploy_id import ValidDeployId
+from utils.roles.validation.deploy_id import ValidDeployId
 
 
 class TestValidDeployId(unittest.TestCase):

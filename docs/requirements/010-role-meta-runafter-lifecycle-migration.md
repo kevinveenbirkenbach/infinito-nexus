@@ -213,8 +213,8 @@ The following consumers read `run_after` and/or `lifecycle` from
 `meta/services.yml.<primary_entity>` (via the new helper or directly):
 
 - [ ] `utils/roles/dependency_resolver.py`
-- [ ] `utils/service_registry.py`
-- [ ] `utils/invokable.py`
+- [ ] `utils/roles/applications/services/registry.py`
+- [ ] `utils/roles/validation/invokable.py`
 - [ ] `roles/sys-utils-service-loader` (its tasks/templates that drive the
       load-order pass)
 - [ ] `cli/meta/applications/resolution/run_after/__main__.py`

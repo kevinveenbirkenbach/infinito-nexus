@@ -8,7 +8,7 @@ handled by the sibling tests."""
 import unittest
 from collections.abc import Iterable
 
-from utils.applications.config import ConfigEntryNotSetError, get
+from utils.roles.applications.config import ConfigEntryNotSetError, get
 
 from ._scan import LookupMatch, get_context, iter_matches
 from ._validate import PathNotFound, validate_app_path

@@ -5,7 +5,7 @@ import unittest
 from pathlib import Path
 
 from utils.cache.yaml import dump_yaml_str
-from utils.service_registry import (
+from utils.roles.applications.services.registry import (
     ServiceRegistryError,
     build_service_registry_from_applications,
     detect_service_bucket,

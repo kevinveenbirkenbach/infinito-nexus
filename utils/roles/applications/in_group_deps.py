@@ -5,7 +5,7 @@ from pathlib import Path
 from typing import Any
 
 from utils.cache.yaml import load_yaml_any
-from utils.service_registry import (
+from utils.roles.applications.services.registry import (
     build_service_registry_from_applications,
     build_service_registry_from_roles_dir,
     resolve_service_dependency_roles_from_config,

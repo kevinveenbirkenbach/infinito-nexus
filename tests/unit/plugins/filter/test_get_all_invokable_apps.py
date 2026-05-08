@@ -58,7 +58,7 @@ class TestGetAllInvokableApps(unittest.TestCase):
 
     def test_get_all_invokable_apps(self):
         """Should return only applications whose role paths match invokable paths."""
-        with patch("utils.invokable.PROJECT_ROOT", self.test_dir):
+        with patch("utils.roles.validation.invokable.PROJECT_ROOT", self.test_dir):
             result = get_all_invokable_apps()
 
         expected = sorted(
@@ -75,7 +75,7 @@ class TestGetAllInvokableApps(unittest.TestCase):
         dump_yaml(self.categories_file, {"roles": {"foo": {"invokable": False}}})
 
         with (
-            patch("utils.invokable.PROJECT_ROOT", self.test_dir),
+            patch("utils.roles.validation.invokable.PROJECT_ROOT", self.test_dir),
             self.assertRaises(RuntimeError),
         ):
             get_all_invokable_apps()
@@ -90,7 +90,7 @@ class TestGetAllInvokableApps(unittest.TestCase):
             self.categories_file, {"roles": {"web": {"app": {"invokable": True}}}}
         )
 
-        with patch("utils.invokable.PROJECT_ROOT", self.test_dir):
+        with patch("utils.roles.validation.invokable.PROJECT_ROOT", self.test_dir):
             result = get_all_invokable_apps()
 
         self.assertEqual(result, [])
@@ -100,15 +100,15 @@ class TestGetAllInvokableApps(unittest.TestCase):
         Should raise FileNotFoundError if categories.yml is missing.
 
         Note: the implementation resolves invokable paths via
-        utils.invokable._get_invokable_paths().
+        utils.roles.validation.invokable._get_invokable_paths().
         To make the test deterministic, patch this function directly.
         """
         self.categories_file.unlink()
 
         with (
-            patch("utils.invokable.PROJECT_ROOT", self.test_dir),
+            patch("utils.roles.validation.invokable.PROJECT_ROOT", self.test_dir),
             patch(
-                "utils.invokable._get_invokable_paths",
+                "utils.roles.validation.invokable._get_invokable_paths",
                 side_effect=FileNotFoundError,
             ),
             self.assertRaises(FileNotFoundError),

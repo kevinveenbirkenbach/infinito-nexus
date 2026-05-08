@@ -2,7 +2,7 @@ import sys
 from collections.abc import Mapping
 from pathlib import Path
 
-from utils.applications.config import get  # reuse existing helper
+from utils.roles.applications.config import get  # reuse existing helper
 
 # Allow imports from utils (same trick as your config filter).
 # Role-bundled plugin: Ansible loads by file path with no package

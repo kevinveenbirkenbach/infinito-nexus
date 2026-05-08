@@ -13,11 +13,11 @@ sys.path.insert(0, str(PROJECT_ROOT))
 
 from humanfriendly import format_size, parse_size
 
-from utils.entity_name_utils import get_entity_name
-from utils.service_registry import (
+from utils.roles.applications.services.registry import (
     build_service_registry_from_applications,
     load_applications_from_roles_dir,
 )
+from utils.roles.entity_name import get_entity_name
 
 ROLES_DIR = PROJECT_ROOT / "roles"
 
