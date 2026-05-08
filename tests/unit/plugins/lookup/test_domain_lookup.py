@@ -1,4 +1,3 @@
-# tests/unit/plugins/lookup/test_domain_lookup.py
 import sys
 import unittest
 from unittest.mock import patch

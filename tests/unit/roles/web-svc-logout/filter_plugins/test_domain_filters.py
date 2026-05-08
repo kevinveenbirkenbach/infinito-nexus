@@ -1,5 +1,3 @@
-# tests/unit/roles/web-svc-logout/filter_plugins/test_domain_filters.py
-
 import importlib.util
 import unittest
 

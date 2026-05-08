@@ -1,4 +1,3 @@
-# tests/unit/roles/sys-front-inj-all/filter_plugins/test_inj_snippets.py
 """
 Unit tests for roles/sys-front-inj-all/filter_plugins/inj_snippets.py
 

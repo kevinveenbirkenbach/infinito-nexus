@@ -1,4 +1,3 @@
-# tests/unit/plugins/filter/test_get_all_invokable_apps.py
 import shutil
 import tempfile
 import unittest

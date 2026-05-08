@@ -1,4 +1,3 @@
-# tests/unit/cli/meta/applications/resolution/combined/test_main.py
 from __future__ import annotations
 
 import io

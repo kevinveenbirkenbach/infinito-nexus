@@ -1,7 +1,6 @@
 # Defines WP Discourse plugin settings
 # @see https://github.com/discourse/wp-discourse
 
-# roles/web-app-wordpress/vars/discourse.yml
 # Defines WP Discourse plugin settings (exported from your current wp_options dump)
 #
 # Requirement 007 decision: wp-discourse `auto-publish` stays DISABLED by

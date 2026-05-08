@@ -1,4 +1,3 @@
-# cli/meta/applications/resolution/combined/resolver.py
 from __future__ import annotations
 
 from dataclasses import dataclass

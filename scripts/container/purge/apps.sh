@@ -12,7 +12,7 @@
 #
 # Designed to be invoked from the host via:
 #   docker exec -e APPS="${APPS}" <container> \
-#     bash /opt/src/infinito/scripts/container/purge/apps.sh
+#     bash /opt/src/infinito/scripts/container/purge/apps.sh  # nocheck: self-path-reference
 
 set -euo pipefail
 cd /opt/src/infinito

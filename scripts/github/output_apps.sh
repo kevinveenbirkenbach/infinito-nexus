@@ -1,5 +1,4 @@
 #!/usr/bin/env bash
-# scripts/github/output_apps.sh
 #
 # Resolve the app list and write it to GITHUB_OUTPUT.
 # Inputs via env (forwarded to scripts/meta/resolve/apps.sh):

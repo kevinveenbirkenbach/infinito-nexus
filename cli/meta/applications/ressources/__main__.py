@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# cli/meta/applications/ressources/__main__.py
 from __future__ import annotations
 
 import argparse

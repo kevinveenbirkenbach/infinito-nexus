@@ -1,4 +1,3 @@
-# tests/unit/plugins/lookup/test_tls.py
 import sys
 import unittest
 from unittest.mock import patch

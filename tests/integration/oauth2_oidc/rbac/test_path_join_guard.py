@@ -33,7 +33,7 @@ ALLOWED_RELATIVE_PREFIXES = (
     # KEYCLOAK_RBAC_GROUP_NAME is a pure alias, not a path construction.
     "roles/web-app-keycloak/vars/main.yml",
     # This guard's own file mentions the forbidden pattern literally.
-    "tests/integration/oauth2_oidc/rbac/test_path_join_guard.py",
+    "tests/integration/oauth2_oidc/rbac/test_path_join_guard.py",  # nocheck: self-path-reference
 )
 
 EXCLUDED_DIRS = {

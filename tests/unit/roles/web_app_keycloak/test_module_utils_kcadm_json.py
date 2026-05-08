@@ -1,4 +1,3 @@
-# tests/unit/roles/web_app_keycloak/test_module_utils_kcadm_json.py
 from __future__ import annotations
 
 import importlib.util

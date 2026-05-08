@@ -1,5 +1,4 @@
 #!/usr/bin/env bash
-# scripts/meta/resolve/apps.sh
 set -euo pipefail
 
 # Purpose (SRP): Return JSON list of apps based on deployment type,

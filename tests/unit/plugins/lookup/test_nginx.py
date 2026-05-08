@@ -1,4 +1,3 @@
-# tests/unit/plugins/lookup/test_nginx.py
 import unittest
 from unittest.mock import patch
 

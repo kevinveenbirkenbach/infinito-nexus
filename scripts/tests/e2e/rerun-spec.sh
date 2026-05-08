@@ -12,8 +12,8 @@
 # reruns Playwright via the same container image the deploy-time runner uses.
 #
 # Usage:
-#   scripts/tests/e2e/rerun-spec.sh <role> [playwright args...]
-#   scripts/tests/e2e/rerun-spec.sh web-app-nextcloud --grep "talk admin"
+#   scripts/tests/e2e/rerun-spec.sh <role> [playwright args...]  # nocheck: self-path-reference
+#   scripts/tests/e2e/rerun-spec.sh web-app-nextcloud --grep "talk admin"  # nocheck: self-path-reference
 set -euo pipefail
 
 if [[ $# -lt 1 ]]; then

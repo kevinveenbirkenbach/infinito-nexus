@@ -1,4 +1,3 @@
-# tests/unit/cli/create/inventory/test_mirror_overrides.py
 from __future__ import annotations
 
 import unittest

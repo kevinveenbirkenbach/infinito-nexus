@@ -1,4 +1,3 @@
-# tests/unit/cli/create/inventory/test_services_disabler.py
 from __future__ import annotations
 
 import os

@@ -2,10 +2,9 @@
 """
 CLI for extracting invokable or non-invokable role paths from a nested roles YAML file.
 
-Layout assumption:
-  <repo_root>/cli/meta/categories/invokable/command.py
-  <repo_root>/plugins/filter/...
-  <repo_root>/roles/categories.yml
+Layout assumption: this module sits under ``cli/`` and reads
+``<repo_root>/roles/categories.yml`` plus filter plugins under
+``<repo_root>/plugins/filter/``.
 """
 
 from __future__ import annotations

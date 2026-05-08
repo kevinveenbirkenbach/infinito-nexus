@@ -1,4 +1,3 @@
-# tests/unit/plugins/lookup/test_database.py
 import importlib.util
 import unittest
 from unittest.mock import patch

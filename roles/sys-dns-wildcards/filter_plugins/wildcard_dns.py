@@ -1,4 +1,3 @@
-# roles/sys-dns-wildcards/filter_plugins/wildcard_dns.py
 import ipaddress
 
 from ansible.errors import AnsibleFilterError

@@ -1,4 +1,3 @@
-# roles/web-app-keycloak/module_utils/kcadm_json.py
 from __future__ import annotations
 
 import json

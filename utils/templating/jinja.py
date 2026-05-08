@@ -1,4 +1,3 @@
-# utils/templating/jinja.py
 #
 # Strict Jinja2 renderer for values that may contain Jinja markers.
 #

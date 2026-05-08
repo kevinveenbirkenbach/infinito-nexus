@@ -3,7 +3,7 @@ set -euo pipefail
 
 # Local app test without teardown/cleanup.
 # Usage:
-#   scripts/tests/deploy/local/deploy/fresh-kept-app.sh <app-id>
+#   scripts/tests/deploy/local/deploy/fresh-kept-app.sh <app-id>  # nocheck: self-path-reference
 #
 # Environment variables:
 #   INFINITO_DISTRO   arch|debian|ubuntu|fedora|centos (default from scripts/meta/env/all.sh)
@@ -12,8 +12,8 @@ set -euo pipefail
 #   DEBUG             true|false (default: true)
 #
 # Examples:
-#   scripts/tests/deploy/local/deploy/fresh-kept-app.sh web-app-mailu
-#   INFINITO_DISTRO=arch DEBUG=false scripts/tests/deploy/local/deploy/fresh-kept-app.sh web-app-nextcloud
+#   scripts/tests/deploy/local/deploy/fresh-kept-app.sh web-app-mailu  # nocheck: self-path-reference
+#   INFINITO_DISTRO=arch DEBUG=false scripts/tests/deploy/local/deploy/fresh-kept-app.sh web-app-nextcloud  # nocheck: self-path-reference
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "${SCRIPT_DIR}/../../../../.." && pwd)"

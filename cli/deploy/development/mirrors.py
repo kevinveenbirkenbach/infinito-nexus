@@ -1,4 +1,3 @@
-# cli/deploy/development/mirrors.py
 from __future__ import annotations
 
 import os

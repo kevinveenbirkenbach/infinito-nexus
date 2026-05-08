@@ -73,7 +73,7 @@ _ALLOWLIST: frozenset[str] = frozenset(
         "tests/unit/utils/annotations/test_suppress.py",
         "docs/contributing/actions/testing/suppression.md",
         "tests/lint/repository/test_no_direct_yaml_calls.py",
-        "tests/lint/repository/test_noqa_only_ruff_codes.py",
+        "tests/lint/repository/test_noqa_only_ruff_codes.py",  # nocheck: self-path-reference
     }
 )
 

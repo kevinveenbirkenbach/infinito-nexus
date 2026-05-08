@@ -1,4 +1,3 @@
-# tests/unit/roles/sys-ctl-cln-bkps/files/test_script.py
 from __future__ import annotations
 
 import io

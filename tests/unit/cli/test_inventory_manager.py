@@ -1,5 +1,3 @@
-# tests/unit/cli/test_inventory_manager.py
-
 import shutil
 import tempfile
 import unittest

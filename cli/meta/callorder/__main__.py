@@ -1,7 +1,5 @@
 #!/usr/bin/env python3
 """
-cli/meta/callorder/__main__.py
-
 What it does:
 - 📄 Prints the call order of roles per tasks/groups/*.yml
 - 🎯 With --marker (and no --call): shows all groups/roles split into ✅ called (<= marker) vs ⏳ remaining (> marker)

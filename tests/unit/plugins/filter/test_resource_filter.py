@@ -1,4 +1,3 @@
-# tests/unit/plugins/filter/test_resource_filter.py
 import importlib
 import unittest
 from unittest.mock import patch

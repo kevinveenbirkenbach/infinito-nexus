@@ -1,4 +1,3 @@
-# tests/unit/cli/meta/applications/resolution/dependencies/test_dependencies_main.py
 from __future__ import annotations
 
 import io

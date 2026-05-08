@@ -4,10 +4,10 @@ from __future__ import annotations
 import sys
 from pathlib import Path
 
-# This file is invoked directly as ``python3 cli/__main__.py ...`` (the
-# ``cli`` console-script entry-point and the integration help-test), in
-# which case ``from . import PROJECT_ROOT`` fails with ``attempted
-# relative import with no known parent package``. Compute the repo root
+# This file is invoked directly as a script (the ``cli`` console-script
+# entry-point and the integration help-test), in which case
+# ``from . import PROJECT_ROOT`` fails with ``attempted relative import
+# with no known parent package``. Compute the repo root
 # locally and prepend it to sys.path before any project-package import
 # resolves. Without this, sys.path[0] points to ``<root>/cli`` and
 # importing ``cli.*`` may accidentally resolve to an installed package

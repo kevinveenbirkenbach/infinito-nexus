@@ -1,4 +1,3 @@
-# tests/unit/cli/meta/applications/type/test_main.py
 from __future__ import annotations
 
 import io

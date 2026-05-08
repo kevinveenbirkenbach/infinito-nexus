@@ -5,8 +5,7 @@ set -euo pipefail
 # one-off command inside it when CMD or positional arguments are set.
 #
 # Usage:
-#   scripts/tests/deploy/local/exec/container.sh
-#   scripts/tests/deploy/local/exec/container.sh [command...]
+#   scripts/tests/deploy/local/exec/container.sh [command...]  # nocheck: self-path-reference
 #
 # Environment:
 #   INFINITO_DISTRO     arch|debian|ubuntu|fedora|centos
@@ -14,18 +13,17 @@ set -euo pipefail
 #   CMD                 One-off shell command to run instead of an interactive shell
 #
 # Examples:
-#   scripts/tests/deploy/local/exec/container.sh
-#   scripts/tests/deploy/local/exec/container.sh whoami
-#   CMD='whoami && id' scripts/tests/deploy/local/exec/container.sh
+#   scripts/tests/deploy/local/exec/container.sh whoami  # nocheck: self-path-reference
+#   CMD='whoami && id' scripts/tests/deploy/local/exec/container.sh  # nocheck: self-path-reference
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "${SCRIPT_DIR}/../../../../../" && pwd)"
 
 usage() {
-	cat <<'EOF'
+	cat <<EOF
 Usage:
-  scripts/tests/deploy/local/exec/container.sh
-  scripts/tests/deploy/local/exec/container.sh [command...]
+  ${0}
+  ${0} [command...]
 
 Environment:
   INFINITO_DISTRO     arch|debian|ubuntu|fedora|centos
@@ -33,9 +31,9 @@ Environment:
   CMD                 One-off shell command to run instead of an interactive shell
 
 Examples:
-  scripts/tests/deploy/local/exec/container.sh
-  scripts/tests/deploy/local/exec/container.sh whoami
-  CMD='whoami && id' scripts/tests/deploy/local/exec/container.sh
+  ${0}
+  ${0} whoami
+  CMD='whoami && id' ${0}
 EOF
 }
 

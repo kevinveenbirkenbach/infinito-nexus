@@ -126,8 +126,7 @@ def _resolve_role(role: PathLike, role_name: str | None) -> tuple[Path, str]:
     if role_path.is_absolute() or role_path.parts[:1] == (".",):
         role_dir = role_path.resolve()
     else:
-        # Treat as a role name relative to <repo>/roles. The repo root is
-        # two levels above this module: utils/roles/meta_lookup.py -> repo.
+        # Treat as a role name relative to <repo>/roles.
         repo_root = PROJECT_ROOT
         role_dir = repo_root / "roles" / str(role)
     name = role_name or role_dir.name

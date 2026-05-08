@@ -86,7 +86,7 @@ EXCLUDED_RELATIVE_PATHS = frozenset(
         # The lookup plugin's own docstring shows usage examples.
         "plugins/lookup/rbac_group_path.py",
         # This guard contains the literal call form in its docstring.
-        "tests/integration/oauth2_oidc/rbac/test_group_path_role_declarations.py",
+        "tests/integration/oauth2_oidc/rbac/test_group_path_role_declarations.py",  # nocheck: self-path-reference
     }
 )
 

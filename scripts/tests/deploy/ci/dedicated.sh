@@ -38,7 +38,7 @@ usage() {
 	cat <<'EOF'
 Usage:
   INFINITO_DISTRO=<distro> INVENTORY_DIR=<dir> INFINITO_DOCKER_VOLUME=<abs_path> \
-    scripts/tests/deploy/ci/dedicated.sh \
+    scripts/tests/deploy/ci/dedicated.sh \  # nocheck: self-path-reference
     --apps <app_ids>
 EOF
 }

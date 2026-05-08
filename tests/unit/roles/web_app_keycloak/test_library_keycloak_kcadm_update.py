@@ -1,4 +1,3 @@
-# tests/unit/roles/web_app_keycloak/test_library_keycloak_kcadm_update.py
 from __future__ import annotations
 
 import importlib.util

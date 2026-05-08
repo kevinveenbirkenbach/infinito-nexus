@@ -1,4 +1,3 @@
-# tests/unit/cli/meta/applications/resolution/services/test_yaml_utils.py
 from __future__ import annotations
 
 import tempfile

@@ -1,4 +1,3 @@
-# utils/tls_common.py
 #
 # Shared strict resolution helpers for Infinito.Nexus TLS/cert lookups.
 

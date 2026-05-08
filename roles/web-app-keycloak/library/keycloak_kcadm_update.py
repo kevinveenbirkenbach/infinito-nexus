@@ -1,5 +1,4 @@
 #!/usr/bin/python
-# roles/web-app-keycloak/library/keycloak_kcadm_update.py
 
 
 import json

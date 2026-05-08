@@ -1,4 +1,3 @@
-# tests/unit/roles/web_app_keycloak/test_filter_plugins_kcadm.py
 from __future__ import annotations
 
 import importlib.util

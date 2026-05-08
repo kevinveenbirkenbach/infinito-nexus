@@ -1,5 +1,4 @@
 ###############################################################################
-# roles/svc-db-openldap/tasks/04_users.yml
 #
 # Purpose:
 # - Ensure base LDAP tree exists (suffix + OUs)

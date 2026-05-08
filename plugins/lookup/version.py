@@ -2,8 +2,8 @@
 Ansible lookup plugin: version
 
 No parameters.
-Reads pyproject.toml relative to this plugin file:
-<repo>/plugins/lookup/version.py -> <repo>/pyproject.toml
+Reads ``pyproject.toml`` from the repository root, located by walking
+parents from this plugin file's location.
 
 Resolution order:
 1) [project].version (PEP 621)

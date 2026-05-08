@@ -1,4 +1,3 @@
-# tests/unit/plugins/lookup/test_compose_file_args.py
 import importlib.util
 import unittest
 from unittest.mock import patch

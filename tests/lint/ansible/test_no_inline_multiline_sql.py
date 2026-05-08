@@ -79,7 +79,7 @@ _SQL_KEYWORD_LEADERS = (
 # Files we must not scan to avoid recursive false positives.
 _EXCLUDED_RELATIVE_PATHS = frozenset(
     {
-        "tests/lint/ansible/test_no_inline_multiline_sql.py",
+        "tests/lint/ansible/test_no_inline_multiline_sql.py",  # nocheck: self-path-reference
     }
 )
 

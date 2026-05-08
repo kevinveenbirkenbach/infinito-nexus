@@ -1,4 +1,3 @@
-# tests/unit/plugins/filter/test_text_filters.py
 import unittest
 
 from ansible.errors import AnsibleFilterError

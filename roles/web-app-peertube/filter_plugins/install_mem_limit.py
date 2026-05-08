@@ -1,4 +1,3 @@
-# roles/web-app-peertube/filter_plugins/install_mem_limit.py
 # Derive a temporary cgroup memory ceiling for the one-off
 # `npm run plugin:install` exec.
 #

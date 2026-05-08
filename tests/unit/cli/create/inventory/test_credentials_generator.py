@@ -1,5 +1,3 @@
-# tests/unit/cli/create/inventory/test_credentials_generator.py
-
 import tempfile
 import unittest
 from pathlib import Path

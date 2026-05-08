@@ -1,4 +1,3 @@
-# tests/unit/roles/sys-dns-wildcards/filter_plugins/test_wildcard_dns.py
 import importlib.util
 import unittest
 

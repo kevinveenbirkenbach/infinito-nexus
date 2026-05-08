@@ -1,4 +1,3 @@
-# cli/meta/applications/resolution/combined/role_introspection.py
 from __future__ import annotations
 
 from cli.meta.applications.resolution.services.errors import ServicesResolutionError

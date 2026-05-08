@@ -1,5 +1,3 @@
-# tests/unit/roles/sys-ctl-bkp-docker-2-loc/library/test_file_has_content.py
-
 from __future__ import annotations
 
 import contextlib
@@ -46,9 +44,7 @@ def _import_module_under_test():
     """
     Load the module under test via file path computed by walking parents only.
 
-    Test file:
-      tests/unit/roles/sys-ctl-bkp-docker-2-loc/library/test_file_has_content.py
-    Repo root is parents[5] from the test file path.
+    Repo root is ``parents[5]`` from this test file's location.
     """
     module_path = (
         PROJECT_ROOT

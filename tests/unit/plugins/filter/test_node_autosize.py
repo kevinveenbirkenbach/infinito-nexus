@@ -1,4 +1,3 @@
-# tests/unit/plugins/filter/test_node_autosize.py
 import unittest
 from unittest.mock import patch
 

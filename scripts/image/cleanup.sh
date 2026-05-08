@@ -24,8 +24,8 @@ Env:
   DAYS, OWNER, REPOSITORY, DISTROS, REPO_PREFIX can be used as defaults.
 
 Examples:
-  DAYS=14 OWNER=myorg REPOSITORY=myorg/my-repo REPO_PREFIX=my-repo ./scripts/image/cleanup.sh
-  ./scripts/image/cleanup.sh --days 7 --repository kevinveenbirkenbach/infinito-nexus --distros "arch debian" --repo-prefix infinito-nexus
+  DAYS=14 OWNER=myorg REPOSITORY=myorg/my-repo REPO_PREFIX=my-repo ./scripts/image/cleanup.sh  # nocheck: self-path-reference
+  ./scripts/image/cleanup.sh --days 7 --repository kevinveenbirkenbach/infinito-nexus --distros "arch debian" --repo-prefix infinito-nexus  # nocheck: self-path-reference
 USAGE
 }
 

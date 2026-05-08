@@ -1,4 +1,3 @@
-# tests/unit/plugins/filter/test_get_deployment_types_from_groups.py
 from __future__ import annotations
 
 import unittest

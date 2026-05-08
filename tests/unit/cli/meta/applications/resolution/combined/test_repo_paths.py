@@ -1,4 +1,3 @@
-# tests/unit/cli/meta/applications/resolution/combined/test_repo_paths.py
 from __future__ import annotations
 
 import unittest

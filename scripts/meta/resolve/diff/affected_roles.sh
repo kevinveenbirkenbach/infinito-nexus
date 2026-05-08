@@ -1,5 +1,4 @@
 #!/usr/bin/env bash
-# scripts/meta/resolve/diff/affected_roles.sh
 #
 # Compute which roles are affected by the current branch's diff against
 # `origin/main`, expanded transitively over run_after + dependencies +

@@ -1,5 +1,4 @@
 #!/usr/bin/env bash
-# scripts/github/resolve_effective_whitelist.sh
 #
 # Resolve the effective WHITELIST that the discover step should pass to
 # scripts/github/output_apps.sh, and write it to GITHUB_OUTPUT.

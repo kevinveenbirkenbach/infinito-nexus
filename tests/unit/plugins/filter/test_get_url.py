@@ -1,4 +1,3 @@
-# tests/unit/plugins/filter/test_get_url.py
 import sys
 import unittest
 from pathlib import Path

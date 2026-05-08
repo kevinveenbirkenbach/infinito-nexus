@@ -16,7 +16,6 @@ from . import PROJECT_ROOT
 
 THIS_FILE = Path(__file__).resolve()
 
-# tests/unit/roles/sys-svc-container/files/test_container.py -> project root
 CONTAINER_PY = PROJECT_ROOT / "roles" / "sys-svc-container" / "files" / "container.py"
 
 if not CONTAINER_PY.exists():
