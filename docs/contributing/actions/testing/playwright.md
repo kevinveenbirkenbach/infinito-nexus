@@ -1,6 +1,6 @@
 # Playwright Tests 🎭
 
-This page is the SPOT for Playwright end-to-end test requirements, runner integration, and file contracts.
+This page covers Playwright end-to-end test requirements, runner integration, and file contracts.
 For implementation guidance when writing or updating role-local files, see
 [Agent `playwright.spec.js`](../../../agents/files/role/playwright.spec.js.md) and
 [Agent `playwright.env.j2`](../../../agents/files/role/playwright.env.j2.md).

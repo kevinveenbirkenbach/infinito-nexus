@@ -11,7 +11,7 @@ CI is triggered automatically on pull-request events and on pushes to the branch
 Every external CI trigger MUST route through one of the entry workflows. Each entry translates its event into a call to the orchestrator; the catalog of triggers and inputs lives in [workflows.md](../../tools/github/actions/workflows.md).
 
 - [entry-pull-request-change.yml](../../../../.github/workflows/entry-pull-request-change.yml): detects PR scope and conditionally calls the orchestrator.
-- [entry-push-latest.yml](../../../../.github/workflows/entry-push-latest.yml): calls the orchestrator for pushes on the supported branch prefixes and additionally invokes the release workflow on version tags.
+- [entry-push-latest.yml](../../../../.github/workflows/entry-push-latest.yml): calls the orchestrator for pushes on the supported branch prefixes and additionally invokes the release workflow on version tags. For the contributor-facing release procedure see [release.md](../../actions/release.md).
 - [entry-manual.yml](../../../../.github/workflows/entry-manual.yml): dispatches the orchestrator manually for a chosen distro set and whitelist.
 
 ## PR Scope Detection 🔎

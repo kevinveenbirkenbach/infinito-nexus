@@ -1,6 +1,6 @@
 # Integration Tests 🔗
 
-This page is the SPOT for integration testing requirements, framework, and structure.
+This page covers integration testing requirements, framework, and structure.
 Run integration tests with `make test-integration`.
 
 ## Framework 🧰

@@ -1,6 +1,6 @@
 # Unit Tests 🧪
 
-This page is the SPOT for unit testing requirements, framework, and structure.
+This page covers unit testing requirements, framework, and structure.
 Run unit tests with `make test-unit`.
 
 ## Framework 🧰

@@ -1,6 +1,6 @@
 # Makefile Commands 🛠️
 
-Use these commands from the repository root. This is the SPOT for `make` targets in Infinito Nexus.
+Use these commands from the repository root. This page indexes the `make` targets in Infinito Nexus.
 Use the dedicated script READMEs for the underlying shell helpers, and use the development/testing guides for deeper workflow details.
 
 For rules on how to write and structure the `Makefile` itself, see [makefile.md](../artefact/files/makefile.md).

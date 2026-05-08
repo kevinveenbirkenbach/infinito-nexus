@@ -1,6 +1,6 @@
 # CI Configuration ⚙️
 
-This page is the SPOT (single point of truth) for every repository variable that controls GitHub Actions CI behaviour in this repo. For the workflow catalog see [workflows.md](workflows.md); for the CI flow see [pipeline.md](../../../artefact/git/pipeline.md).
+This page lists every repository variable that controls GitHub Actions CI behaviour in this repo. For the workflow catalog see [workflows.md](workflows.md); for the CI flow see [pipeline.md](../../../artefact/git/pipeline.md).
 
 Repository variables are set under **Settings → Secrets and variables → Actions → Variables**.
 
