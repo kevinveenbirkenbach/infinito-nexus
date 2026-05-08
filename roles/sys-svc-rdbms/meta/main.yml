@@ -5,7 +5,7 @@ galaxy_info:
   company: Kevin Veen-Birkenbach Consulting & Coaching Solutions
   min_ansible_version: '2.9'
   platforms:
-    - name: Docker
+    - name: Linux
       versions:
         - latest
   galaxy_tags:

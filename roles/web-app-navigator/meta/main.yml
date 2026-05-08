@@ -11,7 +11,7 @@ galaxy_info:
     '
   min_ansible_version: '2.9'
   platforms:
-    - name: Docker
+    - name: Linux
       versions:
         - all
     - name: Linux
