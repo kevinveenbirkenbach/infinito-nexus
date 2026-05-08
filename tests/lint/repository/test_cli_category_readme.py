@@ -26,47 +26,44 @@ A conformant ``README.md`` has:
 from __future__ import annotations
 
 import unittest
-from typing import TYPE_CHECKING
+from pathlib import Path
+
+from utils.cache.files import iter_project_files, read_text
 
 from . import PROJECT_ROOT
-
-if TYPE_CHECKING:
-    from pathlib import Path
 
 CLI_DIR = PROJECT_ROOT / "cli"
 README_NAME = "README.md"
 CONVENTION_DOC = "docs/contributing/artefact/files/cli/readme_md.md"
 
 
-def _has_command_descendant(folder: Path) -> bool:
-    if (folder / "__main__.py").is_file():
-        return True
-    for path in folder.rglob("__main__.py"):
-        if "__pycache__" in path.parts:
-            continue
-        return True
-    return False
+def _project_files() -> list[Path]:
+    return [Path(p) for p in iter_project_files()]
 
 
-def _is_category_folder(folder: Path) -> bool:
-    if not folder.is_dir():
-        return False
-    if folder.name == "__pycache__":
-        return False
-    if "__pycache__" in folder.parts:
-        return False
-    if (folder / "__main__.py").is_file():
-        return False
-    return _has_command_descendant(folder)
+def _iter_category_folders(cli_dir: Path, all_files: list[Path]) -> list[Path]:
+    """Return paths of every category folder under ``cli/``.
 
+    A category folder has at least one ``__main__.py`` somewhere
+    underneath but no ``__main__.py`` at its own level. Derived from
+    the cached project-file list so the walk is shared with the rest
+    of the lint suite.
+    """
+    main_paths = [
+        path
+        for path in all_files
+        if path.name == "__main__.py" and cli_dir in path.parents
+    ]
+    runnable_folders = {path.parent for path in main_paths}
 
-def _iter_category_folders(cli_dir: Path) -> list[Path]:
-    """Return every category folder under ``cli/``, sorted by relative
-    path. The ``cli`` package itself is skipped because the global
-    help splash already covers the repo-level entry."""
-    found = [path for path in cli_dir.rglob("*") if _is_category_folder(path)]
-    found.sort(key=lambda p: p.relative_to(cli_dir).as_posix())
-    return found
+    ancestors: set[Path] = set()
+    for runnable in runnable_folders:
+        current = runnable.parent
+        while current != cli_dir and cli_dir in current.parents:
+            ancestors.add(current)
+            current = current.parent
+
+    return sorted(folder for folder in ancestors if folder not in runnable_folders)
 
 
 def _has_trailing_emoji(line: str) -> bool:
@@ -80,14 +77,14 @@ def _has_trailing_emoji(line: str) -> bool:
     return ord(stripped[-1]) > 0x7F
 
 
-def _check_readme_shape(readme_path: Path) -> str | None:
+def _check_readme_shape(readme_path: Path, project_files: set[Path]) -> str | None:
     """Validate one README.md against the convention. Returns ``None``
     when the file conforms, otherwise a short violation message."""
-    if not readme_path.is_file():
+    if readme_path not in project_files:
         return f"missing {README_NAME}"
 
     try:
-        text = readme_path.read_text(encoding="utf-8")
+        text = read_text(str(readme_path))
     except Exception as exc:
         return f"could not read {README_NAME}: {exc}"
 
@@ -115,8 +112,6 @@ def _check_readme_shape(readme_path: Path) -> str | None:
             f"(per the heading-emoji rule in documentation.md)"
         )
 
-    # Description paragraph: there must be a blank line after the H1,
-    # then a non-blank, non-heading paragraph.
     saw_blank_separator = False
     for line in lines[h1_index + 1 :]:
         stripped = line.strip()
@@ -145,9 +140,13 @@ class TestCliCategoryReadme(unittest.TestCase):
     def test_every_category_folder_has_a_conformant_readme(self) -> None:
         self.assertTrue(CLI_DIR.is_dir(), f"cli/ directory not found at: {CLI_DIR}")
 
+        all_files = _project_files()
+        project_files_set = set(all_files)
+
         offenders: list[str] = []
-        for folder in _iter_category_folders(CLI_DIR):
-            issue = _check_readme_shape(folder / README_NAME)
+        for folder in _iter_category_folders(CLI_DIR, all_files):
+            readme_path = folder / README_NAME
+            issue = _check_readme_shape(readme_path, project_files_set)
             if issue is not None:
                 rel = folder.relative_to(PROJECT_ROOT).as_posix()
                 offenders.append(f"{rel}: {issue}")
