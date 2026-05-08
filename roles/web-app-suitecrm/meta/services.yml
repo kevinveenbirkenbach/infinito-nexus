@@ -1,3 +1,4 @@
+---
 # nocheck: dynamic-flag
 oidc:
   enabled: false
@@ -6,7 +7,7 @@ logout:
   enabled: "{{ 'web-svc-logout' in group_names }}"
   shared: "{{ 'web-svc-logout' in group_names }}"
 ldap:
-  enabled: true  # nocheck: dynamic-flag
+  enabled: true # nocheck: dynamic-flag
   shared: "{{ 'svc-db-openldap' in group_names }}"
 dashboard:
   enabled: "{{ 'web-app-dashboard' in group_names }}"
@@ -18,7 +19,7 @@ email:
   enabled: "{{ 'web-app-mailu' in group_names }}"
   shared: "{{ 'web-app-mailu' in group_names }}"
 mariadb:
-  enabled: true  # nocheck: dynamic-flag
+  enabled: true # nocheck: dynamic-flag
   shared: "{{ 'svc-db-mariadb' in group_names }}"
 suitecrm:
   image: php
@@ -40,16 +41,16 @@ suitecrm:
       oauth2: 16490
       http: 8062
   run_after:
-  - web-app-keycloak
-  - web-app-mailu
-  - web-app-matomo
+    - web-app-keycloak
+    - web-app-mailu
+    - web-app-matomo
   lifecycle: beta
 oauth2:
   enabled: "{{ 'web-app-keycloak' in group_names }}"
   shared: "{{ 'web-app-keycloak' in group_names }}"
   origin:
     host: suitecrm
-    port: '80'
+    port: "80"
 # nocheck: dynamic-flag
 css:
   enabled: false
