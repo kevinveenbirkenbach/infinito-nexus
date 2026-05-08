@@ -31,6 +31,10 @@ WordPress offers an extensive array of features that make it a robust platform f
 
 This automated Docker Compose deployment streamlines the process by building a custom WordPress image (which includes tools like msmtp for email delivery) and configuring the necessary PHP settings, ensuring that your WordPress site is secure, scalable, and always up to date.
 
+## Features
+
+- **Automated provisioning:** Configured by Ansible without manual steps.
+
 ## Purpose
 
 The goal of this deployment is to provide a production-ready, scalable WordPress instance with multisite capabilities and enhanced performance. By automating the custom image build and configuration processes via Docker Compose and Ansible, it minimizes manual intervention, reduces errors, and allows you to concentrate on building great content.

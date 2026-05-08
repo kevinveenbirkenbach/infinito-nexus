@@ -1,9 +1,20 @@
 # sys-openssl
 
+
+## Description
+
 Ensures that the `openssl` CLI is installed on the host.
 
 This role is intended as a shared dependency for other roles that execute
 OpenSSL commands on the host system.
+
+## Overview
+
+This role ensures OpenSSL is installed once as a shared host dependency for roles that invoke the `openssl` CLI.
+
+## Features
+
+- **Automated provisioning:** Configured by Ansible without manual steps.
 
 ## Behavior
 

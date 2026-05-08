@@ -7,6 +7,10 @@ This role aggregates various GNOME desktop components to ensure a cohesive and f
 - **desk-gnome-extensions:** Manages GNOME Shell extensions and installs the CLI GNOME Extension Manager.
 - **desk-gnome-terminal:** Installs GNOME Terminal, the official terminal emulator for GNOME.
 
+## Overview
+
+This role aggregates essential GNOME desktop roles (including caffeine, extensions, and terminal) for a complete GNOME environment on Linux.
+
 ## Purpose
 
 The purpose of this role is to provide a complete GNOME desktop experience by orchestrating multiple sub-roles. This simplifies deployment and management by ensuring that all key components are installed and configured in a consistent, system-wide manner.

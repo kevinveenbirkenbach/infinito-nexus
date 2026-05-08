@@ -2,7 +2,11 @@
 
 ## Description
 
-This Ansible role injects a custom JavaScript snippet into all HTML responses served by NGINX. It leverages NGINX’s `sub_filter` to seamlessly insert your application-specific script just before the closing `</head>` tag, ensuring that your code runs on every page load—perfect for global feature flags, analytics, or UI enhancements.
+This Ansible role injects a custom JavaScript snippet into all HTML responses served by NGINX. It leverages NGINX’s `sub_filter` to seamlessly insert your application-specific script just before the closing `</head>` tag, ensuring that your code runs on every page load, which is useful for global feature flags, analytics, or UI enhancements.
+
+## Overview
+
+This role injects a custom JavaScript snippet into Nginx-served HTML responses via sub_filter.
 
 ## Features
 

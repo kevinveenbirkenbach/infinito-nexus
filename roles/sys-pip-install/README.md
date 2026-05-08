@@ -13,6 +13,10 @@ It is intended for CLI tools that should be available globally (e.g., maintenanc
 - Installs or upgrades a package specified by `package_name`.
 - Designed for non-interactive automation (CI/maintenance hosts).
 
+## Features
+
+- **Automated provisioning:** Configured by Ansible without manual steps.
+
 ## Variables
 
 ### Required

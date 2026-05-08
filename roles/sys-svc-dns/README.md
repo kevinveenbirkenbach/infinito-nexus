@@ -1,5 +1,8 @@
 # sys-svc-dns
 
+
+## Description
+
 Bootstrap and maintain **DNS prerequisites** for your web stack on Cloudflare.
 
 This role validates credentials and (by default) ensures:
@@ -10,6 +13,14 @@ This role validates credentials and (by default) ensures:
 Runs **once per play** and is safe to include in stacks that roll out many domains.
 
 ---
+
+## Overview
+
+This role cloudflare DNS bootstrap: parent host A/AAAA (and optional CAA), runs once per play.
+
+## Features
+
+- **Automated provisioning:** Configured by Ansible without manual steps.
 
 ## What it does
 

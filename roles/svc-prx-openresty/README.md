@@ -16,6 +16,10 @@ This role deploys an OpenResty container via Docker Compose, validates its confi
 3. Defines handlers to validate and restart the container  
 4. Triggers a restart on configuration changes  
 
+## Features
+
+- **Automated provisioning:** Configured by Ansible without manual steps.
+
 ## Further Reading
 
 - [OpenResty Docker Hub](https://hub.docker.com/r/openresty/openresty)  

@@ -23,6 +23,10 @@ This Docker Compose deployment uses Ansible automation to launch pgAdmin togethe
 - **Flexible Configuration:**  
   Adjust settings such as SSL options, port numbers, and server credentials through environment variables and templated configuration files.
 
+## Features
+
+- **Automated provisioning:** Configured by Ansible without manual steps.
+
 ## Other Resources
 
 - [pgAdmin Official Homepage](https://www.pgadmin.org/)

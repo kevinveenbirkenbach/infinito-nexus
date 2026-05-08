@@ -1,6 +1,13 @@
 # NGINX Matomo Tracking Role
 
+
+## Description
+
 This Ansible role automates the integration of Matomo tracking code into NGINX-served websites. It simplifies the process of adding the Matomo analytics tracking script and image tracker to all your web pages served through NGINX.
+
+## Overview
+
+This role injects Matomo analytics tracking code and noscript image tracker into Nginx-served HTML pages.
 
 ## Features
 - Automated insertion of Matomo tracking script into the `</head>` tag of HTML pages.

@@ -32,6 +32,10 @@ This role:
 - Runs Playwright in Docker with stable browser settings (`--ipc=host`, `--shm-size=1g`)
 - Stores per-role reports/artifacts under `TEST_E2E_PLAYWRIGHT_REPORTS_BASE_DIR/<application_id>`
 
+## Features
+
+- **Automated provisioning:** Configured by Ansible without manual steps.
+
 ## Purpose
 
 The purpose of this role is to provide a central E2E test primitive that can be executed

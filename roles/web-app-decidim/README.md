@@ -1,6 +1,13 @@
 # Decidim
 
-Deploys [Decidim](https://decidim.org/) — a free, open-source participatory democracy platform — as part of the Infinito.Nexus stack.
+
+## Description
+
+Deploys [Decidim](https://decidim.org/) (a free, open-source participatory democracy platform) as part of the Infinito.Nexus stack.
+
+## Overview
+
+This role deploy Decidim, an open-source participatory democracy platform for public consultations, civic processes, community voting, and collaborative policy creation.
 
 ## Features
 
@@ -18,7 +25,7 @@ Decidim's base image does not include an OpenID Connect OmniAuth strategy. This 
 - Patches decidim-core's `omniauth.rb` initializer to register the provider gated on `ENV["OIDC_ENABLED"]` (Rails 7.2 no longer uses `config/secrets.yml`)
 - Patches decidim-core's `omniauth_helper.rb` to return the correct icon
 
-Credentials (`OIDC_CLIENT_ID`, `OIDC_CLIENT_SECRET`, `OIDC_ISSUER`) are read from env vars at runtime — never stored in the database — to avoid `ActiveSupport::MessageEncryptor::InvalidMessage` errors on container rebuild.
+Credentials (`OIDC_CLIENT_ID`, `OIDC_CLIENT_SECRET`, `OIDC_ISSUER`) are read from env vars at runtime (never stored in the database) to avoid `ActiveSupport::MessageEncryptor::InvalidMessage` errors on container rebuild.
 
 To enable SSO, set `services.oidc.enabled: true` in your inventory.
 

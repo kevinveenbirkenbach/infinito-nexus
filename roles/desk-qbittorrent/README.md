@@ -1,7 +1,15 @@
 # QBittorrent
 
+## Description
+
+Installs the qBittorrent torrent client via AUR on Arch Linux.
+
 ## Overview
 This README is for the `desk-qbittorrent` role within the `infinito` repository. This role is specifically crafted for installing qBittorrent, a popular open-source torrent client, on personal computers.
+
+## Features
+
+- **Automated provisioning:** Configured by Ansible without manual steps.
 
 ## Role Tasks
 The `main.yml` file in the `desk-qbittorrent` role includes the following task:

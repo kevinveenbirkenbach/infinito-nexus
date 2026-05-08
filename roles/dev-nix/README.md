@@ -14,6 +14,10 @@ On platforms where distro packages are known to be problematic
 and falls back to the official installer to ensure a working and
 up-to-date Nix installation.
 
+## Overview
+
+This role installs the Nix package manager via pacman on Arch x86_64 or via the official installer with SHA256 verification.
+
 ## Installation Strategy
 
 The role automatically selects the appropriate installation method:

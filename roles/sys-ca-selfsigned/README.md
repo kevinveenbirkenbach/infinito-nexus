@@ -1,5 +1,8 @@
 # sys-ca-selfsigned
 
+
+## Description
+
 Creates (once) a local Root CA (self-signed) for the Infinito.Nexus environment.
 
 This role provisions:
@@ -8,6 +11,14 @@ This role provisions:
 - Root CA certificate: `{{ CA_ROOT.cert_host }}`
 
 The generated Root CA certificate can be injected into containers (e.g. via `sys-svc-compose-ca`) so that containers trust your internal TLS endpoints.
+
+## Overview
+
+This role provisions a local Root CA (self-signed, CA:TRUE) for trusting internal TLS endpoints. Produces /etc/infinito.nexus/ca/root-ca.crt for sys-svc-compose-ca injection.
+
+## Features
+
+- **Automated provisioning:** Configured by Ansible without manual steps.
 
 ## Outputs
 

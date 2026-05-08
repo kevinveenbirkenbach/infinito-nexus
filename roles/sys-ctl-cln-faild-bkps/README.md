@@ -1,5 +1,8 @@
 # Cleanup Failed Backups
 
+
+## Description
+
 This role installs and runs the **cleanback** tool to automatically detect and remove **failed Docker backups**.
 
 The cleanup process scans backup directories located under the configurable path  
@@ -7,6 +10,14 @@ The cleanup process scans backup directories located under the configurable path
 and removes only those backups that are detected as invalid, while keeping recent backups safe.
 
 To avoid accidental data loss, the role **keeps the most recent backups by default** and runs fully unattended via a scheduled system service.
+
+## Overview
+
+This role cleans up failed Docker backups by configuring a systemd service and timer to execute the cleanup operations periodically.
+
+## Features
+
+- **Automated provisioning:** Configured by Ansible without manual steps.
 
 ## What this role does
 
@@ -50,7 +61,7 @@ never trigger automatic deletion.
 
 The cleanup logic itself is provided by the **cleanback** project:
 
-[https://github.com/kevinveenbirkenbach/cleanup-failed-backups](https://github.com/kevinveenbirkenbach/cleanup-failed-backups)
+[cleanup-failed-backups](https://github.com/kevinveenbirkenbach/cleanup-failed-backups)
 
 This role focuses on **safe automation and scheduling**, while the linked project contains the actual cleanup implementation.
 

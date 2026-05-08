@@ -1,6 +1,17 @@
 # sys-front-tls-selfsigned
 
+
+## Description
+
 Self-signed TLS provider for sys-front-tls (SAN aware).
+
+## Overview
+
+This role self-signed TLS provider for sys-front-tls (SAN aware). Generates and stores self-signed certificates.
+
+## Features
+
+- **Automated provisioning:** Configured by Ansible without manual steps.
 
 ## Inputs
 

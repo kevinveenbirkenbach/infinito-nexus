@@ -6,6 +6,14 @@ Runs a collected list of systemd services at the **end of a play**.
 This is useful for services where flush/restart is suppressed during setup,
 but should be started once everything they depend on is ready.
 
+## Overview
+
+This role runs a collected list of systemd services at the end of a play.
+
+## Features
+
+- **Automated provisioning:** Configured by Ansible without manual steps.
+
 ## How it works
 
 - Consumes `system_service_run_list` (created by `sys-service` when `system_service_force_flush_final=true`).

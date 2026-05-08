@@ -3,6 +3,10 @@
 ## Description
 Checks the health of all mounted Btrfs filesystems by inspecting device error counters.
 
+## Overview
+
+This role health-check for Btrfs filesystems, alerts on any device error counters.
+
 ## Features
 - Iterates over every Btrfs filesystem.
 - Runs `btrfs device stats` and alerts if any error counters are non-zero.

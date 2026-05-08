@@ -1,7 +1,15 @@
 # Java
 
+## Description
+
+Installs OpenJDK 11 (`jdk11-openjdk`) on Pacman-based systems to provide a Java runtime and development environment.
+
 ## Overview
 This README file is for the Java role, which is part of the `infinito`. The role is specifically designed to automate the installation of Java on a system, focusing on the OpenJDK 11 version.
+
+## Features
+
+- **Automated provisioning:** Configured by Ansible without manual steps.
 
 ## Contents of the role
 The `main.yml` file within the `java` role consists of a single, but crucial task:

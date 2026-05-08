@@ -4,6 +4,14 @@
 
 This role installs additional system packages defined directly in host or group inventory variables.
 
+## Overview
+
+This role installs system packages defined via the inventory variable `SYS_PACKAGES`.
+
+## Features
+
+- **Automated provisioning:** Configured by Ansible without manual steps.
+
 ## Variables
 
 - `SYS_PACKAGES` (list, default: `[]`)

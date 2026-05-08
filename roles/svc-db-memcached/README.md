@@ -4,6 +4,14 @@
 
 This Ansible role provides a Jinja2 snippet to inject a Memcached service definition into your Docker Compose setup.
 
+## Overview
+
+This role provides a Docker Compose snippet for a Memcached service (`memcached`) with optional volume, healthcheck, and logging.
+
+## Features
+
+- **Automated provisioning:** Configured by Ansible without manual steps.
+
 ## Further Resources
 
 - [Official Memcached Docker image on Docker Hub](https://hub.docker.com/_/memcached)  

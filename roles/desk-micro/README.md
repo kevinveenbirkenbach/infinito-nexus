@@ -1,7 +1,15 @@
 # micro
 
+## Description
+
+Installs micro CLI text editor on Pacman‑based systems.
+
 ## Overview
 This role automates the installation of micro, a CLI text editor, on Pacman‑based systems. It uses the `community.general.pacman` module to ensure the editor is installed and up to date.
+
+## Features
+
+- **Automated provisioning:** Configured by Ansible without manual steps.
 
 ## Requirements
 - Ansible 2.9 or higher  

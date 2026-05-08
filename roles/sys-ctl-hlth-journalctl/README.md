@@ -3,6 +3,10 @@
 ## Description
 Scans `journalctl` over the last day for “error” entries and alerts if any are found.
 
+## Overview
+
+This role searches the systemd journal for errors over the past day and alerts if any are found.
+
 ## Features
 - Runs `journalctl --since '1 day ago' | grep -i error`.
 - Exits non-zero on matches.

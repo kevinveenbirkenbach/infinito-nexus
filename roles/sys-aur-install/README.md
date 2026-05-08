@@ -1,6 +1,17 @@
 # sys-aur-install
 
+
+## Description
+
 Installs one or more AUR packages using `kewlfft.aur.aur` and the `yay` helper.
+
+## Overview
+
+This role wrapper role to install AUR packages via kewlfft.aur.aur using yay.
+
+## Features
+
+- **Automated provisioning:** Configured by Ansible without manual steps.
 
 ## Variables
 

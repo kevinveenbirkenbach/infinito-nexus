@@ -1,5 +1,17 @@
 NGINX Legal role
 
+## Description
+
+Deploys a legal imprint (Impressum) page in Nginx from a Jinja2 template.
+
+## Overview
+
+This role deploys a legal imprint (Impressum) page in Nginx from a Jinja2 template.
+
+## Features
+
+- **Automated provisioning:** Configured by Ansible without manual steps.
+
 ## Credits
 
 Developed and maintained by **Kevin Veen-Birkenbach**.

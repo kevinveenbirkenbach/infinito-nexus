@@ -1,5 +1,17 @@
 # Epson Multiprinter Driver
 
+## Description
+
+Installs Epson multifunction printer drivers and scanning utilities (escpr, imagescan) via Pacman and AUR on Arch Linux.
+
+## Overview
+
+This role installs Epson multifunction printer drivers and scanning utilities (escpr, imagescan) via Pacman and AUR on Arch Linux.
+
+## Features
+
+- **Automated provisioning:** Configured by Ansible without manual steps.
+
 ## Other Resources
 - https://bernhardsteindl.at/epson-ecotank-et-3600-unter-arch-linux-einrichten/
 - http://download.ebz.epson.net/dsc/search/01/search/searchModule

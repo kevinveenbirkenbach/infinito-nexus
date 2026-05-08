@@ -1,8 +1,15 @@
 # NGINX Global Matomo & Theming Modifier Role
 
+
+## Description
+
 This role enhances your NGINX configuration by conditionally injecting global Matomo tracking and theming elements into your HTML responses. It uses NGINX sub-filters to seamlessly add tracking scripts and CSS links to your web pages.
 
 ---
+
+## Overview
+
+This role core role for Nginx HTML injection of Matomo, theming, iFrame and JS snippets based on application feature flags.
 
 ## Features
 

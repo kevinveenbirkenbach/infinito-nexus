@@ -6,7 +6,15 @@ This role creates the workstation user defined by *WORKSTATION_USER* and configu
 its basic environment. It integrates with the shared `user` role to deploy shell
 dotfiles and SSH `authorized_keys`.
 
-## Single Point of Truth (SPOT)
+## Overview
+
+This role creates the workstation user selected via WORKSTATION_USER and configures the user environment.
+
+## Features
+
+- **Automated provisioning:** Configured by Ansible without manual steps.
+
+## User data resolution
 
 User data must be defined under `users.<name>` and selected via `WORKSTATION_USER`.
 

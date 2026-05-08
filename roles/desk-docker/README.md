@@ -1,9 +1,13 @@
 # Workstation Docker
 
+## Description
+
+Installs Docker and Docker Compose, and adds a user to the Docker group for non-root usage on development machines.
+
 ## Overview
 This playbook, `desk-docker`, is part of a larger collection housed within the `infinito` repository. It is specifically tailored for setting up Docker and Docker Compose on personal computers (PCs) used for development purposes. The primary goal is to facilitate a development environment on individual workstations rather than configuring servers for hosting or distributing Docker images.
 
-## Contents
+## Features
 The `main.yml` file in the `desk-docker` role consists of two primary tasks:
 
 1. **Install Docker**: This task uses the `community.general.pacman` module to install `docker` and `docker-compose` on the system. It ensures that these packages are present on the PC.

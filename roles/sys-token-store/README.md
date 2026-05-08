@@ -11,6 +11,14 @@ It only **stores and propagates tokens that already exist** (e.g. created by boo
 
 ---
 
+## Overview
+
+This role stores and manages per-user application tokens in a local YAML store file (idempotent read/write helpers).
+
+## Features
+
+- **Automated provisioning:** Configured by Ansible without manual steps.
+
 ## Core Principles
 
 - **Single logic for all roles**

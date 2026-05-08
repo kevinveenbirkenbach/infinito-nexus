@@ -8,6 +8,14 @@ and applies dotlinker mappings provided by the calling role.
 The role is intentionally generic: it does not know anything about Nextcloud or other apps.
 It can be included multiple times from different roles, each time with a different set of mappings.
 
+## Overview
+
+This role installs and applies dotlinker (doli) mappings (generic role).
+
+## Features
+
+- **Automated provisioning:** Configured by Ansible without manual steps.
+
 ## Usage
 
 Call this role via `include_role` and pass mappings through `dotlinker_mappings`:

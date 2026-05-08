@@ -6,6 +6,10 @@ This role manages GNOME Shell extensions by ensuring user extensions are enabled
 
 Learn more about the CLI tool on its [GitHub page](https://github.com/kevinveenbirkenbach/cli-gnome-extension-manager) and about GNOME Extensions at [GNOME Extensions](https://extensions.gnome.org).
 
+## Overview
+
+This role configures GNOME Shell extensions and installs the CLI GNOME Extension Manager for managing extensions.
+
 ## Purpose
 
 The purpose of this role is to enhance and customize the GNOME desktop environment by managing shell extensions. It simplifies the process of installing and configuring extensions, thereby improving productivity and desktop functionality.

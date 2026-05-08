@@ -8,10 +8,14 @@
 
 The role uses a multi-stage Dockerfile:
 
-1. **Builder stage** — pinned `hugomods/hugo:exts-<version>` (extended Hugo) clones the configured content repository and runs `hugo --minify -e <env> -b <baseURL>` to render the site to `/public`.
-2. **Serve stage** — pinned `nginx:<version>-alpine` ships the rendered `/public` from the builder stage as `/usr/share/nginx/html`.
+1. **Builder stage:** pinned `hugomods/hugo:exts-<version>` (extended Hugo) clones the configured content repository and runs `hugo --minify -e <env> -b <baseURL>` to render the site to `/public`.
+2. **Serve stage:** pinned `nginx:<version>-alpine` ships the rendered `/public` from the builder stage as `/usr/share/nginx/html`.
 
 `compose build` re-bakes the static output whenever the cloned content changes, so deploys are content-driven without any runtime build step.
+
+## Features
+
+- **Automated provisioning:** Configured by Ansible without manual steps.
 
 ## Configuration
 
@@ -43,7 +47,7 @@ V1 supports **exactly one canonical domain** per role deploy. The play asserts t
 ## Further Resources
 
 - [Hugo official site](https://gohugo.io/)
-- [Hugo documentation source — gohugoio/hugoDocs](https://github.com/gohugoio/hugoDocs)
+- [Hugo documentation source: gohugoio/hugoDocs](https://github.com/gohugoio/hugoDocs)
 - [hugomods/hugo Docker images](https://hub.docker.com/r/hugomods/hugo)
 
 ## Credits

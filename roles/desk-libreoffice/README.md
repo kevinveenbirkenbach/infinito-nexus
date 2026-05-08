@@ -6,6 +6,10 @@ This role installs LibreOffice on Arch Linux systems using the Pacman package ma
 
 Learn more about LibreOffice on the [official website](https://www.libreoffice.org).
 
+## Overview
+
+This role installs LibreOffice along with Liberation fonts and language packages on Arch Linux systems for a complete office suite experience.
+
 ## Purpose
 
 The purpose of this role is to automate the installation and configuration of LibreOffice along with its language support on personal computers. This ensures that users have a consistent and fully functional office suite environment across their systems.

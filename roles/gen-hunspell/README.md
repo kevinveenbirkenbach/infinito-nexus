@@ -1,7 +1,15 @@
 # Hunspell
 
+## Description
+
+Installs Hunspell and configured language packs on Pacman-based systems for spell checking in multiple languages.
+
 ## Overview
 This README accompanies the Hunspell Playbook, located within the `infinito` repository. The playbook is focused on installing Hunspell, a widely-used spell checker, along with various language packages to enhance its functionality.
+
+## Features
+
+- **Automated provisioning:** Configured by Ansible without manual steps.
 
 ## Playbook Contents
 The `main.yml` file in the `hunspell` role includes two primary tasks:

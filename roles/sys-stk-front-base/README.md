@@ -9,6 +9,14 @@
 
 > This role is intentionally small and reusable. It prepares the ground so app roles can just render their vHost.
 
+## Overview
+
+This role front bootstrap for web apps: HTTPS base, optional Cloudflare setup, and handler wiring.
+
+## Features
+
+- **Automated provisioning:** Configured by Ansible without manual steps.
+
 ## Responsibilities
 - Include `sys-svc-webserver-https` (once per host)
 - Include Cloudflare tasks when `DNS_PROVIDER == "cloudflare"`
