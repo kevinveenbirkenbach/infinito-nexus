@@ -140,6 +140,7 @@
       "WebFetch(domain:nodejs.org)",
       "WebFetch(domain:nominatim.openstreetmap.org)",
       "WebFetch(domain:oauth2-proxy.github.io)",
+      "WebFetch(domain:obsproject.com)",
       "WebFetch(domain:ollama.com)",
       "WebFetch(domain:open.spotify.com)",
       "WebFetch(domain:openid.net)",

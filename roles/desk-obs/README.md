@@ -19,7 +19,7 @@ It targets the desktop tier and does not configure scenes, capture devices, or s
 ## Further Resources
 
 - [OBS Studio](https://obsproject.com/)
-- [OBS Studio documentation](https://obsproject.com/wiki/)
+- [OBS Studio knowledge base](https://obsproject.com/kb/)
 
 ## Credits
 
