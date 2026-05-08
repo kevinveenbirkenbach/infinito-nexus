@@ -19,3 +19,8 @@ galaxy_info:
     - graph
     - mig
   issue_tracker_url: https://github.com/kevinveenbirkenbach/meta-infinite-graph/issues
+  min_ansible_version: '2.9'
+  platforms:
+    - name: Linux
+      versions:
+        - all

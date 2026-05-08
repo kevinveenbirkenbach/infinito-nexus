@@ -20,4 +20,8 @@ galaxy_info:
     - dashboard
     - webapp
   issue_tracker_url: https://github.com/defnull/fediwall/issues
+  platforms:
+    - name: Linux
+      versions:
+        - all
 dependencies: []

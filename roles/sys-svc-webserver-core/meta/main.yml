@@ -19,3 +19,7 @@ galaxy_info:
     - security
     - performance
   issue_tracker_url: https://s.infinito.nexus/issues
+  platforms:
+    - name: Linux
+      versions:
+        - all
