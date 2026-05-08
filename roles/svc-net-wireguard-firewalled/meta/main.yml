@@ -1,11 +1,13 @@
+---
 galaxy_info:
   author: Kevin Veen-Birkenbach
-  description: Adapts iptables rules to enable proper connectivity for a WireGuard client running behind a NAT or firewall, ensuring that traffic is correctly forwarded and masqueraded.
+  description: Adapts iptables rules to enable proper connectivity for a WireGuard client running behind a NAT or firewall, ensuring that traffic is correctly
+    forwarded and masqueraded.
   license: Infinito.Nexus Community License (Non-Commercial)
   company: |
     Kevin Veen-Birkenbach
     https://www.veen.world
-  min_ansible_version: '2.9'
+  min_ansible_version: "2.9"
   platforms:
     - name: ArchLinux
       versions:
