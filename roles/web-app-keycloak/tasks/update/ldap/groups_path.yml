@@ -1,3 +1,4 @@
+---
 #
 # This file is included ONLY when desired_groups_top is non-empty.
 # Do not add an additional "when: desired_groups_top | length > 0" here.

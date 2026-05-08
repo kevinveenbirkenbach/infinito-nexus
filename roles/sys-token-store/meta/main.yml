@@ -1,3 +1,4 @@
+---
 galaxy_info:
   author: Kevin Veen-Birkenbach
   description: Stores and manages per-user application tokens in a local YAML store file (idempotent read/write helpers).
@@ -12,7 +13,7 @@ galaxy_info:
     - security
     - ansible
   issue_tracker_url: https://s.infinito.nexus/issues
-  min_ansible_version: '2.9'
+  min_ansible_version: "2.9"
   platforms:
     - name: ArchLinux
       versions:

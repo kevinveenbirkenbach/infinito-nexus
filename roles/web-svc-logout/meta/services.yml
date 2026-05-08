@@ -1,3 +1,4 @@
+---
 logout:
   enabled: true
   shared: true

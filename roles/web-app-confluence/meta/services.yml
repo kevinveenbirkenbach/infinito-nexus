@@ -1,3 +1,4 @@
+---
 logout:
   enabled: "{{ 'web-svc-logout' in group_names }}"
   shared: "{{ 'web-svc-logout' in group_names }}"
@@ -21,14 +22,14 @@ email:
   enabled: "{{ 'web-app-mailu' in group_names }}"
   shared: "{{ 'web-app-mailu' in group_names }}"
 postgres:
-  enabled: true  # nocheck: dynamic-flag
+  enabled: true # nocheck: dynamic-flag
   shared: "{{ 'svc-db-postgres' in group_names }}"
 confluence:
   image: atlassian/confluence
   version: latest
   name: confluence
   min_storage: 20GB
-  cpus: '3.0'
+  cpus: "3.0"
   mem_reservation: 6g
   mem_limit: 8g
   pids_limit: 2048
@@ -37,8 +38,8 @@ confluence:
     local:
       http: 8005
   run_after:
-  - web-app-matomo
-  - web-app-mailu
+    - web-app-matomo
+    - web-app-mailu
   lifecycle: unsupported
 # nocheck: dynamic-flag
 css:

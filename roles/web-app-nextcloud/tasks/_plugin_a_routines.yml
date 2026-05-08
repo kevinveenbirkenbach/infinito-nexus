@@ -1,3 +1,4 @@
+---
 - name: "Disable incompatible plugins for {{ plugin_key }} (batched shell, no async)"
   ansible.builtin.shell: |
     # do not set -e here; allow per-line fallbacks
@@ -19,7 +20,7 @@
     )
   failed_when: false
   async: "{{ ASYNC_TIME if ASYNC_ENABLED | bool else omit }}"
-  poll:  "{{ ASYNC_POLL if ASYNC_ENABLED | bool else omit }}"
+  poll: "{{ ASYNC_POLL if ASYNC_ENABLED | bool else omit }}"
 
 - name: install {{ plugin_key }} nextcloud plugin
   # Clear NC appstore-fetcher cooldown (300s) before each attempt so retries
@@ -47,7 +48,7 @@
 
 - include_tasks: _plugin_b_enable_and_configure.yml
   when:
-    - install_result is defined 
+    - install_result is defined
     - >
       install_result.rc == 0
       or "already installed" in install_result.stdout

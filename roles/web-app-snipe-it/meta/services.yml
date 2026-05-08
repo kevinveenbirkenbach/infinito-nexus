@@ -1,8 +1,9 @@
+---
 logout:
   enabled: "{{ 'web-svc-logout' in group_names }}"
   shared: "{{ 'web-svc-logout' in group_names }}"
 ldap:
-  enabled: true  # nocheck: dynamic-flag
+  enabled: true # nocheck: dynamic-flag
   shared: "{{ 'svc-db-openldap' in group_names }}"
 dashboard:
   enabled: "{{ 'web-app-dashboard' in group_names }}"
@@ -20,14 +21,14 @@ redis:
     disabled: true
   enabled: true
 mariadb:
-  enabled: true  # nocheck: dynamic-flag
+  enabled: true # nocheck: dynamic-flag
   shared: "{{ 'svc-db-mariadb' in group_names }}"
 snipe-it:
   version: latest-alpine
   name: snipe-it
   image: snipe/snipe-it
   min_storage: 8GB
-  cpus: '1.0'
+  cpus: "1.0"
   mem_reservation: 256m
   mem_limit: 2g
   pids_limit: 512
@@ -36,19 +37,19 @@ snipe-it:
       oauth2: 16489
       http: 8035
   run_after:
-  - web-app-matomo
-  - web-app-keycloak
-  - web-app-mailu
+    - web-app-matomo
+    - web-app-keycloak
+    - web-app-mailu
   lifecycle: beta
 oauth2:
   enabled: "{{ 'web-app-keycloak' in group_names }}"
   shared: "{{ 'web-app-keycloak' in group_names }}"
   origin:
     host: snipe-it
-    port: '80'
+    port: "80"
   acl:
     blacklist:
-    - /login
+      - /login
 # nocheck: dynamic-flag
 css:
   enabled: false

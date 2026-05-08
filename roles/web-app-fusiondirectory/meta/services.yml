@@ -1,3 +1,4 @@
+---
 logout:
   enabled: "{{ 'web-svc-logout' in group_names }}"
   shared: "{{ 'web-svc-logout' in group_names }}"
@@ -14,7 +15,7 @@ matomo:
   enabled: "{{ 'web-app-matomo' in group_names }}"
   shared: "{{ 'web-app-matomo' in group_names }}"
 ldap:
-  enabled: true  # nocheck: dynamic-flag
+  enabled: true # nocheck: dynamic-flag
   shared: "{{ 'svc-db-openldap' in group_names }}"
 oauth2:
   enabled: "{{ 'web-app-keycloak' in group_names }}"
@@ -23,7 +24,7 @@ oauth2:
     host: fusiondirectory
     port: 80
   allowed_groups:
-  - '{{ lookup(''rbac_group_path'', application_id=''web-app-fusiondirectory'', role=''administrator'') }}'
+    - "{{ lookup('rbac_group_path', application_id='web-app-fusiondirectory', role='administrator') }}"
 fusiondirectory:
   image: tiredofit/fusiondirectory
   version: latest
@@ -39,7 +40,7 @@ fusiondirectory:
     - svc-db-openldap
   lifecycle: beta
   min_storage: 5GB
-  cpus: '0.5'
+  cpus: "0.5"
   mem_reservation: 256m
   mem_limit: 1g
   pids_limit: 512

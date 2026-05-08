@@ -1,11 +1,8 @@
+---
 - include_tasks: utils/once/flag.yml
 
-- name: "Validate configuration"
-  include_tasks: "02_validate.yml"
-  when: MODE_ASSERT | bool
-
 - name: "Include JS routines"
-  include_tasks: "03_javascript.yml"
+  include_tasks: "02_javascript.yml"
 
 - name: "load docker, proxy for '{{ application_id }}'"
   include_role:
@@ -39,7 +36,7 @@
   file:
     path: "{{ DASHBOARD_SIMPLEICONS_STATIC_DIR_HOST }}"
     state: directory
-    mode: '0755'
+    mode: "0755"
   when: DASHBOARD_SIMPLEICONS_ENABLED | bool
 
 - name: Group docker cards
@@ -134,7 +131,7 @@
       meta: flush_handlers
 
     - name: Refresh dashboard cards after Simple Icons becomes reachable
-      include_tasks: "04_simpleicons_refresh.yml"
+      include_tasks: "03_simpleicons_refresh.yml"
 
 - name: Wait for Dashboard HTTP endpoint (required so all logos can be downloaded during initialization)
   uri_retry:

@@ -1,3 +1,4 @@
+---
 logout:
   enabled: "{{ 'web-svc-logout' in group_names }}"
   shared: "{{ 'web-svc-logout' in group_names }}"
@@ -22,7 +23,7 @@ email:
   enabled: "{{ 'web-app-mailu' in group_names }}"
   shared: "{{ 'web-app-mailu' in group_names }}"
 mariadb:
-  enabled: true  # nocheck: dynamic-flag
+  enabled: true # nocheck: dynamic-flag
   shared: "{{ 'svc-db-mariadb' in group_names }}"
 init:
   name: shopware-init
@@ -33,12 +34,12 @@ init:
   pids_limit: 256
 shopware:
   image: composer
-  version: '2.9'
+  version: "2.9"
   min_storage: 20GB
   package:
     name: shopware/production
     version: 6.7.8.2
-  title: '{{ SOFTWARE_NAME }} Shop'
+  title: "{{ SOFTWARE_NAME }} Shop"
   ports:
     local:
       http: 8060
@@ -46,15 +47,15 @@ shopware:
     - web-app-keycloak
     - web-app-mailu
   lifecycle: beta
-  cpus: '1.0'
+  cpus: "1.0"
   mem_reservation: 1g
   mem_limit: 2g
   pids_limit: 1024
 php:
   image: ghcr.io/shopware/docker-base
-  version: '8.3'
+  version: "8.3"
   min_storage: 5GB
-  cpus: '0.5'
+  cpus: "0.5"
   mem_reservation: 256m
   mem_limit: 1g
   pids_limit: 512

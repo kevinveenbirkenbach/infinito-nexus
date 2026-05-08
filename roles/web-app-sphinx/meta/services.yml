@@ -1,3 +1,4 @@
+---
 # nocheck: dynamic-flag
 # nocheck: logout
 logout:
@@ -33,7 +34,7 @@ sphinx:
   run_after:
     - web-app-matomo
   lifecycle: beta
-  cpus: '0.2'
+  cpus: "0.2"
   mem_reservation: 128m
   mem_limit: 256m
   pids_limit: 256

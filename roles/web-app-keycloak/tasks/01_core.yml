@@ -39,7 +39,6 @@
   include_tasks: update/04_rbac_client_scope.yml
 
 - block:
-
     - name: "Load LDAP Update routines for '{{ application_id }}'"
       include_tasks: update/05_ldap.yml
 

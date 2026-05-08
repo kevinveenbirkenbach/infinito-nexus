@@ -1,3 +1,4 @@
+---
 # Matrix-deploy variant overrides for web-app-espocrm.
 # See docs/contributing/artefact/files/role/variants.md for the file format.
 
@@ -25,8 +26,8 @@
       enabled: true
       shared: true
 
-# variant pinning every dynamic services.yml flag to false so the
-# matrix also exercises the out-of-group_names branch.
+    # variant pinning every dynamic services.yml flag to false so the
+    # matrix also exercises the out-of-group_names branch.
     ldap:
       enabled: true
       shared: true

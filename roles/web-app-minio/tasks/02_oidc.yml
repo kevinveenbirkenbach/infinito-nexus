@@ -165,6 +165,6 @@
   args: { executable: /bin/bash }
   no_log: "{{ MASK_CREDENTIALS_IN_LOGS | bool }}"
   async: "{{ ASYNC_TIME if ASYNC_ENABLED | bool else omit }}"
-  poll:  "{{ ASYNC_POLL if ASYNC_ENABLED | bool else omit }}"
+  poll: "{{ ASYNC_POLL if ASYNC_ENABLED | bool else omit }}"
   when:
     - mc_policy_info_raw.rc != 0

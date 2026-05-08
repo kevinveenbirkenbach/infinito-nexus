@@ -1,3 +1,4 @@
+---
 # Matrix-deploy variant overrides per requirement 013. The LDAP
 # variant is the canonical XMPP path because most clients only
 # support SCRAM-SHA-256 over a real password store; the OIDC

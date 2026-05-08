@@ -1,3 +1,4 @@
+---
 - block:
     - name: Include dependency 'sys-svc-webserver-core'
       include_role:
@@ -26,7 +27,7 @@
 
 - name: "Activate Dashboard iFrame notifier for '{{ domain }}'"
   include_role:
-    name:   sys-front-inj-dashboard
+    name: sys-front-inj-dashboard
     public: true
   when: inj_enabled.dashboard
 

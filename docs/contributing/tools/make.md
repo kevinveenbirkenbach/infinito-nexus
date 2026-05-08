@@ -80,13 +80,16 @@ For rules on how to write and structure the `Makefile` itself, see [makefile.md]
 | Category | Command | What it does | When to use it |
 |---|---|---|---|
 | Install lint tooling | `make install-lint` | Installs lint-related tooling. | Use this when you only need the lint stack. |
-| Auto-format | `make autoformat` | Runs all available auto-formatters (`ruff`, `shfmt`, `shellcheck`). Skips any tool that is not installed and reports which ones were skipped. | Use this to apply automatic formatting fixes before committing. |
+| Auto-format | `make autoformat` | Runs every available auto-formatter (`ruff`, `shfmt`, `shellcheck`, `markdownlint-cli2`, `ansible-lint`, `mbake`, `sort-claude-settings`). Skips any tool that is not installed and reports which ones were skipped. Workers run concurrently by default; set `PARALLEL=0` (also accepts `false`/`no`/`off`) to fall back to sequential execution. | Use this to apply automatic formatting fixes before committing. |
 | Lint | `make lint` | Runs the main lint checks for the repository. | Use this when you want a broad lint pass before pushing. |
 | Lint test suite | `make test-lint` | Runs the lint test suite inside the development environment. | Use this when you want CI-like lint validation. |
 | Lint action | `make lint-action` | Runs the GitHub Actions lint checks. | Use this when you changed workflow files or workflow logic. |
-| Lint Ansible | `make lint-ansible` | Runs the Ansible lint checks. | Use this when you changed Ansible roles, inventories, or playbook-related files. |
+| Lint Ansible | `make lint-ansible` | Runs the Ansible lint checks (`ansible-playbook --syntax-check` plus `ansible-lint`). | Use this when you changed Ansible roles, inventories, or playbook-related files. |
 | Lint Python | `make lint-python` | Runs the Python lint checks. | Use this when you changed Python code. |
 | Lint shell | `make lint-shellcheck` | Runs shellcheck lint checks. | Use this when you changed shell scripts. |
+| Lint Markdown | `make lint-markdown` | Runs markdownlint-cli2 against the repository per `.markdownlint-cli2.jsonc`. | Use this when you changed Markdown files. |
+| Lint Galaxy | `make lint-galaxy` | Runs galaxy-importer schema validation against every role. Workers run concurrently by default; set `PARALLEL=0` for sequential execution. | Use this when you changed any `roles/<role>/meta/main.yml` file. |
+| Lint Makefile | `make lint-makefile` | Runs `mbake format --check` against the project Makefile. | Use this when you changed the Makefile. |
 
 ### Test 🧪
 

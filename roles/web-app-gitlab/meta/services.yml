@@ -1,3 +1,4 @@
+---
 oidc:
   enabled: "{{ 'web-app-keycloak' in group_names }}"
   shared: "{{ 'web-app-keycloak' in group_names }}"
@@ -20,14 +21,14 @@ redis:
     disabled: true
   enabled: true
 postgres:
-  enabled: true  # nocheck: dynamic-flag
+  enabled: true # nocheck: dynamic-flag
   shared: "{{ 'svc-db-postgres' in group_names }}"
 gitlab:
   image: gitlab/gitlab-ee
   version: latest
   name: gitlab
   min_storage: 30GB
-  cpus: '4.0'
+  cpus: "4.0"
   mem_reservation: 8g
   mem_limit: 12g
   pids_limit: 4096
@@ -37,9 +38,9 @@ gitlab:
     public:
       ssh: 2202
   run_after:
-  - web-app-matomo
-  - web-app-keycloak
-  - web-app-mailu
+    - web-app-matomo
+    - web-app-keycloak
+    - web-app-mailu
   lifecycle: beta
 # nocheck: dynamic-flag
 css:

@@ -1,11 +1,13 @@
+---
 galaxy_info:
   author: Kevin Veen-Birkenbach
-  description: Deploys OpenCloud, a sovereign file-sync and collaboration suite. Sync, share, and co-edit from any device with single sign-on, central directory, and integrated video meetings.
+  description: Deploys OpenCloud, a sovereign file-sync and collaboration suite. Sync, share, and co-edit from any device with single sign-on, central
+    directory, and integrated video meetings.
   license: Infinito.Nexus Community License (Non-Commercial)
   company: |
     Kevin Veen-Birkenbach
     https://www.veen.world
-  min_ansible_version: '2.9'
+  min_ansible_version: "2.9"
   platforms:
     - name: ArchLinux
       versions:

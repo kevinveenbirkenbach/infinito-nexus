@@ -1,3 +1,4 @@
+---
 postgres:
   enabled: true
   shared: true
@@ -7,7 +8,7 @@ postgres:
   min_storage: 10GB
   backup:
     database_routine: true
-  cpus: '2.0'
+  cpus: "2.0"
   mem_reservation: 4g
   mem_limit: 6g
   pids_limit: 1024

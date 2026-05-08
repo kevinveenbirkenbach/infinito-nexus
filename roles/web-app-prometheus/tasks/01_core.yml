@@ -49,5 +49,5 @@
   include_role:
     name: sys-stk-front-proxy
   vars:
-    domain:     "{{ lookup('domain', application_id) }}"
-    http_port:  "{{ lookup('config', application_id, 'services.prometheus.ports.local.http') }}"
+    domain: "{{ lookup('domain', application_id) }}"
+    http_port: "{{ lookup('config', application_id, 'services.prometheus.ports.local.http') }}"

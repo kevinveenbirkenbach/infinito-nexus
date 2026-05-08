@@ -1,3 +1,4 @@
+---
 # Matrix-deploy variant overrides per requirement 013. Both auth-flow
 # variants ride the same `web-app-oauth2-proxy` sidecar in front of
 # the Akaunting web UI.

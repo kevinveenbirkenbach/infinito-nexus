@@ -37,7 +37,7 @@
   listen:
     - compose up
 
-- name: Build compose 
+- name: Build compose
   ansible.builtin.shell: |
     set -euo pipefail
     compose build || {

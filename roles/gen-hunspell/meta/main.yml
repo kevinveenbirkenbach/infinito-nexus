@@ -1,3 +1,4 @@
+---
 galaxy_info:
   author: Kevin Veen-Birkenbach
   description: Installs Hunspell and configured language packs on Pacman-based systems for spell checking in multiple languages.
@@ -10,7 +11,7 @@ galaxy_info:
     - spellcheck
     - language
   issue_tracker_url: https://s.infinito.nexus/issues
-  min_ansible_version: '2.9'
+  min_ansible_version: "2.9"
   platforms:
     - name: ArchLinux
       versions:

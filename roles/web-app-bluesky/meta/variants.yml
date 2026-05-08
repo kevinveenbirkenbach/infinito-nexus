@@ -1,3 +1,4 @@
+---
 # Matrix-deploy variant overrides for this role (requirement 013
 # alpha-to-beta promotion). Both variants ride the same OIDC →
 # login-broker → social-app handoff (variant A+); the difference is

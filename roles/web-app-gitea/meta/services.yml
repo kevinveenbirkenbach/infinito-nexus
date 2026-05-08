@@ -1,3 +1,4 @@
+---
 logout:
   enabled: "{{ 'web-svc-logout' in group_names }}"
   shared: "{{ 'web-svc-logout' in group_names }}"
@@ -17,7 +18,7 @@ email:
   enabled: "{{ 'web-app-mailu' in group_names }}"
   shared: "{{ 'web-app-mailu' in group_names }}"
 mariadb:
-  enabled: true  # nocheck: dynamic-flag
+  enabled: true # nocheck: dynamic-flag
   shared: "{{ 'svc-db-mariadb' in group_names }}"
 gitea:
   image: gitea/gitea
@@ -30,7 +31,7 @@ gitea:
   mem_reservation: 1g
   mem_limit: 2g
   pids_limit: 1024
-  title: '{{ SOFTWARE_NAME }} Code Hub'
+  title: "{{ SOFTWARE_NAME }} Code Hub"
   configuration:
     repository:
       enable_push_create_user: true
@@ -44,9 +45,9 @@ gitea:
     public:
       ssh: 2201
   run_after:
-  - web-app-matomo
-  - web-app-keycloak
-  - web-app-mailu
+    - web-app-matomo
+    - web-app-keycloak
+    - web-app-mailu
   lifecycle: beta
 # nocheck: dynamic-flag
 redis:
@@ -60,10 +61,10 @@ redis:
 oauth2:
   origin:
     host: application
-    port: '{{ lookup(''config'', ''web-app-gitea'', ''services.gitea.ports.inter'') }}'
+    port: "{{ lookup('config', 'web-app-gitea', 'services.gitea.ports.inter') }}"
   acl:
     blacklist:
-    - /user/login
+      - /user/login
   enabled: "{{ 'web-app-keycloak' in group_names }}"
   shared: "{{ 'web-app-keycloak' in group_names }}"
 # nocheck: dynamic-flag

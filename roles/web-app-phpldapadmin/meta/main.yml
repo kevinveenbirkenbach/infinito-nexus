@@ -1,11 +1,13 @@
+---
 galaxy_info:
   author: Kevin Veen-Birkenbach
-  description: Take control of your LDAP directory with phpldapadmin — a web‑based LDAP client offering an intuitive interface to manage your LDAP directories. This containerized deployment simplifies administration and provides secure, flexible configuration options.
+  description: Take control of your LDAP directory with phpldapadmin — a web‑based LDAP client offering an intuitive interface to manage your LDAP directories.
+    This containerized deployment simplifies administration and provides secure, flexible configuration options.
   license: Infinito.Nexus Community License (Non-Commercial)
   company: |
     Kevin Veen-Birkenbach
     https://www.veen.world
-  min_ansible_version: '2.9'
+  min_ansible_version: "2.9"
   platforms:
     - name: ArchLinux
       versions:

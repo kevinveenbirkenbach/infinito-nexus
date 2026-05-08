@@ -1,7 +1,8 @@
+---
 file:
   enabled: true
   shared: true
-  cpus: '0.2'
+  cpus: "0.2"
   mem_reservation: 128m
   mem_limit: 256m
   pids_limit: 128

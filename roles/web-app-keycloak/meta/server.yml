@@ -1,3 +1,4 @@
+---
 csp:
   flags:
     script-src-elem:
@@ -8,10 +9,10 @@ csp:
       unsafe-inline: true
   whitelist:
     frame-src:
-    - '*'
+      - "*"
 domains:
   canonical:
-  - auth.{{ DOMAIN_PRIMARY }}
+    - auth.{{ DOMAIN_PRIMARY }}
   aliases: []
 networks:
   local:

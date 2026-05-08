@@ -1,3 +1,4 @@
+---
 # RBAC declaration for the in-role plg_system_keycloak OIDC plugin
 # (requirement 013). The plugin maps the Keycloak `groups` claim
 # onto Joomla's built-in usergroup IDs:

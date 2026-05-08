@@ -1,3 +1,4 @@
+---
 - name: "Check if any container is running in {{ lookup('container', application_id, 'directories.instance') }}"
   command: >-
     compose ps -q --filter status=running

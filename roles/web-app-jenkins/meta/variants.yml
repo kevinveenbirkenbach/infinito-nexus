@@ -1,3 +1,4 @@
+---
 # Matrix-deploy variant overrides per requirement 013. Variant 0 is
 # the canonical OIDC variant (Jenkins's `oic-auth` plugin against
 # Keycloak). Variant 1 flips the role onto the `ldap` plugin against

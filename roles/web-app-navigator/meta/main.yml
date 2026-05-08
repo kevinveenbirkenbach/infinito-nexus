@@ -1,11 +1,13 @@
+---
 galaxy_info:
   author: Kevin Veen-Birkenbach
-  description: Interactive presentation platform that guides end-users through the Infinito.Nexus software, demonstrating features and workflows for Administrators, Developers, End-Users, Businesses, and Investors.
+  description: Interactive presentation platform that guides end-users through the Infinito.Nexus software, demonstrating features and workflows for
+    Administrators, Developers, End-Users, Businesses, and Investors.
   license: Infinito.Nexus Community License (Non-Commercial)
   company: |
     Kevin Veen-Birkenbach
     https://www.veen.world
-  min_ansible_version: '2.9'
+  min_ansible_version: "2.9"
   platforms:
     - name: ArchLinux
       versions:

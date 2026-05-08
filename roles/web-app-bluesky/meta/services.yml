@@ -1,3 +1,4 @@
+---
 logout:
   enabled: "{{ 'web-svc-logout' in group_names }}"
   shared: "{{ 'web-svc-logout' in group_names }}"
@@ -34,7 +35,7 @@ oauth2:
       - /.well-known/
       - /robots.txt
   allowed_groups:
-  - '{{ lookup(''rbac_group_path'', application_id=''web-app-bluesky'', role=''administrator'') }}'
+    - "{{ lookup('rbac_group_path', application_id='web-app-bluesky', role='administrator') }}"
 # nocheck: shared
 # nocheck: dynamic-flag
 web:
@@ -44,7 +45,7 @@ web:
       http: 8031
       oauth2: 16496
   min_storage: 5GB
-  cpus: '0.5'
+  cpus: "0.5"
   mem_reservation: 256m
   mem_limit: 1g
   pids_limit: 512
@@ -55,7 +56,7 @@ view:
     local:
       http: 8051
   min_storage: 1GB
-  cpus: '0.2'
+  cpus: "0.2"
   mem_reservation: 128m
   mem_limit: 256m
   pids_limit: 256
@@ -63,7 +64,7 @@ pds:
   image: ghcr.io/bluesky-social/pds
   version: latest
   min_storage: 10GB
-  cpus: '1.0'
+  cpus: "1.0"
   mem_reservation: 1g
   mem_limit: 2g
   pids_limit: 1024
@@ -78,7 +79,7 @@ broker:
     local:
       http: 8076
   min_storage: 1GB
-  cpus: '0.2'
+  cpus: "0.2"
   mem_reservation: 128m
   mem_limit: 256m
   pids_limit: 256
@@ -94,7 +95,7 @@ api:
     local:
       http: 8030
   min_storage: 5GB
-  cpus: '0.5'
+  cpus: "0.5"
   mem_reservation: 256m
   mem_limit: 1g
   pids_limit: 512
@@ -111,7 +112,7 @@ bluesky:
     - web-app-mailu
   lifecycle: beta
   min_storage: 1GB
-  cpus: '0.5'
+  cpus: "0.5"
   mem_reservation: 256m
   mem_limit: 1g
   pids_limit: 512

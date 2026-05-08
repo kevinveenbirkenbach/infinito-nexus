@@ -1,3 +1,4 @@
+---
 - name: Load LDAP configuration variables
   include_vars:
     file: "ldap.yml"
@@ -40,7 +41,7 @@
       WHERE name = '{{ OPENPROJECT_LDAP.name }}';
   when: ldap_check.query_result | length > 0
   async: "{{ ASYNC_TIME if ASYNC_ENABLED | bool else omit }}"
-  poll:  "{{ ASYNC_POLL if ASYNC_ENABLED | bool else omit }}"
+  poll: "{{ ASYNC_POLL if ASYNC_ENABLED | bool else omit }}"
 
 - name: Create new LDAP auth source
   community.postgresql.postgresql_query:
@@ -76,4 +77,4 @@
       );
   when: ldap_check.query_result | length == 0
   async: "{{ ASYNC_TIME if ASYNC_ENABLED | bool else omit }}"
-  poll:  "{{ ASYNC_POLL if ASYNC_ENABLED | bool else omit }}"
+  poll: "{{ ASYNC_POLL if ASYNC_ENABLED | bool else omit }}"

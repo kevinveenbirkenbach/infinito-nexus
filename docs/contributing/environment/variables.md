@@ -27,6 +27,7 @@ App-specific container variables live next to the role that owns them, usually i
 | Variable | Purpose | Default / values | Defined in |
 |---|---|---|---|
 | `IS_WSL2` | Indicates whether the current host looks like WSL2. | `true` or `false`. | [runtime.sh](../../../scripts/meta/env/runtime.sh) |
+| `PARALLEL` | Toggles per-tool worker concurrency in `make autoformat` and `make lint-galaxy`. In autoformat, `shfmt`+`shellcheck` stay paired on one worker (they both write to `scripts/*.sh`); in galaxy, falsy demotes the xargs fan-out to one worker (sequential). Concurrent is the default. | `true` (concurrent); falsy values are `0`, `false`, `no`, `off`. | [autoformat.sh](../../../scripts/lint/autoformat.sh), [galaxy.sh](../../../scripts/lint/galaxy.sh) |
 | `NIX_CONFIG` | Optional pass-through Nix configuration used by build and compose flows. | Optional. | [github.sh](../../../scripts/meta/env/github.sh), [compose.yml](../../../compose.yml) |
 | `PIP` | Pip command derived from `PYTHON`. | `${PYTHON} -m pip` | [python.sh](../../../scripts/meta/env/python.sh) |
 | `PYTHONPATH` | Python import path for helper scripts. | `.` | [python.sh](../../../scripts/meta/env/python.sh) |

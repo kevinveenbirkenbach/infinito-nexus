@@ -1,4 +1,4 @@
-
+---
 - name: "Update REALM settings (merge LDAP component .config)"
   keycloak_kcadm_update:
     object_kind: "component"
@@ -42,7 +42,7 @@
 
 - name: Assert LDAP component id resolved
   assert:
-    that: [ "ldap_cmp_id not in ['', 'null']" ]
+    that: ["ldap_cmp_id not in ['', 'null']"]
     fail_msg: "LDAP component '{{ KEYCLOAK_LDAP_CMP_NAME }}' not found in Keycloak."
   when: MODE_ASSERT | bool
 
@@ -79,7 +79,7 @@
 
 - name: Ensure mapper exists in dictionary
   assert:
-    that: [ "desired_group_mapper_raw | length > 0" ]
+    that: ["desired_group_mapper_raw | length > 0"]
     fail_msg: "'ldap-roles' mapper not found in dictionary under LDAP component."
   when: MODE_ASSERT | bool
 
@@ -97,7 +97,8 @@
 - name: Extract desired groups.path (if any)
   set_fact:
     desired_groups_path: "{{ (desired_group_mapper.config['groups.path'] | default([])) | first | default('') | trim }}"
-    desired_groups_top: "{{ ((desired_group_mapper.config['groups.path'] | default([])) | first | default('') | trim).lstrip('/') | split('/') | first | default('') }}"
+    desired_groups_top: "{{ ((desired_group_mapper.config['groups.path'] | default([])) | first | default('') | trim).lstrip('/') | split('/') | first | default('')
+      }}"
   changed_when: false
 
 # ---------------------------------------------------------------------------

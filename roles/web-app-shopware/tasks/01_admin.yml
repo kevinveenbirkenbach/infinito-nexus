@@ -1,3 +1,4 @@
+---
 - name: "Rename default Shopware admin user to {{ lookup('users', 'administrator').username }}"
   shell: |
     container exec -i --user {{ SHOPWARE_USER }} {{ SHOPWARE_WEB_CONTAINER }} sh -lc '
