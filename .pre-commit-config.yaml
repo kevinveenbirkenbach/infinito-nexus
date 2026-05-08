@@ -1,3 +1,7 @@
+default_install_hook_types:
+  - pre-commit
+  - pre-push
+
 repos:
   - repo: local
     hooks:
@@ -7,9 +11,18 @@ repos:
         language: system
         pass_filenames: false
         exclude: \.(md|rst|txt)$
+        stages: [pre-commit]
       - id: make-test-lint
         name: Run make test-lint (md-only commits)
         entry: bash -c 'git diff --cached --name-only | grep -qv "\.md$" || make test-lint'
         language: system
         pass_filenames: false
         files: \.md$
+        stages: [pre-commit]
+      - id: make-test-external
+        name: Run make test-external (pre-push gate)
+        entry: make test-external
+        language: system
+        pass_filenames: false
+        always_run: true
+        stages: [pre-push]
