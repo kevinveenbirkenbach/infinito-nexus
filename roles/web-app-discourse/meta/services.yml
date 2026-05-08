@@ -4,9 +4,10 @@ asset:
 oidc:
   enabled: "{{ 'web-app-keycloak' in group_names }}"
   shared: "{{ 'web-app-keycloak' in group_names }}"
+# nocheck: dynamic-flag
 ldap:
-  enabled: "{{ 'svc-db-openldap' in group_names }}"
-  shared: "{{ 'svc-db-openldap' in group_names }}"
+  enabled: false
+  shared: false
 logout:
   enabled: "{{ 'web-svc-logout' in group_names }}"
   shared: "{{ 'web-svc-logout' in group_names }}"
@@ -57,7 +58,7 @@ discourse:
   mem_reservation: 1g
   mem_limit: 2g
   pids_limit: 1024
-  disable_local_logins: "{{ ('web-app-keycloak' in group_names) and not ('svc-db-openldap' in group_names) }}"
+  disable_local_logins: "{{ (lookup('config', 'web-app-discourse', 'services.oidc.enabled') | bool) and not (lookup('config', 'web-app-discourse', 'services.ldap.enabled') | bool) }}"
 # nocheck: dynamic-flag
 css:
   enabled: true

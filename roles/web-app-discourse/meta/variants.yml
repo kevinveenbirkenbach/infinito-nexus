@@ -28,9 +28,6 @@
     prometheus:
       enabled: true
       shared: true
-    ldap:
-      enabled: true
-      shared: true
 - services:
     asset:
       enabled: false
@@ -53,15 +50,5 @@
     postgres:
       shared: false
     prometheus:
-      enabled: false
-      shared: false
-    ldap:
-      enabled: false
-      shared: false
-- services:
-    ldap:
-      enabled: true
-      shared: true
-    oidc:
       enabled: false
       shared: false
