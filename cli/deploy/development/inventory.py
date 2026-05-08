@@ -124,8 +124,8 @@ def _resolve_round_include(
 
 @dataclass(frozen=True)
 class DevInventorySpec:
-    """Everything `infinito create inventory` needs to materialise one
-    development inventory folder.
+    """Everything `infinito administration inventory provision` needs to
+    materialise one development inventory folder.
 
     `extra_vars` wins over the implicit `STORAGE_CONSTRAINED` / `RUNTIME`
     overrides so callers (and tests) keep the documented "user-provided
@@ -200,7 +200,8 @@ def _bake_overrides(
     variant_payloads: Mapping[str, Any],
 ) -> dict[str, Any]:
     """Merge the per-app variant payloads under `applications:` into the
-    `--vars` JSON the init step will hand to `infinito create inventory`.
+    `--vars` JSON the init step will hand to
+    `infinito administration inventory provision`.
     Caller-supplied `extra_vars` (already inside `base_overrides`) win
     over the variant bake when the same key is set on both sides — that
     matches the existing "user vars always win" rule."""
@@ -244,8 +245,9 @@ def build_dev_inventory(compose: Compose, spec: DevInventorySpec) -> None:
 
     cmd = [
         "infinito",
-        "create",
+        "administration",
         "inventory",
+        "provision",
         inv_root,
         "--host",
         "localhost",

@@ -56,8 +56,8 @@ css:
   shared: true
 # nocheck: dynamic-flag
 javascript:
-  enabled: true
-  shared: true
+  enabled: false
+  shared: false
 prometheus:
   enabled: "{{ 'web-app-prometheus' in group_names }}"
   shared: "{{ 'web-app-prometheus' in group_names }}"

@@ -43,7 +43,7 @@ fi
 echo ">>> Creating inventory at ${INVENTORY_FILE}"
 echo ">>> Include apps (${APPS_COUNT}): ${APPS_CSV}"
 
-infinito create inventory "${inv_dir}" \
+infinito administration inventory provision "${inv_dir}" \
 	--inventory-file "${INVENTORY_FILE}" \
 	--host "${LIMIT_HOST}" \
 	--ssl-disabled \

@@ -94,7 +94,7 @@ echo ">>> Initializing inventory inside container"
     fi
 
     echo \">>> Creating inventory at \${INVENTORY_FILE}\"
-    infinito create inventory \"\${inv_dir}\" \
+    infinito administration inventory provision \"\${inv_dir}\" \
       --inventory-file \"\${INVENTORY_FILE}\" \
       --vars '${RUNTIME_VARS_JSON}' \
       --host 'localhost' \

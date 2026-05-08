@@ -6,7 +6,7 @@ import sys
 from pathlib import Path
 from typing import Any
 
-from cli.create.inventory.services_disabler import (
+from cli.administration.inventory.provision.services_disabler import (
     ServicesDisabledConflictError,
     assert_services_disabled_inventory_consistency_from_env,
 )

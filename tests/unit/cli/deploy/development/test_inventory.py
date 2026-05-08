@@ -355,18 +355,21 @@ class TestBuildDevInventory(unittest.TestCase):
         autospec=True,
         return_value=False,
     )
-    def test_invokes_infinito_create_inventory_with_spot_vars_file(
+    def test_invokes_infinito_inventory_provision_with_spot_vars_file(
         self,
         _mirrors_mock: MagicMock,
         _variants_mock: MagicMock,
     ) -> None:
         build_dev_inventory(self.compose, _spec())
 
-        # First exec call is the `infinito create inventory ...` cmd; the
-        # second is the password-file ensure step.
+        # First exec call is the `infinito administration inventory provision ...`
+        # cmd; the second is the password-file ensure step.
         self.assertEqual(self.compose.exec.call_count, 2)
         first_cmd = self.compose.exec.call_args_list[0].args[0]
-        self.assertEqual(first_cmd[0:3], ["infinito", "create", "inventory"])
+        self.assertEqual(
+            first_cmd[0:4],
+            ["infinito", "administration", "inventory", "provision"],
+        )
         # SPOT enforcement: the vars-file MUST come from the common.py constant.
         vars_file_index = first_cmd.index("--vars-file") + 1
         self.assertEqual(first_cmd[vars_file_index], DEV_INVENTORY_VARS_FILE)

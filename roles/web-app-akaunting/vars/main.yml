@@ -1,7 +1,6 @@
 
 # General
 application_id:                       "web-app-akaunting"
-js_application_name:                  "Akaunting"
 
 # Database
 database_password:                    "{{ lookup('config', application_id, 'credentials.database_password') }}"  # nocheck: lookup-config-path

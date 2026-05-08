@@ -30,7 +30,7 @@ MAX_ITEMS_PER_FOLDER = 12
 FLAT_STRUCTURE_WHITELIST = {
     ".github/workflows",
     "cli",
-    "cli/create/inventory",
+    "cli/administration/inventory/provision",
     "cli/deploy/development",
     "group_vars/all",
     "plugins/filter",

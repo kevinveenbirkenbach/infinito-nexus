@@ -32,7 +32,7 @@ HOST_VARS_FILE="${INVENTORY_DIR}/host_vars/localhost.yml"
 export HOST_VARS_FILE
 
 # SPOT: canonical repo-relative path to the development vars file that
-# `infinito create inventory --vars-file <...>` consumes. Anything that
+# `infinito administration inventory provision --vars-file <...>` consumes. Anything that
 # would otherwise hard-code "inventories/development/default.yml" MUST
 # read this variable instead. The Python side mirrors this default in
 # cli.deploy.development.common.DEV_INVENTORY_VARS_FILE; a unit test

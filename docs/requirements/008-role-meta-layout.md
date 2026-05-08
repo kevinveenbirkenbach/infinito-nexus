@@ -310,8 +310,8 @@ the old `compose.…` or top-level paths.
       - `cli/meta/roles/applications/resolution/services/resolver.py`
       - `cli/meta/roles/applications/ressources/__main__.py`
       - `cli/meta/roles/applications/sufficient_storage/__main__.py`
-      - `cli/create/inventory/services_disabler.py`
-      - `cli/create/credentials/__main__.py`
+      - `cli/administration/inventory/provision/services_disabler.py`
+      - `cli/administration/inventory/credentials/__main__.py`
       - any other consumer discovered during migration that references
         `schema/main.yml`, `users/main.yml`, or `config/main.yml`.
 - [ ] No legacy fallback to the old paths is implemented; the new paths are

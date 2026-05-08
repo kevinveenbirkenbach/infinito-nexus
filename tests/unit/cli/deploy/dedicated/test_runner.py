@@ -4,7 +4,9 @@ import subprocess
 import unittest
 from typing import Any
 
-from cli.create.inventory.services_disabler import ServicesDisabledConflictError
+from cli.administration.inventory.provision.services_disabler import (
+    ServicesDisabledConflictError,
+)
 from cli.deploy.dedicated import runner
 
 

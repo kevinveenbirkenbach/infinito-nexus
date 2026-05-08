@@ -7,7 +7,7 @@ import subprocess
 from collections.abc import Mapping
 from typing import Any
 
-from cli.create.inventory.services_disabler import (
+from cli.administration.inventory.provision.services_disabler import (
     find_provider_roles,
     parse_services_disabled,
 )

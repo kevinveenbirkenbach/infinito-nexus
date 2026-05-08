@@ -5,7 +5,7 @@ import json
 import os
 from typing import Any
 
-from cli.create.inventory.services_disabler import (
+from cli.administration.inventory.provision.services_disabler import (
     find_provider_roles,
     parse_services_disabled,
 )
@@ -109,7 +109,7 @@ def handler(args: argparse.Namespace) -> int:
         raise SystemExit("Primary app list is empty")
 
     # SERVICES_DISABLED removes provider roles from the inventory at
-    # `infinito create inventory` time anyway, so do the same filter on
+    # `infinito administration inventory provision` time anyway, so do the same filter on
     # the primary list here. Otherwise the variant-aware resolver would
     # still pull a disabled provider in via service edges, only to have
     # the inventory step strip it back out — leaving the round's

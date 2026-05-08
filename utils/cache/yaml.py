@@ -124,8 +124,8 @@ def load_yaml(path, *, default_if_missing: Any = _MISSING) -> dict[str, Any]:
     - Default (`_MISSING`): raise `FileNotFoundError` for callers that
       want to fail loud (resolution code).
     - Pass a value (typically `{}`): return that value when the file
-      does not exist, mirroring the historical
-      `cli.create.inventory.yaml_io.load_yaml` behaviour.
+      does not exist, matching the behaviour expected by
+      `cli.administration.inventory.provision.yaml_io.load_yaml`.
 
     Raises `TypeError` when the YAML root is not a mapping; use
     `load_yaml_any` for files whose root is a list or scalar.

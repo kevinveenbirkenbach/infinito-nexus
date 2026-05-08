@@ -189,7 +189,7 @@ def run_in_container(
     """
     Full CI "run" mode:
       - start CI container (host docker socket mode)
-      - run `infinito create inventory` (with forwarded inventory_args)
+      - run `infinito administration inventory provision` (with forwarded inventory_args)
       - ensure CI vault password file
       - run cli.deploy.dedicated (with forwarded deploy_args)
       - always remove container at the end
@@ -211,12 +211,14 @@ def run_in_container(
 
         # 1) Create CI inventory
         print(
-            ">>> Creating CI inventory inside container (infinito create inventory)..."
+            ">>> Creating CI inventory inside container "
+            "(infinito administration inventory provision)..."
         )
         inventory_cmd: list[str] = [
             "infinito",
-            "create",
+            "administration",
             "inventory",
+            "provision",
             inv_root,
             "--host",
             "localhost",
@@ -322,7 +324,7 @@ def exec_in_container(name: str, cmd_args: list[str]) -> int:
 def split_inventory_and_deploy_args(rest: list[str]) -> tuple[list[str], list[str]]:
     """
     Split remaining arguments into:
-      - inventory_args: passed to cli.create.inventory
+      - inventory_args: passed to cli.administration.inventory.provision
       - deploy_args:    passed to cli.deploy.dedicated
 
     Convention:
