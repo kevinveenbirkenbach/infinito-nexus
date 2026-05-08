@@ -27,6 +27,11 @@ jobs:
           python -m pip install --upgrade pip
           pip install ansible-core ansible-lint
 
+      - name: Install required Ansible collections
+        run: |
+          ansible-galaxy collection install \
+            -r requirements/requirements.galaxy.yml
+
       - name: Show Docker version
         run: docker version
 
