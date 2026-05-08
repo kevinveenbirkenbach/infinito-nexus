@@ -160,6 +160,7 @@
     src: "{{ _playwright_spec_src }}"
     dest: "{{ _playwright_stage_tests_dir }}/playwright.spec.js"
     mode: "0644"
+    diff: false
 
 # Stage the shared service-gating helper next to the spec so the spec can
 # `require("./service-gating")`. See docs/requirements/006 for the contract.
