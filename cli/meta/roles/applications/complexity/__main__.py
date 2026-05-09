@@ -85,25 +85,33 @@ def _resolve_transitively(
     registry: dict[str, dict[str, Any]],
     *,
     truth: TruthFn,
+    max_level: int | None = None,
 ) -> list[str]:
+    """BFS over shared-service deps. ``max_level`` caps recursion depth:
+    ``1`` returns direct deps only, ``2`` adds their direct deps, etc.
+    ``None`` walks the full closure."""
     seen: set[str] = {start_role}
     order: list[str] = []
-    queue: list[str] = list(
-        _direct_service_dep_roles(
-            _load_role_services(roles_dir / start_role), registry, truth=truth
-        )
+    initial = _direct_service_dep_roles(
+        _load_role_services(roles_dir / start_role), registry, truth=truth
     )
+    queue: list[tuple[str, int]] = [(role_name, 1) for role_name in initial]
 
     while queue:
-        role_name = queue.pop(0)
+        role_name, depth = queue.pop(0)
         if role_name in seen:
             continue
         seen.add(role_name)
         order.append(role_name)
+        if max_level is not None and depth >= max_level:
+            continue
+        next_depth = depth + 1
         queue.extend(
-            _direct_service_dep_roles(
+            (next_role, next_depth)
+            for next_role in _direct_service_dep_roles(
                 _load_role_services(roles_dir / role_name), registry, truth=truth
             )
+            if next_role not in seen
         )
     return order
 
@@ -112,12 +120,13 @@ def compute_complexity_rows(
     roles_dir: Path,
     *,
     include_group_names: bool = True,
+    max_level: int | None = None,
 ) -> list[tuple[str, int, list[str]]]:
     """Return ``(role_name, points, services)`` per application role.
 
-    ``points`` is the number of transitively reached provider roles.
-    ``services`` is the same list, in BFS-discovery order. The role
-    itself is never counted.
+    ``points`` is the number of reached provider roles within
+    ``max_level`` BFS hops (``None`` = unbounded). ``services`` is the
+    same list in BFS-discovery order. The role itself is never counted.
     """
     registry = build_service_registry_from_roles_dir(roles_dir)
     truth = _truth_predicate(include_group_names=include_group_names)
@@ -126,7 +135,13 @@ def compute_complexity_rows(
     for role_dir in sorted(p for p in roles_dir.iterdir() if p.is_dir()):
         if not _is_application_role(role_dir):
             continue
-        deps = _resolve_transitively(role_dir.name, roles_dir, registry, truth=truth)
+        deps = _resolve_transitively(
+            role_dir.name,
+            roles_dir,
+            registry,
+            truth=truth,
+            max_level=max_level,
+        )
         rows.append((role_dir.name, len(deps), deps))
     return rows
 
@@ -169,7 +184,21 @@ def main(argv: list[str] | None = None) -> int:
             "flags count as deps."
         ),
     )
+    p.add_argument(
+        "-L",
+        "--level",
+        type=int,
+        default=None,
+        metavar="N",
+        help=(
+            "Limit recursion depth: 1 = direct deps only, 2 = direct + "
+            "their direct, ... Default: unbounded (full closure)."
+        ),
+    )
     args = p.parse_args(argv)
+
+    if args.level is not None and args.level < 1:
+        p.error("--level/-L must be >= 1")
 
     roles_dir = PROJECT_ROOT / "roles"
     if not roles_dir.is_dir():
@@ -177,7 +206,9 @@ def main(argv: list[str] | None = None) -> int:
         return 1
 
     rows = compute_complexity_rows(
-        roles_dir, include_group_names=not args.no_group_names
+        roles_dir,
+        include_group_names=not args.no_group_names,
+        max_level=args.level,
     )
 
     if args.sort == "points":

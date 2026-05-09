@@ -121,6 +121,33 @@ class TestComplexityRows(unittest.TestCase):
             self.assertEqual(row_map["r1"][1], 0)
             self.assertEqual(row_map["r1"][2], [])
 
+    def test_level_caps_recursion_depth(self) -> None:
+        with tempfile.TemporaryDirectory() as td:
+            roles_dir = Path(td) / "roles"
+            roles_dir.mkdir()
+            self._build_chain_roles(roles_dir)
+
+            rows_full = compute_complexity_rows(roles_dir)
+            rows_l1 = compute_complexity_rows(roles_dir, max_level=1)
+            rows_l2 = compute_complexity_rows(roles_dir, max_level=2)
+
+            full_map = {row[0]: row for row in rows_full}
+            l1_map = {row[0]: row for row in rows_l1}
+            l2_map = {row[0]: row for row in rows_l2}
+
+            # r3 -> r2 -> r1: full=2, level1=1 (just r2), level2=2 (r2, r1)
+            self.assertEqual(full_map["r3"][1], 2)
+            self.assertEqual(full_map["r3"][2], ["r2", "r1"])
+
+            self.assertEqual(l1_map["r3"][1], 1)
+            self.assertEqual(l1_map["r3"][2], ["r2"])
+
+            self.assertEqual(l2_map["r3"][1], 2)
+            self.assertEqual(l2_map["r3"][2], ["r2", "r1"])
+
+            # r2 has only r1 as a direct dep -- level 1 already covers it.
+            self.assertEqual(l1_map["r2"][2], ["r1"])
+
     def test_non_application_roles_are_skipped(self) -> None:
         with tempfile.TemporaryDirectory() as td:
             roles_dir = Path(td) / "roles"
