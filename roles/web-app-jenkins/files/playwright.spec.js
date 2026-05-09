@@ -1,6 +1,7 @@
 const { test, expect } = require("@playwright/test");
-const { skipUnlessServiceEnabled } = require("./service-gating");
+const { skipUnlessServiceEnabled, isServiceEnabled } = require("./service-gating");
 
+const { runGuestFlow, runBiberFlow, runAdminFlow } = require("./personas");
 test.use({ ignoreHTTPSErrors: true });
 
 function decodeDotenvQuotedValue(value) {
@@ -64,4 +65,35 @@ test("LDAP: Jenkins LDAP plugin authenticates against svc-db-openldap (variant 1
   await p.fill(adminPassword);
   await page.locator("button[name='Submit'], input[type='submit']").first().click();
   await expect(page.locator("body")).toBeVisible({ timeout: 60_000 });
+});
+
+// Persona scenarios (req 019 Rule 3).
+// Bodies live in the shared helper roles/test-e2e-playwright/files/personas.js
+// so every role's persona flow stays consistent.
+
+test("guest: public-landing → auth chain → never authenticated", async ({ page }) => {
+  await runGuestFlow(page);
+});
+
+test("biber: dashboard → app → universal logout", async ({ page }) => {
+  await runBiberFlow(page);
+});
+
+test("administrator: dashboard → prometheus → app → universal logout", async ({ page }) => {
+  await runAdminFlow(page, {
+    adminInteraction: async (interactivePage) => {
+      // web-app-jenkins admin-only interaction: open a management surface.
+      const link = interactivePage
+        .getByRole("link", { name: /^(manage jenkins|configure system|nodes|plugins|users)$/i })
+        .first();
+      if (await link.isVisible({ timeout: 10_000 }).catch(() => false)) {
+        await link.click().catch(() => {});
+        await interactivePage.waitForLoadState("domcontentloaded", { timeout: 30_000 }).catch(() => {});
+        await expect(interactivePage.locator("body")).toContainText(
+          /manage jenkins|configure system|nodes|plugins|users|credentials/i,
+          { timeout: 30_000 },
+        );
+      }
+    },
+  });
 });

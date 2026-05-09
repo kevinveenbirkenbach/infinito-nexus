@@ -1,6 +1,7 @@
 const { test, expect } = require("@playwright/test");
-const { skipUnlessServiceEnabled } = require("./service-gating");
+const { skipUnlessServiceEnabled, isServiceEnabled } = require("./service-gating");
 
+const { runGuestFlow, runBiberFlow, runAdminFlow } = require("./personas");
 test.use({ ignoreHTTPSErrors: true });
 
 function decodeDotenvQuotedValue(value) {
@@ -103,4 +104,16 @@ test("administrator: oauth2-proxy gates the LibreTranslate UI through Keycloak",
       message: "expected the UI to redirect to Keycloak again after logout"
     })
     .toContain(expectedOidcAuthUrl);
+});
+
+// Persona scenarios (req 019 Rule 3).
+// Bodies live in the shared helper roles/test-e2e-playwright/files/personas.js
+// so every role's persona flow stays consistent.
+
+test("guest: public-landing → auth chain → never authenticated", async ({ page }) => {
+  await runGuestFlow(page);
+});
+
+test("biber: dashboard → app → universal logout", async ({ page }) => {
+  await runBiberFlow(page);
 });

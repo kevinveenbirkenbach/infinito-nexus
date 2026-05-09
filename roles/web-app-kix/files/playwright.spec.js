@@ -1,5 +1,7 @@
 const { test, expect, request } = require("@playwright/test");
 
+const { skipUnlessServiceEnabled, isServiceEnabled } = require("./service-gating");
+const { runGuestFlow, runBiberFlow, runAdminFlow } = require("./personas");
 test.use({ ignoreHTTPSErrors: true });
 
 function decodeDotenvQuotedValue(value) {
@@ -183,4 +185,16 @@ test("administrator: full login flow (dashboard → KIX card → OAuth2-proxy �
 test("biber (granted web-app-kix-user via Keycloak): full login flow (dashboard → KIX card → OAuth2-proxy → Keycloak → KIX-LDAP login → KIX UI → universal logout)", async ({ page }) => {
   await ensureUserInGroup(biberUsername, kixUserGroupPath);
   await runKixLoginLogoutFlow(page, biberUsername, biberPassword);
+});
+
+// Persona scenarios (req 019 Rule 3).
+// Bodies live in the shared helper roles/test-e2e-playwright/files/personas.js
+// so every role's persona flow stays consistent.
+
+test("guest: public-landing → auth chain → never authenticated", async ({ page }) => {
+  await runGuestFlow(page);
+});
+
+test("biber: dashboard → app → universal logout", async ({ page }) => {
+  await runBiberFlow(page);
 });

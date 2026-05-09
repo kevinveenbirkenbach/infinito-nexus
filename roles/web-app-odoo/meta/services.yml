@@ -17,6 +17,7 @@ matomo:
 email:
   enabled: "{{ 'web-app-mailu' in group_names }}"
   shared: "{{ 'web-app-mailu' in group_names }}"
+# nocheck: playwright-service-flag — DB engine, covered by role-local integration tests
 postgres:
   enabled: true # nocheck: dynamic-flag
   shared: "{{ 'svc-db-postgres' in group_names }}"
@@ -52,6 +53,7 @@ odoo:
     - web-app-mailu
   lifecycle: beta
 # nocheck: dynamic-flag
+# nocheck: playwright-service-flag — DB engine, covered by role-local integration tests
 redis:
   enabled: true
   shared: false
@@ -60,10 +62,12 @@ redis:
   mem_limit: 512m
   pids_limit: 256
 # nocheck: dynamic-flag
+# nocheck: playwright-service-flag — canonical:cdn alias of static-asset provider
 css:
   enabled: false
   shared: true
 # nocheck: dynamic-flag
+# nocheck: playwright-service-flag — canonical:cdn alias of static-asset provider
 javascript:
   enabled: false
   shared: true

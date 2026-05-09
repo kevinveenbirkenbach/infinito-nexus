@@ -24,10 +24,12 @@ ldap:
   shared: "{{ 'svc-db-openldap' in group_names }}"
 # nocheck: shared
 # nocheck: dynamic-flag
+# nocheck: playwright-service-flag — DB engine, covered by role-local integration tests
 redis:
   backup:
     disabled: true
   enabled: true
+# nocheck: playwright-service-flag — DB engine, covered by role-local integration tests
 postgres:
   enabled: true # nocheck: dynamic-flag
   shared: "{{ 'svc-db-postgres' in group_names }}"
@@ -52,10 +54,12 @@ baserow:
     - web-app-mailu
   lifecycle: beta
 # nocheck: dynamic-flag
+# nocheck: playwright-service-flag — canonical:cdn alias of static-asset provider
 css:
   enabled: true
   shared: true
 # nocheck: dynamic-flag
+# nocheck: playwright-service-flag — canonical:cdn alias of static-asset provider
 javascript:
   enabled: false
   shared: false

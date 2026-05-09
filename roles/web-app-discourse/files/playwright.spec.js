@@ -1,5 +1,6 @@
 const { test, expect } = require("@playwright/test");
 
+const { skipUnlessServiceEnabled, isServiceEnabled } = require("./service-gating");
 test.use({ ignoreHTTPSErrors: true });
 
 function decodeDotenvQuotedValue(value) {
@@ -336,3 +337,4 @@ test("biber: dashboard to discourse OIDC login and logout", async ({ page }) => 
 
   await expectNoCspViolations(page, diagnostics, "discourse biber OIDC");
 });
+

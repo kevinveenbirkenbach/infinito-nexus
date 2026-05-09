@@ -34,6 +34,7 @@ jenkins:
   mem_limit: 2g
   pids_limit: 1024
 # nocheck: dynamic-flag
+# nocheck: playwright-service-flag — canonical:cdn alias of static-asset provider
 css:
   enabled: true
   shared: true

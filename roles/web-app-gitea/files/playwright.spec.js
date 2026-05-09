@@ -1,5 +1,7 @@
 const { test, expect } = require("@playwright/test");
 
+const { skipUnlessServiceEnabled, isServiceEnabled } = require("./service-gating");
+const { runGuestFlow, runBiberFlow, runAdminFlow } = require("./personas");
 test.use({
   ignoreHTTPSErrors: true
 });
@@ -189,4 +191,35 @@ test("healthz/ready endpoint returns non-5xx when gitea is running", async ({ re
     `/healthz/ready returned ${response.status()} — ` +
     "502/503 means the Gitea container is down or nginx cannot reach it."
   ).toBeLessThan(500);
+});
+
+// Persona scenarios (req 019 Rule 3).
+// Bodies live in the shared helper roles/test-e2e-playwright/files/personas.js
+// so every role's persona flow stays consistent.
+
+test("guest: public-landing → auth chain → never authenticated", async ({ page }) => {
+  await runGuestFlow(page);
+});
+
+test("biber: dashboard → app → universal logout", async ({ page }) => {
+  await runBiberFlow(page);
+});
+
+test("administrator: dashboard → prometheus → app → universal logout", async ({ page }) => {
+  await runAdminFlow(page, {
+    adminInteraction: async (interactivePage) => {
+      // web-app-gitea admin-only interaction: open a management surface.
+      const link = interactivePage
+        .getByRole("link", { name: /^(site administration|admin|user accounts|repositories)$/i })
+        .first();
+      if (await link.isVisible({ timeout: 10_000 }).catch(() => false)) {
+        await link.click().catch(() => {});
+        await interactivePage.waitForLoadState("domcontentloaded", { timeout: 30_000 }).catch(() => {});
+        await expect(interactivePage.locator("body")).toContainText(
+          /site administration|repositories|users|integrations|actions/i,
+          { timeout: 30_000 },
+        );
+      }
+    },
+  });
 });

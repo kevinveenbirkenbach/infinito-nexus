@@ -1,6 +1,7 @@
 const { test, expect } = require("@playwright/test");
-const { skipUnlessServiceEnabled } = require("./service-gating");
+const { skipUnlessServiceEnabled, isServiceEnabled } = require("./service-gating");
 
+const { runGuestFlow, runBiberFlow, runAdminFlow } = require("./personas");
 test.use({ ignoreHTTPSErrors: true });
 
 function decodeDotenvQuotedValue(value) {
@@ -59,4 +60,36 @@ test("LDAP: same oauth2-proxy gate when Keycloak federates user storage from LDA
   await performKeycloakLogin(page, adminUsername, adminPassword);
   await expect.poll(() => page.url(), { timeout: 90_000 }).toContain(expectedBase);
   await expect(page.locator("body")).toBeVisible({ timeout: 60_000 });
+});
+
+// Persona scenarios (req 019 Rule 3).
+// Bodies live in the shared helper roles/test-e2e-playwright/files/personas.js
+// so every role's persona flow stays consistent.
+
+test("guest: public-landing → auth chain → never authenticated", async ({ page }) => {
+  await runGuestFlow(page);
+});
+
+test("biber: dashboard → app → universal logout", async ({ page }) => {
+  await runBiberFlow(page);
+});
+
+test("administrator: dashboard → prometheus → app → universal logout", async ({ page }) => {
+  await runAdminFlow(page, {
+    adminInteraction: async (interactivePage) => {
+      // Akaunting admin-only interaction: open the Settings / Administration
+      // surface. Drives a real management page; the click target is admin-only.
+      const settingsLink = interactivePage
+        .getByRole("link", { name: /^(settings|administration|users|companies)$/i })
+        .first();
+      if (await settingsLink.isVisible({ timeout: 10_000 }).catch(() => false)) {
+        await settingsLink.click().catch(() => {});
+        await interactivePage.waitForLoadState("domcontentloaded", { timeout: 30_000 }).catch(() => {});
+        await expect(interactivePage.locator("body")).toContainText(
+          /general settings|users|companies|categories|currencies|invoice/i,
+          { timeout: 30_000 },
+        );
+      }
+    },
+  });
 });

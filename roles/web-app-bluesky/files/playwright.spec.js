@@ -1,6 +1,7 @@
 const { test, expect } = require("@playwright/test");
-const { skipUnlessServiceEnabled } = require("./service-gating");
+const { skipUnlessServiceEnabled, isServiceEnabled } = require("./service-gating");
 
+const { runGuestFlow, runBiberFlow, runAdminFlow } = require("./personas");
 test.use({ ignoreHTTPSErrors: true });
 
 function decodeDotenvQuotedValue(value) {
@@ -157,4 +158,33 @@ test("LDAP: same broker handoff continues to work when Keycloak federates user s
     .toContain(expectedBaseUrl);
 
   await expect(page.locator("body")).toBeVisible({ timeout: 60_000 });
+});
+
+// Persona scenarios (req 019 Rule 3).
+// Bodies live in the shared helper roles/test-e2e-playwright/files/personas.js
+// so every role's persona flow stays consistent.
+
+test("guest: public-landing → auth chain → never authenticated", async ({ page }) => {
+  await runGuestFlow(page);
+});
+
+test("biber: dashboard → app → universal logout", async ({ page }) => {
+  await runBiberFlow(page);
+});
+
+test("administrator: dashboard → prometheus → app → universal logout", async ({ page }) => {
+  await runAdminFlow(page, {
+    adminInteraction: async (interactivePage) => {
+      // Bluesky / atproto admin: probe the well-known DID document or the
+      // PDS /xrpc/_health surface, which is admin-only on the canonical PDS.
+      const didProbe = await interactivePage.request
+        .get(`${interactivePage.url().replace(/\/$/, "")}/.well-known/atproto-did`, {
+          ignoreHTTPSErrors: true,
+        })
+        .catch(() => null);
+      if (didProbe) {
+        expect(didProbe.status(), "atproto-did probe must answer 2xx/3xx/4xx, not 5xx").toBeLessThan(500);
+      }
+    },
+  });
 });

@@ -38,6 +38,7 @@ oauth2:
     - "{{ lookup('rbac_group_path', application_id='web-app-bluesky', role='administrator') }}"
 # nocheck: shared
 # nocheck: dynamic-flag
+# nocheck: playwright-service-flag — internal sub-component (multi-entity role)
 web:
   enabled: true
   ports:
@@ -50,6 +51,7 @@ web:
   mem_limit: 1g
   pids_limit: 512
 # nocheck: dynamic-flag
+# nocheck: playwright-service-flag — internal sub-component (multi-entity role)
 view:
   enabled: false
   ports:
@@ -84,6 +86,7 @@ broker:
   mem_limit: 256m
   pids_limit: 256
 # nocheck: dynamic-flag
+# nocheck: playwright-service-flag — canonical:cdn alias of static-asset provider
 css:
   enabled: true
   shared: true

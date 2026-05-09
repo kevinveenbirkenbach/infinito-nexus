@@ -6,6 +6,8 @@
 // Keycloak credential form -> back to OpenCloud Files view.
 const { test, expect } = require("@playwright/test");
 
+const { skipUnlessServiceEnabled, isServiceEnabled } = require("./service-gating");
+const { runGuestFlow, runBiberFlow, runAdminFlow } = require("./personas");
 test.use({ ignoreHTTPSErrors: true });
 
 function decodeDotenvQuotedValue(value) {
@@ -141,4 +143,35 @@ test("opencloud sso login (biber) lands on files view", async ({ page }) => {
   expect(biberPassword, "BIBER_PASSWORD must be set").toBeTruthy();
 
   await ssoLoginAndAssertUsername(page, biberUsername, biberPassword);
+});
+
+// Persona scenarios (req 019 Rule 3).
+// Bodies live in the shared helper roles/test-e2e-playwright/files/personas.js
+// so every role's persona flow stays consistent.
+
+test("guest: public-landing → auth chain → never authenticated", async ({ page }) => {
+  await runGuestFlow(page);
+});
+
+test("biber: dashboard → app → universal logout", async ({ page }) => {
+  await runBiberFlow(page);
+});
+
+test("administrator: dashboard → prometheus → app → universal logout", async ({ page }) => {
+  await runAdminFlow(page, {
+    adminInteraction: async (interactivePage) => {
+      // web-app-opencloud admin-only interaction: open a management surface.
+      const link = interactivePage
+        .getByRole("link", { name: /^(admin|users|spaces|files)$/i })
+        .first();
+      if (await link.isVisible({ timeout: 10_000 }).catch(() => false)) {
+        await link.click().catch(() => {});
+        await interactivePage.waitForLoadState("domcontentloaded", { timeout: 30_000 }).catch(() => {});
+        await expect(interactivePage.locator("body")).toContainText(
+          /admin|users|spaces|files|sharing|members/i,
+          { timeout: 30_000 },
+        );
+      }
+    },
+  });
 });

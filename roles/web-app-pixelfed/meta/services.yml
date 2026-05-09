@@ -16,15 +16,18 @@ email:
   shared: "{{ 'web-app-mailu' in group_names }}"
 # nocheck: shared
 # nocheck: dynamic-flag
+# nocheck: playwright-service-flag — DB engine, covered by role-local integration tests
 redis:
   backup:
     disabled: true
   enabled: true
   mem_reservation: 0.1g
   mem_limit: 0.2g
+# nocheck: playwright-service-flag — DB engine, covered by role-local integration tests
 mariadb:
   enabled: true # nocheck: dynamic-flag
   shared: "{{ 'svc-db-mariadb' in group_names }}"
+# nocheck: playwright-service-flag — self-provider
 pixelfed:
   shared: true
   enabled: true
@@ -53,6 +56,7 @@ worker:
   pids_limit: 512
   min_storage: 5GB
 # nocheck: dynamic-flag
+# nocheck: playwright-service-flag — canonical:cdn alias of static-asset provider
 css:
   enabled: false
   shared: true

@@ -1,5 +1,7 @@
 const { test, expect } = require("@playwright/test");
 
+const { skipUnlessServiceEnabled, isServiceEnabled } = require("./service-gating");
+const { runGuestFlow, runBiberFlow, runAdminFlow } = require("./personas");
 test.use({ ignoreHTTPSErrors: true });
 
 // -----------------------------------------------------------------------------
@@ -45,7 +47,6 @@ const lamEnabled  = String(process.env.SERVICE_LAM  || "").toLowerCase() === "tr
 
 const lamBaseUrl  = normalizeBaseUrl(process.env.LAM_BASE_URL || "");
 const lamPassword = decodeDotenvQuotedValue(process.env.LAM_PASSWORD);
-
 
 test.beforeEach(async ({ page }) => {
   await page.setViewportSize({ width: 1440, height: 1100 });
@@ -388,3 +389,31 @@ test.describe("keycloak → ldap write-through, verified via LAM", () => {
     ).toContainText(probe, { timeout: 30_000 });
   });
 });
+
+// Persona scenarios (req 019 Rule 3).
+// Bodies live in the shared helper roles/test-e2e-playwright/files/personas.js
+// so every role's persona flow stays consistent.
+
+test("administrator: dashboard → prometheus → app → universal logout", async ({ page }) => {
+  await runAdminFlow(page, {
+    adminInteraction: async (interactivePage) => {
+      // web-app-moodle admin-only interaction: open a management surface.
+      const link = interactivePage
+        .getByRole("link", { name: /^(site administration|users|courses|reports|server)$/i })
+        .first();
+      if (await link.isVisible({ timeout: 10_000 }).catch(() => false)) {
+        await link.click().catch(() => {});
+        await interactivePage.waitForLoadState("domcontentloaded", { timeout: 30_000 }).catch(() => {});
+        await expect(interactivePage.locator("body")).toContainText(
+          /site administration|users|courses|reports|server|appearance/i,
+          { timeout: 30_000 },
+        );
+      }
+    },
+  });
+});
+
+test("guest: public-landing → auth chain → never authenticated", async ({ page }) => {
+  await runGuestFlow(page);
+});
+

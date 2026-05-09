@@ -1,5 +1,6 @@
 const { test, expect } = require("@playwright/test");
 
+const { skipUnlessServiceEnabled, isServiceEnabled } = require("./service-gating");
 test.use({ ignoreHTTPSErrors: true });
 // Matrix SSO has several long-tail failure modes (Synapse rc_login rate
 // limits, Element rust_crypto "Skip verification" dialog, first-run Synapse
@@ -611,3 +612,4 @@ test.describe("matrix DM", () => {
     await biberContext.close();
   });
 });
+

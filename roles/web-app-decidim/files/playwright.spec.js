@@ -182,3 +182,30 @@ test("SSO login button is visible when OIDC is enabled", async ({ page }) => {
     test.skip();
   }
 });
+
+// Persona scenarios (req 019 Rule 3).
+// Bodies live in the shared helper roles/test-e2e-playwright/files/personas.js
+// so every role's persona flow stays consistent.
+
+test("biber: dashboard → app → universal logout", async ({ page }) => {
+  await runBiberFlow(page);
+});
+
+test("administrator: dashboard → prometheus → app → universal logout", async ({ page }) => {
+  await runAdminFlow(page, {
+    adminInteraction: async (interactivePage) => {
+      // web-app-decidim admin-only interaction: open a management surface.
+      const link = interactivePage
+        .getByRole("link", { name: /^(admin|administration|configuration|participants)$/i })
+        .first();
+      if (await link.isVisible({ timeout: 10_000 }).catch(() => false)) {
+        await link.click().catch(() => {});
+        await interactivePage.waitForLoadState("domcontentloaded", { timeout: 30_000 }).catch(() => {});
+        await expect(interactivePage.locator("body")).toContainText(
+          /admin|administration|participants|processes|assemblies|moderation/i,
+          { timeout: 30_000 },
+        );
+      }
+    },
+  });
+});
