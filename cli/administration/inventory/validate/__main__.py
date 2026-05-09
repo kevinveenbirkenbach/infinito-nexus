@@ -10,7 +10,7 @@ from pathlib import Path
 # package``. Compute the repo root locally and prepend it to sys.path
 # before any project-package import resolves.
 # nocheck: project-root-import  sys.path bootstrap before package imports resolve
-PROJECT_ROOT = Path(__file__).resolve().parents[3]
+PROJECT_ROOT = Path(__file__).resolve().parents[4]
 if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
 
