@@ -67,9 +67,7 @@ _RULE = "playwright-service-gate"
 _ENV_TEMPLATE_REL = "templates/playwright.env.j2"  # nocheck: role-file-spot
 _SPEC_FILE_REL = "files/playwright.spec.js"  # nocheck: role-file-spot
 
-_FLAG_LINE_RE = re.compile(
-    r"^\s*([A-Z][A-Z0-9_]*)_SERVICE_ENABLED\s*="
-)
+_FLAG_LINE_RE = re.compile(r"^\s*([A-Z][A-Z0-9_]*)_SERVICE_ENABLED\s*=")
 _HELPER_CALL_RE = re.compile(
     r"\b(?:requireService|skipUnlessServiceEnabled|isServiceEnabled|"
     r"isServiceDisabledReason)\s*\(\s*['\"]([^'\"]+)['\"]"
@@ -99,9 +97,7 @@ def _gated_roots_in_spec(spec_path: Path) -> set[str]:
     """Return the set of env-key roots gated somewhere in the spec
     (any of the four helper APIs, with the helper's own canonicalisation)."""
     text = read_text(str(spec_path))
-    return {
-        _service_to_env_key_root(name) for name in _HELPER_CALL_RE.findall(text)
-    }
+    return {_service_to_env_key_root(name) for name in _HELPER_CALL_RE.findall(text)}
 
 
 class TestPlaywrightSpecGatesEnvFlags(unittest.TestCase):
@@ -127,10 +123,10 @@ class TestPlaywrightSpecGatesEnvFlags(unittest.TestCase):
                 offenders.append(
                     f"{role_name}: {_ENV_TEMPLATE_REL}:{line_no} declares "
                     f"`{root}_SERVICE_ENABLED=` but {_SPEC_FILE_REL} has "
-                    f"no `requireService(\"{root.lower()}\", …)` / "
-                    f"`skipUnlessServiceEnabled(\"{root.lower()}\")` / "
-                    f"`isServiceEnabled(\"{root.lower()}\")` / "
-                    f"`isServiceDisabledReason(\"{root.lower()}\")` call. "
+                    f'no `requireService("{root.lower()}", …)` / '
+                    f'`skipUnlessServiceEnabled("{root.lower()}")` / '
+                    f'`isServiceEnabled("{root.lower()}")` / '
+                    f'`isServiceDisabledReason("{root.lower()}")` call. '
                     f"Add a gated test or mark the flag with "
                     f"`# nocheck: {_RULE}`."
                 )
