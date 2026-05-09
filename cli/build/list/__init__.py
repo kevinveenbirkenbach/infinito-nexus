@@ -1,9 +1,7 @@
 """Compatibility wrapper.
 
-This package was migrated from a flat module (roles_list.py) to a package layout:
-  roles_list/__main__.py contains the original implementation.
-
-We re-export the public API so existing imports keep working.
+The implementation lives in ``cli/build/list/__main__.py``; this package
+re-exports its public API so ``from cli.build.list import ...`` works.
 """
 
 from __future__ import annotations

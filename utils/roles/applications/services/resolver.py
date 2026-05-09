@@ -2,16 +2,15 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Any
 
+from utils import PROJECT_ROOT
 from utils.cache.yaml import load_yaml
+from utils.roles.applications.services.errors import ServicesResolutionError
 from utils.roles.applications.services.registry import (
     build_service_registry_from_roles_dir,
     is_explicit_truth,
     resolve_service_dependency_roles_from_config,
 )
 from utils.roles.mapping import ROLE_FILE_META_SERVICES
-
-from . import PROJECT_ROOT
-from .errors import ServicesResolutionError
 
 if TYPE_CHECKING:
     from collections.abc import Iterable

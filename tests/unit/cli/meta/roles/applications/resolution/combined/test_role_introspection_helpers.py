@@ -1,4 +1,3 @@
-# tests/unit/cli/meta/roles/applications/resolution/combined/test_role_introspection.py
 from __future__ import annotations
 
 import tempfile

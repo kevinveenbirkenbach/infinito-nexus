@@ -169,7 +169,7 @@ chmod-scripts:
 # Print the repository role list.
 list:
 	@echo "Generating the roles list"
-	@"$${PYTHON}" -m cli.build.roles_list
+	@"$${PYTHON}" -m cli.build.list
 
 # Print the repository tree.
 tree:

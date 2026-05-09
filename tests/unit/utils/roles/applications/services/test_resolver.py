@@ -4,7 +4,8 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from cli.meta.roles.applications.resolution.services.resolver import (
+from utils import PROJECT_ROOT
+from utils.roles.applications.services.resolver import (
     ServicesResolver,
     resolve_direct_service_roles_from_config,
 )
@@ -13,8 +14,6 @@ from utils.roles.mapping import (
     ROLE_FILE_META_SERVICES,
     ROLE_FILE_VARS_MAIN,
 )
-
-from . import PROJECT_ROOT
 
 _MINIMAL_SERVICE_REGISTRY = {
     "ldap": {"role": "svc-db-openldap"},

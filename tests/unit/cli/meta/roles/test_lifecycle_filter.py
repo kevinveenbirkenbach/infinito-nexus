@@ -5,7 +5,7 @@ import unittest
 from pathlib import Path
 from tempfile import TemporaryDirectory
 
-from cli.meta.roles.lifecycle_filter.__main__ import filter_roles
+from cli.meta.roles.lifecycle.__main__ import filter_roles
 from utils.roles.mapping import ROLE_FILE_META_SERVICES
 from utils.roles.meta_lookup import get_role_lifecycle
 

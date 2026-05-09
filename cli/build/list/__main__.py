@@ -3,7 +3,7 @@
 Generate a JSON file listing all Ansible role directories.
 
 Usage:
-  python roles_list.py [--roles-dir path/to/roles] [--output path/to/roles/list.json | console]
+  python -m cli.build.list [--roles-dir path/to/roles] [--output path/to/roles/list.json | console]
 """
 import os
 import json

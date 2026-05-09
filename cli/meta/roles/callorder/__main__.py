@@ -10,18 +10,18 @@ What it does:
 
 Examples:
   # 1) Print call order per group file
-  python -m cli.meta.callorder
+  python -m cli.meta.roles.callorder
 
   # 2) Marker-only view: show everything before/after marker
-  python -m cli.meta.callorder --marker "web-app-nextcloud"
+  python -m cli.meta.roles.callorder --marker "web-app-nextcloud"
 
   # 3) Filter to selected roles and split relative to marker
-  python -m cli.meta.callorder \
+  python -m cli.meta.roles.callorder \
     --call "web-app-akaunting web-app-bigbluebutton web-app-bookwyrm web-app-chess web-app-discourse web-app-funkwhale web-app-matrix web-app-mediawiki web-app-nextcloud" \
     --marker "web-app-nextcloud"
 
   # 4) Only show effected groups (groups containing the marker role)
-  python -m cli.meta.callorder --marker "web-app-nextcloud" --effected
+  python -m cli.meta.roles.callorder --marker "web-app-nextcloud" --effected
 """
 
 from __future__ import annotations
@@ -31,9 +31,8 @@ import sys
 from dataclasses import dataclass
 from typing import TYPE_CHECKING, Any
 
+from utils import PROJECT_ROOT
 from utils.cache.yaml import load_yaml_any as _load_yaml_cached
-
-from . import PROJECT_ROOT
 
 if TYPE_CHECKING:
     from pathlib import Path
@@ -136,7 +135,7 @@ def normalize_call_list(s: str) -> list[str]:
 
 def main(argv: list[str] | None = None) -> int:
     ap = argparse.ArgumentParser(
-        prog="python -m cli.meta.callorder",
+        prog="python -m cli.meta.roles.callorder",
         description="Print role call order per tasks/groups/*.yml and analyze relative to a marker role.",
     )
     ap.add_argument(

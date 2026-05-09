@@ -307,15 +307,13 @@ the old `compose.…` or top-level paths.
       - `cli/contributing/docker/update_versions/__main__.py`
       - `cli/administration/deploy/development/inventory.py`
       - `cli/meta/roles/applications/resolution/combined/role_introspection.py`
-      - `cli/meta/roles/applications/resolution/services/resolver.py`
+      - `utils/roles/applications/services/resolver.py`
       - `cli/meta/roles/applications/ressources/__main__.py`
       - `cli/meta/roles/applications/sufficient_storage/__main__.py`
       - `cli/administration/inventory/provision/services_disabler.py`
       - `cli/administration/inventory/credentials/__main__.py`
-      - any other consumer discovered during migration that references
-        `schema/main.yml`, `users/main.yml`, or `config/main.yml`.
-- [ ] No legacy fallback to the old paths is implemented; the new paths are
-      the single source of truth.
+      - any other consumer discovered during migration that references `schema/main.yml`, `users/main.yml`, or `config/main.yml`.
+- [ ] No legacy fallback to the old paths is implemented; the new paths are the single source of truth.
 
 ### Consumer-path rewrites
 

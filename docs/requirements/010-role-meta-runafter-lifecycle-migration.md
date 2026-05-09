@@ -42,18 +42,10 @@ galaxy_info:
   lifecycle: pre-alpha
 ```
 
-- **`run_after:`** is the project-specific role-load-order list introduced by
-  req-002. `roles/sys-utils-service-loader` reads it to order role loads
-  within a deploy-type pass.
-- **`lifecycle:`** is a maturity marker (`pre-alpha`, `alpha`, `beta`,
-  `stable`, …) used by `cli meta roles lifecycle_filter` and other
-  introspection commands to filter or report on role status.
+- **`run_after:`** is the project-specific role-load-order list introduced by req-002. `roles/sys-utils-service-loader` reads it to order role loads within a deploy-type pass.
+- **`lifecycle:`** is a maturity marker (`pre-alpha`, `alpha`, `beta`, `stable`, …) used by `cli meta roles lifecycle` and other introspection commands to filter or report on role status.
 
-Bundling these under `galaxy_info` mixes Ansible-standard fields with
-project-internal ones; Galaxy publishers ignore unknown keys, so the values
-have always lived there as a workaround. With req-008 we now have a
-project-owned location for per-role/per-entity metadata
-(`meta/services.yml`), and these two fields belong there.
+Bundling these under `galaxy_info` mixes Ansible-standard fields with project-internal ones; Galaxy publishers ignore unknown keys, so the values have always lived there as a workaround. With req-008 we now have a project-owned location for per-role/per-entity metadata (`meta/services.yml`), and these two fields belong there.
 
 ## Target Layout
 
@@ -215,10 +207,9 @@ The following consumers read `run_after` and/or `lifecycle` from
 - [ ] `utils/roles/dependency_resolver.py`
 - [ ] `utils/roles/applications/services/registry.py`
 - [ ] `utils/roles/validation/invokable.py`
-- [ ] `roles/sys-utils-service-loader` (its tasks/templates that drive the
-      load-order pass)
+- [ ] `roles/sys-utils-service-loader` (its tasks/templates that drive the load-order pass)
 - [ ] `cli/meta/roles/applications/resolution/run_after/__main__.py`
-- [ ] `cli/meta/roles/lifecycle_filter/__main__.py`
+- [ ] `cli/meta/roles/lifecycle/__main__.py`
 - [ ] `cli/meta/roles/applications/resolution/combined/__main__.py`
 - [ ] `cli/meta/roles/applications/resolution/combined/resolver.py`
 - [ ] `cli/meta/roles/applications/resolution/combined/role_introspection.py`
@@ -227,14 +218,13 @@ The following consumers read `run_after` and/or `lifecycle` from
 - [ ] `cli/meta/roles/applications/type/__main__.py`
 - [ ] `cli/build/tree/__main__.py`
 - [ ] `cli/build/graph/__main__.py`
-- [ ] `cli/build/role_include/__main__.py`
+- [ ] `cli/build/include/__main__.py`
 - [ ] `cli/administration/deploy/development/common.py`
 - [ ] `cli/administration/deploy/development/init.py`
 - [ ] `cli/administration/deploy/development/deps.py`
 - [ ] `cli/administration/deploy/development/deploy.py`
 - [ ] `plugins/filter/canonical_domains_map.py`
-- [ ] any other consumer discovered during migration that reads
-      `run_after` or `lifecycle` from `meta/main.yml`.
+- [ ] any other consumer discovered during migration that reads `run_after` or `lifecycle` from `meta/main.yml`.
 
 ### Helper
 

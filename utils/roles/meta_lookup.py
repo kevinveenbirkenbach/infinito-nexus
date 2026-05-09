@@ -5,7 +5,7 @@ Both fields used to live nested inside `meta/main.yml.galaxy_info`:
 
   * ``run_after``  — project-specific role-load-order list (req-002).
   * ``lifecycle``  — maturity marker filtered by
-    ``cli meta roles lifecycle_filter``.
+    ``cli meta roles lifecycle``.
 
 After req-010 they live at
 ``meta/services.yml.<primary_entity>.{run_after,lifecycle}`` where

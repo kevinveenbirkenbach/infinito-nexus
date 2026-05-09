@@ -1,9 +1,9 @@
 from __future__ import annotations
 
-from cli.meta.roles.applications.resolution.services.errors import (
+from utils.roles.applications.services.errors import (
     ServicesResolutionError,
 )
-from cli.meta.roles.applications.resolution.services.resolver import (
+from utils.roles.applications.services.resolver import (
     resolve_direct_service_roles_from_config,
 )
 
@@ -87,7 +87,7 @@ def load_shared_service_roles_for_app(
     If role is an application role, inspect roles/<role>/meta/services.yml and
     return provider roles implied by services.* flags.
 
-    Logic is centralized in cli.meta.roles.applications.resolution.services.resolver.
+    Logic is centralized in utils.roles.applications.services.resolver.
 
     `services_override`, when provided, replaces the disk read of
     `meta/services.yml` with an in-memory services map. Used by the

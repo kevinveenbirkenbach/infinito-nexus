@@ -3,7 +3,7 @@ import os
 import unittest
 import tempfile
 import shutil
-from cli.build.role_include import build_dependency_graph, topological_sort, gen_condi_role_incl
+from cli.build.include import build_dependency_graph, topological_sort, gen_condi_role_incl
 
 from utils.cache.yaml import dump_yaml
 from utils.roles.mapping import ROLE_FILE_META_MAIN, ROLE_FILE_META_SERVICES, ROLE_FILE_VARS_MAIN

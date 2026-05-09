@@ -22,20 +22,28 @@ def format_command_help(
     # Reserve at least two spaces between the name column and the
     # description column. Names that would crowd into (or past) the
     # description column drop the description onto the next line so
-    # the two never collide.
+    # the two never collide. The description is rendered in DIM so it
+    # visually steps back from the command name (which keeps the
+    # terminal's default brightness).
     prefix = " " * indent + name
     desc_indent = " " * col_width
     if len(prefix) + 2 > col_width:
         wrapper = textwrap.TextWrapper(
             width=width, initial_indent=desc_indent, subsequent_indent=desc_indent
         )
-        return prefix + "\n" + wrapper.fill(description)
+        return prefix + "\n\n" + color_text(wrapper.fill(description), Style.DIM)
 
     prefix_padded = f"{prefix:<{col_width}}"
     wrapper = textwrap.TextWrapper(
-        width=width, initial_indent=prefix_padded, subsequent_indent=desc_indent
+        width=width, initial_indent=desc_indent, subsequent_indent=desc_indent
     )
-    return wrapper.fill(description)
+    wrapped = wrapper.fill(description)
+    head, _, rest = wrapped.partition("\n")
+    head_desc = head[col_width:]
+    first_line = prefix_padded + color_text(head_desc, Style.DIM)
+    if rest:
+        return first_line + "\n" + color_text(rest, Style.DIM)
+    return first_line
 
 
 def extract_description_via_help(module: str) -> str:
@@ -281,7 +289,8 @@ def print_dir_overview(cli_dir: Path, parts: list[str]) -> None:
 
     if title:
         print(color_text(title, Fore.CYAN + Style.BRIGHT))
-        print(color_text(invocation, Style.DIM))
+        print()
+        print(color_text(invocation, Style.ITALIC))
     else:
         print(color_text(invocation, Fore.CYAN + Style.BRIGHT))
     print()
@@ -314,7 +323,8 @@ def print_tree(cli_dir: Path, parts: list[str], max_depth: int | None = None) ->
 
     if title:
         print(color_text(title, Fore.CYAN + Style.BRIGHT))
-        print(color_text(invocation, Style.DIM))
+        print()
+        print(color_text(invocation, Style.ITALIC))
     else:
         print(color_text(invocation, Fore.CYAN + Style.BRIGHT))
     desc = read_folder_description(base)

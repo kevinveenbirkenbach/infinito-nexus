@@ -60,13 +60,13 @@ def build_parser() -> argparse.ArgumentParser:
     default_roles_dir = PROJECT_ROOT / "roles"
 
     p = argparse.ArgumentParser(
-        prog="infinito meta roles lifecycle_filter",
+        prog="infinito meta roles lifecycle",
         description="Print role names (space-separated) filtered by galaxy_info.lifecycle "
         "in roles/*/meta/main.yml.\n\n"
         "Examples:\n"
-        "  infinito meta roles lifecycle_filter whitelist stable rc\n"
-        "  infinito meta roles lifecycle_filter blacklist deprecated eol\n"
-        "  infinito meta roles lifecycle_filter whitelist stable "
+        "  infinito meta roles lifecycle whitelist stable rc\n"
+        "  infinito meta roles lifecycle blacklist deprecated eol\n"
+        "  infinito meta roles lifecycle whitelist stable "
         "--selection web-app-matomo docker-keycloak\n",
         formatter_class=argparse.RawTextHelpFormatter,
     )

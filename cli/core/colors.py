@@ -5,6 +5,7 @@ class Style:
     RESET_ALL = "\033[0m"
     BRIGHT = "\033[1m"
     DIM = "\033[2m"
+    ITALIC = "\033[3m"
 
 
 class Fore:
