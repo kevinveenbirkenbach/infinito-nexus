@@ -1,194 +1,77 @@
 # 019 - Playwright meta/services.yml parity coverage
 
-## User Story
+## Vision
 
-As a contributor maintaining the per-role Playwright suite, I want
-every shared-service dependency a role declares in its
-`meta/services.yml` to surface as a `<SERVICE>_SERVICE_ENABLED` flag
-in `templates/playwright.env.j2` AND be consumed by at least one
-gated scenario in `files/playwright.spec.js` — for every role, for
-every service — so that a deploy with `SERVICES_DISABLED=<svc>`
-deterministically reports the affected scenarios as `skipped` and a
-deploy with the service enabled deterministically exercises the
-integration. No silently undeclared dep, no flag without a consumer,
-no spec scenario reading `process.env.<SVC>_SERVICE_ENABLED` outside
-the helper.
+The unit of coverage is the role's single `files/playwright.spec.js`.
+That one file MAY contain any number of `test()` blocks, but for every `(role, included-service)` pair there MUST be at least one gated step or scenario inside the file that:
 
-## Context
+1. **runs** when the service is enabled, and
+2. **skips cleanly** (`skipped: <NAME>_SERVICE_ENABLED=false`) when the service is disabled, never `failed`.
 
-[006 - Service-gated Playwright tests](006-playwright-service-gated-tests.md)
-established the registry and the helper API:
-`templates/playwright.env.j2` IS the per-role registry; a
-`<SERVICE>_SERVICE_ENABLED` flag declared there is the contract that
-authorises the spec to gate on `<service>`. Two integration tests
-enforce both halves of the round-trip:
+A service "included" means a top-level entry in `roles/<role>/meta/services.yml`.
+Skip-on-disabled is enforced through the shared [service-gating.js](../../roles/test-e2e-playwright/files/service-gating.js) helper from [006](006-playwright-service-gated-tests.md).
 
-- [test_playwright_env_services_match.py](../../tests/integration/roles/test_playwright_env_services_match.py)
-  (Test A): every entry in `meta/services.yml` with an `enabled:`
-  key MUST appear as `<NAME>_SERVICE_ENABLED=` in the env template,
-  unless marked `# nocheck: playwright-service-flag` on the
-  services-yml entry.
-- [test_playwright_spec_env_gates.py](../../tests/integration/roles/test_playwright_spec_env_gates.py)
-  (Test B): every `<NAME>_SERVICE_ENABLED=` line in the env template
-  MUST be consumed by at least one
-  `requireService` / `skipUnlessServiceEnabled` /
-  `isServiceEnabled` / `isServiceDisabledReason` call in the spec,
-  unless marked `# nocheck: playwright-service-gate` on the env
-  line.
+The user-journey shape every `web-app-*` spec MUST instantiate is defined in [playwright.specs.js.md](../contributing/artefact/files/role/playwright.specs.js.md): one `biber` scenario and one `administrator` scenario, both starting on the dashboard, named `<persona>: <flow>`.
+**Both persona scenarios MUST exist in every `web-app-*` role's spec under this requirement; their presence is part of the acceptance criteria, not optional polish.**
 
-Today most roles fail Test A: their `meta/services.yml` declares a
-broad shared-service dep set (`dashboard`, `oidc`, `ldap`, `email`,
-`matomo`, `logout`, `oauth2`, `prometheus`, …) but the env template
-ships only a subset, and the spec gates only a subset of that
-subset. Two earlier requirements close specific slices of this gap:
-[017 - Playwright biber RBAC coverage](017-playwright-biber-rbac-coverage.md)
-covers the RBAC dimension and
-[018 - Playwright LDAP authentication coverage](018-playwright-ldap-coverage.md)
-covers the LDAP-vs-OIDC variant split. This requirement closes the
-remaining global parity gap between `meta/services.yml`,
-`templates/playwright.env.j2`, and `files/playwright.spec.js` — for
-every service the role declares, not just the ones already covered
-by 017 / 018.
+`web-svc-*` roles are auth-less by construction (no end-user UI, programmatic API only).
+They are NOT subject to the persona contract; their spec ships a single baseline reachability scenario plus the per-service gates that apply to them.
+The persona-collapse exception in [playwright.specs.js.md](../contributing/artefact/files/role/playwright.specs.js.md) covers this case.
 
-The trigger for this requirement was the dashboard tile: every
-`web-app-*` role declares `dashboard:` in its services.yml because
-the canonical user entry point is "open the dashboard, click the
-role's card". Today no role's playwright env carries the
-`DASHBOARD_SERVICE_ENABLED` flag and no spec exercises the tile
-click. The dashboard tile is therefore the recurring example
-throughout this document, but the policy is symmetric across every
-shared service the role depends on.
+The acceptance criteria below are the mechanical translation of this contract.
 
-## Acceptance Criteria
+## Rules
 
-### Policy
+| # | Rule | Enforced by |
+| --- | --- | --- |
+| 1 | Every entry in `meta/services.yml` with an `enabled:` key MUST surface as `<NAME>_SERVICE_ENABLED=` in `templates/playwright.env.j2`, OR carry `# nocheck: playwright-service-flag` above the key with a one-line rationale. | [test_playwright_env_services_match.py](../../tests/integration/roles/test_playwright_env_services_match.py) (Test A) |
+| 2 | Every `<NAME>_SERVICE_ENABLED=` line in the env template MUST be consumed by ≥1 `requireService` / `skipUnlessServiceEnabled` / `isServiceEnabled` / `isServiceDisabledReason` call in `files/playwright.spec.js`, OR carry `# nocheck: playwright-service-gate` on the env line. | [test_playwright_spec_env_gates.py](../../tests/integration/roles/test_playwright_spec_env_gates.py) (Test B) |
+| 3 | Every `web-app-*` role's `files/playwright.spec.js` MUST contain the two persona scenarios defined in [playwright.specs.js.md](../contributing/artefact/files/role/playwright.specs.js.md), named `biber: <flow>` and `administrator: <flow>` respectively. `web-svc-*` roles and `web-app-*` roles whose upstream has no auth surface (federation-only or static-only, see the auth-less list under [Iteration order](#iteration-order)) MAY collapse them into a single baseline scenario. | review (this requirement); the persona-naming check is the role-closure gate for the matrix below |
+| 4 | Specs MUST NOT read `<NAME>_SERVICE_ENABLED` directly via `process.env`. All reads go through the helper. | grep verification (see below) |
+| 5 | A scenario that depends on multiple services MUST gate each via a separate `skipUnlessServiceEnabled('<svc>')` call. No bundled multi-service gates; bundling defeats the variant matrix (same rule as [018](018-playwright-ldap-coverage.md)). | review |
+| 6 | A new env key without a spec consumer is a regression. | [test_env_keys_used.py](../../tests/lint/ansible/roles/web-app/playwright/test_env_keys_used.py) |
 
-- [ ] **Test A parity (services.yml → env).** For every role with
-  `templates/playwright.env.j2`, every top-level entry in
-  `meta/services.yml` that carries an `enabled:` key MUST either
-  surface as `<NAME>_SERVICE_ENABLED=` in the env template (with
-  `<NAME>` being the upper-snake form of the service key per
-  `service-gating.js::envKey`), or carry a
-  `# nocheck: playwright-service-flag` marker on the comment block
-  immediately above the services-yml key with a one-line rationale.
-  No silent omission.
-- [ ] **Test B parity (env → spec).** For every role with both an
-  env template and a spec, every `<NAME>_SERVICE_ENABLED=` line in
-  the env template MUST be referenced by at least one helper call
-  (`requireService` / `skipUnlessServiceEnabled` /
-  `isServiceEnabled` / `isServiceDisabledReason`) in the spec, or
-  carry a `# nocheck: playwright-service-gate` marker on the env
-  line itself with a one-line rationale.
-- [ ] **No bypass.** Specs MUST NOT read
-  `<NAME>_SERVICE_ENABLED` directly via `process.env`. All reads go
-  through the helper from
-  [roles/test-e2e-playwright/files/service-gating.js](../../roles/test-e2e-playwright/files/service-gating.js).
-  This is the same rule from
-  [006](006-playwright-service-gated-tests.md) and is verified by
-  the `process.env\.[A-Z_]*_SERVICE_ENABLED` grep in the
-  verification block below.
-- [ ] **Variant separation.** A scenario that gates on multiple
-  services MUST gate on each via a separate
-  `skipUnlessServiceEnabled('<svc>')` call. Combining unrelated
-  services in one body is forbidden — the matrix-deploy variants
-  exist to drive each branch in isolation, and bundling them
-  defeats the variant matrix (same rule as
-  [018](018-playwright-ldap-coverage.md)).
+## Per-service scenario catalogue
 
-### Per-service scenario shapes
+The per-service assertion catalogue (what each gate's body MUST exercise: `dashboard` tile click, `oidc` round-trip, `ldap` bind, `email` send/receive, `prometheus` `up=1`, …) is documented in [playwright.specs.js.md](../contributing/artefact/files/role/playwright.specs.js.md#per-service-assertion-catalogue-).
+The persona flow is the surrounding journey; the catalogue tells the spec what to assert at each gate inside that journey.
+This requirement's matrix below uses the catalogue's vocabulary but does not duplicate it; refer to that page for the per-service contract.
 
-The following table is the recurring catalogue of "what counts as
-exercising the service" when a role gates a scenario on it. The
-list is non-exhaustive; new services inherit the same contract
-shape (a real end-to-end flow that fails when the integration
-breaks, gated via `skipUnlessServiceEnabled`).
+## Self-gate `# nocheck` list
 
-| Service | Scenario shape |
-| --- | --- |
-| `dashboard` | Open `${DASHBOARD_BASE_URL}/`, locate the role's tile via `a[href*="<canonical>"]`, assert presence + correct `href`, click, assert landing on `CANONICAL_DOMAIN`. Reference: [web-app-kix/files/playwright.spec.js](../../roles/web-app-kix/files/playwright.spec.js). |
-| `oidc` | Visit a protected URL, assert redirect to Keycloak's `openid-connect/auth`, perform the login, assert redirect back, assert authenticated UI. |
-| `ldap` | LDAP-bind path per [018](018-playwright-ldap-coverage.md). MUST exercise both the admin and the canonical non-admin user `biber` per [017](017-playwright-biber-rbac-coverage.md). |
-| `oauth2` | oauth2-proxy gates the role's UI: assert a request to a protected path triggers the proxy, completes through Keycloak, lands back, and `/oauth2/sign_out` re-engages the gate. |
-| `email` | Send mail in / receive mail out via the role's mail surface (where applicable). For roles that only originate notifications, verify the rendered body via the test mailbox. |
-| `logout` | Universal-logout endpoint clears the role's session AND the SSO session, the next protected request re-engages auth. |
-| `matomo` | The Matomo tracking snippet for `application_id` is present in the role's HTML, and a navigation generates the expected `/matomo.php` request. |
-| `prometheus` | The role exposes its `/metrics` endpoint at the documented path AND Prometheus reports the role's target as `up=1` (where the spec runs against a deployed Prometheus). |
-| `discourse` | Per [007 - WordPress → Discourse round-trip](007-wordpress-discourse-post-round-trip.md) and analogous role-pair flows. |
-| `simpleicons`, `cdn`, `css`, `javascript`, `asset` | Static-asset deps. The scenario asserts the role's HTML references the expected asset host AND a request returns < 400 with the right content-type. |
-| `redis`, `mariadb`, `postgres` | Database-engine deps. NOT independently gateable from a Playwright surface in most roles; mark with `# nocheck: playwright-service-flag` and rely on the role's own integration tests. The exception is roles that surface DB health in the UI. |
-| `coturn`, `collabora`, `onlyoffice`, `talk`, `greenlight`, `ollama`, `webmail`, `webdav`, `imap`, `smtp`, `antispam`, `antivirus`, `oletools`, `fetchmail`, `front`, `resolver`, `admin`, `worker`, `view`, `web` | Sub-component deps. Either a real scenario where the component is the surface of the integration, OR `# nocheck: playwright-service-flag` with a rationale pointing at the role-local test that does cover it. |
-| `<role-name itself>` (`mailu`, `friendica`, `pixelfed`, `discourse`, `keycloak`, `libretranslate`, `simpleicons`, `cdn`, …) | Self-provider entries. MUST be marked `# nocheck: playwright-service-flag` per [006](006-playwright-service-gated-tests.md)'s "MUST NOT self-gate" rule. |
+The role IS the provider; the service entry MUST be marked
+`# nocheck: playwright-service-flag`:
 
-### Self-gate exceptions
+- [ ] `web-app-keycloak` → `oidc`
+- [ ] `web-app-mailu` → `email`, `mailu`
+- [ ] `web-app-matomo` → `matomo`
+- [ ] `web-app-dashboard` → `dashboard`
+- [ ] `web-app-discourse` → `discourse`
+- [ ] `web-app-pixelfed` → `pixelfed`
+- [ ] `web-app-friendica` → `friendica`
+- [ ] `web-app-prometheus` → `prometheus`
+- [ ] `web-svc-cdn` → `cdn`
+- [ ] `web-svc-libretranslate` → `libretranslate`
+- [ ] `web-svc-simpleicons` → `simpleicons`
 
-Roles whose `meta/services.yml` declares the service they themselves
-provide MUST mark that entry with
-`# nocheck: playwright-service-flag`. The catalogue from
-[006](006-playwright-service-gated-tests.md):
+## Closure paths per matrix row
 
-- [ ] [web-app-keycloak](../../roles/web-app-keycloak/) — IS the
-  OIDC provider; MUST NOT gate on `oidc`.
-- [ ] [web-app-mailu](../../roles/web-app-mailu/) — IS the mail
-  provider; MUST NOT gate on `email` / `mailu`.
-- [ ] [web-app-matomo](../../roles/web-app-matomo/) — IS the
-  analytics provider; MUST NOT gate on `matomo`.
-- [ ] [web-app-dashboard](../../roles/web-app-dashboard/) — IS the
-  dashboard; MUST NOT gate on `dashboard`.
-- [ ] [web-app-discourse](../../roles/web-app-discourse/) — IS
-  Discourse; MUST NOT gate on `discourse`.
-- [ ] [web-app-pixelfed](../../roles/web-app-pixelfed/) — IS
-  Pixelfed; MUST NOT gate on `pixelfed`.
-- [ ] [web-app-friendica](../../roles/web-app-friendica/) — IS
-  Friendica; MUST NOT gate on `friendica`.
-- [ ] [web-app-prometheus](../../roles/web-app-prometheus/) — IS
-  Prometheus; MUST NOT gate on `prometheus`.
-- [ ] [web-svc-cdn](../../roles/web-svc-cdn/) — IS the CDN; MUST
-  NOT gate on `cdn`.
-- [ ] [web-svc-libretranslate](../../roles/web-svc-libretranslate/)
-  — IS LibreTranslate; MUST NOT gate on `libretranslate`.
-- [ ] [web-svc-simpleicons](../../roles/web-svc-simpleicons/) —
-  IS the SimpleIcons service; MUST NOT gate on `simpleicons`.
+Each missing flag in the matrix is closed by exactly one of:
 
-The same rule applies to any future role whose primary entity is
-also referenced in its own `meta/services.yml`.
+1. **Render flag + add gated scenario** *(default)*. Render `<NAME>_SERVICE_ENABLED={{ … }}` in `templates/playwright.env.j2` (literal `"true"` / `"false"` per [006](006-playwright-service-gated-tests.md)). Add a `skipUnlessServiceEnabled('<svc>')`-gated step inside the appropriate persona scenario in `files/playwright.spec.js` per [playwright.specs.js.md](../contributing/artefact/files/role/playwright.specs.js.md). Mention the service in the role's README so reduced-deploy skip behaviour is predictable.
+2. **Drop the entry**. Remove the service from `meta/services.yml` if no longer consumed. Verify [test_services_explicit.py](../../tests/integration/roles/meta/services/run_after/test_services_explicit.py) stays green.
+3. **`# nocheck: playwright-service-flag`**. Comment block above the services-yml key with a one-line rationale. Reserved for self-gate, infrastructural, or no-Playwright-surface cases.
 
-### Out-of-scope entries
+Closure of any row also requires that the role's spec already contains the two persona scenarios (Rule 3); a row's missing flag MAY be added inside a new persona scenario, but the row is NOT closed until both persona scenarios exist.
 
-Roles that have a `meta/services.yml` entry for a shared dep but
-legitimately have no Playwright-reachable surface for it MUST mark
-the entry with `# nocheck: playwright-service-flag` and document
-the reason in `README.md`. Typical reasons:
+## Per-role drift matrix
 
-- Role has no Playwright spec yet (then **every** services.yml
-  entry's flag rendering is deferred until the spec exists; do not
-  pre-render flags that nothing consumes).
-- Service is consumer-side only with no UI surface (e.g. a backend
-  worker queue used by a daemon).
-- Service is a pure infrastructure dep covered by its own spec
-  (e.g. `redis`, `mariadb`, `postgres` engines for most roles).
+Snapshot at requirement-open. Test B drift is currently empty; the column is omitted until a new offender appears.
+Each non-empty row in the "fehlende Flags" column is the work for that role.
+Closing a role's row also requires the role's spec to ship the two persona scenarios (Rule 3); a role with `hat spec ✅` and a non-empty drift list MUST add the missing gates **inside** those persona bodies, not as ungated standalone tests.
 
-### Per-role status matrix
-
-Snapshot at the moment this requirement opened. Each row records
-the per-role state of the parity contract: does the role ship an
-env template / a spec, and which `meta/services.yml` entries are
-**still missing** as `<NAME>_SERVICE_ENABLED=` flags in the env
-template (Test A drift). The list IS the work that needs to happen
-to close this requirement for the role: each missing service MUST
-be either rendered as a flag (and gated in the spec), dropped from
-`meta/services.yml` if it is no longer consumed, or marked
-`# nocheck: playwright-service-flag` with a rationale.
-
-Test B drift (env flag without spec gate) is currently empty across
-the tree — the eight earlier offenders were closed by deleting
-unused flags. The column is omitted from the matrix below until a
-new Test B drift entry appears; new offenders surface immediately
-in the test output.
-
-Legend: ✅ present, ❌ missing, — not applicable (no env / no spec).
-Service entries annotated `*(self-gate)*` are role-self-provider
-entries that MUST be closed via `# nocheck:
-playwright-service-flag` per the section above.
+Legend: ✅ present, ❌ missing, — n/a (no env / no spec).
+`*(self-gate)*` = MUST be closed via `# nocheck: playwright-service-flag` (path 3 above).
 
 | Rolle | hat env | hat spec | fehlende `<NAME>_SERVICE_ENABLED=` Flags (Test A) |
 | --- | --- | --- | --- |
@@ -264,99 +147,179 @@ playwright-service-flag` per the section above.
 | `web-svc-simpleicons` | ✅ | ✅ | `css`, `dashboard`, `matomo`, `oauth2`, `prometheus`, `recaptcha`, `redis`, `simpleicons` *(self-gate)* |
 | `web-svc-xmpp` | ✅ | ✅ | `logout`, `oidc`, `prometheus` |
 
-#### How to read the matrix
+Rows with both `❌` are roles without Playwright artefacts yet.
+When they grow a spec, the new env template MUST satisfy this requirement from day one AND the new spec MUST ship both persona scenarios per Rule 3.
 
-- **Each entry in the "fehlende Flags" column** is a Test A failure
-  the requirement closes by either:
-  1. **Adding the flag.** Render
-     `<NAME>_SERVICE_ENABLED={{ … }}` into
-     `templates/playwright.env.j2` per the value-shape rules from
-     [006](006-playwright-service-gated-tests.md), AND add a
-     `skipUnlessServiceEnabled('<svc>')`-gated scenario to
-     `files/playwright.spec.js` per the per-service catalogue
-     above. **This is the default.**
-  2. **Dropping the entry.** Remove the service from
-     `meta/services.yml` if the role no longer consumes it. Verify
-     [test_services_explicit.py](../../tests/integration/roles/meta/services/run_after/test_services_explicit.py)
-     stays green.
-  3. **Marking it.** Place `# nocheck: playwright-service-flag`
-     in the comment block immediately above the services-yml key
-     with a one-line rationale. Use only for documented
-     exceptions: self-gate (see "Self-gate exceptions" above),
-     infrastructural / non-Playwright-reachable surfaces, or roles
-     that legitimately have no spec for the surface.
-- **Self-gate entries** (annotated `*(self-gate)*` in the matrix)
-  MUST be closed via path 3 (`# nocheck`).
-  [006](006-playwright-service-gated-tests.md) forbids self-gating;
-  rendering the flag for the role's own provider service would
-  contradict that rule.
-- **Rows with `hat env ❌` / `hat spec ❌`**: roles that have not
-  yet adopted Playwright. The matrix does not enumerate their
-  per-service drift because Test A only fires when both
-  `templates/playwright.env.j2` and `meta/services.yml` exist.
-  When such a role grows a Playwright spec, the new env template
-  MUST satisfy this requirement from day one — never as a follow-up.
-- **`web-app-mailu` is the largest single row** (20 missing flags)
-  because its `meta/services.yml` declares every Mailu sub-component
-  (`admin`, `imap`, `smtp`, `antispam`, …) as a service entry. The
-  expected closure path for Mailu is: render flags for the
-  shared-dep entries (`oidc`, `dashboard`, `matomo`, `logout`,
-  `prometheus`); `# nocheck: playwright-service-flag` every internal
-  sub-component (`admin`, `antispam`, …) plus the self-gate
-  `mailu` per [006](006-playwright-service-gated-tests.md).
+## Closure procedure
 
-### Closure shape per matrix row
+The agent MUST follow this procedure verbatim to close the matrix above.
 
-For each non-self-gate, non-empty row in the matrix, the closing
-contributor MUST produce:
+### Required reading
 
-1. The new `<NAME>_SERVICE_ENABLED=…` lines in
-   `templates/playwright.env.j2`. Value shape per
-   [006](006-playwright-service-gated-tests.md): a Jinja expression
-   resolving to literal `"true"` / `"false"`.
-2. The new gated scenario(s) in `files/playwright.spec.js`. The
-   spec MUST `require('./service-gating')` at the top and call
-   `skipUnlessServiceEnabled('<svc>')` at the start of each
-   service-dependent scenario body.
-3. A `README.md` paragraph (or a sentence in the existing
-   "Playwright" section) listing which shared services the spec now
-   exercises, so a contributor planning a reduced deploy can
-   predict which scenarios will skip.
+Load all of the following before the first deploy.
 
-### Verification
+1. [Contributing `playwright.spec.js`](../contributing/artefact/files/role/playwright.specs.js.md): the persona scenarios, invariants, per-service catalogue, env contract, and final state.
+2. [Role Loop](../agents/action/iteration/role.md): per-role deploy procedure, certificate trust, inspect-before-redeploy, matrix-variant mechanics.
+3. [Playwright Spec Loop](../agents/action/iteration/playwright.md): inner-loop edits against an already-running stack.
 
-- [ ] [test_playwright_env_services_match.py](../../tests/integration/roles/test_playwright_env_services_match.py)
-  MUST be green for the in-scope tree at the close of this
-  requirement.
-- [ ] [test_playwright_spec_env_gates.py](../../tests/integration/roles/test_playwright_spec_env_gates.py)
-  MUST be green for the in-scope tree at the close of this
-  requirement.
-- [ ] [test_playwright_env_keys_used.py](../../tests/lint/ansible/roles/test_playwright_env_keys_used.py)
-  MUST stay green throughout the rollout. A new env key without a
-  spec consumer is a regression even when both new tests above are
-  passing on their respective slices.
-- [ ] A run with `SERVICES_DISABLED=<svc>` MUST report every
-  scenario gated on `<svc>` as
-  `skipped: <NAME>_SERVICE_ENABLED=false`, never `failed`. The
-  verification MUST cover at least one representative entry from
-  each non-trivial column of the per-service catalogue
-  (`dashboard`, `oidc`, `ldap`, `email`, `logout`, `matomo`).
-- [ ] A run without `SERVICES_DISABLED` MUST produce at least one
-  `passed` scenario per (role, service) combination that is in
-  scope per the matrix above. An empty-skip pass (zero scenarios
-  executed for a service across the whole suite) MUST fail the
-  verification step.
-- [ ] A grep `process.env\.[A-Z_]*_SERVICE_ENABLED` over the spec
-  tree (excluding
-  [roles/test-e2e-playwright/files/service-gating.js](../../roles/test-e2e-playwright/files/service-gating.js))
-  MUST return zero hits, proving every spec routes its gates
-  through the helper.
+### Autonomy
 
-## See Also
+- The agent MUST run the rollout autonomously without questions back to the operator.
+- The agent MUST NOT ask "should I disable matomo/email" or any other deploy-time question; this rollout deploys with NO `SERVICES_DISABLED`.
+- The agent MUST fix every failure that is caused by or related to this rollout (env-template drift, missing gates, persona scenarios, pattern-transfer regressions, …) without asking.
+- Failures clearly unrelated to the rollout (an upstream image outage, a flaky network test in another module, a pre-existing CI flake on a path this rollout does not touch) MUST be ignored: the agent does NOT deep-dive into them.
+  The agent SHOULD note the unrelated failure in the role's TODO.md if one exists, otherwise continue.
+- The agent MUST NOT use any command that requires elevated permissions or an interactive approval prompt.
+  Allowed permissions are defined by [.claude/settings.json](../../.claude/settings.json); commands that fall under `ask` or `deny` MUST NOT be invoked.
+- Matrix-variant roles MUST be iterated through every declared variant; the role-closure gate (see below) only fires when every variant passes.
+  Variants are read from `roles/<role>/meta/variants.yml` and driven via `VARIANT=<idx>` per [Role Loop → Matrix variants](../agents/action/iteration/role.md#matrix-variants).
 
-- [006 - Service-gated Playwright tests](006-playwright-service-gated-tests.md)
-- [017 - Playwright biber RBAC coverage](017-playwright-biber-rbac-coverage.md)
-- [018 - Playwright LDAP authentication coverage](018-playwright-ldap-coverage.md)
-- [test_playwright_env_services_match.py](../../tests/integration/roles/test_playwright_env_services_match.py)
-- [test_playwright_spec_env_gates.py](../../tests/integration/roles/test_playwright_spec_env_gates.py)
-- [test_playwright_env_keys_used.py](../../tests/lint/ansible/roles/test_playwright_env_keys_used.py)
+### Closure vocabulary
+
+This requirement uses two distinct closure terms; do NOT mix them.
+
+- **Flag closure** is the per-row event in the matrix below: a single `<NAME>_SERVICE_ENABLED=` flag has been rendered, gated, dropped, or `# nocheck`-marked per the [Closure paths](#closure-paths-per-matrix-row).
+  Closing a flag is a code change; it does NOT require a deploy on its own.
+- **Role closure** is the per-role event: every flag for the role is closed AND the role's spec ships the persona scenarios (where applicable) AND the role's full-cycle deploy plus Playwright spec passed for every declared variant AND Tests A and B are green for the role.
+
+The matrix tracks flag closure; the iteration tracks role closure.
+
+### Per-role flow
+
+For each role in the [Iteration order](#iteration-order) below:
+
+1. Run `make test`.
+   On failure, fix the underlying issue if it is rollout-related; per [Autonomy](#autonomy), unrelated failures are ignored.
+2. Run `make deploy-fresh-purged-apps APPS=<role> FULL_CYCLE=true` to establish a fresh full-cycle baseline WITHOUT `SERVICES_DISABLED`.
+   For matrix-variant roles, iterate through every variant declared in `roles/<role>/meta/variants.yml` via `VARIANT=<idx>` per [Role Loop → Matrix variants](../agents/action/iteration/role.md#matrix-variants); the role is NOT role-closed until every variant has produced a passing deploy plus passing Playwright spec.
+3. If the deploy fails or the spec fails, follow [Role Loop](../agents/action/iteration/role.md) and [Playwright Spec Loop](../agents/action/iteration/playwright.md) to fix the root cause.
+   Apply the fix in the repository files (NOT in the staged copy or the running container).
+4. If a specific service genuinely cannot work for the role (upstream limitation, infrastructural exclusion, scope conflict), perform a **flag closure** through one of the closure paths above: either disable the service in `roles/<role>/meta/services.yml` (when the role legitimately has no business consuming it), or mark the entry with `# nocheck: playwright-service-flag` and document the rationale in a one-line comment above the key (e.g. `# nocheck: playwright-service-flag — self-provider`, `# nocheck: playwright-service-flag — infrastructural, no Playwright surface`, `# nocheck: playwright-service-flag — covered by tests/integration/services/test_<x>.py`, `# nocheck: playwright-service-flag — upstream offers no <svc> integration`).
+   The agent decides which path applies based on the role's documented contract; it does NOT ask the operator.
+5. The role's `roles/<role>/meta/variants.yml` MAY need adjustment when its declared variants do not exercise the service combinations the spec gates on.
+   The agent MUST edit `meta/variants.yml` whenever any of the following holds:
+   - A new variant is required to exercise a service-off path that the matrix does not yet cover (e.g. an LDAP-only variant pinning `oidc.enabled: false` plus `ldap.enabled: true` per [018](018-playwright-ldap-coverage.md), or a variant that disables `matomo` to validate the skip-on-disabled contract).
+   - An existing variant pins service flags that conflict with the spec's gates (e.g. the variant pins `oauth2.enabled: true` while the role's spec only ever drives the `oidc` path); fix the variant to match what the spec actually exercises.
+   - A variant references a service key that is no longer declared in `meta/services.yml`; remove the override.
+   Variants edits MUST keep [test_auth_coverage.py](../../tests/integration/roles/meta/variants/test_auth_coverage.py) and [test_services_match.py](../../tests/integration/roles/meta/variants/test_services_match.py) green; the agent re-runs both after every `meta/variants.yml` change.
+   Variants edits are part of the same role-closure scope and do NOT trigger a separate commit.
+6. The role is **role-closed** only when:
+   - the final `make deploy-fresh-purged-apps APPS=<role> FULL_CYCLE=true` run completed successfully for every variant, AND
+   - the Playwright spec passed for every variant, AND
+   - the role's `files/playwright.spec.js` ships the two persona scenarios per [Rule 3](#rules) (or the auth-less single-scenario collapse for `web-svc-*` and the auth-less `web-app-*` exceptions), AND
+   - both [test_playwright_env_services_match.py](../../tests/integration/roles/test_playwright_env_services_match.py) and [test_playwright_spec_env_gates.py](../../tests/integration/roles/test_playwright_spec_env_gates.py) are green for the role, AND
+   - if `meta/variants.yml` was edited, [test_auth_coverage.py](../../tests/integration/roles/meta/variants/test_auth_coverage.py) and [test_services_match.py](../../tests/integration/roles/meta/variants/test_services_match.py) are green.
+7. **Strike the role through in the matrix** as the progress marker (see [Resumability](#resumability)) and move to the next role.
+
+### Pattern transfer
+
+After a role role-closes successfully, the agent MUST extract the **learnings** from that role and apply them to every later role in the iteration order **before** running the next role's deploy.
+Pattern transfer is a code-edit step, not a deploy step: each receiving role still goes through its own [Per-role flow](#per-role-flow) when its turn comes; the deploy never spans more than one role at a time.
+
+Learnings to propagate include every per-service assertion shape from the [per-service assertion catalogue](../contributing/artefact/files/role/playwright.specs.js.md#per-service-assertion-catalogue-):
+
+- the `dashboard` tile-click flow (locate role tile via `a[href*="<canonical>"]`, click, assert canonical landing);
+- the `prometheus` health-check (`up=1` for the role's target);
+- the `oidc` Keycloak round-trip (redirect to `openid-connect/auth`, login, redirect back, authenticated assertion);
+- the `oauth2` proxy-gate flow;
+- the `logout` universal-logout assertion;
+- the `matomo` tracking snippet check;
+- the `ldap` bind path (admin AND `biber`);
+- the `email`, `discourse`, federation, and any other service-pair flow.
+
+For every receiving role, the agent MUST adapt the propagated pattern to the role-specific selectors and credentials.
+Receiving roles whose `meta/services.yml` does NOT declare the relevant service MUST be skipped from that particular pattern transfer.
+The transfer happens **immediately** after the source role closes successfully; deferral to a later pass is forbidden.
+
+### Preserving existing tests
+
+The rollout is purely additive.
+The agent MUST NOT delete, shorten, or weaken any working test code in `files/playwright.spec.js`.
+The persona scenarios and per-service gates land **alongside** the existing scenarios, never instead of them.
+
+Specifically:
+
+- A passing scenario MUST stay passing through the rollout.
+  If a refactor risks breaking it, the agent MUST split the change so the existing scenario keeps its current shape and the new persona / gated scenarios are added next to it.
+- Existing helper functions, selectors, and `test.beforeEach` setup MUST be preserved; new scenarios SHOULD reuse them rather than introducing parallel copies.
+- An existing scenario MAY be **renamed** to follow the `<persona>: <flow>` naming convention from [Rule 3](#rules) when it already drives the persona's flow end-to-end; renaming MUST NOT change the assertions or the gated services.
+- Deletion of an existing scenario is only allowed when the underlying behaviour has been removed from the role itself (the same exception that already lives in the [trigger conditions](../contributing/artefact/files/role/playwright.specs.js.md#triggers-when-to-add-or-update-a-scenario-) of `playwright.specs.js.md`).
+  In every other case the agent MUST extend, not replace.
+
+### Iteration order
+
+Sorted by [`infinito meta roles applications complexity`](../../cli/meta/roles/applications/complexity/__main__.py) (ascending; lowest complexity first).
+**Within a tier, the order is dependency-aware**, not alphabetical: providers go before consumers, even when the complexity score is identical, because consumers' persona scenarios authenticate against / route through the providers.
+The list snapshot is the agent's starting plan.
+
+#### Tier 12 (providers and shared services)
+
+In dependency order:
+
+1. `web-svc-asset`, `web-svc-cdn`, `web-svc-file`, `web-svc-logout`, `web-svc-simpleicons` — base providers with no shared-service dependencies (auth-less; persona scenarios do NOT apply).
+2. `web-app-keycloak` — OIDC/LDAP provider; depends only on its own postgres backend.
+3. `web-app-dashboard` — consumes Keycloak OIDC; the canonical user entry point that every later persona scenario starts from.
+4. `web-app-mailu`, `web-app-matomo`, `web-app-prometheus` — provider apps that consume Keycloak (OIDC) and the dashboard (tile + canonical landing).
+
+#### Tier 13 (single-tier consumers)
+
+Within Tier 13 the iteration order is alphabetical because every entry consumes the providers above and has no further intra-tier ordering constraint.
+
+`web-app-akaunting`, `web-app-baserow`, `web-app-bluesky`, `web-app-bookwyrm`, `web-app-bridgy-fed`, `web-app-chess`, `web-app-confluence`, `web-app-decidim`, `web-app-discourse`, `web-app-espocrm`, `web-app-fider`, `web-app-friendica`, `web-app-funkwhale`, `web-app-fusiondirectory`, `web-app-gitea`, `web-app-gitlab`, `web-app-hugo`, `web-app-jenkins`, `web-app-jira`, `web-app-joomla`, `web-app-kix`, `web-app-lam`, `web-app-listmonk`, `web-app-littlejs`, `web-app-magento`, `web-app-mastodon`, `web-app-matrix`, `web-app-mattermost`, `web-app-mediawiki`, `web-app-mig`, `web-app-mini-qr`, `web-app-mobilizon`, `web-app-moodle`, `web-app-navigator`, `web-app-oauth2-proxy`, `web-app-odoo`, `web-app-opencloud`, `web-app-openproject`, `web-app-peertube`, `web-app-pgadmin`, `web-app-phpldapadmin`, `web-app-phpmyadmin`, `web-app-pixelfed`, `web-app-postmarks`, `web-app-pretix`, `web-app-roulette-wheel`, `web-app-shopware`, `web-app-snipe-it`, `web-app-socialhome`, `web-app-sphinx`, `web-app-suitecrm`, `web-app-taiga`, `web-app-xwiki`, `web-app-yourls`, `web-svc-collabora`, `web-svc-coturn`, `web-svc-html`, `web-svc-libretranslate`, `web-svc-onlyoffice`, `web-svc-xmpp`.
+
+#### Tier 14
+
+`web-app-flowise`, `web-app-minio`, `web-app-opentalk`, `web-app-openwebui`, `web-app-wordpress`, `web-svc-legal`.
+
+#### Tier 15
+
+`web-app-bigbluebutton`, `web-app-fediwall`.
+
+#### Tier 16
+
+`web-app-nextcloud`.
+
+#### Auth-less roles (persona-collapse exception)
+
+Per [Rule 3](#rules), the following roles MAY collapse the two persona scenarios into a single baseline reachability scenario because their upstream offers no auth surface (federation-only protocol, static-only output, programmatic-API-only service, internal sub-component of another role):
+
+- Every `web-svc-*` role (no end-user UI by construction).
+- `web-app-bridgy-fed` (federation-only; users authenticate at their source platform, not locally).
+- `web-app-hugo` (static-site generator; no runtime auth).
+- `web-app-littlejs`, `web-app-chess`, `web-app-mini-qr`, `web-app-roulette-wheel` (static / single-purpose toys; no upstream auth surface).
+- `web-app-navigator`, `web-app-mig` (in-app modules of `web-app-dashboard`; no separate auth surface).
+- `web-app-oauth2-proxy` (sidecar auth proxy; never directly user-facing).
+
+Every other `web-app-*` role MUST ship both persona scenarios per Rule 3.
+
+### Resumability
+
+The rollout is long-running and MAY be interrupted (sandbox timeout, context exhaustion, machine restart).
+The drift matrix above IS the progress marker; the agent does NOT maintain a separate state file.
+
+When resuming, the agent MUST:
+
+1. Re-derive the iteration order from `infinito meta roles applications complexity` to pick up any new roles added since the snapshot.
+2. Re-run [test_playwright_env_services_match.py](../../tests/integration/roles/test_playwright_env_services_match.py) and [test_playwright_spec_env_gates.py](../../tests/integration/roles/test_playwright_spec_env_gates.py) to discover which roles are already role-closed (zero drift) and which are still open.
+3. Pick the lowest-tier role that is NOT role-closed and resume the [Per-role flow](#per-role-flow) on it.
+4. Replay [Pattern transfer](#pattern-transfer) for any patterns the agent had landed pre-interruption: re-read each role-closed role's spec to identify which catalogue entries it covers, then ensure those patterns are present in every later not-yet-closed role's spec before continuing.
+
+The agent MUST NOT redo deploys for already-role-closed roles unless a later edit broke their tests.
+
+### Commits
+
+- The agent MUST NOT create intermediate commits during the rollout.
+- The agent MUST stage incremental changes locally as it goes (so progress survives between roles) but MUST NOT commit until the final role in the iteration order has been role-closed.
+- A single commit at the end of the rollout captures every change.
+  The commit message format is not prescribed by this requirement; use a concise summary that mentions req 019.
+- The agent MUST NOT push the final commit; the operator runs `git-sign-push` outside the sandbox.
+
+## Verification
+
+- [ ] Test A green tree-wide.
+- [ ] Test B green tree-wide.
+- [ ] [test_env_keys_used.py](../../tests/lint/ansible/roles/web-app/playwright/test_env_keys_used.py) green throughout the rollout.
+- [ ] Every `web-app-*` role's `files/playwright.spec.js` contains a `biber: <flow>` test AND an `administrator: <flow>` test (or the documented auth-less collapse). Verified by inspection or by a follow-up persona-presence lint.
+- [ ] `SERVICES_DISABLED=<svc>` reports every gated scenario as `skipped: <NAME>_SERVICE_ENABLED=false`, never `failed`. MUST cover ≥1 scenario each for `dashboard`, `oidc`, `ldap`, `email`, `logout`, `matomo`.
+- [ ] No-`SERVICES_DISABLED` run produces ≥1 `passed` scenario per in-scope `(role, service)` pair. Empty-skip = fail.
+- [ ] `grep 'process.env\.[A-Z_]*_SERVICE_ENABLED'` over the spec tree (excluding `service-gating.js`) returns zero hits.

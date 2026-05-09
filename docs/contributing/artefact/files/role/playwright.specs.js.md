@@ -13,10 +13,15 @@ For the env contract see [Agent `playwright.env.j2`](../../../../agents/files/ro
 
 ## Two personas, fixed flow 🚶
 
-Every spec ships exactly **two scenarios**, one per persona.
-Both exist in the deploy fixture: `administrator` (admin) and `biber` (non-admin).
+Every spec MUST include the two persona scenarios below as its baseline; additional scenarios (RBAC loops, peer-to-peer messaging, federation round-trips, CSP-deep-checks, …) MAY be added on top.
+Both personas exist in the deploy fixture: `administrator` (admin) and `biber` (non-admin).
 The flow shape is identical across roles; only the role-specific selectors and the post-login assertion change.
 Service-dependent steps MUST be guarded with [`skipUnlessServiceEnabled('<svc>')`](../../../../../roles/test-e2e-playwright/files/service-gating.js) so a deploy with `SERVICES_DISABLED=<svc>` reports the affected step as `skipped: <NAME>_SERVICE_ENABLED=false`, never `failed`.
+
+Each persona scenario MUST be named `<persona>: <flow>`, where `<persona>` is the literal token `biber` or `administrator` and `<flow>` is a concise step description (e.g. `dashboard → app → logout`).
+The persona token MUST appear at the very start of the test title so the Playwright reporter groups runs by persona without further parsing.
+
+Roles that have no auth surface at all (federation-only services with no local accounts, e.g. `web-app-bridgy-fed`) MAY collapse the two persona scenarios into one baseline reachability scenario; the README MUST document the missing auth tier and the omission MUST be visible from the role's `lifecycle` and `services.yml` exceptions.
 
 ### `biber`: single-app journey
 
@@ -95,6 +100,18 @@ test("administrator: dashboard → prometheus → dashboard → app → logout",
   Direct `process.env` reads of `<NAME>_SERVICE_ENABLED` are forbidden.
 - Baseline scenarios (reachability, CSP, canonical-domain DOM assertion, logged-out final state) MUST NOT gate on any service.
   A deploy with every shared service disabled MUST still leave a passing baseline suite.
+- When the role enables both `oidc` and `ldap`, each persona's primary login path MUST use OIDC.
+  The LDAP-bind path is exercised by a separate scenario that runs in the LDAP-only matrix variant (where `oidc` is disabled and `ldap` is enabled); each persona's LDAP scenario gates on `skipUnlessServiceEnabled('ldap')` so it skips cleanly when LDAP is off.
+- Each `test()` runs in its own isolated browser context.
+  Specs MUST NOT share session state between tests; running biber and administrator as two separate `test()` blocks already gives that isolation by default.
+  When a single scenario needs more than one identity at once (peer-to-peer messaging, RBAC promotion observed by the admin, …), it MUST open a fresh `browser.newContext({ ignoreHTTPSErrors: true })` per identity and close them in `finally`.
+- The post-login assertion MUST prove the session is real, in this order of preference: a user-menu / persona-name string visible in the DOM, a navigation element only rendered for authenticated users, a URL pattern unique to authenticated state.
+  Stopping at a 2xx status code or a static text snippet that exists logged-out as well MUST NOT count as a session check.
+- The admin assertion MUST additionally prove admin authorisation (admin panel, management menu, "Users" / "Settings" / "Administration" link visible in the DOM).
+  A scenario that lands on the same surface as `biber` and stops there MUST NOT claim admin coverage.
+- Every spec MUST set `test.use({ ignoreHTTPSErrors: true })` at the top of the file because the test environment uses self-signed certificates.
+  The central `playwright.config.js` does NOT set this globally; per-spec opt-in is the contract.
+- Test titles MUST follow the `<persona>: <flow>` naming convention so the reporter groups runs by persona without parsing.
 
 ## Per-service assertion catalogue 🚦
 
@@ -122,6 +139,12 @@ Non-exhaustive; new services inherit the same shape (real end-to-end check that 
 - Whenever role-local `style.css` or `javascript.js` changes user-visible behaviour, the spec MUST assert on the visible effect.
 - Whenever the role enables an auth integration (OIDC, oauth2, LDAP), at least one persona's flow MUST exercise the integrated login path (not only a local-form login).
 - When the application supports peer-to-peer messaging, the spec MUST cover a bi-directional `biber` ↔ `administrator` exchange (each delivery asserted in the recipient's inbox from an isolated browser context).
+- Every `web-app-*` role MUST include a baseline scenario asserting that the canonical-domain front page emits a `Content-Security-Policy` response header.
+  Roles whose surface is API-only or federation-only (no HTML output) MAY skip this and document the omission in the role's `README.md`.
+- Cross-role round-trip scenarios (WordPress → Discourse, Bluesky → Mastodon, etc.) live in the spec of the role that **initiates** the action.
+  The receiving role asserts the delivery via REST API or DB-bound integration tests, never via its own Playwright spec.
+- When `meta/variants.yml` declares variant-specific behaviour (WordPress Multisite, Moodle LDAP-only, …), the spec MAY add scenarios that gate on a variant-specific env var via `test.skip(!process.env.<VARIANT>_ENABLED, "<reason naming the variant flag>")`.
+  Variant-gated scenarios MUST surface in the reporter as `skipped` with a reason naming the flag, never as silent no-ops.
 - Existing scenarios MUST NOT be deleted when "optimising" a spec.
   Rewrite them to satisfy the rules above or strengthen assertions; do not shrink coverage.
   Deletions are only acceptable when the underlying behaviour was removed from the role itself.
@@ -134,12 +157,40 @@ Non-exhaustive; new services inherit the same shape (real end-to-end check that 
 - When a flow runs inside an iframe and login or OIDC clicks can reload it, the spec MUST treat the reload as a navigation event: await the next visible state or the new iframe URL, then reacquire the frame and rebuild locators before the next interaction.
   A stale iframe handle MUST NOT be reused across redirects.
 
+### Test-budget overrides ⏱️
+
+The Playwright per-test default of 30 s is too tight for several flows.
+Use `test.setTimeout(<ms>)` at the top of the test body (after the gates) and document the reason in a comment when the scenario includes any of:
+
+- An OIDC round-trip plus admin token request (allow ≥ 60 s).
+- Email delivery via Mailu / external SMTP (allow ≥ 60 s for the first inbox poll, ≥ 600 s for full P2P round-trips that wait for matterbot, antivirus scan, etc.).
+- Federation propagation across two services (variable; budget per-flow but log the chosen number).
+- Any cross-role round-trip (e.g. WordPress → Discourse): allow ≥ 300 s for the body and any teardown that runs in the test's `finally`.
+
+The chosen budget MUST be visible in a comment on the same line as `test.setTimeout`, naming the slowest sub-step it covers, so future readers can adjust it without re-deriving.
+
+### Cleanup and teardown 🧹
+
+Scenarios that create persistent state (WordPress posts, Discourse topics, Keycloak group memberships, file uploads, …) MUST clean up in a `try { ... } finally { ... }` block.
+The teardown MUST:
+
+- Run regardless of body outcome (success, assertion failure, exception).
+- Be idempotent (re-running the same cleanup MUST NOT error: a second delete on an already-gone resource MUST be a no-op).
+- Carry its own bounded timeout (`Promise.race` against an explicit deadline) so a hung delete request cannot consume the whole test budget.
+- NOT mask the original test failure: log cleanup errors via `console.warn` rather than throwing, and let the body's assertion failure surface.
+
 ## Environment contract 🔌
 
 - Every env variable the spec reads MUST be exposed in the role's `templates/playwright.env.j2`.
   Names MUST match exactly.
 - URLs, domains, and credentials MUST come from the rendered `.env`.
   No hardcoded values in the spec.
+- The minimum env set for any spec following the persona flows is `APP_BASE_URL`, `CANONICAL_DOMAIN`, `DASHBOARD_BASE_URL`, and `LOGOUT_URL`.
+  Specs that gate on auth additionally read at least one of `OIDC_ISSUER_URL`, `KEYCLOAK_BASE_URL`, plus the persona credentials `ADMIN_USERNAME` / `ADMIN_PASSWORD` and `BIBER_USERNAME` / `BIBER_PASSWORD`.
+  Specs that exercise integrations (Matomo, Discourse, Email, Prometheus, …) read the integration-specific keys defined in [Agent `playwright.env.j2`](../../../../agents/files/role/playwright.env.j2.md).
+- `docker --env-file` preserves the quotes emitted by the `dotenv_quote` Jinja filter.
+  Specs MUST decode quoted values before building URLs or typing credentials.
+  The recurring helpers `decodeDotenvQuotedValue(value)` and `normalizeBaseUrl(value)` are inlined per spec today; once a third spec needs them, they MUST be promoted into the shared helpers under [roles/test-e2e-playwright/files/](../../../../../roles/test-e2e-playwright/files/) and imported instead of copy-pasted.
 
 ## Service gating contract 🔒
 
