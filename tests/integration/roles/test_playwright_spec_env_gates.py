@@ -8,7 +8,7 @@ Scope
 
 Only roles that ship both the env template and the spec are checked.
 Roles with an env template but no spec are already flagged by
-``tests/lint/ansible/roles/test_playwright_env_keys_used.py``.
+``tests/lint/ansible/roles/web-app/playwright/test_env_keys_used.py``.
 
 A "gate" is any one of these helper invocations referencing the
 service name (case-insensitive, whitespace tolerated)::

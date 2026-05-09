@@ -18,7 +18,7 @@ Enforced (hard fail) rules
    project's fixed wording byte-for-byte (Kevin Veen-Birkenbach /
    Consulting & Coaching Solutions / Infinito.Nexus Project / Community
    License). The same exact-value is enforced for ``galaxy_info.company``
-   in :mod:`tests.lint.repository.test_role_meta_main_galaxy_schema` so
+   in :mod:`tests.lint.ansible.roles.meta.test_main_galaxy_schema` so
    the role's metadata and its README stay in sync.
 
 Soft / fuzzy rules from ``readme_md.md`` (sentence-case headings,

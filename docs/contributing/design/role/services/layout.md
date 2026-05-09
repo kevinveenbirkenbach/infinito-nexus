@@ -365,7 +365,7 @@ video: https://youtu.be/3jcYJGQgenI?si=FDmoMSrAb9_WvviC
 | `video`    | string | Upstream demo / overview video URL.                                                                                      |
 | `display`  | bool   | Default `true`. `false` opts the role out of dashboards / cards / apps grids.                                            |
 
-The lint (`tests/lint/repository/test_role_meta_info.py`) rejects any
+The lint (`tests/lint/ansible/roles/meta/test_info.py`) rejects any
 other top-level key so the file does not become a dumping ground.
 
 ### Optionality

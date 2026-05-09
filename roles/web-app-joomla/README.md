@@ -29,7 +29,7 @@ The Playwright spec at [files/playwright.spec.js](./files/playwright.spec.js) cu
 
 Closing that gap is tracked in [docs/requirements/017-playwright-biber-rbac-coverage.md](../../docs/requirements/017-playwright-biber-rbac-coverage.md). Until the requirement is closed:
 
-- the role's [templates/playwright.env.j2](./templates/playwright.env.j2) MUST NOT carry stale `BIBER_USERNAME` / `BIBER_PASSWORD` keys (the lint at [tests/lint/ansible/roles/test_playwright_env_keys_used.py](../../tests/lint/ansible/roles/test_playwright_env_keys_used.py) enforces this);
+- the role's [templates/playwright.env.j2](./templates/playwright.env.j2) MUST NOT carry stale `BIBER_USERNAME` / `BIBER_PASSWORD` keys (the lint at [tests/lint/ansible/roles/web-app/playwright/test_env_keys_used.py](../../tests/lint/ansible/roles/web-app/playwright/test_env_keys_used.py) enforces this);
 - the admin scenarios stay gated on `oidc` (and on `ldap` for the LDAP-variant scenarios) per [006](../../docs/requirements/006-playwright-service-gated-tests.md), so a deploy with `SERVICES_DISABLED=oidc` reports the SSO scenario as `skipped`, never `failed`.
 
 ## Further Resources

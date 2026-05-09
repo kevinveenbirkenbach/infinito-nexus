@@ -92,7 +92,7 @@ def _suppressed_top_level_keys(file_path: Path) -> set[str]:
 def _env_keys_declared(env_text: str) -> set[str]:
     """Return every ``KEY=`` left-hand-side declared in a
     ``playwright.env.j2`` body. The same scan as
-    ``test_playwright_env_keys_used.py`` but coarser — we only care
+    ``web-app/playwright/test_env_keys_used.py`` but coarser — we only care
     whether the key appears, not its value or position."""
     return set(_ENV_KEY_LHS_RE.findall(env_text))
 
