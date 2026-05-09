@@ -13,6 +13,8 @@
 // native form hidden in this deployment.
 const { test, expect } = require("@playwright/test");
 
+const { skipUnlessServiceEnabled, isServiceEnabled } = require("./service-gating");
+const { runGuestFlow, runBiberFlow, runAdminFlow } = require("./personas");
 // `ignoreHTTPSErrors` is needed because the local stack typically uses the
 // self-signed CA set up by `make trust-ca`, which the Playwright container
 // does not trust by default.
@@ -864,4 +866,35 @@ test("biber logs into nextcloud via OIDC and logs out", async ({ browser }) => {
     await biberPage.close().catch(() => {});
     await biberContext.close().catch(() => {});
   }
+});
+
+// Persona scenarios (req 019 Rule 3).
+// Bodies live in the shared helper roles/test-e2e-playwright/files/personas.js
+// so every role's persona flow stays consistent.
+
+test("guest: public-landing → auth chain → never authenticated", async ({ page }) => {
+  await runGuestFlow(page);
+});
+
+test("biber: dashboard → app → universal logout", async ({ page }) => {
+  await runBiberFlow(page);
+});
+
+test("administrator: dashboard → prometheus → app → universal logout", async ({ page }) => {
+  await runAdminFlow(page, {
+    adminInteraction: async (interactivePage) => {
+      // web-app-nextcloud admin-only interaction: open a management surface.
+      const link = interactivePage
+        .getByRole("link", { name: /^(administration settings|administration|users|apps|files)$/i })
+        .first();
+      if (await link.isVisible({ timeout: 10_000 }).catch(() => false)) {
+        await link.click().catch(() => {});
+        await interactivePage.waitForLoadState("domcontentloaded", { timeout: 30_000 }).catch(() => {});
+        await expect(interactivePage.locator("body")).toContainText(
+          /administration|users|apps|files|sharing|security/i,
+          { timeout: 30_000 },
+        );
+      }
+    },
+  });
 });

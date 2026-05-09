@@ -3,6 +3,7 @@ oidc:
   enabled: "{{ 'web-app-keycloak' in group_names }}"
   shared: "{{ 'web-app-keycloak' in group_names }}"
   flavor: ""
+# nocheck: playwright-service-flag — infrastructural sub-component (TURN/STUN)
 coturn:
   enabled: "{{ 'web-svc-coturn' in group_names }}"
   shared: "{{ 'web-svc-coturn' in group_names }}"
@@ -23,6 +24,7 @@ email:
   shared: "{{ 'web-app-mailu' in group_names }}"
 # nocheck: shared
 # nocheck: dynamic-flag
+# nocheck: playwright-service-flag — DB engine, covered by role-local integration tests
 redis:
   backup:
     disabled: true
@@ -31,6 +33,7 @@ redis:
   mem_reservation: 1g
   mem_limit: 8g
   pids_limit: 512
+# nocheck: playwright-service-flag — DB engine, covered by role-local integration tests
 mariadb:
   enabled: true # nocheck: dynamic-flag
   shared: "{{ 'svc-db-mariadb' in group_names }}"
@@ -201,6 +204,7 @@ cron:
   pids_limit: 256
   min_storage: 1GB
 # nocheck: dynamic-flag
+# nocheck: playwright-service-flag — infrastructural sub-component (real-time communication)
 talk:
   enabled: "{{ lookup('config', 'web-app-nextcloud', 'plugins.spreed.enabled', False) }}"
   name: nextcloud-talk
@@ -228,9 +232,11 @@ whiteboard:
   mem_limit: 1g
   pids_limit: 1024
   min_storage: 1GB
+# nocheck: playwright-service-flag — infrastructural sub-component (collaborative editing)
 onlyoffice:
   enabled: "{{ 'web-svc-onlyoffice' in group_names }}"
   shared: "{{ 'web-svc-onlyoffice' in group_names }}"
+# nocheck: playwright-service-flag — infrastructural sub-component (collaborative editing)
 collabora:
   enabled: "{{ 'web-svc-collabora' in group_names }}"
   shared: "{{ 'web-svc-collabora' in group_names }}"
@@ -246,10 +252,12 @@ talk_recording:
   pids_limit: 1024
   min_storage: 1GB
 # nocheck: dynamic-flag
+# nocheck: playwright-service-flag — canonical:cdn alias of static-asset provider
 css:
   enabled: false
   shared: true
 # nocheck: dynamic-flag
+# nocheck: playwright-service-flag — captcha backend, infrastructural
 hcaptcha:
   enabled: "{{ HCAPTCHA_ENABLED | bool }}"
 prometheus:
