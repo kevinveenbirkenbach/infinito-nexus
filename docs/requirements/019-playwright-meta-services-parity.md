@@ -11,8 +11,11 @@ That one file MAY contain any number of `test()` blocks, but for every `(role, i
 A service "included" means a top-level entry in `roles/<role>/meta/services.yml`.
 Skip-on-disabled is enforced through the shared [service-gating.js](../../roles/test-e2e-playwright/files/service-gating.js) helper from [006](006-playwright-service-gated-tests.md).
 
-The user-journey shape every `web-app-*` spec MUST instantiate is defined in [playwright.specs.js.md](../contributing/artefact/files/role/playwright.specs.js.md): one `biber` scenario and one `administrator` scenario, both starting on the dashboard, named `<persona>: <flow>`.
-**Both persona scenarios MUST exist in every `web-app-*` role's spec under this requirement; their presence is part of the acceptance criteria, not optional polish.**
+The user-journey shape every `web-app-*` spec MUST instantiate is defined in [playwright.specs.js.md](../contributing/artefact/files/role/playwright.specs.js.md): one `guest` scenario, one `biber` scenario, and one `administrator` scenario, named `<persona>: <flow>`.
+**All three persona scenarios MUST exist in every `web-app-*` role's spec under this requirement; their presence is part of the acceptance criteria, not optional polish.**
+
+The Playwright spec file IS the single point of truth for the persona contract.
+When the SPOT spec contract page and a role's spec disagree, the spec wins; documentation MUST be brought into alignment, not the other way around.
 
 `web-svc-*` roles are auth-less by construction (no end-user UI, programmatic API only).
 They are NOT subject to the persona contract; their spec ships a single baseline reachability scenario plus the per-service gates that apply to them.
@@ -26,10 +29,14 @@ The acceptance criteria below are the mechanical translation of this contract.
 | --- | --- | --- |
 | 1 | Every entry in `meta/services.yml` with an `enabled:` key MUST surface as `<NAME>_SERVICE_ENABLED=` in `templates/playwright.env.j2`, OR carry `# nocheck: playwright-service-flag` above the key with a one-line rationale. | [test_playwright_env_services_match.py](../../tests/integration/roles/test_playwright_env_services_match.py) (Test A) |
 | 2 | Every `<NAME>_SERVICE_ENABLED=` line in the env template MUST be consumed by ≥1 `requireService` / `skipUnlessServiceEnabled` / `isServiceEnabled` / `isServiceDisabledReason` call in `files/playwright.spec.js`, OR carry `# nocheck: playwright-service-gate` on the env line. | [test_playwright_spec_env_gates.py](../../tests/integration/roles/test_playwright_spec_env_gates.py) (Test B) |
-| 3 | Every `web-app-*` role's `files/playwright.spec.js` MUST contain the two persona scenarios defined in [playwright.specs.js.md](../contributing/artefact/files/role/playwright.specs.js.md), named `biber: <flow>` and `administrator: <flow>` respectively. `web-svc-*` roles and `web-app-*` roles whose upstream has no auth surface (federation-only or static-only, see the auth-less list under [Iteration order](#iteration-order)) MAY collapse them into a single baseline scenario. | review (this requirement); the persona-naming check is the role-closure gate for the matrix below |
+| 3 | Every `web-app-*` role's `files/playwright.spec.js` MUST contain the three persona scenarios defined in [playwright.specs.js.md](../contributing/artefact/files/role/playwright.specs.js.md), named `guest: <flow>`, `biber: <flow>`, and `administrator: <flow>` respectively. The biber scenario MUST assert biber is denied at prometheus AND at matomo (where those services are enabled); the administrator scenario MUST assert the administrator is accepted at the prometheus interface AND the matomo admin UI (where those services are enabled); the guest scenario MUST assert the unauthenticated visitor never reaches the role's authenticated surface. `web-svc-*` roles and `web-app-*` roles whose upstream has no auth surface (federation-only or static-only, see the auth-less list under [Iteration order](#iteration-order)) MAY collapse all three into a single baseline scenario. | review (this requirement); the persona-naming check is the role-closure gate for the matrix below |
 | 4 | Specs MUST NOT read `<NAME>_SERVICE_ENABLED` directly via `process.env`. All reads go through the helper. | grep verification (see below) |
 | 5 | A scenario that depends on multiple services MUST gate each via a separate `skipUnlessServiceEnabled('<svc>')` call. No bundled multi-service gates; bundling defeats the variant matrix (same rule as [018](018-playwright-ldap-coverage.md)). | review |
 | 6 | A new env key without a spec consumer is a regression. | [test_env_keys_used.py](../../tests/lint/ansible/roles/web-app/playwright/test_env_keys_used.py) |
+| 7 | Every persona scenario AND every contract test in `files/playwright.spec.js` MUST simulate a real user flow with at least one `expect(...)` / `await <fn>(...)` / equivalent assertion. Stub bodies (`TODO`, `STUB`, `FIXME`, empty, or only `skipUnlessServiceEnabled`) are FORBIDDEN. The rollout's intent is real flows that fail when the integration breaks; a passing-by-default body provides no signal. | [test_no_stub_tests.py](../../tests/lint/ansible/roles/web-app/playwright/test_no_stub_tests.py) |
+| 8 | Tests MUST drive user-initiated actions through the rendered UI (click on logout button / link / menu, click on submit button, …) and MUST NOT short-circuit them with `page.goto(<action-endpoint>)`. The logout step in particular MUST click the role's own in-app logout control on the currently authenticated surface (or open a user / account menu first when the control is nested). When the universal-logout service is attached, its injected JavaScript auto-rewrites the click target to redirect through Keycloak's end-session endpoint, so the test does NOT branch on whether universal-logout is active. Navigating directly to `${LOGOUT_URL}` is forbidden. | review (this requirement) |
+| 9 | Every persona scenario MUST drive a real, role-specific interaction after the auth chain settles (or directly on the role surface when no auth is required). The `biber` interaction MUST exercise a regular end-user action; the `administrator` interaction MUST exercise an admin-only surface. Specs pass the interaction in via `runBiberFlow(page, { biberInteraction })` / `runAdminFlow(page, { adminInteraction })`. No generic default exists — a generic "click any link" assertion tests nothing role-specific. | review (this requirement) |
+| 10 | When the role supports peer-to-peer interaction (messaging, comment threads, federation round-trips, calendar invites, …), the spec MUST include a separate `biber ↔ administrator: <flow>` test that opens two browser contexts, drives the round-trip end-to-end, and asserts both sides see the expected payload. The shared `runPeerExchangeFlow(browser, { peerExchange })` helper provides the two-context scaffolding. Roles whose upstream offers no peer interaction surface MUST NOT add the test. | review (this requirement) |
 
 ## Per-service scenario catalogue
 
@@ -206,7 +213,7 @@ For each role in the [Iteration order](#iteration-order) below:
 6. The role is **role-closed** only when:
    - the final `make deploy-fresh-purged-apps APPS=<role> FULL_CYCLE=true` run completed successfully for every variant, AND
    - the Playwright spec passed for every variant, AND
-   - the role's `files/playwright.spec.js` ships the two persona scenarios per [Rule 3](#rules) (or the auth-less single-scenario collapse for `web-svc-*` and the auth-less `web-app-*` exceptions), AND
+   - the role's `files/playwright.spec.js` ships the three persona scenarios per [Rule 3](#rules) (or the auth-less single-scenario collapse for `web-svc-*` and the auth-less `web-app-*` exceptions), AND
    - both [test_playwright_env_services_match.py](../../tests/integration/roles/test_playwright_env_services_match.py) and [test_playwright_spec_env_gates.py](../../tests/integration/roles/test_playwright_spec_env_gates.py) are green for the role, AND
    - if `meta/variants.yml` was edited, [test_auth_coverage.py](../../tests/integration/roles/meta/variants/test_auth_coverage.py) and [test_services_match.py](../../tests/integration/roles/meta/variants/test_services_match.py) are green.
 7. **Strike the role through in the matrix** as the progress marker (see [Resumability](#resumability)) and move to the next role.
@@ -219,7 +226,12 @@ Pattern transfer is a code-edit step, not a deploy step: each receiving role sti
 Learnings to propagate include every per-service assertion shape from the [per-service assertion catalogue](../contributing/artefact/files/role/playwright.specs.js.md#per-service-assertion-catalogue-):
 
 - the `dashboard` tile-click flow (locate role tile via `a[href*="<canonical>"]`, click, assert canonical landing);
-- the `prometheus` health-check (`up=1` for the role's target);
+- the `prometheus` interface check for the administrator (`up=1` for the role's target on `/api/v1/query?query=up`);
+- the `prometheus` deny-check for biber (admin-only surface MUST refuse the biber identity);
+- the `matomo` admin-login for the administrator (lands on the matomo admin UI from the dashboard tile);
+- the `matomo` deny-check for biber (admin-only surface MUST refuse the biber identity);
+- the CSP injection assertion (every persona; the page's `Content-Security-Policy` header MUST list every enabled injector host);
+- the `guest` denial flow (unauthenticated visitor never reaches an authenticated surface; empty-credentials submission MUST be rejected by the IdP);
 - the `oidc` Keycloak round-trip (redirect to `openid-connect/auth`, login, redirect back, authenticated assertion);
 - the `oauth2` proxy-gate flow;
 - the `logout` universal-logout assertion;
@@ -319,7 +331,8 @@ The agent MUST NOT redo deploys for already-role-closed roles unless a later edi
 - [ ] Test A green tree-wide.
 - [ ] Test B green tree-wide.
 - [ ] [test_env_keys_used.py](../../tests/lint/ansible/roles/web-app/playwright/test_env_keys_used.py) green throughout the rollout.
-- [ ] Every `web-app-*` role's `files/playwright.spec.js` contains a `biber: <flow>` test AND an `administrator: <flow>` test (or the documented auth-less collapse). Verified by inspection or by a follow-up persona-presence lint.
+- [ ] [test_no_stub_tests.py](../../tests/lint/ansible/roles/web-app/playwright/test_no_stub_tests.py) green tree-wide. Every persona scenario and every contract test drives a real user flow; no stub bodies survive.
+- [ ] Every `web-app-*` role's `files/playwright.spec.js` contains a `guest: <flow>` test, a `biber: <flow>` test, AND an `administrator: <flow>` test (or the documented auth-less collapse). Verified by inspection or by a follow-up persona-presence lint.
 - [ ] `SERVICES_DISABLED=<svc>` reports every gated scenario as `skipped: <NAME>_SERVICE_ENABLED=false`, never `failed`. MUST cover ≥1 scenario each for `dashboard`, `oidc`, `ldap`, `email`, `logout`, `matomo`.
 - [ ] No-`SERVICES_DISABLED` run produces ≥1 `passed` scenario per in-scope `(role, service)` pair. Empty-skip = fail.
 - [ ] `grep 'process.env\.[A-Z_]*_SERVICE_ENABLED'` over the spec tree (excluding `service-gating.js`) returns zero hits.

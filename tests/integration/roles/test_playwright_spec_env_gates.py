@@ -53,7 +53,7 @@ import unittest
 from typing import TYPE_CHECKING
 
 from utils.annotations.suppress import is_suppressed_at
-from utils.cache.files import read_text
+from utils.cache.files import iter_project_files, read_text
 
 from . import PROJECT_ROOT
 
@@ -66,11 +66,13 @@ _RULE = "playwright-service-gate"
 
 _ENV_TEMPLATE_REL = "templates/playwright.env.j2"  # nocheck: role-file-spot
 _SPEC_FILE_REL = "files/playwright.spec.js"  # nocheck: role-file-spot
+_SHARED_PERSONAS_DIR = "roles/test-e2e-playwright/files/personas"
+_PERSONA_RUNNERS: tuple[str, ...] = ("runGuestFlow", "runBiberFlow", "runAdminFlow")
 
 _FLAG_LINE_RE = re.compile(r"^\s*([A-Z][A-Z0-9_]*)_SERVICE_ENABLED\s*=")
 _HELPER_CALL_RE = re.compile(
     r"\b(?:requireService|skipUnlessServiceEnabled|isServiceEnabled|"
-    r"isServiceDisabledReason)\s*\(\s*['\"]([^'\"]+)['\"]"
+    r"isServiceDisabledReason|safeSkipUnlessEnabled|safeIsEnabled)\s*\(\s*['\"]([^'\"]+)['\"]"
 )
 
 
@@ -95,9 +97,31 @@ def _flag_lines_in_env(env_path: Path) -> list[tuple[int, str]]:
 
 def _gated_roots_in_spec(spec_path: Path) -> set[str]:
     """Return the set of env-key roots gated somewhere in the spec
-    (any of the four helper APIs, with the helper's own canonicalisation)."""
+    (any of the four helper APIs, with the helper's own canonicalisation).
+
+    When the spec imports a persona-flow runner from `./personas`
+    (`runGuestFlow` / `runBiberFlow` / `runAdminFlow`), the gates
+    inside the shared personas directory count as consumed by the spec
+    too — every persona scenario fully drives the underlying
+    `skipUnlessServiceEnabled('...')` chain via shared helpers.
+    """
     text = read_text(str(spec_path))
-    return {_service_to_env_key_root(name) for name in _HELPER_CALL_RE.findall(text)}
+    roots: set[str] = {
+        _service_to_env_key_root(name) for name in _HELPER_CALL_RE.findall(text)
+    }
+
+    if any(runner in text for runner in _PERSONA_RUNNERS):
+        personas_prefix = str(PROJECT_ROOT / _SHARED_PERSONAS_DIR) + "/"
+        for persona_path in sorted(iter_project_files(extensions=(".js",))):
+            if not persona_path.startswith(personas_prefix):
+                continue
+            persona_text = read_text(persona_path)
+            roots.update(
+                _service_to_env_key_root(name)
+                for name in _HELPER_CALL_RE.findall(persona_text)
+            )
+
+    return roots
 
 
 class TestPlaywrightSpecGatesEnvFlags(unittest.TestCase):

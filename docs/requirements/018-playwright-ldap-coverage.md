@@ -75,7 +75,7 @@ consistently across the role tree is what this requirement tracks.
   `process.env.LDAP_SERVICE_ENABLED` reads in the spec are forbidden.
 - [ ] No role MAY ship a role-local `<ROLE>_LDAP_ENABLED` env key as
   a workaround for the helper. The
-  [test_playwright_env_keys_used.py](../../tests/lint/ansible/roles/test_playwright_env_keys_used.py)
+  [test_playwright_env_keys_used.py](../../tests/lint/ansible/roles/web-app/playwright/test_env_keys_used.py)
   lint MUST stay green: any custom flag that survives must be
   consumed by the spec, otherwise it is dead config.
 
@@ -122,7 +122,7 @@ item is a NOOP unless a stale env key shows up.
 
 ### Verification
 
-- [ ] After every role-local change [test_playwright_env_keys_used.py](../../tests/lint/ansible/roles/test_playwright_env_keys_used.py) MUST stay green.
+- [ ] After every role-local change [test_playwright_env_keys_used.py](../../tests/lint/ansible/roles/web-app/playwright/test_env_keys_used.py) MUST stay green.
 - [ ] A run with `SERVICES_DISABLED=oidc` (LDAP-only mode) MUST
   produce at least one `passed` LDAP scenario per role marked above
   as in-scope, never an empty-skip pass.

@@ -21,7 +21,7 @@ expected post-login surface, optionally assert that admin-only UI is
 absent).
 
 A static-analysis pass (added in
-[tests/lint/ansible/roles/test_playwright_env_keys_used.py](../../tests/lint/ansible/roles/test_playwright_env_keys_used.py))
+[tests/lint/ansible/roles/web-app/playwright/test_env_keys_used.py](../../tests/lint/ansible/roles/web-app/playwright/test_env_keys_used.py))
 surfaced multiple roles that **declared** the `BIBER_*` env keys but
 never read them in the spec — the env file was prepared, the spec was
 never written. The most prominent example is `web-app-joomla`: it
@@ -70,7 +70,7 @@ rather than role by role.
   `BIBER_USERNAME` and `BIBER_PASSWORD` (via
   `lookup('users', 'biber')`) in its
   `roles/<role>/templates/playwright.env.j2`. The
-  [test_playwright_env_keys_used.py](../../tests/lint/ansible/roles/test_playwright_env_keys_used.py)
+  [test_playwright_env_keys_used.py](../../tests/lint/ansible/roles/web-app/playwright/test_env_keys_used.py)
   lint MUST stay green: any declared `BIBER_*` key MUST be consumed
   by the role's spec or by a shared helper under
   `roles/test-e2e-playwright/files/`.
@@ -132,7 +132,7 @@ shows up — in that case remove it.
 
 ### Verification
 
-- [ ] After every role-local change [test_playwright_env_keys_used.py](../../tests/lint/ansible/roles/test_playwright_env_keys_used.py) MUST be green.
+- [ ] After every role-local change [test_playwright_env_keys_used.py](../../tests/lint/ansible/roles/web-app/playwright/test_env_keys_used.py) MUST be green.
 - [ ] A run with `SERVICES_DISABLED=oidc,ldap` MUST report every biber
   scenario as `skipped: <FLAG>=false` per
   [006](006-playwright-service-gated-tests.md), never as `failed`.
