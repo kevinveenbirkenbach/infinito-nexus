@@ -26,10 +26,6 @@ silently dropped during sync. This filter therefore:
 * Connects parents to children via `member` references. Keycloak turns
   each referenced child groupOfNames into a Keycloak subgroup of the
   referring parent, building the required hierarchy.
-
-See:
-    docs/requirements/004-generic-rbac-ldap-auto-provisioning.md
-    docs/requirements/005-wordpress-multisite-rbac.md
 """
 
 _ENTRY_KIND_GROUP = "group"

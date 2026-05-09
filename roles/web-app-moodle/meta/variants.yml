@@ -29,8 +29,7 @@
       enabled: true
       shared: true
 
-# LDAP-only variant per docs/requirements/015-moodle-self-built.md:
-# auth_ldap only, auth_oidc disabled.
+# LDAP-only variant: auth_ldap only, auth_oidc disabled.
 - services:
     ldap:
       enabled: true

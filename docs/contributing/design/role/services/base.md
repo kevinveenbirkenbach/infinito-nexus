@@ -1,12 +1,10 @@
 # Service Management 🧱
 
-This page describes how shared services are declared, discovered, ordered,
-loaded, and injected.
+This page describes how shared services are declared, discovered, ordered, loaded, and injected.
 
 ## What Is a Service? 🧩
 
-A service is a reusable dependency that an application enables via
-`services.<service_key>`.
+A service is a reusable dependency that an application enables via `services.<service_key>`.
 
 Examples:
 
@@ -14,14 +12,13 @@ Examples:
 - `web-app-keycloak` provides `oidc`
 - `svc-db-mariadb` provides `mariadb`
 
-Each service entry lives in the provider role's own
-[meta/services.yml](../../../../../roles), where the file root IS the services map
-keyed by `<entity_name>` (no `compose:` and no `services:` wrapper). See
-[layout.md](layout.md) for the full per-role meta layout.
+Each service entry lives in the provider role's own [meta/services.yml](../../../../../roles), where the file root IS the services map keyed by `<entity_name>` (no `compose:` and no `services:` wrapper).
+See [layout.md](layout.md) for the full per-role meta layout.
 
 ## Role-Local Service Metadata 🏷️
 
-Service providers are self-describing. The provider role owns:
+Service providers are self-describing.
+The provider role owns:
 
 - `enabled`
 - `shared`
@@ -75,15 +72,13 @@ The discovery layer:
 - discovers provider entries from `services`
 - derives deploy type and loader bucket from the role name
 - resolves `provides:` and `canonical:`
-- validates and applies `run_after:` from `meta/services.yml.<primary_entity>` (per [req-010](../../../../requirements/010-role-meta-runafter-lifecycle-migration.md))
+- validates and applies `run_after:` from `meta/services.yml.<primary_entity>`
 
 ## Load Order 🧮
 
-[main.yml](../../../../../roles/sys-utils-service-loader/tasks/main.yml)
-is the single loader entry point for all shared services.
+[main.yml](../../../../../roles/sys-utils-service-loader/tasks/main.yml) is the single loader entry point for all shared services.
 
-It runs from [01_constructor.yml](../../../../../tasks/stages/01_constructor.yml)
-before the normal application stage.
+It runs from [01_constructor.yml](../../../../../tasks/stages/01_constructor.yml) before the normal application stage.
 
 Global bucket order:
 
@@ -93,18 +88,14 @@ Global bucket order:
 4. `web-svc`
 5. `web-app`
 
-Within the same bucket, ordering is refined by `run_after:` declared on the
-provider role's primary entity in
-[meta/services.yml](../../../../../roles) (i.e. `services.<primary_entity>.run_after`,
-per [req-010](../../../../requirements/010-role-meta-runafter-lifecycle-migration.md)).
+Within the same bucket, ordering is refined by `run_after:` declared on the provider role's primary entity in [meta/services.yml](../../../../../roles) (i.e. `services.<primary_entity>.run_after`).
 
 Rules:
 
 - `run_after:` entries are role names, not service keys.
 - Cross-type `run_after:` is invalid and fails hard.
 - Later-bucket dependencies are invalid and fail hard.
-- Cross-type service dependencies do not need `run_after:` because constructor-stage
-  loading already brings backend services up before normal app deployment.
+- Cross-type service dependencies do not need `run_after:` because constructor-stage loading already brings backend services up before normal app deployment.
 
 ## Loading vs Injection 🔀
 
@@ -127,8 +118,7 @@ Frontend service probe/load helper:
 
 ### Injection 🔌
 
-Injection decides whether a deployed app gets extra nginx integration such as
-dashboard, logout, CSS, or JavaScript hooks.
+Injection decides whether a deployed app gets extra nginx integration such as dashboard, logout, CSS, or JavaScript hooks.
 
 This stays in:
 
@@ -142,8 +132,7 @@ It does not load provider roles.
 
 ### `service` 🧷
 
-File:
-[service.py](../../../../../plugins/lookup/service.py)
+File: [service.py](../../../../../plugins/lookup/service.py)
 
 Examples:
 
@@ -159,13 +148,7 @@ Returns:
 - `role`
 - `enabled`
 - `shared`
-- `required` is True when some deployed app has the service with both
-  `enabled: true` AND `shared: true`, directly or transitively through its
-  own enabled service dependencies. This is the flag consumers should gate
-  on when deciding whether to load, integrate with, or configure the
-  service. A plain `enabled` flag is not enough on its own, because a
-  service that is enabled but never shared with another app is not actually
-  contractually required by anyone.
+- `required` is True when some deployed app has the service with both `enabled: true` AND `shared: true`, directly or transitively through its own enabled service dependencies. This is the flag consumers should gate on when deciding whether to load, integrate with, or configure the service. A plain `enabled` flag is not enough on its own, because a service that is enabled but never shared with another app is not actually contractually required by anyone.
 
 Behavior:
 
@@ -176,8 +159,7 @@ Behavior:
 
 ### `service_registry` 📚
 
-File:
-[service_registry.py](../../../../../plugins/lookup/service_registry.py)
+File: [service_registry.py](../../../../../plugins/lookup/service_registry.py)
 
 Examples:
 
@@ -193,8 +175,7 @@ Modes:
 
 ### `applications_current_play` 🧭
 
-File:
-[applications_current_play.py](../../../../../plugins/lookup/applications_current_play.py)
+File: [applications_current_play.py](../../../../../plugins/lookup/applications_current_play.py)
 
 Builds the current-play application set including:
 
@@ -204,13 +185,12 @@ Builds the current-play application set including:
 
 ## Database Services 🗄️
 
-Relational databases are regular services now:
+Relational databases are regular services:
 
 - `svc-db-mariadb` provides `mariadb`
 - `svc-db-postgres` provides `postgres`
 
-Applications express database choice directly via the file root of
-`meta/services.yml`:
+Applications express database choice directly via the file root of `meta/services.yml`:
 
 ```yaml
 mariadb:
@@ -226,9 +206,7 @@ postgres:
   shared: false
 ```
 
-The `lookup('database', ...)` API remains as the convenience accessor for database
-connection values, but it now resolves the active direct database service from those
-role-local keys instead of `services.database.type`.
+The `lookup('database', ...)` API is the convenience accessor for database connection values; it resolves the active direct database service from the role-local keys above.
 
 ## Related Files 📁
 

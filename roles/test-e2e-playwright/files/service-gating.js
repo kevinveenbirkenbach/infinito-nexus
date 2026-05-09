@@ -22,7 +22,6 @@
  *   surfacing the typo.
  *
  * See:
- *   docs/requirements/006-playwright-service-gated-tests.md
  *   docs/contributing/artefact/files/role/playwright.specs.js.md
  */
 

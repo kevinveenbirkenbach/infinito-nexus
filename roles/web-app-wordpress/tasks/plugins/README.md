@@ -11,7 +11,7 @@ Plugin used: [daggerhart-openid-connect-generic](https://wordpress.org/plugins/d
 
 Seamlessly connects WordPress with a Discourse forum for comments, discussions, and single sign-on (SSO).  
 Plugin used: [wp-discourse](https://wordpress.org/plugins/wp-discourse/).
-Runtime contract for the WordPress to Discourse post round-trip (published post MUST appear as a Discourse topic) is defined in [007-wordpress-discourse-post-round-trip.md](../../../../docs/requirements/007-wordpress-discourse-post-round-trip.md).
+Runtime contract for the WordPress to Discourse post round-trip: a published post MUST appear as a Discourse topic.
 
 ## ActivityPub 🌍
 

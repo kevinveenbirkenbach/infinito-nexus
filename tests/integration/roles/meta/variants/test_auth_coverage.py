@@ -16,11 +16,9 @@ Three coverage rules apply per role:
 3. When both an auth service (`oidc` or `oauth2`) AND `ldap` are
    dynamic in the same role, at least one variant MUST pin the auth
    service to ``enabled: false`` WHILE pinning ``ldap.enabled: true``.
-   That is the LDAP-only branch tracked by
-   [docs/requirements/018-playwright-ldap-coverage.md](../../../../docs/requirements/018-playwright-ldap-coverage.md);
-   without it, the matrix never exercises the LDAP authentication
-   path in isolation from OIDC and the spec defaults to OIDC-only
-   coverage by accident.
+   That is the LDAP-only branch; without it, the matrix never
+   exercises the LDAP authentication path in isolation from OIDC and
+   the spec defaults to OIDC-only coverage by accident.
 
 The check sits next to
 [test_variants_coverage.py](./test_variants_coverage.py), which
@@ -174,8 +172,7 @@ class TestAuthVariantsCoverage(unittest.TestCase):
                     f"{role_name}: both ldap and {auth_list} are dynamic, "
                     f"but no variant pins ``ldap.enabled: true`` together "
                     f"with ``enabled: false`` on the auth service(s) — the "
-                    f"LDAP-only branch is never exercised. See "
-                    f"docs/requirements/018-playwright-ldap-coverage.md."
+                    f"LDAP-only branch is never exercised."
                 )
 
         if offenders:

@@ -1,148 +1,93 @@
 # Per-Role Meta Layout 🗂️
 
-This page describes the on-disk shape of every role's metadata after
-[req-008](../../../../requirements/008-role-meta-layout.md),
-[req-009](../../../../requirements/009-per-role-networks-and-ports.md),
-[req-010](../../../../requirements/010-role-meta-runafter-lifecycle-migration.md), and
-[req-011](../../../../requirements/011-role-meta-info-migration.md).
-
-The legacy entry files `roles/<role>/config/main.yml`,
-`roles/<role>/users/main.yml`, and `roles/<role>/schema/main.yml` are gone.
+This page describes the on-disk shape of every role's metadata.
 All role-owned metadata lives under `roles/<role>/meta/<topic>.yml`.
 
 ## File Layout 📁
 
 | File                     | Contents                                                                                                                                          |
 |--------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------|
-| `meta/main.yml`          | Ansible Galaxy metadata + Ansible `dependencies:`. **No** project-internal `run_after:` / `lifecycle:` keys (req-010), **no** `logo:` / `homepage:` / `video:` / `display:` (req-011). |
+| `meta/main.yml`          | Ansible Galaxy metadata + Ansible `dependencies:`. No project-internal `run_after:` / `lifecycle:` keys, no `logo:` / `homepage:` / `video:` / `display:`. |
 | `meta/services.yml`      | Per-entity service config. **File root IS the services map** keyed by `<entity_name>`. No `compose:` and no `services:` wrapper.                  |
-| `meta/server.yml`        | CSP, `domains`, `status_codes`, plus per-role `networks.local.{subnet,dns_resolver}` (req-009). File root IS `applications.<app>.server`.        |
+| `meta/server.yml`        | CSP, `domains`, `status_codes`, plus per-role `networks.local.{subnet,dns_resolver}`. File root IS `applications.<app>.server`.                   |
 | `meta/rbac.yml`          | RBAC declarations. File root IS `applications.<app>.rbac`.                                                                                         |
 | `meta/volumes.yml`       | Compose volumes. File root IS the volumes map keyed by volume name. No `compose:` and no `volumes:` wrapper.                                      |
 | `meta/users.yml`         | Role-local user definitions. File root IS the users map (no `users:` wrapper).                                                                     |
-| `meta/schema.yml`        | Credential schema (merged from the old `schema/main.yml` and the `credentials:` block of the old `config/main.yml`).                              |
-| `meta/info.yml`          | Optional. Descriptive role-level metadata (`logo`, `homepage`, `video`, `display`) per req-011. File root IS `applications.<app>.info` (no `info:` wrapper). |
+| `meta/schema.yml`        | Credential schema definitions and runtime credential values.                                                                                       |
+| `meta/info.yml`          | Optional. Descriptive role-level metadata (`logo`, `homepage`, `video`, `display`). File root IS `applications.<app>.info` (no `info:` wrapper). |
 | `meta/variants.yml`      | Optional. Variant overrides deep-merged over the assembled application payload (used by `svc-ai-ollama`, `web-app-phpmyadmin`).                   |
 
-Ansible only auto-loads `meta/main.yml`. Every other `meta/<topic>.yml` is
-read by the project's own loaders (`utils/cache/applications.py`,
-`utils/cache/users.py`, `utils/manager/inventory.py`).
+Ansible only auto-loads `meta/main.yml`.
+Every other `meta/<topic>.yml` is read by the project's own loaders (`utils/cache/applications.py`, `utils/cache/users.py`, `utils/manager/inventory.py`).
 
 ## File-Root Convention 🧷
 
-Every `meta/<topic>.yml` (except `meta/main.yml`, which keeps Galaxy semantics,
-and `meta/schema.yml`, which is processed by `apply_schema()`) follows the
-rule:
+Every `meta/<topic>.yml` (except `meta/main.yml`, which keeps Galaxy semantics, and `meta/schema.yml`, which is processed by `apply_schema()`) follows the rule:
 
-> **The file's content IS the value of `applications.<app>.<topic>`. There is
-> NO wrapping key matching the filename.**
+> **The file's content IS the value of `applications.<app>.<topic>`. There is NO wrapping key matching the filename.**
 
-So `meta/services.yml` MUST NOT have a top-level `services:` key wrapping its
-content. `meta/volumes.yml` MUST NOT have a top-level `volumes:` key, and the
-same rule applies to `meta/server.yml`, `meta/rbac.yml`, `meta/users.yml`,
-and `meta/info.yml`. The filename alone fixes the path prefix in the
-materialised application tree, which keeps consumer paths short and
-predictable (no redundant `compose.…` prefixes).
+So `meta/services.yml` MUST NOT have a top-level `services:` key wrapping its content.
+`meta/volumes.yml` MUST NOT have a top-level `volumes:` key, and the same rule applies to `meta/server.yml`, `meta/rbac.yml`, `meta/users.yml`, and `meta/info.yml`.
+The filename alone fixes the path prefix in the materialised application tree, which keeps consumer paths short and predictable (no redundant `compose.…` prefixes).
 
 ## Materialised Paths 🔗
 
-Consumers read the assembled application payload through
-`lookup('applications', '<role>')` or `lookup('config', '<role>', '<dotted.path>')`.
-The new paths are:
+Consumers read the assembled application payload through `lookup('applications', '<role>')` or `lookup('config', '<role>', '<dotted.path>')`.
+The paths are:
 
-| Old path                              | New path                                |
-|---------------------------------------|-----------------------------------------|
-| `compose.services.<entity>.<…>`       | `services.<entity>.<…>`                 |
-| `compose.volumes.<key>`               | `volumes.<key>`                         |
-| `<top-level-key>.<…>` *(see inlining)*| `services.<primary_entity>.<top-level-key>.<…>` |
+| Source                                | Materialised path                                |
+|---------------------------------------|--------------------------------------------------|
+| `meta/services.yml.<entity>.<…>`      | `services.<entity>.<…>`                          |
+| `meta/volumes.yml.<key>`              | `volumes.<key>`                                  |
+| `meta/services.yml.<primary_entity>.<top-level-key>.<…>` | `services.<primary_entity>.<top-level-key>.<…>` |
 
-`credentials.*` paths remain unchanged because `apply_schema()` continues to
-populate `applications.<app>.credentials.<…>`.
+`credentials.*` paths are populated by `apply_schema()` at `applications.<app>.credentials.<…>`.
 
 ## Services Inlining Rule 📥
 
-All top-level keys of the old `config/main.yml` *except* `compose:`, `server:`,
-`rbac:`, and `credentials:` MUST be inlined into `meta/services.yml` under
-`<primary_entity>.<key>`, where `<primary_entity>` is the value returned by
-`get_entity_name(role_name)` (see [req-002](../../../../requirements/002-service-registry-refactoring.md)).
+All non-compose top-level keys (everything except `compose:`, `server:`, `rbac:`, and `credentials:`) MUST be inlined into `meta/services.yml` under `<primary_entity>.<key>`, where `<primary_entity>` is the value returned by `get_entity_name(role_name)`.
 
-Inlined keys observed today (non-exhaustive): `plugins`, `plugins_enabled`,
-`email`, `ldap`, `accounts`, `scopes`, `alerting`, `addons`, `languages`,
-`company`, `default_quota`, `legacy_login_mask`, `site_name`, `token`,
-`modules`, `network`, `performance`, `preload_models`, `provision`,
-`features`.
+Inlined keys observed today (non-exhaustive): `plugins`, `plugins_enabled`, `email`, `ldap`, `accounts`, `scopes`, `alerting`, `addons`, `languages`, `company`, `default_quota`, `legacy_login_mask`, `site_name`, `token`, `modules`, `network`, `performance`, `preload_models`, `provision`, `features`.
 
-`compose.volumes:` is **not** inlined into services. It moves to its own
-`meta/volumes.yml` (volumes are role-wide, not per-service).
+`compose.volumes:` is **not** inlined into services.
+It moves to its own `meta/volumes.yml` (volumes are role-wide, not per-service).
 
 ### Worked Example: `web-app-matomo`
 
-`get_entity_name('web-app-matomo') == 'matomo'`, so every former top-level
-`config/main.yml` key (`site_name`, `performance`, …) is inlined under
-`matomo.<key>`:
+`get_entity_name('web-app-matomo') == 'matomo'`, so every former top-level `config/main.yml` key (`site_name`, `performance`, …) is inlined under `matomo.<key>`:
 
 ```yaml
-# Before: roles/web-app-matomo/config/main.yml
-site_name: "{{ ... }}"
-performance:
-  workers: 4
-compose:
-  services:
-    matomo:
-      image: matomo
-  volumes:
-    data: matomo_data
-
-# After: roles/web-app-matomo/meta/services.yml  (file root IS the services map)
+# roles/web-app-matomo/meta/services.yml  (file root IS the services map)
 matomo:
   image: matomo
   site_name: "{{ ... }}"
   performance:
     workers: 4
 
-# After: roles/web-app-matomo/meta/volumes.yml  (file root IS the volumes map)
+# roles/web-app-matomo/meta/volumes.yml  (file root IS the volumes map)
 data: matomo_data
 ```
 
 ## Schema Format: `meta/schema.yml` 🗝️
 
-`meta/schema.yml` consolidates two structures that used to share the
-`credentials:` top-level key but lived in different files:
+`meta/schema.yml` consolidates two structures under the `credentials:` top-level key:
 
-1. The credential **schema definitions** from the old `schema/main.yml`
-   (today flat, e.g. `alerting_telegram_bot_token: { description, algorithm,
-   validation }`).
-2. The credential **runtime values** from the `credentials:` block of the
-   old `config/main.yml` (today nested, e.g. `recaptcha.key`,
-   `recaptcha.secret`).
+1. The credential **schema definitions** (flat keys, e.g. `alerting_telegram_bot_token: { description, algorithm, validation }`).
+2. The credential **runtime values** (nested keys, e.g. `recaptcha.key`, `recaptcha.secret`).
 
 The unified schema supports:
 
-- **Nested keys.** The flat-keys-only restriction of `schema/main.yml` is
-  lifted, so e.g. `recaptcha.key` and `recaptcha.secret` remain nested.
+- **Nested keys.** Both flat and nested credential keys are accepted, so e.g. `recaptcha.key` and `recaptcha.secret` remain nested.
 - **`algorithm:` defaults to `plain`** when the field is omitted.
-- **`default:` (new, optional)** is a Jinja string used as the credential's
-  value when the inventory does not provide one.
-  - `default:` is **NOT rendered at inventory creation time.** The literal
-    Jinja string is written verbatim into the inventory so that referenced
-    variables (`CAPTCHA.RECAPTCHA.KEY`, `lookup(...)`, …) resolve only at
-    deploy/runtime when those variables are actually defined.
-  - `default:` values are **NOT validated.** `validation:` only applies to
-    user-provided values, so the schema default is exempt.
-  - When `default:` is present, the credential generator MUST NOT generate
-    a new value via `algorithm:`. It writes the literal `default:` string
-    verbatim.
+- **`default:` (optional)** is a Jinja string used as the credential's value when the inventory does not provide one.
+  - `default:` is **NOT rendered at inventory creation time.** The literal Jinja string is written verbatim into the inventory so that referenced variables (`CAPTCHA.RECAPTCHA.KEY`, `lookup(...)`, …) resolve only at deploy/runtime when those variables are actually defined.
+  - `default:` values are **NOT validated.** `validation:` only applies to user-provided values, so the schema default is exempt.
+  - When `default:` is present, the credential generator MUST NOT generate a new value via `algorithm:`. It writes the literal `default:` string verbatim.
 
-### Worked Example: runtime credentials merged into `meta/schema.yml`
+### Worked Example: runtime credentials in `meta/schema.yml`
 
 ```yaml
-# Before: roles/web-app-keycloak/config/main.yml (excerpt)
-credentials:
-  recaptcha:
-    key:    "{{ CAPTCHA.RECAPTCHA.KEY    | default('') }}"
-    secret: "{{ CAPTCHA.RECAPTCHA.SECRET | default('') }}"
-
-# After: roles/web-app-keycloak/meta/schema.yml
+# roles/web-app-keycloak/meta/schema.yml
 credentials:
   recaptcha:
     key:
@@ -155,10 +100,10 @@ credentials:
       default:     "{{ CAPTCHA.RECAPTCHA.SECRET | default('') }}"
 ```
 
-Existing flat schema entries are unchanged in shape:
+Flat schema entries keep the same shape:
 
 ```yaml
-# After: roles/web-app-prometheus/meta/schema.yml
+# roles/web-app-prometheus/meta/schema.yml
 credentials:
   alerting_telegram_bot_token:
     description: "Telegram bot token for Alertmanager notifications."
@@ -166,16 +111,12 @@ credentials:
     validation:  non_empty_string
 ```
 
-If a single role defines the same credential key in both the old
-`schema/main.yml` and the `credentials:` block of the old `config/main.yml`,
-the migration MUST stop and surface the collision instead of silently
-merging.
+If a single role defines the same credential key in both a schema definition and a runtime value, the loader MUST stop and surface the collision instead of silently merging.
 
 ## Per-Role Networks: `meta/server.yml.networks` 🌐
 
-`networks:` is a top-level section of each role's `meta/server.yml`. The
-file-root convention still applies: there is no wrapping `server:` key, and
-the file content IS `applications.<app>.server`.
+`networks:` is a top-level section of each role's `meta/server.yml`.
+The file-root convention applies: there is no wrapping `server:` key, and the file content IS `applications.<app>.server`.
 
 ```yaml
 # roles/<role>/meta/server.yml
@@ -186,15 +127,14 @@ networks:
     dns_resolver: 192.168.102.29      # optional, only when a fixed DNS resolver IP is needed (today: mailu)
 ```
 
-The role's name is implied by the path. There is NO `web-app-<role>` key
-inside the file. The materialised path is
-`applications.<role>.server.networks.local.{subnet,dns_resolver}`.
+The role's name is implied by the path.
+There is NO `web-app-<role>` key inside the file.
+The materialised path is `applications.<role>.server.networks.local.{subnet,dns_resolver}`.
 
 ## Per-Entity Ports: `meta/services.yml.<entity>.ports` 🚪
 
-Ports belong to the service entity that exposes them. All port data lives
-under `<entity>.ports` in `meta/services.yml` (no `ports:` section in
-`meta/server.yml`).
+Ports belong to the service entity that exposes them.
+All port data lives under `<entity>.ports` in `meta/services.yml` (no `ports:` section in `meta/server.yml`).
 
 ```yaml
 # roles/<role>/meta/services.yml
@@ -222,12 +162,9 @@ under `<entity>.ports` in `meta/services.yml` (no `ports:` section in
 
 ### Always Category-Keyed Maps 🗂️
 
-`ports.local` and `ports.public` are **always** category-keyed maps, even
-when the map has only one entry. Polymorphic int-or-map values are NOT
-supported. The category names are the same set as the legacy `09_ports.yml`:
-`http`, `database`, `websocket`, `oauth2`, `ldap`, `ssh`, `ldaps`,
-`stun_turn`, `stun_turn_tls`, `federation`, plus the structured `relay`
-block under `public:`.
+`ports.local` and `ports.public` are **always** category-keyed maps, even when the map has only one entry.
+Polymorphic int-or-map values are NOT supported.
+The category names are: `http`, `database`, `websocket`, `oauth2`, `ldap`, `ssh`, `ldaps`, `stun_turn`, `stun_turn_tls`, `federation`, plus the structured `relay` block under `public:`.
 
 ```yaml
 gitea:
@@ -241,9 +178,8 @@ gitea:
 
 ### `relay` Port Ranges 📡
 
-`ports.public.relay`, when present, is a map with two integer keys `start`
-and `end` directly under `relay` (no nested entity-or-key sub-level), with
-`start < end`. Only one relay range per entity is supported.
+`ports.public.relay`, when present, is a map with two integer keys `start` and `end` directly under `relay` (no nested entity-or-key sub-level), with `start < end`.
+Only one relay range per entity is supported.
 
 ```yaml
 coturn:
@@ -272,22 +208,16 @@ view:
 
 ### Port Bands 📊
 
-The per-category port ranges that the suggester proposes from and that the
-lint check enforces live as a single `PORT_BANDS` map in
-[group_vars/all/08_networks.yml](../../../../../group_vars/all/08_networks.yml).
-Suggesters and lint pick up new entries automatically, with no second
-registration step. See `cli meta ports suggest` in
-[ports-suggest.md](../../../tools/ports-suggest.md).
+The per-category port ranges that the suggester proposes from and that the lint check enforces live as a single `PORT_BANDS` map in [group_vars/all/08_networks.yml](../../../../../group_vars/all/08_networks.yml).
+Suggesters and lint pick up new entries automatically, with no second registration step.
+See `cli meta ports suggest` in [ports-suggest.md](../../../tools/ports-suggest.md).
 
 ## `run_after` and `lifecycle` 🌱
 
-For the semantic meaning of each `lifecycle` value (and the criteria a
-role MUST satisfy to claim a given value) see
-[lifecycle.md](lifecycle.md). This section only covers the on-disk shape
-of the two fields.
+For the semantic meaning of each `lifecycle` value (and the criteria a role MUST satisfy to claim a given value) see [lifecycle.md](lifecycle.md).
+This section only covers the on-disk shape of the two fields.
 
-Both fields live on the role's **primary entity** in `meta/services.yml`,
-where `<primary_entity> = get_entity_name(role_name)`:
+Both fields live on the role's **primary entity** in `meta/services.yml`, where `<primary_entity> = get_entity_name(role_name)`:
 
 ```yaml
 # roles/web-app-gitea/meta/services.yml
@@ -299,9 +229,7 @@ gitea:
   lifecycle: stable
 ```
 
-For multi-entity roles whose primary entity is not a real compose service
-(e.g. `web-app-bluesky` → `bluesky`), the migration creates a dedicated
-top-level metadata holder:
+For multi-entity roles whose primary entity is not a real compose service (e.g. `web-app-bluesky` → `bluesky`), the layout uses a dedicated top-level metadata holder:
 
 ```yaml
 # roles/web-app-bluesky/meta/services.yml
@@ -319,34 +247,25 @@ web:
 
 ### Allowed `lifecycle` Values
 
-`planned`, `pre-alpha`, `alpha`, `beta`, `stable`, `deprecated`. Unknown
-values fail the lint.
+`planned`, `pre-alpha`, `alpha`, `beta`, `stable`, `deprecated`. Unknown values fail the lint.
 
 ### `run_after` Rules
 
 - `run_after:`, when present, is a non-empty list of role names.
-- Empty `run_after: []` is **forbidden**: omit the key when no constraint
-  exists.
-- At most one entity per role carries `run_after` and `lifecycle`. Putting
-  these fields on a non-primary entity fails the lint.
+- Empty `run_after: []` is **forbidden**: omit the key when no constraint exists.
+- At most one entity per role carries `run_after` and `lifecycle`.
+  Putting these fields on a non-primary entity fails the lint.
 
 ### Helper
 
-The helper module `utils/roles/meta_lookup.py` exposes
-`get_role_run_after(role) -> list[str]` and
-`get_role_lifecycle(role) -> str | None`. All consumers of these fields use
-the helper instead of hand-rolled derivations. The helper returns `[]` /
-`None` gracefully when `meta/services.yml` is absent or when the field is
-not set.
+The helper module `utils/roles/meta_lookup.py` exposes `get_role_run_after(role) -> list[str]` and `get_role_lifecycle(role) -> str | None`.
+All consumers of these fields use the helper instead of hand-rolled derivations.
+The helper returns `[]` / `None` gracefully when `meta/services.yml` is absent or when the field is not set.
 
 ## Descriptive Role-Level Metadata: `meta/info.yml` 📝
 
-Project-internal descriptive metadata (icon, upstream homepage, demo
-video, dashboard display flag) lives in an OPTIONAL `meta/info.yml`,
-not nested inside `galaxy_info:`. The file-root convention applies:
-there is no wrapping `info:` key, and the file content IS
-`applications.<role>.info`. See
-[req-011](../../../../requirements/011-role-meta-info-migration.md).
+Project-internal descriptive metadata (icon, upstream homepage, demo video, dashboard display flag) lives in an OPTIONAL `meta/info.yml`, not nested inside `galaxy_info:`.
+The file-root convention applies: there is no wrapping `info:` key, and the file content IS `applications.<role>.info`.
 
 ```yaml
 # roles/web-app-nextcloud/meta/info.yml
@@ -365,15 +284,13 @@ video: https://youtu.be/3jcYJGQgenI?si=FDmoMSrAb9_WvviC
 | `video`    | string | Upstream demo / overview video URL.                                                                                      |
 | `display`  | bool   | Default `true`. `false` opts the role out of dashboards / cards / apps grids.                                            |
 
-The lint (`tests/lint/ansible/roles/meta/test_info.py`) rejects any
-other top-level key so the file does not become a dumping ground.
+The lint (`tests/lint/ansible/roles/meta/test_info.py`) rejects any other top-level key so the file does not become a dumping ground.
 
 ### Optionality
 
-`meta/info.yml` is OPTIONAL. A role with none of the four fields does
-not grow the file. Consumers MUST treat a missing file or missing field
-as absent / default, matching the historical
-`galaxy_info.get('display', True)` semantics.
+`meta/info.yml` is OPTIONAL.
+A role with none of the four fields does not grow the file.
+Consumers MUST treat a missing file or missing field as absent / default, and `display` defaults to `true`.
 
 ### Materialised Path
 
@@ -381,9 +298,7 @@ as absent / default, matching the historical
 applications.<role>.info.{logo,homepage,video,display}
 ```
 
-The dashboard's `web-app-dashboard/lookup_plugins/docker_cards.py` reads
-`logo.class` and `display` from this location, while `description` and
-`galaxy_tags` continue to come from `galaxy_info` (Galaxy-spec fields).
+The dashboard's `web-app-dashboard/lookup_plugins/docker_cards.py` reads `logo.class` and `display` from this location, while `description` and `galaxy_tags` continue to come from `galaxy_info` (Galaxy-spec fields).
 
 ## Related Pages 📚
 
@@ -391,7 +306,3 @@ The dashboard's `web-app-dashboard/lookup_plugins/docker_cards.py` reads
 - [email.md](email.md) covers the email lookup contract.
 - [ports-suggest.md](../../../tools/ports-suggest.md) describes the `cli meta ports suggest` helper.
 - [networks-suggest.md](../../../tools/networks-suggest.md) describes the `cli meta networks suggest` helper.
-- [req-008](../../../../requirements/008-role-meta-layout.md) is the meta layout spec.
-- [req-009](../../../../requirements/009-per-role-networks-and-ports.md) is the per-role networks and ports spec.
-- [req-010](../../../../requirements/010-role-meta-runafter-lifecycle-migration.md) is the `run_after` / `lifecycle` migration spec.
-- [req-011](../../../../requirements/011-role-meta-info-migration.md) is the `meta/info.yml` migration spec.

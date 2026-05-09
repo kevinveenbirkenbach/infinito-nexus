@@ -10,7 +10,7 @@ A role MAY declare images in two ways depending on how the image is used.
 ### Compose Service Format: `meta/services.yml`
 
 Used for images that are started as part of the role's Docker Compose stack.
-The file root IS the services map keyed by `<service-name>` (no `compose:` and no `services:` wrapper, per [req-008](../../../requirements/008-role-meta-layout.md)):
+The file root IS the services map keyed by `<service-name>` (no `compose:` and no `services:` wrapper):
 
 ```yaml
 # roles/<role>/meta/services.yml

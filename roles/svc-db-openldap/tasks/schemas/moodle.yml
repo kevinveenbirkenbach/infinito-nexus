@@ -1,7 +1,7 @@
 ---
 # Moodle custom-attribute LDAP schema. Three attributes that have
 # no equivalent in core inetOrgPerson: phonetic given/family name
-# and IANA timezone name. See docs/requirements/015-moodle-self-built.md.
+# and IANA timezone name.
 
 - name: Ensure custom LDAP schema snippet via ldapsm (moodle)
   vars:

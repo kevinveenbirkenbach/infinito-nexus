@@ -5,7 +5,7 @@ entity_name: "{{ application_id | get_entity_name }}"
 # ── Moodle code & data layout (self-built image; no Bitnami) ───────────
 # Moodle source extracts to /var/www/html (standard PHP-FPM web root).
 # moodledata sits outside the web root per Moodle's documented best
-# practice. See docs/requirements/015-moodle-self-built.md.
+# practice.
 MOODLE_CODE_DIR: "/var/www/html"
 MOODLE_DATA_DIR: "/var/www/moodledata"
 # Build-time staging dir inside the image. The entrypoint copies this

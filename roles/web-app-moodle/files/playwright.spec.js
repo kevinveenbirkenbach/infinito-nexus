@@ -6,7 +6,6 @@ test.use({ ignoreHTTPSErrors: true });
 // Spec for web-app-moodle — covers both identity-integration variants:
 //   variant 0 (default): auth_oidc + auth_ldap sync-only (hybrid)
 //   variant 1:           auth_ldap only (no OIDC)
-// See docs/requirements/015-moodle-self-built.md.
 // -----------------------------------------------------------------------------
 
 function decodeDotenvQuotedValue(value) {

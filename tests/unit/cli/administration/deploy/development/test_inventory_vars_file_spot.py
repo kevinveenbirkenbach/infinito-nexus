@@ -65,7 +65,6 @@ class TestInventoryVarsFileSpotDriftGuard(unittest.TestCase):
             Path(__file__).relative_to(PROJECT_ROOT).as_posix(),
             # Documentation and historical/comment references stay as-is:
             "docs/administration/deploy.md",
-            "docs/requirements/003-reduce-applications-and-users-to-lookup.md",
             "roles/web-app-odoo/tasks/03_oidc.yml",
             # The dev inventory file itself sits at the literal path.
             "inventories/development/default.yml",
@@ -85,6 +84,11 @@ class TestInventoryVarsFileSpotDriftGuard(unittest.TestCase):
             # `.mypy_cache` is not in the default skip set — keep the
             # explicit fragment-prefix check for that one.
             if any(rel.startswith(prefix + "/") for prefix in (".mypy_cache",)):
+                continue
+            # Requirement docs are initial-creation-only snapshots and
+            # may legitimately mention the literal path as part of the
+            # original problem description.
+            if rel.startswith("docs/requirements/"):
                 continue
             try:
                 text = read_text(path_str)

@@ -2,9 +2,8 @@
 
 This lookup is the single sanctioned way to derive the Keycloak group
 path that an application role maps to. It replaces the scattered
-`[RBAC.GROUP.NAME, ...] | path_join` idiom so that the per-application
-OU hierarchy introduced by requirement 005 has one authoritative
-producer. See docs/requirements/005-wordpress-multisite-rbac.md.
+`[RBAC.GROUP.NAME, ...] | path_join` idiom so the per-application
+OU hierarchy has one authoritative producer.
 
 Usage:
     "{{ lookup('rbac_group_path',

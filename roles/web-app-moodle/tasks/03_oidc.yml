@@ -1,7 +1,6 @@
 ---
 # Configure Moodle's auth_oidc plugin (variant 0 only). Variant 1
 # disables the OIDC shared service so this file is not included.
-# See docs/requirements/015-moodle-self-built.md.
 
 - name: "Check OIDC plugin presence"
   command: >
@@ -36,7 +35,7 @@
     - { name: "single_sign_off", value: 1 }
     - { name: "logouturi", value: "{{ OIDC.CLIENT.LOGOUT_URL }}" }
     - { name: "icon", value: "moodle:t/lock" }
-    # Field mapping per docs/requirements/015-moodle-self-built.md
+    # Field mapping (Moodle profile field → OIDC claim).
     - { name: "field_map_firstname", value: "given_name" }
     - { name: "field_lock_firstname", value: "locked" }
     - { name: "field_updatelocal_firstname", value: "oneveryloginupdate" }

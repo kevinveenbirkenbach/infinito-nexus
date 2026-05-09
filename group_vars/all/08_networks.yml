@@ -1,8 +1,7 @@
 ---
 # Host-level network defaults + per-category port bands.
 #
-# Per req-009 (docs/requirements/009-per-role-networks-and-ports.md), this file
-# now retains ONLY the host-level keys and the new PORT_BANDS map:
+# This file retains ONLY the host-level keys and the PORT_BANDS map:
 #
 #   * NETWORK_IPV6_ENABLED            — global IPv6 toggle.
 #   * defaults_networks.internet.*    — host-level addresses (ip4 / ip6 / dns).

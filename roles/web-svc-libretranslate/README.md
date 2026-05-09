@@ -1,14 +1,12 @@
 # LibreTranslate
 
 This role deploys **LibreTranslate** as a containerized web service using Docker Compose.
-It is designed to integrate seamlessly into the Infinito.Nexus stack, including optional
-Redis and database backends, CSP handling, and analytics integration.
+It is designed to integrate seamlessly into the Infinito.Nexus stack, including optional Redis and database backends, CSP handling, and analytics integration.
 
 ## Description
 
 LibreTranslate is an open-source machine translation API that can be self-hosted.
-This role provides a standardized, reproducible deployment with optional extensions
-such as Redis caching, database persistence, and Matomo tracking.
+This role provides a standardized, reproducible deployment with optional extensions such as Redis caching, database persistence, and Matomo tracking.
 
 The role follows Infinito.Nexus conventions:
 
@@ -40,20 +38,13 @@ The role follows Infinito.Nexus conventions:
 
 ## Single sign-on
 
-OIDC is wired in via a sidecar `web-app-oauth2-proxy` that fronts
-the human-facing web UI only. The programmatic API endpoints
-(`/translate`, `/detect`, …) MUST stay reachable with API-key auth
-even when the UI is gated, so the OIDC gate is restricted to the UI
-subpath; otherwise machine clients break.
+OIDC is wired in via a sidecar `web-app-oauth2-proxy` that fronts the human-facing web UI only.
+The programmatic API endpoints (`/translate`, `/detect`, …) MUST stay reachable with API-key auth even when the UI is gated, so the OIDC gate is restricted to the UI subpath; otherwise machine clients break.
 
-LDAP is not feasible: LibreTranslate authenticates programmatic
-clients with API keys, and LDAP cannot map onto that model. RBAC is
-also not feasible because authorisation in LibreTranslate is
-API-key-tier only and decoupled from any IDP. The OIDC gate
-protects the UI but does not grant differential authorisation
-inside the app. These LDAP and RBAC exceptions are documented per
-[lifecycle.md](../../docs/contributing/design/role/services/lifecycle.md)
-and [requirement 013](../../docs/requirements/013-alpha-to-beta-promotion.md).
+LDAP is not feasible: LibreTranslate authenticates programmatic clients with API keys, and LDAP cannot map onto that model.
+RBAC is also not feasible because authorisation in LibreTranslate is API-key-tier only and decoupled from any IDP.
+The OIDC gate protects the UI but does not grant differential authorisation inside the app.
+These LDAP and RBAC exceptions are documented per [lifecycle.md](../../docs/contributing/design/role/services/lifecycle.md).
 
 ## Configuration
 

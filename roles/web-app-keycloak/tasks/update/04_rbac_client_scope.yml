@@ -81,7 +81,7 @@
 # optional scope, Keycloak gates the userinfo-level mapper on the scope
 # being explicitly granted — and the `groups` scope is dropped from the
 # granted scope set when `include.in.token.scope=false`, leaving userinfo
-# without the claim. See docs/requirements/004-generic-rbac-ldap-auto-provisioning.md.
+# without the claim.
 - name: Remove RBAC scope from optional client scopes (if present)
   when: has_rbac_optional
   shell: >

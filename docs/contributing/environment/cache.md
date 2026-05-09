@@ -116,8 +116,7 @@ When a new package manager or upstream needs caching:
 4. Add an `extra_hosts` entry on the `infinito` service in [compose/cache.override.yml](../../../compose/cache.override.yml) for runner-side traffic.
 5. If the upstream is HTTP-only and inner-`dockerd` builds need it, also add it to `_CACHE_HTTP_HOSTNAMES` in [compose.py](../../../roles/sys-svc-compose/files/compose.py) so the per-app `compose.cache.override.yml` includes it in `build.extra_hosts`.
 
-## Background and Requirements 📚
+## Background 📚
 
 - Compose-file env-var contract: [compose.yml.md](../artefact/files/compose.yml.md)
-- Original requirement and acceptance criteria: [docs/requirements/012-package-cache-nexus3-oss.md](../../requirements/012-package-cache-nexus3-oss.md)
 - Profile gating mechanics: [profile.py](../../../cli/administration/deploy/development/profile.py)

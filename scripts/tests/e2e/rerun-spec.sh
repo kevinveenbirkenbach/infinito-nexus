@@ -64,7 +64,6 @@ command -v docker >/dev/null || {
 mkdir -p "$stage_dir/tests" "$stage_dir/volume" "$reports_dir"
 cp "$spec_src" "$stage_dir/tests/playwright.spec.js"
 # Stage the shared service-gating helper so the spec can require("./service-gating").
-# See docs/requirements/006-playwright-service-gated-tests.md.
 helper_src="$repo_root/roles/test-e2e-playwright/files/service-gating.js"
 if [[ -f "$helper_src" ]]; then
 	cp "$helper_src" "$stage_dir/tests/service-gating.js"

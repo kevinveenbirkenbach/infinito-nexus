@@ -3,7 +3,6 @@
 # config so files/Dockerfile can stay lean (just FROM + COPY + RUN).
 # Filenames are read from MOODLE_BUILD_FILES (vars/main.yml) — a single
 # spot consumed here AND referenced literally by the Dockerfile.
-# See docs/requirements/015-moodle-self-built.md.
 
 - name: "Set fact: moodle compose dir"
   ansible.builtin.set_fact:

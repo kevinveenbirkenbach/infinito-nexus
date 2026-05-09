@@ -1,6 +1,4 @@
-"""Lint guard: roles/<role>/meta/info.yml conforms to req-011.
-
-Per docs/requirements/011-role-meta-info-migration.md:
+"""Lint guard: ``roles/<role>/meta/info.yml`` schema.
 
   * the file is OPTIONAL (a role with no descriptive metadata does not
     grow the file);

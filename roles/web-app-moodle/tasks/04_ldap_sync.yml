@@ -2,7 +2,7 @@
 # Configure Moodle's auth_ldap plugin. In variant 0 (hybrid) it runs
 # in sync-only mode (login = auth_oidc); in variant 1 (LDAP-only) it
 # is the primary login plugin. Field mapping is identical between
-# variants. See docs/requirements/015-moodle-self-built.md.
+# variants.
 
 - name: "Run Moodle DB upgrade for auth_ldap plugin"
   command: >
