@@ -37,7 +37,11 @@ from . import PROJECT_ROOT
 ROLES_DIR = PROJECT_ROOT / "roles"
 _ENV_TEMPLATE_REL = "templates/playwright.env.j2"  # nocheck: role-file-spot
 _DASHBOARD_FLAG_RE = re.compile(r"^\s*DASHBOARD_SERVICE_ENABLED\s*=", re.MULTILINE)
-_REQUIRED_URLS: tuple[str, ...] = ("DASHBOARD_BASE_URL", "PROMETHEUS_BASE_URL", "MATOMO_BASE_URL")
+_REQUIRED_URLS: tuple[str, ...] = (
+    "DASHBOARD_BASE_URL",
+    "PROMETHEUS_BASE_URL",
+    "MATOMO_BASE_URL",
+)
 _RULE = "persona-required-envs"
 
 
