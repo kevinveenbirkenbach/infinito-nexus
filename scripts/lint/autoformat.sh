@@ -42,7 +42,11 @@ run_ruff() {
 	local rc=0
 	ruff format . || rc=$?
 	[[ $rc -eq 0 ]] && { ruff check . --fix || rc=$?; }
-	[[ $rc -eq 0 ]] && write_status ruff OK || write_status ruff FAIL
+	if [[ $rc -eq 0 ]]; then
+		write_status ruff OK
+	else
+		write_status ruff FAIL
+	fi
 }
 
 run_claude() {
@@ -82,7 +86,11 @@ run_shell_pair() {
 				git apply --whitespace=nowarn "${diff_file}" || rc=$?
 			fi
 			rm -f "${diff_file}"
-			[[ $rc -eq 0 ]] && write_status shellcheck OK || write_status shellcheck FAIL
+			if [[ $rc -eq 0 ]]; then
+				write_status shellcheck OK
+			else
+				write_status shellcheck FAIL
+			fi
 		else
 			write_status shellcheck OK
 		fi
@@ -132,7 +140,11 @@ run_mbake() {
 	local rc=0
 	mbake format Makefile >/dev/null 2>&1 || rc=$?
 	[[ $rc -eq 0 ]] && { mbake format Makefile >/dev/null 2>&1 || rc=$?; }
-	[[ $rc -eq 0 ]] && write_status mbake OK || write_status mbake FAIL
+	if [[ $rc -eq 0 ]]; then
+		write_status mbake OK
+	else
+		write_status mbake FAIL
+	fi
 }
 
 # ── dispatch ─────────────────────────────────────────────────────────────────
