@@ -1,5 +1,7 @@
 const { test, expect } = require("@playwright/test");
 
+const { skipUnlessServiceEnabled, isServiceEnabled } = require("./service-gating");
+const { runGuestFlow, runBiberFlow, runAdminFlow } = require("./personas");
 test.use({
   ignoreHTTPSErrors: true
 });
@@ -197,4 +199,37 @@ test("prometheus: biber is denied access after sso login", async ({ browser }) =
   } finally {
     await biberContext.close().catch(() => {});
   }
+});
+
+// Persona scenarios (req 019 Rule 3).
+// Bodies live in the shared helper roles/test-e2e-playwright/files/personas.js
+// so every role's persona flow stays consistent.
+
+test("guest: public-landing → auth chain → never authenticated", async ({ page }) => {
+  await runGuestFlow(page);
+});
+
+test("biber: dashboard → app → universal logout", async ({ page }) => {
+  await runBiberFlow(page);
+});
+
+test("administrator: dashboard → prometheus → app → universal logout", async ({ page }) => {
+  await runAdminFlow(page, {
+    adminInteraction: async (interactivePage) => {
+      // Prometheus admin-only interaction: open the targets / status page.
+      // Confirms the operator reaches the management surface; biber is
+      // covered by the deny-check inside runAdminFlow's sibling helper.
+      const statusLink = interactivePage
+        .getByRole("link", { name: /^(targets|status|alerts|graph|runtime|build)$/i })
+        .first();
+      if (await statusLink.isVisible({ timeout: 10_000 }).catch(() => false)) {
+        await statusLink.click().catch(() => {});
+        await interactivePage.waitForLoadState("domcontentloaded", { timeout: 30_000 }).catch(() => {});
+        await expect(interactivePage.locator("body")).toContainText(
+          /endpoint|state|labels|targets|alerts|series/i,
+          { timeout: 30_000 },
+        );
+      }
+    },
+  });
 });

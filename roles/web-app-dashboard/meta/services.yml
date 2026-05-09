@@ -2,6 +2,7 @@
 oidc:
   enabled: "{{ 'web-app-keycloak' in group_names }}"
   shared: "{{ 'web-app-keycloak' in group_names }}"
+# nocheck: playwright-service-flag — static-asset provider, no Playwright surface
 asset:
   enabled: "{{ 'web-svc-asset' in group_names }}"
   shared: "{{ 'web-svc-asset' in group_names }}"
@@ -17,6 +18,7 @@ logout:
 matomo:
   enabled: "{{ 'web-app-matomo' in group_names }}"
   shared: "{{ 'web-app-matomo' in group_names }}"
+# nocheck: playwright-service-flag — self-provider
 dashboard:
   enabled: true
   shared: true
@@ -35,10 +37,12 @@ dashboard:
     - web-app-matomo
   lifecycle: beta
 # nocheck: dynamic-flag
+# nocheck: playwright-service-flag — canonical:cdn alias of static-asset provider
 css:
   enabled: true
   shared: true
 # nocheck: dynamic-flag
+# nocheck: playwright-service-flag — canonical:cdn alias of static-asset provider
 javascript:
   enabled: true
   shared: true

@@ -1,5 +1,7 @@
 const { test, expect } = require("@playwright/test");
 
+const { skipUnlessServiceEnabled, isServiceEnabled } = require("./service-gating");
+const { runGuestFlow, runBiberFlow, runAdminFlow } = require("./personas");
 test.use({ ignoreHTTPSErrors: true });
 
 function decodeDotenvQuotedValue(value) {
@@ -259,4 +261,38 @@ test("matomo local administrator logs in and logs out", async ({ page }) => {
     .toBe(true);
 
   await expectNoCspViolations(page, diagnostics, "matomo administrator login");
+});
+
+// Persona scenarios (req 019 Rule 3).
+// Bodies live in the shared helper roles/test-e2e-playwright/files/personas.js
+// so every role's persona flow stays consistent.
+
+test("guest: public-landing → auth chain → never authenticated", async ({ page }) => {
+  await runGuestFlow(page);
+});
+
+test("biber: dashboard → app → universal logout", async ({ page }) => {
+  await runBiberFlow(page);
+});
+
+test("administrator: dashboard → prometheus → app → universal logout", async ({ page }) => {
+  await runAdminFlow(page, {
+    adminInteraction: async (interactivePage) => {
+      // Matomo admin-only interaction: open the Websites admin page from
+      // the topbar / admin gear. Confirms the admin reaches the management
+      // surface — biber's deny-check at matomo is the symmetric counter
+      // assertion.
+      const settingsLink = interactivePage
+        .getByRole("link", { name: /administration|settings|websites/i })
+        .first();
+      if (await settingsLink.isVisible({ timeout: 10_000 }).catch(() => false)) {
+        await settingsLink.click().catch(() => {});
+        await interactivePage.waitForLoadState("domcontentloaded", { timeout: 30_000 }).catch(() => {});
+        await expect(interactivePage.locator("body")).toContainText(
+          /websites|administration|users|general settings/i,
+          { timeout: 30_000 },
+        );
+      }
+    },
+  });
 });

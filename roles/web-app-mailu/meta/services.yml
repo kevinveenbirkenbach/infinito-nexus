@@ -13,6 +13,7 @@ dashboard:
 matomo:
   enabled: "{{ 'web-app-matomo' in group_names }}"
   shared: "{{ 'web-app-matomo' in group_names }}"
+# nocheck: playwright-service-flag — self-provider
 mailu:
   enabled: true
   shared: true
@@ -33,6 +34,7 @@ mailu:
   pids_limit: 1024
 # nocheck: shared
 # nocheck: dynamic-flag
+# nocheck: playwright-service-flag — DB engine, covered by role-local integration tests
 redis:
   backup:
     disabled: true
@@ -41,6 +43,7 @@ redis:
   mem_reservation: 256m
   mem_limit: 512m
   pids_limit: 256
+# nocheck: playwright-service-flag — DB engine, covered by role-local integration tests
 mariadb:
   enabled: true # nocheck: dynamic-flag
   shared: "{{ 'svc-db-mariadb' in group_names }}"
@@ -49,6 +52,7 @@ mariadb:
   mem_limit: 2g
   pids_limit: 512
 # nocheck: dynamic-flag
+# nocheck: playwright-service-flag — internal sub-component
 admin:
   enabled: true
   shared: false
@@ -57,6 +61,7 @@ admin:
   mem_limit: 1g
   pids_limit: 512
 # nocheck: dynamic-flag
+# nocheck: playwright-service-flag — internal sub-component
 imap:
   enabled: true
   shared: false
@@ -65,6 +70,7 @@ imap:
   mem_limit: 1.5g
   pids_limit: 512
 # nocheck: dynamic-flag
+# nocheck: playwright-service-flag — internal sub-component
 smtp:
   enabled: true
   shared: false
@@ -73,6 +79,7 @@ smtp:
   mem_limit: 1.5g
   pids_limit: 512
 # nocheck: dynamic-flag
+# nocheck: playwright-service-flag — internal sub-component
 antispam:
   enabled: true
   shared: false
@@ -81,6 +88,7 @@ antispam:
   mem_limit: 1.5g
   pids_limit: 512
 # nocheck: dynamic-flag
+# nocheck: playwright-service-flag — internal sub-component
 antivirus:
   enabled: true
   shared: false
@@ -89,6 +97,7 @@ antivirus:
   mem_limit: 3g
   pids_limit: 512
 # nocheck: dynamic-flag
+# nocheck: playwright-service-flag — internal sub-component
 oletools:
   enabled: true
   shared: false
@@ -97,6 +106,7 @@ oletools:
   mem_limit: 512m
   pids_limit: 256
 # nocheck: dynamic-flag
+# nocheck: playwright-service-flag — internal sub-component
 webdav:
   enabled: true
   shared: false
@@ -105,6 +115,7 @@ webdav:
   mem_limit: 512m
   pids_limit: 256
 # nocheck: dynamic-flag
+# nocheck: playwright-service-flag — internal sub-component
 fetchmail:
   enabled: true
   shared: false
@@ -113,6 +124,7 @@ fetchmail:
   mem_limit: 512m
   pids_limit: 256
 # nocheck: dynamic-flag
+# nocheck: playwright-service-flag — internal sub-component
 webmail:
   enabled: true
   shared: false
@@ -121,6 +133,7 @@ webmail:
   mem_limit: 1g
   pids_limit: 512
 # nocheck: dynamic-flag
+# nocheck: playwright-service-flag — internal sub-component
 resolver:
   enabled: true
   shared: false
@@ -129,6 +142,7 @@ resolver:
   mem_limit: 512m
   pids_limit: 256
 # nocheck: dynamic-flag
+# nocheck: playwright-service-flag — internal sub-component
 front:
   enabled: true
   shared: false
@@ -137,6 +151,7 @@ front:
   mem_limit: 1g
   pids_limit: 512
 # nocheck: dynamic-flag
+# nocheck: playwright-service-flag — canonical:cdn alias of static-asset provider
 css:
   enabled: false
   shared: true

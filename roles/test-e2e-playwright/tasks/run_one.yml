@@ -170,6 +170,41 @@
     dest: "{{ _playwright_stage_tests_dir }}/service-gating.js"
     mode: "0644"
 
+# Stage the shared persona-flow helpers (req 019).
+# The personas/ tree ships every persona flow runner at the top level
+# (biber.js, admin.js, guest.js, index.js) and every helper under
+# personas/utils/. We use ansible.builtin.copy with `directory_mode`
+# semantics by listing the tree explicitly via fileglob; the recursive
+# variant is achieved by chaining one task per depth level so we keep
+# Ansible-idempotent file copies (no `synchronize`/rsync dependency).
+- name: Create staging personas directory
+  ansible.builtin.file:
+    path: "{{ _playwright_stage_tests_dir }}/personas"
+    state: directory
+    mode: "0755"
+
+- name: Create staging personas/utils directory
+  ansible.builtin.file:
+    path: "{{ _playwright_stage_tests_dir }}/personas/utils"
+    state: directory
+    mode: "0755"
+
+- name: Copy persona-flow runners into staging personas directory
+  ansible.builtin.copy:
+    src: "{{ item }}"
+    dest: "{{ _playwright_stage_tests_dir }}/personas/{{ item | basename }}"
+    mode: "0644"
+  with_fileglob:
+    - "{{ playbook_dir }}/roles/test-e2e-playwright/files/personas/*.js"
+
+- name: Copy persona helper modules into staging personas/utils directory
+  ansible.builtin.copy:
+    src: "{{ item }}"
+    dest: "{{ _playwright_stage_tests_dir }}/personas/utils/{{ item | basename }}"
+    mode: "0644"
+  with_fileglob:
+    - "{{ playbook_dir }}/roles/test-e2e-playwright/files/personas/utils/*.js"
+
 # Keep /volume mount stable even if the source project does not define one.
 - name: Ensure staging volume directory exists
   ansible.builtin.file:

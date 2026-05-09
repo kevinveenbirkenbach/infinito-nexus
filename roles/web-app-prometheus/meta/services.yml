@@ -23,9 +23,11 @@ email:
   enabled: "{{ 'web-app-mailu' in group_names }}"
   shared: "{{ 'web-app-mailu' in group_names }}"
 # nocheck: dynamic-flag
+# nocheck: playwright-service-flag — canonical:cdn alias of static-asset provider
 css:
   enabled: true
   shared: true
+# nocheck: playwright-service-flag — self-provider
 prometheus:
   enabled: true
   shared: true

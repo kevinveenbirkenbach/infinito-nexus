@@ -114,7 +114,7 @@ Legend: ✅ present, ❌ missing, — n/a (no env / no spec).
 | `web-app-magento` | ❌ | ❌ | — |
 | `web-app-mailu` | ✅ | ✅ | `admin`, `antispam`, `antivirus`, `css`, `dashboard`, `fetchmail`, `front`, `imap`, `logout`, `mailu` *(self-gate)*, `mariadb`, `matomo`, `oidc`, `oletools`, `prometheus`, `redis`, `resolver`, `smtp`, `webdav`, `webmail` |
 | `web-app-mastodon` | ❌ | ❌ | — |
-| `web-app-matomo` | ✅ | ✅ | `css`, `dashboard`, `logout`, `mariadb`, `matomo` *(self-gate)*, `oauth2`, `oidc`, `prometheus`, `redis` |
+| ~~`web-app-matomo`~~ | ✅ | ✅ | ~~`css`, `dashboard`, `logout`, `mariadb`, `matomo` *(self-gate)*, `oauth2`, `oidc`, `prometheus`, `redis`~~ — role-closed |
 | `web-app-matrix` | ✅ | ✅ | `css`, `dashboard`, `email`, `logout`, `matomo`, `oidc`, `postgres`, `prometheus` |
 | `web-app-mattermost` | ✅ | ✅ | `css`, `dashboard`, `email`, `javascript`, `ldap`, `logout`, `matomo`, `oauth2`, `oidc`, `postgres`, `prometheus`, `redis` |
 | `web-app-mediawiki` | ❌ | ❌ | — |

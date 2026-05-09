@@ -68,6 +68,24 @@ helper_src="$repo_root/roles/test-e2e-playwright/files/service-gating.js"
 if [[ -f "$helper_src" ]]; then
 	cp "$helper_src" "$stage_dir/tests/service-gating.js"
 fi
+# Stage the shared persona-flow helpers (req 019).
+# personas/ holds the persona flow runners (biber.js, admin.js, guest.js,
+# index.js) at the top and every helper module under personas/utils/. Copy
+# both levels so a spec can `require("./personas")` (resolves to
+# personas/index.js) or directly `require("./personas/<flow>")` /
+# `require("./personas/utils/<helper>")` for a subset.
+personas_dir="$repo_root/roles/test-e2e-playwright/files/personas"
+if [[ -d "$personas_dir" ]]; then
+	mkdir -p "$stage_dir/tests/personas/utils"
+	for persona_file in "$personas_dir"/*.js; do
+		[[ -f "$persona_file" ]] || continue
+		cp "$persona_file" "$stage_dir/tests/personas/$(basename "$persona_file")"
+	done
+	for util_file in "$personas_dir"/utils/*.js; do
+		[[ -f "$util_file" ]] || continue
+		cp "$util_file" "$stage_dir/tests/personas/utils/$(basename "$util_file")"
+	done
+fi
 
 cmd="${TEST_E2E_PLAYWRIGHT_COMMAND:-npm install --no-fund --no-audit && npx playwright test${*:+ $*}}"
 

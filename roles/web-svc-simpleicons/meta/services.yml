@@ -11,17 +11,21 @@ matomo:
   enabled: false
   shared: false
 # nocheck: dynamic-flag
+# nocheck: playwright-service-flag — DB engine, covered by role-local integration tests
 redis:
   backup:
     disabled: true
   enabled: false
 # nocheck: dynamic-flag
+# nocheck: playwright-service-flag — canonical:cdn alias of static-asset provider
 css:
   enabled: false
   shared: false
 # nocheck: dynamic-flag
+# nocheck: playwright-service-flag — captcha backend, infrastructural
 recaptcha:
   enabled: false
+# nocheck: playwright-service-flag — self-provider
 simpleicons:
   enabled: true
   shared: true
