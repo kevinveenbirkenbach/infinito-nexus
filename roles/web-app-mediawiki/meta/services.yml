@@ -1,3 +1,4 @@
+---
 oidc:
   enabled: "{{ 'web-app-keycloak' in group_names }}"
   shared: "{{ 'web-app-keycloak' in group_names }}"
@@ -14,11 +15,11 @@ email:
   enabled: "{{ 'web-app-mailu' in group_names }}"
   shared: "{{ 'web-app-mailu' in group_names }}"
 mariadb:
-  enabled: true  # nocheck: dynamic-flag
+  enabled: true # nocheck: dynamic-flag
   shared: "{{ 'svc-db-mariadb' in group_names }}"
 mediawiki:
   image: mediawiki
-  version: '1.45'
+  version: "1.45"
   min_storage: 8GB
   backup:
     no_stop_required: true
@@ -32,7 +33,7 @@ mediawiki:
     - web-app-keycloak
     - web-app-mailu
   lifecycle: beta
-  cpus: '0.5'
+  cpus: "0.5"
   mem_reservation: 256m
   mem_limit: 1g
   pids_limit: 512

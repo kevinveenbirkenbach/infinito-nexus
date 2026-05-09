@@ -1,3 +1,4 @@
+---
 logout:
   enabled: "{{ 'web-svc-logout' in group_names }}"
   shared: "{{ 'web-svc-logout' in group_names }}"
@@ -11,17 +12,17 @@ email:
   enabled: "{{ 'web-app-mailu' in group_names }}"
   shared: "{{ 'web-app-mailu' in group_names }}"
 ldap:
-  enabled: true  # nocheck: dynamic-flag
+  enabled: true # nocheck: dynamic-flag
   shared: "{{ 'svc-db-openldap' in group_names }}"
 oauth2:
   origin:
     host: kix-proxy
-    port: '80'
+    port: "80"
   enabled: "{{ 'web-app-keycloak' in group_names }}"
   shared: "{{ 'web-app-keycloak' in group_names }}"
   allowed_groups:
-  - 'roles/web-app-kix/administrator'
-  - 'roles/web-app-kix/user'
+    - "roles/web-app-kix/administrator"
+    - "roles/web-app-kix/user"
 # nocheck: dynamic-flag
 css:
   enabled: false
@@ -42,9 +43,9 @@ kix:
       http: 8083
       oauth2: 16500
   run_after:
-  - web-app-keycloak
+    - web-app-keycloak
   lifecycle: pre-alpha
-  cpus: '0.5'
+  cpus: "0.5"
   mem_reservation: 512m
   mem_limit: 1g
   pids_limit: 512
@@ -52,7 +53,7 @@ backend:
   image: docker-registry.kixdesk.com/public/backend
   version: stable
   min_storage: 5GB
-  cpus: '1.5'
+  cpus: "1.5"
   mem_reservation: 2g
   mem_limit: 4g
   pids_limit: 1024
@@ -60,7 +61,7 @@ frontend:
   image: docker-registry.kixdesk.com/public/frontend
   version: stable
   min_storage: 2GB
-  cpus: '0.5'
+  cpus: "0.5"
   mem_reservation: 512m
   mem_limit: 1g
   pids_limit: 512
@@ -68,7 +69,7 @@ db:
   image: docker-registry.kixdesk.com/public/db
   version: stable
   min_storage: 5GB
-  cpus: '0.5'
+  cpus: "0.5"
   mem_reservation: 1g
   mem_limit: 2g
   pids_limit: 512
