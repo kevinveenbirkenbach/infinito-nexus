@@ -18,14 +18,17 @@ matomo:
 email:
   enabled: "{{ 'web-app-mailu' in group_names }}"
   shared: "{{ 'web-app-mailu' in group_names }}"
+# nocheck: playwright-service-flag — infrastructural sub-component (TURN/STUN)
 coturn:
   enabled: "{{ 'web-svc-coturn' in group_names }}"
   shared: "{{ 'web-svc-coturn' in group_names }}"
+# nocheck: playwright-service-flag — DB engine, covered by role-local integration tests
 postgres:
   enabled: true # nocheck: dynamic-flag
   shared: "{{ 'svc-db-postgres' in group_names }}"
 # nocheck: shared
 # nocheck: dynamic-flag
+# nocheck: playwright-service-flag — DB engine, covered by role-local integration tests
 redis:
   backup:
     disabled: true
@@ -110,6 +113,7 @@ recorder:
   mem_limit: 2g
   pids_limit: 1024
 # nocheck: dynamic-flag
+# nocheck: playwright-service-flag — canonical:cdn alias of static-asset provider
 css:
   enabled: false
   shared: true
