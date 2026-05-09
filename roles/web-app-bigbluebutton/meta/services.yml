@@ -41,20 +41,25 @@ bigbluebutton:
     - web-app-keycloak
   lifecycle: beta
 # nocheck: dynamic-flag
+# nocheck: playwright-service-flag — DB engine, covered by role-local integration tests
 postgres:
   shared: false
   enabled: true
 # nocheck: dynamic-flag
+# nocheck: playwright-service-flag — internal sub-component (multi-entity role)
 greenlight:
   enabled: true
   shared: false
+# nocheck: playwright-service-flag — infrastructural sub-component (TURN/STUN)
 coturn:
   shared: "{{ 'web-svc-coturn' in group_names }}"
   enabled: "{{ 'web-svc-coturn' in group_names }}"
+# nocheck: playwright-service-flag — infrastructural sub-component (collaborative editing)
 collabora:
   shared: "{{ 'web-svc-collabora' in group_names }}"
   enabled: "{{ 'web-svc-collabora' in group_names }}"
 # nocheck: dynamic-flag
+# nocheck: playwright-service-flag — canonical:cdn alias of static-asset provider
 css:
   enabled: true
   shared: true

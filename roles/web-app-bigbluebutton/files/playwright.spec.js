@@ -1,5 +1,6 @@
 const { test, expect } = require("@playwright/test");
 
+const { skipUnlessServiceEnabled, isServiceEnabled } = require("./service-gating");
 test.use({ ignoreHTTPSErrors: true });
 
 function decodeDotenvQuotedValue(value) {
@@ -237,3 +238,4 @@ test("biber: dashboard to bigbluebutton OIDC login and logout", async ({ page })
   await assertLoggedOut(page, bbbBaseUrl, "biber");
   await expectNoCspViolations(page, diagnostics, "bigbluebutton biber OIDC");
 });
+
