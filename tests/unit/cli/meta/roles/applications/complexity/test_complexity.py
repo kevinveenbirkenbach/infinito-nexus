@@ -67,6 +67,16 @@ class TestComplexityRows(unittest.TestCase):
             # r3 -> r2 -> r1 (BFS reaches r2 first, then r1)
             self.assertEqual(rows[2][2], ["r2", "r1"])
 
+            # Reverse direction (consumers): r1 is embedded by r2 and
+            # transitively by r3; r2 is embedded by r3; r3 has no consumer.
+            row_map = {row[0]: row for row in rows}
+            self.assertEqual(row_map["r1"][3], 2)
+            self.assertEqual(row_map["r1"][4], ["r2", "r3"])
+            self.assertEqual(row_map["r2"][3], 1)
+            self.assertEqual(row_map["r2"][4], ["r3"])
+            self.assertEqual(row_map["r3"][3], 0)
+            self.assertEqual(row_map["r3"][4], [])
+
     def test_group_names_flag_toggles_dynamic_truth(self) -> None:
         with tempfile.TemporaryDirectory() as td:
             roles_dir = Path(td) / "roles"
@@ -147,6 +157,17 @@ class TestComplexityRows(unittest.TestCase):
 
             # r2 has only r1 as a direct dep -- level 1 already covers it.
             self.assertEqual(l1_map["r2"][2], ["r1"])
+
+            # Reverse direction respects the same depth cap. r1 is
+            # consumed by r2 (depth 1) and transitively by r3 (depth 2).
+            self.assertEqual(full_map["r1"][3], 2)
+            self.assertEqual(full_map["r1"][4], ["r2", "r3"])
+
+            self.assertEqual(l1_map["r1"][3], 1)
+            self.assertEqual(l1_map["r1"][4], ["r2"])
+
+            self.assertEqual(l2_map["r1"][3], 2)
+            self.assertEqual(l2_map["r1"][4], ["r2", "r3"])
 
     def test_non_application_roles_are_skipped(self) -> None:
         with tempfile.TemporaryDirectory() as td:

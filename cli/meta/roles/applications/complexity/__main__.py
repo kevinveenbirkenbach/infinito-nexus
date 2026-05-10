@@ -81,21 +81,20 @@ def _direct_service_dep_roles(
 
 def _resolve_transitively(
     start_role: str,
-    roles_dir: Path,
-    registry: dict[str, dict[str, Any]],
+    forward_graph: dict[str, list[str]],
     *,
-    truth: TruthFn,
     max_level: int | None = None,
 ) -> list[str]:
-    """BFS over shared-service deps. ``max_level`` caps recursion depth:
-    ``1`` returns direct deps only, ``2`` adds their direct deps, etc.
-    ``None`` walks the full closure."""
+    """BFS over an adjacency map. ``max_level`` caps recursion depth:
+    ``1`` returns direct neighbours only, ``2`` adds their direct
+    neighbours, etc. ``None`` walks the full closure. The start role
+    itself is never included in the result.
+    """
     seen: set[str] = {start_role}
     order: list[str] = []
-    initial = _direct_service_dep_roles(
-        _load_role_services(roles_dir / start_role), registry, truth=truth
-    )
-    queue: list[tuple[str, int]] = [(role_name, 1) for role_name in initial]
+    queue: list[tuple[str, int]] = [
+        (role_name, 1) for role_name in forward_graph.get(start_role, [])
+    ]
 
     while queue:
         role_name, depth = queue.pop(0)
@@ -108,12 +107,34 @@ def _resolve_transitively(
         next_depth = depth + 1
         queue.extend(
             (next_role, next_depth)
-            for next_role in _direct_service_dep_roles(
-                _load_role_services(roles_dir / role_name), registry, truth=truth
-            )
+            for next_role in forward_graph.get(role_name, [])
             if next_role not in seen
         )
     return order
+
+
+def _build_direct_graphs(
+    roles_dir: Path,
+    registry: dict[str, dict[str, Any]],
+    *,
+    truth: TruthFn,
+) -> tuple[dict[str, list[str]], dict[str, list[str]]]:
+    """Return ``(forward, reverse)`` adjacency maps over all role dirs.
+
+    ``forward[A]`` is the list of provider roles that ``A`` directly
+    depends on (services it embeds). ``reverse[B]`` is the list of
+    roles that directly depend on ``B`` (consumers that embed ``B``).
+    """
+    forward: dict[str, list[str]] = {}
+    reverse: dict[str, list[str]] = {}
+    for role_dir in sorted(p for p in roles_dir.iterdir() if p.is_dir()):
+        consumer = role_dir.name
+        services_map = _load_role_services(role_dir)
+        providers = _direct_service_dep_roles(services_map, registry, truth=truth)
+        forward[consumer] = providers
+        for provider in providers:
+            reverse.setdefault(provider, []).append(consumer)
+    return forward, reverse
 
 
 def compute_complexity_rows(
@@ -121,43 +142,62 @@ def compute_complexity_rows(
     *,
     include_group_names: bool = True,
     max_level: int | None = None,
-) -> list[tuple[str, int, list[str]]]:
-    """Return ``(role_name, points, services)`` per application role.
+) -> list[tuple[str, int, list[str], int, list[str]]]:
+    """Return ``(role, embeds, services, consumers, consumed_by)`` per
+    application role.
 
-    ``points`` is the number of reached provider roles within
-    ``max_level`` BFS hops (``None`` = unbounded). ``services`` is the
-    same list in BFS-discovery order. The role itself is never counted.
+    ``embeds`` / ``services`` count and list the provider roles the
+    application transitively embeds (forward closure). ``consumers`` /
+    ``consumed_by`` count and list the application roles that
+    transitively embed *this* role (reverse closure). Both directions
+    share the same BFS depth cap ``max_level`` (``None`` = unbounded).
+    The role itself is never counted in either direction.
     """
     registry = build_service_registry_from_roles_dir(roles_dir)
     truth = _truth_predicate(include_group_names=include_group_names)
+    forward, reverse = _build_direct_graphs(roles_dir, registry, truth=truth)
 
-    rows: list[tuple[str, int, list[str]]] = []
+    rows: list[tuple[str, int, list[str], int, list[str]]] = []
     for role_dir in sorted(p for p in roles_dir.iterdir() if p.is_dir()):
         if not _is_application_role(role_dir):
             continue
-        deps = _resolve_transitively(
-            role_dir.name,
-            roles_dir,
-            registry,
-            truth=truth,
-            max_level=max_level,
-        )
-        rows.append((role_dir.name, len(deps), deps))
+        services = _resolve_transitively(role_dir.name, forward, max_level=max_level)
+        consumers = _resolve_transitively(role_dir.name, reverse, max_level=max_level)
+        rows.append((role_dir.name, len(services), services, len(consumers), consumers))
     return rows
 
 
-def _render_table(rows: list[tuple[str, int, list[str]]]) -> str:
+def _render_table(rows: list[tuple[str, int, list[str], int, list[str]]]) -> str:
+    """Render counts only (no name lists). Use ``--format json`` for the
+    full role names."""
     if not rows:
         return ""
     name_w = max(len("name"), max(len(r[0]) for r in rows))
-    pts_w = max(len("points"), max(len(str(r[1])) for r in rows))
+    out_w = max(len("embeds"), max(len(str(r[1])) for r in rows))
+    in_w = max(len("consumers"), max(len(str(r[3])) for r in rows))
     lines = [
-        f"{'name':<{name_w}}  {'points':>{pts_w}}  services",
-        f"{'-' * name_w}  {'-' * pts_w}  --------",
+        f"{'name':<{name_w}}  {'embeds':>{out_w}}  {'consumers':>{in_w}}",
+        f"{'-' * name_w}  {'-' * out_w}  {'-' * in_w}",
     ]
-    for name, points, services in rows:
-        lines.append(f"{name:<{name_w}}  {points:>{pts_w}}  {', '.join(services)}")
+    for name, embeds, _services, consumers, _consumed_by in rows:
+        lines.append(f"{name:<{name_w}}  {embeds:>{out_w}}  {consumers:>{in_w}}")
     return "\n".join(lines)
+
+
+def _render_json(rows: list[tuple[str, int, list[str], int, list[str]]]) -> str:
+    import json as _json
+
+    payload = [
+        {
+            "name": name,
+            "embeds": embeds,
+            "services": services,
+            "consumers": consumers,
+            "consumed_by": consumed_by,
+        }
+        for name, embeds, services, consumers, consumed_by in rows
+    ]
+    return _json.dumps(payload, indent=2)
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -171,9 +211,13 @@ def main(argv: list[str] | None = None) -> int:
     )
     p.add_argument(
         "--sort",
-        choices=("points", "name"),
-        default="points",
-        help="Sort by 'points' (ascending, default) or 'name' (ascending).",
+        choices=("embeds", "name", "consumers"),
+        default="embeds",
+        help=(
+            "Sort by 'embeds' (ascending, default — service deps the role "
+            "embeds), 'consumers' (ascending — roles that embed this one), "
+            "or 'name' (ascending)."
+        ),
     )
     p.add_argument(
         "--no-group-names",
@@ -182,6 +226,17 @@ def main(argv: list[str] | None = None) -> int:
             "Ignore services whose enabled/shared flag is the "
             "'<role>' in group_names Jinja form. Only literal `true` "
             "flags count as deps."
+        ),
+    )
+    p.add_argument(
+        "--format",
+        choices=("cli", "json"),
+        default="cli",
+        help=(
+            "Output format. 'cli' (default) shows counts only — name, "
+            "embeds, consumers — for a compact terminal view. 'json' "
+            "emits the full payload including the resolved service and "
+            "consumer role lists."
         ),
     )
     p.add_argument(
@@ -211,14 +266,16 @@ def main(argv: list[str] | None = None) -> int:
         max_level=args.level,
     )
 
-    if args.sort == "points":
+    if args.sort == "embeds":
         rows.sort(key=lambda r: (r[1], r[0]))
+    elif args.sort == "consumers":
+        rows.sort(key=lambda r: (r[3], r[0]))
     else:
         rows.sort(key=lambda r: r[0])
 
-    table = _render_table(rows)
-    if table:
-        print(table)
+    rendered = _render_json(rows) if args.format == "json" else _render_table(rows)
+    if rendered:
+        print(rendered)
     return 0
 
 
