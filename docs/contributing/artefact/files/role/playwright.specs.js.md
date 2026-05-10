@@ -141,6 +141,27 @@ After the auth chain settles (or directly on the role surface when no auth is re
 
 The role-specific interaction callbacks and the peer-exchange test are part of the persona contract; specs that ship only the personas without an interaction callback fulfil the bare minimum but SHOULD extend with bespoke role coverage during the role's rollout iteration.
 
+### Strict failure on un-executable persona cases
+
+A persona scenario MUST fail loudly when its contracted journey cannot execute end-to-end.
+A silent `test.skip(...)` on runtime detection of "no logout button", "no authenticated surface", or "no admin UI marker" is FORBIDDEN.
+Silent skips hide real regressions (broken OIDC mapping, removed logout button, misconfigured oauth2-proxy, drifted UI selectors) behind a green deploy.
+
+The ONLY clean-skip mechanism is an EXPLICIT role-declared opt-out via env flag rendered in `templates/playwright.env.j2`:
+
+```
+PERSONA_BIBER_BLOCKED=true
+PERSONA_ADMINISTRATOR_BLOCKED=true
+PERSONA_GUEST_BLOCKED=true
+```
+
+Each flag MUST be accompanied by a one-line `# nocheck` comment above the env line stating the role contract that justifies blocking the persona, and a matching paragraph in the role's `README.md` (or `TODO.md` while the rationale is still drafting).
+Without the flag, the persona helper hard-fails the test with a diagnostic naming the last-seen URL and pointing the operator at the two repair paths: "fix the auth chain" or "declare the opt-out flag".
+
+Direct-probe deny-checks (`assertPrometheusForbiddenForBiber`, `assertMatomoForbiddenForBiber`) MUST validate the response body, not only the status code.
+A `200 OK` is acceptable ONLY when the body contains role-specific markers proving the response is the genuine role surface (e.g. `prometheus_build_info` or `<title>Prometheus</title>` for prometheus; matomo's login-form markers or `piwik|matomo` for matomo).
+Any 200 with a non-matching body is treated as a misconfigured proxy or a denial-as-200 surface and fails loudly.
+
 ### Invariants (every spec, every role)
 
 - The `biber` and `administrator` personas always start at `${DASHBOARD_BASE_URL}/`; the `guest` persona starts at `${APP_BASE_URL}/`.

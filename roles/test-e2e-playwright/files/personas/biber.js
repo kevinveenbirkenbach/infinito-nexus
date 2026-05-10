@@ -82,6 +82,47 @@ async function runBiberFlow(page, opts = {}) {
 
   await assertCspInjections(page, { isEnabled: safeIsEnabled });
 
+  // Verify biber actually reached an authenticated surface on the
+  // role. The persona contract demands a full dashboard → app →
+  // logout journey, so the post-OIDC page MUST expose a logout
+  // control or a user menu. When it does NOT, that is either:
+  //   - a real regression (OIDC mapping broken, post-login UI
+  //     missing the logout button, role's auth chain misconfigured),
+  //     OR
+  //   - a deliberate role contract that biber has NO access to this
+  //     role at all (admin-only role like akaunting / matomo /
+  //     prometheus admin UI / fider).
+  //
+  // The deliberate case MUST be declared explicitly by the role via
+  // the env flag `PERSONA_BIBER_BLOCKED=true` (rendered in
+  // `templates/playwright.env.j2`). Without that flag the test
+  // fails loudly so a real regression cannot hide behind a silent
+  // skip.
+  const logoutMarker = page
+    .getByRole("button", { name: /^(log\s*out|sign\s*out|abmelden)$/i })
+    .or(page.getByRole("link", { name: /^(log\s*out|sign\s*out|abmelden)$/i }))
+    .or(page.getByRole("button", { name: /^(account|profile|user.?menu|menu)$/i }))
+    .or(page.locator("[data-region='user-menu-toggle'], .user-menu-toggle, .usermenu, [aria-label*='user menu' i]"));
+  const reachedAuthenticated = await logoutMarker.first().isVisible({ timeout: 10_000 }).catch(() => false);
+  if (!reachedAuthenticated) {
+    if ((process.env.PERSONA_BIBER_BLOCKED || "").toLowerCase() === "true") {
+      test.skip(
+        true,
+        `biber persona is explicitly blocked by the role contract (PERSONA_BIBER_BLOCKED=true). Document the rationale in the role's README/TODO and consider whether this is the intended user model.`,
+      );
+      return;
+    }
+    expect(
+      false,
+      `biber did NOT reach an authenticated surface on ${canonicalDomain}. ` +
+        `Either the role's auth chain is broken (OIDC mapping, post-login UI, logout button) ` +
+        `or biber legitimately has no access here — in which case the role MUST declare ` +
+        `\`PERSONA_BIBER_BLOCKED=true\` in templates/playwright.env.j2. ` +
+        `Current URL: ${page.url()}.`,
+    ).toBe(true);
+    return;
+  }
+
   // Drive a real, app-specific interaction after login (or directly on
   // the role surface when no auth is required). Specs SHOULD override
   // the default by passing a `roleInteraction` callback that exercises

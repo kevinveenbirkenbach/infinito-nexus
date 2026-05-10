@@ -102,6 +102,38 @@ async function runAdminFlow(page, opts = {}) {
     }
   }
 
+  // Verify administrator actually reached an authenticated surface.
+  // The persona contract demands a full dashboard → app → logout
+  // journey. When the post-OIDC page does NOT expose a logout
+  // control / user menu, that is a real regression UNLESS the role
+  // explicitly declares the admin persona blocked via env flag
+  // `PERSONA_ADMINISTRATOR_BLOCKED=true` (e.g. roles whose admin
+  // surface only accepts a bespoke local admin, not OIDC). Without
+  // that flag the test fails loudly.
+  const adminLogoutMarker = page
+    .getByRole("button", { name: /^(log\s*out|sign\s*out|abmelden)$/i })
+    .or(page.getByRole("link", { name: /^(log\s*out|sign\s*out|abmelden)$/i }))
+    .or(page.getByRole("button", { name: /^(account|profile|user.?menu|menu)$/i }))
+    .or(page.locator("[data-region='user-menu-toggle'], .user-menu-toggle, .usermenu, [aria-label*='user menu' i]"));
+  const adminReachedAuthenticated = await adminLogoutMarker.first().isVisible({ timeout: 10_000 }).catch(() => false);
+  if (!adminReachedAuthenticated) {
+    if ((process.env.PERSONA_ADMINISTRATOR_BLOCKED || "").toLowerCase() === "true") {
+      test.skip(
+        true,
+        `administrator persona is explicitly blocked by the role contract (PERSONA_ADMINISTRATOR_BLOCKED=true). The role's bespoke admin path covers the journey; document the rationale in the role README/TODO.`,
+      );
+      return;
+    }
+    expect(
+      false,
+      `administrator did NOT reach an authenticated surface on ${canonicalDomain}. ` +
+        `Either the role's auth chain is broken or administrator legitimately has no OIDC-driven admin path here — ` +
+        `in which case the role MUST declare \`PERSONA_ADMINISTRATOR_BLOCKED=true\` in templates/playwright.env.j2. ` +
+        `Current URL: ${page.url()}.`,
+    ).toBe(true);
+    return;
+  }
+
   await assertCspInjections(page, { isEnabled: safeIsEnabled });
 
   // Drive a real, app-specific interaction after login. Specs SHOULD
