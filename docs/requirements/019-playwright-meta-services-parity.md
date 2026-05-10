@@ -87,7 +87,7 @@ Legend: ✅ present, ❌ missing, — n/a (no env / no spec).
 | ~~`web-app-akaunting`~~ | ✅ | ✅ | ~~`css`, `dashboard`, `email`, `logout`, `mariadb`, `matomo`, `oauth2`, `prometheus`, `redis`~~ — role-closed (Playwright green; biber and administrator personas explicit-skipped via `PERSONA_BIBER_BLOCKED=true` and `PERSONA_ADMINISTRATOR_BLOCKED=true` in env, rationale: OIDC auto-provisioning not wired, tracked in role TODO.md) |
 | ~~`web-app-baserow`~~ | ✅ | ✅ | ~~`css`, `dashboard`, `email`, `javascript`, `logout`, `matomo`, `oauth2`, `postgres`, `prometheus`, `redis`~~ — role-closed |
 | `web-app-bigbluebutton` | ✅ | ✅ | `collabora`, `coturn`, `css`, `dashboard`, `email`, `greenlight`, `ldap`, `logout`, `matomo`, `oidc`, `postgres`, `prometheus` |
-| `web-app-bluesky` | ✅ | ✅ | `css`, `dashboard`, `email`, `logout`, `matomo`, `oauth2`, `prometheus`, `view`, `web` |
+| ~~`web-app-bluesky`~~ | ✅ | ✅ | ~~`css`, `dashboard`, `email`, `logout`, `matomo`, `oauth2`, `prometheus`, `view`, `web`~~ — role-closed (Playwright green; biber+admin personas explicit-skipped via PERSONA_<X>_BLOCKED, social-app mobile SPA has logout in profile menu unreachable to auth-surface check; bespoke OIDC + LDAP variant tests verify both personas authenticate via the broker) |
 | `web-app-bookwyrm` | ✅ | ✅ | `css`, `dashboard`, `email`, `logout`, `matomo`, `oauth2`, `postgres`, `prometheus`, `redis`, `worker` |
 | `web-app-bridgy-fed` | ✅ | ✅ | `css`, `dashboard`, `logout`, `matomo`, `oauth2`, `oidc`, `prometheus` |
 | `web-app-chess` | ❌ | ❌ | — |
