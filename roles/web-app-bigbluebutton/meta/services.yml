@@ -8,11 +8,9 @@ logout:
 # nocheck: dynamic-flag
 ldap:
   enabled: false
-# nocheck: dynamic-flag
-# nocheck: dashboard
 dashboard:
-  enabled: false
-  shared: false
+  enabled: "{{ 'web-app-dashboard' in group_names }}"
+  shared: "{{ 'web-app-dashboard' in group_names }}"
 matomo:
   enabled: "{{ 'web-app-matomo' in group_names }}"
   shared: "{{ 'web-app-matomo' in group_names }}"

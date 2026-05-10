@@ -14,11 +14,9 @@ oauth2:
 logout:
   enabled: "{{ 'web-svc-logout' in group_names }}"
   shared: "{{ 'web-svc-logout' in group_names }}"
-# nocheck: dynamic-flag
-# nocheck: dashboard
 dashboard:
-  enabled: false
-  shared: false
+  enabled: "{{ 'web-app-dashboard' in group_names }}"
+  shared: "{{ 'web-app-dashboard' in group_names }}"
 # nocheck: playwright-service-flag — self-provider
 matomo:
   enabled: true
