@@ -1,7 +1,7 @@
 const { test, expect, request } = require("@playwright/test");
 
 const { skipUnlessServiceEnabled, isServiceEnabled } = require("./service-gating");
-const { decodeDotenvQuotedValue, runAdminFlow, runBiberFlow, runGuestFlow } = require("./personas");
+const { decodeDotenvQuotedValue, performKeycloakLoginForm, runAdminFlow, runBiberFlow, runGuestFlow } = require("./personas");
 test.use({ ignoreHTTPSErrors: true });
 
 const dashboardBaseUrl   = decodeDotenvQuotedValue(process.env.DASHBOARD_BASE_URL   || "").replace(/\/$/, "");
@@ -18,18 +18,6 @@ const adminUsername      = decodeDotenvQuotedValue(process.env.ADMIN_USERNAME   
 const adminPassword      = decodeDotenvQuotedValue(process.env.ADMIN_PASSWORD       || "");
 const biberUsername      = decodeDotenvQuotedValue(process.env.BIBER_USERNAME       || "");
 const biberPassword      = decodeDotenvQuotedValue(process.env.BIBER_PASSWORD       || "");
-
-async function performKeycloakLogin(page, username, password) {
-  const usernameField = page.getByRole("textbox", { name: /username|email/i });
-  const passwordField = page.getByRole("textbox", { name: "Password" });
-  const signInButton  = page.getByRole("button", { name: /sign in/i });
-
-  await usernameField.waitFor({ state: "visible", timeout: 60_000 });
-  await usernameField.fill(username);
-  await usernameField.press("Tab");
-  await passwordField.fill(password);
-  await signInButton.click();
-}
 
 async function performKixLogin(page, username, password) {
   const usernameInput = page.locator('input[type="text"], input[type="email"], input[name="UserLogin"], input[name="username"]').first();
@@ -136,7 +124,7 @@ async function runKixLoginLogoutFlow(page, username, password) {
       message: `Expected redirect to Keycloak OIDC auth: ${expectedAuthUrl}`,
     })
     .toContain(expectedAuthUrl);
-  await performKeycloakLogin(page, username, password);
+  await performKeycloakLoginForm(page, username, password);
 
   await expect
     .poll(() => page.url(), {

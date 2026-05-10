@@ -1,7 +1,7 @@
 const { test, expect } = require("@playwright/test");
 const { skipUnlessServiceEnabled, isServiceEnabled } = require("./service-gating");
 
-const { decodeDotenvQuotedValue, normalizeBaseUrl, runAdminFlow, runBiberFlow, runGuestFlow } = require("./personas");
+const { decodeDotenvQuotedValue, normalizeBaseUrl, performKeycloakLoginForm, runAdminFlow, runBiberFlow, runGuestFlow } = require("./personas");
 test.use({ ignoreHTTPSErrors: true });
 
 const baseUrl = normalizeBaseUrl(process.env.BLUESKY_BASE_URL || "");
@@ -9,19 +9,6 @@ const oidcIssuerUrl = normalizeBaseUrl(process.env.OIDC_ISSUER_URL || "");
 const canonicalDomain = decodeDotenvQuotedValue(process.env.CANONICAL_DOMAIN || "");
 const adminUsername = decodeDotenvQuotedValue(process.env.ADMIN_USERNAME);
 const adminPassword = decodeDotenvQuotedValue(process.env.ADMIN_PASSWORD);
-
-async function performKeycloakLogin(page, username, password) {
-  const usernameField = page.locator("input[name='username'], input#username").first();
-  const passwordField = page.locator("input[name='password'], input#password").first();
-  const signInButton = page
-    .locator("input#kc-login, button#kc-login, button[type='submit'], input[type='submit']")
-    .first();
-  await expect(usernameField).toBeVisible({ timeout: 60_000 });
-  await usernameField.fill(username);
-  await usernameField.press("Tab");
-  await passwordField.fill(password);
-  await signInButton.click();
-}
 
 test.beforeEach(async ({ page }) => {
   expect(baseUrl, "BLUESKY_BASE_URL must be set").toBeTruthy();
@@ -74,7 +61,7 @@ test("OIDC: oauth2-proxy + login-broker drop a Bluesky session into social-app v
     })
     .toContain(expectedOidcAuthUrl);
 
-  await performKeycloakLogin(page, adminUsername, adminPassword);
+  await performKeycloakLoginForm(page, adminUsername, adminPassword);
 
   // Wait for the post-OIDC redirect chain to settle. After Keycloak
   // accepts the credentials, the browser bounces through
@@ -133,7 +120,7 @@ test("LDAP: same broker handoff continues to work when Keycloak federates user s
   const expectedBaseUrl = baseUrl.replace(/\/$/, "");
 
   await page.goto(`${expectedBaseUrl}/`);
-  await performKeycloakLogin(page, adminUsername, adminPassword);
+  await performKeycloakLoginForm(page, adminUsername, adminPassword);
 
   await expect
     .poll(() => page.url(), {

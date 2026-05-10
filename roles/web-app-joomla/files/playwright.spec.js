@@ -1,7 +1,7 @@
 const { test, expect } = require("@playwright/test");
 const { skipUnlessServiceEnabled, isServiceEnabled } = require("./service-gating");
 
-const { decodeDotenvQuotedValue, normalizeBaseUrl, runAdminFlow, runBiberFlow, runGuestFlow } = require("./personas");
+const { decodeDotenvQuotedValue, normalizeBaseUrl, performKeycloakLoginForm, runAdminFlow, runBiberFlow, runGuestFlow } = require("./personas");
 test.use({
   ignoreHTTPSErrors: true
 });
@@ -10,20 +10,6 @@ const joomlaBaseUrl = normalizeBaseUrl(process.env.JOOMLA_BASE_URL);
 const oidcIssuerUrl = normalizeBaseUrl(process.env.OIDC_ISSUER_URL || "");
 const adminUsername = decodeDotenvQuotedValue(process.env.ADMIN_USERNAME);
 const adminPassword = decodeDotenvQuotedValue(process.env.ADMIN_PASSWORD);
-
-async function performKeycloakLogin(page, username, password) {
-  const usernameField = page.locator("input[name='username'], input#username").first();
-  const passwordField = page.locator("input[name='password'], input#password").first();
-  const signInButton = page
-    .locator("input#kc-login, button#kc-login, button[type='submit'], input[type='submit']")
-    .first();
-
-  await expect(usernameField).toBeVisible({ timeout: 60_000 });
-  await usernameField.fill(username);
-  await usernameField.press("Tab");
-  await passwordField.fill(password);
-  await signInButton.click();
-}
 
 // Log out via the universal logout endpoint. Every app's nginx vhost intercepts
 // `location = /logout` and proxies it to web-svc-logout. Using `waitUntil: 'commit'`
@@ -85,7 +71,7 @@ test("OIDC: native plg_system_keycloak redirects unauthenticated visitors to Key
     })
     .toContain(expectedOidcAuthUrl);
 
-  await performKeycloakLogin(page, adminUsername, adminPassword);
+  await performKeycloakLoginForm(page, adminUsername, adminPassword);
 
   await expect
     .poll(() => page.url(), {

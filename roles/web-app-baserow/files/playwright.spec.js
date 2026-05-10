@@ -1,7 +1,7 @@
 const { test, expect } = require("@playwright/test");
 const { skipUnlessServiceEnabled, isServiceEnabled } = require("./service-gating");
 
-const { decodeDotenvQuotedValue, normalizeBaseUrl, runAdminFlow, runBiberFlow, runGuestFlow } = require("./personas");
+const { decodeDotenvQuotedValue, normalizeBaseUrl, performKeycloakLoginForm, runAdminFlow, runBiberFlow, runGuestFlow } = require("./personas");
 test.use({ ignoreHTTPSErrors: true });
 
 const baseUrl = normalizeBaseUrl(process.env.BASEROW_BASE_URL || "");
@@ -9,14 +9,6 @@ const oidcIssuerUrl = normalizeBaseUrl(process.env.OIDC_ISSUER_URL || "");
 const canonicalDomain = decodeDotenvQuotedValue(process.env.CANONICAL_DOMAIN || "");
 const adminUsername = decodeDotenvQuotedValue(process.env.ADMIN_USERNAME);
 const adminPassword = decodeDotenvQuotedValue(process.env.ADMIN_PASSWORD);
-
-async function performKeycloakLogin(page, username, password) {
-  const u = page.locator("input[name='username'], input#username").first();
-  const p = page.locator("input[name='password'], input#password").first();
-  const b = page.locator("input#kc-login, button#kc-login, button[type='submit'], input[type='submit']").first();
-  await expect(u).toBeVisible({ timeout: 60_000 });
-  await u.fill(username); await u.press("Tab"); await p.fill(password); await b.click();
-}
 
 test.beforeEach(async ({ page }) => {
   expect(baseUrl, "BASEROW_BASE_URL must be set").toBeTruthy();
@@ -39,7 +31,7 @@ test("OIDC: oauth2-proxy redirects unauthenticated visitors through Keycloak (va
   const expectedBase = baseUrl.replace(/\/$/, "");
   await page.goto(`${expectedBase}/`);
   await expect.poll(() => page.url(), { timeout: 60_000, message: `expected redirect to ${expectedAuth}` }).toContain(expectedAuth);
-  await performKeycloakLogin(page, adminUsername, adminPassword);
+  await performKeycloakLoginForm(page, adminUsername, adminPassword);
   await expect.poll(() => page.url(), { timeout: 90_000, message: `expected redirect back to ${expectedBase}` }).toContain(expectedBase);
   await expect(page.locator("body")).toBeVisible({ timeout: 60_000 });
 });
@@ -49,7 +41,7 @@ test("LDAP: same oauth2-proxy gate when Keycloak federates user storage from LDA
   expect(adminUsername).toBeTruthy(); expect(adminPassword).toBeTruthy();
   const expectedBase = baseUrl.replace(/\/$/, "");
   await page.goto(`${expectedBase}/`);
-  await performKeycloakLogin(page, adminUsername, adminPassword);
+  await performKeycloakLoginForm(page, adminUsername, adminPassword);
   await expect.poll(() => page.url(), { timeout: 90_000, message: `expected redirect back to ${expectedBase}` }).toContain(expectedBase);
   await expect(page.locator("body")).toBeVisible({ timeout: 60_000 });
 });
