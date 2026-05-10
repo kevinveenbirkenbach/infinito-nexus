@@ -9,14 +9,17 @@
 # task dir). The include works at runtime; the lint is structurally blind
 # to path_join templates. Listed paths are the literal strings ansible-lint
 # reports in its error output.
-roles/svc-ai-ollama/tasks/roles/sys-svc-compose/tasks/utils/network.yml load-failure[filenotfounderror]
-roles/svc-db-mariadb/tasks/roles/sys-svc-compose/tasks/utils/network.yml load-failure[filenotfounderror]
-roles/svc-db-postgres/tasks/roles/sys-svc-compose/tasks/utils/network.yml load-failure[filenotfounderror]
+roles/svc-ai-ollama/tasks/roles/sys-svc-compose/tasks/utils/network/routine.yml load-failure[filenotfounderror]
+roles/svc-db-mariadb/tasks/roles/sys-svc-compose/tasks/utils/network/routine.yml load-failure[filenotfounderror]
+roles/svc-db-openldap/tasks/roles/sys-svc-compose/tasks/utils/network/create.yml load-failure[filenotfounderror]
+roles/svc-db-postgres/tasks/roles/sys-svc-compose/tasks/utils/network/routine.yml load-failure[filenotfounderror]
 roles/sys-front-tls-letsencrypt/tasks/roles/sys-ca-selfsigned/tasks/disable_env.yml load-failure[filenotfounderror]
+roles/sys-svc-compose/tasks/utils/network/roles/sys-svc-compose/tasks/utils/network/create.yml load-failure[filenotfounderror]
 roles/sys-svc-mail-msmtp/tasks/roles/sys-svc-mail-smtp/tasks/disable.yml load-failure[filenotfounderror]
 roles/web-app-bigbluebutton/tasks/roles/sys-ctl-bkp-docker-2-loc/tasks/04_seed-database-to-backup.yml load-failure[filenotfounderror]
 roles/web-app-mailu/tasks/roles/sys-svc-mail-smtp/tasks/disable.yml load-failure[filenotfounderror]
 roles/web-app-matrix/tasks/roles/sys-ctl-bkp-docker-2-loc/tasks/04_seed-database-to-backup.yml load-failure[filenotfounderror]
+roles/web-app-prometheus/tasks/roles/sys-svc-compose/tasks/utils/network/create.yml load-failure[filenotfounderror]
 
 # syntax-check ----------------------------------------------------------
 # `keycloak_kcadm_update` is a role-local module shipped at
