@@ -1,6 +1,10 @@
 {% set container_port = 80 %}
 {% include 'roles/sys-svc-compose/templates/base.yml.j2' %}
 
+  oauth2-proxy:
+    extra_hosts:
+      - "auth.infinito.example:host-gateway"
+
   pihole:
 {% include 'roles/sys-svc-container/templates/base.yml.j2' %}
     image: "{{ PIHOLE_IMAGE }}:{{ PIHOLE_VERSION }}"
