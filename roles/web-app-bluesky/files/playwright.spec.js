@@ -1,5 +1,5 @@
 const { test, expect } = require("@playwright/test");
-const { skipUnlessServiceEnabled, isServiceEnabled } = require("./service-gating");
+const { skipUnlessServiceEnabled } = require("./service-gating");
 
 const { decodeDotenvQuotedValue, normalizeBaseUrl, performKeycloakLoginForm, runAdminFlow, runBiberFlow, runGuestFlow } = require("./personas");
 test.use({ ignoreHTTPSErrors: true });
@@ -100,7 +100,7 @@ test("OIDC: oauth2-proxy + login-broker drop a Bluesky session into social-app v
         hasCurrentAccount: !!cur,
         hasAccessJwt: !!(cur && cur.accessJwt)
       };
-    } catch (_) {
+    } catch {
       return { present: true, hasCurrentAccount: false, hasAccessJwt: false, parseError: true };
     }
   });

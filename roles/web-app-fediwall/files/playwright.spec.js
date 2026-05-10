@@ -1,5 +1,5 @@
 const { test, expect } = require("@playwright/test");
-const { skipUnlessServiceEnabled, isServiceEnabled } = require("./service-gating");
+const { skipUnlessServiceEnabled } = require("./service-gating");
 
 const { decodeDotenvQuotedValue, normalizeBaseUrl, runAdminFlow, runBiberFlow, runGuestFlow } = require("./personas");
 test.use({ ignoreHTTPSErrors: true });
@@ -134,6 +134,7 @@ async function loginToMastodonViaOidc(page, baseUrl) {
   await expect(oidcLink, "Expected Mastodon OIDC sign-in link").toBeVisible({ timeout: 30_000 });
 
   await Promise.all([
+    // eslint-disable-next-line playwright/no-wait-for-navigation -- the navigation target depends on the OIDC issuer; waitForURL would need a runtime-built pattern. The Promise.all is the documented Playwright pattern for "click triggers navigation".
     page.waitForNavigation({ waitUntil: "domcontentloaded" }),
     page.evaluate(() => {
       const a = document.querySelector(

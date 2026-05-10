@@ -1,5 +1,5 @@
 const { test, expect } = require("@playwright/test");
-const { skipUnlessServiceEnabled, isServiceEnabled } = require("./service-gating");
+const { skipUnlessServiceEnabled } = require("./service-gating");
 
 const { assertCspMetaParity, assertCspResponseHeader, decodeDotenvQuotedValue, expectNoCspViolations, installCspViolationObserver, normalizeBaseUrl, runAdminFlow, runBiberFlow, runGuestFlow } = require("./personas");
 test.use({ ignoreHTTPSErrors: true });
@@ -325,6 +325,7 @@ async function keycloakAdminAddUserToGroup(
  * It is intentionally unused; the request-based variant above is the
  * authoritative driver during verification.
  */
+// eslint-disable-next-line no-unused-vars -- intentional reference; see docstring above
 async function keycloakAdminAddUserToGroupViaUi(
   page,
   keycloakBaseUrl,
@@ -721,7 +722,6 @@ for (const role of RBAC_ROLE_SEQUENCE) {
           }
         } catch (err) {
           // Log but do not mask the original test failure.
-          // eslint-disable-next-line no-console
           console.warn(`Cleanup removal of biber from ${groupPath} failed: ${err}`);
         }
       }
@@ -1033,7 +1033,6 @@ test("wordpress post published with discourse toggle appears as a Discourse topi
         ]);
         await wpPageCleanup.close().catch(() => {});
       } catch (err) {
-        // eslint-disable-next-line no-console
         console.warn(`WP teardown of "${postTitle}" failed: ${err}`);
       }
       try {
@@ -1045,7 +1044,6 @@ test("wordpress post published with discourse toggle appears as a Discourse topi
           await discourseDeleteTopic(reqCtx.request, topic.id);
         }
       } catch (err) {
-        // eslint-disable-next-line no-console
         console.warn(`Discourse teardown of "${postTitle}" failed: ${err}`);
       }
       await wpCtx.close().catch(() => {});

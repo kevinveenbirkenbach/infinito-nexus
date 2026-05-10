@@ -18,7 +18,7 @@
 const { test, expect } = require("@playwright/test");
 const { normalizeUrl, readEnv, safeIsEnabled, assertCspInjections } = require("./utils");
 
-async function runGuestFlow(page, opts = {}) {
+async function runGuestFlow(page = {}) {
   const appBaseUrl = normalizeUrl(process.env.APP_BASE_URL);
   const canonicalDomain = readEnv("CANONICAL_DOMAIN");
 

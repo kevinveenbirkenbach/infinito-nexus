@@ -13,7 +13,6 @@
 // native form hidden in this deployment.
 const { test, expect } = require("@playwright/test");
 
-const { skipUnlessServiceEnabled, isServiceEnabled } = require("./service-gating");
 const { decodeDotenvQuotedValue, findFirstVisibleCandidate, runAdminFlow, runBiberFlow, runGuestFlow } = require("./personas");
 // `ignoreHTTPSErrors` is needed because the local stack typically uses the
 // self-signed CA set up by `make trust-ca`, which the Playwright container
@@ -485,7 +484,7 @@ async function loginToStandaloneNextcloudWithRetry(adminPage, username, password
   try {
     await loginToStandaloneNextcloud(adminPage, username, password);
     return;
-  } catch (error) {
+  } catch {
     await adminPage.waitForTimeout(5_000);
     await loginToStandaloneNextcloud(adminPage, username, password);
   }

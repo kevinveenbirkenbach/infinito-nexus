@@ -1,6 +1,5 @@
 const { test, expect } = require("@playwright/test");
 
-const { skipUnlessServiceEnabled, isServiceEnabled } = require("./service-gating");
 const { decodeDotenvQuotedValue, isVisible, performKeycloakLoginForm, runAdminFlow, runBiberFlow, runGuestFlow, waitForFrameUrl } = require("./personas");
 test.use({
   ignoreHTTPSErrors: true

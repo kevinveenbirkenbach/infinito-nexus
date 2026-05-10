@@ -1,7 +1,6 @@
 const { test, expect, request } = require("@playwright/test");
 
-const { skipUnlessServiceEnabled, isServiceEnabled } = require("./service-gating");
-const { decodeDotenvQuotedValue, performKeycloakLoginForm, runAdminFlow, runBiberFlow, runGuestFlow } = require("./personas");
+const { decodeDotenvQuotedValue, performKeycloakLoginForm, runBiberFlow, runGuestFlow } = require("./personas");
 test.use({ ignoreHTTPSErrors: true });
 
 const dashboardBaseUrl   = decodeDotenvQuotedValue(process.env.DASHBOARD_BASE_URL   || "").replace(/\/$/, "");

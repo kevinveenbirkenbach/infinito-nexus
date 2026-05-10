@@ -5,7 +5,6 @@
 //   2. biber persona — same flow in an isolated browser context.
 const { test, expect } = require("@playwright/test");
 
-const { skipUnlessServiceEnabled, isServiceEnabled } = require("./service-gating");
 const { decodeDotenvQuotedValue, runAdminFlow, runBiberFlow, runGuestFlow } = require("./personas");
 test.use({ ignoreHTTPSErrors: true });
 

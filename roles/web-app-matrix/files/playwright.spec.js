@@ -1,6 +1,5 @@
 const { test, expect } = require("@playwright/test");
 
-const { skipUnlessServiceEnabled, isServiceEnabled } = require("./service-gating");
 const { assertCspResponseHeader, decodeDotenvQuotedValue, expectNoCspViolations, installCspViolationObserver, normalizeBaseUrl, performKeycloakLoginForm, runGuestFlow } = require("./personas");
 test.use({ ignoreHTTPSErrors: true });
 // Matrix SSO has several long-tail failure modes (Synapse rc_login rate

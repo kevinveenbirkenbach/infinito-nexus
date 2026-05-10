@@ -1,7 +1,6 @@
 const { test, expect } = require("@playwright/test");
 
-const { skipUnlessServiceEnabled, isServiceEnabled } = require("./service-gating");
-const { decodeDotenvQuotedValue, installCspViolationObserver, normalizeBaseUrl, runAdminFlow, runBiberFlow, runGuestFlow } = require("./personas");
+const { decodeDotenvQuotedValue, installCspViolationObserver, normalizeBaseUrl, runAdminFlow, runGuestFlow } = require("./personas");
 test.use({ ignoreHTTPSErrors: true });
 
 // -----------------------------------------------------------------------------
@@ -11,7 +10,6 @@ test.use({ ignoreHTTPSErrors: true });
 // -----------------------------------------------------------------------------
 
 const moodleBaseUrl   = normalizeBaseUrl(process.env.APP_BASE_URL);
-const dashboardBaseUrl = normalizeBaseUrl(process.env.DASHBOARD_BASE_URL || "");
 const oidcIssuerUrl   = normalizeBaseUrl(process.env.OIDC_ISSUER_URL || "");
 const oidcClientId    = decodeDotenvQuotedValue(process.env.OIDC_CLIENT_ID || "");
 const adminUsername   = decodeDotenvQuotedValue(process.env.ADMIN_USERNAME);

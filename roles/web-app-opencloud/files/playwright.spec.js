@@ -6,7 +6,6 @@
 // Keycloak credential form -> back to OpenCloud Files view.
 const { test, expect } = require("@playwright/test");
 
-const { skipUnlessServiceEnabled, isServiceEnabled } = require("./service-gating");
 const { decodeDotenvQuotedValue, runAdminFlow, runBiberFlow, runGuestFlow } = require("./personas");
 test.use({ ignoreHTTPSErrors: true });
 
@@ -22,7 +21,7 @@ const issuerHost = new URL(issuerUrl).host;
 const issuerPattern = new RegExp(`^https?://${issuerHost.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}`);
 const baseUrlPattern = new RegExp(`^${baseUrl.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}`);
 
-function attachDiagnostics(page, label) {
+function attachDiagnostics(page, _label) {
   const diagnostics = { console: [], requests: [], errors: [] };
   page.on("console", (msg) => {
     diagnostics.console.push(`[${msg.type()}] ${msg.text()}`);
@@ -48,7 +47,7 @@ async function ssoLoginAndAssertUsername(page, username, password) {
         "forceAllowOldBrowser",
         JSON.stringify({ expiry: Date.now() + 30 * 24 * 60 * 60 * 1000 })
       );
-    } catch (e) {}
+    } catch {}
   });
   await page.goto(baseUrl);
 

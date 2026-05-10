@@ -14,14 +14,19 @@ module.exports = [
     ],
   },
   {
-    // ESLint v9 reports unused `eslint-disable` directives as warnings by
-    // default. Cleanup is mostly cosmetic and the autofixer leaves
-    // whitespace artefacts; defer the cleanup pass and silence for now.
     linterOptions: {
-      reportUnusedDisableDirectives: "off",
+      reportUnusedDisableDirectives: "warn",
     },
   },
   js.configs.recommended,
+  {
+    // Repo-root config / build files are CommonJS Node modules.
+    files: ["*.js", "*.cjs"],
+    languageOptions: {
+      sourceType: "commonjs",
+      globals: { ...globals.node },
+    },
+  },
   {
     files: ["roles/**/files/**/*.js"],
     languageOptions: {
@@ -37,7 +42,9 @@ module.exports = [
       },
     },
     rules: {
-      "no-unused-vars": ["warn", { argsIgnorePattern: "^_" }],
+      "no-unused-vars": ["error", { argsIgnorePattern: "^_" }],
+      "no-var": "error",
+      "eqeqeq": ["error", "always"],
       // Empty `catch (e) {}` is the project's idiom for fire-and-forget
       // best-effort actions (localStorage probes, optional cleanups, …);
       // the catch protects the surrounding flow from incidental
@@ -76,7 +83,7 @@ module.exports = [
       // trailing-comma `toHaveAttribute("href", )` call). Keep off until
       // a hand-migration pass; promote to "error" as those are reviewed.
       "playwright/prefer-web-first-assertions": "off",
-      "playwright/no-wait-for-navigation": "off",
+      "playwright/no-wait-for-navigation": "error",
     },
   },
 ];

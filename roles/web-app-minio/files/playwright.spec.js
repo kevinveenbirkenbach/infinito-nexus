@@ -1,7 +1,7 @@
 const { test, expect } = require("@playwright/test");
-const { skipUnlessServiceEnabled, isServiceEnabled } = require("./service-gating");
+const { skipUnlessServiceEnabled } = require("./service-gating");
 
-const { decodeDotenvQuotedValue, normalizeBaseUrl, runAdminFlow, runBiberFlow, runGuestFlow } = require("./personas");
+const { decodeDotenvQuotedValue, normalizeBaseUrl, runBiberFlow, runGuestFlow } = require("./personas");
 test.use({ ignoreHTTPSErrors: true });
 
 function parseStsAssumeRoleResponse(body) {
@@ -38,7 +38,6 @@ async function minioConsoleLogout(page, baseUrl) {
   await page.context().clearCookies();
 }
 
-const dashboardBaseUrl = normalizeBaseUrl(process.env.APP_BASE_URL || "");
 const consoleBaseUrl = normalizeBaseUrl(process.env.MINIO_CONSOLE_URL || "");
 const apiBaseUrl = normalizeBaseUrl(process.env.MINIO_API_URL || "");
 const oidcIssuerUrl = normalizeBaseUrl(process.env.OIDC_ISSUER_URL || "");
