@@ -42,6 +42,12 @@
     mode: "0644"
   notify: compose up
 
+- name: "Pre-create native-metrics docker networks (idempotent)"
+  include_tasks: "{{ [playbook_dir, 'roles/sys-svc-compose/tasks/utils/network/create.yml' ] | path_join }}"
+  vars:
+    network_role_id: "{{ item }}"
+  loop: "{{ lookup('native_metrics_apps') }}"
+
 - name: "flush handlers for '{{ application_id }}'"
   meta: flush_handlers
 

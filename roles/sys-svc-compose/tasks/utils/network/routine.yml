@@ -6,11 +6,9 @@
   when: run_once_sys_svc_container is not defined
 
 - name: "2) Create the network"
-  community.docker.docker_network:
-    name: "{{ docker_network_name }}"
-    state: present
-    ipam_config:
-      - subnet: "{{ docker_network_subnet }}"
+  include_tasks: "{{ [playbook_dir, 'roles/sys-svc-compose/tasks/utils/network/create.yml' ] | path_join }}"
+  vars:
+    network_role_id: "{{ application_id }}"
 
 - name: "3) Include and flush the compose which requires the network"
   include_role:

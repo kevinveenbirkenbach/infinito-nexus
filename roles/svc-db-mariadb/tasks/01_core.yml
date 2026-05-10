@@ -2,10 +2,8 @@
 - include_tasks: utils/once/flag.yml
 
 - name: "Setup container network for {{ application_id }}"
-  include_tasks: "{{ [playbook_dir, 'roles/sys-svc-compose/tasks/utils/network.yml' ] | path_join }}"
+  include_tasks: "{{ [playbook_dir, 'roles/sys-svc-compose/tasks/utils/network/routine.yml' ] | path_join }}"
   vars:
-    docker_network_name: "{{ MARIADB_NETWORK }}"
-    docker_network_subnet: "{{ MARIADB_SUBNET }}"
     docker_compose_flush_handlers: true
 
 - name: Install MySQL Python client library via pip

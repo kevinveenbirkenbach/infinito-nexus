@@ -1,0 +1,12 @@
+---
+# Idempotently ensure the docker network for `network_role_id` exists.
+# Network name is derived from the role's primary entity, the subnet
+# from `meta/server.yml.networks.local.subnet`. Required var:
+#   network_role_id   the role whose network to create (e.g.
+#                     "svc-db-postgres" → docker network "postgres").
+- name: "Ensure docker network for '{{ network_role_id }}' exists"
+  community.docker.docker_network:
+    name: "{{ network_role_id | get_entity_name }}"
+    state: present
+    ipam_config:
+      - subnet: "{{ lookup('config', network_role_id, 'server.networks.local.subnet') }}"

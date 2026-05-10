@@ -13,7 +13,6 @@ POSTGRES_IMAGE: "{{ lookup('config', application_id, 'services.' ~ entity_name ~
 POSTGRES_VERSION: "{{ lookup('config', application_id, 'services.' ~ entity_name ~ '.version') }}"
 POSTGRES_VERSION_MAJOR: "{{ POSTGRES_VERSION | regex_replace('^([0-9]+).*', '\\1') }}"
 POSTGRES_NETWORK_NAME: "{{ application_id | get_entity_name }}"
-POSTGRES_SUBNET: "{{ lookup('config', 'svc-db-postgres', 'server.networks.local.subnet') }}"
 POSTGRES_PASSWORD: "{{ lookup('config', application_id, 'credentials.POSTGRES_PASSWORD') }}"
 POSTGRES_PORT: "{{ database_port | default(lookup('config', application_id, 'services.postgres.ports.local.postgres')) }}"
 POSTGRES_EXPOSE_LOCAL: true # Exposes the db to localhost, almost everytime neccessary
