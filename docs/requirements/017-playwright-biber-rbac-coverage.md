@@ -45,7 +45,7 @@ rather than role by role.
   `"{{ '<role>' in group_names }}"` form per
   [test_dynamic_flags.py](../../tests/integration/roles/meta/services/test_dynamic_flags.py))
   MUST include at least one `biber`-driven scenario.
-- [ ] The biber scenario MUST follow the `biber: <flow>` naming convention from [019 Rule 3](019-playwright-meta-services-parity.md#rules), enforced by [test_persona_naming.py](../../tests/lint/ansible/roles/web-app/playwright/test_persona_naming.py).
+- [ ] The biber scenario MUST follow the `biber: <flow>` naming convention from [019 Rule 3](019-playwright-meta-services-parity.md#rules), enforced by [test_naming.py](../../tests/lint/ansible/roles/web-app/playwright/persona/test_naming.py).
   A role that legitimately cannot run a biber journey opts out via `PERSONA_BIBER_BLOCKED=true` in `templates/playwright.env.j2` per [019 Rule 11](019-playwright-meta-services-parity.md#rules).
 - [ ] The biber scenario MUST gate on the same service flags that the
   matching admin scenario uses (typically `oidc`, `ldap`, or both),
