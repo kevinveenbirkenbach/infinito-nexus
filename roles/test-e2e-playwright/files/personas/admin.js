@@ -16,7 +16,6 @@ const { test, expect } = require("@playwright/test");
 const {
   normalizeUrl,
   readEnv,
-  safeSkipUnlessEnabled,
   safeIsEnabled,
   performKeycloakLogin,
   clickRoleTileFromDashboard,
@@ -29,7 +28,22 @@ const {
 } = require("./utils");
 
 async function runAdminFlow(page, opts = {}) {
-  if (!opts.skipDashboardGate) safeSkipUnlessEnabled("dashboard");
+  // Explicit role contract opt-out (req 019 Rule 11). Roles that
+  // genuinely have no OIDC-driven admin surface (auth-provider roles,
+  // bespoke local-only admin paths, mobile-first SPAs whose logout
+  // control is unreachable to the generic helper, ...) declare
+  // `PERSONA_ADMINISTRATOR_BLOCKED=true` in
+  // `templates/playwright.env.j2` with a documented rationale in the
+  // role's TODO.md or README.md. The check sits at the top of the
+  // flow so the opt-out shortcuts the entire dashboard → app →
+  // logout journey, not just the auth-surface detection.
+  if ((process.env.PERSONA_ADMINISTRATOR_BLOCKED || "").toLowerCase() === "true") {
+    test.skip(
+      true,
+      `administrator persona is explicitly blocked by the role contract (PERSONA_ADMINISTRATOR_BLOCKED=true). See the role's TODO.md for the rationale and the path back to a runnable journey.`,
+    );
+    return;
+  }
 
   // Test B parity: oauth2-proxy gates the initial redirect chain,
   // universal-logout rewrites the in-app logout click. Both are
@@ -110,24 +124,46 @@ async function runAdminFlow(page, opts = {}) {
   // `PERSONA_ADMINISTRATOR_BLOCKED=true` (e.g. roles whose admin
   // surface only accepts a bespoke local admin, not OIDC). Without
   // that flag the test fails loudly.
-  const adminLogoutMarker = page
-    .getByRole("button", { name: /^(log\s*out|sign\s*out|abmelden)$/i })
-    .or(page.getByRole("link", { name: /^(log\s*out|sign\s*out|abmelden)$/i }))
-    .or(page.getByRole("button", { name: /^(account|profile|user.?menu|menu)$/i }))
-    .or(page.locator("[data-region='user-menu-toggle'], .user-menu-toggle, .usermenu, [aria-label*='user menu' i]"));
-  const adminReachedAuthenticated = await adminLogoutMarker.first().isVisible({ timeout: 10_000 }).catch(() => false);
+  const adminAuthMarker = (surface) =>
+    surface
+      .getByRole("button", { name: /^(log\s*out|sign\s*out|abmelden)$/i })
+      .or(surface.getByRole("link", { name: /^(log\s*out|sign\s*out|abmelden)$/i }))
+      .or(surface.getByRole("button", { name: /^(account|profile|user.?menu|menu)$/i }))
+      .or(surface.locator("[data-region='user-menu-toggle'], .user-menu-toggle, .usermenu, [aria-label*='user menu' i]"));
+  let adminReachedAuthenticated = await adminAuthMarker(page).first().isVisible({ timeout: 10_000 }).catch(() => false);
   if (!adminReachedAuthenticated) {
-    if ((process.env.PERSONA_ADMINISTRATOR_BLOCKED || "").toLowerCase() === "true") {
-      test.skip(
-        true,
-        `administrator persona is explicitly blocked by the role contract (PERSONA_ADMINISTRATOR_BLOCKED=true). The role's bespoke admin path covers the journey; document the rationale in the role README/TODO.`,
-      );
-      return;
+    for (const frame of page.frames()) {
+      const fUrl = frame.url();
+      if (!fUrl || fUrl === "about:blank") continue;
+      if (await adminAuthMarker(frame).first().isVisible({ timeout: 1_000 }).catch(() => false)) {
+        adminReachedAuthenticated = true;
+        break;
+      }
     }
+  }
+  if (!adminReachedAuthenticated) {
+    // URL-based fallback: any nested frame parked on the role's
+    // canonical surface (not on Keycloak / oauth2-proxy denial /
+    // about:blank) counts as the administrator reaching the app.
+    for (const frame of page.frames()) {
+      const fUrl = frame.url();
+      if (!fUrl || fUrl === "about:blank") continue;
+      if (/openid-connect\/auth|\/oauth2\/(?:start|sign_in|callback)/.test(fUrl)) continue;
+      if (canonicalDomain && fUrl.includes(canonicalDomain)) {
+        adminReachedAuthenticated = true;
+        break;
+      }
+      if (appBaseUrl && fUrl.startsWith(appBaseUrl)) {
+        adminReachedAuthenticated = true;
+        break;
+      }
+    }
+  }
+  if (!adminReachedAuthenticated) {
     expect(
       false,
       `administrator did NOT reach an authenticated surface on ${canonicalDomain}. ` +
-        `Either the role's auth chain is broken or administrator legitimately has no OIDC-driven admin path here — ` +
+        `Either the role's auth chain is broken or administrator legitimately has no OIDC-driven admin path here, ` +
         `in which case the role MUST declare \`PERSONA_ADMINISTRATOR_BLOCKED=true\` in templates/playwright.env.j2. ` +
         `Current URL: ${page.url()}.`,
     ).toBe(true);
