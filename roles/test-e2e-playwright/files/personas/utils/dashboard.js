@@ -13,16 +13,38 @@ const { expect } = require("@playwright/test");
 async function clickRoleTileFromDashboard(page, dashboardBaseUrl, canonicalDomain) {
   await page.goto(`${dashboardBaseUrl}/`, { waitUntil: "domcontentloaded" });
 
-  const tile = page.locator(`a[href*="${canonicalDomain}"]`).first();
-  await expect(tile, `role tile for ${canonicalDomain} must be present on the dashboard`).toBeVisible({
-    timeout: 30_000,
-  });
+  const visibleTile = page.locator(`a[href*="${canonicalDomain}"]:visible`).first();
+  let visible = await visibleTile.isVisible({ timeout: 5_000 }).catch(() => false);
 
-  const href = await tile.getAttribute("href");
+  if (!visible) {
+    // Tile is rendered but hidden (collapsed Bootstrap dropdown / accordion).
+    // Open every dropdown / accordion trigger so the tile becomes visible
+    // before the click. This handles the dashboard's category dropdowns
+    // (e.g. "Identity" → keycloak tile) without coupling personas to the
+    // dashboard's exact menu structure.
+    const triggers = page.locator(
+      "[data-bs-toggle='dropdown'], [data-bs-toggle='collapse'], [aria-expanded='false']",
+    );
+    const triggerCount = await triggers.count().catch(() => 0);
+    for (let i = 0; i < triggerCount; i++) {
+      const t = triggers.nth(i);
+      const isVis = await t.isVisible({ timeout: 200 }).catch(() => false);
+      if (!isVis) continue;
+      await t.click({ timeout: 1_000 }).catch(() => {});
+    }
+    visible = await visibleTile.isVisible({ timeout: 10_000 }).catch(() => false);
+  }
+
+  await expect(
+    visibleTile,
+    `role tile for ${canonicalDomain} must be present on the dashboard (after opening any collapsed dropdowns)`,
+  ).toBeVisible({ timeout: 30_000 });
+
+  const href = await visibleTile.getAttribute("href");
   expect(href, "role tile must carry an href").toBeTruthy();
   expect(href, `role tile href must point at ${canonicalDomain}`).toContain(canonicalDomain);
 
-  await tile.click();
+  await visibleTile.click();
 
   await expect
     .poll(() => page.url(), {
@@ -44,8 +66,22 @@ async function clickSiblingTileFromDashboard(page, dashboardBaseUrl, siblingBase
   if (!siblingBaseUrl) return null;
   await page.goto(`${dashboardBaseUrl}/`, { waitUntil: "domcontentloaded" });
   const host = new URL(siblingBaseUrl).hostname;
-  const tile = page.locator(`a[href*="${host}"]`).first();
-  const visible = await tile.isVisible({ timeout: 10_000 }).catch(() => false);
+  const tile = page.locator(`a[href*="${host}"]:visible`).first();
+
+  let visible = await tile.isVisible({ timeout: 5_000 }).catch(() => false);
+  if (!visible) {
+    const triggers = page.locator(
+      "[data-bs-toggle='dropdown'], [data-bs-toggle='collapse'], [aria-expanded='false']",
+    );
+    const triggerCount = await triggers.count().catch(() => 0);
+    for (let i = 0; i < triggerCount; i++) {
+      const t = triggers.nth(i);
+      const isVis = await t.isVisible({ timeout: 200 }).catch(() => false);
+      if (!isVis) continue;
+      await t.click({ timeout: 1_000 }).catch(() => {});
+    }
+    visible = await tile.isVisible({ timeout: 5_000 }).catch(() => false);
+  }
   if (!visible) return null;
   await tile.click();
   await expect

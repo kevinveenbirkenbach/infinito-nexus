@@ -1,7 +1,6 @@
 const { test, expect } = require("@playwright/test");
 
 const { skipUnlessServiceEnabled, isServiceEnabled } = require("./service-gating");
-const { runGuestFlow, runBiberFlow, runAdminFlow } = require("./personas");
 test.use({ ignoreHTTPSErrors: true });
 
 // -----------------------------------------------------------------------------
@@ -390,33 +389,24 @@ test("normal-realm biber logs in through account interface and logs out", async 
   await expectNoCspViolations(page, diagnostics, "keycloak normal-realm account (biber)");
 });
 
-// Persona scenarios (req 019 Rule 3).
-// Bodies live in the shared helper roles/test-e2e-playwright/files/personas.js
-// so every role's persona flow stays consistent.
-
-test("guest: public-landing → auth chain → never authenticated", async ({ page }) => {
-  await runGuestFlow(page);
-});
-
-test("biber: dashboard → app → universal logout", async ({ page }) => {
-  await runBiberFlow(page);
-});
-
-test("administrator: dashboard → prometheus → app → universal logout", async ({ page }) => {
-  await runAdminFlow(page, {
-    adminInteraction: async (interactivePage) => {
-      // web-app-keycloak admin-only interaction: open a management surface.
-      const link = interactivePage
-        .getByRole("link", { name: /^(realm settings|clients|users|groups|sessions|authentication)$/i })
-        .first();
-      if (await link.isVisible({ timeout: 10_000 }).catch(() => false)) {
-        await link.click().catch(() => {});
-        await interactivePage.waitForLoadState("domcontentloaded", { timeout: 30_000 }).catch(() => {});
-        await expect(interactivePage.locator("body")).toContainText(
-          /realm settings|clients|users|groups|sessions|authentication|events/i,
-          { timeout: 30_000 },
-        );
-      }
-    },
-  });
-});
+// Persona scenarios — auth-provider exception.
+//
+// web-app-keycloak IS the OIDC / OAuth2 / LDAP-federation auth provider
+// itself. The generic persona-flow runners assume a downstream app
+// behind a Keycloak chain; for keycloak that journey is circular (the
+// "app" behind keycloak IS keycloak). The persona-equivalent coverage
+// for this role lives in the bespoke role-specific tests above:
+//
+//   - "keycloak enforces Content-Security-Policy and exposes canonical
+//     domain from applications lookup"
+//                              → guest persona equivalent.
+//   - "master-realm super administrator logs into Keycloak admin
+//     console and logs out"   → administrator persona equivalent.
+//   - "normal-realm administrator logs in through account interface
+//     and logs out"            → administrator persona via account UI.
+//   - "normal-realm biber logs in through account interface and logs
+//     out"                     → biber persona via account UI.
+//
+// No generic persona scenarios are emitted; the auth-provider role is
+// part of the auth-less / circular-dependency persona-collapse
+// exception.

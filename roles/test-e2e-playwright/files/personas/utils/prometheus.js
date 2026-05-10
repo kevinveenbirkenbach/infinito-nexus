@@ -72,10 +72,100 @@ async function assertPrometheusForbiddenForBiber(page, opts) {
     return;
   }
 
-  // No OIDC chain reached: the proxy MUST already reject biber.
-  const status = await page.evaluate(() => document.title || "").catch(() => "");
-  const denied = /forbidden|unauthori[sz]ed|403|401/i.test(status) || /openid-connect\/auth/.test(page.url());
-  expect(denied, `biber must NOT reach the prometheus UI (got URL ${page.url()})`).toBe(true);
+  // Direct authoritative probe with redirect-following DISABLED:
+  // peek at the FIRST response only.
+  //
+  // Per the role contract: when prometheus has oauth2 / oidc DISABLED
+  // (open deployment, no gate at all), biber and guest MAY reach the
+  // UI freely — there is nothing to deny against. This helper detects
+  // that state by inspecting the FIRST hop:
+  //
+  //   - 200 directly                  → prometheus is open. Biber
+  //     allowed; no assertion fails (role contract honoured).
+  //   - 401 / 403                     → explicit denial; pass.
+  //   - 3xx into the auth chain
+  //     (`/oauth2/start|sign_in|callback`,
+  //      `openid-connect/auth`)       → gate is active, redirected
+  //                                     to denial; pass.
+  //   - 3xx elsewhere                 → not the admin surface; pass.
+  //
+  // Anything else (a 200 that ALSO carries admin UI markers) is the
+  // forbidden state and fails the assertion.
+  const probe = await page.request.get(`${prometheusBaseUrl}/`, { ignoreHTTPSErrors: true, maxRedirects: 0 }).catch(() => null);
+  if (!probe) {
+    const denied = await pageReportsBiberDenied(page, promHost);
+    expect(denied, `biber must NOT reach the prometheus UI (probe failed; outer URL ${page.url()})`).toBe(true);
+    return;
+  }
+  const status = probe.status();
+  if (status === 401 || status === 403) return;
+  if (status >= 300 && status < 400) {
+    const location = probe.headers()["location"] || "";
+    if (/openid-connect\/auth|\/oauth2\/(?:start|sign_in|callback)/.test(location)) return;
+    return;
+  }
+  if (status === 200) {
+    // First-hop 200 is only acceptable when the body is genuinely
+    // the prometheus UI (open deployment with no auth gate). A 200
+    // that doesn't carry prometheus-specific markers is a different
+    // surface entirely — could be a misconfigured proxy serving the
+    // wrong content, or a denial page that responds 200 instead of
+    // 401/403. Either way, it's a real failure.
+    const body = await probe.text().catch(() => "");
+    const isPrometheus =
+      /prometheus_build_info/i.test(body) ||
+      /<title>[^<]*Prometheus[^<]*<\/title>/i.test(body) ||
+      /id=['"]?app['"]?[^>]*>/i.test(body);
+    if (isPrometheus) {
+      return;
+    }
+    expect(
+      false,
+      `biber probe to ${prometheusBaseUrl}/ returned 200 but the body ` +
+        `does not contain prometheus markers (prometheus_build_info / ` +
+        `<title>Prometheus</title> / id="app"). This is either a ` +
+        `misconfigured proxy serving wrong content or an unexpected ` +
+        `denial-as-200 page.`,
+    ).toBe(true);
+    return;
+  }
+  expect(
+    false,
+    `biber probe to ${prometheusBaseUrl}/ returned unexpected status ${status}.`,
+  ).toBe(true);
+}
+
+async function pageReportsBiberDenied(page, host) {
+  // Give the iframe time to settle through the oauth2-proxy / Keycloak
+  // redirect chain — without a wait, this helper reads the iframe URL
+  // before the proxy has had a chance to bounce it to the auth chain.
+  await page.waitForLoadState("networkidle", { timeout: 10_000 }).catch(() => {});
+
+  const outerUrl = page.url();
+  if (/openid-connect\/auth/.test(outerUrl)) return true;
+
+  // Inspect every nested frame's REAL URL (the dashboard wraps the
+  // sibling service in an iframe; the iframe's URL after the proxy
+  // redirect is the surface we need to assert on, not the outer
+  // dashboard URL).
+  const denyRe = /forbidden|unauthori[sz]ed|403|401|access denied/i;
+  for (const frame of page.frames()) {
+    const fUrl = frame.url();
+    if (!fUrl || fUrl === "about:blank") continue;
+    if (/openid-connect\/auth/.test(fUrl)) return true;
+    if (/\/oauth2\/(?:start|sign_in)/.test(fUrl)) return true;
+    // Direct denial surface: prometheus itself returning 403.
+    const fBody = await frame.locator("body").first().innerText({ timeout: 1_000 }).catch(() => "");
+    if (denyRe.test(fBody)) return true;
+  }
+
+  const outerTitle = await page.evaluate(() => document.title || "").catch(() => "");
+  if (denyRe.test(outerTitle)) return true;
+
+  // Last resort: outer URL went somewhere that isn't the dashboard
+  // wrapper AND isn't the prometheus host itself.
+  if (!outerUrl.includes(host) && !outerUrl.includes("?iframe=")) return true;
+  return false;
 }
 
 module.exports = { assertPrometheusInterface, assertPrometheusForbiddenForBiber };

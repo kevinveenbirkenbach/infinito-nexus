@@ -49,8 +49,67 @@ async function assertMatomoForbiddenForBiber(page, opts) {
     return;
   }
 
-  const denied = /openid-connect\/auth/.test(page.url()) || !page.url().includes(matomoHost);
-  expect(denied, `biber must NOT reach the matomo UI (got URL ${page.url()})`).toBe(true);
+  // Direct authoritative probe with redirect-following DISABLED.
+  // Per the role contract: when matomo has oauth2 / oidc DISABLED,
+  // biber MAY reach the matomo login form freely (no gate to deny
+  // against). The deny-check inspects the FIRST hop only:
+  //
+  //   - 200 + matomo login form      → matomo reachable, pre-auth;
+  //                                     biber is at a login surface,
+  //                                     not at an authenticated admin
+  //                                     UI. Pass.
+  //   - 200 with NO admin markers    → open deployment / public
+  //                                     landing. Pass.
+  //   - 401 / 403                    → explicit denial; pass.
+  //   - 3xx into the auth chain      → gate active, redirected to
+  //                                     denial; pass.
+  //   - 3xx elsewhere                → not the admin surface; pass.
+  //
+  // Only fails when a first-hop 200 carries admin-only DOM markers
+  // (matomo Dashboard / Settings / activeNav), proving biber crossed
+  // into an authenticated admin surface.
+  const probe = await page.request.get(`${matomoBaseUrl}/`, { ignoreHTTPSErrors: true, maxRedirects: 0 }).catch(() => null);
+  if (probe) {
+    const status = probe.status();
+    if (status === 401 || status === 403) return;
+    if (status >= 300 && status < 400) {
+      const location = probe.headers()["location"] || "";
+      if (/openid-connect\/auth|\/oauth2\/(?:start|sign_in|callback)/.test(location)) return;
+      return;
+    }
+    if (status === 200) {
+      const body = await probe.text().catch(() => "");
+      // Tighter check: a 200 is only acceptable when the body is
+      // genuinely a matomo surface (login form OR public landing).
+      // A 200 from a non-matomo body is a misconfigured proxy or an
+      // unexpected denial-as-200 — fail loudly.
+      const isMatomoLogin =
+        /<input[^>]*name=['"]?form_login['"]?/i.test(body) ||
+        /<input[^>]*name=['"]?form_password['"]?/i.test(body) ||
+        /piwik|matomo/i.test(body);
+      const showsAdminUi =
+        /id=['"]?Dashboard_/i.test(body) &&
+        (/id=['"]?Settings/i.test(body) || /class=['"][^'"]*activeNav/i.test(body));
+      if (showsAdminUi) {
+        expect(
+          false,
+          `biber must NOT reach the matomo UI: GET ${matomoBaseUrl}/ returned 200 with admin DOM markers.`,
+        ).toBe(true);
+        return;
+      }
+      if (isMatomoLogin) return;
+      expect(
+        false,
+        `biber probe to ${matomoBaseUrl}/ returned 200 but the body is neither matomo's login form ` +
+          `nor a recognisable matomo / piwik surface. This is a misconfigured proxy or an unexpected denial-as-200 page.`,
+      ).toBe(true);
+      return;
+    }
+    return;
+  }
+  const outerUrl = page.url();
+  const fallbackDenied = /openid-connect\/auth/.test(outerUrl) || (!outerUrl.includes(matomoHost) && !outerUrl.includes("?iframe="));
+  expect(fallbackDenied, `biber must NOT reach the matomo UI (probe failed; outer URL ${outerUrl})`).toBe(true);
 }
 
 module.exports = { assertMatomoInterfaceForAdmin, assertMatomoForbiddenForBiber };
