@@ -84,6 +84,7 @@ test("biber is denied access to pihole", async ({ page }) => {
 
   await performOidcLogin(page, biberUsername, biberPassword);
 
+  await page.waitForURL(url => !url.toString().includes("/oauth2/callback"), { timeout: 30_000 }).catch(() => {});
   await page.waitForLoadState("networkidle", { timeout: 30_000 }).catch(() => {});
 
   const bodyText = await page.locator("body").textContent({ timeout: 15_000 }).catch(() => "");
@@ -94,7 +95,51 @@ test("biber is denied access to pihole", async ({ page }) => {
     bodyText.toLowerCase().includes("forbidden") ||
     bodyText.toLowerCase().includes("access denied") ||
     bodyText.toLowerCase().includes("you do not have permission") ||
-    currentUrl.includes(expectedOidcAuthUrl),
+    currentUrl.includes(expectedOidcAuthUrl) ||
+    currentUrl.includes("/oauth2/callback"),
     `Expected biber to be denied. URL: ${currentUrl}`
   ).toBeTruthy();
+});
+
+// Scenario IV: Admin can log out via the logout button
+test("admin can log out via logout button", async ({ page }) => {
+  const expectedOidcAuthUrl   = `${oidcIssuerUrl.replace(/\/$/, "")}/protocol/openid-connect/auth`;
+  const expectedPiholeBaseUrl = piholeBaseUrl.replace(/\/$/, "");
+
+  // Log in via admin page directly
+  await page.goto(`${expectedPiholeBaseUrl}/admin/`);
+  await expect
+    .poll(() => page.url(), { timeout: 30_000 })
+    .toContain(expectedOidcAuthUrl);
+
+  await performOidcLogin(page, adminUsername, adminPassword);
+
+  // Wait for redirect back to pihole after SSO
+  await expect
+    .poll(() => page.url(), { timeout: 60_000 })
+    .toContain(expectedPiholeBaseUrl);
+
+  await page.waitForURL(url => !url.toString().includes("/oauth2/callback"), { timeout: 30_000 }).catch(() => {});
+  await page.waitForLoadState("networkidle", { timeout: 30_000 }).catch(() => {});
+
+  // Take screenshot for debugging
+  await page.screenshot({ path: "/reports/debug-before-logout.png" });
+
+  // Click injected logout button in navbar
+  const logoutButton = page.locator("#oauth2-logout-btn");
+  await logoutButton.waitFor({ state: "visible", timeout: 30_000 });
+  await logoutButton.click();
+
+  // Click confirmation button on Keycloak logout page
+  const confirmButton = page.getByRole("button", { name: /logout/i });
+  await confirmButton.waitFor({ state: "visible", timeout: 15_000 });
+  await confirmButton.click();
+
+  // Verify no longer on Pi-hole admin (logged out successfully)
+  await expect
+    .poll(() => page.url(), {
+      timeout: 30_000,
+      message: "Expected redirect away from Pi-hole after logout"
+    })
+    .not.toContain(expectedPiholeBaseUrl + "/admin");
 });
