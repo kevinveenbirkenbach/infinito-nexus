@@ -38,8 +38,12 @@ jobs:
         # Without them ansible-lint reports a fatal load-failure on
         # `tasks/groups/desk-roles.yml`. Generate via the same script the
         # local `make setup` target uses; PyYAML is already on the runner
-        # because we install it above.
-        run: PYTHON=python3 bash scripts/setup.sh
+        # because we install it above. PYTHONPATH=. is set explicitly so
+        # `cli/build/include/__main__.py` can import the repo-local
+        # `utils.*` modules — locally the Makefile env layer
+        # (scripts/meta/env/python.sh) does this, but here we invoke the
+        # script directly without going through `make`.
+        run: PYTHON=python3 PYTHONPATH=. bash scripts/setup.sh
 
       - name: Show Docker version
         run: docker version
