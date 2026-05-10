@@ -29,7 +29,7 @@ The acceptance criteria below are the mechanical translation of this contract.
 | --- | --- | --- |
 | 1 | Every entry in `meta/services.yml` with an `enabled:` key MUST surface as `<NAME>_SERVICE_ENABLED=` in `templates/playwright.env.j2`, OR carry `# nocheck: playwright-service-flag` above the key with a one-line rationale. **Globally exempt: `dashboard` and `prometheus`.** Their per-consumer reachability is owned by the provider's own spec via `*_TARGET_ROLES_JSON` (see Rule 13); `web-app-*` consumers still declare the service in `meta/services.yml` for inventory completeness but do NOT render the `<NAME>_SERVICE_ENABLED=` flag. **For `dashboard` only:** a non-`web-app-*` role MUST NOT declare the service with a truthy `enabled`/`shared` flag (literal `true` or the `'<role>' in group_names` Jinja form); the dashboard tile grid is reserved for end-user-visible web-app surfaces and infrastructural roles never contribute a tile. Non-`web-app-*` roles that need a static no-tile declaration MAY ship `dashboard: { enabled: false, shared: false }`, otherwise the entry MUST be dropped. | [test_playwright_env_services_match.py](../../tests/integration/roles/test_playwright_env_services_match.py) (Test A); for the dashboard-scope sub-rule: [test_dashboard_integration_scope.py](../../tests/integration/roles/test_dashboard_integration_scope.py) |
 | 2 | Every `<NAME>_SERVICE_ENABLED=` line in the env template MUST be consumed by ≥1 `requireService` / `skipUnlessServiceEnabled` / `isServiceEnabled` / `isServiceDisabledReason` call in `files/playwright.spec.js`, OR carry `# nocheck: playwright-service-gate` on the env line. | [test_playwright_spec_env_gates.py](../../tests/integration/roles/test_playwright_spec_env_gates.py) (Test B) |
-| 3 | Every `web-app-*` role's `files/playwright.spec.js` MUST contain the three persona scenarios defined in [playwright.specs.js.md](../contributing/artefact/files/role/playwright.specs.js.md), named `guest: <flow>`, `biber: <flow>`, and `administrator: <flow>` respectively. Each persona enters the role's own canonical surface directly (no dashboard tile click); the auth chain runs through OAuth2-Proxy + Keycloak regardless of how the user arrived. The guest scenario MUST assert the unauthenticated visitor never reaches the role's authenticated surface. **Cross-service probes (biber denied at prometheus / matomo, administrator accepted at prometheus / matomo, dashboard tile reachability) are NOT part of the per-role persona; they are owned by the provider's own spec per Rule 13.** `web-svc-*` roles and `web-app-*` roles whose upstream has no auth surface (federation-only or static-only, see the auth-less list under [Iteration order](#iteration-order)) MAY collapse all three into a single baseline scenario. | [test_naming.py](../../tests/lint/ansible/roles/web-app/playwright/persona/test_naming.py) enforces the `<persona>: <flow>` shape across all `web-app-*` roles; [test_required_envs.py](../../tests/lint/ansible/roles/web-app/playwright/persona/test_required_envs.py) enforces the auth-less collapse exception consistency. The persona-naming lint is the role-closure gate for the matrix below. |
+| 3 | Every `web-app-*` role's `files/playwright.spec.js` MUST contain the three persona scenarios defined in [playwright.specs.js.md](../contributing/artefact/files/role/playwright.specs.js.md), named `guest: <flow>`, `biber: <flow>`, and `administrator: <flow>` respectively. Each persona enters the role's own canonical surface directly (no dashboard tile click); the auth chain runs through OAuth2-Proxy + Keycloak regardless of how the user arrived. The guest scenario MUST assert the unauthenticated visitor never reaches the role's authenticated surface. **Cross-service probes (biber denied at prometheus / matomo, administrator accepted at prometheus / matomo, dashboard tile reachability) are NOT part of the per-role persona; they are owned by the provider's own spec per Rule 13.** `web-svc-*` roles and `web-app-*` roles whose upstream has no auth surface (federation-only or static-only, see the auth-less list under [Iteration order](#iteration-order)) MAY collapse all three into a single baseline scenario. | [test_naming.py](../../tests/lint/ansible/roles/web-app/playwright/persona/test_naming.py) enforces the `<persona>: <flow>` shape across all `web-app-*` roles; [test_required_envs.py](../../tests/lint/ansible/roles/web-app/playwright/persona/test_required_envs.py) enforces the auth-less collapse exception consistency. The persona-naming lint is the role-closure gate for *spec shape*; the full role-closure definition (passing deploy, Test A, Test B, strict-mode lint) lives in [Closure vocabulary](#closure-vocabulary). |
 | 4 | Specs MUST NOT read `<NAME>_SERVICE_ENABLED` directly via `process.env`. All reads go through the helper. | grep verification (see below) |
 | 5 | A scenario that depends on multiple services MUST gate each via a separate `skipUnlessServiceEnabled('<svc>')` call. No bundled multi-service gates; bundling defeats the variant matrix (same rule as [018](018-playwright-ldap-coverage.md)). | review |
 | 6 | A new env key without a spec consumer is a regression. | [test_env_keys_used.py](../../tests/lint/ansible/roles/web-app/playwright/test_env_keys_used.py) |
@@ -47,26 +47,9 @@ The per-service assertion catalogue (what each gate's body MUST exercise: `dashb
 The persona flow is the surrounding journey; the catalogue tells the spec what to assert at each gate inside that journey.
 This requirement's matrix below uses the catalogue's vocabulary but does not duplicate it; refer to that page for the per-service contract.
 
-## Self-gate `# nocheck` list
-
-The role IS the provider; the service entry MUST be marked
-`# nocheck: playwright-service-flag`:
-
-- [ ] `web-app-keycloak` → `oidc`
-- [ ] `web-app-mailu` → `email`, `mailu`
-- [ ] `web-app-matomo` → `matomo`
-- [ ] `web-app-dashboard` → `dashboard`
-- [ ] `web-app-discourse` → `discourse`
-- [ ] `web-app-pixelfed` → `pixelfed`
-- [ ] `web-app-friendica` → `friendica`
-- [ ] `web-app-prometheus` → `prometheus`
-- [ ] `web-svc-cdn` → `cdn`
-- [ ] `web-svc-libretranslate` → `libretranslate`
-- [ ] `web-svc-simpleicons` → `simpleicons`
-
 ## Closure paths per matrix row
 
-Each missing flag in the matrix is closed by exactly one of:
+When a future iteration surfaces fresh drift (a new `meta/services.yml` entry without a matching `<NAME>_SERVICE_ENABLED=` line, or a new matrix row that fails Test A), each missing flag is closed by exactly one of:
 
 1. **Render flag + add gated scenario** *(default)*. Render `<NAME>_SERVICE_ENABLED={{ … }}` in `templates/playwright.env.j2` (literal `"true"` / `"false"` per [006](006-playwright-service-gated-tests.md)). Add a `skipUnlessServiceEnabled('<svc>')`-gated step inside the appropriate persona scenario in `files/playwright.spec.js` per [playwright.specs.js.md](../contributing/artefact/files/role/playwright.specs.js.md). Mention the service in the role's README so reduced-deploy skip behaviour is predictable.
 2. **Drop the entry**. Remove the service from `meta/services.yml` if no longer consumed. Verify [test_services_explicit.py](../../tests/integration/roles/meta/services/run_after/test_services_explicit.py) stays green.
@@ -76,97 +59,96 @@ Each missing flag in the matrix is closed by exactly one of:
 For these roles, closure runs exclusively through path 2 (drop the entry) OR through a static `dashboard: { enabled: false, shared: false }` declaration when the inventory-side registry visibility is required.
 Persona scenarios are already covered by the auth-less collapse, so removing the `dashboard:` block does NOT shrink coverage.
 
-Closure of any row also requires that the role's spec already contains the two persona scenarios (Rule 3); a row's missing flag MAY be added inside a new persona scenario, but the row is NOT closed until both persona scenarios exist.
+Closure of any row also requires that the role's spec already contains the three persona scenarios (Rule 3); a row's missing flag MAY be added inside a new persona scenario, but the row is NOT closed until all three persona scenarios exist.
 
-## Per-role drift matrix
+## Per-role iteration matrix
 
-Snapshot at requirement-open. Test B drift is currently empty; the column is omitted until a new offender appears.
-Each non-empty row in the "fehlende Flags" column is the work for that role.
-Closing a role's row also requires the role's spec to ship the two persona scenarios (Rule 3); a role with `hat spec ✅` and a non-empty drift list MUST add the missing gates **inside** those persona bodies, not as ungated standalone tests.
+The matrix is sorted by `total` descending so the highest-coupling roles surface first; the agent walks the table top-to-bottom and treats `total` as the priority signal.
+`total` is the sum of direct + transitive embeds and consumers per [`infinito meta roles applications complexity --sort total --order desc`](../../cli/meta/roles/applications/complexity/__main__.py).
+Test A and Test B are currently green tree-wide, so no per-row drift list is carried in this table; the `notes` column captures role-specific contract context (auth-less collapse, persona blocked-flag opt-outs, bespoke admin-only test bodies).
 
-Legend: ✅ present, ❌ missing, — n/a (no env / no spec).
-`*(self-gate)*` = MUST be closed via `# nocheck: playwright-service-flag` (path 3 above).
+Legend: ✅ present, ❌ missing.
 
-| Rolle | hat env | hat spec | fehlende `<NAME>_SERVICE_ENABLED=` Flags (Test A) |
-| --- | --- | --- | --- |
-| ~~`web-app-akaunting`~~ | ✅ | ✅ | ~~`css`, `dashboard`, `email`, `logout`, `mariadb`, `matomo`, `oauth2`, `prometheus`, `redis`~~ — role-closed (Playwright green; biber and administrator personas explicit-skipped via `PERSONA_BIBER_BLOCKED=true` and `PERSONA_ADMINISTRATOR_BLOCKED=true` in env, rationale: OIDC auto-provisioning not wired, tracked in role TODO.md) |
-| ~~`web-app-baserow`~~ | ✅ | ✅ | ~~`css`, `dashboard`, `email`, `javascript`, `logout`, `matomo`, `oauth2`, `postgres`, `prometheus`, `redis`~~ — role-closed |
-| `web-app-bigbluebutton` | ✅ | ✅ | `collabora`, `coturn`, `css`, `dashboard`, `email`, `greenlight`, `ldap`, `logout`, `matomo`, `oidc`, `postgres`, `prometheus` |
-| ~~`web-app-bluesky`~~ | ✅ | ✅ | ~~`css`, `dashboard`, `email`, `logout`, `matomo`, `oauth2`, `prometheus`, `view`, `web`~~ — role-closed (Playwright green; biber+admin personas explicit-skipped via PERSONA_<X>_BLOCKED, social-app mobile SPA has logout in profile menu unreachable to auth-surface check; bespoke OIDC + LDAP variant tests verify both personas authenticate via the broker) |
-| `web-app-bookwyrm` | ✅ | ✅ | `css`, `dashboard`, `email`, `logout`, `matomo`, `oauth2`, `postgres`, `prometheus`, `redis`, `worker` |
-| `web-app-bridgy-fed` | ✅ | ✅ | `css`, `dashboard`, `logout`, `matomo`, `oauth2`, `oidc`, `prometheus` |
-| `web-app-chess` | ❌ | ❌ | — |
-| `web-app-confluence` | ❌ | ❌ | — |
-| `web-app-dashboard` | ✅ | ✅ | `asset`, `cdn`, `css`, `dashboard` *(self-gate)*, `javascript`, `logout`, `matomo`, `oidc`, `prometheus`, `simpleicons` |
-| `web-app-decidim` | ✅ | ✅ | `css`, `dashboard`, `email`, `logout`, `matomo`, `oauth2`, `oidc`, `postgres`, `prometheus`, `redis` |
-| `web-app-discourse` | ✅ | ✅ | `asset`, `css`, `dashboard`, `discourse` *(self-gate)*, `email`, `ldap`, `logout`, `matomo`, `oidc`, `postgres`, `prometheus`, `redis` |
-| `web-app-espocrm` | ❌ | ❌ | — |
-| `web-app-fediwall` | ✅ | ✅ | `css`, `dashboard`, `email`, `logout`, `matomo`, `oauth2`, `oidc`, `prometheus` |
-| `web-app-fider` | ✅ | ✅ | `css`, `dashboard`, `email`, `javascript`, `logout`, `matomo`, `oauth2`, `oidc`, `postgres`, `prometheus`, `redis` |
-| `web-app-flowise` | ✅ | ✅ | `css`, `dashboard`, `email`, `javascript`, `logout`, `matomo`, `oauth2`, `ollama`, `prometheus`, `redis` |
-| `web-app-friendica` | ✅ | ✅ | `css`, `dashboard`, `email`, `friendica` *(self-gate)*, `ldap`, `logout`, `mariadb`, `matomo`, `oauth2`, `oidc`, `prometheus` |
-| `web-app-funkwhale` | ❌ | ❌ | — |
-| `web-app-fusiondirectory` | ✅ | ✅ | `css`, `dashboard`, `email`, `logout`, `matomo`, `oauth2`, `prometheus` |
-| `web-app-gitea` | ✅ | ✅ | `css`, `dashboard`, `email`, `ldap`, `logout`, `mariadb`, `matomo`, `oauth2`, `oidc`, `prometheus`, `redis` |
-| `web-app-gitlab` | ❌ | ❌ | — |
-| `web-app-hugo` | ✅ | ✅ | `css`, `dashboard`, `email`, `logout`, `matomo`, `oauth2`, `oidc`, `prometheus` |
-| `web-app-jenkins` | ✅ | ✅ | `css`, `dashboard`, `logout`, `matomo`, `prometheus` |
-| `web-app-jira` | ❌ | ❌ | — |
-| `web-app-joomla` | ✅ | ✅ | `css`, `dashboard`, `email`, `logout`, `mariadb`, `matomo`, `prometheus` |
-| ~~`web-app-keycloak`~~ | ✅ | ✅ | ~~`css`, `dashboard`, `email`, `keycloak` *(self-gate)*, `ldap`, `logout`, `matomo`, `postgres`, `prometheus`, `recaptcha`~~ — role-closed (auth-provider exception: generic persona scenarios are exempt; bespoke "master-realm super administrator", "normal-realm administrator", "normal-realm biber" tests cover the persona contract via the realm account UI) |
-| `web-app-kix` | ✅ | ✅ | `css`, `dashboard`, `email`, `ldap`, `logout`, `matomo`, `oauth2`, `prometheus`, `redis` |
-| `web-app-lam` | ❌ | ❌ | — |
-| `web-app-listmonk` | ❌ | ❌ | — |
-| `web-app-littlejs` | ❌ | ❌ | — |
-| `web-app-magento` | ❌ | ❌ | — |
-| `web-app-mailu` | ✅ | ✅ | `admin`, `antispam`, `antivirus`, `css`, `dashboard`, `fetchmail`, `front`, `imap`, `logout`, `mailu` *(self-gate)*, `mariadb`, `matomo`, `oidc`, `oletools`, `prometheus`, `redis`, `resolver`, `smtp`, `webdav`, `webmail` |
-| `web-app-mastodon` | ❌ | ❌ | — |
-| ~~`web-app-matomo`~~ | ✅ | ✅ | ~~`css`, `dashboard`, `logout`, `mariadb`, `matomo` *(self-gate)*, `oauth2`, `oidc`, `prometheus`, `redis`~~ — role-closed (Playwright green; admin-only role: personas skip via `safeSkipUnlessEnabled("dashboard")` because `services.dashboard.enabled: false` in services.yml — bespoke "matomo administrator" test covers the admin journey) |
-| `web-app-matrix` | ✅ | ✅ | `css`, `dashboard`, `email`, `logout`, `matomo`, `oidc`, `postgres`, `prometheus` |
-| `web-app-mattermost` | ✅ | ✅ | `css`, `dashboard`, `email`, `javascript`, `ldap`, `logout`, `matomo`, `oauth2`, `oidc`, `postgres`, `prometheus`, `redis` |
-| `web-app-mediawiki` | ❌ | ❌ | — |
-| `web-app-mig` | ✅ | ✅ | `css`, `dashboard`, `logout`, `matomo`, `oauth2`, `oidc`, `prometheus`, `redis` |
-| `web-app-mini-qr` | ❌ | ❌ | — |
-| `web-app-minio` | ✅ | ✅ | `css`, `dashboard`, `javascript`, `logout`, `matomo`, `ollama`, `prometheus`, `redis` |
-| `web-app-mobilizon` | ❌ | ❌ | — |
-| `web-app-moodle` | ✅ | ✅ | `css`, `dashboard`, `email`, `ldap`, `logout`, `mariadb`, `matomo`, `oidc`, `prometheus` |
-| `web-app-navigator` | ❌ | ❌ | — |
-| `web-app-nextcloud` | ✅ | ✅ | `collabora`, `coturn`, `css`, `dashboard`, `email`, `hcaptcha`, `ldap`, `logout`, `mariadb`, `matomo`, `oidc`, `onlyoffice`, `prometheus`, `redis`, `talk` |
-| `web-app-oauth2-proxy` | ❌ | ❌ | — |
-| `web-app-odoo` | ✅ | ✅ | `css`, `dashboard`, `email`, `javascript`, `ldap`, `logout`, `matomo`, `oidc`, `postgres`, `prometheus`, `redis` |
-| `web-app-opencloud` | ✅ | ✅ | `css`, `dashboard`, `email`, `ldap`, `logout`, `matomo`, `oidc`, `prometheus` |
-| `web-app-openproject` | ❌ | ❌ | — |
-| `web-app-opentalk` | ✅ | ✅ | `coturn`, `css`, `dashboard`, `email`, `ldap`, `logout`, `matomo`, `oidc`, `postgres`, `prometheus`, `redis` |
-| `web-app-openwebui` | ✅ | ✅ | `css`, `dashboard`, `email`, `javascript`, `ldap`, `logout`, `matomo`, `oidc`, `ollama`, `prometheus`, `redis` |
-| `web-app-peertube` | ✅ | ✅ | `css`, `dashboard`, `email`, `logout`, `matomo`, `oidc`, `postgres`, `prometheus`, `redis` |
-| `web-app-pgadmin` | ❌ | ❌ | — |
-| `web-app-phpldapadmin` | ❌ | ❌ | — |
-| `web-app-phpmyadmin` | ❌ | ❌ | — |
-| `web-app-pixelfed` | ✅ | ✅ | `css`, `dashboard`, `email`, `logout`, `mariadb`, `matomo`, `oidc`, `pixelfed` *(self-gate)*, `prometheus`, `redis` |
-| `web-app-postmarks` | ✅ | ✅ | `css`, `dashboard`, `email`, `logout`, `matomo`, `oauth2`, `prometheus` |
-| `web-app-pretix` | ❌ | ❌ | — |
-| ~~`web-app-prometheus`~~ | ✅ | ✅ | ~~`css`, `dashboard`, `email`, `logout`, `matomo`, `oauth2`, `oidc`, `prometheus` *(self-gate)*~~ — role-closed (Playwright green; admin-only role: personas skip via `safeSkipUnlessEnabled("dashboard")` because `services.dashboard.enabled: false` — bespoke `metricz`, `dashboard-to-prometheus admin SSO`, and `biber-denied-access` tests cover the contract) |
-| `web-app-roulette-wheel` | ❌ | ❌ | — |
-| `web-app-shopware` | ❌ | ❌ | — |
-| `web-app-snipe-it` | ❌ | ❌ | — |
-| `web-app-socialhome` | ❌ | ❌ | — |
-| `web-app-sphinx` | ✅ | ✅ | `css`, `dashboard`, `email`, `logout`, `matomo`, `oauth2`, `oidc`, `prometheus` |
-| `web-app-suitecrm` | ❌ | ❌ | — |
-| `web-app-taiga` | ✅ | ✅ | `css`, `dashboard`, `email`, `javascript`, `ldap`, `logout`, `matomo`, `oauth2`, `oidc`, `postgres`, `prometheus` |
-| `web-app-wordpress` | ✅ | ✅ | `css`, `dashboard`, `logout`, `mariadb`, `matomo`, `prometheus` |
-| `web-app-xwiki` | ❌ | ❌ | — |
-| `web-app-yourls` | ✅ | ✅ | `css`, `dashboard`, `email`, `logout`, `mariadb`, `matomo`, `oauth2`, `prometheus` |
-| `web-svc-cdn` | ✅ | ✅ | `cdn` *(self-gate)*, `css`, `javascript`, `matomo`, `prometheus` |
-| `web-svc-libretranslate` | ✅ | ✅ | `css`, `javascript`, `libretranslate` *(self-gate)*, `logout`, `matomo`, `oauth2`, `prometheus`, `recaptcha`, `redis` |
-| `web-svc-simpleicons` | ✅ | ✅ | `css`, `matomo`, `oauth2`, `prometheus`, `recaptcha`, `redis`, `simpleicons` *(self-gate)* |
-| `web-svc-xmpp` | ✅ | ✅ | `logout`, `oidc`, `prometheus` |
+| Role | total | has env | has spec | notes |
+| --- | ---: | --- | --- | --- |
+| `web-app-prometheus` | 173 | ✅ | ✅ | admin-only role: personas skip via `safeSkipUnlessEnabled("dashboard")` because `services.dashboard.enabled: false`; bespoke `metricz`, `dashboard-to-prometheus admin SSO`, and `biber-denied-access` tests cover the contract |
+| `web-app-matomo` | 168 | ✅ | ✅ | admin-only role: personas skip via `safeSkipUnlessEnabled("dashboard")` because `services.dashboard.enabled: false`; bespoke "matomo administrator" test covers the admin journey |
+| `web-app-dashboard` | 162 | ✅ | ✅ |  |
+| `web-svc-cdn` | 144 | ✅ | ✅ |  |
+| `web-app-mailu` | 139 | ✅ | ✅ |  |
+| `web-app-keycloak` | 130 | ✅ | ✅ | auth-provider exception: generic persona scenarios are exempt; bespoke "master-realm super administrator", "normal-realm administrator", "normal-realm biber" tests cover the persona contract via the realm account UI |
+| `web-svc-simpleicons` | 92 | ✅ | ✅ |  |
+| `web-app-nextcloud` | 27 | ✅ | ✅ |  |
+| `web-app-discourse` | 24 | ✅ | ✅ |  |
+| `web-app-bigbluebutton` | 24 | ✅ | ✅ |  |
+| `web-app-opentalk` | 23 | ✅ | ✅ |  |
+| `web-app-mastodon` | 23 | ❌ | ✅ |  |
+| `web-app-friendica` | 23 | ✅ | ✅ |  |
+| `web-app-openwebui` | 22 | ✅ | ✅ |  |
+| `web-app-minio` | 22 | ✅ | ✅ |  |
+| `web-app-listmonk` | 22 | ❌ | ✅ |  |
+| `web-app-gitea` | 22 | ✅ | ✅ |  |
+| `web-app-flowise` | 22 | ✅ | ✅ |  |
+| `web-app-bookwyrm` | 22 | ✅ | ✅ |  |
+| `web-app-xwiki` | 21 | ❌ | ✅ |  |
+| `web-app-wordpress` | 21 | ✅ | ✅ |  |
+| `web-app-taiga` | 21 | ✅ | ✅ |  |
+| `web-app-shopware` | 21 | ❌ | ✅ |  |
+| `web-app-pretix` | 21 | ❌ | ✅ |  |
+| `web-app-odoo` | 21 | ✅ | ✅ |  |
+| `web-app-moodle` | 21 | ✅ | ✅ |  |
+| `web-app-mobilizon` | 21 | ❌ | ✅ |  |
+| `web-app-mattermost` | 21 | ✅ | ✅ |  |
+| `web-app-matrix` | 21 | ✅ | ✅ |  |
+| `web-app-joomla` | 21 | ✅ | ✅ |  |
+| `web-app-gitlab` | 21 | ❌ | ✅ |  |
+| `web-app-fider` | 21 | ✅ | ✅ |  |
+| `web-app-fediwall` | 21 | ✅ | ✅ |  |
+| `web-app-espocrm` | 21 | ❌ | ✅ |  |
+| `web-app-decidim` | 21 | ✅ | ✅ |  |
+| `web-app-baserow` | 21 | ✅ | ✅ |  |
+| `web-app-akaunting` | 21 | ✅ | ✅ | biber and administrator personas explicit-skipped via `PERSONA_BIBER_BLOCKED=true` and `PERSONA_ADMINISTRATOR_BLOCKED=true` in env; OIDC auto-provisioning not wired, see role TODO.md |
+| `web-app-suitecrm` | 20 | ❌ | ✅ |  |
+| `web-app-snipe-it` | 20 | ❌ | ✅ |  |
+| `web-app-pixelfed` | 20 | ✅ | ✅ |  |
+| `web-app-peertube` | 20 | ✅ | ✅ |  |
+| `web-app-openproject` | 20 | ❌ | ✅ |  |
+| `web-app-opencloud` | 20 | ✅ | ✅ |  |
+| `web-app-mediawiki` | 20 | ❌ | ✅ |  |
+| `web-app-jira` | 20 | ❌ | ✅ |  |
+| `web-app-jenkins` | 20 | ✅ | ✅ |  |
+| `web-app-fusiondirectory` | 20 | ✅ | ✅ |  |
+| `web-app-funkwhale` | 20 | ❌ | ✅ |  |
+| `web-app-confluence` | 20 | ❌ | ✅ |  |
+| `web-app-bluesky` | 20 | ✅ | ✅ | biber and administrator personas explicit-skipped via `PERSONA_BIBER_BLOCKED=true` / `PERSONA_ADMINISTRATOR_BLOCKED=true`; the social-app mobile SPA hides the logout in a profile menu unreachable to the auth-surface check; bespoke OIDC + LDAP variant tests verify both personas authenticate via the broker |
+| `web-app-yourls` | 19 | ✅ | ✅ |  |
+| `web-app-phpldapadmin` | 19 | ❌ | ✅ |  |
+| `web-app-pgadmin` | 19 | ❌ | ✅ |  |
+| `web-app-magento` | 19 | ❌ | ✅ |  |
+| `web-app-lam` | 19 | ❌ | ✅ |  |
+| `web-app-kix` | 19 | ✅ | ✅ |  |
+| `web-app-postmarks` | 18 | ✅ | ✅ |  |
+| `web-app-phpmyadmin` | 18 | ❌ | ✅ |  |
+| `web-app-chess` | 18 | ❌ | ✅ |  |
+| `web-app-sphinx` | 17 | ✅ | ✅ |  |
+| `web-app-roulette-wheel` | 17 | ❌ | ✅ |  |
+| `web-app-oauth2-proxy` | 17 | ❌ | ✅ |  |
+| `web-app-navigator` | 17 | ❌ | ✅ |  |
+| `web-app-mini-qr` | 17 | ❌ | ✅ |  |
+| `web-app-mig` | 17 | ✅ | ✅ |  |
+| `web-app-littlejs` | 17 | ❌ | ✅ |  |
+| `web-app-hugo` | 17 | ✅ | ✅ |  |
+| `web-app-bridgy-fed` | 17 | ✅ | ✅ |  |
+| `web-svc-xmpp` | 16 | ✅ | ✅ |  |
+| `web-svc-libretranslate` | 16 | ✅ | ✅ |  |
+| `web-app-socialhome` | 16 | ❌ | ✅ |  |
 
-Rows with both `❌` are roles without Playwright artefacts yet.
-When they grow a spec, the new env template MUST satisfy this requirement from day one AND the new spec MUST ship both persona scenarios per Rule 3.
+Rows with `has env ❌` and `has spec ✅` ship the auth-less collapse exception per Rule 3: the spec contains a single baseline reachability scenario and no env template is rendered because the role has no `<NAME>_SERVICE_ENABLED=` flags to gate on.
+The matrix only lists roles that already ship a Playwright spec. A role with neither artefact is out of scope until it grows one; when that happens, the new spec MUST ship the three persona scenarios per Rule 3 (or document the auth-less collapse explicitly) AND the env template MUST satisfy this requirement from day one.
 
 ## Closure procedure
 
-The agent MUST follow this procedure verbatim to close the matrix above.
+The agent MUST follow this procedure verbatim to walk every row of the matrix above through to role closure.
 
 ### Required reading
 
@@ -230,21 +212,17 @@ For each role in the [Iteration order](#iteration-order) below:
 After a role role-closes successfully, the agent MUST extract the **learnings** from that role and apply them to every later role in the iteration order **before** running the next role's deploy.
 Pattern transfer is a code-edit step, not a deploy step: each receiving role still goes through its own [Per-role flow](#per-role-flow) when its turn comes; the deploy never spans more than one role at a time.
 
-Learnings to propagate include every per-service assertion shape from the [per-service assertion catalogue](../contributing/artefact/files/role/playwright.specs.js.md#per-service-assertion-catalogue-):
+Learnings to propagate include every per-persona assertion shape from the [per-service assertion catalogue](../contributing/artefact/files/role/playwright.specs.js.md#per-service-assertion-catalogue-) that runs *inside the role under test*:
 
-- the `dashboard` tile-click flow (locate role tile via `a[href*="<canonical>"]`, click, assert canonical landing);
-- the `prometheus` interface check for the administrator (`up=1` for the role's target on `/api/v1/query?query=up`);
-- the `prometheus` deny-check for biber (admin-only surface MUST refuse the biber identity);
-- the `matomo` admin-login for the administrator (lands on the matomo admin UI from the dashboard tile);
-- the `matomo` deny-check for biber (admin-only surface MUST refuse the biber identity);
 - the CSP injection assertion (every persona; the page's `Content-Security-Policy` header MUST list every enabled injector host);
 - the `guest` denial flow (unauthenticated visitor never reaches an authenticated surface; empty-credentials submission MUST be rejected by the IdP);
 - the `oidc` Keycloak round-trip (redirect to `openid-connect/auth`, login, redirect back, authenticated assertion);
 - the `oauth2` proxy-gate flow;
 - the `logout` universal-logout assertion;
-- the `matomo` tracking snippet check;
 - the `ldap` bind path (admin AND `biber`);
-- the `email`, `discourse`, federation, and any other service-pair flow.
+- the `email`, `discourse`, federation, and any other service-pair flow that the role itself initiates.
+
+The SPOT-owned cross-service probes from Rule 13 are explicitly **out of scope** for pattern transfer — `dashboard` tile reachability, `prometheus` scrape parity (`up=1` per consumer), `matomo` tracker presence, and the per-consumer biber/administrator deny / accept checks at the prometheus and matomo admin surfaces all live in `roles/web-app-{dashboard,prometheus,matomo}/files/playwright.spec.js`, parameterised over `*_TARGET_ROLES_JSON`. Consumer specs MUST NOT carry these patterns.
 
 For every receiving role, the agent MUST adapt the propagated pattern to the role-specific selectors and credentials.
 Receiving roles whose `meta/services.yml` does NOT declare the relevant service MUST be skipped from that particular pattern transfer.
@@ -267,40 +245,14 @@ Specifically:
 
 ### Iteration order
 
-Sorted by [`infinito meta roles applications complexity`](../../cli/meta/roles/applications/complexity/__main__.py) (ascending; lowest complexity first).
-**Within a tier, the order is dependency-aware**, not alphabetical: providers go before consumers, even when the complexity score is identical, because consumers' persona scenarios authenticate against / route through the providers.
-The list snapshot is the agent's starting plan.
-
-#### Tier 12 (providers and shared services)
-
-In dependency order:
-
-1. `web-svc-asset`, `web-svc-cdn`, `web-svc-file`, `web-svc-logout`, `web-svc-simpleicons` — base providers with no shared-service dependencies (auth-less; persona scenarios do NOT apply).
-2. `web-app-keycloak` — OIDC/LDAP provider; depends only on its own postgres backend.
-3. `web-app-dashboard` — consumes Keycloak OIDC; the canonical user entry point that every later persona scenario starts from.
-4. `web-app-mailu`, `web-app-matomo`, `web-app-prometheus` — provider apps that consume Keycloak (OIDC) and the dashboard (tile + canonical landing).
-
-#### Tier 13 (single-tier consumers)
-
-Within Tier 13 the iteration order is alphabetical because every entry consumes the providers above and has no further intra-tier ordering constraint.
-
-`web-app-akaunting`, `web-app-baserow`, `web-app-bluesky`, `web-app-bookwyrm`, `web-app-bridgy-fed`, `web-app-chess`, `web-app-confluence`, `web-app-decidim`, `web-app-discourse`, `web-app-espocrm`, `web-app-fider`, `web-app-friendica`, `web-app-funkwhale`, `web-app-fusiondirectory`, `web-app-gitea`, `web-app-gitlab`, `web-app-hugo`, `web-app-jenkins`, `web-app-jira`, `web-app-joomla`, `web-app-kix`, `web-app-lam`, `web-app-listmonk`, `web-app-littlejs`, `web-app-magento`, `web-app-mastodon`, `web-app-matrix`, `web-app-mattermost`, `web-app-mediawiki`, `web-app-mig`, `web-app-mini-qr`, `web-app-mobilizon`, `web-app-moodle`, `web-app-navigator`, `web-app-oauth2-proxy`, `web-app-odoo`, `web-app-opencloud`, `web-app-openproject`, `web-app-peertube`, `web-app-pgadmin`, `web-app-phpldapadmin`, `web-app-phpmyadmin`, `web-app-pixelfed`, `web-app-postmarks`, `web-app-pretix`, `web-app-roulette-wheel`, `web-app-shopware`, `web-app-snipe-it`, `web-app-socialhome`, `web-app-sphinx`, `web-app-suitecrm`, `web-app-taiga`, `web-app-xwiki`, `web-app-yourls`, `web-svc-collabora`, `web-svc-coturn`, `web-svc-html`, `web-svc-libretranslate`, `web-svc-onlyoffice`, `web-svc-xmpp`.
-
-#### Tier 14
-
-`web-app-flowise`, `web-app-minio`, `web-app-opentalk`, `web-app-openwebui`, `web-app-wordpress`, `web-svc-legal`.
-
-#### Tier 15
-
-`web-app-bigbluebutton`, `web-app-fediwall`.
-
-#### Tier 16
-
-`web-app-nextcloud`.
+The matrix above IS the iteration plan: rows are sorted by `total` descending, so the highest-priority role is the first row and the agent walks the table top-to-bottom.
+`total` is the priority signal; ties are broken alphabetically by role name.
+A hub fix propagates to the long tail of consumers via [Pattern transfer](#pattern-transfer), which is why the highest-`total` roles run first.
+The agent MUST re-derive the table from [`infinito meta roles applications complexity --sort total --order desc`](../../cli/meta/roles/applications/complexity/__main__.py) on every resume per [Resumability](#resumability).
 
 #### Auth-less roles (persona-collapse exception)
 
-Per [Rule 3](#rules), the following roles MAY collapse the two persona scenarios into a single baseline reachability scenario because their upstream offers no auth surface (federation-only protocol, static-only output, programmatic-API-only service, internal sub-component of another role):
+Per [Rule 3](#rules), the following roles MAY collapse the three persona scenarios into a single baseline reachability scenario because their upstream offers no auth surface (federation-only protocol, static-only output, programmatic-API-only service, internal sub-component of another role):
 
 - Every `web-svc-*` role (no end-user UI by construction).
 - `web-app-bridgy-fed` (federation-only; users authenticate at their source platform, not locally).
@@ -309,18 +261,18 @@ Per [Rule 3](#rules), the following roles MAY collapse the two persona scenarios
 - `web-app-navigator`, `web-app-mig` (in-app modules of `web-app-dashboard`; no separate auth surface).
 - `web-app-oauth2-proxy` (sidecar auth proxy; never directly user-facing).
 
-Every other `web-app-*` role MUST ship both persona scenarios per Rule 3.
+Every other `web-app-*` role MUST ship all three persona scenarios per Rule 3.
 
 ### Resumability
 
 The rollout is long-running and MAY be interrupted (sandbox timeout, context exhaustion, machine restart).
-The drift matrix above IS the progress marker; the agent does NOT maintain a separate state file.
+The iteration matrix above IS the progress marker; the agent strikes a row through (`~~`web-app-foo`~~`) after the role's full-cycle deploy plus Playwright spec pass for every declared variant, and does NOT maintain a separate state file.
 
 When resuming, the agent MUST:
 
-1. Re-derive the iteration order from `infinito meta roles applications complexity` to pick up any new roles added since the snapshot.
+1. Re-derive the iteration order from `infinito meta roles applications complexity --sort total --order desc` to pick up any new roles added since the snapshot and to apply the highest-coupling-first walk per [Iteration order](#iteration-order).
 2. Re-run [test_playwright_env_services_match.py](../../tests/integration/roles/test_playwright_env_services_match.py) and [test_playwright_spec_env_gates.py](../../tests/integration/roles/test_playwright_spec_env_gates.py) to discover which roles are already role-closed (zero drift) and which are still open.
-3. Pick the lowest-tier role that is NOT role-closed and resume the [Per-role flow](#per-role-flow) on it.
+3. Pick the highest-`total` role that is NOT role-closed and resume the [Per-role flow](#per-role-flow) on it.
 4. Replay [Pattern transfer](#pattern-transfer) for any patterns the agent had landed pre-interruption: re-read each role-closed role's spec to identify which catalogue entries it covers, then ensure those patterns are present in every later not-yet-closed role's spec before continuing.
 
 The agent MUST NOT redo deploys for already-role-closed roles unless a later edit broke their tests.
@@ -343,6 +295,6 @@ The agent MUST NOT redo deploys for already-role-closed roles unless a later edi
 - [ ] [test_required_envs.py](../../tests/lint/ansible/roles/web-app/playwright/persona/test_required_envs.py) green tree-wide. Roles that ship the auth-less collapse MUST be auth-less by construction (no `CANONICAL_DOMAIN` / `APP_BASE_URL`); any role pinning a persona-blocked flag MUST document the rationale in its README/TODO.
 - [ ] [test_strict_mode.py](../../tests/lint/ansible/roles/web-app/playwright/persona/test_strict_mode.py) green tree-wide. Persona helpers fail loudly on un-executable journeys (Rule 11) and deny-check helpers validate the response body on a 200 (Rule 12).
 - [ ] [test_dashboard_integration_scope.py](../../tests/integration/roles/test_dashboard_integration_scope.py) green tree-wide. No non-`web-app-*` role declares `dashboard:` with a truthy `enabled`/`shared` flag (Rule 1, dashboard-scope sub-rule).
-- [ ] `SERVICES_DISABLED=<svc>` reports every gated scenario as `skipped: <NAME>_SERVICE_ENABLED=false`, never `failed`. MUST cover ≥1 scenario each for `dashboard`, `oidc`, `ldap`, `email`, `logout`, `matomo`.
+- [ ] `SERVICES_DISABLED=<svc>` reports every gated scenario as `skipped: <NAME>_SERVICE_ENABLED=false`, never `failed`. MUST cover ≥1 scenario each for `oidc`, `ldap`, `email`, `logout`, `matomo`. The `dashboard` exemption (Rule 1) means consumers do not render `DASHBOARD_SERVICE_ENABLED=`; coverage for that service runs through web-app-dashboard's parameterised tile-reachability test (Rule 13).
 - [ ] No-`SERVICES_DISABLED` run produces ≥1 `passed` scenario per in-scope `(role, service)` pair. Empty-skip = fail.
 - [ ] `grep 'process.env\.[A-Z_]*_SERVICE_ENABLED'` over the spec tree (excluding `service-gating.js`) returns zero hits.
