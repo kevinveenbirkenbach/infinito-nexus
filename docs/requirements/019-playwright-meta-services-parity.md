@@ -84,7 +84,7 @@ Legend: ✅ present, ❌ missing, — n/a (no env / no spec).
 
 | Rolle | hat env | hat spec | fehlende `<NAME>_SERVICE_ENABLED=` Flags (Test A) |
 | --- | --- | --- | --- |
-| ~~`web-app-akaunting`~~ | ✅ | ✅ | ~~`css`, `dashboard`, `email`, `logout`, `mariadb`, `matomo`, `oauth2`, `prometheus`, `redis`~~ — role-closed (Playwright green; admin-only role: persona scenarios skip cleanly via auth-surface detection in biber.js/admin.js) |
+| ~~`web-app-akaunting`~~ | ✅ | ✅ | ~~`css`, `dashboard`, `email`, `logout`, `mariadb`, `matomo`, `oauth2`, `prometheus`, `redis`~~ — role-closed (Playwright green; biber and administrator personas explicit-skipped via `PERSONA_BIBER_BLOCKED=true` and `PERSONA_ADMINISTRATOR_BLOCKED=true` in env, rationale: OIDC auto-provisioning not wired, tracked in role TODO.md) |
 | ~~`web-app-baserow`~~ | ✅ | ✅ | ~~`css`, `dashboard`, `email`, `javascript`, `logout`, `matomo`, `oauth2`, `postgres`, `prometheus`, `redis`~~ — role-closed |
 | `web-app-bigbluebutton` | ✅ | ✅ | `collabora`, `coturn`, `css`, `dashboard`, `email`, `greenlight`, `ldap`, `logout`, `matomo`, `oidc`, `postgres`, `prometheus` |
 | `web-app-bluesky` | ✅ | ✅ | `css`, `dashboard`, `email`, `logout`, `matomo`, `oauth2`, `prometheus`, `view`, `web` |
