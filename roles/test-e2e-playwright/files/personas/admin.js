@@ -86,13 +86,20 @@ async function runAdminFlow(page, opts = {}) {
   // arrived at the URL.
   await page.goto(`${appBaseUrl}/`, { waitUntil: "domcontentloaded" }).catch(() => {});
 
-  if (oidcEnabled && adminUsername && adminPassword) {
-    const loginLink = page
-      .getByRole("link", { name: /^(log\s*in|sign\s*in|login|sso|admin)$/i })
-      .or(page.getByRole("button", { name: /^(log\s*in|sign\s*in|login|sso|admin)$/i }))
-      .first();
-    if (await loginLink.isVisible({ timeout: 5_000 }).catch(() => false)) {
-      await loginLink.click().catch(() => {});
+  // Two auth shapes share a single login step:
+  //   * oauth2-proxy gate: the goto is intercepted and the page lands
+  //     directly on the Keycloak auth endpoint; perform Keycloak login.
+  //   * In-app OIDC plugin: the role's own UI exposes a Login link;
+  //     click it to trigger the redirect, then perform Keycloak login.
+  if (adminUsername && adminPassword) {
+    if (oidcEnabled && !page.url().includes("openid-connect/auth")) {
+      const loginLink = page
+        .getByRole("link", { name: /^\s*(log\s*in|sign\s*in|login|sso|admin)\s*$/i })
+        .or(page.getByRole("button", { name: /^\s*(log\s*in|sign\s*in|login|sso|admin)\s*$/i }))
+        .first();
+      if (await loginLink.isVisible({ timeout: 5_000 }).catch(() => false)) {
+        await loginLink.click().catch(() => {});
+      }
     }
     if (page.url().includes("openid-connect/auth")) {
       await performKeycloakLogin(page, adminUsername, adminPassword, canonicalDomain);

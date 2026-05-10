@@ -9,6 +9,7 @@ test.use({
 // so normalize these values before building URLs or typing credentials.
 const oidcIssuerUrl      = decodeDotenvQuotedValue(process.env.OIDC_ISSUER_URL);
 const prometheusBaseUrl  = decodeDotenvQuotedValue(process.env.PROMETHEUS_BASE_URL);
+const canonicalDomain    = decodeDotenvQuotedValue(process.env.CANONICAL_DOMAIN || "");
 const adminUsername      = decodeDotenvQuotedValue(process.env.ADMIN_USERNAME);
 const adminPassword      = decodeDotenvQuotedValue(process.env.ADMIN_PASSWORD);
 const biberUsername      = decodeDotenvQuotedValue(process.env.BIBER_USERNAME);
@@ -25,6 +26,7 @@ async function prometheusLogout(page, baseUrl) {
 test.beforeEach(() => {
   expect(oidcIssuerUrl,     "OIDC_ISSUER_URL must be set in the Playwright env file").toBeTruthy();
   expect(prometheusBaseUrl, "PROMETHEUS_BASE_URL must be set in the Playwright env file").toBeTruthy();
+  expect(canonicalDomain,   "CANONICAL_DOMAIN must be set in the Playwright env file").toBeTruthy();
   expect(adminUsername,     "ADMIN_USERNAME must be set in the Playwright env file").toBeTruthy();
   expect(adminPassword,     "ADMIN_PASSWORD must be set in the Playwright env file").toBeTruthy();
   expect(biberUsername,     "BIBER_USERNAME must be set in the Playwright env file").toBeTruthy();

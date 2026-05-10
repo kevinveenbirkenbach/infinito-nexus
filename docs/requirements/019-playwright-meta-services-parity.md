@@ -71,8 +71,8 @@ Legend: ✅ present, ❌ missing.
 
 | Role | total | has env | has spec | notes |
 | --- | ---: | --- | --- | --- |
-| `web-app-prometheus` | 173 | ✅ | ✅ | admin-only role: personas skip via `safeSkipUnlessEnabled("dashboard")` because `services.dashboard.enabled: false`; bespoke `metricz`, `dashboard-to-prometheus admin SSO`, and `biber-denied-access` tests cover the contract |
-| `web-app-matomo` | 168 | ✅ | ✅ | admin-only role: personas skip via `safeSkipUnlessEnabled("dashboard")` because `services.dashboard.enabled: false`; bespoke "matomo administrator" test covers the admin journey |
+| `web-app-prometheus` | 173 | ✅ | ✅ | oauth2-proxy gates the role on `web-app-prometheus-administrator`; biber lacks the role so the proxy denies the session and biber has no in-app surface to drive a logout from — opt out via `PERSONA_BIBER_BLOCKED=true` (Rule 11). The administrator persona runs the standard oauth2-proxy → Keycloak chain. Bespoke `metricz`, `dashboard-to-prometheus admin SSO`, and `biber-denied-access` tests cover the SPOT-owned probes |
+| `web-app-matomo` | 168 | ✅ | ✅ | admin-only role: persona stubs explicit-skipped via `PERSONA_BIBER_BLOCKED=true` / `PERSONA_ADMINISTRATOR_BLOCKED=true` in env (Rule 11); bespoke "matomo administrator" test covers the admin journey |
 | `web-app-dashboard` | 162 | ✅ | ✅ |  |
 | `web-svc-cdn` | 144 | ✅ | ✅ |  |
 | `web-app-mailu` | 139 | ✅ | ✅ |  |
