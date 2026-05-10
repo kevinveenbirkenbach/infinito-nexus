@@ -21,8 +21,7 @@ Mirrors the resolution logic of `plugins/lookup/config.py`:
 - `users.<canonical>.<sub>`: requires the role's `meta/users.yml` to
   declare `<canonical>` AND the global `user_defaults[<canonical>]` to
   expose `<sub>`.
-- `credentials.<key>` / `images.<key>`: same fallbacks as the
-  literal-paths check.
+- `credentials.<key>`: same fallbacks as the literal-paths check.
 - everything else: must walk the role's `application_defaults` entry.
 """
 

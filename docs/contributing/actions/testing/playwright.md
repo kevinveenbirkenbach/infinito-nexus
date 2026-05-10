@@ -30,11 +30,11 @@ Every Playwright-enabled role MUST provide exactly these two files:
 
 `playwright.config.js` MUST remain centralized in `roles/test-e2e-playwright/files/` and `package.json` in `roles/test-e2e-playwright/templates/package.json.j2` (rendered per-deploy into the staging dir). You MUST NOT duplicate or override either per role.
 
-The `@playwright/test` version pinned into the rendered `package.json` comes from `images.playwright.version` in `roles/test-e2e-playwright/defaults/main.yml` via the `image_version` filter. That YAML value is the single source of truth for the Playwright version.
+The `@playwright/test` version pinned into the rendered `package.json` comes from `playwright.version` in `roles/test-e2e-playwright/meta/services.yml` via the `image_version` filter. That YAML value is the single source of truth for the Playwright version.
 
 ## CI Image Source 🪞
 
-The Playwright container image is declared in `roles/test-e2e-playwright/defaults/main.yml` under `images.playwright` (`image:` + `version:`). CI mirrors that image into GHCR through the standard mirror pipeline before deploy tests run, so Playwright jobs do not depend on direct pulls from MCR during the test phase.
+The Playwright container image is declared in `roles/test-e2e-playwright/meta/services.yml` under the `playwright` service entry (`image:` + `version:`). CI mirrors that image into GHCR through the standard mirror pipeline before deploy tests run, so Playwright jobs do not depend on direct pulls from MCR during the test phase.
 
 The `version:` MUST stay pinned to an exact Playwright version and distro pair such as `v1.59.1-noble`. You MUST NOT switch this to a mutable tag such as `latest`, because mutable upstream tags are more vulnerable to CDN propagation delays and make flaky CI failures much harder to reason about.
 

@@ -7,15 +7,15 @@ from unittest.mock import patch
 
 from utils.cache.yaml import load_yaml_str
 from utils.docker.image.discovery import iter_role_images
-from utils.roles.mapping import ROLE_FILE_DEFAULTS_MAIN, ROLE_FILE_META_SERVICES
+from utils.roles.mapping import ROLE_FILE_META_SERVICES
 
 
 def _make_fs(files: dict[str, str]) -> dict[Path, str]:
     return {Path(k): textwrap.dedent(v) for k, v in files.items()}
 
 
-class TestIterRoleImagesVarsImages(unittest.TestCase):
-    """iter_role_images reads defaults/main.yml → images and meta/services.yml → services (any registry)."""
+class TestIterRoleImagesMetaServices(unittest.TestCase):
+    """iter_role_images reads meta/services.yml → services (any registry)."""
 
     def _run(self, fs: dict[str, str]) -> list:
         real_fs = _make_fs(fs)
@@ -37,11 +37,10 @@ class TestIterRoleImagesVarsImages(unittest.TestCase):
     def test_mcr_playwright_image(self):
         refs = self._run(
             {
-                f"roles/test-e2e-playwright/{ROLE_FILE_DEFAULTS_MAIN}": """
-                images:
-                  playwright:
-                    image: mcr.microsoft.com/playwright
-                    version: v1.58.2-noble
+                f"roles/test-e2e-playwright/{ROLE_FILE_META_SERVICES}": """
+                playwright:
+                  image: mcr.microsoft.com/playwright
+                  version: v1.58.2-noble
             """,
             }
         )
@@ -53,16 +52,15 @@ class TestIterRoleImagesVarsImages(unittest.TestCase):
         self.assertEqual(ref.version, "v1.58.2-noble")
         self.assertEqual(ref.registry, "mcr.microsoft.com")
         self.assertEqual(ref.source, "mcr.microsoft.com/playwright:v1.58.2-noble")
-        self.assertEqual(ref.source_file, ROLE_FILE_DEFAULTS_MAIN)
+        self.assertEqual(ref.source_file, ROLE_FILE_META_SERVICES)
 
     def test_ghcr_image_strips_registry_from_name(self):
         refs = self._run(
             {
-                f"roles/web-app-matrix/{ROLE_FILE_DEFAULTS_MAIN}": """
-                images:
-                  matrix-chatgpt-bot:
-                    image: ghcr.io/matrixgpt/matrix-chatgpt-bot
-                    version: latest
+                f"roles/web-app-matrix/{ROLE_FILE_META_SERVICES}": """
+                matrix-chatgpt-bot:
+                  image: ghcr.io/matrixgpt/matrix-chatgpt-bot
+                  version: latest
             """,
             }
         )
@@ -71,35 +69,33 @@ class TestIterRoleImagesVarsImages(unittest.TestCase):
         self.assertEqual(ref.name, "matrixgpt/matrix-chatgpt-bot")
         self.assertEqual(ref.registry, "ghcr.io")
         self.assertEqual(ref.source, "ghcr.io/matrixgpt/matrix-chatgpt-bot:latest")
-        self.assertEqual(ref.source_file, ROLE_FILE_DEFAULTS_MAIN)
+        self.assertEqual(ref.source_file, ROLE_FILE_META_SERVICES)
 
     def test_missing_image_or_version_is_skipped(self):
         refs = self._run(
             {
-                f"roles/some-role/{ROLE_FILE_DEFAULTS_MAIN}": """
-                images:
-                  no-version:
-                    image: ghcr.io/foo/bar
-                  no-image:
-                    version: "1.0"
+                f"roles/some-role/{ROLE_FILE_META_SERVICES}": """
+                no-version:
+                  image: ghcr.io/foo/bar
+                no-image:
+                  version: "1.0"
             """,
             }
         )
         self.assertEqual(refs, [])
 
-    def test_no_images_key_yields_nothing(self):
+    def test_no_image_keys_yields_nothing(self):
         refs = self._run(
             {
-                f"roles/some-role/{ROLE_FILE_DEFAULTS_MAIN}": """
-                some_var: value
+                f"roles/some-role/{ROLE_FILE_META_SERVICES}": """
+                some-svc:
+                  lifecycle: beta
             """,
             }
         )
         self.assertEqual(refs, [])
 
-    def test_config_main_yml_ghcr_image(self):
-        # Per the file root IS the services map (no compose envelope)
-        # and source_file reports the new path.
+    def test_meta_services_ghcr_image(self):
         refs = self._run(
             {
                 f"roles/web-app-matrix/{ROLE_FILE_META_SERVICES}": """
@@ -119,5 +115,5 @@ class TestIterRoleImagesVarsImages(unittest.TestCase):
         self.assertEqual(ref.source_file, ROLE_FILE_META_SERVICES)
 
 
-if __name__ == "__main__":  # pragma: no cover
+if __name__ == "__main__":
     unittest.main()

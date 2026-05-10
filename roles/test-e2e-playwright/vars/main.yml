@@ -1,0 +1,2 @@
+---
+TEST_E2E_PLAYWRIGHT_IMAGE: "{{ lookup('image', 'playwright', 'ref') }}"

@@ -60,14 +60,14 @@ For the file-level contract, use [Contributing `playwright.env.j2`](../../docs/a
 
 `package.json` and `playwright.config.js` are provided centrally by this role:
 
-- `roles/test-e2e-playwright/templates/package.json.j2` (rendered per-deploy; pins `@playwright/test` from `images.playwright.version`)
+- `roles/test-e2e-playwright/templates/package.json.j2` (rendered per-deploy; pins `@playwright/test` from `meta/services.yml.playwright.version`)
 - `roles/test-e2e-playwright/files/playwright.config.js` (copied as-is)
 
 ## Included files
 
 This role ships central Playwright defaults:
 
-- `templates/package.json.j2`: `@playwright/test` version derived from `images.playwright.version`
+- `templates/package.json.j2`: `@playwright/test` version derived from `meta/services.yml.playwright.version`
 - `files/playwright.config.js`: shared Playwright configuration
 
 Both are used as central defaults for every app role.
@@ -81,7 +81,7 @@ Both are used as central defaults for every app role.
 
 ### Playwright runtime
 
-- `TEST_E2E_PLAYWRIGHT_IMAGE` (default: empty; optional full image override. When empty, derived from `images.playwright.image` + `images.playwright.version`)
+- `TEST_E2E_PLAYWRIGHT_IMAGE` (resolved in `vars/main.yml` from `meta/services.yml.playwright.image` + `.version` via `lookup('image', 'playwright', 'ref')`)
 - `TEST_E2E_PLAYWRIGHT_IMAGE_DISTRO` (default: `noble`)
 - `TEST_E2E_PLAYWRIGHT_COMMAND` (default: `npm install --no-fund --no-audit && npx playwright test`)
 
@@ -99,7 +99,7 @@ Both are used as central defaults for every app role.
 ## Design notes
 
 - The runner is intentionally test-agnostic at runtime: it executes only tests provided by application roles.
-- `images.playwright.version` in `defaults/main.yml` is the single source of truth for the default Playwright version; the central `templates/package.json.j2` pins it via the `image_version` filter.
+- `playwright.version` in `meta/services.yml` is the single source of truth for the default Playwright version; the central `templates/package.json.j2` pins it via the `image_version` filter.
 - `templates/playwright.env.j2` acts as the stable marker for discovery and as the source of environment configuration.
 - Playwright is executed in Docker for reproducibility and consistent browser dependencies.
 - In `TLS_MODE=self_signed`, the role requires `CA_TRUST.cert_host`, `CA_TRUST.wrapper_host`, and `CA_TRUST.trust_name` and fails early if cert/wrapper files are missing.

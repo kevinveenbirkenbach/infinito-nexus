@@ -167,8 +167,8 @@ def main(argv: list[str] | None = None) -> int:
         default=None,
         help=(
             "Apply docker image mirror overrides to host_vars "
-            "applications.*.services.* and images_overrides.*.* "
-            "(image/version). If used without value, defaults to <repo-root>/mirrors.yml. "
+            "applications.*.services.* (image/version). "
+            "If used without value, defaults to <repo-root>/mirrors.yml. "
             "If a value is provided, it is treated as a path to the mirrors YAML/JSON file."
         ),
     )

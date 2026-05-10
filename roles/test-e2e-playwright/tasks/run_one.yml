@@ -110,15 +110,6 @@
     msg: "Missing central Playwright package.json template: {{ _playwright_default_package_template }}"
   when: not _default_package_stat.stat.exists
 
-- name: Resolve Playwright image
-  ansible.builtin.set_fact:
-    _playwright_image: >-
-      {{
-        TEST_E2E_PLAYWRIGHT_IMAGE
-        if (TEST_E2E_PLAYWRIGHT_IMAGE | default('') | trim | length > 0)
-        else lookup('image', 'playwright', 'ref')
-      }}
-
 # The `container` wrapper insists the image is present locally before
 # `run`. Pull it explicitly so a pruned cache doesn't fail the stage.
 - name: Pull Playwright image if missing
@@ -126,7 +117,7 @@
     argv:
       - container
       - pull
-      - "{{ _playwright_image }}"
+      - "{{ TEST_E2E_PLAYWRIGHT_IMAGE }}"
   register: _playwright_pull
   changed_when: false
   failed_when: false
@@ -290,7 +281,7 @@
       - "{{ _playwright_reports_dir }}:/reports"
       - -w
       - /e2e
-      - "{{ _playwright_image }}"
+      - "{{ TEST_E2E_PLAYWRIGHT_IMAGE }}"
       - /bin/bash
       - -lc
       - "{{ TEST_E2E_PLAYWRIGHT_COMMAND }}"

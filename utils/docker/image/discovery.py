@@ -4,7 +4,7 @@ from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
 from utils.cache.yaml import load_yaml_any as _load_yaml_cached
-from utils.roles.mapping import ROLE_FILE_DEFAULTS_MAIN, ROLE_FILE_META_SERVICES
+from utils.roles.mapping import ROLE_FILE_META_SERVICES
 
 if TYPE_CHECKING:
     from collections.abc import Iterable
@@ -47,9 +47,7 @@ class ImageRef:
     registry: str = (
         "docker.io"  # source registry hostname, e.g. docker.io, quay.io, ghcr.io
     )
-    source_file: str = (
-        ROLE_FILE_META_SERVICES  # ROLE_FILE_META_SERVICES or ROLE_FILE_DEFAULTS_MAIN
-    )
+    source_file: str = ROLE_FILE_META_SERVICES
 
 
 def load_yaml(path: Path) -> dict:
@@ -179,16 +177,12 @@ def iter_role_images(repo_root: Path) -> Iterable[ImageRef]:
     """
     Yield all ImageRef entries discovered across all roles in *repo_root*.
 
-    Sources:
-      1. roles/**/meta/services.yml → <entity>.{image,version}
-      2. roles/**/defaults/main.yml → images.<name>.{image,version}
+    Source: roles/**/meta/services.yml → <entity>.{image,version}.
 
     See docs/contributing/artefact/image.md for the full format reference.
     """
     roles_dir = repo_root / "roles"
 
-    # 1. Images from meta/services.yml. The file root IS the services map
-    # keyed by <entity_name>.
     for services_file in roles_dir.glob(f"**/{ROLE_FILE_META_SERVICES}"):
         role_name = services_file.parent.parent.name
         services = load_yaml(services_file)
@@ -217,36 +211,4 @@ def iter_role_images(repo_root: Path) -> Iterable[ImageRef]:
                 source=image_source(image, version),
                 registry=_detect_registry(image),
                 source_file=ROLE_FILE_META_SERVICES,
-            )
-
-    # 2. Images from defaults/main.yml → images.<name>.{image,version}
-    for vars_file in roles_dir.glob(f"**/{ROLE_FILE_DEFAULTS_MAIN}"):
-        role_name = vars_file.parent.parent.name
-        data = load_yaml(vars_file)
-
-        images = data.get("images", {})
-        if not isinstance(images, dict):
-            continue
-
-        for service_name, entry in images.items():
-            if not isinstance(entry, dict):
-                continue
-
-            image = (entry.get("image") or "").strip()
-            version = (entry.get("version") or "").strip()
-
-            if not image or not version:
-                continue
-
-            if not is_mirrorable_image(image):
-                continue
-
-            yield ImageRef(
-                role=role_name,
-                service=str(service_name),
-                name=canonical_image_name(image),
-                version=version,
-                source=image_source(image, version),
-                registry=_detect_registry(image),
-                source_file=ROLE_FILE_DEFAULTS_MAIN,
             )

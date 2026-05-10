@@ -63,10 +63,8 @@ def apply_mirror_overrides(host_vars_file: Path, mirrors_file: Path) -> None:
         )
 
     mirrors_apps = mirrors_raw.get("applications", {}) or {}
-    mirrors_images = mirrors_raw.get("images", {}) or {}
     has_applications = isinstance(mirrors_apps, dict) and bool(mirrors_apps)
-    has_images = isinstance(mirrors_images, dict) and bool(mirrors_images)
-    if not has_applications and not has_images:
+    if not has_applications:
         return  # no-op
 
     yaml_rt = YAML(typ="rt")
@@ -137,36 +135,6 @@ def apply_mirror_overrides(host_vars_file: Path, mirrors_file: Path) -> None:
                     changed = True
                 if _is_blank(svc_doc.get("version")):
                     svc_doc["version"] = version
-                    changed = True
-
-    if has_images:
-        images_overrides_doc = _ensure_ruamel_map(doc, "images_overrides")
-        for role_id, role_svcs in mirrors_images.items():
-            if not isinstance(role_svcs, dict):
-                continue
-
-            role_images_doc = _ensure_ruamel_map(images_overrides_doc, str(role_id))
-            for svc_name, svc_block in role_svcs.items():
-                if not isinstance(svc_block, dict):
-                    continue
-
-                image = svc_block.get("image")
-                version = svc_block.get("version")
-
-                if not isinstance(image, str) or _is_blank(image):
-                    continue
-                if not isinstance(version, str) or _is_blank(version):
-                    continue
-
-                image = image.strip()
-                version = version.strip()
-
-                svc_images_doc = _ensure_ruamel_map(role_images_doc, str(svc_name))
-                if _is_blank(svc_images_doc.get("image")):
-                    svc_images_doc["image"] = image
-                    changed = True
-                if _is_blank(svc_images_doc.get("version")):
-                    svc_images_doc["version"] = version
                     changed = True
 
     if not changed:

@@ -1,9 +1,14 @@
 from __future__ import annotations
 
+from pathlib import Path
 from typing import Any
 
 from ansible.errors import AnsibleError
 from ansible.plugins.lookup import LookupBase
+
+from utils.cache.yaml import load_yaml_any
+from utils.roles import PROJECT_ROOT
+from utils.roles.mapping import ROLE_FILE_META_SERVICES
 
 _VALID_WANTS = frozenset({"all", "image", "version", "ref"})
 
@@ -22,8 +27,11 @@ class LookupModule(LookupBase):
       - lookup('image', service_name[, want])
       - lookup('image', role_id, service_name[, want])
 
-    The lookup prefers images_overrides.<role>.<service> over local defaults
-    from images.<service>, falling back field-wise when an override is absent.
+    Defaults are sourced from ``roles/<role_id>/meta/services.yml`` under
+    the matching ``<service_name>`` entry's ``image`` and ``version``
+    fields. Inventory overrides at
+    ``images_overrides.<role_id>.<service_name>`` win field-wise over the
+    role default.
     """
 
     def run(
@@ -68,9 +76,7 @@ class LookupModule(LookupBase):
         if want not in _VALID_WANTS:
             raise AnsibleError("image: want must be one of all, image, version, ref")
 
-        defaults = vars_.get("images", {}) or {}
-        if not isinstance(defaults, dict):
-            raise AnsibleError("image: Ansible variable 'images' must be a mapping")
+        defaults = self._load_role_services(role_id)
 
         overrides_root = vars_.get("images_overrides", {}) or {}
         if not isinstance(overrides_root, dict):
@@ -115,6 +121,18 @@ class LookupModule(LookupBase):
         )
 
     @staticmethod
+    def _load_role_services(role_id: str) -> dict[str, Any]:
+        services_path = Path(PROJECT_ROOT) / "roles" / role_id / ROLE_FILE_META_SERVICES
+        if not services_path.is_file():
+            raise AnsibleError(f"image: missing {services_path} for role '{role_id}'")
+        loaded = load_yaml_any(str(services_path), default_if_missing={}) or {}
+        if not isinstance(loaded, dict):
+            raise AnsibleError(
+                f"image: {services_path} must be a YAML mapping at the file root"
+            )
+        return loaded
+
+    @staticmethod
     def _merge_entry(
         *,
         role_id: str,
@@ -127,7 +145,7 @@ class LookupModule(LookupBase):
         default_entry = defaults.get(service_name, {})
         if default_entry is not None and not isinstance(default_entry, dict):
             raise AnsibleError(
-                f"image: images.{service_name} must be a mapping in role '{role_id}'"
+                f"image: meta/services.yml entry '{service_name}' must be a mapping in role '{role_id}'"
             )
         if isinstance(default_entry, dict):
             for key in ("image", "version"):

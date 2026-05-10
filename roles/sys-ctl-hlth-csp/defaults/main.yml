@@ -1,9 +1,4 @@
 ---
-images:
-  csp-checker:
-    image: ghcr.io/kevinveenbirkenbach/csp-checker
-    version: stable
-
 # List of domains whose network block failures (e.g., ORB) should be ignored
 # during CSP checks. This is useful for suppressing known external resources
 # (e.g., third-party CDNs) that cannot be influenced but otherwise cause

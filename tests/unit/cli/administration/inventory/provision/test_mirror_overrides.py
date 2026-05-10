@@ -312,11 +312,11 @@ class TestApplyMirrorOverrides(unittest.TestCase):
 
         self.assertNotIn("web-app-wordpress", out.get("applications", {}))
 
-    def test_noop_when_mirrors_has_no_applications_or_images(self) -> None:
+    def test_noop_when_mirrors_has_no_applications(self) -> None:
         host_vars_data = {
             "applications": {"a": {"services": {"s": {"image": "i", "version": "v"}}}}
         }
-        mirrors_data = {"not_applications_or_images": {"x": 1}}
+        mirrors_data = {"not_applications": {"x": 1}}
 
         self._write_yaml(self.host_vars, host_vars_data)
         self._write_yaml(self.mirrors, mirrors_data)
@@ -377,77 +377,6 @@ class TestApplyMirrorOverrides(unittest.TestCase):
         self.assertEqual(svc["env"], {"FOO": "bar"})
 
         self.assertNotIn("images_overrides", out)
-
-    def test_images_entries_merge_into_images_overrides_only(self) -> None:
-        host_vars_data = {
-            "applications": {
-                "web-app-nextcloud": {
-                    "services": {
-                        "app": {
-                            "image": "docker.io/library/nextcloud",
-                            "version": "30.0.0",
-                        }
-                    }
-                }
-            }
-        }
-        mirrors_data = {
-            "images": {
-                "test-e2e-playwright": {
-                    "playwright": {
-                        "image": "ghcr.io/acme/mirror/mcr.microsoft.com/playwright",
-                        "version": "v1.58.2-noble",
-                    }
-                }
-            }
-        }
-
-        self._write_yaml(self.host_vars, host_vars_data)
-        self._write_yaml(self.mirrors, mirrors_data)
-
-        apply_mirror_overrides(self.host_vars, self.mirrors)
-
-        out = self._read_yaml(self.host_vars)
-        svc = out["applications"]["web-app-nextcloud"]["services"]["app"]
-        self.assertEqual(svc["image"], "docker.io/library/nextcloud")
-        self.assertEqual(svc["version"], "30.0.0")
-
-        img = out["images_overrides"]["test-e2e-playwright"]["playwright"]
-        self.assertEqual(
-            img["image"], "ghcr.io/acme/mirror/mcr.microsoft.com/playwright"
-        )
-        self.assertEqual(img["version"], "v1.58.2-noble")
-
-    def test_images_entries_fill_only_missing_override_fields(self) -> None:
-        host_vars_data = {
-            "images_overrides": {
-                "test-e2e-playwright": {
-                    "playwright": {
-                        "image": "ghcr.io/custom/playwright",
-                    }
-                }
-            }
-        }
-        mirrors_data = {
-            "images": {
-                "test-e2e-playwright": {
-                    "playwright": {
-                        "image": "ghcr.io/acme/mirror/mcr.microsoft.com/playwright",
-                        "version": "v1.58.2-noble",
-                    }
-                }
-            }
-        }
-
-        self._write_yaml(self.host_vars, host_vars_data)
-        self._write_yaml(self.mirrors, mirrors_data)
-
-        apply_mirror_overrides(self.host_vars, self.mirrors)
-
-        out = self._read_yaml(self.host_vars)
-        img = out["images_overrides"]["test-e2e-playwright"]["playwright"]
-        self.assertEqual(img["image"], "ghcr.io/custom/playwright")
-        self.assertEqual(img["version"], "v1.58.2-noble")
 
 
 if __name__ == "__main__":

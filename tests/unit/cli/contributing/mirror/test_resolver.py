@@ -7,11 +7,11 @@ from unittest.mock import patch
 import cli.contributing.mirror.resolver.__main__ as resolver_main
 from cli.contributing.mirror.model import ImageRef
 from utils.cache.yaml import load_yaml_str
-from utils.roles.mapping import ROLE_FILE_DEFAULTS_MAIN, ROLE_FILE_META_SERVICES
+from utils.roles.mapping import ROLE_FILE_META_SERVICES
 
 
 class TestResolverOutputFormat(unittest.TestCase):
-    """resolver emits per-role services map and a separate images key."""
+    """resolver emits per-role services map under the applications key."""
 
     def _run_resolver(
         self, images: list[ImageRef], extra_argv: list[str] | None = None
@@ -40,7 +40,7 @@ class TestResolverOutputFormat(unittest.TestCase):
         self.assertEqual(result, 0)
         return load_yaml_str(buf.getvalue()) or {}
 
-    def test_compose_images_go_to_applications_key(self) -> None:
+    def test_meta_services_image_goes_to_applications_key(self) -> None:
         image = ImageRef(
             role="web-app-nextcloud",
             service="app",
@@ -53,13 +53,12 @@ class TestResolverOutputFormat(unittest.TestCase):
         out = self._run_resolver([image])
 
         self.assertIn("applications", out)
-        self.assertIn("images", out)
+        self.assertNotIn("images", out)
         svc = out["applications"]["web-app-nextcloud"]["services"]["app"]
         self.assertEqual(svc["version"], "31.0.0")
         self.assertIn("ghcr.io/acme/myrepo/mirror/docker.io/nextcloud", svc["image"])
-        self.assertEqual(out["images"], {})
 
-    def test_defaults_images_go_to_images_key(self) -> None:
+    def test_test_role_image_also_goes_to_applications_key(self) -> None:
         image = ImageRef(
             role="test-e2e-playwright",
             service="playwright",
@@ -67,19 +66,18 @@ class TestResolverOutputFormat(unittest.TestCase):
             version="v1.58.2-noble",
             source="mcr.microsoft.com/playwright:v1.58.2-noble",
             registry="mcr.microsoft.com",
-            source_file=ROLE_FILE_DEFAULTS_MAIN,
+            source_file=ROLE_FILE_META_SERVICES,
         )
         out = self._run_resolver([image])
 
-        self.assertEqual(out["applications"], {})
-        svc = out["images"]["test-e2e-playwright"]["playwright"]
+        svc = out["applications"]["test-e2e-playwright"]["services"]["playwright"]
         self.assertEqual(svc["version"], "v1.58.2-noble")
         self.assertIn(
             "ghcr.io/acme/myrepo/mirror/mcr.microsoft.com/playwright",
             svc["image"],
         )
 
-    def test_multiple_services_same_role_stay_grouped_per_source_type(self) -> None:
+    def test_multiple_services_same_role_stay_grouped(self) -> None:
         images = [
             ImageRef(
                 role="web-app-nextcloud",
@@ -99,26 +97,15 @@ class TestResolverOutputFormat(unittest.TestCase):
                 registry="docker.io",
                 source_file=ROLE_FILE_META_SERVICES,
             ),
-            ImageRef(
-                role="web-app-nextcloud",
-                service="backup",
-                name="restic",
-                version="latest",
-                source="docker.io/restic/restic:latest",
-                registry="docker.io",
-                source_file=ROLE_FILE_DEFAULTS_MAIN,
-            ),
         ]
         out = self._run_resolver(images)
 
         self.assertIn("app", out["applications"]["web-app-nextcloud"]["services"])
         self.assertIn("proxy", out["applications"]["web-app-nextcloud"]["services"])
-        self.assertIn("backup", out["images"]["web-app-nextcloud"])
 
-    def test_empty_images_yield_both_empty_top_level_keys(self) -> None:
+    def test_empty_images_yield_empty_applications(self) -> None:
         out = self._run_resolver([])
         self.assertEqual(out["applications"], {})
-        self.assertEqual(out["images"], {})
 
 
 if __name__ == "__main__":  # pragma: no cover
