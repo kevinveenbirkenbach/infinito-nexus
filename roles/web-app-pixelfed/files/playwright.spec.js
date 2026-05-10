@@ -7,18 +7,24 @@ test.use({
 
 const oidcIssuerUrl = decodeDotenvQuotedValue(process.env.OIDC_ISSUER_URL);
 const pixelfedBaseUrl = decodeDotenvQuotedValue(process.env.PIXELFED_BASE_URL);
+// The OIDC self-provisioning path is exercised by the non-reserved
+// `biber` first so the bootstrapped administrator (whose name is
+// reserved and cannot be created through pixelfed's first-time OIDC
+// registration flow) can be validated separately afterwards.
 const loginScenarios = [
   {
-    envSuffix: "FIRST",
     label: "biber",
-    username: decodeDotenvQuotedValue(process.env.LOGIN_USERNAME_FIRST),
-    password: decodeDotenvQuotedValue(process.env.LOGIN_PASSWORD_FIRST)
+    usernameEnv: "BIBER_USERNAME",
+    passwordEnv: "BIBER_PASSWORD",
+    username: decodeDotenvQuotedValue(process.env.BIBER_USERNAME),
+    password: decodeDotenvQuotedValue(process.env.BIBER_PASSWORD)
   },
   {
-    envSuffix: "SECOND",
     label: "administrator",
-    username: decodeDotenvQuotedValue(process.env.LOGIN_USERNAME_SECOND),
-    password: decodeDotenvQuotedValue(process.env.LOGIN_PASSWORD_SECOND)
+    usernameEnv: "ADMIN_USERNAME",
+    passwordEnv: "ADMIN_PASSWORD",
+    username: decodeDotenvQuotedValue(process.env.ADMIN_USERNAME),
+    password: decodeDotenvQuotedValue(process.env.ADMIN_PASSWORD)
   }
 ];
 
@@ -501,11 +507,11 @@ test.beforeEach(() => {
   for (const loginScenario of loginScenarios) {
     expect(
       loginScenario.username,
-      `LOGIN_USERNAME_${loginScenario.envSuffix} must be set in the Playwright env file`
+      `${loginScenario.usernameEnv} must be set in the Playwright env file`
     ).toBeTruthy();
     expect(
       loginScenario.password,
-      `LOGIN_PASSWORD_${loginScenario.envSuffix} must be set in the Playwright env file`
+      `${loginScenario.passwordEnv} must be set in the Playwright env file`
     ).toBeTruthy();
   }
 });
