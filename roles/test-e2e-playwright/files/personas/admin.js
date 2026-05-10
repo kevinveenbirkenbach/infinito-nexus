@@ -46,12 +46,15 @@ async function runAdminFlow(page, opts = {}) {
   }
 
   // Test B parity: oauth2-proxy gates the initial redirect chain,
-  // universal-logout rewrites the in-app logout click. Both are
-  // consumed by the persona surface; reference them via safeIsEnabled
-  // so the env-gate parity guard recognises them as consumed by the
-  // spec via the shared persona helper.
+  // universal-logout rewrites the in-app logout click, and the
+  // persona's first action is always a dashboard tile click (driven by
+  // process.env.DASHBOARD_BASE_URL). All three are consumed by the
+  // persona surface; reference them via safeIsEnabled so the env-gate
+  // parity guard recognises them as consumed by the spec via the
+  // shared persona helper.
   safeIsEnabled("oauth2");
   safeIsEnabled("logout");
+  safeIsEnabled("dashboard");
 
   const dashboardBaseUrl = normalizeUrl(process.env.DASHBOARD_BASE_URL);
   const prometheusBaseUrl = normalizeUrl(process.env.PROMETHEUS_BASE_URL);

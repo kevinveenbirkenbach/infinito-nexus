@@ -46,15 +46,17 @@ async function runBiberFlow(page, opts = {}) {
     return;
   }
 
-  // Test B parity: every role's env declares OAUTH2/LOGOUT_SERVICE_ENABLED
-  // (the auth chain runs through oauth2-proxy, the post-flow universal-
-  // logout JS rewrites the role's own logout button). Both flags are
-  // genuinely consumed by the persona surface — oauth2-proxy gates the
-  // initial redirect, universal-logout rewrites the in-app logout
-  // click. Reference them via safeIsEnabled so the env-gate parity guard
-  // recognises them as consumed by the spec via the shared persona.
+  // Test B parity: every role's env declares OAUTH2/LOGOUT/DASHBOARD
+  // _SERVICE_ENABLED (the auth chain runs through oauth2-proxy, the
+  // post-flow universal-logout JS rewrites the role's own logout button,
+  // and the persona's first action is always a dashboard tile click
+  // driven by process.env.DASHBOARD_BASE_URL). All three flags are
+  // genuinely consumed by the persona surface; reference them via
+  // safeIsEnabled so the env-gate parity guard recognises them as
+  // consumed by the spec via the shared persona.
   safeIsEnabled("oauth2");
   safeIsEnabled("logout");
+  safeIsEnabled("dashboard");
 
   const dashboardBaseUrl = normalizeUrl(process.env.DASHBOARD_BASE_URL);
   const prometheusBaseUrl = normalizeUrl(process.env.PROMETHEUS_BASE_URL);
