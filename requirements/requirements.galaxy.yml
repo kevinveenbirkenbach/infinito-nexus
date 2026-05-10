@@ -2,4 +2,5 @@
 collections:
   - name: kewlfft.aur
   - name: community.general
+  - name: community.docker
   - name: hetzner.hcloud
