@@ -63,7 +63,7 @@ discourse:
   mem_reservation: 1g
   mem_limit: 2g
   pids_limit: 1024
-  disable_local_logins: "{{ (lookup('config', 'web-app-discourse', 'services.oidc.enabled') | bool) and not (lookup('config', 'web-app-discourse', 'services.ldap.enabled')
+  local_login_enabled: "{{ not (lookup('config', 'web-app-discourse', 'services.oidc.enabled') | bool) or (lookup('config', 'web-app-discourse', 'services.ldap.enabled')
     | bool) }}"
 # nocheck: dynamic-flag
 # nocheck: playwright-service-flag — canonical:cdn alias of static-asset provider

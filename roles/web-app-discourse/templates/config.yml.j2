@@ -151,7 +151,7 @@ run:
   ## If you want to set the 'From' email address for your first registration, uncomment and change:
   ## After getting the first signup email, re-comment the line. It only needs to run once.
   #- exec: rails r "SiteSetting.notification_email='info@unconfigured.discourse.org'"
-  - exec: rails r "SiteSetting.enable_local_logins = {{ DISCOURSE_DISABLE_LOCAL_LOGINS | bool | string }}"
+  - exec: rails r "SiteSetting.enable_local_logins = {{ DISCOURSE_LOCAL_LOGIN_ENABLED | bool | string | lower }}"
 {% if DISCOURSE_OIDC_ENABLED | bool %}
   # Deactivate Default Login
   - exec: rails r "SiteSetting.openid_connect_verbose_logging = {{ MODE_DEBUG | bool | string | lower }}"
