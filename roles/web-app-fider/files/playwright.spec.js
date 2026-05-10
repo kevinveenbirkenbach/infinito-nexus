@@ -1,7 +1,7 @@
 const { test, expect } = require("@playwright/test");
 
 const { skipUnlessServiceEnabled, isServiceEnabled } = require("./service-gating");
-const { decodeDotenvQuotedValue, runAdminFlow, runBiberFlow, runGuestFlow } = require("./personas");
+const { decodeDotenvQuotedValue, performKeycloakLoginForm, runAdminFlow, runBiberFlow, runGuestFlow } = require("./personas");
 test.use({
   ignoreHTTPSErrors: true
 });
@@ -17,17 +17,6 @@ const biberPassword  = decodeDotenvQuotedValue(process.env.BIBER_PASSWORD);
 
 // Perform SSO login via Keycloak.
 // Accepts a Page or FrameLocator (when Keycloak loads inside the dashboard iframe).
-async function performOidcLogin(locator, username, password) {
-  const usernameField = locator.getByRole("textbox", { name: /username|email/i });
-  const passwordField = locator.getByRole("textbox", { name: "Password" });
-  const signInButton  = locator.getByRole("button", { name: /sign in/i });
-
-  await usernameField.waitFor({ state: "visible", timeout: 60_000 });
-  await usernameField.fill(username);
-  await usernameField.press("Tab");
-  await passwordField.fill(password);
-  await signInButton.click();
-}
 
 // Click through Fider's sign-in page to reach the SSO provider button.
 // Fider shows a "Sign in" button in the header, then a modal listing OAuth providers.
@@ -92,8 +81,8 @@ test("dashboard to fider: admin sso login, verify ui, logout", async ({ page }) 
   // 5. Fider redirects the iframe to Keycloak for SSO login.
   //    The outer dashboard URL never changes when the iframe navigates, so we wait
   //    for the Keycloak login form to become visible inside the iframe directly.
-  //    (performOidcLogin waits for the username field before filling credentials.)
-  await performOidcLogin(appFrame, adminUsername, adminPassword);
+  //    (performKeycloakLoginForm waits for the username field before filling credentials.)
+  await performKeycloakLoginForm(appFrame, adminUsername, adminPassword);
 
   // 6. After login Fider redirects back inside the iframe — verify the admin
   //    is logged in (.c-menu-user is only rendered when fider.session.isAuthenticated)
@@ -140,7 +129,7 @@ test("fider: biber sso login as regular user, verify access, logout", async ({ b
       .toContain(expectedOidcAuthUrl);
 
     // 4. Log in as biber
-    await performOidcLogin(biberPage, biberUsername, biberPassword);
+    await performKeycloakLoginForm(biberPage, biberUsername, biberPassword);
 
     // 5. After login Fider redirects back
     await expect

@@ -1,7 +1,7 @@
 const { test, expect } = require("@playwright/test");
 
 const { skipUnlessServiceEnabled, isServiceEnabled } = require("./service-gating");
-const { decodeDotenvQuotedValue, runAdminFlow, runBiberFlow, runGuestFlow } = require("./personas");
+const { decodeDotenvQuotedValue, performKeycloakLoginForm, runAdminFlow, runBiberFlow, runGuestFlow } = require("./personas");
 test.use({
   ignoreHTTPSErrors: true
 });
@@ -15,17 +15,6 @@ const adminUsername     = decodeDotenvQuotedValue(process.env.ADMIN_USERNAME);
 const adminPassword     = decodeDotenvQuotedValue(process.env.ADMIN_PASSWORD);
 
 // Perform SSO login via Keycloak.
-async function performOidcLogin(locator, username, password) {
-  const usernameField = locator.getByRole("textbox", { name: /username|email/i });
-  const passwordField = locator.getByRole("textbox", { name: "Password" });
-  const signInButton  = locator.getByRole("button", { name: /sign in/i });
-
-  await usernameField.waitFor({ state: "visible", timeout: 60_000 });
-  await usernameField.fill(username);
-  await usernameField.press("Tab");
-  await passwordField.fill(password);
-  await signInButton.click();
-}
 
 test.beforeEach(() => {
   expect(prometheusBaseUrl, "PROMETHEUS_BASE_URL must be set in the Playwright env file").toBeTruthy();
@@ -113,7 +102,7 @@ test("prometheus scrapes gitea native metrics — job target is up", async ({ br
       })
       .toContain(oidcIssuerUrl);
 
-    await performOidcLogin(page, adminUsername, adminPassword);
+    await performKeycloakLoginForm(page, adminUsername, adminPassword);
 
     await expect
       .poll(() => page.url(), {

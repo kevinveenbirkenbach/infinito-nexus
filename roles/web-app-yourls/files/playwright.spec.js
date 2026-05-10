@@ -1,7 +1,7 @@
 const { test, expect } = require("@playwright/test");
 const { skipUnlessServiceEnabled, isServiceEnabled } = require("./service-gating");
 
-const { decodeDotenvQuotedValue, runAdminFlow, runBiberFlow, runGuestFlow } = require("./personas");
+const { decodeDotenvQuotedValue, performKeycloakLoginForm, runAdminFlow, runBiberFlow, runGuestFlow } = require("./personas");
 test.use({
   ignoreHTTPSErrors: true,
 });
@@ -16,17 +16,6 @@ const biberUsername  = decodeDotenvQuotedValue(process.env.BIBER_USERNAME);
 const biberPassword  = decodeDotenvQuotedValue(process.env.BIBER_PASSWORD);
 
 // Perform SSO login via Keycloak.
-async function performOidcLogin(locator, username, password) {
-  const usernameField = locator.getByRole("textbox", { name: /username|email/i });
-  const passwordField = locator.getByRole("textbox", { name: "Password" });
-  const signInButton  = locator.getByRole("button", { name: /sign in/i });
-
-  await usernameField.waitFor({ state: "visible", timeout: 60_000 });
-  await usernameField.fill(username);
-  await usernameField.press("Tab");
-  await passwordField.fill(password);
-  await signInButton.click();
-}
 
 test.beforeEach(() => {
   expect(oidcIssuerUrl, "OIDC_ISSUER_URL must be set in the Playwright env file").toBeTruthy();
@@ -64,7 +53,7 @@ test("yourls: admin sso login to admin panel, then logout", async ({
       .toContain(expectedOidcAuthUrl);
 
     // 2. Log in as admin
-    await performOidcLogin(page, adminUsername, adminPassword);
+    await performKeycloakLoginForm(page, adminUsername, adminPassword);
 
     // 3. After successful auth, oauth2-proxy redirects back to /admin/
     await expect
@@ -109,7 +98,7 @@ test("yourls: biber is denied access to /admin/ after sso login", async ({
       const biberPage = await biberContext.newPage();
 
       // Register the callback listener BEFORE goto — the redirect chain can complete
-      // faster than a listener registered after performOidcLogin would start.
+      // faster than a listener registered after performKeycloakLoginForm would start.
       const callbackResponsePromise = biberPage.waitForResponse(
         (res) => res.url().includes("/oauth2/callback"),
         { timeout: 60_000 }
@@ -126,7 +115,7 @@ test("yourls: biber is denied access to /admin/ after sso login", async ({
         .toContain(expectedOidcAuthUrl);
 
       // 2. Log in as biber
-      await performOidcLogin(biberPage, biberUsername, biberPassword);
+      await performKeycloakLoginForm(biberPage, biberUsername, biberPassword);
 
       // 3. oauth2-proxy callback must return 403 — biber is not in the admin group
       const callbackResponse = await callbackResponsePromise;

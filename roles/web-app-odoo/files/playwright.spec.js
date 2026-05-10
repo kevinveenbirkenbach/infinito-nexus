@@ -1,7 +1,7 @@
 const { test, expect } = require("@playwright/test");
 
 const { skipUnlessServiceEnabled, isServiceEnabled } = require("./service-gating");
-const { decodeDotenvQuotedValue, runAdminFlow, runBiberFlow, runGuestFlow } = require("./personas");
+const { decodeDotenvQuotedValue, performKeycloakLoginForm, runAdminFlow, runBiberFlow, runGuestFlow } = require("./personas");
 test.use({
   ignoreHTTPSErrors: true
 });
@@ -17,17 +17,6 @@ const biberPassword  = decodeDotenvQuotedValue(process.env.BIBER_PASSWORD);
 
 // Perform SSO login via Keycloak.
 // Accepts a Page or FrameLocator (when Keycloak loads inside the dashboard iframe).
-async function performOidcLogin(locator, username, password) {
-  const usernameField = locator.getByRole("textbox", { name: /username|email/i });
-  const passwordField = locator.getByRole("textbox", { name: "Password" });
-  const signInButton  = locator.getByRole("button", { name: /sign in/i });
-
-  await usernameField.waitFor({ state: "visible", timeout: 60_000 });
-  await usernameField.fill(username);
-  await usernameField.press("Tab");
-  await passwordField.fill(password);
-  await signInButton.click();
-}
 
 // Click the "Login with SSO" button on Odoo's login page.
 // Odoo renders OAuth provider links inside a ".o_login_auth" container (modern
@@ -209,7 +198,7 @@ test("dashboard to odoo: admin sso login, verify ui, logout", async ({ page }) =
 
   // 6. Perform OIDC login with admin credentials
   const keycloakFrame = page.frameLocator("#main iframe").first();
-  await performOidcLogin(keycloakFrame, adminUsername, adminPassword);
+  await performKeycloakLoginForm(keycloakFrame, adminUsername, adminPassword);
 
   // 7. Wait for navigation back to Odoo after authentication.
   // The URL must contain the Odoo base URL but NOT /web/login (which would mean auth failed).
@@ -300,7 +289,7 @@ test("dashboard to odoo: biber sso login, verify ui, logout", async ({ page }) =
 
   // 6. Perform OIDC login with biber credentials
   const keycloakFrame = page.frameLocator("#main iframe").first();
-  await performOidcLogin(keycloakFrame, biberUsername, biberPassword);
+  await performKeycloakLoginForm(keycloakFrame, biberUsername, biberPassword);
 
   // 7. Wait for navigation back to Odoo after authentication.
   await expect

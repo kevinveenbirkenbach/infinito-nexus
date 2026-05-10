@@ -1,7 +1,7 @@
 const { test, expect } = require("@playwright/test");
 
 const { skipUnlessServiceEnabled, isServiceEnabled } = require("./service-gating");
-const { assertCspMetaParity, assertCspResponseHeader, decodeDotenvQuotedValue, expectNoCspViolations, installCspViolationObserver, normalizeBaseUrl } = require("./personas");
+const { assertCspMetaParity, assertCspResponseHeader, decodeDotenvQuotedValue, expectNoCspViolations, installCspViolationObserver, normalizeBaseUrl, performKeycloakLoginForm } = require("./personas");
 test.use({ ignoreHTTPSErrors: true });
 
 function attachDiagnostics(page) {
@@ -29,20 +29,6 @@ function attachDiagnostics(page) {
   });
 
   return { consoleErrors, pageErrors, cspRelated };
-}
-
-async function performOidcLogin(frame, username, password) {
-  const usernameField = frame.locator("input[name='username'], input#username").first();
-  const passwordField = frame.locator("input[name='password'], input#password").first();
-  const signInButton = frame
-    .locator("input#kc-login, button#kc-login, button[type='submit'], input[type='submit']")
-    .first();
-
-  await expect(usernameField).toBeVisible({ timeout: 60_000 });
-  await usernameField.fill(username);
-  await usernameField.press("Tab");
-  await passwordField.fill(password);
-  await signInButton.click();
 }
 
 async function discourseLogout(page, discourseBaseUrl) {
@@ -125,7 +111,7 @@ async function signInViaDashboardOidc(page, username, password, personaLabel) {
     })
     .toContain(expectedOidcAuthUrl);
 
-  await performOidcLogin(page, username, password);
+  await performKeycloakLoginForm(page, username, password);
 
   await expect
     .poll(() => page.url(), {

@@ -1,22 +1,8 @@
 const { test, expect } = require("@playwright/test");
 
 const { skipUnlessServiceEnabled, isServiceEnabled } = require("./service-gating");
-const { decodeDotenvQuotedValue, normalizeBaseUrl } = require("./personas");
+const { decodeDotenvQuotedValue, normalizeBaseUrl, performKeycloakLoginForm } = require("./personas");
 test.use({ ignoreHTTPSErrors: true });
-
-async function performOidcLogin(page, username, password) {
-  const usernameField = page.locator("input[name='username'], input#username").first();
-  const passwordField = page.locator("input[name='password'], input#password").first();
-  const signInButton = page
-    .locator("input#kc-login, button#kc-login, button[type='submit'], input[type='submit']")
-    .first();
-
-  await expect(usernameField).toBeVisible({ timeout: 60_000 });
-  await usernameField.fill(username);
-  await usernameField.press("Tab");
-  await passwordField.fill(password);
-  await signInButton.click();
-}
 
 async function peertubeLogout(page, peertubeBaseUrl) {
   await page
@@ -100,7 +86,7 @@ async function signInViaDashboardOidc(page, username, password, personaLabel) {
     })
     .toContain(expectedOidcAuthUrl);
 
-  await performOidcLogin(page, username, password);
+  await performKeycloakLoginForm(page, username, password);
 
   await expect
     .poll(() => page.url(), {

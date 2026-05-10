@@ -1,7 +1,7 @@
 const { test, expect } = require("@playwright/test");
 
 const { skipUnlessServiceEnabled, isServiceEnabled } = require("./service-gating");
-const { decodeDotenvQuotedValue, runAdminFlow, runBiberFlow, runGuestFlow } = require("./personas");
+const { decodeDotenvQuotedValue, performKeycloakLoginForm, runAdminFlow, runBiberFlow, runGuestFlow } = require("./personas");
 test.use({
   ignoreHTTPSErrors: true
 });
@@ -33,17 +33,6 @@ async function waitForFirstVisible(locators, timeout = 60_000) {
 }
 
 // Perform SSO login via Keycloak inside a frame context (or page context for direct navigation).
-async function performOidcLogin(frame, username, password) {
-  const usernameField = frame.getByRole("textbox", { name: /username|email/i });
-  const passwordField = frame.getByRole("textbox", { name: "Password" });
-  const signInButton  = frame.getByRole("button", { name: /sign in/i });
-
-  await usernameField.waitFor({ state: "visible", timeout: 60_000 });
-  await usernameField.fill(username);
-  await usernameField.press("Tab");
-  await passwordField.fill(password);
-  await signInButton.click();
-}
 
 // Trigger the Mattermost SSO flow the way a real user does: navigate to
 // the login page, then click the "SSO with Infinito.Nexus" button that
@@ -221,7 +210,7 @@ test("prometheus scrapes mattermost native metrics — job target is up", async 
       })
       .toContain(oidcIssuerUrl);
 
-    await performOidcLogin(page, adminUsername, adminPassword);
+    await performKeycloakLoginForm(page, adminUsername, adminPassword);
 
     await expect
       .poll(() => page.url(), {
@@ -297,7 +286,7 @@ test("dashboard to mattermost: sso login, verify channel view, logout", async ({
     .toContain(expectedOidcAuthUrl);
 
   // 5. Fill credentials and sign in via Keycloak
-  await performOidcLogin(page, adminUsername, adminPassword);
+  await performKeycloakLoginForm(page, adminUsername, adminPassword);
 
   // 6. Wait for redirect back to Mattermost after successful auth
   await expect
@@ -361,7 +350,7 @@ test("mattermost: biber sends direct message to administrator, administrator rec
       })
       .toContain(expectedOidcAuthUrl);
 
-    await performOidcLogin(biberPage, biberUsername, biberPassword);
+    await performKeycloakLoginForm(biberPage, biberUsername, biberPassword);
 
     // Wait for redirect back to Mattermost (any path under the base URL)
     await expect
@@ -424,7 +413,7 @@ test("mattermost: biber sends direct message to administrator, administrator rec
       })
       .toContain(expectedOidcAuthUrl);
 
-    await performOidcLogin(adminPage, adminUsername, adminPassword);
+    await performKeycloakLoginForm(adminPage, adminUsername, adminPassword);
 
     await expect
       .poll(() => adminPage.url(), {

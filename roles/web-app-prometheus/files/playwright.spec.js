@@ -1,7 +1,7 @@
 const { test, expect } = require("@playwright/test");
 
 const { skipUnlessServiceEnabled, isServiceEnabled } = require("./service-gating");
-const { decodeDotenvQuotedValue, runAdminFlow, runBiberFlow, runGuestFlow } = require("./personas");
+const { decodeDotenvQuotedValue, performKeycloakLoginForm, runAdminFlow, runBiberFlow, runGuestFlow } = require("./personas");
 test.use({
   ignoreHTTPSErrors: true
 });
@@ -17,17 +17,6 @@ const biberPassword      = decodeDotenvQuotedValue(process.env.BIBER_PASSWORD);
 
 // Perform SSO login via Keycloak.
 // Accepts either a Page or a FrameLocator (when Keycloak is inside the dashboard iframe).
-async function performOidcLogin(locator, username, password) {
-  const usernameField = locator.getByRole("textbox", { name: /username|email/i });
-  const passwordField = locator.getByRole("textbox", { name: "Password" });
-  const signInButton  = locator.getByRole("button", { name: /sign in/i });
-
-  await usernameField.waitFor({ state: "visible", timeout: 60_000 });
-  await usernameField.fill(username);
-  await usernameField.press("Tab");
-  await passwordField.fill(password);
-  await signInButton.click();
-}
 
 // Log out via the universal logout endpoint.
 async function prometheusLogout(page, baseUrl) {
@@ -96,7 +85,7 @@ test("prometheus: admin sso login, verify ui, logout", async ({ page }) => {
     .toContain(expectedOidcAuthUrl);
 
   // 2. Log in as admin at Keycloak.
-  await performOidcLogin(page, adminUsername, adminPassword);
+  await performKeycloakLoginForm(page, adminUsername, adminPassword);
 
   // 3. After successful auth, oauth2-proxy redirects back to Prometheus.
   await expect
@@ -142,7 +131,7 @@ test("prometheus: biber is denied access after sso login", async ({ browser }) =
 
     // Register the callback listener BEFORE goto to guarantee no response is missed.
     // In fast local environments the entire redirect chain (goto → Keycloak → callback)
-    // can complete before a listener registered after performOidcLogin would start,
+    // can complete before a listener registered after performKeycloakLoginForm would start,
     // causing waitForResponse to catch a 200 sub-resource instead of the real response.
     //
     // oauth2-proxy hits /oauth2/callback after the Keycloak login:
@@ -164,7 +153,7 @@ test("prometheus: biber is denied access after sso login", async ({ browser }) =
       .toContain(expectedOidcAuthUrl);
 
     // 2. Log in as biber via Keycloak
-    await performOidcLogin(biberPage, biberUsername, biberPassword);
+    await performKeycloakLoginForm(biberPage, biberUsername, biberPassword);
 
     // 3. Await the callback response — must be 403 (biber is not in prometheus-administrator group)
     const callbackResponse = await callbackResponsePromise;
@@ -209,7 +198,7 @@ test("prometheus scrape: every consumer role reports up=1", async ({ page }) => 
   // so the OAuth2-Proxy callback succeeds (302 -> prometheus).
   await page.goto(`${expectedPrometheusBaseUrl}/`, { waitUntil: "domcontentloaded" });
   if (page.url().includes("openid-connect/auth")) {
-    await performOidcLogin(page, adminUsername, adminPassword);
+    await performKeycloakLoginForm(page, adminUsername, adminPassword);
   }
   await expect
     .poll(() => page.url(), {

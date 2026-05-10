@@ -1,7 +1,7 @@
 const { test, expect } = require("@playwright/test");
 
 const { skipUnlessServiceEnabled, isServiceEnabled } = require("./service-gating");
-const { decodeDotenvQuotedValue, runAdminFlow, runBiberFlow, runGuestFlow } = require("./personas");
+const { decodeDotenvQuotedValue, performKeycloakLoginForm, runAdminFlow, runBiberFlow, runGuestFlow } = require("./personas");
 test.use({
   ignoreHTTPSErrors: true
 });
@@ -47,17 +47,6 @@ async function clickThroughMailuSsoPage(frame) {
 
 // Perform SSO login via Keycloak inside a frame context (or page context for direct navigation).
 // Works for both iframe-embedded and full-page Mailu flows.
-async function performOidcLogin(frame, username, password) {
-  const usernameField = frame.getByRole("textbox", { name: /username|email/i });
-  const passwordField = frame.getByRole("textbox", { name: "Password" });
-  const signInButton  = frame.getByRole("button", { name: /sign in/i });
-
-  await usernameField.waitFor({ state: "visible", timeout: 60_000 });
-  await usernameField.fill(username);
-  await usernameField.press("Tab");
-  await passwordField.fill(password);
-  await signInButton.click();
-}
 
 // Wait for an email with the given subject to appear in the current view.
 // Retries for up to `timeout` ms to account for delivery delay.
@@ -127,7 +116,7 @@ test("dashboard to mailu: sso login, open admin interface, logout", async ({ pag
     .toContain(expectedOidcAuthUrl);
 
   // 5. Fill credentials and sign in via Keycloak
-  await performOidcLogin(mailuFrame, adminUsername, adminPassword);
+  await performKeycloakLoginForm(mailuFrame, adminUsername, adminPassword);
 
   // 6. Wait for redirect back to Mailu webmail
   await expect
@@ -220,7 +209,7 @@ test("mailu: biber sends email to administrator, administrator receives it", asy
       })
       .toContain(expectedOidcAuthUrl);
 
-    await performOidcLogin(biberPage, biberUsername, biberPassword);
+    await performKeycloakLoginForm(biberPage, biberUsername, biberPassword);
 
     // Wait for redirect back to Mailu webmail — require /webmail/ in the URL to confirm
     // the OIDC callback was fully processed and the PHP session cookie was set.
@@ -290,7 +279,7 @@ test("mailu: biber sends email to administrator, administrator receives it", asy
       })
       .toContain(expectedOidcAuthUrl);
 
-    await performOidcLogin(adminPage, adminUsername, adminPassword);
+    await performKeycloakLoginForm(adminPage, adminUsername, adminPassword);
 
     await expect
       .poll(() => adminPage.url(), {

@@ -1,27 +1,44 @@
 /**
- * Drive a Keycloak OIDC login form with the given credentials.
+ * Keycloak OIDC login helpers.
  *
- * The function expects the page to already sit on a Keycloak
- * authorization endpoint (`.../openid-connect/auth?...`). It fills the
- * username + password fields, clicks the sign-in button, and waits
- * until the URL has left Keycloak and is back on the role's canonical
- * domain (the OAuth2-Proxy / app callback).
+ *   `performKeycloakLoginForm(target, username, password)`
+ *     Fills the Keycloak login form on `target` (a `Page` OR a
+ *     `FrameLocator`) and clicks sign-in. Tolerates both the
+ *     role-based selector strategy (`getByRole({ name: /username|
+ *     email/i })`, etc.) and the legacy input-name selector strategy
+ *     (`input[name='username']`, etc.) so iframe-embedded Keycloak
+ *     forms work without branching at the call site. Does NOT assert
+ *     post-login navigation.
+ *
+ *   `performKeycloakLogin(page, username, password, canonicalDomain)`
+ *     Calls `performKeycloakLoginForm` and additionally polls the
+ *     page URL until it contains `canonicalDomain`, asserting the
+ *     OAuth2-Proxy / app callback completes.
+ *
+ *   `performKeycloakLoginExpectingDenial(page, username, password, canonicalDomain)`
+ *     Drives the form with credentials expected to be REJECTED
+ *     (insufficient privileges, forbidden role, denied app) and
+ *     asserts the round-trip ends on a denial state (Keycloak error
+ *     page, the same authorization endpoint with an error indicator,
+ *     or a 401 / 403 on the relying party after the callback).
+ *     Returns the resulting URL so callers can assert additional
+ *     details if needed.
  */
 
 const { expect } = require("@playwright/test");
 
-async function performKeycloakLogin(page, username, password, canonicalDomain) {
-  const usernameField = page
+async function performKeycloakLoginForm(target, username, password) {
+  const usernameField = target
     .getByRole("textbox", { name: /username|email/i })
-    .or(page.locator("input[name='username'], input#username"))
+    .or(target.locator("input[name='username'], input#username"))
     .first();
-  const passwordField = page
+  const passwordField = target
     .getByRole("textbox", { name: /^password$/i })
-    .or(page.locator("input[name='password'], input#password"))
+    .or(target.locator("input[name='password'], input#password"))
     .first();
-  const signInButton = page
+  const signInButton = target
     .getByRole("button", { name: /sign in|login|log in/i })
-    .or(page.locator("input#kc-login, button#kc-login, button[type='submit'], input[type='submit']"))
+    .or(target.locator("input#kc-login, button#kc-login, button[type='submit'], input[type='submit']"))
     .first();
 
   await usernameField.waitFor({ state: "visible", timeout: 60_000 });
@@ -29,6 +46,10 @@ async function performKeycloakLogin(page, username, password, canonicalDomain) {
   await usernameField.press("Tab").catch(() => {});
   await passwordField.fill(password);
   await signInButton.click();
+}
+
+async function performKeycloakLogin(page, username, password, canonicalDomain) {
+  await performKeycloakLoginForm(page, username, password);
 
   await expect
     .poll(() => page.url(), {
@@ -38,40 +59,8 @@ async function performKeycloakLogin(page, username, password, canonicalDomain) {
     .toContain(canonicalDomain);
 }
 
-/**
- * Drive a Keycloak OIDC login form with credentials that are expected
- * to be REJECTED (insufficient privileges, forbidden role, denied app).
- *
- * Used for the biber-vs-prometheus / biber-vs-matomo deny-login
- * assertions: biber's OIDC account exists in Keycloak but does NOT
- * carry the realm role / client mapping required to reach the admin
- * surface, so the login round-trip MUST end on either:
- *   - a Keycloak error page (e.g. "Access denied") on the IdP, or
- *   - the same authorization endpoint with an error indicator, or
- *   - a 401/403 on the relying party after the callback.
- *
- * The function returns the resulting URL so callers can assert
- * additional details if needed.
- */
 async function performKeycloakLoginExpectingDenial(page, username, password, canonicalDomain) {
-  const usernameField = page
-    .getByRole("textbox", { name: /username|email/i })
-    .or(page.locator("input[name='username'], input#username"))
-    .first();
-  const passwordField = page
-    .getByRole("textbox", { name: /^password$/i })
-    .or(page.locator("input[name='password'], input#password"))
-    .first();
-  const signInButton = page
-    .getByRole("button", { name: /sign in|login|log in/i })
-    .or(page.locator("input#kc-login, button#kc-login, button[type='submit'], input[type='submit']"))
-    .first();
-
-  await usernameField.waitFor({ state: "visible", timeout: 60_000 });
-  await usernameField.fill(username);
-  await usernameField.press("Tab").catch(() => {});
-  await passwordField.fill(password);
-  await signInButton.click();
+  await performKeycloakLoginForm(page, username, password);
 
   await page.waitForLoadState("domcontentloaded", { timeout: 60_000 }).catch(() => {});
 
@@ -91,4 +80,8 @@ async function performKeycloakLoginExpectingDenial(page, username, password, can
   return finalUrl;
 }
 
-module.exports = { performKeycloakLogin, performKeycloakLoginExpectingDenial };
+module.exports = {
+  performKeycloakLoginForm,
+  performKeycloakLogin,
+  performKeycloakLoginExpectingDenial,
+};
