@@ -145,16 +145,4 @@ jobs:
       - name: Cleanup (always)
         if: always()
         shell: bash
-        run: |
-          set -euo pipefail
-          echo "=== Cleanup ==="
-          docker buildx prune -af || true
-          docker builder prune -af || true
-          docker image prune -af || true
-          docker container prune -f || true
-          echo
-          echo "=== Disk pressure: AFTER CLEANUP ==="
-          df -h
-          echo
-          docker system df || true
-          docker buildx du || true
+        run: bash scripts/github/cleanup_docker_runner.sh

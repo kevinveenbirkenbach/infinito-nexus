@@ -174,21 +174,16 @@
       }}
   changed_when: false
 
+- name: Render 'ldap-roles' mapper payload
+  when: (grp_mapper_id | trim) in ["", "null"]
+  ansible.builtin.set_fact:
+    _ldap_roles_mapper_payload: "{{ desired_group_mapper | combine({'name': 'ldap-roles', 'parentId': (ldap_cmp_id | trim), 'providerType': 'org.keycloak.storage.ldap.mappers.LDAPStorageMapper', 'providerId': 'group-ldap-mapper'}, recursive=True) | to_json }}"
+
 - name: Create 'ldap-roles' mapper if missing
   when: (grp_mapper_id | trim) in ["", "null"]
-  shell: |
-    cat <<'JSON' | {{ KEYCLOAK_EXEC_KCADM }} create components -r {{ KEYCLOAK_REALM }} -f -
-    {{
-      desired_group_mapper
-      | combine({
-          'name':         'ldap-roles',
-          'parentId':     (ldap_cmp_id | trim),
-          'providerType': 'org.keycloak.storage.ldap.mappers.LDAPStorageMapper',
-          'providerId':   'group-ldap-mapper'
-        }, recursive=True)
-      | to_json
-    }}
-    JSON
+  ansible.builtin.shell: >-
+    printf '%s' {{ _ldap_roles_mapper_payload | quote }}
+    | {{ KEYCLOAK_EXEC_KCADM }} create components -r {{ KEYCLOAK_REALM }} -f -
   register: create_mapper
   changed_when: create_mapper.rc == 0
   failed_when: create_mapper.rc != 0 and ('already exists' not in (create_mapper.stderr | lower))

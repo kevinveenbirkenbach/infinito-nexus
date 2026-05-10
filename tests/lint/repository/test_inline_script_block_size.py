@@ -27,10 +27,10 @@ Lines that end with ``\`` (line-continuation) collapse with the next
 physical line and count as ONE logical line, matching how the shell
 parses them. Blank lines are ignored. Comments count.
 
-Example failure (this would fail with MAX_LINES=12):
+Example failure (this would fail with MAX_LINES=11):
 
     shell: |-
-        # 13 logical lines below — extract me
+        # 12 logical lines below — extract me
         a
         b
         c
@@ -42,7 +42,6 @@ Example failure (this would fail with MAX_LINES=12):
         i
         j
         k
-        l
 """
 
 from __future__ import annotations
@@ -64,7 +63,7 @@ if TYPE_CHECKING:
 # Top-level path segments where YAML files are scanned. Files outside
 # these dirs (notably tests/, docs/) are exempt from the lint.
 SCAN_DIRS = ("roles", "tasks", "playbooks", ".github")
-MAX_LINES = 12
+MAX_LINES = 11
 
 # Ansible task keys that take a script body, plus GitHub Actions' `run`.
 # Both bare (`shell:`) and FQCN (`ansible.builtin.shell:`, `ansible.legacy.shell:`,

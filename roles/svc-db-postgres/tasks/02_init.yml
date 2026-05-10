@@ -129,23 +129,7 @@
       failed_when: false
 
     - name: "POSTGRES | container inspect (escaped go-templates)"
-      ansible.builtin.shell: |
-        set -e
-
-        echo "== Container state =="
-        {% raw %} container inspect --format 'Name={{.Name}} State={{.State.Status}} ExitCode={{.State.ExitCode}} StartedAt={{.State.StartedAt}} Restarting={{.State.Restarting}}' {% endraw %} {{ POSTGRES_CONTAINER }}
-
-        echo
-        echo "== Image =="
-        {% raw %} container inspect --format 'Image={{.Config.Image}}' {% endraw %} {{ POSTGRES_CONTAINER }}
-
-        echo
-        echo "== Mounts =="
-        {% raw %} container inspect --format '{{range .Mounts}}{{.Type}}:{{.Source}}->{{.Destination}}{{"\n"}}{{end}}' {% endraw %} {{ POSTGRES_CONTAINER }}
-
-        echo
-        echo "== Env (redacted) =="
-        {% raw %} container inspect --format '{{range .Config.Env}}{{println .}}{{end}}' {% endraw %} {{ POSTGRES_CONTAINER }} | sed -E 's/=.*/=***REDACTED***/'
+      ansible.builtin.script: "{{ role_path }}/files/inspect_container.sh {{ POSTGRES_CONTAINER }}"
       register: dbg_docker_inspect
       changed_when: false
       failed_when: false
