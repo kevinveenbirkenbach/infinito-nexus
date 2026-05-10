@@ -46,7 +46,6 @@ from utils.cache.files import read_text
 
 from . import PROJECT_ROOT
 
-
 PERSONAS_DIR = PROJECT_ROOT / "roles" / "test-e2e-playwright" / "files" / "personas"
 _FLOW_FILES: tuple[str, ...] = ("biber.js", "admin.js", "guest.js")
 _DENY_HELPER_FILES: tuple[str, ...] = ("prometheus.js", "matomo.js")
@@ -127,8 +126,7 @@ def _enclosing_if_condition(text: str, idx: int) -> str | None:
                 if not pre.endswith("if"):
                     return None
                 return text[cond_start:cond_end]
-            else:
-                depth -= 1
+            depth -= 1
         i -= 1
     return None
 
