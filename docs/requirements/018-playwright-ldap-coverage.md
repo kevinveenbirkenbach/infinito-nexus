@@ -65,6 +65,8 @@ consistently across the role tree is what this requirement tracks.
   [017](017-playwright-biber-rbac-coverage.md)). A role that only
   asserts the admin path under LDAP MUST flag the biber follow-up
   in its README until it is added.
+- [ ] LDAP-driven persona scenarios MUST live INSIDE the persona bodies named `biber: <flow>` and `administrator: <flow>` per [019 Rule 3](019-playwright-meta-services-parity.md#rules); the per-persona LDAP gate is added via a separate `skipUnlessServiceEnabled('ldap')` call inside the existing persona body, not as a parallel ungated test.
+  The persona-naming lint [test_persona_naming.py](../../tests/lint/ansible/roles/web-app/playwright/test_persona_naming.py) is the role-closure gate; an additional ungated `ldap login` test next to the personas is forbidden by [019 Rule 5](019-playwright-meta-services-parity.md#rules).
 
 ### Env contract
 
