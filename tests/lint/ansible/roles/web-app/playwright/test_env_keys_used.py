@@ -78,14 +78,21 @@ def _extract_env_keys(env_text: str) -> list[str]:
 
 
 def _key_referenced(key: str, sources: Iterable[str]) -> bool:
-    """Return True iff *key* appears as ``process.env.<KEY>`` or
-    ``process.env["<KEY>"]`` / ``process.env['<KEY>']`` in any source."""
+    """Return True iff *key* appears as ``process.env.<KEY>``,
+    ``process.env["<KEY>"]`` / ``process.env['<KEY>']``, or via the
+    shared ``readEnv("<KEY>")`` / ``readEnv('<KEY>')`` wrapper
+    (defined in ``roles/test-e2e-playwright/files/personas/utils/env.js``
+    and used by every persona helper) in any source."""
+    quoted = re.escape(key)
     pattern = re.compile(
         r"process\.env\.(?:"
-        + re.escape(key)
+        + quoted
         + r"\b|\[\s*['\"]"
-        + re.escape(key)
+        + quoted
         + r"['\"]\s*\])"
+        + r"|readEnv\(\s*['\"]"
+        + quoted
+        + r"['\"]\s*\)"
     )
     return any(pattern.search(text) for text in sources)
 
