@@ -493,8 +493,11 @@ install_galaxy_importer_with_pip() {
 
 install_markdownlint_with_npm() {
 	if ! command -v npm >/dev/null 2>&1; then
-		warn "npm not found; install Node.js/npm first to get markdownlint-cli2."
-		return 1
+		log "npm missing; attempting Node.js/npm install via system package manager."
+		ensure_command npm || {
+			warn "npm not found and could not be installed; cannot install markdownlint-cli2."
+			return 1
+		}
 	fi
 	log "Installing 'markdownlint-cli2' via npm (global)"
 	if install_with_optional_sudo npm install -g markdownlint-cli2; then
@@ -550,8 +553,11 @@ ensure_eslint() {
 	[[ -d "${REPO_ROOT}/node_modules/eslint" ]] && return 0
 
 	if ! command -v npm >/dev/null 2>&1; then
-		warn "npm not found; install Node.js/npm first to get ESLint."
-		return 1
+		log "npm missing; attempting Node.js/npm install via system package manager."
+		ensure_command npm || {
+			warn "npm not found and could not be installed; cannot install ESLint."
+			return 1
+		}
 	fi
 
 	log "Missing local 'eslint'. Installing via npm (in repo root)."
@@ -682,6 +688,12 @@ install_command() {
 		;;
 	shellcheck:pacman | shellcheck:apt-get | shellcheck:dnf | shellcheck:yum | shellcheck:brew)
 		install_package_candidates "${manager}" shellcheck
+		;;
+	npm:pacman | npm:apt-get | npm:dnf | npm:yum)
+		install_package_candidates "${manager}" npm nodejs
+		;;
+	npm:brew)
+		install_package_candidates "${manager}" node
 		;;
 	*)
 		warn "No installer mapping defined for '${command_name}' on '${manager}'."
