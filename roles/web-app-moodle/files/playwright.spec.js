@@ -1,7 +1,7 @@
 const { test, expect } = require("@playwright/test");
 
 const { skipUnlessServiceEnabled, isServiceEnabled } = require("./service-gating");
-const { decodeDotenvQuotedValue, normalizeBaseUrl, runAdminFlow, runBiberFlow, runGuestFlow } = require("./personas");
+const { decodeDotenvQuotedValue, installCspViolationObserver, normalizeBaseUrl, runAdminFlow, runBiberFlow, runGuestFlow } = require("./personas");
 test.use({ ignoreHTTPSErrors: true });
 
 // -----------------------------------------------------------------------------
@@ -9,15 +9,6 @@ test.use({ ignoreHTTPSErrors: true });
 //   variant 0 (default): auth_oidc + auth_ldap sync-only (hybrid)
 //   variant 1:           auth_ldap only (no OIDC)
 // -----------------------------------------------------------------------------
-
-function installCspViolationObserver(page) {
-  return page.addInitScript(() => {
-    window.__cspViolations = [];
-    window.addEventListener("securitypolicyviolation", (e) => {
-      window.__cspViolations.push({ violatedDirective: e.violatedDirective, blockedURI: e.blockedURI });
-    });
-  });
-}
 
 const moodleBaseUrl   = normalizeBaseUrl(process.env.APP_BASE_URL);
 const dashboardBaseUrl = normalizeBaseUrl(process.env.DASHBOARD_BASE_URL || "");

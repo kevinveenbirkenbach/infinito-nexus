@@ -103,4 +103,146 @@ async function assertCspInjections(page, opts = {}) {
   }
 }
 
-module.exports = { assertCspInjections };
+// -----------------------------------------------------------------------------
+// CSP header / meta / violation assertions
+//
+// Shared by every spec that probes a role's `Content-Security-Policy`
+// response header, its optional `<meta http-equiv="Content-Security-Policy">`
+// echo, and the runtime `securitypolicyviolation` event stream.
+// -----------------------------------------------------------------------------
+
+const EXPECTED_CSP_DIRECTIVES = [
+  "default-src",
+  "connect-src",
+  "frame-ancestors",
+  "frame-src",
+  "script-src",
+  "script-src-elem",
+  "script-src-attr",
+  "style-src",
+  "style-src-elem",
+  "style-src-attr",
+  "font-src",
+  "worker-src",
+  "manifest-src",
+  "media-src",
+  "img-src",
+];
+
+/** Install a `securitypolicyviolation` listener that captures every
+ * blocked load on the page. Pair with `readCspViolations(page)` and
+ * `expectNoCspViolations(page, diagnostics, label)`. */
+function installCspViolationObserver(page) {
+  return page.addInitScript(() => {
+    window.__cspViolations = [];
+    window.addEventListener("securitypolicyviolation", (event) => {
+      window.__cspViolations.push({
+        violatedDirective: event.violatedDirective,
+        blockedURI: event.blockedURI,
+        sourceFile: event.sourceFile,
+        lineNumber: event.lineNumber,
+        originalPolicy: event.originalPolicy,
+      });
+    });
+  });
+}
+
+async function readCspViolations(page) {
+  return page.evaluate(() => window.__cspViolations || []).catch(() => []);
+}
+
+/** Parse a `Content-Security-Policy` header string into a directive
+ * map (`{ "default-src": ["'self'", "https://example.com"], ... }`). */
+function parseCspHeader(value) {
+  const result = {};
+  if (!value) return result;
+  for (const raw of value.split(";")) {
+    const trimmed = raw.trim();
+    if (!trimmed) continue;
+    const parts = trimmed.split(/\s+/);
+    const directive = parts.shift();
+    if (!directive) continue;
+    result[directive.toLowerCase()] = parts;
+  }
+  return result;
+}
+
+/** Assert the response carries an enforced (NOT report-only) CSP
+ * header that lists every directive in `EXPECTED_CSP_DIRECTIVES`.
+ * Returns the parsed header so callers can hand it to
+ * `assertCspMetaParity`. */
+function assertCspResponseHeader(response, label) {
+  const headers = response.headers();
+  const cspHeader = headers["content-security-policy"];
+  expect(
+    cspHeader,
+    `${label}: Content-Security-Policy response header MUST be present`
+  ).toBeTruthy();
+  const reportOnly = headers["content-security-policy-report-only"];
+  expect(
+    reportOnly,
+    `${label}: Content-Security-Policy-Report-Only MUST NOT be set (policy must be enforced)`
+  ).toBeFalsy();
+  const parsed = parseCspHeader(cspHeader);
+  const missing = EXPECTED_CSP_DIRECTIVES.filter((directive) => !parsed[directive]);
+  expect(
+    missing,
+    `${label}: CSP directives missing from response header: ${missing.join(", ")}`
+  ).toEqual([]);
+  return parsed;
+}
+
+/** When the role echoes its CSP via `<meta http-equiv="...">`, every
+ * token in the meta MUST also appear in the response header — meta
+ * MAY be a strict subset, never a strict superset. No-op when the
+ * meta tag is absent. */
+async function assertCspMetaParity(page, headerDirectives, label) {
+  const metaLocator = page.locator('meta[http-equiv="Content-Security-Policy"]').first();
+  const hasMeta = (await metaLocator.count().catch(() => 0)) > 0;
+  if (!hasMeta) return;
+  const metaContent = await metaLocator.getAttribute("content").catch(() => null);
+  if (!metaContent) return;
+  const metaParsed = parseCspHeader(metaContent);
+  for (const directive of Object.keys(metaParsed)) {
+    const headerTokens = new Set(headerDirectives[directive] || []);
+    const metaTokens = metaParsed[directive] || [];
+    for (const token of metaTokens) {
+      expect(
+        headerTokens.has(token),
+        `${label}: CSP meta token "${token}" for directive ${directive} MUST also appear in the response header`
+      ).toBe(true);
+    }
+  }
+}
+
+/** Assert no `securitypolicyviolation` events fired AND (when the
+ * caller passes a diagnostics object captured by `attachDiagnostics`)
+ * no CSP-related console / pageerror entries surfaced.
+ *
+ * `diagnostics` is optional: pass `null` (or omit the third arg) when
+ * the spec does not track diagnostics. The shared helper still
+ * validates the DOM-level violations either way. */
+async function expectNoCspViolations(page, diagnostics, label) {
+  const domViolations = await readCspViolations(page);
+  expect(
+    domViolations,
+    `${label}: securitypolicyviolation events observed: ${JSON.stringify(domViolations)}`
+  ).toEqual([]);
+  if (diagnostics && Array.isArray(diagnostics.cspRelated)) {
+    expect(
+      diagnostics.cspRelated,
+      `${label}: CSP-related console/pageerror entries observed: ${JSON.stringify(diagnostics.cspRelated)}`
+    ).toEqual([]);
+  }
+}
+
+module.exports = {
+  assertCspInjections,
+  EXPECTED_CSP_DIRECTIVES,
+  installCspViolationObserver,
+  readCspViolations,
+  parseCspHeader,
+  assertCspResponseHeader,
+  assertCspMetaParity,
+  expectNoCspViolations,
+};

@@ -1,7 +1,7 @@
 const { test, expect } = require("@playwright/test");
 
 const { skipUnlessServiceEnabled, isServiceEnabled } = require("./service-gating");
-const { decodeDotenvQuotedValue, normalizeBaseUrl } = require("./personas");
+const { assertCspResponseHeader, decodeDotenvQuotedValue, expectNoCspViolations, installCspViolationObserver, normalizeBaseUrl } = require("./personas");
 test.use({ ignoreHTTPSErrors: true });
 // Matrix SSO has several long-tail failure modes (Synapse rc_login rate
 // limits, Element rust_crypto "Skip verification" dialog, first-run Synapse
@@ -37,64 +37,6 @@ function attachDiagnostics(page) {
     }
   });
   return { consoleErrors, pageErrors, cspRelated };
-}
-
-function installCspViolationObserver(page) {
-  return page.addInitScript(() => {
-    window.__cspViolations = [];
-    window.addEventListener("securitypolicyviolation", (event) => {
-      window.__cspViolations.push({
-        violatedDirective: event.violatedDirective,
-        blockedURI: event.blockedURI,
-        sourceFile: event.sourceFile,
-        lineNumber: event.lineNumber,
-        originalPolicy: event.originalPolicy
-      });
-    });
-  });
-}
-
-async function readCspViolations(page) {
-  return page.evaluate(() => window.__cspViolations || []).catch(() => []);
-}
-
-const EXPECTED_CSP_DIRECTIVES = [
-  "default-src", "connect-src", "frame-ancestors", "frame-src",
-  "script-src", "script-src-elem", "script-src-attr",
-  "style-src", "style-src-elem", "style-src-attr",
-  "font-src", "worker-src", "manifest-src", "media-src", "img-src"
-];
-
-function parseCspHeader(value) {
-  const result = {};
-  if (!value) return result;
-  for (const raw of value.split(";")) {
-    const trimmed = raw.trim();
-    if (!trimmed) continue;
-    const parts = trimmed.split(/\s+/);
-    const directive = parts.shift();
-    if (!directive) continue;
-    result[directive.toLowerCase()] = parts;
-  }
-  return result;
-}
-
-function assertCspResponseHeader(response, label) {
-  const headers = response.headers();
-  const cspHeader = headers["content-security-policy"];
-  expect(cspHeader, `${label}: CSP response header MUST be present`).toBeTruthy();
-  const reportOnly = headers["content-security-policy-report-only"];
-  expect(reportOnly, `${label}: CSP-Report-Only MUST NOT be set`).toBeFalsy();
-  const parsed = parseCspHeader(cspHeader);
-  const missing = EXPECTED_CSP_DIRECTIVES.filter((d) => !parsed[d]);
-  expect(missing, `${label}: CSP directives missing: ${missing.join(", ")}`).toEqual([]);
-  return parsed;
-}
-
-async function expectNoCspViolations(page, diagnostics, label) {
-  const domViolations = await readCspViolations(page);
-  expect(domViolations, `${label}: securitypolicyviolation: ${JSON.stringify(domViolations)}`).toEqual([]);
-  expect(diagnostics.cspRelated, `${label}: CSP console/pageerror: ${JSON.stringify(diagnostics.cspRelated)}`).toEqual([]);
 }
 
 async function performOidcLogin(frame, username, password) {

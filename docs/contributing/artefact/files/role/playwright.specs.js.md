@@ -163,7 +163,9 @@ The deny-checks live in the provider's own spec (`web-app-prometheus/files/playw
   Consumer roles' personas MUST NOT duplicate these probes.
 - Every persona scenario MUST run the CSP injection assertion at least once on the role's canonical surface.
   When an injector service (`asset`, `cdn`, `css`, `javascript`, `simpleicons`, `matomo`) is enabled, the page's `Content-Security-Policy` header MUST list the injector's host.
-  The assertion is centralised in `personas/utils/csp.js` so every spec gets the check by default.
+  The assertion is centralised in [`personas/utils/csp.js`](../../../../../roles/test-e2e-playwright/files/personas/utils/csp.js) so every spec gets the check by default.
+- The full CSP test surface lives in the same module: `assertCspResponseHeader(response, label)` (returns the parsed directive map), `assertCspMetaParity(page, headerDirectives, label)` (verifies the optional `<meta http-equiv>` echo is a subset of the response header), `installCspViolationObserver(page)` + `readCspViolations(page)` (DOM-side `securitypolicyviolation` capture), `expectNoCspViolations(page, diagnostics, label)` (asserts neither the DOM stream nor `diagnostics.cspRelated` carries a violation), and the `EXPECTED_CSP_DIRECTIVES` constant.
+  Specs MUST require these from `./personas`; inline copies are forbidden and caught at review.
 - Every service-dependent step uses `skipUnlessServiceEnabled(...)`.
   Direct `process.env` reads of `<NAME>_SERVICE_ENABLED` are forbidden.
 - Baseline scenarios (reachability, CSP, canonical-domain DOM assertion, logged-out final state) MUST NOT gate on any service.
@@ -237,7 +239,7 @@ Non-exhaustive; new services inherit the same shape (real end-to-end check that 
 | `logout` | Universal-logout endpoint clears role + SSO session; next protected request re-engages auth. |
 | `matomo` | The consumer role asserts only that the matomo tracking snippet is in the HTML and that navigation generates the expected `/matomo.php` request (covered by `assertCspInjections` in the persona-helper). Matomo admin-reach, biber denial, and per-consumer tracker-site registration live in `web-app-matomo/files/playwright.spec.js` only. |
 | `prometheus` | The consumer role asserts only that `/metrics` is reachable at the documented path (where applicable). Prometheus admin-reach, biber denial, and per-consumer `up=1` verification live in `web-app-prometheus/files/playwright.spec.js` only, parameterised over `PROMETHEUS_TARGET_ROLES_JSON`. |
-| CSP / injectors | When any injector service (`asset`, `cdn`, `css`, `javascript`, `simpleicons`, `matomo`) is enabled, the role's `Content-Security-Policy` header MUST list the injector's host. The `assertCspInjections` helper drives the check on every persona scenario. |
+| CSP / injectors | When any injector service (`asset`, `cdn`, `css`, `javascript`, `simpleicons`, `matomo`) is enabled, the role's `Content-Security-Policy` header MUST list the injector's host. The shared module `personas/utils/csp.js` exposes the full CSP test surface: `assertCspInjections` for the per-injector parity check, `assertCspResponseHeader` and `assertCspMetaParity` for header / meta validation, plus `installCspViolationObserver` / `readCspViolations` / `expectNoCspViolations` for the runtime `securitypolicyviolation` stream. Specs require these helpers from `./personas`. |
 | `discourse` | WordPress to Discourse post round-trip and analogous role-pair flows. |
 | Static assets (`simpleicons`, `cdn`, `css`, `javascript`, `asset`) | The role's HTML references the expected asset host AND a request returns < 400 with the right content-type. |
 | DB engines (`redis`, `mariadb`, `postgres`) | Default: `# nocheck: playwright-service-flag`. Covered by role-local integration tests. Exception: roles that surface DB health in the UI. |
