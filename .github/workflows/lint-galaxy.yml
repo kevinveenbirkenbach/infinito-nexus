@@ -8,7 +8,7 @@ permissions:
 
 jobs:
   lint-galaxy:
-    name: 🧹 Lint Galaxy (galaxy-importer)
+    name: 🧹 Lint Galaxy
     runs-on: ubuntu-latest
     timeout-minutes: 30
 

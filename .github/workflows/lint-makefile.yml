@@ -8,7 +8,7 @@ permissions:
 
 jobs:
   lint-makefile:
-    name: 🧹 Lint Makefile (mbake)
+    name: 🧹 Lint Makefile
     runs-on: ubuntu-latest
     timeout-minutes: 5
 
