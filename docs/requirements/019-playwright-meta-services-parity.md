@@ -40,6 +40,7 @@ The acceptance criteria below are the mechanical translation of this contract.
 | 11 | Persona scenarios MUST FAIL LOUDLY when the persona cannot execute the contracted journey, never silently `test.skip(...)` on runtime detection of "no logout button" / "no authenticated surface" / "no admin UI marker". A silent skip hides real regressions (broken OIDC mapping, removed logout button, misconfigured oauth2-proxy, drifted UI selectors) behind a green deploy. The ONLY clean-skip mechanism is an EXPLICIT env opt-out declared by the role: `PERSONA_BIBER_BLOCKED=true` / `PERSONA_ADMINISTRATOR_BLOCKED=true` / `PERSONA_GUEST_BLOCKED=true` rendered in `templates/playwright.env.j2`, with a documented rationale in the role's README or TODO. Without the flag the persona helper hard-fails the test. | [test_strict_mode.py](../../tests/lint/ansible/roles/web-app/playwright/persona/test_strict_mode.py) (`test_persona_skips_only_via_explicit_opt_out`) + persona-helper bodies in `roles/test-e2e-playwright/files/personas/{biber,admin,guest}.js` |
 | 12 | Direct-probe deny-checks at prometheus / matomo MUST validate the response body, not only the status code. A `200 OK` is acceptable ONLY when the body contains role-specific markers proving the response is the genuine provider surface (e.g. `prometheus_build_info`, `<title>Prometheus</title>` for prometheus; matomo's login-form markers / `piwik` or `matomo` for matomo). Any 200 with a non-matching body is treated as a misconfigured proxy or a denial-as-200 surface and fails loudly. | [test_strict_mode.py](../../tests/lint/ansible/roles/web-app/playwright/persona/test_strict_mode.py) (`test_deny_helpers_validate_body_on_200`) + bodies in `roles/web-app-prometheus/files/playwright.spec.js` and `roles/web-app-matomo/files/playwright.spec.js` (per Rule 13: provider-owned SPOT) |
 | 13 | **SPOT-owned cross-service assertions.** Dashboard tile reachability, prometheus scrape parity, and matomo tracker presence are owned by the provider's own spec, not duplicated across consumer roles. Each provider's `templates/playwright.env.j2` renders a `<NAME>_TARGET_ROLES_JSON` manifest via the `lookup('roles_with_service', '<svc>')` Ansible lookup ([plugins/lookup/roles_with_service.py](../../plugins/lookup/roles_with_service.py)), enumerating every role whose merged applications config declares the service with both `enabled` and `shared` truthy and whose role exposes a canonical domain. The provider's `files/playwright.spec.js` parameterises one assertion per consumer over that manifest. The shared persona helpers (`runBiberFlow`, `runAdminFlow`) consequently no longer drive cross-service probes — they exercise the role under test only. | provider specs `roles/web-app-{dashboard,prometheus,matomo}/files/playwright.spec.js` and the `roles_with_service` lookup |
+| 14 | **Post-deploy log inspection.** After every deploy cycle the agent MUST inspect the Playwright logs (`list` reporter, `playwright-report/index.html`, `test-results/<test>/error-context.md`, plus the trace / video captured under `PLAYWRIGHT_KEEP_ALL=true`) and verify both (a) the intended per-persona and per-service behavior is really wired into the role's `files/playwright.spec.js`, and (b) every wired assertion was actually executed by Playwright. A green exit alone is NOT sufficient evidence: a silent `test.skip(...)`, a scenario that exits before the role-specific interaction fires, or a `<NAME>_SERVICE_ENABLED=true` gate whose body never ran all violate this rule. Gaps MUST be closed by extending the spec to cover the missing behavior; existing assertions stay per [Preserving existing tests](#preserving-existing-tests), and removal is permitted only when the deleted assertion is demonstrably faulty. | review (this requirement) + log inspection per [Playwright Spec Loop](../agents/action/iteration/playwright.md#procedure) step 4 |
 
 ## Per-service scenario catalogue
 
@@ -63,85 +64,87 @@ Closure of any row also requires that the role's spec already contains the three
 
 ## Per-role iteration matrix
 
-The matrix is sorted by `total` descending so the highest-coupling roles surface first; the agent walks the table top-to-bottom and treats `total` as the priority signal.
-`total` is the sum of direct + transitive embeds and consumers per [`infinito meta roles applications complexity --sort total --order desc`](../../cli/meta/roles/applications/complexity/__main__.py).
-Test A and Test B are currently green tree-wide, so no per-row drift list is carried in this table; the `notes` column captures role-specific contract context (auth-less collapse, persona blocked-flag opt-outs, bespoke admin-only test bodies).
+The matrix is the source of truth for the rollout: the agent walks it top-to-bottom and treats `total` as the priority signal.
+The `notes` column captures role-specific contract context (auth-less collapse, persona blocked-flag opt-outs, bespoke admin-only test bodies).
+The `v0` / `v1` / `v2` columns track per-variant progress: each cell starts as ⏳ (untested) and flips to ✅ once the role's full Per-role flow passes for that variant, including the post-deploy log inspection from Rule 14.
+An empty per-variant cell means the role does not declare that variant index in `roles/<role>/meta/variants.yml`.
 
-Legend: ✅ present, ❌ missing.
+Legend (`has env` / `has spec`): ✅ present, ❌ missing.
+Legend (`v0` / `v1` / `v2`): ⏳ untested, ✅ passed (full Per-role flow incl. log inspection), empty = variant not declared.
 
-| Role | total | has env | has spec | notes |
-| --- | ---: | --- | --- | --- |
-| `web-app-prometheus` | 173 | ✅ | ✅ | oauth2-proxy gates the role on `web-app-prometheus-administrator`; biber lacks the role so the proxy denies the session and biber has no in-app surface to drive a logout from — opt out via `PERSONA_BIBER_BLOCKED=true` (Rule 11). The administrator persona runs the standard oauth2-proxy → Keycloak chain. Bespoke `metricz`, `dashboard-to-prometheus admin SSO`, and `biber-denied-access` tests cover the SPOT-owned probes |
-| `web-app-matomo` | 168 | ✅ | ✅ | admin-only role: persona stubs explicit-skipped via `PERSONA_BIBER_BLOCKED=true` / `PERSONA_ADMINISTRATOR_BLOCKED=true` in env (Rule 11); bespoke "matomo administrator" test covers the admin journey via matomo's own login form. The biber-deny test gates on `isServiceEnabled("oauth2")` and parks until matomo's oauth2-proxy gate is wired (TODO in `meta/services.yml`) |
-| `web-app-dashboard` | 162 | ✅ | ✅ |  |
-| `web-svc-cdn` | 144 | ✅ | ✅ |  |
-| `web-app-mailu` | 139 | ✅ | ✅ |  |
-| `web-app-keycloak` | 130 | ✅ | ✅ | auth-provider exception: generic persona scenarios are exempt; bespoke "master-realm super administrator", "normal-realm administrator", "normal-realm biber" tests cover the persona contract via the realm account UI |
-| `web-svc-simpleicons` | 92 | ✅ | ✅ |  |
-| `web-app-nextcloud` | 27 | ✅ | ✅ |  |
-| `web-app-discourse` | 24 | ✅ | ✅ |  |
-| `web-app-bigbluebutton` | 24 | ✅ | ✅ |  |
-| `web-app-opentalk` | 23 | ✅ | ✅ |  |
-| `web-app-mastodon` | 23 | ❌ | ✅ |  |
-| `web-app-friendica` | 23 | ✅ | ✅ |  |
-| `web-app-openwebui` | 22 | ✅ | ✅ |  |
-| `web-app-minio` | 22 | ✅ | ✅ |  |
-| `web-app-listmonk` | 22 | ❌ | ✅ |  |
-| `web-app-gitea` | 22 | ✅ | ✅ |  |
-| `web-app-flowise` | 22 | ✅ | ✅ |  |
-| `web-app-bookwyrm` | 22 | ✅ | ✅ |  |
-| `web-app-xwiki` | 21 | ❌ | ✅ |  |
-| `web-app-wordpress` | 21 | ✅ | ✅ |  |
-| `web-app-taiga` | 21 | ✅ | ✅ |  |
-| `web-app-shopware` | 21 | ❌ | ✅ |  |
-| `web-app-pretix` | 21 | ❌ | ✅ |  |
-| `web-app-odoo` | 21 | ✅ | ✅ |  |
-| `web-app-moodle` | 21 | ✅ | ✅ |  |
-| `web-app-mobilizon` | 21 | ❌ | ✅ |  |
-| `web-app-mattermost` | 21 | ✅ | ✅ |  |
-| `web-app-matrix` | 21 | ✅ | ✅ |  |
-| `web-app-joomla` | 21 | ✅ | ✅ |  |
-| `web-app-gitlab` | 21 | ❌ | ✅ |  |
-| `web-app-fider` | 21 | ✅ | ✅ |  |
-| `web-app-fediwall` | 21 | ✅ | ✅ |  |
-| `web-app-espocrm` | 21 | ❌ | ✅ |  |
-| `web-app-decidim` | 21 | ✅ | ✅ |  |
-| `web-app-baserow` | 21 | ✅ | ✅ |  |
-| `web-app-akaunting` | 21 | ✅ | ✅ | biber and administrator personas explicit-skipped via `PERSONA_BIBER_BLOCKED=true` and `PERSONA_ADMINISTRATOR_BLOCKED=true` in env; OIDC auto-provisioning not wired, see role TODO.md |
-| `web-app-suitecrm` | 20 | ❌ | ✅ |  |
-| `web-app-snipe-it` | 20 | ❌ | ✅ |  |
-| `web-app-pixelfed` | 20 | ✅ | ✅ |  |
-| `web-app-peertube` | 20 | ✅ | ✅ |  |
-| `web-app-openproject` | 20 | ❌ | ✅ |  |
-| `web-app-opencloud` | 20 | ✅ | ✅ |  |
-| `web-app-mediawiki` | 20 | ❌ | ✅ |  |
-| `web-app-jira` | 20 | ❌ | ✅ |  |
-| `web-app-jenkins` | 20 | ✅ | ✅ |  |
-| `web-app-fusiondirectory` | 20 | ✅ | ✅ |  |
-| `web-app-funkwhale` | 20 | ❌ | ✅ |  |
-| `web-app-confluence` | 20 | ❌ | ✅ |  |
-| `web-app-bluesky` | 20 | ✅ | ✅ | biber and administrator personas explicit-skipped via `PERSONA_BIBER_BLOCKED=true` / `PERSONA_ADMINISTRATOR_BLOCKED=true`; the social-app mobile SPA hides the logout in a profile menu unreachable to the auth-surface check; bespoke OIDC + LDAP variant tests verify both personas authenticate via the broker |
-| `web-app-yourls` | 19 | ✅ | ✅ |  |
-| `web-app-phpldapadmin` | 19 | ❌ | ✅ |  |
-| `web-app-pgadmin` | 19 | ❌ | ✅ |  |
-| `web-app-magento` | 19 | ❌ | ✅ |  |
-| `web-app-lam` | 19 | ❌ | ✅ |  |
-| `web-app-kix` | 19 | ✅ | ✅ |  |
-| `web-app-postmarks` | 18 | ✅ | ✅ |  |
-| `web-app-phpmyadmin` | 18 | ❌ | ✅ |  |
-| `web-app-chess` | 18 | ❌ | ✅ |  |
-| `web-app-sphinx` | 17 | ✅ | ✅ |  |
-| `web-app-roulette-wheel` | 17 | ❌ | ✅ |  |
-| `web-app-oauth2-proxy` | 17 | ❌ | ✅ |  |
-| `web-app-navigator` | 17 | ❌ | ✅ |  |
-| `web-app-mini-qr` | 17 | ❌ | ✅ |  |
-| `web-app-mig` | 17 | ✅ | ✅ |  |
-| `web-app-littlejs` | 17 | ❌ | ✅ |  |
-| `web-app-hugo` | 17 | ✅ | ✅ |  |
-| `web-app-bridgy-fed` | 17 | ✅ | ✅ |  |
-| `web-svc-xmpp` | 16 | ✅ | ✅ |  |
-| `web-svc-libretranslate` | 16 | ✅ | ✅ |  |
-| `web-app-socialhome` | 16 | ❌ | ✅ |  |
+| Role | total | has env | has spec | v0 | v1 | v2 | notes |
+| --- | ---: | --- | --- | --- | --- | --- | --- |
+| `web-app-prometheus` | 173 | ✅ | ✅ | ⏳ | ⏳ |  | oauth2-proxy gates the role on `web-app-prometheus-administrator`; biber lacks the role so the proxy denies the session and biber has no in-app surface to drive a logout from — opt out via `PERSONA_BIBER_BLOCKED=true` (Rule 11). The administrator persona runs the standard oauth2-proxy → Keycloak chain. Bespoke `metricz`, `dashboard-to-prometheus admin SSO`, and `biber-denied-access` tests cover the SPOT-owned probes |
+| `web-app-matomo` | 168 | ✅ | ✅ | ⏳ | ⏳ |  | admin-only role: persona stubs explicit-skipped via `PERSONA_BIBER_BLOCKED=true` / `PERSONA_ADMINISTRATOR_BLOCKED=true` in env (Rule 11); bespoke "matomo administrator" test covers the admin journey via matomo's own login form. The biber-deny test gates on `isServiceEnabled("oauth2")` and parks until matomo's oauth2-proxy gate is wired (TODO in `meta/services.yml`) |
+| `web-app-dashboard` | 162 | ✅ | ✅ | ⏳ | ⏳ |  |  |
+| `web-svc-cdn` | 144 | ✅ | ✅ | ⏳ | ⏳ |  |  |
+| `web-app-mailu` | 139 | ✅ | ✅ | ⏳ | ⏳ |  |  |
+| `web-app-keycloak` | 130 | ✅ | ✅ | ⏳ | ⏳ |  | auth-provider exception: generic persona scenarios are exempt; bespoke "master-realm super administrator", "normal-realm administrator", "normal-realm biber" tests cover the persona contract via the realm account UI |
+| `web-svc-simpleicons` | 92 | ✅ | ✅ | ⏳ | ⏳ |  |  |
+| `web-app-nextcloud` | 27 | ✅ | ✅ | ⏳ | ⏳ | ⏳ |  |
+| `web-app-discourse` | 24 | ✅ | ✅ | ⏳ | ⏳ |  |  |
+| `web-app-bigbluebutton` | 24 | ✅ | ✅ | ⏳ | ⏳ |  |  |
+| `web-app-opentalk` | 23 | ✅ | ✅ | ⏳ | ⏳ | ⏳ |  |
+| `web-app-mastodon` | 23 | ❌ | ✅ | ⏳ | ⏳ |  |  |
+| `web-app-friendica` | 23 | ✅ | ✅ | ⏳ | ⏳ | ⏳ |  |
+| `web-app-openwebui` | 22 | ✅ | ✅ | ⏳ | ⏳ | ⏳ |  |
+| `web-app-minio` | 22 | ✅ | ✅ | ⏳ | ⏳ | ⏳ |  |
+| `web-app-listmonk` | 22 | ❌ | ✅ | ⏳ | ⏳ |  |  |
+| `web-app-gitea` | 22 | ✅ | ✅ | ⏳ | ⏳ | ⏳ |  |
+| `web-app-flowise` | 22 | ✅ | ✅ | ⏳ | ⏳ | ⏳ |  |
+| `web-app-bookwyrm` | 22 | ✅ | ✅ | ⏳ | ⏳ | ⏳ |  |
+| `web-app-xwiki` | 21 | ❌ | ✅ | ⏳ | ⏳ |  |  |
+| `web-app-wordpress` | 21 | ✅ | ✅ | ⏳ | ⏳ |  |  |
+| `web-app-taiga` | 21 | ✅ | ✅ | ⏳ | ⏳ | ⏳ |  |
+| `web-app-shopware` | 21 | ❌ | ✅ | ⏳ | ⏳ | ⏳ |  |
+| `web-app-pretix` | 21 | ❌ | ✅ | ⏳ | ⏳ |  |  |
+| `web-app-odoo` | 21 | ✅ | ✅ | ⏳ | ⏳ | ⏳ |  |
+| `web-app-moodle` | 21 | ✅ | ✅ | ⏳ | ⏳ | ⏳ |  |
+| `web-app-mobilizon` | 21 | ❌ | ✅ | ⏳ | ⏳ |  |  |
+| `web-app-mattermost` | 21 | ✅ | ✅ | ⏳ | ⏳ |  |  |
+| `web-app-matrix` | 21 | ✅ | ✅ | ⏳ | ⏳ |  |  |
+| `web-app-joomla` | 21 | ✅ | ✅ | ⏳ | ⏳ |  |  |
+| `web-app-gitlab` | 21 | ❌ | ✅ | ⏳ | ⏳ |  |  |
+| `web-app-fider` | 21 | ✅ | ✅ | ⏳ | ⏳ |  |  |
+| `web-app-fediwall` | 21 | ✅ | ✅ | ⏳ | ⏳ | ⏳ |  |
+| `web-app-espocrm` | 21 | ❌ | ✅ | ⏳ | ⏳ | ⏳ |  |
+| `web-app-decidim` | 21 | ✅ | ✅ | ⏳ | ⏳ |  |  |
+| `web-app-baserow` | 21 | ✅ | ✅ | ⏳ | ⏳ | ⏳ |  |
+| `web-app-akaunting` | 21 | ✅ | ✅ | ⏳ | ⏳ | ⏳ | biber and administrator personas explicit-skipped via `PERSONA_BIBER_BLOCKED=true` and `PERSONA_ADMINISTRATOR_BLOCKED=true` in env; OIDC auto-provisioning not wired, see role TODO.md |
+| `web-app-suitecrm` | 20 | ❌ | ✅ | ⏳ | ⏳ | ⏳ |  |
+| `web-app-snipe-it` | 20 | ❌ | ✅ | ⏳ | ⏳ | ⏳ |  |
+| `web-app-pixelfed` | 20 | ✅ | ✅ | ⏳ | ⏳ |  |  |
+| `web-app-peertube` | 20 | ✅ | ✅ | ⏳ | ⏳ |  |  |
+| `web-app-openproject` | 20 | ❌ | ✅ | ⏳ | ⏳ | ⏳ |  |
+| `web-app-opencloud` | 20 | ✅ | ✅ | ⏳ | ⏳ | ⏳ |  |
+| `web-app-mediawiki` | 20 | ❌ | ✅ | ⏳ | ⏳ |  |  |
+| `web-app-jira` | 20 | ❌ | ✅ | ⏳ | ⏳ |  |  |
+| `web-app-jenkins` | 20 | ✅ | ✅ | ⏳ | ⏳ | ⏳ |  |
+| `web-app-fusiondirectory` | 20 | ✅ | ✅ | ⏳ | ⏳ | ⏳ |  |
+| `web-app-funkwhale` | 20 | ❌ | ✅ | ⏳ | ⏳ | ⏳ |  |
+| `web-app-confluence` | 20 | ❌ | ✅ | ⏳ | ⏳ |  |  |
+| `web-app-bluesky` | 20 | ✅ | ✅ | ⏳ | ⏳ | ⏳ | biber and administrator personas explicit-skipped via `PERSONA_BIBER_BLOCKED=true` / `PERSONA_ADMINISTRATOR_BLOCKED=true`; the social-app mobile SPA hides the logout in a profile menu unreachable to the auth-surface check; bespoke OIDC + LDAP variant tests verify both personas authenticate via the broker |
+| `web-app-yourls` | 19 | ✅ | ✅ | ⏳ | ⏳ |  |  |
+| `web-app-phpldapadmin` | 19 | ❌ | ✅ | ⏳ | ⏳ | ⏳ |  |
+| `web-app-pgadmin` | 19 | ❌ | ✅ | ⏳ | ⏳ |  |  |
+| `web-app-magento` | 19 | ❌ | ✅ | ⏳ | ⏳ |  |  |
+| `web-app-lam` | 19 | ❌ | ✅ | ⏳ | ⏳ | ⏳ |  |
+| `web-app-kix` | 19 | ✅ | ✅ | ⏳ | ⏳ | ⏳ |  |
+| `web-app-postmarks` | 18 | ✅ | ✅ | ⏳ | ⏳ |  |  |
+| `web-app-phpmyadmin` | 18 | ❌ | ✅ | ⏳ | ⏳ |  |  |
+| `web-app-chess` | 18 | ❌ | ✅ | ⏳ | ⏳ |  |  |
+| `web-app-sphinx` | 17 | ✅ | ✅ | ⏳ | ⏳ |  |  |
+| `web-app-roulette-wheel` | 17 | ❌ | ✅ | ⏳ | ⏳ |  |  |
+| `web-app-oauth2-proxy` | 17 | ❌ | ✅ | ⏳ | ⏳ |  |  |
+| `web-app-navigator` | 17 | ❌ | ✅ | ⏳ | ⏳ |  |  |
+| `web-app-mini-qr` | 17 | ❌ | ✅ | ⏳ | ⏳ |  |  |
+| `web-app-mig` | 17 | ✅ | ✅ | ⏳ | ⏳ |  |  |
+| `web-app-littlejs` | 17 | ❌ | ✅ | ⏳ | ⏳ |  |  |
+| `web-app-hugo` | 17 | ✅ | ✅ | ⏳ | ⏳ |  |  |
+| `web-app-bridgy-fed` | 17 | ✅ | ✅ | ⏳ | ⏳ |  |  |
+| `web-svc-xmpp` | 16 | ✅ | ✅ | ⏳ | ⏳ | ⏳ |  |
+| `web-svc-libretranslate` | 16 | ✅ | ✅ | ⏳ | ⏳ |  |  |
+| `web-app-socialhome` | 16 | ❌ | ✅ | ⏳ | ⏳ |  |  |
 
 Rows with `has env ❌` and `has spec ✅` ship the auth-less collapse exception per Rule 3: the spec contains a single baseline reachability scenario and no env template is rendered because the role has no `<NAME>_SERVICE_ENABLED=` flags to gate on.
 The matrix only lists roles that already ship a Playwright spec. A role with neither artefact is out of scope until it grows one; when that happens, the new spec MUST ship the three persona scenarios per Rule 3 (or document the auth-less collapse explicitly) AND the env template MUST satisfy this requirement from day one.
@@ -199,13 +202,22 @@ For each role in the [Iteration order](#iteration-order) below:
    - A variant references a service key that is no longer declared in `meta/services.yml`; remove the override.
    Variants edits MUST keep [test_auth_coverage.py](../../tests/integration/roles/meta/variants/test_auth_coverage.py) and [test_services_match.py](../../tests/integration/roles/meta/variants/test_services_match.py) green; the agent re-runs both after every `meta/variants.yml` change.
    Variants edits are part of the same role-closure scope and do NOT trigger a separate commit.
-6. The role is **role-closed** only when:
+6. **Inspect the Playwright logs after every deploy cycle for this role** per [Rule 14](#rules), even when the deploy and the spec both exit `0`.
+   The agent MUST confirm via the `list` reporter, `playwright-report/index.html`, and the trace / video captured under `PLAYWRIGHT_KEEP_ALL=true` (set per [Role Loop](../agents/action/iteration/role.md)) that:
+   - the spec really wires the persona and per-service assertions the role's `meta/services.yml` declares (no contract gap silently masked by absence of a gated step), AND
+   - every wired assertion actually executed (no silent `test.skip(...)`, no scenario that exited before the role-specific interaction fired, no `<NAME>_SERVICE_ENABLED=true` gate whose body never ran).
+   When the inspection surfaces a gap, the agent MUST extend the spec until the missing behavior is both wired AND executed.
+   Existing test logic stays per [Preserving existing tests](#preserving-existing-tests); deletion is allowed only when the removed assertion is demonstrably faulty.
+   After every spec edit the agent re-runs the spec via [Playwright Spec Loop](../agents/action/iteration/playwright.md) and repeats the inspection until the role passes the gate cleanly.
+   The role MUST NOT progress to role closure until this inspection is clean.
+7. The role is **role-closed** only when:
    - the final `make deploy-fresh-purged-apps APPS=<role> FULL_CYCLE=true` run completed successfully for every variant, AND
    - the Playwright spec passed for every variant, AND
+   - the post-deploy log inspection in step 6 is clean for every variant, AND
    - the role's `files/playwright.spec.js` ships the three persona scenarios per [Rule 3](#rules) (or the auth-less single-scenario collapse for `web-svc-*` and the auth-less `web-app-*` exceptions), AND
    - both [test_playwright_env_services_match.py](../../tests/integration/roles/test_playwright_env_services_match.py) and [test_playwright_spec_env_gates.py](../../tests/integration/roles/test_playwright_spec_env_gates.py) are green for the role, AND
    - if `meta/variants.yml` was edited, [test_auth_coverage.py](../../tests/integration/roles/meta/variants/test_auth_coverage.py) and [test_services_match.py](../../tests/integration/roles/meta/variants/test_services_match.py) are green.
-7. **Strike the role through in the matrix** as the progress marker (see [Resumability](#resumability)) and move to the next role.
+8. **Strike the role through in the matrix** as the progress marker (see [Resumability](#resumability)) and move to the next role.
 
 ### Pattern transfer
 
@@ -245,10 +257,9 @@ Specifically:
 
 ### Iteration order
 
-The matrix above IS the iteration plan: rows are sorted by `total` descending, so the highest-priority role is the first row and the agent walks the table top-to-bottom.
+The matrix above IS the iteration plan: the agent walks the table top-to-bottom.
 `total` is the priority signal; ties are broken alphabetically by role name.
 A hub fix propagates to the long tail of consumers via [Pattern transfer](#pattern-transfer), which is why the highest-`total` roles run first.
-The agent MUST re-derive the table from [`infinito meta roles applications complexity --sort total --order desc`](../../cli/meta/roles/applications/complexity/__main__.py) on every resume per [Resumability](#resumability).
 
 #### Auth-less roles (persona-collapse exception)
 
@@ -270,10 +281,9 @@ The iteration matrix above IS the progress marker; the agent strikes a row throu
 
 When resuming, the agent MUST:
 
-1. Re-derive the iteration order from `infinito meta roles applications complexity --sort total --order desc` to pick up any new roles added since the snapshot and to apply the highest-coupling-first walk per [Iteration order](#iteration-order).
-2. Re-run [test_playwright_env_services_match.py](../../tests/integration/roles/test_playwright_env_services_match.py) and [test_playwright_spec_env_gates.py](../../tests/integration/roles/test_playwright_spec_env_gates.py) to discover which roles are already role-closed (zero drift) and which are still open.
-3. Pick the highest-`total` role that is NOT role-closed and resume the [Per-role flow](#per-role-flow) on it.
-4. Replay [Pattern transfer](#pattern-transfer) for any patterns the agent had landed pre-interruption: re-read each role-closed role's spec to identify which catalogue entries it covers, then ensure those patterns are present in every later not-yet-closed role's spec before continuing.
+1. Re-run [test_playwright_env_services_match.py](../../tests/integration/roles/test_playwright_env_services_match.py) and [test_playwright_spec_env_gates.py](../../tests/integration/roles/test_playwright_spec_env_gates.py) to discover which roles are already role-closed (zero drift) and which are still open.
+2. Pick the highest-`total` role in the matrix that is NOT role-closed and resume the [Per-role flow](#per-role-flow) on it.
+3. Replay [Pattern transfer](#pattern-transfer) for any patterns the agent had landed pre-interruption: re-read each role-closed role's spec to identify which catalogue entries it covers, then ensure those patterns are present in every later not-yet-closed role's spec before continuing.
 
 The agent MUST NOT redo deploys for already-role-closed roles unless a later edit broke their tests.
 
@@ -298,3 +308,4 @@ The agent MUST NOT redo deploys for already-role-closed roles unless a later edi
 - [ ] `SERVICES_DISABLED=<svc>` reports every gated scenario as `skipped: <NAME>_SERVICE_ENABLED=false`, never `failed`. MUST cover ≥1 scenario each for `oidc`, `ldap`, `email`, `logout`, `matomo`. The `dashboard` exemption (Rule 1) means consumers do not render `DASHBOARD_SERVICE_ENABLED=`; coverage for that service runs through web-app-dashboard's parameterised tile-reachability test (Rule 13).
 - [ ] No-`SERVICES_DISABLED` run produces ≥1 `passed` scenario per in-scope `(role, service)` pair. Empty-skip = fail.
 - [ ] `grep 'process.env\.[A-Z_]*_SERVICE_ENABLED'` over the spec tree (excluding `service-gating.js`) returns zero hits.
+- [ ] Post-deploy log inspection per [Rule 14](#rules) is clean for every role-closed variant: every wired persona / per-service assertion executed, no silent skip, no green-but-empty gate.
