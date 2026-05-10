@@ -1,7 +1,7 @@
 const { test, expect } = require("@playwright/test");
 
 const { skipUnlessServiceEnabled, isServiceEnabled } = require("./service-gating");
-const { decodeDotenvQuotedValue, runAdminFlow, runBiberFlow, runGuestFlow } = require("./personas");
+const { decodeDotenvQuotedValue, escapeRegex, isVisible, runAdminFlow, runBiberFlow, runGuestFlow, waitForFrameUrl } = require("./personas");
 test.use({
   ignoreHTTPSErrors: true
 });
@@ -13,14 +13,6 @@ const oidcButtonText = decodeDotenvQuotedValue(process.env.OIDC_BUTTON_TEXT);
 const taigaBaseUrl = decodeDotenvQuotedValue(process.env.TAIGA_BASE_URL);
 const taigaOauth2Enabled = /^(1|true|yes|on)$/i.test(process.env.TAIGA_OAUTH2_ENABLED || "");
 const taigaOidcEnabled = /^(1|true|yes|on)$/i.test(process.env.TAIGA_OIDC_ENABLED || "");
-
-function escapeRegex(value) {
-  return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-}
-
-async function isVisible(locator) {
-  return locator.first().isVisible().catch(() => false);
-}
 
 async function findFirstVisible(locators) {
   for (const locator of locators) {
@@ -49,22 +41,6 @@ function getOidcEntryLocators(target) {
     target.getByRole("button", { name: oidcLabelPattern }),
     target.locator('[href*="/oidc"], [data-href*="/oidc"], [ui-sref*="oidc"], [ng-click*="oidc"]')
   ];
-}
-
-async function waitForFrameUrl(iframeLocator, matcher, timeout, errorMessage) {
-  await expect
-    .poll(
-      async () => {
-        const iframeHandle = await iframeLocator.elementHandle();
-        const frame = iframeHandle ? await iframeHandle.contentFrame() : null;
-        return frame ? frame.url() : "";
-      },
-      {
-        timeout,
-        message: errorMessage
-      }
-    )
-    .toContain(matcher);
 }
 
 async function waitForInitialTaigaAuthState(

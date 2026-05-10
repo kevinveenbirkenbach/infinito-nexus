@@ -1,7 +1,7 @@
 const { test, expect } = require("@playwright/test");
 
 const { skipUnlessServiceEnabled, isServiceEnabled } = require("./service-gating");
-const { decodeDotenvQuotedValue, runAdminFlow, runBiberFlow, runGuestFlow } = require("./personas");
+const { decodeDotenvQuotedValue, findFirstVisibleCandidate, runAdminFlow, runBiberFlow, runGuestFlow } = require("./personas");
 test.use({
   ignoreHTTPSErrors: true
 });
@@ -39,18 +39,6 @@ async function waitForFirstVisible(page, locators, timeout = 60_000, errorMessag
   }
 
   throw new Error(errorMessage);
-}
-
-async function findFirstVisibleCandidate(candidates) {
-  for (const candidate of candidates) {
-    const locator = candidate.locator.first();
-
-    if (await locator.isVisible().catch(() => false)) {
-      return { ...candidate, locator };
-    }
-  }
-
-  return null;
 }
 
 async function waitForVisibleCandidate(

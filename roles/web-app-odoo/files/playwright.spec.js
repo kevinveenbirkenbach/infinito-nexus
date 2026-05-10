@@ -1,7 +1,7 @@
 const { test, expect } = require("@playwright/test");
 
 const { skipUnlessServiceEnabled, isServiceEnabled } = require("./service-gating");
-const { decodeDotenvQuotedValue, performKeycloakLoginForm, runAdminFlow, runBiberFlow, runGuestFlow } = require("./personas");
+const { decodeDotenvQuotedValue, isVisible, performKeycloakLoginForm, runAdminFlow, runBiberFlow, runGuestFlow, waitForFrameUrl } = require("./personas");
 test.use({
   ignoreHTTPSErrors: true
 });
@@ -89,26 +89,8 @@ async function performOdooLogout(page, odooBaseUrl) {
 }
 
 // Wait for frame URL to contain a specific string
-async function waitForFrameUrl(iframeLocator, matcher, timeout, errorMessage) {
-  await expect
-    .poll(
-      async () => {
-        const iframeHandle = await iframeLocator.elementHandle();
-        const frame = iframeHandle ? await iframeHandle.contentFrame() : null;
-        return frame ? frame.url() : "";
-      },
-      {
-        timeout,
-        message: errorMessage
-      }
-    )
-    .toContain(matcher);
-}
 
 // Helper to check visibility
-async function isVisible(locator) {
-  return locator.first().isVisible().catch(() => false);
-}
 
 // Log out from dashboard if needed
 async function logoutFromDashboardIfNeeded(page) {

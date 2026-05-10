@@ -1,21 +1,13 @@
 const { test, expect } = require("@playwright/test");
 
 const { skipUnlessServiceEnabled, isServiceEnabled } = require("./service-gating");
-const { assertCspMetaParity, assertCspResponseHeader, decodeDotenvQuotedValue, expectNoCspViolations, installCspViolationObserver, normalizeBaseUrl, runAdminFlow, runBiberFlow, runGuestFlow } = require("./personas");
+const { assertCspMetaParity, assertCspResponseHeader, decodeDotenvQuotedValue, escapeRegex, expectNoCspViolations, installCspViolationObserver, isVisible, normalizeBaseUrl, runAdminFlow, runBiberFlow, runGuestFlow } = require("./personas");
 test.use({
   ignoreHTTPSErrors: true
 });
 
-function escapeRegex(value) {
-  return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-}
-
 function buildAssetPathPrefix(baseUrl, path) {
   return `${baseUrl.replace(/\/$/, "")}${path}`;
-}
-
-async function isVisible(locator) {
-  return locator.first().isVisible().catch(() => false);
 }
 
 async function waitForFirstVisible(locators, timeout, errorMessage) {

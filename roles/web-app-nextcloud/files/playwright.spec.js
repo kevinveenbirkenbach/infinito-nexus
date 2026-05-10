@@ -14,7 +14,7 @@
 const { test, expect } = require("@playwright/test");
 
 const { skipUnlessServiceEnabled, isServiceEnabled } = require("./service-gating");
-const { decodeDotenvQuotedValue, runAdminFlow, runBiberFlow, runGuestFlow } = require("./personas");
+const { decodeDotenvQuotedValue, findFirstVisibleCandidate, runAdminFlow, runBiberFlow, runGuestFlow } = require("./personas");
 // `ignoreHTTPSErrors` is needed because the local stack typically uses the
 // self-signed CA set up by `make trust-ca`, which the Playwright container
 // does not trust by default.
@@ -109,18 +109,6 @@ async function waitForFirstVisible(page, locators, timeout = 60_000) {
   }
 
   throw new Error("Timed out waiting for one of the expected Nextcloud selectors to become visible");
-}
-
-async function findFirstVisibleCandidate(candidates) {
-  for (const candidate of candidates) {
-    const locator = candidate.locator.first();
-
-    if (await locator.isVisible().catch(() => false)) {
-      return { ...candidate, locator };
-    }
-  }
-
-  return null;
 }
 
 async function waitForVisibleCandidate(
