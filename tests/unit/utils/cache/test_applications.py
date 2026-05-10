@@ -34,7 +34,7 @@ def _write(path: Path, content: str) -> None:
 
 
 def _seed_minimal_roles(tmp: Path) -> Path:
-    """Create a minimal `<tmp>/roles/web-app-foo/meta/...` tree (post req-008)
+    """Create a minimal `<tmp>/roles/web-app-foo/meta/...` tree
     so applications/variants can resolve a real role.
     """
     roles = tmp / "roles"

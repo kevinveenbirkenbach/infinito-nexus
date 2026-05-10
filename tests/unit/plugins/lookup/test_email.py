@@ -82,7 +82,7 @@ class TestEmailLookup(unittest.TestCase):
         self.assertEqual(result["host"], "localhost")
 
     def test_application_override_wins_over_defaults(self) -> None:
-        # Per req-008 the file root of meta/services.yml IS the services map
+        # Per the file root of meta/services.yml IS the services map
         # (no `compose.services` envelope).
         _write_role_config(
             self._tmp,

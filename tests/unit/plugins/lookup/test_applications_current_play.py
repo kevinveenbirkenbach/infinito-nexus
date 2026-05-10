@@ -8,7 +8,7 @@ from plugins.lookup.applications_current_play import (
     _reset_cache_for_tests,
 )
 
-# Per req-008 the materialised payload moved from
+# Per the materialised payload moved from
 # `applications.<app>.compose.services.<X>` to `applications.<app>.services.<X>`.
 SAMPLE_APPS = {
     "web-svc-html": {},

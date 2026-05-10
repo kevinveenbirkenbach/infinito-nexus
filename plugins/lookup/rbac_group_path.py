@@ -27,7 +27,7 @@ Contract:
   in its `meta/services.yml`. The role may be tenant-aware
   (`rbac.tenancy.axis == "domain"`) or not (default).
 - `role` MUST appear under `rbac.roles.<role>` or be the implicit
-  `administrator` that requirement 004 auto-adds.
+  `administrator` that the role-list contract auto-adds.
 - `tenant` MUST be passed for tenant-aware per-tenant roles, MUST NOT
   be passed for global-scope roles or non-tenant apps.
 - Every failure raises AnsibleError with an actionable message.
@@ -96,7 +96,7 @@ def _resolve_role_scope(app_cfg, application_id, role):
     roles = rbac.get("roles") or {}
     role_cfg = roles.get(role)
 
-    # The implicit `administrator` role from requirement 004 is auto-added
+    # The implicit `administrator` role from the role-list contract is auto-added
     # for every app with an rbac: block and is always valid.
     if role != _IMPLICIT_ADMIN_ROLE and not isinstance(role_cfg, dict):
         declared = sorted(roles.keys()) if isinstance(roles, dict) else []
@@ -167,7 +167,7 @@ class LookupModule(LookupBase):
         scope, axis = _resolve_role_scope(app_cfg, application_id, role)
         group_root = _get_rbac_group_name(variables)
 
-        # Requirement 005: hierarchical OIDC claim paths that mirror the
+        # hierarchical OIDC claim paths that mirror the
         # LDAP RBAC tree verbatim, with no redundant segments:
         #   /<group_root>/<application_id>/<role_name>                        # non-tenant / global
         #   /<group_root>/<application_id>/<tenant_id>/<role_name>            # per-tenant

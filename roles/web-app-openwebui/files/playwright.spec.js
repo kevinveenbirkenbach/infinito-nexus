@@ -176,7 +176,7 @@ test("biber: dashboard to openwebui OIDC login and logout", async ({ page }) => 
 });
 
 
-// Persona scenarios (req 019 Rule 3).
+// Persona scenarios.
 // Bodies live in the shared persona helpers under
 // roles/test-e2e-playwright/files/personas/{guest,biber,admin}.js.
 

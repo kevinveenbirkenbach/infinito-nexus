@@ -15,7 +15,7 @@ from utils.roles.mapping import ROLE_FILE_META_USERS
 
 
 def _write_users(base_dir: Path, role_name: str, users: dict) -> None:
-    """Write meta/users.yml — file root IS the users map (req-008)."""
+    """Write meta/users.yml — file root IS the users map."""
     users_path = base_dir / "roles" / role_name / ROLE_FILE_META_USERS
     users_path.parent.mkdir(parents=True, exist_ok=True)
     users_path.write_text(dump_yaml_str(users), encoding="utf-8")

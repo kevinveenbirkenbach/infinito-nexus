@@ -57,7 +57,7 @@ def _read_yaml(path: Path) -> dict:
 
 
 def _role_lifecycle(role_dir: Path) -> str:
-    # Per req-010 `lifecycle` lives on the role's primary entity at
+    # `lifecycle` lives on the role's primary entity at
     # `meta/services.yml.<primary_entity>.lifecycle`. Delegate to the
     # canonical helper and treat any failure as "no lifecycle" so role
     # discovery is never broken by a single malformed meta file.

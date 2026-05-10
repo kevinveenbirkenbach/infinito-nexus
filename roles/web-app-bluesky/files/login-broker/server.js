@@ -1,7 +1,7 @@
 /*
  * Bluesky login-broker.
  *
- * Architecture (variant A+ per requirement 013, web-app-bluesky):
+ * Architecture (variant A+, web-app-bluesky):
  *
  *     Browser
  *       │

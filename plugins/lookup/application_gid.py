@@ -20,7 +20,7 @@ def compute_application_gid(application_id, roles_dir="roles", base_gid=10000):
     if not Path(roles_dir).is_dir():
         raise ValueError(f"Roles directory '{roles_dir}' not found")
 
-    # Per req-008, an "application role" is identified by the presence of
+    # Per, an "application role" is identified by the presence of
     # at least one of the project-owned `meta/<topic>.yml` files (services,
     # server, rbac, volumes, schema, users). This preserves the prior
     # assignment ordering: every role that previously had `meta/services.yml`

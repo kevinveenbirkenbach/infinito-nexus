@@ -98,7 +98,7 @@ class TestIterRoleImagesVarsImages(unittest.TestCase):
         self.assertEqual(refs, [])
 
     def test_config_main_yml_ghcr_image(self):
-        # Per req-008 the file root IS the services map (no compose envelope)
+        # Per the file root IS the services map (no compose envelope)
         # and source_file reports the new path.
         refs = self._run(
             {

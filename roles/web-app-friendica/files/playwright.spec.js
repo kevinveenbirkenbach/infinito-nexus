@@ -121,7 +121,7 @@ test("friendica: biber and administrator log in side by side in isolated context
   }
 });
 
-// Persona scenarios (req 019 Rule 3).
+// Persona scenarios.
 // Bodies live in the shared helper roles/test-e2e-playwright/files/personas.js
 // so every role's persona flow stays consistent.
 

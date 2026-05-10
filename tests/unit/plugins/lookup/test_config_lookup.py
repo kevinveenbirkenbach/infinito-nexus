@@ -32,7 +32,7 @@ def _write_config(base_dir: Path, application_id: str, config: dict) -> None:
 
 
 def _write_users(base_dir: Path, application_id: str, users: dict) -> None:
-    """Write meta/users.yml — file root IS the users map (req-008)."""
+    """Write meta/users.yml — file root IS the users map."""
     users_path = base_dir / "roles" / application_id / ROLE_FILE_META_USERS
     users_path.parent.mkdir(parents=True, exist_ok=True)
     users_path.write_text(dump_yaml_str(users), encoding="utf-8")
@@ -86,7 +86,7 @@ class TestConfigLookup(unittest.TestCase):
             self.lm.run(["a", "b", "c", "d"], variables={"applications": {}})
 
     def test_resolves_from_roles_without_applications_var(self) -> None:
-        # meta/services.yml file root IS the services map (req-008): the
+        # meta/services.yml file root IS the services map: the
         # consumer path therefore reads `services.<entity>.<…>`.
         _write_config(
             self._tmp,

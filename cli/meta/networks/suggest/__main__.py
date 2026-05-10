@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Suggest free per-role subnets based on the live role tree (req-009).
+"""Suggest free per-role subnets based on the live role tree.
 
 Walks every ``roles/*/meta/server.yml``, collects occupied
 ``networks.local.subnet`` assignments, picks the smallest CIDR prefix that

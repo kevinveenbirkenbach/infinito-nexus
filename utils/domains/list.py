@@ -81,7 +81,7 @@ def build_applications_from_roles(
         if not isinstance(application_id, str) or not application_id.strip():
             continue
 
-        # Per req-008 the file-root of meta/server.yml IS the value of
+        # The file-root of meta/server.yml IS the value of
         # applications.<app>.server.
         server = load_yaml_mapping(server_meta)
         if not isinstance(server, dict):

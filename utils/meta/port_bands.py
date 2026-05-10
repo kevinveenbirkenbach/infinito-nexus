@@ -1,7 +1,7 @@
 """Read PORT_BANDS from group_vars/all/08_networks.yml.
 
-Per req-009 the canonical bands map lives there as a single key. The CLI
-helpers and the lint test consult this module so the bands stay in one place.
+The canonical bands map lives there as a single key. The CLI helpers
+and the lint test consult this module so the bands stay in one place.
 """
 
 from __future__ import annotations
@@ -31,9 +31,7 @@ def load_port_bands() -> dict[str, dict[str, dict[str, int]]]:
     root = _load_root()
     bands = root.get("PORT_BANDS")
     if not isinstance(bands, dict):
-        raise PortBandsError(
-            f"{NETWORKS_FILE} is missing the PORT_BANDS map (req-009)."
-        )
+        raise PortBandsError(f"{NETWORKS_FILE} is missing the PORT_BANDS map.")
     return bands
 
 

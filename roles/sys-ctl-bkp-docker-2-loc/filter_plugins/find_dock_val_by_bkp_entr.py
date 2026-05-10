@@ -18,7 +18,7 @@ def find_dock_val_by_bkp_entr(applications, search_string, mapped_entry):
     results = []
 
     for app in applications.values():
-        # Per req-008 the materialised payload exposes services under
+        # Per the materialised payload exposes services under
         # the bare `services` key (no `compose.services` envelope).
         services = app.get("services", {}) if isinstance(app, dict) else {}
         if not isinstance(services, dict):

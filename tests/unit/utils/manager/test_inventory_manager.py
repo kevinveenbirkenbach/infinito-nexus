@@ -44,7 +44,7 @@ class TestInventoryManager(TestCase):
                 if p == role_path / ROLE_FILE_VARS_MAIN:
                     return {}  # missing application_id on purpose
                 if p == role_path / ROLE_FILE_META_SERVICES:
-                    # Per req-008: meta/services.yml file root IS the
+                    # Per: meta/services.yml file root IS the
                     # services map (no `compose.services` envelope).
                     return {}
                 return {}
@@ -106,7 +106,7 @@ class TestInventoryManager(TestCase):
                 if p == role_path / ROLE_FILE_VARS_MAIN:
                     return {"application_id": "app_test"}
                 if p == role_path / ROLE_FILE_META_SERVICES:
-                    # Per req-008: meta/services.yml file root IS the
+                    # Per: meta/services.yml file root IS the
                     # services map (no `compose.services` envelope).
                     return {}
                 return {}
@@ -170,7 +170,7 @@ class TestInventoryManager(TestCase):
                 if p == role_path / ROLE_FILE_VARS_MAIN:
                     return {"application_id": "app_test"}
                 if p == role_path / ROLE_FILE_META_SERVICES:
-                    # Per req-008: meta/services.yml file root IS the
+                    # Per: meta/services.yml file root IS the
                     # services map (no `compose.services` envelope).
                     return {}
                 return {}
@@ -242,7 +242,7 @@ class TestInventoryManager(TestCase):
                 if p == role_path / ROLE_FILE_VARS_MAIN:
                     return {"application_id": "app_test"}
                 if p == role_path / ROLE_FILE_META_SERVICES:
-                    # Per req-008 the file root IS the services map
+                    # Per the file root IS the services map
                     # (no `compose.services` envelope).
                     return {"oauth2": {"enabled": True}}
                 return {}
@@ -425,7 +425,7 @@ class TestInventoryManager(TestCase):
                 if p == role_path / ROLE_FILE_VARS_MAIN:
                     return {"application_id": "app_test"}
                 if p == role_path / ROLE_FILE_META_SERVICES:
-                    # Per req-008: meta/services.yml file root IS the
+                    # Per: meta/services.yml file root IS the
                     # services map (no `compose.services` envelope).
                     return {}
                 return {}
@@ -530,7 +530,7 @@ class TestInventoryManager(TestCase):
                     return {"application_id": "app_test"}
                 if p == role_path / ROLE_FILE_META_SERVICES:
                     # No provider resolution / no special rules
-                    # Per req-008: meta/services.yml file root IS the
+                    # Per: meta/services.yml file root IS the
                     # services map (no `compose.services` envelope).
                     return {}
                 return {}

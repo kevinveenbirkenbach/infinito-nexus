@@ -21,7 +21,7 @@ KEYCLOAK_SERVER_INTERNAL_URL: "http://127.0.0.1:8080"
 KEYCLOAK_RBAC_GROUP_CLAIM: "{{ RBAC.GROUP.CLAIM }}"
 KEYCLOAK_RBAC_GROUP_NAME: "{{ RBAC.GROUP.NAME }}"
 
-# RBAC | Per-application group-ldap-mapper payload (requirement 005).
+# RBAC | Per-application group-ldap-mapper payload.
 # Single SPOT for the per-app mapper definition: takes the canonical
 # 'ldap-roles' mapper from the realm-import dictionary
 # (templates/import/components/org.keycloak.storage.UserStorageProvider.json.j2)

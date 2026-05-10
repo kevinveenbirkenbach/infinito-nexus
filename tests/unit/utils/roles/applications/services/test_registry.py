@@ -16,7 +16,7 @@ from utils.roles.applications.services.registry import (
 
 
 class TestServiceRegistryDiscovery(unittest.TestCase):
-    """Per req-008, the materialised application payload exposes services
+    """Per, the materialised application payload exposes services
     under the bare ``services`` key (no ``compose.services`` wrapper)."""
 
     def test_discovery_reads_provides_canonical_shared_and_enabled(self):
@@ -102,7 +102,7 @@ class TestServiceRegistryDiscovery(unittest.TestCase):
 
 
 class TestServiceRegistryOrdering(unittest.TestCase):
-    """Per req-010, ``run_after`` lives on the role's primary entity at
+    """Per, ``run_after`` lives on the role's primary entity at
     ``meta/services.yml.<primary_entity>.run_after``."""
 
     def _mk_role(
@@ -119,7 +119,7 @@ class TestServiceRegistryOrdering(unittest.TestCase):
         meta_dir = role_dir / "meta"
         meta_dir.mkdir(parents=True, exist_ok=True)
 
-        # Inject run_after onto the primary entity (req-010 location).
+        # Inject run_after onto the primary entity.
         services = dict(services_payload)
         if run_after is not None:
             primary = dict(services.get(primary_entity, {}) or {})
@@ -131,7 +131,7 @@ class TestServiceRegistryOrdering(unittest.TestCase):
             dump_yaml_str(services),
             encoding="utf-8",
         )
-        # meta/main.yml MUST NOT carry run_after anymore (req-010).
+        # meta/main.yml MUST NOT carry run_after anymore.
         meta_dir.joinpath("main.yml").write_text(
             "galaxy_info: {}\n",
             encoding="utf-8",

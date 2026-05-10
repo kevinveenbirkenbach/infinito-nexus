@@ -1,5 +1,5 @@
 ---
-# Requirement 005: produce OIDC `groups` claims of shape
+# produce OIDC `groups` claims of shape
 #   /roles/<application_id>/<role_name>                       (non-tenant / global)
 #   /roles/<application_id>/<tenant_id>/<role_name>           (per-tenant)
 # with no redundant segments.

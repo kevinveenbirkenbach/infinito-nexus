@@ -37,12 +37,12 @@ _APPLICATIONS_DEFAULTS_CACHE: dict[str, dict[str, Any]] = {}
 _VARIANTS_CACHE: dict[str, dict[str, list[Any]]] = {}
 _MERGED_APPLICATIONS_CACHE: dict[tuple, dict[str, Any]] = {}
 
-# Per req-008, every role's metadata lives under these `meta/<topic>.yml`
-# files. The file root IS the value of `applications.<app>.<topic>` — there
+# Every role's metadata lives under these `meta/<topic>.yml` files.
+# The file root IS the value of `applications.<app>.<topic>` — there
 # is NO wrapping key matching the filename.
 _META_TOPICS: tuple[str, ...] = ("server", "rbac", "services", "volumes")
 
-# `meta/info.yml` is descriptive role-level metadata (req-011). Loaded into
+# `meta/info.yml` is descriptive role-level metadata. Loaded into
 # `applications.<role>.info` like the other meta files, but does NOT mark a
 # role as an application by itself — a metadata-only `info.yml` next to a
 # bare `meta/main.yml` is just documentation, not config.
@@ -53,8 +53,8 @@ def _extract_default_credentials(creds_node: Any) -> dict[str, Any]:
     """Walk a `meta/schema.yml` `credentials:` tree and return the subset of
     leaves that carry a literal `default:` Jinja string.
 
-    The shape mirrors the schema tree: nested keys stay nested. Per req-008
-    the literal string is preserved verbatim — no rendering, no validation.
+    The shape mirrors the schema tree: nested keys stay nested. The
+    literal string is preserved verbatim — no rendering, no validation.
     Leaves WITHOUT `default:` are intentionally absent so the inventory's
     apply_schema-generated values win the merge.
     """
@@ -87,7 +87,7 @@ def _extract_default_credentials(creds_node: Any) -> dict[str, Any]:
 
 
 def _has_application_metadata(role_dir: Path) -> bool:
-    """Detect whether a role behaves as an application after req-008.
+    """Detect whether a role behaves as an application.
 
     A role is an "application" iff at least one of its `meta/<topic>.yml`
     files exists (plus `meta/schema.yml` and `meta/users.yml` for the
@@ -116,7 +116,7 @@ def _build_role_base_config(
     `meta/rbac.yml`     → `rbac`
     `meta/services.yml` → `services`
     `meta/volumes.yml`  → `volumes`
-    `meta/info.yml`     → `info`     (descriptive role-level metadata per req-011)
+    `meta/info.yml`     → `info`     (descriptive role-level metadata)
     `meta/schema.yml`   → `credentials` (only the literal `default:` values;
                          non-default credentials are filled by the
                          inventory's apply_schema step and merged in by the

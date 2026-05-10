@@ -19,7 +19,7 @@ class TestGetAppConf(unittest.TestCase):
         self.tmpdir = tempfile.mkdtemp(prefix="cfgutilstest_")
         os.chdir(self.tmpdir)
 
-        # Minimal schema structure (post req-008):
+        # Minimal schema structure:
         # roles/web-app-demo/meta/schema.yml
         Path(str(Path("roles") / "web-app-demo" / "meta")).mkdir(
             parents=True, exist_ok=True

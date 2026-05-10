@@ -9,12 +9,12 @@ Only roles that ship a ``templates/playwright.env.j2`` are checked.
 A service entry counts as "declared" iff it carries an ``enabled:``
 key. Bare config stubs (entries with only ``image:`` / ``version:`` /
 ``ports:`` / etc. and no ``enabled:`` key) are out of scope — they
-are not gateable shared-service deps in the requirement-006 sense.
+are not gateable shared-service deps in the documented sense.
 
 Why
 ---
 
-Requirement 006 makes ``templates/playwright.env.j2`` the per-role
+Makes ``templates/playwright.env.j2`` the per-role
 registry of gateable services for Playwright specs: a service that is
 not declared as ``<NAME>_SERVICE_ENABLED=...`` cannot be gated, and
 ``service-gating.js`` will hard-fail any ``isServiceEnabled("<name>")``
@@ -29,7 +29,7 @@ A service entry MAY opt out via ``# nocheck: playwright-service-flag``
 in the comment block immediately above its top-level key in
 ``meta/services.yml``. Use this only when a service legitimately
 cannot or must not be gated from Playwright (for example the role's
-own provider service that requirement 006 forbids self-gating on).
+own provider service (forbidden self-gate).
 The catalog entry lives in
 ``docs/contributing/actions/testing/suppression.md``.
 
@@ -37,7 +37,7 @@ Globally-exempt services
 ------------------------
 
 Services whose verification is owned by their own provider's
-parameterised spec per req 019 SPOT (``dashboard``, ``prometheus``)
+parameterised spec (``dashboard``, ``prometheus``)
 are globally exempt: every consumer role declares them in
 ``meta/services.yml`` for inventory completeness, but the per-role
 env templates intentionally do NOT render the
@@ -72,7 +72,7 @@ _RULE = "playwright-service-flag"
 _ENV_TEMPLATE_REL = "templates/playwright.env.j2"  # nocheck: role-file-spot
 _ENV_KEY_LHS_RE = re.compile(r"^([A-Z_][A-Z0-9_]*)\s*=", re.MULTILINE)
 
-# SPOT-owned services (req 019): the provider's own spec parameterises
+# SPOT-owned services: the provider's own spec parameterises
 # one assertion per consumer via *_TARGET_ROLES_JSON, so consumer roles
 # declare the service in `meta/services.yml` for inventory completeness
 # but legitimately do NOT render `<NAME>_SERVICE_ENABLED=` in their env.

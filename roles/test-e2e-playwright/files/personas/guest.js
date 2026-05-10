@@ -22,7 +22,7 @@ async function runGuestFlow(page, opts = {}) {
   const appBaseUrl = normalizeUrl(process.env.APP_BASE_URL);
   const canonicalDomain = readEnv("CANONICAL_DOMAIN");
 
-  // Persona-collapse exception (req 019): roles whose env does not
+  // Persona-collapse exception: roles whose env does not
   // expose CANONICAL_DOMAIN are auth-less by construction (web-svc-*
   // and federation-only web-app-*). The guest persona is skipped
   // cleanly; the role's own baseline scenario carries the unauth
@@ -30,14 +30,14 @@ async function runGuestFlow(page, opts = {}) {
   if (!canonicalDomain) {
     test.skip(
       true,
-      "Auth-less role (no CANONICAL_DOMAIN) — guest persona scenario collapsed per req 019.",
+      "Auth-less role (no CANONICAL_DOMAIN) — guest persona scenario collapsed.",
     );
     return;
   }
   if (!appBaseUrl) {
     test.skip(
       true,
-      "Auth-less role with no public surface (no APP_BASE_URL) — guest persona scenario collapsed per req 019.",
+      "Auth-less role with no public surface (no APP_BASE_URL) — guest persona scenario collapsed.",
     );
     return;
   }

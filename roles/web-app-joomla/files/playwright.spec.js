@@ -22,7 +22,7 @@ async function performJoomlaAdminFormLogin(page, baseUrl, username, password) {
   // Local Joomla form-login at /administrator?fallback=local. The
   // `?fallback=local` query short-circuits the plg_system_keycloak
   // redirect so the operator has an emergency hatch when Keycloak is
-  // unavailable (Modus 3 per requirement 013).
+  // unavailable (per the documented Modus 3 contract).
   await page.goto(`${baseUrl}/administrator?fallback=local`, { waitUntil: "domcontentloaded" });
 
   const usernameField = page.locator("input[name='username']");
@@ -89,7 +89,7 @@ test("OIDC: native plg_system_keycloak redirects unauthenticated visitors to Key
 test("OIDC: /administrator?fallback=local hatch bypasses Keycloak and accepts the local Joomla form (Modus 3 emergency path)", async ({ page }) => {
   // The local form-login fallback at /administrator?fallback=local
   // is the operationally-mandated hatch when Keycloak is unavailable
-  // (Modus 3 per requirement 013). It MUST NOT redirect to the IdP,
+  // (per the documented Modus 3 contract). It MUST NOT redirect to the IdP,
   // and the local form MUST accept the bootstrap administrator
   // credentials.
   skipUnlessServiceEnabled("oidc");
@@ -156,7 +156,7 @@ test("LDAP: Joomla core LDAP plugin authenticates the administrator at /administ
   await expect(page.locator("input[name='username']")).toBeVisible({ timeout: 15_000 });
 });
 
-// Persona scenarios (req 019 Rule 3).
+// Persona scenarios.
 // Bodies live in the shared helper roles/test-e2e-playwright/files/personas.js
 // so every role's persona flow stays consistent.
 

@@ -71,7 +71,7 @@ function assertKnownService(name) {
   const registered = registeredServices();
   if (registered.size === 0) {
     // No <SERVICE>_SERVICE_ENABLED at all in the env — assume an older
-    // staged .env that predates requirement 006. Treat every service as
+    // staged .env without service-gate flags. Treat every service as
     // enabled and let individual lookups fall through to the default.
     return;
   }

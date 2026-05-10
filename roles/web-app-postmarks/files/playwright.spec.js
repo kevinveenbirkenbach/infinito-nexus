@@ -19,7 +19,7 @@ test.beforeEach(async ({ page }) => {
 test("administrator: oauth2-proxy gates the Postmarks web UI through Keycloak", async ({ page }) => {
   // Postmarks has no in-app authorisation tier beyond "logged in or
   // not"; the integrated login path is provided by a sidecar
-  // oauth2-proxy in front of the entire web UI per requirement 013.
+  // oauth2-proxy in front of the entire web UI.
   // The RBAC exception is documented in README.md.
   skipUnlessServiceEnabled("oidc");
   expect(oidcIssuerUrl, "OIDC_ISSUER_URL must be set when OIDC is enabled").toBeTruthy();
@@ -62,7 +62,7 @@ test("administrator: oauth2-proxy gates the Postmarks web UI through Keycloak", 
     .toContain(expectedOidcAuthUrl);
 });
 
-// Persona scenarios (req 019 Rule 3).
+// Persona scenarios.
 // Bodies live in the shared helper roles/test-e2e-playwright/files/personas.js
 // so every role's persona flow stays consistent.
 

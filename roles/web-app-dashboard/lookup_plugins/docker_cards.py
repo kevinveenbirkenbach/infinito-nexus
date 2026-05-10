@@ -27,8 +27,8 @@ class LookupModule(LookupBase):
           - Reads application_id from the role's vars/main.yml
           - Reads the title from the role's README.md (the first H1 line)
           - Retrieves the description from galaxy_info.description in meta/main.yml
-          - Retrieves the icon class from meta/info.yml.logo.class (req-011)
-          - Retrieves the display flag from meta/info.yml.display (req-011)
+          - Retrieves the icon class from meta/info.yml.logo.class
+          - Retrieves the display flag from meta/info.yml.display
           - Retrieves the tags from galaxy_info.galaxy_tags
           - Builds the URL using the 'domains' variable
           - Sets the iframe flag from applications
@@ -98,7 +98,7 @@ class LookupModule(LookupBase):
             # Define paths to README.md, meta/main.yml and meta/info.yml.
             # meta/main.yml carries Galaxy-spec fields (description, galaxy_tags);
             # meta/info.yml is the project-internal store for descriptive
-            # role-level metadata (logo, display) per req-011.
+            # role-level metadata (logo, display).
             readme_path = str(Path(role_dir) / "README.md")
             meta_path = str(Path(role_dir) / ROLE_FILE_META_MAIN)
             info_path = str(Path(role_dir) / ROLE_FILE_META_INFO)

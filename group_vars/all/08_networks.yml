@@ -15,7 +15,7 @@
 #                                       automatically with no second
 #                                       registration step.
 #
-# What MOVED out of this file (per req-009):
+# What MOVED out of this file:
 #
 #   * defaults_networks.local.<role>.subnet  → roles/<role>/meta/server.yml
 #                                               under networks.local.subnet

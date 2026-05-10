@@ -61,7 +61,7 @@ def load_meta(path: str) -> Dict[str, Any]:
     Load metadata from meta/main.yml.
     Returns a dict with:
         - galaxy_info
-        - run_after  (per req-010 read from meta/services.yml.<primary>.run_after)
+        - run_after 
         - dependencies
     """
     from utils.roles.meta_lookup import get_role_run_after

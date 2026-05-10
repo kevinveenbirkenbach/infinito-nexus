@@ -249,7 +249,7 @@ class RoleDependencyResolver:
         return deps
 
     def _extract_meta_run_after(self, role_path: str) -> set[str]:
-        # Per req-010 `run_after` lives on the role's primary entity at
+        # `run_after` lives on the role's primary entity at
         # `meta/services.yml.<primary_entity>.run_after`. Delegate to the
         # canonical helper so the primary-entity derivation is in one
         # place, and degrade gracefully if the file is absent.

@@ -53,7 +53,7 @@ def find_roles_with_service(service_name: str, roles_dir: Path) -> set[str]:
     ``enabled: false`` overrides that turn metadata into spurious provider
     declarations downstream.
 
-    Per req-008 the file root of meta/services.yml IS the services map
+    Per the file root of meta/services.yml IS the services map
     (no `compose.services` wrapper).
     """
     role_ids: set[str] = set()
@@ -158,7 +158,7 @@ def apply_services_disabled(
     applications.<app_id>.services.<svc_name>.  Missing application
     or services blocks are created as needed.
 
-    Per req-008 the materialised path is ``applications.<app>.services.<svc>``
+    Per the materialised path is ``applications.<app>.services.<svc>``
     (no ``compose.services`` wrapper).
 
     If inventory_file is provided, also removes the provider role for each service
@@ -296,7 +296,7 @@ def find_services_disabled_conflicts(
                 continue
             for app_id in sorted(deployed_app_ids):
                 app_conf = applications.get(app_id) or {}
-                # Per req-008 services live at applications.<app>.services
+                # Per services live at applications.<app>.services
                 # directly (no `compose.services` wrapper).
                 service_map = app_conf.get("services") or {}
                 if not isinstance(service_map, dict):

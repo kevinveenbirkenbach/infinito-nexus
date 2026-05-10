@@ -87,8 +87,7 @@ def _collect_findings(root: Path) -> list[MissingKeyFinding]:
         if not config_path.is_file():
             continue
 
-        # Post-req-008: meta/services.yml's root IS the services map; the
-        # legacy `compose.services` wrapper no longer exists.
+        # meta/services.yml's root IS the services map.
         services = _load_yaml(config_path)
         if not isinstance(services, dict):
             continue

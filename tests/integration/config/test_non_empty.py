@@ -38,11 +38,10 @@ def find_none_values(data, prefix=None):
 
 class TestConfigurationNoNone(unittest.TestCase):
     def test_configuration_files_have_no_none_values(self):
-        # Post-req-008: per-role configuration lives in roles/*/meta/*.yml
+        # Per-role configuration lives in roles/*/meta/*.yml
         # (services.yml, server.yml, rbac.yml, schema.yml, users.yml,
-        # volumes.yml). The legacy roles/*/config/main.yml file no longer
-        # exists. Recurse into every meta/*.yml file and assert no key
-        # resolves to a YAML null.
+        # volumes.yml). Recurse into every meta/*.yml file and assert no
+        # key resolves to a YAML null.
         roles_root = str(PROJECT_ROOT / "roles")
         roles_prefix = roles_root + os.sep
         meta_segment = os.sep + "meta" + os.sep

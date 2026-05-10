@@ -1,6 +1,6 @@
 """Guard: roles that already emit `<SERVICE>_SERVICE_ENABLED` flags in
 their Playwright env template MUST follow the strict "true"/"false"
-literal contract from requirement 006.
+literal contract from the env-flag rules.
 
 Every `<SERVICE>_SERVICE_ENABLED=...` line MUST resolve at deploy time
 to either the literal "true" or "false" string. No other value is
@@ -66,8 +66,7 @@ class TestPlaywrightEnvServiceFlags(unittest.TestCase):
             [],
             msg=(
                 "Playwright env service flags MUST resolve to literal "
-                '"true" or "false". See requirement 006. Offenders:\n'
-                + "\n".join(offenders)
+                '"true" or "false". Offenders:\n' + "\n".join(offenders)
             ),
         )
 

@@ -150,7 +150,7 @@ class TestDockerCardsLookup(unittest.TestCase):
         with Path(readme_path).open("w", encoding="utf-8") as f:
             f.write("# Portfolio Application\nThis is a sample portfolio role.")
 
-        # Create a sample meta/main.yml in the meta folder. Per req-011
+        # Create a sample meta/main.yml in the meta folder. Per
         # the icon class lives in meta/info.yml (file-root convention),
         # not under galaxy_info.
         meta_main_path = str(Path(self.role_dir) / ROLE_FILE_META_MAIN)
@@ -203,7 +203,7 @@ logo:
         return {
             "domains": {"portfolio": "myportfolio.com"},
             "applications": {
-                # Per req-008 the materialised payload moved to services.<X>.
+                # Per the materialised payload moved to services.<X>.
                 "portfolio": {"services": {"dashboard": {"enabled": True}}}
             },
             "group_names": ["portfolio"],

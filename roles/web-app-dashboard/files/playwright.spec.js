@@ -642,7 +642,7 @@ test("dashboard login automatically switches Login to Account and exposes Logout
 });
 
 // -----------------------------------------------------------------------------
-// Tile reachability per consumer (req 019 SPOT): one parameterised test
+// Tile reachability per consumer: one parameterised test
 // per role declared as a dashboard consumer in its meta/services.yml.
 // The role list is emitted into DASHBOARD_TARGET_ROLES_JSON at deploy
 // time by the env template via the `roles_with_service('dashboard')`
@@ -703,7 +703,7 @@ for (const target of dashboardTargetRoles) {
   });
 }
 
-// Persona scenarios (req 019 Rule 3).
+// Persona scenarios.
 // Bodies live in the shared helper roles/test-e2e-playwright/files/personas.js
 // so every role's persona flow stays consistent.
 

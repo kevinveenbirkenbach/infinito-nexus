@@ -46,7 +46,7 @@
 - name: "Install wordpress"
   include_tasks: 02_install.yml
 
-- name: "Convert to Multisite when opted in (requirement 005)"
+- name: "Convert to Multisite when opted in"
   include_tasks: 06_multisite.yml
   when: >-
     (lookup('config', application_id, 'services.wordpress.multisite.enabled')

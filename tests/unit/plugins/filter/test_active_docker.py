@@ -18,7 +18,7 @@ class TestActiveDockerFilter(unittest.TestCase):
             "unrelated-group",
         ]
 
-        # a representative applications structure (post-req-008: file-root services map)
+        # a representative applications structure (file-root services map)
         self.apps = {
             # counted (prefix web-/svc- AND in group_names)
             "web-app-jira": {

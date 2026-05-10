@@ -56,7 +56,7 @@
       enabled: false
       shared: false
 
-# LDAP-only variant per req-018: ldap on, oauth2 off so the
+# LDAP-only variant: ldap on, oauth2 off so the
 # Playwright spec exercises the LDAP-bind login path.
 - services:
     ldap:

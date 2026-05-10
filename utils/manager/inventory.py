@@ -17,7 +17,7 @@ from utils.roles.mapping import ROLE_FILE_META_SCHEMA, ROLE_FILE_VARS_MAIN
 if TYPE_CHECKING:
     from pathlib import Path
 
-# Marker fields that identify a credential schema leaf (per req-008). Any
+# Marker fields that identify a credential schema leaf. Any
 # `default:` value is preserved verbatim; algorithm defaults to `plain` when
 # absent; `validation:` only applies to user-provided values.
 _CREDENTIAL_LEAF_MARKERS = ("description", "algorithm", "validation", "default")
@@ -30,7 +30,7 @@ def _is_credential_leaf(node: Any) -> bool:
 
 
 def _meta_role_config(role_path: Path) -> dict[str, Any]:
-    """Assemble the post-req-008 view of a role's config from its meta files.
+    """Assemble the view of a role's config from its meta files.
 
     The shape mirrors the old `meta/services.yml` payload so that downstream
     helpers (database_service, service_registry, ...) keep working unchanged:
@@ -217,7 +217,7 @@ class InventoryManager:
     def recurse_credentials(self, branch: dict, dest: dict, prefix: str = "") -> None:
         """Recursively process the 'credentials' section and generate values.
 
-        Supports the post-req-008 schema:
+        Supports the schema:
           * Nested keys are walked transparently (e.g.
             `credentials.recaptcha.{key,secret}`).
           * `algorithm:` defaults to `plain` when omitted.
@@ -269,8 +269,8 @@ class InventoryManager:
             return
 
         if "default" in meta:
-            # Per req-008: write the literal Jinja string verbatim, no
-            # rendering, no validation, no algorithm-based generation.
+            # Write the literal Jinja string verbatim, no rendering,
+            # no validation, no algorithm-based generation.
             if isinstance(existing_value, str) and existing_value != "":
                 return
             dest[key] = meta["default"]

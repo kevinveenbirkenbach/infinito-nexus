@@ -2,7 +2,7 @@
 oidc:
   enabled: "{{ 'web-app-keycloak' in group_names }}"
   shared: "{{ 'web-app-keycloak' in group_names }}"
-  # Modus 3 per requirement 013: when `fallback_enabled` is true, the
+  # per the documented Modus 3 contract: when `fallback_enabled` is true, the
   # local Joomla form-login at `/administrator?fallback=local` is
   # available as an emergency hatch (recommended default). Set to
   # `false` for high-security deployments where the IdP is the only

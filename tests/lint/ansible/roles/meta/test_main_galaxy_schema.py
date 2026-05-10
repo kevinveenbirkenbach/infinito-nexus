@@ -13,11 +13,10 @@ fixed set of allowed top-level keys (``galaxy_info``, ``dependencies``,
 allowed sub-keys under ``galaxy_info``.
 
 Galaxy silently ignores unknown keys, which historically tempted us to bury
-project-internal metadata (``run_after`` / ``lifecycle`` — migrated out by
-req-010, plus ``logo`` / ``video`` / ``homepage`` / ``repository`` /
-``documentation`` / ``license_url``) under ``galaxy_info:``. Those non-Galaxy
-fields belong in project-owned files (``meta/services.yml.<entity>``), not in
-the Galaxy slot.
+project-internal metadata (``run_after`` / ``lifecycle``, plus ``logo`` /
+``video`` / ``homepage`` / ``repository`` / ``documentation`` /
+``license_url``) under ``galaxy_info:``. Those non-Galaxy fields belong in
+project-owned files (``meta/services.yml.<entity>``), not in the Galaxy slot.
 
 On top of the generic schema this lint also enforces two project-wide
 canonical exact-values to stop drift: ``galaxy_info.company`` is one

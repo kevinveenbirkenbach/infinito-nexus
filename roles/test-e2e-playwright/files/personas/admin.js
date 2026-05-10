@@ -33,7 +33,7 @@ const {
 } = require("./utils");
 
 async function runAdminFlow(page, opts = {}) {
-  // Explicit role contract opt-out (req 019 Rule 11). Roles that
+  // Explicit role contract opt-out. Roles that
   // genuinely have no OIDC-driven admin surface (auth-provider roles,
   // bespoke local-only admin paths, mobile-first SPAs whose logout
   // control is unreachable to the generic helper, ...) declare
@@ -65,13 +65,13 @@ async function runAdminFlow(page, opts = {}) {
   const adminUsername = readEnv("ADMIN_USERNAME");
   const adminPassword = readEnv("ADMIN_PASSWORD");
 
-  // Persona-collapse exception (req 019): roles whose env does not
+  // Persona-collapse exception: roles whose env does not
   // expose APP_BASE_URL or CANONICAL_DOMAIN are auth-less by
   // construction; skip cleanly rather than fail.
   if (!appBaseUrl || !canonicalDomain) {
     test.skip(
       true,
-      "Auth-less role (no APP_BASE_URL / CANONICAL_DOMAIN) — persona scenario collapsed per req 019.",
+      "Auth-less role (no APP_BASE_URL / CANONICAL_DOMAIN) — persona scenario collapsed.",
     );
     return;
   }

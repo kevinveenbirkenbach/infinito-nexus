@@ -157,7 +157,7 @@ ROLE_FILE_TASKS_MAIN = "tasks/main.yml"
 ROLE_FILE_VARS_MAIN = "vars/main.yml"
 ROLE_FILE_README = "README.md"
 
-# Project-specific meta files (per req-008 / req-010)
+# Project-specific meta files
 ROLE_FILE_META_MAIN = "meta/main.yml"
 ROLE_FILE_META_SERVICES = "meta/services.yml"
 ROLE_FILE_META_VARIANTS = "meta/variants.yml"
@@ -247,7 +247,7 @@ ROLE_FILES: dict[str, dict[str, object]] = {
         "description": (
             "Compose services map keyed by entity. Carries "
             "``lifecycle``, ``run_after`` and per-service "
-            "port/credential definitions per req-008 / req-010."
+            "port/credential definitions."
         ),
         # Mandatory only for application roles (lifecycle declarations
         # are required there); wildcard default keeps it optional for

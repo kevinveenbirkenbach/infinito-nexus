@@ -41,7 +41,7 @@ def _write_role(
     """Write a synthetic role tree under <roles_dir>/<name>/meta/.
 
     ``config``  -> meta/services.yml content (the file root IS the services
-                   map post req-008)
+                   map)
     ``server``  -> meta/server.yml content
     ``meta``    -> meta/variants.yml content (matrix-deploy variant list)
     """
@@ -114,7 +114,7 @@ class TestApplicationVariants(unittest.TestCase):
         )
 
     def test_role_with_two_variants_deep_merges_each_entry(self):
-        # Per req-008, the role's meta is split: server -> meta/server.yml,
+        # Per, the role's meta is split: server -> meta/server.yml,
         # services -> meta/services.yml. The variants file overrides the
         # assembled payload (top-level keys: server, services, ...).
         role = self.roles_dir / "web-app-bar"

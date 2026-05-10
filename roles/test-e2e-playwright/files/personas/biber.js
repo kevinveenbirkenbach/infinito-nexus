@@ -33,7 +33,7 @@ const {
 } = require("./utils");
 
 async function runBiberFlow(page, opts = {}) {
-  // Explicit role contract opt-out (req 019 Rule 11). Roles that
+  // Explicit role contract opt-out. Roles that
   // genuinely have no biber-accessible surface (admin-only software
   // without OIDC auto-provisioning, mobile-first SPAs whose logout
   // control is unreachable to the generic helper, ...) declare
@@ -65,14 +65,14 @@ async function runBiberFlow(page, opts = {}) {
   const biberUsername = readEnv("BIBER_USERNAME");
   const biberPassword = readEnv("BIBER_PASSWORD");
 
-  // Persona-collapse exception (req 019): roles whose env does not
+  // Persona-collapse exception: roles whose env does not
   // expose APP_BASE_URL or CANONICAL_DOMAIN are auth-less by
   // construction (web-svc-*, federation-only web-app-*); the persona
   // scenario MUST skip cleanly rather than fail.
   if (!appBaseUrl || !canonicalDomain) {
     test.skip(
       true,
-      "Auth-less role (no APP_BASE_URL / CANONICAL_DOMAIN) — persona scenario collapsed per req 019.",
+      "Auth-less role (no APP_BASE_URL / CANONICAL_DOMAIN) — persona scenario collapsed.",
     );
     return;
   }

@@ -1,4 +1,4 @@
-"""Unit tests for utils.roles.meta_lookup (req-010 AC).
+"""Unit tests for utils.roles.meta_lookup.
 
 Covers:
   * service role with run_after / lifecycle on its primary entity;

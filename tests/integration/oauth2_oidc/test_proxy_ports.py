@@ -5,7 +5,7 @@ MUST allocate an oauth2-proxy listen port via
 Background
 ==========
 When a role enables the oauth2-proxy frontend, the proxy needs a unique
-local port to listen on. Per req-008 the port is declared under one of
+local port to listen on. Per the port is declared under one of
 the role's service entries' ``ports.local.oauth2`` key (typically the
 role's primary service block). Without this the proxy renders without a
 port and rollout silently produces a half-wired vhost.
@@ -23,7 +23,7 @@ Scope
   ``utils.cache.yaml.load_yaml`` so the file is read once per process
   and matches the loader policy enforced by
   ``tests/lint/repository/test_no_direct_yaml_calls.py``.
-* Per req-008 the file root IS the services map (no
+* Per the file root IS the services map (no
   ``compose.services`` wrapper), matching the convention pinned by
   ``tests/integration/oauth2_oidc/test_mutual_exclusive.py``.
 """

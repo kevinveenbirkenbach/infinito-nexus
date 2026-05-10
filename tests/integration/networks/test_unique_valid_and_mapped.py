@@ -1,4 +1,4 @@
-"""Per req-009: subnets declared per-role under
+"""Per: subnets declared per-role under
 ``meta/server.yml.networks.local.subnet`` MUST be valid, unique, and
 non-overlapping across the role tree."""
 

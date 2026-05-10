@@ -31,7 +31,7 @@ test("LDAP: ejabberd backend points at svc-db-openldap (variant 1)", async ({ pa
   expect(r.status()).toBeLessThan(500);
 });
 
-// Persona scenarios (req 019 Rule 3).
+// Persona scenarios.
 // Bodies live in the shared helper roles/test-e2e-playwright/files/personas.js
 // so every role's persona flow stays consistent.
 

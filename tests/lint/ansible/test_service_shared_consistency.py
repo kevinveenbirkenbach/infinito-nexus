@@ -77,7 +77,7 @@ class TestServiceSharedConsistency(unittest.TestCase):
                 errors.append(f"{role_name}: YAML parse error in {file_path}: {exc}")
                 continue
 
-            # Per req-008 the file root of meta/services.yml IS the
+            # Per the file root of meta/services.yml IS the
             # services map (no `compose.services` wrapper).
             services = cfg if isinstance(cfg, dict) else {}
 

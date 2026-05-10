@@ -18,9 +18,9 @@ def get_compose_services(
 ) -> dict[str, Any]:
     """Return the role's services map.
 
-    Per req-008 the materialised application payload exposes services
-    under the bare ``services`` key (no ``compose.services`` wrapper).
-    The function name is preserved for backwards compatibility with
+    The materialised application payload exposes services under the
+    bare ``services`` key (no ``compose.services`` wrapper). The
+    function name is preserved for backwards compatibility with
     existing call sites.
     """
     application = _as_mapping(applications.get(application_id))

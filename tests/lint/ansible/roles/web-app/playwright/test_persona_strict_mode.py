@@ -1,6 +1,6 @@
 """Lint: persona helpers MUST fail loudly on un-executable journeys
-(req 019 Rule 11) AND deny-check helpers MUST validate response body
-content on a 200 (req 019 Rule 12).
+AND deny-check helpers MUST validate response body
+content on a 200.
 
 Two independent checks, both backed by source-shape regex against the
 persona-helper tree under
@@ -15,7 +15,7 @@ sit in a branch guarded by one of these allowed conditions:
   (matched against ``process.env.<FLAG>``),
 * an auth-less persona-collapse case: a guard that AND-combines
   emptiness of ``canonicalDomain`` with ``appBaseUrl`` /
-  ``dashboardBaseUrl`` (req 019 persona-collapse exception),
+  ``dashboardBaseUrl`` (persona-collapse exception),
 * a service-gate skip via ``safeSkipUnlessEnabled(...)`` /
   ``skipUnlessServiceEnabled(...)``: that helper itself owns the
   skip-on-disabled-service contract.
@@ -158,7 +158,7 @@ class TestPersonaStrictMode(unittest.TestCase):
                         f"`test.skip(...)` guard `{cond.strip()}` does "
                         f"NOT reference an allowed opt-out token. "
                         f"Allowed: {', '.join(_ALLOWED_SKIP_GUARDS)}. "
-                        f"Per req 019 Rule 11, runtime auto-detection "
+                        f"Per the runtime contract, auto-detection "
                         f"skips are forbidden — only explicit env opt-outs "
                         f"or the auth-less collapse case may skip cleanly."
                     )
@@ -194,7 +194,7 @@ class TestPersonaStrictMode(unittest.TestCase):
                         f"{path.relative_to(PROJECT_ROOT)} line {line_no}: "
                         f"`status === 200` branch does NOT read the body "
                         f"(no `await probe.text()` / `await probe.body()`). "
-                        f"Per req 019 Rule 12, a 200-hop is only acceptable "
+                        f"A 200-hop is only acceptable "
                         f"after validating the body matches role-specific "
                         f"markers."
                     )
@@ -207,7 +207,7 @@ class TestPersonaStrictMode(unittest.TestCase):
                         f"NOT assert role-specific markers (no "
                         f"`<re>.test(body)` / `body.includes(...)` / "
                         f"`isMatomoLogin` / `isPrometheus` / `showsAdminUi`). "
-                        f"Per req 019 Rule 12, an unchecked 200 with the "
+                        f"An unchecked 200 with the "
                         f"wrong body is a misconfigured proxy / "
                         f"denial-as-200 surface and MUST fail loudly."
                     )

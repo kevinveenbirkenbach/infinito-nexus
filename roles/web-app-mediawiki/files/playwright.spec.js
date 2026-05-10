@@ -35,7 +35,7 @@ test("MediaWiki returns HTML content under canonical domain", async ({ request }
   ).toBe(true);
 });
 
-// Persona scenarios (req 019 Rule 3).
+// Persona scenarios.
 // Bodies live in the shared helper roles/test-e2e-playwright/files/personas
 // so every role's persona flow stays consistent.
 

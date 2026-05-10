@@ -85,7 +85,7 @@ OPENTALK_KEYCLOAK_CLIENT_SECRET: "{{ OPENTALK_CTRL_OIDC_CLIENT_SECRET }}"
 OPENTALK_OPENCLOUD_ENABLED: "{{ 'web-app-opencloud' in (group_names | default([])) | lower }}"
 OPENTALK_OPENCLOUD_URL: "{{ lookup('tls', 'web-app-opencloud', 'url.base') if OPENTALK_OPENCLOUD_ENABLED | bool else '' }}"
 
-# TURN credentials reuse from existing web-svc-coturn (req 001 / req 015)
+# TURN credentials reuse from existing web-svc-coturn
 OPENTALK_TURN_HOST: "{{ lookup('domain', 'web-svc-coturn') }}"
 OPENTALK_TURN_PORT: "{{ lookup('config', 'web-svc-coturn', 'services.coturn.ports.public.stun_turn') }}"
 OPENTALK_TURN_SECRET: "{{ lookup('config', 'web-svc-coturn', 'credentials.auth_secret') }}"

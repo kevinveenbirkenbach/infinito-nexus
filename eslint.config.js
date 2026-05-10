@@ -55,7 +55,7 @@ module.exports = [
       ...playwright.configs["flat/recommended"].rules,
       // skipUnlessServiceEnabled() drives a real test.skip(...) on
       // runtime-detected disabled services — that's the project's
-      // contract per req 006/019, not an oversight.
+      // contract, not an oversight.
       "playwright/no-skipped-test": "off",
       // Persona helpers (runGuestFlow / runBiberFlow / runAdminFlow) branch
       // on isVisible() / isServiceEnabled() before expect(); the conditional

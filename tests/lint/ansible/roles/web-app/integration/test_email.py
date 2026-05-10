@@ -15,9 +15,7 @@ _ROLE_PREFIX = "web-app-"
 _MAILU_ROLE = "web-app-mailu"
 _EMAIL_LOOKUP_RE = re.compile(r"""lookup\(\s*['"]email['"]""")
 _SCAN_EXTENSIONS = {".yml", ".yaml", ".j2", ".py", ".sh", ".conf", ".env"}
-# Post-req-008 the email block is at the file root (top-level `email:`)
-# rather than nested under `compose.services.email:`. Match either shape so
-# this lint keeps working during the long tail of role migrations.
+# The email block is at the file root (top-level `email:`).
 _EMAIL_KEY_RE = re.compile(r"^(\s*)email:\s*(#.*)?$")
 
 _SILENCER_HINT = (
@@ -41,7 +39,7 @@ def _role_uses_email_lookup(role_path: Path) -> bool:
 
 
 def _email_service_conf(config_path: Path) -> dict:
-    """Read ``services.email`` from the post-req-008 ``meta/services.yml``.
+    """Read ``services.email`` from the ``meta/services.yml``.
 
     The file root IS the services map; there is no ``compose.services``
     wrapper anymore.

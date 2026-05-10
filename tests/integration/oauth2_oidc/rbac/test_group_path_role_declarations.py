@@ -1,6 +1,6 @@
 """Guard: every role passed to `lookup('rbac_group_path', ...)` MUST be
 declared in the target application's `meta/rbac.yml` (or be the implicit
-`administrator` auto-added by requirement 004).
+`administrator` auto-added by the role-list contract).
 
 Why this test exists
 --------------------

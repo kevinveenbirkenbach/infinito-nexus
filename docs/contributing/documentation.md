@@ -8,6 +8,10 @@ All project documentation MUST be reachable at [docs.infinito.nexus](https://doc
 - You MUST add code comments only when an exception, edge case, or surprising decision would otherwise confuse readers.
 - You MUST use comments to explain why something is unusual, not to restate what obvious code already does.
 - When keeping an intentionally retained outdated version pin, you MUST document the exception at the pin site with a local `TODO` comment in the file's normal comment style (`#todo`, `# TODO`, or similar) and explain why it remains pinned so the root cause stays visible until it can be fixed.
+- You MUST NOT reference requirement files from code (comments, docstrings, error / log messages, prose inside templates).
+  Tokens such as `req 019`, `req 019 Rule 3`, `requirement-005`, or path references like `docs/requirements/019-...md` MUST NOT appear in `.js`, `.py`, `.yml`, `.j2`, `.sh`, or any other non-Markdown source file.
+  Requirements are an authoring contract enforced by lint and integration tests; comments anchored to requirement numbers rot when requirements are renumbered, restructured, or rewritten, and they conflate the *what is true now* (which the comment should describe) with the *audit trail of how we got here* (which belongs in commit messages, pull request descriptions, and the requirement file itself).
+  Describe the *why* of the code in present-state language; the contract enforcement lives in tests, not folklore.
 
 ## Requirement Keywords (RFC 2119) 📋
 

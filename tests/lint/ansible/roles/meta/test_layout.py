@@ -1,19 +1,18 @@
-"""Lint guards for the post-req-008/009/010 role meta layout.
+"""Lint guards for the role meta layout.
 
 Failure modes covered:
   * Any role retains ``schema/main.yml``, ``users/main.yml`` or
-    ``config/main.yml`` (req-008 file-move ACs).
-  * Any source file references those legacy paths (req-008 path-rewrite AC).
-  * ``meta/main.yml`` carries ``run_after`` or ``lifecycle`` (req-010
-    location AC).
+    ``config/main.yml``.
+  * Any source file references those legacy paths.
+  * ``meta/main.yml`` carries ``run_after`` or ``lifecycle``.
   * ``meta/services.yml.<entity>.lifecycle`` carries an out-of-allowlist
-    value (req-010 schema AC).
+    value.
   * ``meta/services.yml.<entity>.ports.{local,public}`` is a bare int
-    instead of a category-keyed map (req-009 schema AC).
+    instead of a category-keyed map.
   * Any host-bound port collides with another (single int + relay span set;
-    req-009 port-collision AC).
+    port-collision AC).
   * Any ``meta/services.yml.<entity>.ports`` value falls outside its
-    ``PORT_BANDS.<scope>.<category>`` range (req-009 band-membership AC).
+    ``PORT_BANDS.<scope>.<category>`` range.
 """
 
 from __future__ import annotations
@@ -55,7 +54,7 @@ ALLOWED_LIFECYCLES = {
 }
 
 # Roles whose `local.http` port is allowed to live outside the documented
-# band (req-009 explicit allow-list).
+# band.
 LEGACY_PORT_ALLOWLIST = {
     ("web-app-bigbluebutton", "bigbluebutton", "local", "http"): {48087},
 }
@@ -85,13 +84,13 @@ class TestNoLegacyRoleDirs(unittest.TestCase):
                     offenders.append(str(legacy_path.relative_to(PROJECT_ROOT)))
         if offenders:
             self.fail(
-                "Legacy role directories present (must move under meta/, "
-                "per req-008):\n" + "\n".join(f"  - {p}" for p in offenders)
+                "Legacy role directories present (must move under meta/):\n"
+                + "\n".join(f"  - {p}" for p in offenders)
             )
 
 
 class TestNoLegacyPathReferences(unittest.TestCase):
-    """Repository-wide grep guard for the old path strings (req-008)."""
+    """Repository-wide grep guard for the old path strings."""
 
     LEGACY_TOKENS = (
         "schema/main.yml",
@@ -149,7 +148,7 @@ class TestNoLegacyPathReferences(unittest.TestCase):
                     break
         if offenders:
             self.fail(
-                "Legacy path tokens present (req-008 forbids these):\n"
+                "Legacy path tokens present:\n"
                 + "\n".join(f"  - {o}" for o in offenders)
             )
 
@@ -178,8 +177,7 @@ class TestMetaMainHasNoRunAfterOrLifecycle(unittest.TestCase):
         if offenders:
             self.fail(
                 "run_after/lifecycle must live on the role's primary entity "
-                "in meta/services.yml (req-010):\n"
-                + "\n".join(f"  - {o}" for o in offenders)
+                "in meta/services.yml:\n" + "\n".join(f"  - {o}" for o in offenders)
             )
 
 
@@ -206,7 +204,7 @@ class TestLifecycleAllowedValues(unittest.TestCase):
         if offenders:
             self.fail(
                 "lifecycle must be one of "
-                f"{sorted(ALLOWED_LIFECYCLES)} (req-010):\n"
+                f"{sorted(ALLOWED_LIFECYCLES)}:\n"
                 + "\n".join(f"  - {o}" for o in offenders)
             )
 
@@ -236,13 +234,13 @@ class TestPortShape(unittest.TestCase):
                         )
         if offenders:
             self.fail(
-                "ports.{local,public} must be category-keyed maps "
-                "(req-009):\n" + "\n".join(f"  - {o}" for o in offenders)
+                "ports.{local,public} must be category-keyed maps:\n"
+                + "\n".join(f"  - {o}" for o in offenders)
             )
 
 
 class TestHostBoundPortCollisions(unittest.TestCase):
-    # Per req-009 explicit allow-list: legacy BBB http port 48087 lives
+    # The explicit allow-list: legacy BBB http port 48087 lives
     # inside the BBB relay range (40000-49999) historically. Same role
     # owning both ends of the collision is acceptable for this specific
     # documented exception.
@@ -270,7 +268,7 @@ class TestHostBoundPortCollisions(unittest.TestCase):
             clashes.append(f"port {port}: {pretty}")
         if clashes:
             self.fail(
-                "Host-bound port collisions detected (req-009):\n"
+                "Host-bound port collisions detected:\n"
                 + "\n".join(f"  - {c}" for c in clashes)
                 + "\n\nFix: pick a free port via "
                 + "`infinito meta ports suggest --scope <local|public> "
@@ -326,7 +324,7 @@ class TestPortBandMembership(unittest.TestCase):
                 )
         if offenders:
             self.fail(
-                "PORT_BANDS membership / shape violation (req-009):\n"
+                "PORT_BANDS membership / shape violation:\n"
                 + "\n".join(f"  - {o}" for o in offenders)
                 + "\n\nFix: pick an in-band port via "
                 + "`infinito meta ports suggest --scope <local|public> "
@@ -383,7 +381,7 @@ class TestPortBandsDisjoint(unittest.TestCase):
 
         if offenders:
             self.fail(
-                "PORT_BANDS overlap detected (req-009):\n"
+                "PORT_BANDS overlap detected:\n"
                 + "\n".join(f"  - {o}" for o in offenders)
                 + "\n\nFix: shrink one of the overlapping ranges in "
                 + "group_vars/all/08_networks.yml so each port belongs to "
@@ -392,7 +390,7 @@ class TestPortBandsDisjoint(unittest.TestCase):
 
 
 class TestNoComposeWrapperInVariants(unittest.TestCase):
-    """Per req-008 the file root of meta/services.yml IS the services map.
+    """The file root of meta/services.yml IS the services map.
     Variant overrides in meta/variants.yml MUST follow the same shape: top
     keys are server / services / rbac / volumes / credentials / users,
     NEVER `compose:` (which silently no-ops because the loader doesn't
@@ -425,8 +423,8 @@ class TestNoComposeWrapperInVariants(unittest.TestCase):
                     )
         if offenders:
             self.fail(
-                "meta/variants.yml MUST NOT use a `compose:` wrapper "
-                "(req-008):\n" + "\n".join(f"  - {o}" for o in offenders)
+                "meta/variants.yml MUST NOT use a `compose:` wrapper:\n"
+                + "\n".join(f"  - {o}" for o in offenders)
             )
 
 
@@ -446,8 +444,7 @@ class TestRunAfterNotEmpty(unittest.TestCase):
         if offenders:
             self.fail(
                 "run_after must be omitted (not empty list) when no ordering "
-                "constraint exists (req-010):\n"
-                + "\n".join(f"  - {o}" for o in offenders)
+                "constraint exists:\n" + "\n".join(f"  - {o}" for o in offenders)
             )
 
 

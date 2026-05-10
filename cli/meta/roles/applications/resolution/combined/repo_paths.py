@@ -31,7 +31,7 @@ def role_vars_path(role_name: str) -> Path:
 
 
 def role_services_path(role_name: str) -> Path:
-    """Return the post-req-008 services manifest path."""
+    """Return the services manifest path."""
     return role_dir(role_name) / ROLE_FILE_META_SERVICES
 
 

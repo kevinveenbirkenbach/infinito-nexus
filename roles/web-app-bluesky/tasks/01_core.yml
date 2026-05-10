@@ -43,7 +43,7 @@
 
 # Use sys-stk-backend (not sys-svc-compose directly) so that the
 # oauth2-proxy sidecar is auto-included when `services.oauth2.enabled`
-# is true (variant A+ login-broker gate per requirement 013). The
+# is true (variant A+ login-broker gate). The
 # sys-stk-backend role internally loads sys-svc-compose for the
 # compose layer and additionally pulls in web-app-oauth2-proxy and
 # its deterministic config template. Without this, oauth2-proxy

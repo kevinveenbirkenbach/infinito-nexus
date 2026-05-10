@@ -1,4 +1,4 @@
-"""Unit tests for `cli meta networks suggest` (req-009 AC).
+"""Unit tests for `cli meta networks suggest`.
 
 Covers the gap-first / increment-fallback path for synthetic role-tree
 fixtures.

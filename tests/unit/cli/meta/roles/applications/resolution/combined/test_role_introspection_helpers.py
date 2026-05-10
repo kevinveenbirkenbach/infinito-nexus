@@ -52,7 +52,7 @@ class TestCombinedRoleIntrospection(unittest.TestCase):
     def test_load_run_after(self) -> None:
         with tempfile.TemporaryDirectory() as td:
             root = Path(td)
-            # Per req-010 run_after lives under meta/services.yml.<entity>.
+            # Per run_after lives under meta/services.yml.<entity>.
             # Entity for plain "a" is "a" itself.
             _write(
                 root / "roles" / "a" / ROLE_FILE_META_SERVICES,
@@ -99,7 +99,7 @@ class TestCombinedRoleIntrospection(unittest.TestCase):
                 root / "roles" / "web-app-wordpress" / ROLE_FILE_VARS_MAIN,
                 "application_id: wordpress\n",
             )
-            # Per req-008 the file root IS the services map (no
+            # Per the file root IS the services map (no
             # `compose.services` envelope).
             _write(
                 root / "roles" / "web-app-wordpress" / ROLE_FILE_META_SERVICES,

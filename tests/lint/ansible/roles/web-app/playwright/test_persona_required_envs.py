@@ -8,7 +8,7 @@ Why
 
 The persona helpers (`roles/test-e2e-playwright/files/personas/{biber,
 admin,guest}.js`) collapse the persona scenario when their required
-URLs are empty (the persona-collapse exception per req 019). A role
+URLs are empty (the persona-collapse exception). A role
 that declares `dashboard: enabled` but forgets to render
 `DASHBOARD_BASE_URL` therefore makes the personas SILENTLY SKIP rather
 than fail — the deploy reports green but the personas never actually

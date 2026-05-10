@@ -42,7 +42,7 @@ test("LDAP: FusionDirectory backend points at svc-db-openldap (variant 1)", asyn
   expect(page.url().includes(canonicalDomain)).toBe(true);
 });
 
-// Persona scenarios (req 019 Rule 3).
+// Persona scenarios.
 // Bodies live in the shared helper roles/test-e2e-playwright/files/personas.js
 // so every role's persona flow stays consistent.
 

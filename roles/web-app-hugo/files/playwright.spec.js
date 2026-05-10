@@ -53,7 +53,7 @@ test("hugo serves rendered HTML with a non-empty <title>", async ({ page }) => {
   ).toBe(false);
 });
 
-// Persona scenarios (req 019 Rule 3).
+// Persona scenarios.
 // Bodies live in the shared helper roles/test-e2e-playwright/files/personas.js
 // so every role's persona flow stays consistent.
 

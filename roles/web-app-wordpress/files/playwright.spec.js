@@ -246,14 +246,14 @@ async function keycloakResolveGroupId(
  * Returns:
  *   true  — the user was not a member and the helper successfully joined them.
  *   false — the user was ALREADY a member (no join performed); the caller
- *           MUST NOT run a teardown removal, per requirement 004's
+ *           MUST NOT run a teardown removal, per the auto-add contract's
  *           idempotency rule ("if the test found biber already a member,
  *           it MUST leave that membership in place").
  *
  * The Keycloak admin "Join Group" dialog filters its search results by
  * leaf name only and paginates. Once Keycloak's RBAC tree contains many
  * subgroups whose leaf is the same role name (administrator, editor,
- * ...) — which is exactly the requirement-005 hierarchical layout —
+ * ...) — which is exactly the documented hierarchical layout —
  * the WordPress entry can fall outside the first page and the dialog
  * stops being a reliable test driver. We therefore drive the join step
  * through the Admin REST API while still asserting the tree shape that
@@ -323,7 +323,7 @@ async function keycloakAdminAddUserToGroup(
  * Legacy UI-driven implementation kept for reference / re-enabling once
  * Keycloak's admin "Join Group" dialog grows a non-paginated tree view.
  * It is intentionally unused; the request-based variant above is the
- * authoritative driver during requirement-005 verification.
+ * authoritative driver during verification.
  */
 async function keycloakAdminAddUserToGroupViaUi(
   page,
@@ -333,7 +333,7 @@ async function keycloakAdminAddUserToGroupViaUi(
   username
 ) {
   // `targetGroupPath` is the leading-slash Keycloak group path, e.g.
-  // `/roles/web-app-wordpress/subscriber` (requirement 005 hierarchical
+  // `/roles/web-app-wordpress/subscriber` (hierarchical
   // layout). The last segment is used for the dialog search, the full
   // path is used to disambiguate the checkbox.
   const pathSegments = targetGroupPath.replace(/^\//, "").split("/");
@@ -386,7 +386,7 @@ async function keycloakAdminAddUserToGroupViaUi(
     await nextButton.click();
     await page.waitForTimeout(500);
   }
-  // Idempotency rule from requirement 004: when the user is already a
+  // Idempotency rule: when the user is already a
   // member of the target group (e.g. via the LDAP-provisioned role
   // assignment), Keycloak's admin "Join Group" dialog hides that group
   // entirely. Treat a missing checkbox as "already a member" and let
@@ -434,7 +434,7 @@ async function keycloakAdminAddUserToGroupViaUi(
 /**
  * Remove a user from a Keycloak group via the Keycloak Admin REST API.
  *
- * Requirement 004 only mandates the *add* operation via the admin UI
+ * Only mandates the *add* operation via the admin UI
  * ("Add `biber` to that existing Keycloak group via the admin UI"). The
  * teardown step ("remove `biber` from the Keycloak group again") does not
  * prescribe a channel, and the admin-UI Groups tab's row-level Leave
@@ -516,7 +516,7 @@ const rbacGroupPathPrefix = decodeDotenvQuotedValue(
 );
 const multisiteEnabled =
   (process.env.WORDPRESS_MULTISITE_ENABLED || "").toLowerCase() === "true";
-// Discourse round-trip (requirement 007)
+// Discourse round-trip
 const discourseBaseUrl = normalizeBaseUrl(process.env.DISCOURSE_BASE_URL || "");
 const discourseApiKey = decodeDotenvQuotedValue(process.env.DISCOURSE_API_KEY);
 const discourseApiUsername = decodeDotenvQuotedValue(
@@ -544,7 +544,7 @@ test.beforeEach(async ({ page }) => {
 
 // -----------------------------------------------------------------------------
 // Baseline MUSTs: CSP + OIDC flow + canonical-domain DOM assertion
-// Baseline scenarios MUST NOT gate on any service (requirement 006).
+// Baseline scenarios MUST NOT gate on any service.
 // -----------------------------------------------------------------------------
 
 test("wordpress front page enforces Content-Security-Policy and renders canonical domain", async ({
@@ -585,20 +585,20 @@ test("wordpress administrator can complete an OIDC login round-trip", async ({
 // -----------------------------------------------------------------------------
 // RBAC role mapping: biber in web-app-wordpress-<role> → WP role <role>
 //
-// Requirement 004: auto-provisioned LDAP/Keycloak groups drive WordPress roles
+// auto-provisioned LDAP/Keycloak groups drive WordPress roles
 // via the OIDC `groups` claim, consumed by the mu-plugin
 // infinito-oidc-rbac-mapper.php. We test three roles across the privilege
 // spectrum serially so a regression in one mapping does not mask another.
 // -----------------------------------------------------------------------------
 
 const RBAC_ROLE_SEQUENCE = ["subscriber", "editor", "administrator"];
-// Per requirement 005 the Keycloak group path is hierarchical:
+// The Keycloak group path is hierarchical:
 // /roles/web-app-wordpress/<role> (Single-Site) or
 // /roles/web-app-wordpress/<tenant>/<role> (Multisite). RBAC_GROUP_PATH_PREFIX
 // renders `/roles/web-app-wordpress/` so the spec appends the role segment
 // below.
 //
-// Multisite scenarios (requirement 005): only run when multisite is opted
+// Multisite scenarios: only run when multisite is opted
 // in via `services.wordpress.multisite.enabled = true`. The default
 // path continues to run the Single-Site scenarios below.
 
@@ -730,7 +730,7 @@ for (const role of RBAC_ROLE_SEQUENCE) {
 }
 
 // -----------------------------------------------------------------------------
-// Requirement 005 Multisite scenarios.
+// Multisite scenarios.
 //
 // Placeholder: Multisite is opt-in via
 // `services.wordpress.multisite.enabled = true`. The spec records
@@ -747,11 +747,11 @@ test("wordpress multisite per-site RBAC is not exercised in single-site deploys"
   );
   // When multisite is enabled the scenarios land here. This guard exists
   // so the skip surfaces explicitly in the reporter, matching the
-  // documented contract of requirement 005.
+  // the documented Keycloak group-path contract.
 });
 
 // -----------------------------------------------------------------------------
-// Requirement 007: WordPress -> Discourse post round-trip.
+// WordPress -> Discourse post round-trip.
 //
 // Publish a post in the WP admin UI (with the wp-discourse sidebar toggle
 // set) and assert that the matching topic appears in Discourse. Tear down
@@ -963,7 +963,7 @@ test("wordpress post published with discourse toggle appears as a Discourse topi
 
       await wpSignOut(wpPage, wpBaseUrl);
     } finally {
-      // Teardown (see requirement 007): remove both sides regardless of
+      // Teardown: remove both sides regardless of
       // outcome. Cover draft/unpublished posts too to handle crashes
       // between create and publish. The whole WP-side cleanup is bounded
       // to 60s — Playwright counts the finally block toward the test
@@ -1053,7 +1053,7 @@ test("wordpress post published with discourse toggle appears as a Discourse topi
     }
 });
 
-// Persona scenarios (req 019 Rule 3).
+// Persona scenarios.
 // Bodies live in the shared helper roles/test-e2e-playwright/files/personas.js
 // so every role's persona flow stays consistent.
 

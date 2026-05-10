@@ -30,7 +30,7 @@ def _iter_role_config_files(repo_root: Path) -> list[Path]:
 
 
 def _extract_services(cfg: dict[str, Any]) -> dict[str, Any]:
-    # Per req-008 the file root of meta/services.yml IS the services
+    # Per the file root of meta/services.yml IS the services
     # map (no `compose.services` wrapper).
     return _safe_mapping(cfg)
 

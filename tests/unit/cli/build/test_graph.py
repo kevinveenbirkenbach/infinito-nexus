@@ -40,7 +40,7 @@ dependencies:
   - role_e
 """,
         )
-        # Per req-010 run_after lives in meta/services.yml under the role's
+        # Per run_after lives in meta/services.yml under the role's
         # primary entity; for "role_a" (no category prefix) the entity name
         # is the role name itself.
         self._write_file(

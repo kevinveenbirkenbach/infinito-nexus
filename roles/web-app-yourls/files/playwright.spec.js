@@ -32,7 +32,7 @@ test.beforeEach(() => {
 // (URL redirects work without login) but /admin/ is protected. Only members
 // of the hierarchical Keycloak group `/roles/web-app-yourls/administrator`
 // (post-005 layout) are allowed through. This scenario is the end-to-end
-// proof that requirement 005's hierarchical RBAC layout reaches oauth2-proxy's
+// proof that the hierarchical RBAC layout reaches oauth2-proxy's
 // `allowed_groups` correctly.
 test("yourls: admin sso login to admin panel, then logout", async ({
   page,
@@ -129,7 +129,7 @@ test("yourls: biber is denied access to /admin/ after sso login", async ({
     }
 });
 
-// Persona scenarios (req 019 Rule 3).
+// Persona scenarios.
 // Bodies live in the shared helper roles/test-e2e-playwright/files/personas.js
 // so every role's persona flow stays consistent.
 

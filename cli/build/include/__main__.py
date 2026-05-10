@@ -24,7 +24,7 @@ def find_roles(roles_dir, prefixes=None):
             yield path, meta_file
 
 def load_run_after(meta_file):
-    """Return the role's `run_after` list (per req-010)."""
+    """Return the role's `run_after` list."""
     from utils.roles.meta_lookup import get_role_run_after
 
     role_path = os.path.dirname(os.path.dirname(meta_file))

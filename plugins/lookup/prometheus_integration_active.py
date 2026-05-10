@@ -55,7 +55,7 @@ class LookupModule(LookupBase):
             return [True]
 
         try:
-            # Per req-008 services live at applications.<app>.services
+            # Per services live at applications.<app>.services
             # (no `compose.services` wrapper).
             enabled = bool(
                 applications.get(application_id, {})

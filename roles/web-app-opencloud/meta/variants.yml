@@ -53,7 +53,7 @@
       enabled: false
       shared: false
 
-# LDAP-only variant (req 018): pin ldap.enabled true with
+# LDAP-only variant: pin ldap.enabled true with
 # oidc.enabled false so the spec exercises the LDAP-bind login path
 # in isolation from OIDC.
 - services:

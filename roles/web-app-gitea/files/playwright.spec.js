@@ -164,7 +164,7 @@ test("healthz/ready endpoint returns non-5xx when gitea is running", async ({ re
   ).toBeLessThan(500);
 });
 
-// Persona scenarios (req 019 Rule 3).
+// Persona scenarios.
 // Bodies live in the shared helper roles/test-e2e-playwright/files/personas.js
 // so every role's persona flow stays consistent.
 

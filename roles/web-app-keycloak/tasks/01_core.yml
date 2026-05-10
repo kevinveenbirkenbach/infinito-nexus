@@ -46,7 +46,7 @@
       include_tasks: assert/05_ldap.yml
       when: MODE_ASSERT | bool
 
-    - name: "Load per-app group-ldap-mapper routines for '{{ application_id }}' (requirement 005)"
+    - name: "Load per-app group-ldap-mapper routines for '{{ application_id }}'"
       include_tasks: update/05c_per_app_mappers.yml
 
   when:

@@ -134,7 +134,7 @@ test("opencloud sso login (biber) lands on files view", async ({ page }) => {
   await ssoLoginAndAssertUsername(page, biberUsername, biberPassword);
 });
 
-// Persona scenarios (req 019 Rule 3).
+// Persona scenarios.
 // Bodies live in the shared helper roles/test-e2e-playwright/files/personas.js
 // so every role's persona flow stays consistent.
 

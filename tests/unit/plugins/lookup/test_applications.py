@@ -40,7 +40,7 @@ class TestApplicationsLookup(unittest.TestCase):
         self._tmpdir.cleanup()
 
     def test_returns_full_mapping(self) -> None:
-        # Per req-008 the file root of meta/services.yml is the services map,
+        # Per the file root of meta/services.yml is the services map,
         # so the loader puts it under `services` in the materialised payload.
         result = self.lookup.run([], variables={}, roles_dir=str(self._tmp / "roles"))[
             0

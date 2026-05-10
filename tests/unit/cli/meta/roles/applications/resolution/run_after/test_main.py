@@ -29,7 +29,7 @@ class TestRunAfterResolution(unittest.TestCase):
 
     def _make_role(self, name: str, run_after=None, with_meta: bool = True):
         """Create ``roles/<name>/meta/services.yml`` with the role's
-        ``run_after`` on its primary entity (per req-010).
+        ``run_after`` on its primary entity.
 
         If ``with_meta=False``, the role dir exists but ``meta/services.yml``
         does not.

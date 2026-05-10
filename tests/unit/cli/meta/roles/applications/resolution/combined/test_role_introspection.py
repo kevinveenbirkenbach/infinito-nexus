@@ -34,7 +34,7 @@ def _write_meta(root: Path, role: str, text: str) -> None:
 
 
 def _write_services(root: Path, role: str, text: str) -> None:
-    """Write meta/services.yml. The file root IS the services map (req-008)."""
+    """Write meta/services.yml. The file root IS the services map."""
     p = root / "roles" / role / ROLE_FILE_META_SERVICES
     p.parent.mkdir(parents=True, exist_ok=True)
     p.write_text(text, encoding="utf-8")
@@ -68,7 +68,7 @@ class TestRoleIntrospection(unittest.TestCase):
             _mk_role(root, "dep1", app_id="dep1")
             _mk_role(root, "dep2", app_id="dep2")
 
-            # Per req-010 run_after lives at meta/services.yml.<entity>.run_after
+            # Per run_after lives at meta/services.yml.<entity>.run_after
             # Entity name for "web-app-a" is "a".
             _write_services(
                 root,

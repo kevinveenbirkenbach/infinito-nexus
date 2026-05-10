@@ -163,14 +163,14 @@
     mode: "0644"
 
 # Stage the shared service-gating helper next to the spec so the spec can
-# `require("./service-gating")`. See docs/requirements/006 for the contract.
+# `require("./service-gating")`.
 - name: Copy shared service-gating helper into staging tests directory
   ansible.builtin.copy:
     src: "{{ playbook_dir }}/roles/test-e2e-playwright/files/service-gating.js"
     dest: "{{ _playwright_stage_tests_dir }}/service-gating.js"
     mode: "0644"
 
-# Stage the shared persona-flow helpers (req 019).
+# Stage the shared persona-flow helpers.
 # The personas/ tree ships every persona flow runner at the top level
 # (biber.js, admin.js, guest.js, index.js) and every helper under
 # personas/utils/. We use ansible.builtin.copy with `directory_mode`

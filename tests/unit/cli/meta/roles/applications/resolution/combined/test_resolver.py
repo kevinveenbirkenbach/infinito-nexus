@@ -33,7 +33,7 @@ class TestCombinedTree(unittest.TestCase):
             (root / "roles").mkdir()
 
             # start app role with dashboard enabled.
-            # Per req-010 run_after lives at
+            # Per run_after lives at
             # meta/services.yml.<primary_entity>.run_after.
             # For "start" (no category prefix) the entity name = role name.
             _write(

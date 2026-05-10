@@ -180,7 +180,7 @@ def iter_role_images(repo_root: Path) -> Iterable[ImageRef]:
     Yield all ImageRef entries discovered across all roles in *repo_root*.
 
     Sources:
-      1. roles/**/meta/services.yml → <entity>.{image,version}   (post-req-008)
+      1. roles/**/meta/services.yml → <entity>.{image,version}
       2. roles/**/defaults/main.yml → images.<name>.{image,version}
 
     See docs/contributing/artefact/image.md for the full format reference.
@@ -188,7 +188,7 @@ def iter_role_images(repo_root: Path) -> Iterable[ImageRef]:
     roles_dir = repo_root / "roles"
 
     # 1. Images from meta/services.yml. The file root IS the services map
-    # (per req-008 file-root convention) keyed by <entity_name>.
+    # keyed by <entity_name>.
     for services_file in roles_dir.glob(f"**/{ROLE_FILE_META_SERVICES}"):
         role_name = services_file.parent.parent.name
         services = load_yaml(services_file)

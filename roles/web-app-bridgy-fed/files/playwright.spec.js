@@ -34,14 +34,14 @@ test("bridgy-fed serves /robots.txt successfully", async ({ request }) => {
   // Bridgy Fed has no local user accounts and authenticates federation
   // peers via their source-platform credentials, so login / logout
   // scenarios are not applicable. The SSO and RBAC exception is
-  // documented in README.md per requirement 013 and lifecycle.md.
+  // documented in README.md and lifecycle.md.
   // /robots.txt is the canonical "service is alive" probe for this
   // role; the homepage at `/` is a 404 by design.
   const response = await request.get(`${appBaseUrl}/robots.txt`);
   expect(response.status(), "Expected bridgy-fed /robots.txt status < 400").toBeLessThan(400);
 });
 
-// Persona scenarios (req 019 Rule 3).
+// Persona scenarios.
 // Bodies live in the shared helper roles/test-e2e-playwright/files/personas.js
 // so every role's persona flow stays consistent.
 

@@ -1,4 +1,4 @@
-"""Per-application RBAC naming for Keycloak (requirement 005).
+"""Per-application RBAC naming for Keycloak.
 
 Single SPOT for the strings that vary per deployed application in the
 per-app `group-ldap-mapper` setup:

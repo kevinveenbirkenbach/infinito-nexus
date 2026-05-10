@@ -16,7 +16,7 @@ Suppression
 Three independent opt-outs are recognised; each MAY suppress one or
 more personas:
 
-* **Explicit role-contract opt-out (req 019 Rule 11)** — a
+* **Explicit role-contract opt-out** — a
   `PERSONA_<PERSONA>_BLOCKED=true` line in the role's
   `templates/playwright.env.j2` declares that the persona has no
   runnable journey and the spec body legitimately omits it. The
@@ -47,9 +47,7 @@ _TEST_TITLE_RE = re.compile(
     r"""^\s*test\s*\(\s*['"]([^'"]+)['"]""",
     re.MULTILINE,
 )
-_BLOCKED_FLAG_RE_TPL = (
-    r"^\s*PERSONA_{persona}_BLOCKED\s*=\s*true\b"
-)
+_BLOCKED_FLAG_RE_TPL = r"^\s*PERSONA_{persona}_BLOCKED\s*=\s*true\b"
 
 
 def _persona_titles_in_spec(spec_text: str) -> set[str]:
@@ -97,7 +95,7 @@ class TestPersonaNaming(unittest.TestCase):
                 missing_sorted = sorted(missing)
                 offenders.append(
                     f"{role_name}: files/playwright.spec.js has no "
-                    f"`test(\"<persona>: …\")` for personas {missing_sorted}; "
+                    f'`test("<persona>: …")` for personas {missing_sorted}; '
                     f"add the scenario(s) using `runGuestFlow` / "
                     f"`runBiberFlow` / `runAdminFlow` from `./personas`, OR "
                     f"declare `PERSONA_{{PERSONA}}_BLOCKED=true` in "

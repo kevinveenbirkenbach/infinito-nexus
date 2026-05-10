@@ -1,10 +1,9 @@
 ---
-# Matrix-deploy variant overrides for this role (requirement 013
-# alpha-to-beta promotion). Both variants ride the same OIDC →
+# Matrix-deploy variant overrides for this role. Both variants ride the same OIDC →
 # login-broker → social-app handoff (variant A+); the difference is
 # whether Keycloak's user storage is local (variant 0) or LDAP-
 # federated against svc-db-openldap (variant 1). This matches the
-# requirement-013 contract that 🛠️ glue paths MUST exercise both an
+# contract that 🛠️ glue paths MUST exercise both an
 # `oidc` and an `ldap` variant.
 # See docs/contributing/artefact/files/role/variants.md for the file format.
 

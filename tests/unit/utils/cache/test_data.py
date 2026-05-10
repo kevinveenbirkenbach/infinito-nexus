@@ -152,7 +152,7 @@ class TestStableVariablesSignature(unittest.TestCase):
 
 class TestLoadUserDefs(unittest.TestCase):
     def test_merges_non_conflicting_across_roles(self):
-        # Per req-008 the file root of meta/users.yml IS the users map
+        # Per the file root of meta/users.yml IS the users map
         # (no `users:` wrapper).
         with tempfile.TemporaryDirectory() as tmp:
             roles = Path(tmp)
@@ -326,7 +326,7 @@ class TestGetApplicationDefaults(unittest.TestCase):
         _reset_cache_for_tests()
 
     def test_reads_role_config_files(self):
-        # Per req-008 the server topic now lives in its own
+        # Per the server topic now lives in its own
         # `meta/server.yml`, not nested inside `meta/services.yml`.
         with tempfile.TemporaryDirectory() as tmp:
             roles = Path(tmp)

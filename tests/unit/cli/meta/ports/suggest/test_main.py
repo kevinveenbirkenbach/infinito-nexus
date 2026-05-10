@@ -1,4 +1,4 @@
-"""Unit tests for `cli meta ports suggest` (req-009 AC).
+"""Unit tests for `cli meta ports suggest`.
 
 Covers gap-first / increment-fallback behaviour against synthetic
 role-tree fixtures plus the relay-range allocator.

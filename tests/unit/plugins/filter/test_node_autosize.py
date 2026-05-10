@@ -15,7 +15,7 @@ class TestNodeAutosizeFilter(unittest.TestCase):
 
     def setUp(self):
         # Default parameters used by all tests
-        # Per req-008 the materialised payload exposes services under
+        # Per the materialised payload exposes services under
         # the bare `services` key (no `compose.services` envelope).
         self.applications = {"web-app-nextcloud": {"services": {"whiteboard": {}}}}
         self.application_id = "web-app-nextcloud"

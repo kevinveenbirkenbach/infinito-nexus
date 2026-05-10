@@ -1,13 +1,13 @@
 """Helpers for reading per-role metadata that lives on the role's primary
-service entity in `meta/services.yml` (per req-010).
+service entity in `meta/services.yml`.
 
 Both fields used to live nested inside `meta/main.yml.galaxy_info`:
 
-  * ``run_after``  — project-specific role-load-order list (req-002).
+  * ``run_after``  — project-specific role-load-order list.
   * ``lifecycle``  — maturity marker filtered by
     ``cli meta roles lifecycle``.
 
-After req-010 they live at
+They live at
 ``meta/services.yml.<primary_entity>.{run_after,lifecycle}`` where
 ``<primary_entity>`` is the value returned by
 :func:`utils.roles.entity_name.get_entity_name` for the role's directory

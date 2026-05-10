@@ -1,4 +1,4 @@
-"""Per req-009: every role that ships a Compose template MUST declare its
+"""Per: every role that ships a Compose template MUST declare its
 own local subnet under ``meta/server.yml.networks.local.subnet``."""
 
 from __future__ import annotations
@@ -58,7 +58,7 @@ class TestComposeRolesHaveLocalNetwork(unittest.TestCase):
             self.fail(
                 "The following roles ship a templates/compose.yml.j2 and define "
                 "an application_id but have no networks.local.subnet entry in "
-                "meta/server.yml (per req-009):\n" + details
+                "meta/server.yml:\n" + details
             )
 
 

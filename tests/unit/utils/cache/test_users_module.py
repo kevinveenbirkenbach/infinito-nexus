@@ -30,7 +30,7 @@ def _write(path: Path, content: str) -> None:
 
 
 def _seed_minimal_user_role(tmp: Path, role_name: str = "web-app-foo") -> Path:
-    # Per req-008 the file root of meta/users.yml IS the users map
+    # Per the file root of meta/users.yml IS the users map
     # (no `users:` wrapper).
     roles = tmp / "roles"
     role = roles / role_name

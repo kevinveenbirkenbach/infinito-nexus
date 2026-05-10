@@ -35,7 +35,7 @@ class TestNoStopRequiredIntegrity(unittest.TestCase):
                 self.fail(f"YAML parsing failed for {docker_config_path}: {e}")
                 continue
 
-            # Per req-008 the file root of meta/services.yml IS the
+            # Per the file root of meta/services.yml IS the
             # services map (no `compose.services` wrapper).
             services = config if isinstance(config, dict) else {}
 

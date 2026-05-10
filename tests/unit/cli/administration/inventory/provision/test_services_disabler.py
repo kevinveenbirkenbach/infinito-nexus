@@ -51,7 +51,7 @@ class TestFindProviderRoles(unittest.TestCase):
         role_dir = self.roles_dir / role_name
         (role_dir / "meta").mkdir(parents=True)
         (role_dir / "vars").mkdir(parents=True)
-        # New layout (req-008): meta/services.yml is the services map directly
+        # New layout: meta/services.yml is the services map directly
         dump_yaml(role_dir / ROLE_FILE_META_SERVICES, services)
         dump_yaml(role_dir / ROLE_FILE_VARS_MAIN, {"application_id": role_name})
 
@@ -188,7 +188,7 @@ class TestApplyServicesDisabled(unittest.TestCase):
         role_dir = self.roles_dir / role_name
         (role_dir / "meta").mkdir(parents=True)
         (role_dir / "vars").mkdir(parents=True)
-        # New layout (req-008): meta/services.yml is the services map directly
+        # New layout: meta/services.yml is the services map directly
         dump_yaml(role_dir / ROLE_FILE_META_SERVICES, services)
         dump_yaml(role_dir / ROLE_FILE_VARS_MAIN, {"application_id": role_name})
 
@@ -374,7 +374,7 @@ class TestApplyServicesDisabledFromEnv(unittest.TestCase):
         role_dir = self.roles_dir / role_name
         (role_dir / "meta").mkdir(parents=True)
         (role_dir / "vars").mkdir(parents=True)
-        # New layout (req-008): meta/services.yml is the services map directly
+        # New layout: meta/services.yml is the services map directly
         dump_yaml(role_dir / ROLE_FILE_META_SERVICES, services)
         dump_yaml(role_dir / ROLE_FILE_VARS_MAIN, {"application_id": role_name})
 
@@ -424,7 +424,7 @@ class TestServicesDisabledConflicts(unittest.TestCase):
         role_dir = self.roles_dir / role_name
         (role_dir / "meta").mkdir(parents=True)
         (role_dir / "vars").mkdir(parents=True)
-        # New layout (req-008): meta/services.yml is the services map directly
+        # New layout: meta/services.yml is the services map directly
         dump_yaml(role_dir / ROLE_FILE_META_SERVICES, services)
         dump_yaml(role_dir / ROLE_FILE_VARS_MAIN, {"application_id": role_name})
 

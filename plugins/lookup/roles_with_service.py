@@ -12,7 +12,7 @@ Used by the SPOT-owner specs (web-app-{dashboard, prometheus, matomo})
 to render a per-consumer manifest into ``templates/playwright.env.j2``.
 The provider's ``files/playwright.spec.js`` then parameterises one
 assertion per consumer over that manifest, owning the cross-service
-reachability assertion in one place per req 019 Rule 13.
+reachability assertion in one place.
 
 The lookup reuses ``get_merged_applications`` (the same helper
 ``lookup('applications', ...)`` uses) so the data is already rendered

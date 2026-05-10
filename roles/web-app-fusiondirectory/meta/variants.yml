@@ -1,5 +1,5 @@
 ---
-# Matrix-deploy variant overrides per requirement 013. The LDAP
+# Matrix-deploy variant overrides. The LDAP
 # marker stays on across both variants because LDAP IS the storage
 # backend; variant 1 is essentially equivalent on FusionDirectory's
 # side, the change is in how Keycloak federates user storage in

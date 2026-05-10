@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Suggest free host-bound ports based on the live role tree (req-009).
+"""Suggest free host-bound ports based on the live role tree.
 
 Walks every ``roles/*/meta/services.yml``, collects occupied
 ``<entity>.ports.{local,public}.<category>`` assignments per scope+category,

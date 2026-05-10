@@ -68,7 +68,7 @@ test("metricz endpoint is accessible and returns prometheus text format", async 
 // chain to Keycloak; on successful auth the proxy redirects back to the
 // Prometheus UI directly (no dashboard-iframe wrapping). The
 // dashboard-tile-reachability concern is owned by web-app-dashboard's
-// own spec per req 019 Rule 13, so this test no longer exercises that
+// own spec, so this test no longer exercises that
 // click path — keeping admin-reach SPOT-clean.
 test("prometheus: admin sso login, verify ui, logout", async ({ page }) => {
   const expectedOidcAuthUrl       = `${oidcIssuerUrl.replace(/\/$/, "")}/protocol/openid-connect/auth`;
@@ -169,7 +169,7 @@ test("prometheus: biber is denied access after sso login", async ({ browser }) =
 });
 
 // -----------------------------------------------------------------------------
-// Scrape-target reachability per consumer (req 019 SPOT): one
+// Scrape-target reachability per consumer: one
 // parameterised assertion per role declared as a prometheus consumer
 // in its meta/services.yml. The role list is emitted into
 // PROMETHEUS_TARGET_ROLES_JSON at deploy time by the env template via
@@ -245,7 +245,7 @@ test("prometheus scrape: every consumer role reports up=1", async ({ page }) => 
   ).toEqual([]);
 });
 
-// Persona scenarios (req 019 Rule 3).
+// Persona scenarios.
 // Bodies live in the shared helper roles/test-e2e-playwright/files/personas.js
 // so every role's persona flow stays consistent.
 

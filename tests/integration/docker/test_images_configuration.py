@@ -10,7 +10,7 @@ from utils.roles.mapping import ROLE_FILE_META_SERVICES, ROLE_FILE_VARS_MAIN
 class TestDockerRoleServicesConfiguration(unittest.TestCase):
     def test_services_keys_and_templates(self):
         """For each web-app-* role, check that ``meta/services.yml`` contains
-        a non-empty mapping at the file root (the services map per req-008)."""
+        a non-empty mapping at the file root (the services map)."""
         repo_root = Path(__file__).resolve().parent.parent.parent.parent
         roles_dir = repo_root / "roles"
         errors = []
@@ -39,7 +39,7 @@ class TestDockerRoleServicesConfiguration(unittest.TestCase):
             if not isinstance(services, dict):
                 errors.append(
                     f"{role_path.name}: meta/services.yml file root must be a "
-                    "mapping (the services map; per req-008)"
+                    "mapping (the services map;)"
                 )
                 continue
         if warnings:

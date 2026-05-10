@@ -66,7 +66,7 @@ BLUESKY_ADMIN_PASSWORD: "{{ lookup('users', 'administrator').password }}"
 BLUESKY_FRONT_PROXY_CONTENT: "{{ lookup('template', 'extra_locations.conf.j2') }}"
 BLUESKY_CONFIG_UPSTREAM_URL: "{{ lookup('config', application_id, 'server.config_upstream_url') }}"
 
-## Login broker (variant A+ per requirement 013)
+## Login broker (variant A+)
 BLUESKY_BROKER_BUILD_CONTEXT: "{{ [ lookup('container', application_id, 'directories.services'), 'login-broker' ] | path_join }}"
 BLUESKY_BROKER_SRC_DIR: "{{ role_path }}/files/login-broker"
 BLUESKY_BROKER_IMAGE: "bluesky_broker_custom"

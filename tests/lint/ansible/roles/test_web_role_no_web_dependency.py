@@ -16,7 +16,7 @@ Cross-`web-*` includes belong in the variant-aware service registry:
 Putting another `web-*` role in `meta/main.yml.dependencies` makes it
 mandatory for every deploy of the consumer role and bypasses the
 variant-aware planner. That couples otherwise independent roles and
-violates req-009 / req-010 expectations around per-role inclusion.
+violates / expectations around per-role inclusion.
 """
 
 import unittest

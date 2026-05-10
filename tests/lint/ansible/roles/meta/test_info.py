@@ -73,7 +73,7 @@ def _validate_meta_info(path: Path) -> list[str]:
 
     if "info" in parsed and isinstance(parsed.get("info"), dict):
         problems.append(
-            "file uses an `info:` wrapper key — req-011 mandates the file-root "
+            "file uses an `info:` wrapper key — mandates the file-root "
             "convention (the file's content IS applications.<role>.info)"
         )
 
@@ -121,14 +121,14 @@ def _validate_meta_main_no_forbidden(path: Path) -> list[str]:
     if not found:
         return []
     return [
-        "post-req-011 forbidden key(s) under galaxy_info: "
+        "Forbidden key(s) under galaxy_info: "
         + ", ".join(found)
         + " (move them to meta/info.yml)"
     ]
 
 
 class TestMetaInfoShape(unittest.TestCase):
-    """Enforce the meta/info.yml schema per req-011."""
+    """Enforce the meta/info.yml schema."""
 
     def test_meta_info_files_are_well_shaped(self) -> None:
         offenders: dict[Path, list[str]] = {}
@@ -141,7 +141,7 @@ class TestMetaInfoShape(unittest.TestCase):
             return
 
         rel = lambda p: p.relative_to(PROJECT_ROOT)  # noqa: E731
-        lines = [f"{len(offenders)} meta/info.yml file(s) violate req-011:"]
+        lines = [f"{len(offenders)} meta/info.yml file(s) violate:"]
         for path, problems in sorted(offenders.items()):
             lines.append(f"  - {rel(path)}:")
             lines.extend(f"      * {problem}" for problem in problems)
@@ -149,7 +149,7 @@ class TestMetaInfoShape(unittest.TestCase):
 
 
 class TestMetaMainHasNoMigratedFields(unittest.TestCase):
-    """galaxy_info MUST NOT carry the four fields after req-011."""
+    """galaxy_info MUST NOT carry the four fields after."""
 
     def test_no_forbidden_keys_in_galaxy_info(self) -> None:
         offenders: dict[Path, list[str]] = {}
@@ -163,7 +163,7 @@ class TestMetaMainHasNoMigratedFields(unittest.TestCase):
 
         rel = lambda p: p.relative_to(PROJECT_ROOT)  # noqa: E731
         lines = [
-            f"{len(offenders)} meta/main.yml file(s) still carry post-req-011 "
+            f"{len(offenders)} meta/main.yml file(s) still carry "
             f"forbidden keys under galaxy_info:"
         ]
         for path, problems in sorted(offenders.items()):

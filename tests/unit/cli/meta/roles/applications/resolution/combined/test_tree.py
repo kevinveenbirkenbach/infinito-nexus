@@ -32,7 +32,7 @@ class TestCombinedTree(unittest.TestCase):
             (root / "roles").mkdir()
 
             # start app role with dashboard enabled.
-            # Per req-008/req-010, meta/services.yml is the services map at the
+            # meta/services.yml is the services map at the
             # file root, with run_after under the role's primary entity.
             _write(
                 root / "roles" / "start" / ROLE_FILE_VARS_MAIN,

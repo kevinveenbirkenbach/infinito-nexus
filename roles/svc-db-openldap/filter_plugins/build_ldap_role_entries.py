@@ -1,6 +1,6 @@
 """Build structured LDAP role entries for the RBAC groups container.
 
-Requirement 005 mandates a hierarchical Keycloak group path shape:
+Mandates a hierarchical Keycloak group path shape:
 
     /roles/<application_id>/<role_name>                    # non-tenant / global
     /roles/<application_id>/<tenant_id>/<role_name>        # per-tenant

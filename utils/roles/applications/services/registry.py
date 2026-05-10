@@ -90,9 +90,9 @@ def load_applications_from_roles_dir(roles_dir: Path) -> dict[str, dict[str, Any
         application_id = _normalized_name(vars_data.get("application_id"))
         if not application_id:
             continue
-        # Per req-008 every role's metadata lives under meta/<topic>.yml.
-        # Reassemble the legacy `{compose: {services: ...}, server: ...}`
-        # shape so this module's downstream readers stay unchanged.
+        # Every role's metadata lives under meta/<topic>.yml. Reassemble
+        # the legacy `{compose: {services: ...}, server: ...}` shape so
+        # this module's downstream readers stay unchanged.
         meta_dir = role_dir / "meta"
         config: dict[str, Any] = {}
         services_data = read_yaml_file(meta_dir / "services.yml")
@@ -307,11 +307,10 @@ def resolve_service_dependency_roles_from_config(
 
 
 def load_run_after_from_roles_dir(roles_dir: Path, role_name: str) -> list[str]:
-    # Per req-010 `run_after` lives at
-    # `meta/services.yml.<primary_entity>.run_after`. The helper resolves
-    # the primary entity name and surfaces shape errors via
-    # MetaServicesShapeError, which we wrap so loaders see a single error
-    # type from this module.
+    # `run_after` lives at `meta/services.yml.<primary_entity>.run_after`.
+    # The helper resolves the primary entity name and surfaces shape errors
+    # via MetaServicesShapeError, which we wrap so loaders see a single
+    # error type from this module.
     try:
         result = get_role_run_after(roles_dir / role_name, role_name=role_name)
     except Exception as exc:

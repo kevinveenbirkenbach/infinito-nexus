@@ -26,7 +26,7 @@ class TestGeneratePlaybook(unittest.TestCase):
             os.makedirs(os.path.join(role_path, 'meta'), exist_ok=True)
             os.makedirs(os.path.join(role_path, 'vars'), exist_ok=True)
 
-            # In the new layout (req-010) run_after lives at
+            # In the new layout run_after lives at
             # meta/services.yml.<primary_entity>.run_after. For role names
             # that are not prefixed by a known category (e.g. 'role-a'),
             # get_entity_name returns the role name itself.

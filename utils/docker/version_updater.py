@@ -197,8 +197,8 @@ def suppressed_services(config_path: Path) -> set[str]:
     """Return service names whose `version:` line is annotated with the
     unified ``# nocheck: docker-version`` marker.
 
-    Post req-008 the file root of `meta/services.yml` IS the services map.
-    There is no `services.` wrapper to walk into.
+    The file root of `meta/services.yml` IS the services map. There
+    is no `services.` wrapper to walk into.
     """
     raw = read_text(str(config_path))
     lines = raw.splitlines()
@@ -295,7 +295,7 @@ def find_outdated_updates(repo_root: Path) -> list[DockerImageVersionUpdate]:
 def update_config_versions(config_path: Path, service_versions: dict[str, str]) -> bool:
     """Rewrite each ``<service>.version:`` value in `meta/services.yml`.
 
-    The post-req-008 file root IS the services map (no `services.`
+    The file root IS the services map (no `services.`
     wrapper), so the walker tracks one nesting level: top-level service keys
     and their immediate ``version:`` field.
     """

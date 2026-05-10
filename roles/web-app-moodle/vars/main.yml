@@ -86,7 +86,7 @@ MOODLE_LDAP_ENABLED: "{{ lookup('config', application_id, 'services.ldap.enabled
 
 # OIDC scopes Moodle requests from Keycloak. The custom 'moodle' scope
 # (rendered by web-app-keycloak when this role is enabled) carries the
-# 7 non-standard profile claims documented in req-015 §"Profile-field
+# 7 non-standard profile claims documented in §"Profile-field
 # mapping": name_phonetic_given/family, phone_number_alt, institution,
 # department, description, id_number.
 MOODLE_OIDC_CUSTOM_SCOPE: "{{ lookup('config', 'web-app-keycloak', 'services.keycloak.scopes.moodle') }}"

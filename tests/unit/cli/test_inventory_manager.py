@@ -64,7 +64,7 @@ class TestInventoryManager(unittest.TestCase):
         if path.match(f"*/{ROLE_FILE_VARS_MAIN}"):
             return {"application_id": "testapp"}
 
-        # Return docker service flags for meta/services.yml. Per req-008 the
+        # Return docker service flags for meta/services.yml. Per the
         # file root IS the services map (no `compose.services` wrapper).
         if path.match(f"*/{ROLE_FILE_META_SERVICES}"):
             return {
@@ -138,7 +138,7 @@ class TestInventoryManager(unittest.TestCase):
         """
         apply_schema should inject database password and vault plain_cred.
         """
-        # Setup role directory (post-req-008: only meta/ + vars/).
+        # Setup role directory (only meta/ + vars/).
         role_dir = self.tmpdir / "role"
         (role_dir / "meta").mkdir(parents=True, exist_ok=True)
         (role_dir / "vars").mkdir(parents=True, exist_ok=True)
@@ -186,7 +186,7 @@ class TestInventoryManager(unittest.TestCase):
         # plain_cred vaulted from override
         self.assertIsInstance(creds["plain_cred"], VaultScalar)
 
-        # Per req-008 nested credential keys are supported and walked
+        # Per nested credential keys are supported and walked
         # recursively, so nested.inner with `algorithm: sha256` IS vaulted.
         self.assertIsInstance(creds["nested"]["inner"], VaultScalar)
 

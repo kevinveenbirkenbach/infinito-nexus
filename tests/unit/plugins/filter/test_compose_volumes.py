@@ -30,7 +30,7 @@ class TestComposeVolumes(unittest.TestCase):
         return data
 
     def _base_apps(self) -> dict[str, Any]:
-        # Per req-008 the materialised payload moved from
+        # Per the materialised payload moved from
         # `applications.<app>.compose.services.<X>` to
         # `applications.<app>.services.<X>`.
         return {

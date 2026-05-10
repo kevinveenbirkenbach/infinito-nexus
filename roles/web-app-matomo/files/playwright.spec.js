@@ -120,7 +120,7 @@ test("matomo local administrator logs in and logs out", async ({ page }) => {
   await expectNoCspViolations(page, diagnostics, "matomo administrator login");
 });
 
-// Biber denial at Matomo (req 019 Rule 12): biber's Keycloak account
+// Biber denial at Matomo: biber's Keycloak account
 // exists but is NOT in `web-app-matomo-administrator`. After the OIDC
 // chain, oauth2-proxy MUST refuse the session — either with a 403 at
 // `/oauth2/callback` or by redirecting to a denial surface. The check
@@ -192,7 +192,7 @@ test("matomo: biber is denied access at the admin surface", async ({ browser }) 
 
     // Fallback: no callback observed — verify the URL did not settle
     // on the authenticated Matomo surface, AND the body does not
-    // expose the admin DOM markers (req 019 Rule 12 body validation).
+    // expose the admin DOM markers (body validation).
     await biberPage.waitForLoadState("domcontentloaded", { timeout: 60_000 }).catch(() => {});
     const finalUrl = biberPage.url();
     const onAuthDenialChain =
@@ -238,7 +238,7 @@ test("matomo: biber is denied access at the admin surface", async ({ browser }) 
         /piwik|matomo/i.test(body);
       expect(
         isMatomoSurface,
-        `biber probe to ${expectedMatomoBaseUrl}/ returned 200 but the body is neither matomo's login form nor a recognisable matomo / piwik surface (req 019 Rule 12).`,
+        `biber probe to ${expectedMatomoBaseUrl}/ returned 200 but the body is neither matomo's login form nor a recognisable matomo / piwik surface.`,
       ).toBe(true);
       return;
     }
@@ -252,7 +252,7 @@ test("matomo: biber is denied access at the admin surface", async ({ browser }) 
 });
 
 // -----------------------------------------------------------------------------
-// Tracker-target presence per consumer (req 019 SPOT): one
+// Tracker-target presence per consumer: one
 // parameterised assertion per role declared as a matomo consumer in
 // its meta/services.yml. The role list is emitted into
 // MATOMO_TARGET_ROLES_JSON at deploy time by the env template via the
@@ -343,7 +343,7 @@ test("matomo SitesManager registers a tracker site for every consumer role", asy
   void cookies;
 });
 
-// Persona scenarios (req 019 Rule 3).
+// Persona scenarios.
 // Bodies live in the shared helper roles/test-e2e-playwright/files/personas.js
 // so every role's persona flow stays consistent.
 

@@ -399,7 +399,7 @@ class TestBuildDevInventory(unittest.TestCase):
                     "server": {
                         "domains": {"canonical": ["blog.multi.example"]},
                     },
-                    # Per req-008: services live at applications.<app>.services
+                    # Per: services live at applications.<app>.services
                     # directly (no `compose.services` envelope).
                     "services": {"x": {"flag": True}},
                 },

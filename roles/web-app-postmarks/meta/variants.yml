@@ -1,6 +1,5 @@
 ---
-# Matrix-deploy variant overrides for this role (requirement 013
-# alpha-to-beta promotion). Postmarks has no first-party OIDC or
+# Matrix-deploy variant overrides for this role. Postmarks has no first-party OIDC or
 # LDAP integration, both auth-flow variants ride the same
 # `web-app-oauth2-proxy` sidecar in front of the Postmarks web UI.
 # Variant 0 is the canonical OIDC variant (Keycloak with local

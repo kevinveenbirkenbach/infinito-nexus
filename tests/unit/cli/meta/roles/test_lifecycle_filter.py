@@ -12,7 +12,7 @@ from utils.roles.meta_lookup import get_role_lifecycle
 
 def _write_meta(role_dir: Path, lifecycle_value: str | None) -> None:
     """Write the role's lifecycle into meta/services.yml under the primary
-    entity (per req-010). For role names without a category prefix
+    entity. For role names without a category prefix
     (e.g. ``role-a``) the entity name equals the role name.
     """
     meta_dir = role_dir / "meta"

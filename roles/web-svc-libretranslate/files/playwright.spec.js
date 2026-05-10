@@ -77,7 +77,7 @@ test("administrator: oauth2-proxy gates the LibreTranslate UI through Keycloak",
     .toContain(expectedOidcAuthUrl);
 });
 
-// Persona scenarios (req 019 Rule 3).
+// Persona scenarios.
 // Bodies live in the shared helper roles/test-e2e-playwright/files/personas.js
 // so every role's persona flow stays consistent.
 

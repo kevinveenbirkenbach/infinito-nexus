@@ -2,7 +2,7 @@
 """
 Resolve run_after transitively for a given role.
 
-Per req-010 ``run_after`` lives at
+Per ``run_after`` lives at
 ``meta/services.yml.<primary_entity>.run_after``. This script delegates to
 :func:`utils.roles.meta_lookup.get_role_run_after` so the primary-entity
 derivation stays in one place.
@@ -41,7 +41,7 @@ def roles_dir() -> Path:
 def load_run_after(role_name: str) -> list[str]:
     """Return the role's ``run_after`` list (or ``[]`` when absent).
 
-    Reads from ``meta/services.yml.<primary_entity>.run_after`` per req-010.
+    Reads from ``meta/services.yml.<primary_entity>.run_after``.
     """
     role_dir = roles_dir() / role_name
     if not role_dir.is_dir():

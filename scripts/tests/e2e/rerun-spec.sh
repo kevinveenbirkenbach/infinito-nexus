@@ -68,7 +68,7 @@ helper_src="$repo_root/roles/test-e2e-playwright/files/service-gating.js"
 if [[ -f "$helper_src" ]]; then
 	cp "$helper_src" "$stage_dir/tests/service-gating.js"
 fi
-# Stage the shared persona-flow helpers (req 019).
+# Stage the shared persona-flow helpers.
 # personas/ holds the persona flow runners (biber.js, admin.js, guest.js,
 # index.js) at the top and every helper module under personas/utils/. Copy
 # both levels so a spec can `require("./personas")` (resolves to

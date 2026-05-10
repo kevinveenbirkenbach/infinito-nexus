@@ -20,7 +20,7 @@ const biberUsername   = decodeDotenvQuotedValue(process.env.BIBER_USERNAME);
 const biberPassword   = decodeDotenvQuotedValue(process.env.BIBER_PASSWORD);
 const canonicalDomain = decodeDotenvQuotedValue(process.env.CANONICAL_DOMAIN);
 
-// Service-gating env flags per req-006.
+// Service-gating env flags.
 const oidcEnabled = String(process.env.SERVICE_OIDC || "").toLowerCase() === "true";
 const ldapEnabled = String(process.env.SERVICE_LDAP || "").toLowerCase() === "true";
 const lamEnabled  = String(process.env.SERVICE_LAM  || "").toLowerCase() === "true";
@@ -70,7 +70,7 @@ test("moodle baseline: CSP header present, no violations on landing", async ({ p
 // NOT drive Moodle's auth_oidc login redirect chain in Playwright —
 // the Microsoft auth_oidc plugin uses Azure-AD-style parameters
 // (resource=…, response_mode=form_post) whose end-to-end UI behavior
-// is upstream territory and not introduced by req-015.
+// is upstream territory and not introduced by.
 
 // ──────────────────────────────────────────────────────────────────────
 // Variant 1 — auth_ldap primary (skipped when SERVICE_OIDC=true)
@@ -125,7 +125,7 @@ test.describe("moodle profile fields are read-only", () => {
     await page.goto(`${moodleBaseUrl}/user/edit.php`);
     await expect(page.locator("body")).toBeVisible({ timeout: 30_000 });
 
-    // Per req-015 §"Profile-field mapping" — the 19 LDAP-backed Moodle
+    // Per §"Profile-field mapping" — the 19 LDAP-backed Moodle
     // columns. All must be locked (readonly or disabled) by auth_ldap
     // when the field is present in the form.
     const moodleFields = [
@@ -143,7 +143,7 @@ test.describe("moodle profile fields are read-only", () => {
         const disabled = await input.getAttribute("disabled");
         expect(
           readonly !== null || disabled !== null,
-          `field "${fieldName}" must be readonly/disabled (LDAP-backed lock per req-015)`
+          `field "${fieldName}" must be readonly/disabled (LDAP-backed lock)`
         ).toBe(true);
       }
     }
@@ -152,7 +152,7 @@ test.describe("moodle profile fields are read-only", () => {
 
 // ──────────────────────────────────────────────────────────────────────
 // OIDC discovery — verify the keycloak realm exposes the moodle scope
-// when MOODLE_OIDC_ENABLED (variant 0). Per req-015 §"Profile-field
+// when MOODLE_OIDC_ENABLED (variant 0). Per §"Profile-field
 // mapping", that scope carries the 7 custom claims.
 // ──────────────────────────────────────────────────────────────────────
 
@@ -175,7 +175,7 @@ test.describe("moodle keycloak scope wiring (variant 0)", () => {
 
   // End-to-end check: the Moodle-specific user-profile attribute
   // `middleName` is exposed by the realm's UserProfileProvider AND
-  // round-trips through the Account REST API. Per req-015
+  // round-trips through the Account REST API. Per
   // §"Profile-field mapping" all 19 attributes are edit=user, so the
   // write must succeed. fetch() runs inside a real browser page so
   // it inherits the test's TLS trust / CA wrapper config.
@@ -283,7 +283,7 @@ test.describe("moodle keycloak scope wiring (variant 0)", () => {
 // Proves that a Keycloak-side profile edit propagates ALL the way down
 // into the LDAP server, observable through a separate LDAP browser
 // (LAM) that does NOT touch Keycloak — closing the loop on the
-// WRITABLE federation contract from req-015.
+// WRITABLE federation contract.
 // ──────────────────────────────────────────────────────────────────────
 
 test.describe("keycloak → ldap write-through, verified via LAM", () => {
@@ -370,7 +370,7 @@ test.describe("keycloak → ldap write-through, verified via LAM", () => {
   });
 });
 
-// Persona scenarios (req 019 Rule 3).
+// Persona scenarios.
 // Bodies live in the shared helper roles/test-e2e-playwright/files/personas.js
 // so every role's persona flow stays consistent.
 

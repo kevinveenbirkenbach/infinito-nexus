@@ -1,9 +1,9 @@
 """Guard: the pre-005 `[RBAC.GROUP.NAME, ...] | path_join` idiom MUST NOT
-appear in production code after requirement 005 is implemented.
+appear in production code under the hierarchical RBAC layout.
 
 Every OIDC group path MUST be derived from the `rbac_group_path` lookup
 plugin. Inline `path_join` constructions scatter the path shape across
-many files and make future layout changes partial; requirement 005's
+many files and make future layout changes partial; the hierarchical layout's
 callsite-migration clause explicitly forbids them.
 
 Exceptions allowed by this guard:
@@ -83,7 +83,7 @@ class TestRbacPathJoinIsForbidden(unittest.TestCase):
             offenders,
             [],
             msg=(
-                "Requirement 005 forbids `[RBAC.GROUP.NAME, ...] | path_join` "
+                "Forbids `[RBAC.GROUP.NAME, ...] | path_join` "
                 "outside of group_vars/, plugins/lookup/, docs/, and the "
                 "Keycloak variable alias. Migrate the following files to "
                 "lookup('rbac_group_path', ...):\n" + "\n".join(offenders)

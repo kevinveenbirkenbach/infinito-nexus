@@ -1,4 +1,4 @@
-"""Walk the role tree to collect occupied ports and subnets per req-009.
+"""Walk the role tree to collect occupied ports and subnets.
 
 Used by:
   * `cli meta ports suggest`    — gap-first port allocation suggestions
@@ -143,7 +143,7 @@ def occupied_subnets(prefix_length: int) -> list[ipaddress.IPv4Network]:
 
 
 def host_bound_port_set() -> dict[int, list[tuple[str, str, str, str]]]:
-    """Build the flat host-bound port map per req-009 lint rule.
+    """Build the flat host-bound port map for the lint rule.
 
     Returns ``{port: [(role, entity, scope, category), ...]}``. Single-int
     `local`/`public` categories AND every integer in each relay span are

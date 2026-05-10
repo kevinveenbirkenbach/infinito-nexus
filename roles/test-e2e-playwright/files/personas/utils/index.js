@@ -8,8 +8,8 @@
  *
  * Cross-service surface helpers (dashboard tile click, prometheus
  * /api/v1/query, matomo SitesManager) are owned by the dedicated
- * provider specs (`web-app-{dashboard,prometheus,matomo}`) per req 019
- * Rule 9. They are intentionally NOT exported here.
+ * provider specs (`web-app-{dashboard,prometheus,matomo}`).
+ * They are intentionally NOT exported here.
  */
 
 const env = require("./env");

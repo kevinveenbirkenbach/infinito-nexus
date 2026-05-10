@@ -156,7 +156,7 @@ class TestRoleDependencyResolver(unittest.TestCase):
         make_role(self.roles_dir, "J")
         make_role(self.roles_dir, "K")
 
-        # Per req-010 run_after lives at
+        # Per run_after lives at
         # meta/services.yml.<primary_entity>.run_after; for "A" the entity
         # name equals the role name.
         write(
@@ -252,7 +252,7 @@ class TestRoleDependencyResolver(unittest.TestCase):
               - { role: D2 }
             """,
         )
-        # Per req-010 run_after lives at
+        # Per run_after lives at
         # meta/services.yml.<primary_entity>.run_after.
         write(
             str(Path(self.roles_dir) / "ROOT" / ROLE_FILE_META_SERVICES),

@@ -22,7 +22,7 @@ class TestApplicationGidLookup(unittest.TestCase):
             "web-app-taiga",
         ]
 
-        # Per req-008 an "application role" is identified by the presence of
+        # Per an "application role" is identified by the presence of
         # at least one of the project-owned `meta/<topic>.yml` files.
         for application_id in self.application_ids:
             role_path = str(Path(self.roles_dir) / application_id / "meta")

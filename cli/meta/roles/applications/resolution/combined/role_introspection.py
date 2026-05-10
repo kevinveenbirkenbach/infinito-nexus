@@ -35,7 +35,7 @@ def has_application_id(role_name: str) -> bool:
 def load_run_after(role_name: str) -> list[str]:
     """Return ``run_after`` for the role (or ``[]`` when absent).
 
-    Per req-010 the value lives at
+    Per the value lives at
     ``meta/services.yml.<primary_entity>.run_after``. Delegates to
     :func:`utils.roles.meta_lookup.get_role_run_after` so the
     primary-entity derivation stays in one place.
@@ -109,7 +109,7 @@ def load_shared_service_roles_for_app(
         if not cfg_path.exists():
             return []
         services_map = load_yaml_file(cfg_path)
-    # Per req-008 the meta/services.yml file root IS the services map.
+    # Per the meta/services.yml file root IS the services map.
     # resolve_direct_service_roles_from_config still expects the legacy
     # `{"services": {...}}` envelope, so wrap accordingly.
     cfg = {"services": services_map} if isinstance(services_map, dict) else {}
