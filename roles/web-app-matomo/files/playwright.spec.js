@@ -1,5 +1,6 @@
 const { test, expect } = require("@playwright/test");
 
+const { isServiceEnabled } = require("./service-gating");
 const { assertCspMetaParity, assertCspResponseHeader, decodeDotenvQuotedValue, expectNoCspViolations, installCspViolationObserver, normalizeBaseUrl, runAdminFlow, runBiberFlow, runGuestFlow } = require("./personas");
 test.use({ ignoreHTTPSErrors: true });
 
@@ -119,13 +120,17 @@ test("matomo local administrator logs in and logs out", async ({ page }) => {
   await expectNoCspViolations(page, diagnostics, "matomo administrator login");
 });
 
-// Biber denial at Matomo: biber's Keycloak account
-// exists but is NOT in `web-app-matomo-administrator`. After the OIDC
-// chain, oauth2-proxy MUST refuse the session — either with a 403 at
+// Biber denial at Matomo: biber's Keycloak account exists but is NOT
+// in `web-app-matomo-administrator`. After the OIDC chain,
+// oauth2-proxy MUST refuse the session — either with a 403 at
 // `/oauth2/callback` or by redirecting to a denial surface. The check
 // is the SPOT for "biber cannot reach Matomo" since the persona helper
 // no longer drives this probe.
 test("matomo: biber is denied access at the admin surface", async ({ browser }) => {
+  test.skip(
+    !isServiceEnabled("oauth2"),
+    "matomo's oauth2-proxy gate is not wired yet (services.yml oauth2.enabled=false; see TODO).",
+  );
   test.skip(
     !oidcIssuerUrl || !biberUsername || !biberPassword,
     "OIDC_ISSUER_URL / BIBER_USERNAME / BIBER_PASSWORD must be set in the Playwright env file",
