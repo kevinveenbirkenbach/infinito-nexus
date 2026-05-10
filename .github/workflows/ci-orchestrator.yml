@@ -112,9 +112,11 @@ jobs:
     uses: ./.github/workflows/lint-galaxy.yml
   lint-makefile:
     uses: ./.github/workflows/lint-makefile.yml
+  lint-javascript:
+    uses: ./.github/workflows/lint-javascript.yml
   lint-gate:
     name: 🚦 Gate lint
-    needs: [lint-ansible, lint-python, lint-docker, lint-shell, lint-markdown, lint-galaxy, lint-makefile]
+    needs: [lint-ansible, lint-python, lint-docker, lint-shell, lint-markdown, lint-galaxy, lint-makefile, lint-javascript]
     runs-on: ubuntu-latest
     steps:
       - run: echo "lint gate passed"

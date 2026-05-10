@@ -25,6 +25,7 @@ job-logs.txt
 .claude/commands
 .claude/settings.local.json
 *.lock
+node_modules/
 
 # Host shell / editor / tooling state accidentally surfaced inside this working copy
 .bash_profile

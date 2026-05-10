@@ -147,6 +147,23 @@ run_mbake() {
 	fi
 }
 
+run_eslint() {
+	if [[ ! -d "node_modules/eslint" ]]; then
+		write_status eslint SKIP
+		return 0
+	fi
+	local rc=0
+	# rc=1 means "violations remain after fix" — expected when the
+	# fixer can't auto-resolve everything; treat as OK. Only crashes
+	# (rc>=2) count as FAIL.
+	npx --no-install eslint --fix 'roles/**/files/**/*.js' >/dev/null 2>&1 || rc=$?
+	if [[ $rc -le 1 ]]; then
+		write_status eslint OK
+	else
+		write_status eslint FAIL
+	fi
+}
+
 # ── dispatch ─────────────────────────────────────────────────────────────────
 
 is_truthy() {
@@ -156,7 +173,7 @@ is_truthy() {
 	esac
 }
 
-workers=(run_ruff run_claude run_shell_pair run_markdownlint run_ansible_lint run_mbake)
+workers=(run_ruff run_claude run_shell_pair run_markdownlint run_ansible_lint run_mbake run_eslint)
 
 if is_truthy "${PARALLEL}"; then
 	for w in "${workers[@]}"; do "${w}" & done

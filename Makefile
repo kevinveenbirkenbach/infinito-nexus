@@ -17,7 +17,7 @@ $(error Missing env file: $(ENV_SH))
 endif
 
 .PHONY: setup setup-clean install install-ansible install-lint install-venv install-python install-python-dev install-system-python install-skills update-skills agent-install
-.PHONY: test lint lint-action lint-ansible lint-python lint-shellcheck lint-markdown lint-galaxy lint-makefile autoformat test-lint test-unit test-integration test-external test-deploy test-deploy-app
+.PHONY: test lint lint-action lint-ansible lint-python lint-shellcheck lint-markdown lint-galaxy lint-makefile lint-javascript autoformat test-lint test-unit test-integration test-external test-deploy test-deploy-app
 .PHONY: clean clean-sudo down cache-clean
 .PHONY: system-purge system-disk-usage
 .PHONY: list tree mig dockerignore chmod-scripts
@@ -274,7 +274,7 @@ setup-clean: clean setup
 	@echo "Full build with cleanup before was executed."
 
 # Run all lint checks.
-lint: lint-action lint-ansible lint-python lint-shellcheck lint-markdown lint-galaxy lint-makefile
+lint: lint-action lint-ansible lint-python lint-shellcheck lint-markdown lint-galaxy lint-makefile lint-javascript
 
 # Run the GitHub Actions lint checks.
 lint-action:
@@ -303,6 +303,10 @@ lint-galaxy:
 # Run checkmake against the Makefile.
 lint-makefile:
 	@bash scripts/lint/makefile.sh
+
+# Run ESLint over the project's JavaScript files (Playwright specs + persona helpers).
+lint-javascript:
+	@bash scripts/lint/javascript.sh
 
 # Auto-format all source files (skips tools that are not installed).
 autoformat:

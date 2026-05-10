@@ -1,5 +1,6 @@
 // @ts-check
 const { test, expect } = require('@playwright/test');
+const { runBiberFlow, runAdminFlow } = require("./personas");
 
 test.use({
   ignoreHTTPSErrors: true
@@ -81,7 +82,7 @@ async function oidcLogin(page, username, password) {
   await page.waitForFunction(() => document.readyState === "complete");
   const navigated = page.waitForURL(/auth\.infinito\.example/, { timeout: 30000 });
   await page.evaluate((href) => {
-    const csrfToken = document.querySelector("meta[name=\'csrf-token\']")?.getAttribute("content") || "";
+    const csrfToken = document.querySelector("meta[name='csrf-token']")?.getAttribute("content") || "";
     const form = document.createElement("form");
     form.setAttribute("method", "post");
     form.setAttribute("action", href);

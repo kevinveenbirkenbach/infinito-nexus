@@ -118,7 +118,7 @@ test.describe("moodle LDAP-only (variant 1)", () => {
     const oidcButton = page.locator("a, button").filter({
       hasText: /openid|oidc|keycloak|single.?sign.?on|sso/i
     }).first();
-    expect(await oidcButton.count(), "OIDC button must NOT be visible in variant 1").toBe(0);
+    await expect(oidcButton, "OIDC button must NOT be visible in variant 1").toHaveCount(0);
   });
 });
 

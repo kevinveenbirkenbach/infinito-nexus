@@ -542,6 +542,34 @@ ensure_markdownlint_cli2() {
 	}
 }
 
+ensure_eslint() {
+	# ESLint and the eslint-plugin-playwright config are pinned in the
+	# repo's package.json + package-lock.json; install them locally into
+	# node_modules so the flat config (eslint.config.js) can resolve the
+	# plugin via require(...).
+	[[ -d "${REPO_ROOT}/node_modules/eslint" ]] && return 0
+
+	if ! command -v npm >/dev/null 2>&1; then
+		warn "npm not found; install Node.js/npm first to get ESLint."
+		return 1
+	fi
+
+	log "Missing local 'eslint'. Installing via npm (in repo root)."
+	(
+		cd "${REPO_ROOT}"
+		if [[ -f package-lock.json ]]; then
+			npm ci --no-fund --no-audit
+		else
+			npm install --no-fund --no-audit
+		fi
+	) || return 1
+
+	[[ -d "${REPO_ROOT}/node_modules/eslint" ]] || {
+		warn "Local 'eslint' is still unavailable after installation."
+		return 1
+	}
+}
+
 detect_package_manager() {
 	if command -v pacman >/dev/null 2>&1; then
 		printf 'pacman\n'
@@ -776,6 +804,10 @@ install_makefile_tools() {
 	ensure_mbake
 }
 
+install_javascript_tools() {
+	ensure_eslint
+}
+
 install_requested_group() {
 	local group="$1"
 
@@ -787,6 +819,7 @@ install_requested_group() {
 		install_shellcheck_tools
 		install_markdown_tools
 		install_makefile_tools
+		install_javascript_tools
 		;;
 	action)
 		install_action_tools
@@ -806,8 +839,11 @@ install_requested_group() {
 	makefile)
 		install_makefile_tools
 		;;
+	javascript)
+		install_javascript_tools
+		;;
 	*)
-		warn "Usage: $0 [all|action|ansible|python|shellcheck|markdown|makefile]..."
+		warn "Usage: $0 [all|action|ansible|python|shellcheck|markdown|makefile|javascript]..."
 		return 2
 		;;
 	esac
