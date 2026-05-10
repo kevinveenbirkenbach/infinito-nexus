@@ -77,6 +77,28 @@ class TestComplexityRows(unittest.TestCase):
             self.assertEqual(row_map["r3"][3], 0)
             self.assertEqual(row_map["r3"][4], [])
 
+            # Direct (one-hop) fields. r3 -> r2 transitively reaches r1,
+            # but r3's *direct* embeds is just r2; symmetrically r1's
+            # *direct* consumers is r2 only (r3 reaches it via r2).
+            self.assertEqual(row_map["r1"][5], 0)
+            self.assertEqual(row_map["r1"][6], [])
+            self.assertEqual(row_map["r1"][7], 1)
+            self.assertEqual(row_map["r1"][8], ["r2"])
+            self.assertEqual(row_map["r2"][5], 1)
+            self.assertEqual(row_map["r2"][6], ["r1"])
+            self.assertEqual(row_map["r2"][7], 1)
+            self.assertEqual(row_map["r2"][8], ["r3"])
+            self.assertEqual(row_map["r3"][5], 1)
+            self.assertEqual(row_map["r3"][6], ["r2"])
+            self.assertEqual(row_map["r3"][7], 0)
+            self.assertEqual(row_map["r3"][8], [])
+
+            # Total = embeds + consumers + embeds_direct + consumers_direct.
+            # r1: 0 + 2 + 0 + 1 = 3, r2: 1 + 1 + 1 + 1 = 4, r3: 2 + 0 + 1 + 0 = 3.
+            self.assertEqual(row_map["r1"][9], 3)
+            self.assertEqual(row_map["r2"][9], 4)
+            self.assertEqual(row_map["r3"][9], 3)
+
     def test_group_names_flag_toggles_dynamic_truth(self) -> None:
         with tempfile.TemporaryDirectory() as td:
             roles_dir = Path(td) / "roles"

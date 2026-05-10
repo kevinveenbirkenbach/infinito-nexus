@@ -142,60 +142,116 @@ def compute_complexity_rows(
     *,
     include_group_names: bool = True,
     max_level: int | None = None,
-) -> list[tuple[str, int, list[str], int, list[str]]]:
-    """Return ``(role, embeds, services, consumers, consumed_by)`` per
-    application role.
+) -> list[
+    tuple[str, int, list[str], int, list[str], int, list[str], int, list[str], int]
+]:
+    """Return ``(role, embeds, services, consumers, consumed_by,
+    embeds_direct, services_direct, consumers_direct,
+    consumed_by_direct, total)`` per application role.
 
-    ``embeds`` / ``services`` count and list the provider roles the
-    application transitively embeds (forward closure). ``consumers`` /
-    ``consumed_by`` count and list the application roles that
-    transitively embed *this* role (reverse closure). Both directions
-    share the same BFS depth cap ``max_level`` (``None`` = unbounded).
-    The role itself is never counted in either direction.
+    The transitive fields (``embeds`` / ``services`` /
+    ``consumers`` / ``consumed_by``) are the BFS closure capped at
+    ``max_level`` (``None`` = unbounded). The direct fields
+    (``..._direct``) are always the one-hop neighbours, regardless of
+    ``max_level`` — they let a reader see what the role embeds /
+    is-embedded-by *without* its own indirect dependency tail.
+    ``total`` is the sum of the four numeric columns and serves as a
+    coarse "overall touch points" score: roles that score high are
+    either pulling in many providers, providing for many consumers,
+    or both. The role itself is never counted in either direction.
     """
     registry = build_service_registry_from_roles_dir(roles_dir)
     truth = _truth_predicate(include_group_names=include_group_names)
     forward, reverse = _build_direct_graphs(roles_dir, registry, truth=truth)
 
-    rows: list[tuple[str, int, list[str], int, list[str]]] = []
+    rows: list[
+        tuple[str, int, list[str], int, list[str], int, list[str], int, list[str], int]
+    ] = []
     for role_dir in sorted(p for p in roles_dir.iterdir() if p.is_dir()):
         if not _is_application_role(role_dir):
             continue
         services = _resolve_transitively(role_dir.name, forward, max_level=max_level)
         consumers = _resolve_transitively(role_dir.name, reverse, max_level=max_level)
-        rows.append((role_dir.name, len(services), services, len(consumers), consumers))
+        services_direct = _resolve_transitively(role_dir.name, forward, max_level=1)
+        consumers_direct = _resolve_transitively(role_dir.name, reverse, max_level=1)
+        total = (
+            len(services)
+            + len(consumers)
+            + len(services_direct)
+            + len(consumers_direct)
+        )
+        rows.append(
+            (
+                role_dir.name,
+                len(services),
+                services,
+                len(consumers),
+                consumers,
+                len(services_direct),
+                services_direct,
+                len(consumers_direct),
+                consumers_direct,
+                total,
+            )
+        )
     return rows
 
 
-def _render_table(rows: list[tuple[str, int, list[str], int, list[str]]]) -> str:
+def _render_table(
+    rows: list[
+        tuple[str, int, list[str], int, list[str], int, list[str], int, list[str], int]
+    ],
+) -> str:
     """Render counts only (no name lists). Use ``--format json`` for the
     full role names."""
     if not rows:
         return ""
     name_w = max(len("name"), max(len(r[0]) for r in rows))
-    out_w = max(len("embeds"), max(len(str(r[1])) for r in rows))
-    in_w = max(len("consumers"), max(len(str(r[3])) for r in rows))
+    ed_w = max(len("embeds_direct"), max(len(str(r[5])) for r in rows))
+    e_w = max(len("embeds"), max(len(str(r[1])) for r in rows))
+    cd_w = max(len("consumers_direct"), max(len(str(r[7])) for r in rows))
+    c_w = max(len("consumers"), max(len(str(r[3])) for r in rows))
+    t_w = max(len("total"), max(len(str(r[9])) for r in rows))
     lines = [
-        f"{'name':<{name_w}}  {'embeds':>{out_w}}  {'consumers':>{in_w}}",
-        f"{'-' * name_w}  {'-' * out_w}  {'-' * in_w}",
+        f"{'name':<{name_w}}  {'embeds_direct':>{ed_w}}  {'embeds':>{e_w}}  "
+        f"{'consumers_direct':>{cd_w}}  {'consumers':>{c_w}}  {'total':>{t_w}}",
+        f"{'-' * name_w}  {'-' * ed_w}  {'-' * e_w}  {'-' * cd_w}  {'-' * c_w}  {'-' * t_w}",
     ]
-    for name, embeds, _services, consumers, _consumed_by in rows:
-        lines.append(f"{name:<{name_w}}  {embeds:>{out_w}}  {consumers:>{in_w}}")
+    for r in rows:
+        name = r[0]
+        embeds = r[1]
+        consumers = r[3]
+        embeds_direct = r[5]
+        consumers_direct = r[7]
+        total = r[9]
+        lines.append(
+            f"{name:<{name_w}}  {embeds_direct:>{ed_w}}  {embeds:>{e_w}}  "
+            f"{consumers_direct:>{cd_w}}  {consumers:>{c_w}}  {total:>{t_w}}"
+        )
     return "\n".join(lines)
 
 
-def _render_json(rows: list[tuple[str, int, list[str], int, list[str]]]) -> str:
+def _render_json(
+    rows: list[
+        tuple[str, int, list[str], int, list[str], int, list[str], int, list[str], int]
+    ],
+) -> str:
     import json as _json
 
     payload = [
         {
-            "name": name,
-            "embeds": embeds,
-            "services": services,
-            "consumers": consumers,
-            "consumed_by": consumed_by,
+            "name": r[0],
+            "embeds_direct": r[5],
+            "services_direct": r[6],
+            "embeds": r[1],
+            "services": r[2],
+            "consumers_direct": r[7],
+            "consumed_by_direct": r[8],
+            "consumers": r[3],
+            "consumed_by": r[4],
+            "total": r[9],
         }
-        for name, embeds, services, consumers, consumed_by in rows
+        for r in rows
     ]
     return _json.dumps(payload, indent=2)
 
@@ -211,12 +267,31 @@ def main(argv: list[str] | None = None) -> int:
     )
     p.add_argument(
         "--sort",
-        choices=("embeds", "name", "consumers"),
+        choices=("embeds", "name", "consumers", "total"),
         default="embeds",
         help=(
-            "Sort by 'embeds' (ascending, default — service deps the role "
-            "embeds), 'consumers' (ascending — roles that embed this one), "
-            "or 'name' (ascending)."
+            "Sort column. 'embeds' (default) is the count of service "
+            "deps the role embeds; 'consumers' is the count of roles "
+            "that embed this one; 'total' is the sum of direct + "
+            "transitive in both directions; 'name' sorts alphabetically."
+        ),
+    )
+    p.add_argument(
+        "--order",
+        choices=("asc", "desc"),
+        default="asc",
+        help="Sort direction. 'asc' (default) puts the lowest values first.",
+    )
+    p.add_argument(
+        "--filter",
+        default=None,
+        metavar="SUBSTRING",
+        help=(
+            "Show only roles whose name contains SUBSTRING (case-"
+            "insensitive). The complexity scores are computed against "
+            "the full role tree first; only the rendered rows are "
+            "filtered, so a role's transitive consumer / embed counts "
+            "still reflect the whole codebase."
         ),
     )
     p.add_argument(
@@ -266,12 +341,19 @@ def main(argv: list[str] | None = None) -> int:
         max_level=args.level,
     )
 
+    descending = args.order == "desc"
     if args.sort == "embeds":
-        rows.sort(key=lambda r: (r[1], r[0]))
+        rows.sort(key=lambda r: (r[1], r[0]), reverse=descending)
     elif args.sort == "consumers":
-        rows.sort(key=lambda r: (r[3], r[0]))
+        rows.sort(key=lambda r: (r[3], r[0]), reverse=descending)
+    elif args.sort == "total":
+        rows.sort(key=lambda r: (r[9], r[0]), reverse=descending)
     else:
-        rows.sort(key=lambda r: r[0])
+        rows.sort(key=lambda r: r[0], reverse=descending)
+
+    if args.filter:
+        needle = args.filter.lower()
+        rows = [r for r in rows if needle in r[0].lower()]
 
     rendered = _render_json(rows) if args.format == "json" else _render_table(rows)
     if rendered:
