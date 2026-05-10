@@ -45,6 +45,15 @@ module.exports = [
       "no-unused-vars": ["error", { argsIgnorePattern: "^_" }],
       "no-var": "error",
       "eqeqeq": ["error", "always"],
+      "prefer-const": "error",
+      "no-throw-literal": "error",
+      "no-self-compare": "error",
+      "default-case-last": "error",
+      // Defensive: forbid string-driven code execution shapes outright.
+      "no-eval": "error",
+      "no-implied-eval": "error",
+      "no-new-func": "error",
+      "no-script-url": "error",
       // Empty `catch (e) {}` is the project's idiom for fire-and-forget
       // best-effort actions (localStorage probes, optional cleanups, …);
       // the catch protects the surrounding flow from incidental
