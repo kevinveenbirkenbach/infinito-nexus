@@ -101,7 +101,7 @@
   args:
     chdir: "{{ PIXELFED_INSTANCE_DIR }}"
   register: pixelfed_migrate
-  changed_when: "'Nothing to migrate' not in (pixelfed_migrate.stdout | default(''))"
+  changed_when: "'Nothing to migrate' not in pixelfed_migrate.stdout"
   retries: 60
   delay: 5
   until: pixelfed_migrate.rc == 0

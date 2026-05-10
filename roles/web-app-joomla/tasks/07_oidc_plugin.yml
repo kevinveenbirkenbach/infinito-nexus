@@ -111,7 +111,7 @@
       - extension:install
       - "--path={{ JOOMLA_OIDC_PLUGIN_ZIP }}"
   register: plugin_install
-  changed_when: "'Extension installed successfully' in (plugin_install.stdout | default(''))"
+  changed_when: "'Extension installed successfully' in plugin_install.stdout"
   failed_when:
     - plugin_install.rc != 0
     - plugin_install.stdout | default('') is not search('already')
@@ -143,7 +143,7 @@
       - extension:enable
       - "{{ plugin_id_lookup.stdout | trim }}"
   register: plugin_enable
-  changed_when: "'has been enabled' in (plugin_enable.stdout | default('')) or 'enabled successfully' in (plugin_enable.stdout | default(''))"
+  changed_when: "'has been enabled' in plugin_enable.stdout or 'enabled successfully' in plugin_enable.stdout"
   failed_when:
     - plugin_enable.rc != 0
     - plugin_enable.stdout | default('') is not search('already')

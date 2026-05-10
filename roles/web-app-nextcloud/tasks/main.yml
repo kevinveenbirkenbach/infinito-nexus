@@ -16,7 +16,7 @@
   register: redis_ping
   retries: 60
   delay: 2
-  until: (redis_ping.stdout | default('')) is search('PONG')
+  until: redis_ping.stdout is search('PONG')
 
 - name: Update\Upgrade Nextcloud
   include_tasks: 03_upgrade.yml

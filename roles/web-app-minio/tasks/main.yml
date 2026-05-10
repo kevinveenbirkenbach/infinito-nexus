@@ -86,7 +86,7 @@
                 && mc admin policy attach minio {{ MINIO_OIDC_POLICY_NAME | quote }} --group "$MINIO_LDAP_ADMIN_GROUP_DN"'
       args: { executable: /bin/bash }
       register: mc_policy_attach_ldap
-      changed_when: '"already attached" not in (mc_policy_attach_ldap.stderr | default(""))'
+      changed_when: '"already attached" not in mc_policy_attach_ldap.stderr'
       failed_when:
         - mc_policy_attach_ldap.rc != 0
         - '"already attached" not in (mc_policy_attach_ldap.stderr | default(""))'

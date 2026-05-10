@@ -82,7 +82,7 @@
                 redirect_uri_dynamic=on'
   args: { executable: /bin/bash }
   register: mc_idp_add
-  changed_when: '"Successfully" in (mc_idp_add.stdout | default("")) or "Successfully" in (mc_idp_add.stderr | default(""))'
+  changed_when: '"Successfully" in mc_idp_add.stdout or "Successfully" in mc_idp_add.stderr'
   failed_when:
     - mc_idp_add.rc != 0
     - '"already exists" not in (mc_idp_add.stderr | default(""))'

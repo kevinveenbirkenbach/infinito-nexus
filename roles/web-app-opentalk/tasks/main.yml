@@ -158,5 +158,5 @@
     container exec {{ OPENTALK_MINIO_CONTAINER }}
     mc mb local/{{ OPENTALK_MINIO_BUCKET }}
   register: minio_bucket
-  changed_when: "'Bucket created successfully' in (minio_bucket.stdout | default(''))"
-  failed_when: minio_bucket.rc != 0 and 'already own it' not in (minio_bucket.stderr | default(''))
+  changed_when: "'Bucket created successfully' in minio_bucket.stdout"
+  failed_when: minio_bucket.rc != 0 and 'already own it' not in minio_bucket.stderr

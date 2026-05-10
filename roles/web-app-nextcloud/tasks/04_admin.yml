@@ -4,7 +4,7 @@
     container exec -u {{ NEXTCLOUD_DOCKER_USER }} {{ NEXTCLOUD_CONTAINER }}
     php occ group:adduser admin {{ NEXTCLOUD_ADMINISTRATOR_USERNAME }}
   register: add_admin_to_group
-  changed_when: "not ASYNC_ENABLED and 'Added user' in (add_admin_to_group.stdout | default(''))"
+  changed_when: "not ASYNC_ENABLED and 'Added user' in add_admin_to_group.stdout"
   failed_when: >
     not ASYNC_ENABLED and
     (add_admin_to_group.rc != 0) and

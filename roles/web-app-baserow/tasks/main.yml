@@ -24,7 +24,7 @@
     BASEROW_BOOTSTRAP_ADMIN_PASSWORD: "{{ BASEROW_BOOTSTRAP_ADMIN_PASSWORD }}"
   register: baserow_bootstrap_admin_result
   no_log: "{{ MASK_CREDENTIALS_IN_LOGS | bool }}"
-  changed_when: "'created' in (baserow_bootstrap_admin_result.stdout | default(''))"
+  changed_when: "'created' in baserow_bootstrap_admin_result.stdout"
   failed_when: baserow_bootstrap_admin_result.rc != 0
   # Retry while Baserow's container entrypoint is still running Django
   # migrations on a fresh DB. Without this the very first deploy races the
