@@ -280,6 +280,8 @@
       - --shm-size=1g
       - --env-file
       - "{{ _playwright_stage_dir }}/.env"
+      - -e
+      - "PLAYWRIGHT_KEEP_ALL={{ TEST_E2E_PLAYWRIGHT_KEEP_ALL }}"
       - -v
       - "{{ _playwright_stage_dir }}:/e2e"
       - -v

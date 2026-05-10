@@ -31,6 +31,7 @@ env:
   DISTROS: "debian"
   NIX_CONFIG: ""
   INFINITO_IMAGE_TAG: "latest"
+  PLAYWRIGHT_KEEP_ALL: ${{ vars.PLAYWRIGHT_KEEP_ALL }}
 
 jobs:
   discover:

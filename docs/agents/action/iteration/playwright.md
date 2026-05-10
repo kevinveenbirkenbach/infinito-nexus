@@ -34,10 +34,14 @@ You MUST load the following pages before editing any file, in this order:
 
 1. Verify every item in [Preconditions](#preconditions). If any fails, exit this page and follow [Role Loop](role.md).
 2. Edit `roles/<role>/files/playwright.spec.js`. You MUST NOT hand-edit the staged copy under `TEST_E2E_PLAYWRIGHT_STAGE_BASE_DIR/<role>/tests/`; the rerunner overwrites it from the repo on each run.
-3. Run `scripts/tests/e2e/rerun-spec.sh <role>`. You MAY append `--grep <pattern>` or any other `npx playwright test` argument. The script reuses the staging dir, the rendered `.env`, and the same container image the deploy-time runner uses.
-4. If the script exits `0`, go to [Exit](#exit).
-5. If the script exits non-zero:
-   1. If the failure is caused by a change needed **outside** `files/playwright.spec.js` (role tasks, templates, vars, config, `javascript.js`, `style.css`, or any other role asset the deploy materializes), go to [Escape](#escape).
+3. Run `PLAYWRIGHT_KEEP_ALL=true scripts/tests/e2e/rerun-spec.sh <role>`. You MAY append `--grep <pattern>` or any other `npx playwright test` argument. Set `PLAYWRIGHT_KEEP_ALL=true` on every inner-loop run regardless of the previous result; omit only when the user has explicitly opted out. For the full propagation chain see [Playwright Tests](../../../contributing/actions/testing/playwright.md#artefact-retention-).
+4. Inspect the run output before deciding pass / fail; a green Playwright exit only proves no `expect(...)` threw, not that the contract is satisfied:
+   - You MUST read the per-test logs for every run: the `list` reporter output, `playwright-report/index.html`, and `test-results/<test>/error-context.md` for any failed test.
+   - You MUST verify schema conformance per [Contributing `playwright.spec.js`](../../../contributing/artefact/files/role/playwright.specs.js.md): persona names match `<persona>: <flow>`, every skip routes through `PERSONA_<X>_BLOCKED=true` or `<NAME>_SERVICE_ENABLED=false` (never runtime detection), and every persona reaches an authenticated surface and drives a role-specific interaction.
+   - With `PLAYWRIGHT_KEEP_ALL=true` you MUST open the trace / video of at least one passing persona per run, to confirm the journey actually fired.
+5. If the script exits `0` AND the inspection passed, go to [Exit](#exit).
+6. If the script exits non-zero OR the inspection surfaced a schema violation:
+   1. If the failure needs a change **outside** `files/playwright.spec.js` (role tasks, templates, vars, config, `javascript.js`, `style.css`, or any other role asset the deploy materializes), go to [Escape](#escape).
    2. Otherwise, adjust the spec and return to step 2.
 
 ## Exit

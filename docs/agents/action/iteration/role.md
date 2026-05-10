@@ -17,6 +17,7 @@ For workflow-level iteration with Act, see [Workflow Loop](workflow.md).
   - SIDE EFFECT (yes): inventory initializer auto-removes `web-app-matomo` and `web-app-mailu` provider roles. Do NOT list them in `APPS`.
   - PERSIST: record answer at top of iteration. Reuse for all subsequent deploys without re-asking.
 - You MUST run `make test` before every deploy. Only proceed with the deploy if all tests pass.
+- You MUST prepend `PLAYWRIGHT_KEEP_ALL=true` to every `make deploy-*` command in the iteration (fresh, reuse-kept, and reuse-purged alike), so trace, screenshot, and video of passing Playwright tests stay inspectable. Omit only when the user has explicitly opted out of per-test artefacts. For the full propagation chain see [Playwright Tests](../../../contributing/actions/testing/playwright.md#artefact-retention-).
 - Unless the user explicitly says to reuse the existing setup, you MUST start once with `make deploy-fresh-purged-apps APPS=<roles> FULL_CYCLE=true` to establish the baseline inventory and clean app state. `FULL_CYCLE=true` adds the async update pass (pass 2) and MUST stay on unless the user explicitly asks to skip it.
 - You MUST NOT run more than one deploy command at the same time. Deployments MUST be executed serially, never in parallel.
 - To speed up debugging, you MAY pass multiple apps at once, e.g. `make deploy-fresh-purged-apps APPS="<roles> <roles>" FULL_CYCLE=true`.
