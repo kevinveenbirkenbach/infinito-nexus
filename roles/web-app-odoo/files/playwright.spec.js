@@ -77,7 +77,7 @@ async function isOdooAuthenticated(locator) {
 // This avoids "Target crashed" errors that occur when clicking menu items
 // causes the iframe to navigate and detach.
 async function performOdooLogout(page, odooBaseUrl) {
-  const logoutUrl = odooBaseUrl.replace(/\/$/, "") + "/web/session/logout";
+  const logoutUrl = `${odooBaseUrl.replace(/\/$/, "")}/web/session/logout`;
   
   // Navigate the main page to load the logout URL in the iframe
   // The dashboard's ?iframe= parameter will load the given URL
@@ -146,7 +146,7 @@ test.beforeEach(() => {
 // after login the iframe navigates back to Odoo authenticated.
 test("dashboard to odoo: admin sso login, verify ui, logout", async ({ page }) => {
   const expectedOdooBaseUrl = odooBaseUrl.replace(/\/$/, "");
-  const odooLoginUrl = expectedOdooBaseUrl + "/web/login";
+  const odooLoginUrl = `${expectedOdooBaseUrl}/web/login`;
 
   // 1. Navigate to dashboard with the Odoo login URL pre-loaded in the iframe.
   // The dashboard's ?iframe= parameter auto-opens the given URL in #main iframe.
@@ -239,7 +239,7 @@ test("dashboard to odoo: admin sso login, verify ui, logout", async ({ page }) =
 // for all Keycloak users, not just the administrator.
 test("dashboard to odoo: biber sso login, verify ui, logout", async ({ page }) => {
   const expectedOdooBaseUrl = odooBaseUrl.replace(/\/$/, "");
-  const odooLoginUrl = expectedOdooBaseUrl + "/web/login";
+  const odooLoginUrl = `${expectedOdooBaseUrl}/web/login`;
 
   // 1. Navigate to dashboard with the Odoo login URL pre-loaded in the iframe.
   await page.goto(`/?iframe=${encodeURIComponent(odooLoginUrl)}`);

@@ -88,7 +88,7 @@ async function signInViaBbbOidc(page, username, password, personaLabel) {
 
   await performKeycloakLoginForm(page, username, password);
 
-  await page.waitForURL((u) => u.toString().startsWith(bbbBaseUrl + "/") && !u.toString().includes("/auth/openid_connect") && !u.toString().includes("?sso=true"), {
+  await page.waitForURL((u) => u.toString().startsWith(`${bbbBaseUrl}/`) && !u.toString().includes("/auth/openid_connect") && !u.toString().includes("?sso=true"), {
     timeout: 120_000
   });
 

@@ -219,13 +219,13 @@ test("mailu: biber sends email to administrator, administrator receives it", asy
         timeout: 60_000,
         message: "Expected redirect back to Mailu webmail after biber login"
       })
-      .toContain(mailuBaseUrl.replace(/\/$/, "") + "/webmail/");
+      .toContain(`${mailuBaseUrl.replace(/\/$/, "")}/webmail/`);
 
     // Navigate directly to Roundcube compose URL — clicking the compose button requires
     // rcmail.js to fully execute, direct navigation is more reliable in Playwright.
     // Selectors confirmed from rendered DOM: id="_to", id="compose-subject",
     // id="composebody", button.btn.btn-primary.send inside .formbuttons
-    await biberPage.goto(mailuBaseUrl.replace(/\/$/, "") + "/webmail/?_task=mail&_action=compose");
+    await biberPage.goto(`${mailuBaseUrl.replace(/\/$/, "")}/webmail/?_task=mail&_action=compose`);
     await biberPage.waitForLoadState("networkidle", { timeout: 15_000 }).catch(() => {});
 
     const toField      = biberPage.locator("#_to, input[name='_to']").first();
@@ -285,7 +285,7 @@ test("mailu: biber sends email to administrator, administrator receives it", asy
         timeout: 60_000,
         message: "Expected redirect back to Mailu webmail after admin login"
       })
-      .toContain(mailuBaseUrl.replace(/\/$/, "") + "/webmail/");
+      .toContain(`${mailuBaseUrl.replace(/\/$/, "")}/webmail/`);
 
     // Wait for inbox to load
     const inboxFolder = adminPage.getByRole("link", { name: "Inbox" });

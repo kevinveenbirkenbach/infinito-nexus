@@ -46,6 +46,7 @@ module.exports = [
       "no-var": "error",
       "eqeqeq": ["error", "always"],
       "prefer-const": "error",
+      "prefer-template": "error",
       "no-throw-literal": "error",
       "no-self-compare": "error",
       "default-case-last": "error",
