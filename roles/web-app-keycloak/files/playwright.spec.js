@@ -1,7 +1,7 @@
 const { test, expect } = require("@playwright/test");
 
 const { skipUnlessServiceEnabled, isServiceEnabled } = require("./service-gating");
-const { assertCspMetaParity, assertCspResponseHeader, decodeDotenvQuotedValue, expectNoCspViolations, installCspViolationObserver, normalizeBaseUrl } = require("./personas");
+const { assertCspMetaParity, assertCspResponseHeader, decodeDotenvQuotedValue, expectNoCspViolations, installCspViolationObserver, normalizeBaseUrl, runAdminFlow, runBiberFlow, runGuestFlow } = require("./personas");
 test.use({ ignoreHTTPSErrors: true });
 
 // -----------------------------------------------------------------------------
@@ -265,3 +265,19 @@ test("normal-realm biber logs in through account interface and logs out", async 
 // No generic persona scenarios are emitted; the auth-provider role is
 // part of the auth-less / circular-dependency persona-collapse
 // exception.
+
+// Persona scenarios (req 019 Rule 3).
+// Bodies live in the shared persona helpers under
+// roles/test-e2e-playwright/files/personas/{guest,biber,admin}.js.
+
+test("guest: public-landing → auth chain → never authenticated", async ({ page }) => {
+  await runGuestFlow(page);
+});
+
+test("biber: app → keycloak → role action → logout", async ({ page }) => {
+  await runBiberFlow(page);
+});
+
+test("administrator: app → keycloak → admin action → logout", async ({ page }) => {
+  await runAdminFlow(page);
+});

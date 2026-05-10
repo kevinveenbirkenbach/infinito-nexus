@@ -1,7 +1,7 @@
 const { test, expect } = require("@playwright/test");
 
 const { skipUnlessServiceEnabled, isServiceEnabled } = require("./service-gating");
-const { assertCspResponseHeader, decodeDotenvQuotedValue, expectNoCspViolations, installCspViolationObserver, normalizeBaseUrl, performKeycloakLoginForm } = require("./personas");
+const { assertCspResponseHeader, decodeDotenvQuotedValue, expectNoCspViolations, installCspViolationObserver, normalizeBaseUrl, performKeycloakLoginForm, runGuestFlow } = require("./personas");
 test.use({ ignoreHTTPSErrors: true });
 
 function attachDiagnostics(page) {
@@ -154,3 +154,11 @@ test("biber: dashboard to bigbluebutton OIDC login and logout", async ({ page })
   await expectNoCspViolations(page, diagnostics, "bigbluebutton biber OIDC");
 });
 
+
+// Persona scenarios (req 019 Rule 3).
+// Bodies live in the shared persona helpers under
+// roles/test-e2e-playwright/files/personas/{guest,biber,admin}.js.
+
+test("guest: public-landing → auth chain → never authenticated", async ({ page }) => {
+  await runGuestFlow(page);
+});

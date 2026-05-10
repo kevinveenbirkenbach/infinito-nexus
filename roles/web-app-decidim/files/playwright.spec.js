@@ -1,6 +1,6 @@
 // @ts-check
 const { test, expect } = require('@playwright/test');
-const { decodeDotenvQuotedValue, runAdminFlow, runBiberFlow } = require("./personas");
+const { decodeDotenvQuotedValue, runAdminFlow, runBiberFlow, runGuestFlow } = require("./personas");
 
 test.use({
   ignoreHTTPSErrors: true
@@ -198,4 +198,12 @@ test("administrator: dashboard → prometheus → app → universal logout", asy
       }
     },
   });
+});
+
+// Persona scenarios (req 019 Rule 3).
+// Bodies live in the shared persona helpers under
+// roles/test-e2e-playwright/files/personas/{guest,biber,admin}.js.
+
+test("guest: public-landing → auth chain → never authenticated", async ({ page }) => {
+  await runGuestFlow(page);
 });

@@ -1,7 +1,7 @@
 const { test, expect } = require("@playwright/test");
 
 const { skipUnlessServiceEnabled, isServiceEnabled } = require("./service-gating");
-const { decodeDotenvQuotedValue, normalizeBaseUrl, performKeycloakLoginForm } = require("./personas");
+const { decodeDotenvQuotedValue, normalizeBaseUrl, performKeycloakLoginForm, runGuestFlow } = require("./personas");
 test.use({ ignoreHTTPSErrors: true });
 
 async function peertubeLogout(page, peertubeBaseUrl) {
@@ -165,3 +165,11 @@ test("biber: dashboard to peertube OIDC login and logout", async ({ page }) => {
     .toBe(true);
 });
 
+
+// Persona scenarios (req 019 Rule 3).
+// Bodies live in the shared persona helpers under
+// roles/test-e2e-playwright/files/personas/{guest,biber,admin}.js.
+
+test("guest: public-landing → auth chain → never authenticated", async ({ page }) => {
+  await runGuestFlow(page);
+});
