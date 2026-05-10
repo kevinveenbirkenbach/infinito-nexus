@@ -1,32 +1,10 @@
 const { test, expect } = require("@playwright/test");
 const { skipUnlessServiceEnabled, isServiceEnabled } = require("./service-gating");
 
-const { runGuestFlow, runBiberFlow, runAdminFlow } = require("./personas");
+const { decodeDotenvQuotedValue, normalizeBaseUrl, runAdminFlow, runBiberFlow, runGuestFlow } = require("./personas");
 test.use({
   ignoreHTTPSErrors: true
 });
-
-function decodeDotenvQuotedValue(value) {
-  if (typeof value !== "string" || value.length < 2) {
-    return value;
-  }
-
-  if (!(value.startsWith('"') && value.endsWith('"'))) {
-    return value;
-  }
-
-  const encoded = value.slice(1, -1);
-
-  try {
-    return JSON.parse(`"${encoded}"`).replace(/\$\$/g, "$");
-  } catch {
-    return encoded.replace(/\$\$/g, "$");
-  }
-}
-
-function normalizeBaseUrl(value) {
-  return decodeDotenvQuotedValue(value || "").replace(/\/$/, "");
-}
 
 const joomlaBaseUrl = normalizeBaseUrl(process.env.JOOMLA_BASE_URL);
 const oidcIssuerUrl = normalizeBaseUrl(process.env.OIDC_ISSUER_URL || "");

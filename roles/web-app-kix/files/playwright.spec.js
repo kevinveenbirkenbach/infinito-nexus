@@ -1,19 +1,8 @@
 const { test, expect, request } = require("@playwright/test");
 
 const { skipUnlessServiceEnabled, isServiceEnabled } = require("./service-gating");
-const { runGuestFlow, runBiberFlow, runAdminFlow } = require("./personas");
+const { decodeDotenvQuotedValue, runAdminFlow, runBiberFlow, runGuestFlow } = require("./personas");
 test.use({ ignoreHTTPSErrors: true });
-
-function decodeDotenvQuotedValue(value) {
-  if (typeof value !== "string" || value.length < 2) return value;
-  if (!(value.startsWith('"') && value.endsWith('"'))) return value;
-  const encoded = value.slice(1, -1);
-  try {
-    return JSON.parse(`"${encoded}"`).replace(/\$\$/g, "$");
-  } catch {
-    return encoded.replace(/\$\$/g, "$");
-  }
-}
 
 const dashboardBaseUrl   = decodeDotenvQuotedValue(process.env.DASHBOARD_BASE_URL   || "").replace(/\/$/, "");
 const appBaseUrl         = decodeDotenvQuotedValue(process.env.APP_BASE_URL         || "").replace(/\/$/, "");

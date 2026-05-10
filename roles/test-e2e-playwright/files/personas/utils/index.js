@@ -18,6 +18,7 @@ const logout = require("./logout");
 const landing = require("./landing");
 const csp = require("./csp");
 const interaction = require("./interaction");
+const dotenv = require("./dotenv");
 
 module.exports = {
   ...env,
@@ -26,4 +27,5 @@ module.exports = {
   ...landing,
   ...csp,
   ...interaction,
+  ...dotenv,
 };

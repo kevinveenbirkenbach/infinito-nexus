@@ -1,28 +1,10 @@
 const { test, expect } = require("@playwright/test");
 
 const { skipUnlessServiceEnabled, isServiceEnabled } = require("./service-gating");
-const { runGuestFlow, runBiberFlow, runAdminFlow } = require("./personas");
+const { decodeDotenvQuotedValue, runAdminFlow, runBiberFlow, runGuestFlow } = require("./personas");
 test.use({
   ignoreHTTPSErrors: true
 });
-
-function decodeDotenvQuotedValue(value) {
-  if (typeof value !== "string" || value.length < 2) {
-    return value;
-  }
-
-  if (!(value.startsWith('"') && value.endsWith('"'))) {
-    return value;
-  }
-
-  const encoded = value.slice(1, -1);
-
-  try {
-    return JSON.parse(`"${encoded}"`).replace(/\$\$/g, "$");
-  } catch {
-    return encoded.replace(/\$\$/g, "$");
-  }
-}
 
 const loginUsername = decodeDotenvQuotedValue(process.env.LOGIN_USERNAME);
 const loginPassword = decodeDotenvQuotedValue(process.env.LOGIN_PASSWORD);

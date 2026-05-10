@@ -1,21 +1,10 @@
 // @ts-check
 const { test, expect } = require('@playwright/test');
-const { runBiberFlow, runAdminFlow } = require("./personas");
+const { decodeDotenvQuotedValue, runAdminFlow, runBiberFlow } = require("./personas");
 
 test.use({
   ignoreHTTPSErrors: true
 });
-
-function decodeDotenvQuotedValue(value) {
-  if (typeof value !== "string" || value.length < 2) return value;
-  if (!(value.startsWith('"') && value.endsWith('"'))) return value;
-  const encoded = value.slice(1, -1);
-  try {
-    return JSON.parse(`"${encoded}"`).replace(/\$\$/g, "$");
-  } catch {
-    return encoded.replace(/\$\$/g, "$");
-  }
-}
 
 const baseUrl       = decodeDotenvQuotedValue(process.env.DECIDIM_BASE_URL || process.env.APP_BASE_URL);
 const adminEmail    = decodeDotenvQuotedValue(process.env.ADMIN_EMAIL);

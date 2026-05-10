@@ -1,22 +1,8 @@
 const { test, expect } = require("@playwright/test");
 
 const { skipUnlessServiceEnabled, isServiceEnabled } = require("./service-gating");
+const { decodeDotenvQuotedValue, normalizeBaseUrl } = require("./personas");
 test.use({ ignoreHTTPSErrors: true });
-
-function decodeDotenvQuotedValue(value) {
-  if (typeof value !== "string" || value.length < 2) return value;
-  if (!(value.startsWith('"') && value.endsWith('"'))) return value;
-  const encoded = value.slice(1, -1);
-  try {
-    return JSON.parse(`"${encoded}"`).replace(/\$\$/g, "$");
-  } catch {
-    return encoded.replace(/\$\$/g, "$");
-  }
-}
-
-function normalizeBaseUrl(value) {
-  return decodeDotenvQuotedValue(value || "").replace(/\/$/, "");
-}
 
 async function performOidcLogin(page, username, password) {
   const usernameField = page.locator("input[name='username'], input#username").first();

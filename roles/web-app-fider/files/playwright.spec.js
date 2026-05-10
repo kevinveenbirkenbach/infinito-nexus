@@ -1,28 +1,10 @@
 const { test, expect } = require("@playwright/test");
 
 const { skipUnlessServiceEnabled, isServiceEnabled } = require("./service-gating");
-const { runGuestFlow, runBiberFlow, runAdminFlow } = require("./personas");
+const { decodeDotenvQuotedValue, runAdminFlow, runBiberFlow, runGuestFlow } = require("./personas");
 test.use({
   ignoreHTTPSErrors: true
 });
-
-function decodeDotenvQuotedValue(value) {
-  if (typeof value !== "string" || value.length < 2) {
-    return value;
-  }
-
-  if (!(value.startsWith('"') && value.endsWith('"'))) {
-    return value;
-  }
-
-  const encoded = value.slice(1, -1);
-
-  try {
-    return JSON.parse(`"${encoded}"`).replace(/\$\$/g, "$");
-  } catch {
-    return encoded.replace(/\$\$/g, "$");
-  }
-}
 
 // `docker --env-file` preserves the quotes emitted by `dotenv_quote`,
 // so normalize these values before building URLs or typing credentials.

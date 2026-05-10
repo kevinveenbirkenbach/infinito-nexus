@@ -1,6 +1,7 @@
 const { test, expect } = require("@playwright/test");
 
 const { skipUnlessServiceEnabled, isServiceEnabled } = require("./service-gating");
+const { decodeDotenvQuotedValue, normalizeBaseUrl } = require("./personas");
 test.use({ ignoreHTTPSErrors: true });
 // Matrix SSO has several long-tail failure modes (Synapse rc_login rate
 // limits, Element rust_crypto "Skip verification" dialog, first-run Synapse
@@ -11,21 +12,6 @@ test.use({ ignoreHTTPSErrors: true });
 // sign-in can spend 5+ minutes cycling through consent↔M_LIMIT_EXCEEDED
 // ping-pong before authenticating. 1200s (20 min) covers the worst case.
 test.setTimeout(1_200_000);
-
-function decodeDotenvQuotedValue(value) {
-  if (typeof value !== "string" || value.length < 2) return value;
-  if (!(value.startsWith('"') && value.endsWith('"'))) return value;
-  const encoded = value.slice(1, -1);
-  try {
-    return JSON.parse(`"${encoded}"`).replace(/\$\$/g, "$");
-  } catch {
-    return encoded.replace(/\$\$/g, "$");
-  }
-}
-
-function normalizeBaseUrl(value) {
-  return decodeDotenvQuotedValue(value || "").replace(/\/$/, "");
-}
 
 function attachDiagnostics(page) {
   const consoleErrors = [];

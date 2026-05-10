@@ -301,8 +301,8 @@ The teardown MUST:
   Specs that exercise integrations (Matomo, Discourse, Email, Prometheus, …) read the integration-specific keys defined in [Agent `playwright.env.j2`](../../../../agents/files/role/playwright.env.j2.md).
 - `docker --env-file` preserves the quotes emitted by the `dotenv_quote` Jinja filter.
   Specs MUST decode quoted values before building URLs or typing credentials.
-  The recurring helpers `decodeDotenvQuotedValue(value)` and `normalizeBaseUrl(value)` are inlined per spec.
-  Once a third spec needs them, they MUST be promoted into the shared helpers under [roles/test-e2e-playwright/files/](../../../../../roles/test-e2e-playwright/files/) and imported instead of copy-pasted.
+  The recurring helpers `decodeDotenvQuotedValue(value)` and `normalizeBaseUrl(value)` live in [`personas/utils/dotenv.js`](../../../../../roles/test-e2e-playwright/files/personas/utils/dotenv.js) and are re-exported through `require("./personas")`.
+  Specs that need them MUST import from `./personas`; inline copies are forbidden and caught at review.
 
 ## Service gating contract 🔒
 

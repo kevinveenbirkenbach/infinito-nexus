@@ -14,7 +14,7 @@
 const { test, expect } = require("@playwright/test");
 
 const { skipUnlessServiceEnabled, isServiceEnabled } = require("./service-gating");
-const { runGuestFlow, runBiberFlow, runAdminFlow } = require("./personas");
+const { decodeDotenvQuotedValue, runAdminFlow, runBiberFlow, runGuestFlow } = require("./personas");
 // `ignoreHTTPSErrors` is needed because the local stack typically uses the
 // self-signed CA set up by `make trust-ca`, which the Playwright container
 // does not trust by default.
@@ -25,24 +25,6 @@ test.use({
 // ---------------------------------------------------------------------------
 // Env decoding
 // ---------------------------------------------------------------------------
-
-function decodeDotenvQuotedValue(value) {
-  if (typeof value !== "string" || value.length < 2) {
-    return value;
-  }
-
-  if (!(value.startsWith('"') && value.endsWith('"'))) {
-    return value;
-  }
-
-  const encoded = value.slice(1, -1);
-
-  try {
-    return JSON.parse(`"${encoded}"`).replace(/\$\$/g, "$");
-  } catch {
-    return encoded.replace(/\$\$/g, "$");
-  }
-}
 
 // `docker --env-file` preserves the quotes emitted by `dotenv_quote`,
 // so normalize these values before building URLs or typing credentials.
