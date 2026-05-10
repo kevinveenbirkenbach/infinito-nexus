@@ -1,23 +1,15 @@
 import unittest
-from pathlib import Path
-
-from utils.annotations.message import warning
 
 from . import PROJECT_ROOT
 
 
-def _emit_missing_playwright_spec_warning(repo_root: Path, role_path: Path) -> None:
-    spec_file = role_path / "files" / "playwright.spec.js"
-    relative_spec_path = spec_file.relative_to(repo_root).as_posix()
-    message = f"{role_path.name} has no files/playwright.spec.js (non-blocking)"
-    warning(message, title="Missing Playwright Spec", file=relative_spec_path)
-
-
 class TestWebAppRolesHavePlaywrightSpec(unittest.TestCase):
-    def test_web_app_roles_playwright_spec_warn_only(self):
+    def test_web_app_roles_have_playwright_spec(self):
         """
-        Check all roles/web-app-* for files/playwright.spec.js.
-        Missing specs are reported as warnings but do not fail the test.
+        Every roles/web-app-* role MUST ship a files/playwright.spec.js.
+        A missing spec is a hard error so the meta/services.yml registry
+        and the per-role auth + persona contract are never silently
+        absent from the deploy capstone.
         """
         root = PROJECT_ROOT
         roles_dir = root / "roles"
@@ -25,7 +17,7 @@ class TestWebAppRolesHavePlaywrightSpec(unittest.TestCase):
             roles_dir.is_dir(), f"'roles' directory not found at: {roles_dir}"
         )
 
-        missing = []
+        missing: list[str] = []
         for role_path in sorted(roles_dir.iterdir()):
             if not (role_path.is_dir() and role_path.name.startswith("web-app-")):
                 continue
@@ -33,9 +25,11 @@ class TestWebAppRolesHavePlaywrightSpec(unittest.TestCase):
             spec_file = role_path / "files" / "playwright.spec.js"
             if not spec_file.is_file():
                 missing.append(role_path.name)
-                _emit_missing_playwright_spec_warning(root, role_path)
 
-        self.assertTrue(True)
+        if missing:
+            self.fail(
+                "Missing files/playwright.spec.js in:\n  - " + "\n  - ".join(missing)
+            )
 
 
 if __name__ == "__main__":

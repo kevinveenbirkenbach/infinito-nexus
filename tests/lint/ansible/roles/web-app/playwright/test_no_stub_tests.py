@@ -56,8 +56,14 @@ _REAL_FLOW_TOKENS = (
     "isServiceDisabledReason(",
 )
 
-# Keywords that mark a body as a deferred stub.
+# Keywords that mark a body as a deferred stub. Matched as standalone
+# words (`\bTODO\b`) so substrings like ``masTODOn`` in a regex
+# alternation or an app name do NOT trip the lint.
 _STUB_MARKERS = ("TODO", "STUB", "FIXME", "XXX")
+_STUB_MARKER_RE = re.compile(
+    r"\b(?:" + "|".join(_STUB_MARKERS) + r")\b",
+    re.IGNORECASE,
+)
 
 # Tautological self-check pattern. A body whose only meaningful work is
 # `skipUnlessServiceEnabled("X"); expect(isServiceEnabled("X")).toBe(true)`
@@ -171,8 +177,7 @@ def _body_contains_real_flow(body: str) -> bool:
 
 
 def _body_contains_stub_marker(body: str) -> bool:
-    upper = body.upper()
-    return any(marker in upper for marker in _STUB_MARKERS)
+    return _STUB_MARKER_RE.search(body) is not None
 
 
 def _is_persona_or_contract_test(title: str) -> bool:

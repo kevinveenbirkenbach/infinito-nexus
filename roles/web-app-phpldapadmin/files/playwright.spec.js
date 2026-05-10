@@ -1,0 +1,82 @@
+const { test, expect } = require("@playwright/test");
+
+const { skipUnlessServiceEnabled, isServiceEnabled } = require("./service-gating");
+const { runGuestFlow, runBiberFlow, runAdminFlow } = require("./personas");
+test.use({ ignoreHTTPSErrors: true });
+
+function decodeDotenvQuotedValue(value) {
+  if (typeof value !== "string" || value.length < 2) return value;
+  if (!(value.startsWith('"') && value.endsWith('"'))) return value;
+  const encoded = value.slice(1, -1);
+  try {
+    return JSON.parse(`"${encoded}"`).replace(/\$\$/g, "$");
+  } catch {
+    return encoded.replace(/\$\$/g, "$");
+  }
+}
+
+function normalizeBaseUrl(value) {
+  return decodeDotenvQuotedValue(value || "").replace(/\/$/, "");
+}
+
+const appBaseUrl = normalizeBaseUrl(process.env.APP_BASE_URL || "");
+const canonicalDomain = decodeDotenvQuotedValue(process.env.CANONICAL_DOMAIN || "");
+
+test.beforeEach(async ({ page }) => {
+  expect(appBaseUrl, "APP_BASE_URL must be set").toBeTruthy();
+  expect(canonicalDomain, "CANONICAL_DOMAIN must be set").toBeTruthy();
+  await page.context().clearCookies();
+});
+
+test("phpLDAPadmin front page is served under canonical domain with TLS", async ({ page }) => {
+  const response = await page.goto(`${appBaseUrl}/`);
+  expect(response, "Expected phpLDAPadmin response").toBeTruthy();
+  expect(response.status(), "Expected phpLDAPadmin front page status < 400").toBeLessThan(400);
+  expect(
+    response.url().includes(canonicalDomain),
+    `Expected canonical domain "${canonicalDomain}" to back the phpLDAPadmin URL`
+  ).toBe(true);
+  const headers = response.headers();
+  expect(headers["strict-transport-security"], "phpLDAPadmin must emit HSTS").toBeTruthy();
+});
+
+test("phpLDAPadmin returns HTML content under canonical domain", async ({ request }) => {
+  const response = await request.get(`${appBaseUrl}/`);
+  expect(response.status(), "Expected phpLDAPadmin front page status < 400").toBeLessThan(400);
+  const contentType = response.headers()["content-type"] || "";
+  expect(
+    contentType.includes("text/html"),
+    `Expected HTML content-type, got "${contentType}"`
+  ).toBe(true);
+});
+
+// Persona scenarios (req 019 Rule 3).
+// Bodies live in the shared helper roles/test-e2e-playwright/files/personas
+// so every role's persona flow stays consistent.
+
+test("guest: public-landing → auth chain → never authenticated", async ({ page }) => {
+  await runGuestFlow(page);
+});
+
+test("biber: dashboard → app → universal logout", async ({ page }) => {
+  await runBiberFlow(page);
+});
+
+test("administrator: dashboard → prometheus → app → universal logout", async ({ page }) => {
+  await runAdminFlow(page, {
+    adminInteraction: async (interactivePage) => {
+      // web-app-phpldapadmin admin-only interaction: open a management surface.
+      const link = interactivePage
+        .getByRole("link", { name: /^(tree|create|search|admin)$/i })
+        .first();
+      if (await link.isVisible({ timeout: 10_000 }).catch(() => false)) {
+        await link.click().catch(() => {});
+        await interactivePage.waitForLoadState("domcontentloaded", { timeout: 30_000 }).catch(() => {});
+        await expect(interactivePage.locator("body")).toContainText(
+          /ldap|tree|create|search|object/i,
+          { timeout: 30_000 },
+        );
+      }
+    },
+  });
+});
