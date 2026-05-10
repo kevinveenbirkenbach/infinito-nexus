@@ -1,4 +1,6 @@
+import json
 from collections.abc import Iterable
+from copy import deepcopy
 
 
 class FilterModule:
@@ -7,6 +9,7 @@ class FilterModule:
     def filters(self):
         return {
             "ldap_groups_filter": self.ldap_groups_filter,
+            "ldap_roles_mapper_payload": self.ldap_roles_mapper_payload,
         }
 
     def ldap_groups_filter(self, flavors, default="groupOfNames") -> str:
@@ -48,3 +51,36 @@ class FilterModule:
             return "(objectClass=organizationalUnit)"
         # fallback
         return f"(objectClass={default})"
+
+    def ldap_roles_mapper_payload(self, desired_group_mapper, ldap_cmp_id) -> str:
+        """
+        Render the JSON payload for the canonical ``ldap-roles`` mapper that
+        kcadm consumes via ``create components ... -f -``.
+
+        Args:
+            desired_group_mapper: dict, the cleaned mapper template extracted
+                from KEYCLOAK_DICTIONARY_REALM (no ``id`` / ``subComponents``).
+            ldap_cmp_id: str, the parent LDAP component id (will be ``.strip()``ed).
+
+        Returns:
+            A compact JSON string ready for ``printf '%s'`` piping into kcadm.
+        """
+        if not isinstance(desired_group_mapper, dict):
+            raise TypeError(
+                "ldap_roles_mapper_payload: 'desired_group_mapper' must be a dict"
+            )
+        if not isinstance(ldap_cmp_id, str):
+            raise TypeError(
+                "ldap_roles_mapper_payload: 'ldap_cmp_id' must be a string"
+            )
+
+        payload = deepcopy(desired_group_mapper)
+        payload.update(
+            {
+                "name": "ldap-roles",
+                "parentId": ldap_cmp_id.strip(),
+                "providerType": "org.keycloak.storage.ldap.mappers.LDAPStorageMapper",
+                "providerId": "group-ldap-mapper",
+            },
+        )
+        return json.dumps(payload)

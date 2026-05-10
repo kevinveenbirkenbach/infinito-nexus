@@ -174,51 +174,46 @@
       }}
   changed_when: false
 
-- name: Render 'ldap-roles' mapper payload
+- name: "Create canonical 'ldap-roles' mapper when missing"
   when: (grp_mapper_id | trim) in ["", "null"]
-  ansible.builtin.set_fact:
-    _ldap_roles_mapper_payload: "{{ desired_group_mapper | combine({'name': 'ldap-roles', 'parentId': (ldap_cmp_id | trim), 'providerType': 'org.keycloak.storage.ldap.mappers.LDAPStorageMapper', 'providerId': 'group-ldap-mapper'}, recursive=True) | to_json }}"
+  block:
+    - name: Create 'ldap-roles' mapper if missing
+      ansible.builtin.shell: >-
+        printf '%s' {{ (desired_group_mapper | ldap_roles_mapper_payload(ldap_cmp_id | trim)) | quote }}
+        | {{ KEYCLOAK_EXEC_KCADM }} create components -r {{ KEYCLOAK_REALM }} -f -
+      register: create_mapper
+      changed_when: create_mapper.rc == 0
+      failed_when: create_mapper.rc != 0 and ('already exists' not in (create_mapper.stderr | lower))
+      no_log: "{{ MASK_CREDENTIALS_IN_LOGS | bool }}"
 
-- name: Create 'ldap-roles' mapper if missing
-  when: (grp_mapper_id | trim) in ["", "null"]
-  ansible.builtin.shell: >-
-    printf '%s' {{ _ldap_roles_mapper_payload | quote }}
-    | {{ KEYCLOAK_EXEC_KCADM }} create components -r {{ KEYCLOAK_REALM }} -f -
-  register: create_mapper
-  changed_when: create_mapper.rc == 0
-  failed_when: create_mapper.rc != 0 and ('already exists' not in (create_mapper.stderr | lower))
-  no_log: "{{ MASK_CREDENTIALS_IN_LOGS | bool }}"
+    - name: Refresh components (JSON) after create (authoritative)
+      shell: >
+        {{ KEYCLOAK_EXEC_KCADM }} get components -r {{ KEYCLOAK_REALM }} --format json
+      register: kc_components_after_create
+      changed_when: false
 
-- name: Refresh components (JSON) after create (authoritative)
-  when: (grp_mapper_id | trim) in ["", "null"]
-  shell: >
-    {{ KEYCLOAK_EXEC_KCADM }} get components -r {{ KEYCLOAK_REALM }} --format json
-  register: kc_components_after_create
-  changed_when: false
-
-- name: Set canonical mapper id after create
-  when: (grp_mapper_id | trim) in ["", "null"]
-  set_fact:
-    grp_mapper_id: >-
-      {{
-        (
-          kc_components_after_create.stdout | kcadm_json
-          | selectattr('parentId','equalto', ldap_cmp_id)
-          | selectattr('providerId','equalto','group-ldap-mapper')
-          | selectattr('providerType','equalto','org.keycloak.storage.ldap.mappers.LDAPStorageMapper')
-          | selectattr('name','equalto','ldap-roles')
-          | map(attribute='id')
-          | list
-          | map('string')
-          | map('trim')
-          | reject('equalto','')
-          | list
-          | sort
-          | first
-          | default('')
-        ) | string | trim
-      }}
-  changed_when: false
+    - name: Set canonical mapper id after create
+      set_fact:
+        grp_mapper_id: >-
+          {{
+            (
+              kc_components_after_create.stdout | kcadm_json
+              | selectattr('parentId','equalto', ldap_cmp_id)
+              | selectattr('providerId','equalto','group-ldap-mapper')
+              | selectattr('providerType','equalto','org.keycloak.storage.ldap.mappers.LDAPStorageMapper')
+              | selectattr('name','equalto','ldap-roles')
+              | map(attribute='id')
+              | list
+              | map('string')
+              | map('trim')
+              | reject('equalto','')
+              | list
+              | sort
+              | first
+              | default('')
+            ) | string | trim
+          }}
+      changed_when: false
 
 - name: Update 'ldap-roles' mapper config (merge only .config)
   when: (grp_mapper_id | trim) not in ["", "null"]
