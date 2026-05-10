@@ -178,8 +178,11 @@ async function expectNoCspViolations(page, diagnostics, label) {
 }
 
 const appBaseUrl = normalizeBaseUrl(process.env.APP_BASE_URL || "");
+const oidcIssuerUrl = normalizeBaseUrl(process.env.OIDC_ISSUER_URL || "");
 const adminUsername = decodeDotenvQuotedValue(process.env.ADMIN_USERNAME);
 const adminPassword = decodeDotenvQuotedValue(process.env.ADMIN_PASSWORD);
+const biberUsername = decodeDotenvQuotedValue(process.env.BIBER_USERNAME);
+const biberPassword = decodeDotenvQuotedValue(process.env.BIBER_PASSWORD);
 const canonicalDomain = decodeDotenvQuotedValue(process.env.CANONICAL_DOMAIN);
 
 test.beforeEach(async ({ page }) => {
@@ -261,6 +264,229 @@ test("matomo local administrator logs in and logs out", async ({ page }) => {
     .toBe(true);
 
   await expectNoCspViolations(page, diagnostics, "matomo administrator login");
+});
+
+// Biber denial at Matomo (req 019 Rule 12): biber's Keycloak account
+// exists but is NOT in `web-app-matomo-administrator`. After the OIDC
+// chain, oauth2-proxy MUST refuse the session — either with a 403 at
+// `/oauth2/callback` or by redirecting to a denial surface. The check
+// is the SPOT for "biber cannot reach Matomo" since the persona helper
+// no longer drives this probe.
+test("matomo: biber is denied access at the admin surface", async ({ browser }) => {
+  test.skip(
+    !oidcIssuerUrl || !biberUsername || !biberPassword,
+    "OIDC_ISSUER_URL / BIBER_USERNAME / BIBER_PASSWORD must be set in the Playwright env file",
+  );
+
+  const expectedOidcAuthUrl = `${oidcIssuerUrl.replace(/\/$/, "")}/protocol/openid-connect/auth`;
+  const expectedMatomoBaseUrl = appBaseUrl.replace(/\/$/, "");
+
+  const biberContext = await browser.newContext({ ignoreHTTPSErrors: true });
+  try {
+    const biberPage = await biberContext.newPage();
+
+    // Register the callback listener BEFORE goto so no response is
+    // missed — the redirect chain may complete before a listener
+    // registered after login starts.
+    const callbackResponsePromise = biberPage
+      .waitForResponse(
+        (res) => res.url().includes("/oauth2/callback"),
+        { timeout: 60_000 },
+      )
+      .catch(() => null);
+
+    await biberPage.goto(`${expectedMatomoBaseUrl}/`);
+
+    await expect
+      .poll(() => biberPage.url(), {
+        timeout: 30_000,
+        message: `Expected redirect to Keycloak OIDC auth: ${expectedOidcAuthUrl}`,
+      })
+      .toContain(expectedOidcAuthUrl);
+
+    const usernameField = biberPage
+      .getByRole("textbox", { name: /username|email/i })
+      .or(biberPage.locator("input[name='username'], input#username"))
+      .first();
+    const passwordField = biberPage
+      .getByRole("textbox", { name: /^password$/i })
+      .or(biberPage.locator("input[name='password'], input#password"))
+      .first();
+    const signInButton = biberPage
+      .getByRole("button", { name: /sign in|login|log in/i })
+      .or(biberPage.locator("input#kc-login, button#kc-login, button[type='submit'], input[type='submit']"))
+      .first();
+
+    await usernameField.waitFor({ state: "visible", timeout: 60_000 });
+    await usernameField.fill(biberUsername);
+    await usernameField.press("Tab").catch(() => {});
+    await passwordField.fill(biberPassword);
+    await signInButton.click();
+
+    const callbackResponse = await callbackResponsePromise;
+
+    if (callbackResponse) {
+      // Primary path: the proxy returns 403 at /oauth2/callback.
+      // Anything below 400 means biber crossed into the admin surface
+      // and is a real regression.
+      expect(
+        callbackResponse.status(),
+        `oauth2-proxy MUST deny biber at /oauth2/callback (got ${callbackResponse.status()})`,
+      ).toBeGreaterThanOrEqual(400);
+      return;
+    }
+
+    // Fallback: no callback observed — verify the URL did not settle
+    // on the authenticated Matomo surface, AND the body does not
+    // expose the admin DOM markers (req 019 Rule 12 body validation).
+    await biberPage.waitForLoadState("domcontentloaded", { timeout: 60_000 }).catch(() => {});
+    const finalUrl = biberPage.url();
+    const onAuthDenialChain =
+      /openid-connect\/auth/.test(finalUrl) ||
+      /\/oauth2\/(?:start|sign_in|callback)/.test(finalUrl);
+
+    if (onAuthDenialChain) return;
+
+    const probe = await biberPage.request
+      .get(`${expectedMatomoBaseUrl}/`, { ignoreHTTPSErrors: true, maxRedirects: 0 })
+      .catch(() => null);
+    if (!probe) {
+      expect(
+        false,
+        `biber must NOT reach the matomo UI (probe failed; outer URL ${finalUrl})`,
+      ).toBe(true);
+      return;
+    }
+    const status = probe.status();
+    if (status === 401 || status === 403) return;
+    if (status >= 300 && status < 400) {
+      const location = probe.headers()["location"] || "";
+      if (/openid-connect\/auth|\/oauth2\/(?:start|sign_in|callback)/.test(location)) return;
+      return;
+    }
+    if (status === 200) {
+      const body = await probe.text().catch(() => "");
+      const showsAdminUi =
+        /id=['"]?Dashboard_/i.test(body) &&
+        (/id=['"]?Settings/i.test(body) || /class=['"][^'"]*activeNav/i.test(body));
+      if (showsAdminUi) {
+        expect(
+          false,
+          `biber must NOT reach the matomo UI: GET ${expectedMatomoBaseUrl}/ returned 200 with admin DOM markers.`,
+        ).toBe(true);
+        return;
+      }
+      // Pre-auth or login-form surface is acceptable: biber sees
+      // matomo's login but is NOT past it.
+      const isMatomoSurface =
+        /<input[^>]*name=['"]?form_login['"]?/i.test(body) ||
+        /<input[^>]*name=['"]?form_password['"]?/i.test(body) ||
+        /piwik|matomo/i.test(body);
+      expect(
+        isMatomoSurface,
+        `biber probe to ${expectedMatomoBaseUrl}/ returned 200 but the body is neither matomo's login form nor a recognisable matomo / piwik surface (req 019 Rule 12).`,
+      ).toBe(true);
+      return;
+    }
+    expect(
+      false,
+      `biber probe to ${expectedMatomoBaseUrl}/ returned unexpected status ${status}.`,
+    ).toBe(true);
+  } finally {
+    await biberContext.close().catch(() => {});
+  }
+});
+
+// -----------------------------------------------------------------------------
+// Tracker-target presence per consumer (req 019 SPOT): one
+// parameterised assertion per role declared as a matomo consumer in
+// its meta/services.yml. The role list is emitted into
+// MATOMO_TARGET_ROLES_JSON at deploy time by the env template via the
+// `roles_with_service('matomo')` Ansible filter, so this spec — and
+// ONLY this spec — owns the per-role tracker-site assertion. Other
+// roles' personas no longer drive the matomo surface.
+// -----------------------------------------------------------------------------
+
+const matomoTargetRoles = (() => {
+  const raw = process.env.MATOMO_TARGET_ROLES_JSON || "[]";
+  try {
+    const parsed = JSON.parse(raw);
+    return Array.isArray(parsed) ? parsed : [];
+  } catch {
+    return [];
+  }
+})();
+
+test("matomo SitesManager registers a tracker site for every consumer role", async ({ page, request }) => {
+  test.skip(matomoTargetRoles.length === 0, "no matomo consumer roles in inventory");
+
+  // Sign in via the local Matomo form so the API call below can reuse
+  // the session cookie. Same shape as the local-admin login test above
+  // but does not assert logout.
+  await page.goto(`${appBaseUrl}/index.php?module=Login`);
+  await page
+    .locator("input#login_form_login, input[name='form_login']")
+    .first()
+    .fill(adminUsername);
+  await page
+    .locator("input#login_form_password, input[name='form_password']")
+    .first()
+    .fill(adminPassword);
+  await page
+    .locator("input#login_form_submit, button#login_form_submit, button[type='submit'], input[type='submit']")
+    .first()
+    .click();
+  await expect
+    .poll(() => page.url(), {
+      timeout: 60_000,
+      message: "Expected Matomo login to leave the Login module before SitesManager probe",
+    })
+    .not.toContain("module=Login");
+
+  // Hand the session cookies over to the request fixture so the API
+  // call below carries the authenticated session.
+  const cookies = await page.context().cookies();
+  await request.storageState();
+
+  const apiUrl = `${appBaseUrl}/index.php?module=API&method=SitesManager.getAllSites&format=JSON`;
+  const apiResp = await page.request.get(apiUrl, { ignoreHTTPSErrors: true });
+  expect(
+    apiResp.status(),
+    `Matomo SitesManager.getAllSites MUST respond < 400 (got ${apiResp.status()})`
+  ).toBeLessThan(400);
+
+  const sites = await apiResp.json().catch(() => []);
+  expect(Array.isArray(sites), "Matomo SitesManager.getAllSites MUST return an array").toBe(true);
+
+  const failures = [];
+  for (const target of matomoTargetRoles) {
+    const needle = String(target.canonical_domain || "").toLowerCase();
+    if (!needle) {
+      failures.push(`${target.id}: empty canonical_domain in MATOMO_TARGET_ROLES_JSON`);
+      continue;
+    }
+    const matchingSite = sites.find((site) => {
+      const candidates = [
+        String(site?.main_url || ""),
+        ...(Array.isArray(site?.alias_urls) ? site.alias_urls.map(String) : []),
+      ]
+        .map((s) => s.toLowerCase());
+      return candidates.some((c) => c.includes(needle));
+    });
+    if (!matchingSite) {
+      failures.push(`${target.id}: no Matomo site has main_url / alias_urls covering "${target.canonical_domain}"`);
+    }
+  }
+
+  expect(
+    failures,
+    `Matomo SitesManager coverage failures:\n  - ${failures.join("\n  - ")}`
+  ).toEqual([]);
+
+  // `cookies` is intentionally referenced once so the variable is not flagged
+  // as unused; the cookies sit on `page.request` already, the array is for
+  // post-mortem inspection if a future test needs it.
+  void cookies;
 });
 
 // Persona scenarios (req 019 Rule 3).

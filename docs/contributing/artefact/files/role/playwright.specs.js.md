@@ -13,18 +13,21 @@ For the env contract see [Agent `playwright.env.j2`](../../../../agents/files/ro
 
 ## Three personas, fixed flow 🚶
 
-Every spec MUST include the three persona scenarios below as its baseline; additional scenarios (RBAC loops, peer-to-peer messaging, federation round-trips, CSP-deep-checks, …) MAY be added on top.
+Every spec MUST include the three persona scenarios below as its baseline.
+Additional scenarios (RBAC loops, peer-to-peer messaging, federation round-trips, CSP-deep-checks, …) MAY be added on top.
 Three personas exist in the deploy fixture: `guest` (no Keycloak account), `biber` (regular end-user), and `administrator` (operator/admin).
-The flow shape is identical across roles; only the role-specific selectors and the post-login assertion change.
+The flow shape is identical across roles.
+Only the role-specific selectors and the post-login assertion change.
 Service-dependent steps MUST be guarded with [`skipUnlessServiceEnabled('<svc>')`](../../../../../roles/test-e2e-playwright/files/service-gating.js) so a deploy with `SERVICES_DISABLED=<svc>` reports the affected step as `skipped: <NAME>_SERVICE_ENABLED=false`, never `failed`.
 
 Each persona scenario MUST be named `<persona>: <flow>`, where `<persona>` is the literal token `guest`, `biber`, or `administrator` and `<flow>` is a concise step description (e.g. `dashboard → app → logout`).
 The persona token MUST appear at the very start of the test title so the Playwright reporter groups runs by persona without further parsing.
 
-Roles that have no auth surface at all (federation-only services with no local accounts, e.g. `web-app-bridgy-fed`) MAY collapse the three persona scenarios into one baseline reachability scenario; the README MUST document the missing auth tier and the omission MUST be visible from the role's `lifecycle` and `services.yml` exceptions.
+Roles that have no auth surface at all (federation-only services with no local accounts, e.g. `web-app-bridgy-fed`) MAY collapse the three persona scenarios into one baseline reachability scenario.
+The README MUST document the missing auth tier and the omission MUST be visible from the role's `lifecycle` and `services.yml` exceptions.
 
-This spec file IS the single point of truth for the persona contract.
-When the docs and the spec disagree, the spec wins; documentation MUST be brought into alignment, not the other way around.
+When the docs and the spec disagree, the spec wins.
+Documentation MUST be brought into alignment, not the other way around.
 
 ### `guest`: cannot log in anywhere
 
@@ -39,70 +42,49 @@ When the docs and the spec disagree, the spec wins; documentation MUST be brough
                                                 MUST be rejected by the IdP
 ```
 
-### `biber`: single-app journey + cross-service deny-checks
+### `biber`: single-app authenticated journey
 
 ```
-[ ${DASHBOARD_BASE_URL}/ ]              skipUnlessServiceEnabled('dashboard')
-        │  click role tile  (a[href*="<canonical>"])
+[ ${APP_BASE_URL}/ ]                    direct goto, bookmark-style entry
+        │  oauth2-proxy redirects unauthenticated requests to Keycloak
         ▼
-[ ${APP_BASE_URL}/ ]                    skipUnlessServiceEnabled('oidc' | 'oauth2' | 'ldap')
+[ Keycloak auth chain ]                 skipUnlessServiceEnabled('oidc' | 'oauth2' | 'ldap')
         │  Keycloak login (biber)
         ▼
 [ authenticated app ]                   assert: user-visible authenticated element
                                         assert: CSP injections valid
-        │
-        ├──── (gated on 'prometheus') click prometheus tile via dashboard
-        │            ▼
-        │      [ prometheus auth chain ]
-        │            ▼
-        │      assert: biber is DENIED (no operator role)
-        │
-        ├──── (gated on 'matomo') click matomo tile via dashboard
-        │            ▼
-        │      [ matomo auth chain ]
-        │            ▼
-        │      assert: biber is DENIED (admin-only surface)
-        │
-        ▼
-[ authenticated app ]
+        │  drive role-specific interaction (biberInteraction callback)
         │  click universal logout / in-app logout button
         ▼
 [ unauthenticated landing ]             assert: protected request re-engages auth
 ```
 
-### `administrator`: multi-app round-trip
+Cross-service probes (biber denied at prometheus, biber denied at matomo, dashboard tile reachability) are NOT part of the per-role biber persona.
+They live in the provider's own spec (`web-app-{prometheus,matomo,dashboard}/files/playwright.spec.js`), parameterised once over the provider's `<NAME>_TARGET_ROLES_JSON` manifest.
+
+### `administrator`: single-app authenticated journey
 
 ```
-[ ${DASHBOARD_BASE_URL}/ ]              skipUnlessServiceEnabled('dashboard')
-        │  (gated on 'prometheus')
-        │  click prometheus tile
+[ ${APP_BASE_URL}/ ]                    direct goto, bookmark-style entry
+        │  oauth2-proxy redirects unauthenticated requests to Keycloak
         ▼
-[ ${PROMETHEUS_BASE_URL}/ ]
-        │  Keycloak login (administrator)
-        │  assert: role's target up=1 on /api/v1/query?query=up
-        │  back-nav to dashboard
-        ▼
-[ ${DASHBOARD_BASE_URL}/ ]              (gated on 'matomo')
-        │  click matomo tile
-        ▼
-[ ${MATOMO_BASE_URL}/ ]
-        │  Keycloak login (administrator)
-        │  assert: lands on the matomo admin UI
-        │  back-nav to dashboard
-        ▼
-[ ${DASHBOARD_BASE_URL}/ ]
-        │  click role tile
-        ▼
-[ ${APP_BASE_URL}/ ]                    skipUnlessServiceEnabled('oidc' | 'oauth2' | 'ldap')
+[ Keycloak auth chain ]                 skipUnlessServiceEnabled('oidc' | 'oauth2' | 'ldap')
         │  Keycloak login (administrator)
         ▼
 [ authenticated app ]                   assert: admin-visible element
                                         (admin panel, management menu, ...)
                                         assert: CSP injections valid
+        │  drive admin-only interaction (adminInteraction callback)
         │  click universal logout / in-app logout button
         ▼
 [ unauthenticated landing ]             assert: protected request re-engages auth
 ```
+
+Cross-service probes are NOT part of the per-role administrator persona.
+Dashboard tile reachability is owned by `web-app-dashboard/files/playwright.spec.js`.
+Prometheus admin-reach and scrape parity are owned by `web-app-prometheus/files/playwright.spec.js`.
+Matomo admin-reach and tracker presence are owned by `web-app-matomo/files/playwright.spec.js`.
+Each provider parameterises the assertion over its `<NAME>_TARGET_ROLES_JSON` manifest.
 
 ### Test-body template
 
@@ -115,14 +97,12 @@ test("guest: public-landing → auth chain → never authenticated", async ({ pa
   await runGuestFlow(page);
 });
 
-test("biber: dashboard → app → (deny prometheus) → (deny matomo) → logout", async ({ page }) => {
-  skipUnlessServiceEnabled("dashboard");
-  await runBiberFlow(page);
+test("biber: app → keycloak → role action → logout", async ({ page }) => {
+  await runBiberFlow(page, { biberInteraction: async (p) => { /* role-specific */ } });
 });
 
-test("administrator: dashboard → prometheus → matomo → app → logout", async ({ page }) => {
-  skipUnlessServiceEnabled("dashboard");
-  await runAdminFlow(page);
+test("administrator: app → keycloak → admin action → logout", async ({ page }) => {
+  await runAdminFlow(page, { adminInteraction: async (p) => { /* admin-only */ } });
 });
 ```
 
@@ -132,14 +112,19 @@ A persona scenario that only logs in and logs out is NOT enough.
 After the auth chain settles (or directly on the role surface when no auth is required), every persona MUST drive a real, app-specific interaction so the spec proves the role is responsive to user input, not just reachable.
 
 - The `biber` persona MUST drive at least one role-specific interaction that a regular end-user would perform (post a message, open a settings tab, browse a content list, submit a form, …).
-  Specs supply this via the `biberInteraction` callback on `runBiberFlow(page, { biberInteraction })`; there is NO generic default — a generic "click any link" assertion tests nothing role-specific, so the helper is a no-op until the spec provides a callback.
+  Specs supply this via the `biberInteraction` callback on `runBiberFlow(page, { biberInteraction })`.
+  There is NO generic default.
+  A generic "click any link" assertion tests nothing role-specific, so the helper is a no-op until the spec provides a callback.
 - The `administrator` persona MUST drive at least one admin-only interaction (admin panel toggle, realm settings change, user-management surface, …).
-  Specs supply this via the `adminInteraction` callback on `runAdminFlow(page, { adminInteraction })`; same rule — no generic default.
+  Specs supply this via the `adminInteraction` callback on `runAdminFlow(page, { adminInteraction })` under the same "no generic default" rule.
 - When the role supports peer-to-peer interaction (messaging, comment threads, federation round-trips, calendar invites, …), the spec MUST include a separate `biber ↔ administrator: <flow>` test that opens two browser contexts, drives the round-trip end-to-end, and asserts both sides see the expected payload.
-  The shared `runPeerExchangeFlow(browser, { peerExchange })` helper provides the two-context scaffolding; the role-specific message / payload / assertion lives in the spec.
-- Roles whose upstream offers no peer interaction surface (every static / single-purpose / federation-only role on the auth-less list) MUST NOT add a peer-exchange test; the omission is part of the role's contract, not a gap.
+  The shared `runPeerExchangeFlow(browser, { peerExchange })` helper provides the two-context scaffolding.
+  The role-specific message, payload, and assertion live in the spec.
+- Roles whose upstream offers no peer interaction surface (every static, single-purpose, or federation-only role on the auth-less list) MUST NOT add a peer-exchange test.
+  The omission is part of the role's contract, not a gap.
 
-The role-specific interaction callbacks and the peer-exchange test are part of the persona contract; specs that ship only the personas without an interaction callback fulfil the bare minimum but SHOULD extend with bespoke role coverage during the role's rollout iteration.
+The role-specific interaction callbacks and the peer-exchange test are part of the persona contract.
+Specs that ship only the personas without an interaction callback fulfil the bare minimum, but SHOULD extend with bespoke role coverage during the role's rollout iteration.
 
 ### Strict failure on un-executable persona cases
 
@@ -156,39 +141,47 @@ PERSONA_GUEST_BLOCKED=true
 ```
 
 Each flag MUST be accompanied by a one-line `# nocheck` comment above the env line stating the role contract that justifies blocking the persona, and a matching paragraph in the role's `README.md` (or `TODO.md` while the rationale is still drafting).
-Without the flag, the persona helper hard-fails the test with a diagnostic naming the last-seen URL and pointing the operator at the two repair paths: "fix the auth chain" or "declare the opt-out flag".
+Without the flag, the persona helper hard-fails the test with a diagnostic naming the last-seen URL and pointing the operator at two repair paths: fix the auth chain, or declare the opt-out flag.
 
-Direct-probe deny-checks (`assertPrometheusForbiddenForBiber`, `assertMatomoForbiddenForBiber`) MUST validate the response body, not only the status code.
-A `200 OK` is acceptable ONLY when the body contains role-specific markers proving the response is the genuine role surface (e.g. `prometheus_build_info` or `<title>Prometheus</title>` for prometheus; matomo's login-form markers or `piwik|matomo` for matomo).
+Direct-probe deny-checks MUST validate the response body, not only the status code.
+A `200 OK` is acceptable ONLY when the body contains provider-specific markers proving the response is the genuine provider surface.
+For prometheus, the markers are `prometheus_build_info` or `<title>Prometheus</title>`.
+For matomo, the markers are matomo's login-form markers or `piwik` and `matomo` strings in the body.
 Any 200 with a non-matching body is treated as a misconfigured proxy or a denial-as-200 surface and fails loudly.
+The deny-checks live in the provider's own spec (`web-app-prometheus/files/playwright.spec.js` and `web-app-matomo/files/playwright.spec.js`).
 
 ### Invariants (every spec, every role)
 
-- The `biber` and `administrator` personas always start at `${DASHBOARD_BASE_URL}/`; the `guest` persona starts at `${APP_BASE_URL}/`.
-- The role tile is always located by `a[href*="<canonical>"]`, never by a brittle role-name string.
+- All three personas (`guest`, `biber`, `administrator`) start at `${APP_BASE_URL}/` via direct goto (bookmark-style entry).
+  The OAuth2-Proxy gate fires on the first request and redirects unauthenticated requests through Keycloak.
+  No dashboard-tile click sits in the persona path.
 - The `biber` and `administrator` personas always end on a verified unauthenticated landing via the in-app logout button.
-- The `guest` persona MUST never reach the role's authenticated surface; an empty-credentials submission against Keycloak MUST be rejected by the IdP.
-- The administrator always inserts the prometheus interface check (where `prometheus` is enabled) AND the matomo admin login (where `matomo` is enabled) between dashboard and app under test.
-  Future admin-only health-check surfaces follow the same pattern: visit, assert health/admin-access, back-nav, continue.
-- The `biber` persona MUST verify that biber is DENIED at prometheus (where `prometheus` is enabled) AND at matomo (where `matomo` is enabled).
-  Biber's OIDC account exists in Keycloak but does NOT carry the operator/admin role required to enter those surfaces; the deny assertion is the counter-assertion to the administrator's accept assertion.
+- The `guest` persona MUST never reach the role's authenticated surface.
+  An empty-credentials submission against Keycloak MUST be rejected by the IdP.
+- Cross-service surface assertions (dashboard tile reachability, prometheus admin-reach and scrape parity, matomo admin-reach and tracker presence, biber-denied-at-prometheus, biber-denied-at-matomo) are owned by the provider's own spec.
+  Each provider parameterises the assertion over its `<NAME>_TARGET_ROLES_JSON` manifest, rendered via `lookup('roles_with_service', '<svc>')`.
+  Consumer roles' personas MUST NOT duplicate these probes.
 - Every persona scenario MUST run the CSP injection assertion at least once on the role's canonical surface.
-  When an injector service (`asset`, `cdn`, `css`, `javascript`, `simpleicons`, `matomo`) is enabled, the page's `Content-Security-Policy` header MUST list the injector's host; the assertion is centralised in `personas/utils/csp.js` so every spec gets the check by default.
+  When an injector service (`asset`, `cdn`, `css`, `javascript`, `simpleicons`, `matomo`) is enabled, the page's `Content-Security-Policy` header MUST list the injector's host.
+  The assertion is centralised in `personas/utils/csp.js` so every spec gets the check by default.
 - Every service-dependent step uses `skipUnlessServiceEnabled(...)`.
   Direct `process.env` reads of `<NAME>_SERVICE_ENABLED` are forbidden.
 - Baseline scenarios (reachability, CSP, canonical-domain DOM assertion, logged-out final state) MUST NOT gate on any service.
   A deploy with every shared service disabled MUST still leave a passing baseline suite.
 - When the role enables both `oidc` and `ldap`, each persona's primary login path MUST use OIDC.
-  The LDAP-bind path is exercised by a separate scenario that runs in the LDAP-only matrix variant (where `oidc` is disabled and `ldap` is enabled); each persona's LDAP scenario gates on `skipUnlessServiceEnabled('ldap')` so it skips cleanly when LDAP is off.
+  The LDAP-bind path is exercised by a separate scenario that runs in the LDAP-only matrix variant (where `oidc` is disabled and `ldap` is enabled).
+  Each persona's LDAP scenario gates on `skipUnlessServiceEnabled('ldap')` so it skips cleanly when LDAP is off.
 - Each `test()` runs in its own isolated browser context.
-  Specs MUST NOT share session state between tests; running biber and administrator as two separate `test()` blocks already gives that isolation by default.
+  Specs MUST NOT share session state between tests.
+  Running biber and administrator as two separate `test()` blocks already gives that isolation by default.
   When a single scenario needs more than one identity at once (peer-to-peer messaging, RBAC promotion observed by the admin, …), it MUST open a fresh `browser.newContext({ ignoreHTTPSErrors: true })` per identity and close them in `finally`.
-- The post-login assertion MUST prove the session is real, in this order of preference: a user-menu / persona-name string visible in the DOM, a navigation element only rendered for authenticated users, a URL pattern unique to authenticated state.
+- The post-login assertion MUST prove the session is real, in this order of preference: a user-menu or persona-name string visible in the DOM, a navigation element only rendered for authenticated users, a URL pattern unique to authenticated state.
   Stopping at a 2xx status code or a static text snippet that exists logged-out as well MUST NOT count as a session check.
 - The admin assertion MUST additionally prove admin authorisation (admin panel, management menu, "Users" / "Settings" / "Administration" link visible in the DOM).
   A scenario that lands on the same surface as `biber` and stops there MUST NOT claim admin coverage.
 - Every spec MUST set `test.use({ ignoreHTTPSErrors: true })` at the top of the file because the test environment uses self-signed certificates.
-  The central `playwright.config.js` does NOT set this globally; per-spec opt-in is the contract.
+  The central `playwright.config.js` does NOT set this globally.
+  Per-spec opt-in is the contract.
 - Test titles MUST follow the `<persona>: <flow>` naming convention so the reporter groups runs by persona without parsing.
 
 ## No stub tests 🚫
@@ -197,11 +190,12 @@ Every `test()` body in `files/playwright.spec.js` MUST simulate the user flow th
 Stubs are forbidden:
 
 - A body that contains only `skipUnlessServiceEnabled(...)` (or any combination of helper calls) without at least one `expect(...)`, `await <fn>(...)`, or equivalent real-flow step is rejected.
-- A body that carries a `TODO`, `STUB`, `FIXME`, or `XXX` marker is rejected; the rollout's intent is real flows now, not deferred work.
+- A body that carries a `TODO`, `STUB`, `FIXME`, or `XXX` marker is rejected.
+  The contract requires real flows, not deferred work.
 - An empty body is rejected.
 - A body that asserts only constants (`expect(1).toBe(1)`) without driving any role surface is rejected on review.
 
-The persona scenarios MUST drive the journey from [Two personas, fixed flow](#two-personas-fixed-flow-) end to end.
+The persona scenarios MUST drive the journey from [Three personas, fixed flow](#three-personas-fixed-flow-) end to end.
 Per-service contract tests MUST exercise the [per-service assertion catalogue](#per-service-assertion-catalogue-) entry that matches their gated service.
 The [test_no_stub_tests.py](../../../../../tests/lint/ansible/roles/web-app/playwright/test_no_stub_tests.py) lint hard-fails the build when a stub is detected, so the rule is enforced automatically.
 
@@ -235,14 +229,14 @@ Non-exhaustive; new services inherit the same shape (real end-to-end check that 
 
 | Service | Assertion at the gate |
 | --- | --- |
-| `dashboard` | Open `${DASHBOARD_BASE_URL}/`, locate role tile via `a[href*="<canonical>"]`, assert presence + correct `href`, click, assert landing on `CANONICAL_DOMAIN`. |
+| `dashboard` | The consumer role's spec does NOT exercise the dashboard tile. `web-app-dashboard/files/playwright.spec.js` parameterises one tile-reachability test per consumer over `DASHBOARD_TARGET_ROLES_JSON` (locate `a[href*="<canonical>"]`, assert presence and `href`, click, assert landing on `CANONICAL_DOMAIN`). |
 | `oidc` | Visit protected URL, assert redirect to Keycloak's `openid-connect/auth`, log in, assert redirect back, assert authenticated UI. |
 | `ldap` | LDAP-bind path. MUST exercise admin AND `biber`. |
 | `oauth2` | Protected path triggers oauth2-proxy → Keycloak → callback; `/oauth2/sign_out` re-engages the gate. |
 | `email` | Send / receive via the role's mail surface, OR verify rendered notification body via the test mailbox. |
 | `logout` | Universal-logout endpoint clears role + SSO session; next protected request re-engages auth. |
-| `matomo` | Tracking snippet for `application_id` is in the HTML; navigation generates the expected `/matomo.php` request. The admin persona MUST additionally log in to the matomo UI from the dashboard tile (`assertMatomoInterfaceForAdmin`); the biber persona MUST be denied (`assertMatomoForbiddenForBiber`). |
-| `prometheus` | `/metrics` reachable at the documented path; Prometheus reports the role's target as `up=1`. The admin persona MUST navigate to the prometheus UI from the dashboard tile and verify `up=1` on `/api/v1/query?query=up` (`assertPrometheusInterface`); the biber persona MUST be denied (`assertPrometheusForbiddenForBiber`). |
+| `matomo` | The consumer role asserts only that the matomo tracking snippet is in the HTML and that navigation generates the expected `/matomo.php` request (covered by `assertCspInjections` in the persona-helper). Matomo admin-reach, biber denial, and per-consumer tracker-site registration live in `web-app-matomo/files/playwright.spec.js` only. |
+| `prometheus` | The consumer role asserts only that `/metrics` is reachable at the documented path (where applicable). Prometheus admin-reach, biber denial, and per-consumer `up=1` verification live in `web-app-prometheus/files/playwright.spec.js` only, parameterised over `PROMETHEUS_TARGET_ROLES_JSON`. |
 | CSP / injectors | When any injector service (`asset`, `cdn`, `css`, `javascript`, `simpleicons`, `matomo`) is enabled, the role's `Content-Security-Policy` header MUST list the injector's host. The `assertCspInjections` helper drives the check on every persona scenario. |
 | `discourse` | WordPress to Discourse post round-trip and analogous role-pair flows. |
 | Static assets (`simpleicons`, `cdn`, `css`, `javascript`, `asset`) | The role's HTML references the expected asset host AND a request returns < 400 with the right content-type. |
@@ -301,12 +295,14 @@ The teardown MUST:
   Names MUST match exactly.
 - URLs, domains, and credentials MUST come from the rendered `.env`.
   No hardcoded values in the spec.
-- The minimum env set for any spec following the persona flows is `APP_BASE_URL`, `CANONICAL_DOMAIN`, `DASHBOARD_BASE_URL`, and `LOGOUT_URL`.
+- The minimum env set for any spec following the persona flows is `APP_BASE_URL`, `CANONICAL_DOMAIN`, and `LOGOUT_URL`.
+  `DASHBOARD_BASE_URL` is rendered only by the dashboard role's own spec, because consumer personas enter at `APP_BASE_URL` directly.
   Specs that gate on auth additionally read at least one of `OIDC_ISSUER_URL`, `KEYCLOAK_BASE_URL`, plus the persona credentials `ADMIN_USERNAME` / `ADMIN_PASSWORD` and `BIBER_USERNAME` / `BIBER_PASSWORD`.
   Specs that exercise integrations (Matomo, Discourse, Email, Prometheus, …) read the integration-specific keys defined in [Agent `playwright.env.j2`](../../../../agents/files/role/playwright.env.j2.md).
 - `docker --env-file` preserves the quotes emitted by the `dotenv_quote` Jinja filter.
   Specs MUST decode quoted values before building URLs or typing credentials.
-  The recurring helpers `decodeDotenvQuotedValue(value)` and `normalizeBaseUrl(value)` are inlined per spec today; once a third spec needs them, they MUST be promoted into the shared helpers under [roles/test-e2e-playwright/files/](../../../../../roles/test-e2e-playwright/files/) and imported instead of copy-pasted.
+  The recurring helpers `decodeDotenvQuotedValue(value)` and `normalizeBaseUrl(value)` are inlined per spec.
+  Once a third spec needs them, they MUST be promoted into the shared helpers under [roles/test-e2e-playwright/files/](../../../../../roles/test-e2e-playwright/files/) and imported instead of copy-pasted.
 
 ## Service gating contract 🔒
 

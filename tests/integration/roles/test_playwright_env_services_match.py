@@ -32,6 +32,21 @@ cannot or must not be gated from Playwright (for example the role's
 own provider service that requirement 006 forbids self-gating on).
 The catalog entry lives in
 ``docs/contributing/actions/testing/suppression.md``.
+
+Globally-exempt services
+------------------------
+
+Services whose verification is owned by their own provider's
+parameterised spec per req 019 SPOT (``dashboard``, ``prometheus``)
+are globally exempt: every consumer role declares them in
+``meta/services.yml`` for inventory completeness, but the per-role
+env templates intentionally do NOT render the
+``<NAME>_SERVICE_ENABLED=`` flag because the persona scenarios no
+longer gate on them. The provider specs
+(``roles/web-app-{dashboard,prometheus}/files/playwright.spec.js``)
+parameterise one assertion per consumer using the
+``DASHBOARD_TARGET_ROLES_JSON`` / ``PROMETHEUS_TARGET_ROLES_JSON``
+manifests rendered by the ``roles_with_service`` filter.
 """
 
 from __future__ import annotations
@@ -56,6 +71,12 @@ _RULE = "playwright-service-flag"
 
 _ENV_TEMPLATE_REL = "templates/playwright.env.j2"  # nocheck: role-file-spot
 _ENV_KEY_LHS_RE = re.compile(r"^([A-Z_][A-Z0-9_]*)\s*=", re.MULTILINE)
+
+# SPOT-owned services (req 019): the provider's own spec parameterises
+# one assertion per consumer via *_TARGET_ROLES_JSON, so consumer roles
+# declare the service in `meta/services.yml` for inventory completeness
+# but legitimately do NOT render `<NAME>_SERVICE_ENABLED=` in their env.
+_SPOT_OWNED_SERVICES: frozenset[str] = frozenset({"dashboard", "prometheus"})
 
 
 def _service_to_env_key(name: str) -> str:
@@ -129,6 +150,15 @@ class TestPlaywrightEnvServicesMatch(unittest.TestCase):
                 if "enabled" not in entry:
                     continue
                 if service_key in exempt:
+                    continue
+                # SPOT-owned services are globally exempt; the
+                # provider spec parameterises one assertion per
+                # consumer via the *_TARGET_ROLES_JSON manifest, so
+                # the per-role env flag is intentionally not rendered.
+                if (
+                    service_key in _SPOT_OWNED_SERVICES
+                    and role_name != f"web-app-{service_key}"
+                ):
                     continue
 
                 expected_flag = _service_to_env_key(service_key)

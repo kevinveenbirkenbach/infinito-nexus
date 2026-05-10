@@ -790,6 +790,68 @@ test("dashboard login automatically switches Login to Account and exposes Logout
   expectNoUnexpectedDiagnostics(diagnostics, { ignoreMatomoConsoleNoise: true });
 });
 
+// -----------------------------------------------------------------------------
+// Tile reachability per consumer (req 019 SPOT): one parameterised test
+// per role declared as a dashboard consumer in its meta/services.yml.
+// The role list is emitted into DASHBOARD_TARGET_ROLES_JSON at deploy
+// time by the env template via the `roles_with_service('dashboard')`
+// Ansible filter, so this spec — and ONLY this spec — owns the per-role
+// tile assertion. Other roles' personas no longer drive the dashboard
+// click; they go straight to the app URL.
+// -----------------------------------------------------------------------------
+
+const dashboardTargetRoles = (() => {
+  const raw = process.env.DASHBOARD_TARGET_ROLES_JSON || "[]";
+  try {
+    const parsed = JSON.parse(raw);
+    return Array.isArray(parsed) ? parsed : [];
+  } catch {
+    return [];
+  }
+})();
+
+for (const target of dashboardTargetRoles) {
+  test(`dashboard tile for ${target.id} leads to ${target.canonical_domain}`, async ({ page }) => {
+    await page.goto("/", { waitUntil: "domcontentloaded" });
+    await waitForDashboardReady(page);
+
+    const tile = page.locator(`a[href*="${target.canonical_domain}"]:visible`).first();
+    let visible = await tile.isVisible({ timeout: 5_000 }).catch(() => false);
+
+    if (!visible) {
+      // Tile may be hidden inside a collapsed Bootstrap dropdown / accordion.
+      const triggers = page.locator(
+        "[data-bs-toggle='dropdown'], [data-bs-toggle='collapse'], [aria-expanded='false']"
+      );
+      const triggerCount = await triggers.count().catch(() => 0);
+      for (let i = 0; i < triggerCount; i++) {
+        const t = triggers.nth(i);
+        if (!(await t.isVisible({ timeout: 200 }).catch(() => false))) continue;
+        await t.click({ timeout: 1_000 }).catch(() => {});
+      }
+      visible = await tile.isVisible({ timeout: 10_000 }).catch(() => false);
+    }
+
+    await expect(
+      tile,
+      `dashboard tile for ${target.id} (${target.canonical_domain}) MUST be present`
+    ).toBeVisible({ timeout: 30_000 });
+
+    const href = await tile.getAttribute("href");
+    expect(href, `tile for ${target.id} MUST carry an href`).toBeTruthy();
+    expect(href, `tile href MUST point at ${target.canonical_domain}`).toContain(target.canonical_domain);
+
+    await tile.click();
+
+    await expect
+      .poll(() => page.url(), {
+        timeout: 30_000,
+        message: `Expected to land on ${target.canonical_domain} after clicking the ${target.id} tile`,
+      })
+      .toContain(target.canonical_domain);
+  });
+}
+
 // Persona scenarios (req 019 Rule 3).
 // Bodies live in the shared helper roles/test-e2e-playwright/files/personas.js
 // so every role's persona flow stays consistent.

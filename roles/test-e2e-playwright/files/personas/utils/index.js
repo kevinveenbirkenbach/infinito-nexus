@@ -5,26 +5,25 @@
  * pull every helper through a single import; Node resolves this to
  * `personas/utils/index.js` and exposes every helper through this
  * aggregator.
+ *
+ * Cross-service surface helpers (dashboard tile click, prometheus
+ * /api/v1/query, matomo SitesManager) are owned by the dedicated
+ * provider specs (`web-app-{dashboard,prometheus,matomo}`) per req 019
+ * Rule 9. They are intentionally NOT exported here.
  */
 
 const env = require("./env");
 const keycloak = require("./keycloak");
-const dashboard = require("./dashboard");
 const logout = require("./logout");
 const landing = require("./landing");
-const prometheus = require("./prometheus");
-const matomo = require("./matomo");
 const csp = require("./csp");
 const interaction = require("./interaction");
 
 module.exports = {
   ...env,
   ...keycloak,
-  ...dashboard,
   ...logout,
   ...landing,
-  ...prometheus,
-  ...matomo,
   ...csp,
   ...interaction,
 };

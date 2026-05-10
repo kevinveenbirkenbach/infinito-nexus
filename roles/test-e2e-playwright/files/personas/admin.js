@@ -1,15 +1,23 @@
 /**
- * `administrator` persona: multi-app round-trip.
+ * `administrator` persona: single-app authenticated journey.
  *
- * dashboard → (gated) prometheus interface check → back to dashboard
- *           → (gated) matomo interface login → back to dashboard
- *           → click role tile → admin auth (OIDC if applicable)
- *           → CSP injection check
- *           → in-app logout → unauthenticated landing assertion.
+ *   appBaseUrl → (OIDC if applicable) → admin-only interaction
+ *              → CSP injection check → in-app logout
+ *              → unauthenticated landing assertion.
  *
- * The prometheus and matomo sub-flows prove that the administrator
- * identity is accepted by the operator-only sibling services (the
- * counter-assertion to biber's deny checks).
+ * The administrator persona is now scoped to the role under test only.
+ * Cross-service surface checks (prometheus, matomo, dashboard tile
+ * reachability) are owned by the dedicated provider specs:
+ *
+ *   - `roles/web-app-dashboard/files/playwright.spec.js` parameterises
+ *     dashboard-tile reachability per consumer role.
+ *   - `roles/web-app-prometheus/files/playwright.spec.js` parameterises
+ *     scrape-target presence + admin reach + biber denial.
+ *   - `roles/web-app-matomo/files/playwright.spec.js` parameterises
+ *     tracker-site presence + admin reach + biber denial.
+ *
+ * Each role's persona scenario therefore visits its OWN canonical URL
+ * directly (no dashboard tile click) and exercises only that role.
  */
 
 const { test, expect } = require("@playwright/test");
@@ -18,12 +26,9 @@ const {
   readEnv,
   safeIsEnabled,
   performKeycloakLogin,
-  clickRoleTileFromDashboard,
   inAppLogout,
   assertUnauthenticatedLanding,
   assertCspInjections,
-  assertPrometheusInterface,
-  assertMatomoInterfaceForAdmin,
   runRoleInteraction,
 } = require("./utils");
 
@@ -34,9 +39,7 @@ async function runAdminFlow(page, opts = {}) {
   // control is unreachable to the generic helper, ...) declare
   // `PERSONA_ADMINISTRATOR_BLOCKED=true` in
   // `templates/playwright.env.j2` with a documented rationale in the
-  // role's TODO.md or README.md. The check sits at the top of the
-  // flow so the opt-out shortcuts the entire dashboard → app →
-  // logout journey, not just the auth-surface detection.
+  // role's TODO.md or README.md.
   if ((process.env.PERSONA_ADMINISTRATOR_BLOCKED || "").toLowerCase() === "true") {
     test.skip(
       true,
@@ -46,32 +49,29 @@ async function runAdminFlow(page, opts = {}) {
   }
 
   // Test B parity: oauth2-proxy gates the initial redirect chain,
-  // universal-logout rewrites the in-app logout click, and the
-  // persona's first action is always a dashboard tile click (driven by
-  // process.env.DASHBOARD_BASE_URL). All three are consumed by the
-  // persona surface; reference them via safeIsEnabled so the env-gate
-  // parity guard recognises them as consumed by the spec via the
-  // shared persona helper.
+  // universal-logout rewrites the in-app logout click, and the shared
+  // CSP-injection helper (`assertCspInjections`) gates on `matomo` to
+  // verify every role's CSP allows the matomo tracker host when matomo
+  // is enabled. All three are consumed by the persona surface;
+  // reference them via safeIsEnabled with literal arguments so the
+  // env-gate parity guard recognises them as consumed by the spec via
+  // the shared persona helper.
   safeIsEnabled("oauth2");
   safeIsEnabled("logout");
-  safeIsEnabled("dashboard");
+  safeIsEnabled("matomo");
 
-  const dashboardBaseUrl = normalizeUrl(process.env.DASHBOARD_BASE_URL);
-  const prometheusBaseUrl = normalizeUrl(process.env.PROMETHEUS_BASE_URL);
-  const matomoBaseUrl = normalizeUrl(process.env.MATOMO_BASE_URL);
   const canonicalDomain = readEnv("CANONICAL_DOMAIN");
   const appBaseUrl = normalizeUrl(process.env.APP_BASE_URL);
   const adminUsername = readEnv("ADMIN_USERNAME");
   const adminPassword = readEnv("ADMIN_PASSWORD");
-  const roleTarget = readEnv("PROMETHEUS_TARGET_HINT") || canonicalDomain;
 
   // Persona-collapse exception (req 019): roles whose env does not
-  // expose DASHBOARD_BASE_URL or CANONICAL_DOMAIN are auth-less by
+  // expose APP_BASE_URL or CANONICAL_DOMAIN are auth-less by
   // construction; skip cleanly rather than fail.
-  if (!dashboardBaseUrl || !canonicalDomain) {
+  if (!appBaseUrl || !canonicalDomain) {
     test.skip(
       true,
-      "Auth-less role (no DASHBOARD_BASE_URL / CANONICAL_DOMAIN) — persona scenario collapsed per req 019.",
+      "Auth-less role (no APP_BASE_URL / CANONICAL_DOMAIN) — persona scenario collapsed per req 019.",
     );
     return;
   }
@@ -80,31 +80,11 @@ async function runAdminFlow(page, opts = {}) {
 
   const oidcEnabled = safeIsEnabled("oidc");
 
-  if (safeIsEnabled("prometheus")) {
-    await assertPrometheusInterface(page, {
-      dashboardBaseUrl,
-      prometheusBaseUrl,
-      canonicalDomain,
-      adminUsername,
-      adminPassword,
-      oidcEnabled,
-      roleTarget,
-    });
-    await page.context().clearCookies();
-  }
-
-  if (safeIsEnabled("matomo")) {
-    await assertMatomoInterfaceForAdmin(page, {
-      dashboardBaseUrl,
-      matomoBaseUrl,
-      adminUsername,
-      adminPassword,
-      oidcEnabled,
-    });
-    await page.context().clearCookies();
-  }
-
-  await clickRoleTileFromDashboard(page, dashboardBaseUrl, canonicalDomain);
+  // Direct-app entry: bookmark-style navigation. The OAuth2-Proxy gate
+  // fires on the first request, redirecting unauthenticated requests
+  // to Keycloak; the auth chain is the same regardless of how the user
+  // arrived at the URL.
+  await page.goto(`${appBaseUrl}/`, { waitUntil: "domcontentloaded" }).catch(() => {});
 
   if (oidcEnabled && adminUsername && adminPassword) {
     const loginLink = page
@@ -120,13 +100,13 @@ async function runAdminFlow(page, opts = {}) {
   }
 
   // Verify administrator actually reached an authenticated surface.
-  // The persona contract demands a full dashboard → app → logout
-  // journey. When the post-OIDC page does NOT expose a logout
-  // control / user menu, that is a real regression UNLESS the role
-  // explicitly declares the admin persona blocked via env flag
-  // `PERSONA_ADMINISTRATOR_BLOCKED=true` (e.g. roles whose admin
-  // surface only accepts a bespoke local admin, not OIDC). Without
-  // that flag the test fails loudly.
+  // The persona contract demands a full app → logout journey. When
+  // the post-OIDC page does NOT expose a logout control / user menu,
+  // that is a real regression UNLESS the role explicitly declares the
+  // admin persona blocked via env flag
+  // `PERSONA_ADMINISTRATOR_BLOCKED=true`. Without that flag the test
+  // fails loudly so a real regression cannot hide behind a silent
+  // skip.
   const adminAuthMarker = (surface) =>
     surface
       .getByRole("button", { name: /^(log\s*out|sign\s*out|abmelden)$/i })

@@ -90,52 +90,50 @@ test("metricz endpoint is accessible and returns prometheus text format", async 
   ).toContain("nginx_http_requests_total");
 });
 
-// Scenario II: dashboard → click Prometheus → SSO login inside iframe (as admin) → verify Prometheus UI → logout
+// Scenario II: direct goto Prometheus → SSO login (as admin) → verify Prometheus UI → logout
 //
 // Prometheus is admin-only (allowed_groups: web-app-prometheus-administrator).
-// Clicking the Prometheus link on the dashboard opens it inside a fullscreen iframe.
-// oauth2-proxy redirects unauthenticated requests to Keycloak, which loads inside that iframe.
-// The outer page URL reflects the iframe URL via the `?iframe=` query parameter.
-test("dashboard to prometheus: admin sso login, verify ui, logout", async ({ page }) => {
+// Visiting the canonical Prometheus URL triggers the OAuth2-Proxy redirect
+// chain to Keycloak; on successful auth the proxy redirects back to the
+// Prometheus UI directly (no dashboard-iframe wrapping). The
+// dashboard-tile-reachability concern is owned by web-app-dashboard's
+// own spec per req 019 Rule 13, so this test no longer exercises that
+// click path — keeping admin-reach SPOT-clean.
+test("prometheus: admin sso login, verify ui, logout", async ({ page }) => {
   const expectedOidcAuthUrl       = `${oidcIssuerUrl.replace(/\/$/, "")}/protocol/openid-connect/auth`;
   const expectedPrometheusBaseUrl = prometheusBaseUrl.replace(/\/$/, "");
 
-  // 1. Navigate to dashboard and click the Prometheus app link
-  await page.goto("/");
-  await page.getByRole("link", { name: /Explore Prometheus/i }).click();
+  // 1. Navigate directly to Prometheus — oauth2-proxy redirects to Keycloak.
+  await page.goto(`${expectedPrometheusBaseUrl}/`);
 
-  // 2. Dashboard embeds Prometheus in a fullscreen iframe. oauth2-proxy redirects to Keycloak.
-  //    Outer page URL: dashboard.infinito.example/?iframe=<encoded-keycloak-auth-url>&fullwidth=1...
   await expect
     .poll(() => page.url(), {
       timeout: 60_000,
-      message: `Expected dashboard URL to embed Keycloak OIDC auth: ${expectedOidcAuthUrl}`
+      message: `Expected redirect to Keycloak OIDC auth: ${expectedOidcAuthUrl}`
     })
-    .toContain(encodeURIComponent(expectedOidcAuthUrl));
+    .toContain(expectedOidcAuthUrl);
 
-  // 3. Fill admin credentials inside the dashboard iframe (Keycloak is rendered inside it)
-  const appFrame = page.frameLocator("iframe").first();
-  await performOidcLogin(appFrame, adminUsername, adminPassword);
+  // 2. Log in as admin at Keycloak.
+  await performOidcLogin(page, adminUsername, adminPassword);
 
-  // 4. After successful auth, the iframe navigates to Prometheus.
-  //    Outer page URL updates: dashboard.infinito.example/?iframe=<encoded-prometheus-url>...
+  // 3. After successful auth, oauth2-proxy redirects back to Prometheus.
   await expect
     .poll(() => page.url(), {
       timeout: 60_000,
-      message: `Expected dashboard URL to embed Prometheus: ${expectedPrometheusBaseUrl}`
+      message: `Expected redirect back to Prometheus after admin login: ${expectedPrometheusBaseUrl}`
     })
-    .toContain(encodeURIComponent(expectedPrometheusBaseUrl));
+    .toContain(expectedPrometheusBaseUrl);
 
-  // 5. Verify Prometheus UI is loaded inside the iframe.
+  // 4. Verify Prometheus UI is loaded.
   //    The Prometheus v3.x nav always exposes "Graph", "Alerts", and "Status" links.
   await expect(
-    appFrame.getByRole("link", { name: /^(Graph|Alerts|Status)$/i }).first()
+    page.getByRole("link", { name: /^(Graph|Alerts|Status)$/i }).first()
   ).toBeVisible({ timeout: 30_000 });
 
-  // 6. Logout via universal logout endpoint (navigates away from dashboard)
+  // 5. Logout via universal logout endpoint.
   await prometheusLogout(page, expectedPrometheusBaseUrl);
 
-  // 7. Verify session is gone — oauth2-proxy redirects unauthenticated requests to Keycloak
+  // 6. Verify session is gone — oauth2-proxy redirects unauthenticated requests to Keycloak.
   await page.goto(`${expectedPrometheusBaseUrl}/`, { waitUntil: "domcontentloaded" });
   await expect
     .poll(() => page.url(), {
@@ -143,8 +141,6 @@ test("dashboard to prometheus: admin sso login, verify ui, logout", async ({ pag
       message: "Expected redirect to Keycloak after logout"
     })
     .toContain(expectedOidcAuthUrl);
-
-  await page.goto("/");
 });
 
 // Scenario II: biber (non-admin) navigates directly to Prometheus → SSO login → access denied
@@ -199,6 +195,83 @@ test("prometheus: biber is denied access after sso login", async ({ browser }) =
   } finally {
     await biberContext.close().catch(() => {});
   }
+});
+
+// -----------------------------------------------------------------------------
+// Scrape-target reachability per consumer (req 019 SPOT): one
+// parameterised assertion per role declared as a prometheus consumer
+// in its meta/services.yml. The role list is emitted into
+// PROMETHEUS_TARGET_ROLES_JSON at deploy time by the env template via
+// the `roles_with_service('prometheus')` Ansible filter, so this spec
+// — and ONLY this spec — owns the per-role `up=1` assertion. Other
+// roles' personas no longer drive the prometheus surface.
+// -----------------------------------------------------------------------------
+
+const prometheusTargetRoles = (() => {
+  const raw = process.env.PROMETHEUS_TARGET_ROLES_JSON || "[]";
+  try {
+    const parsed = JSON.parse(raw);
+    return Array.isArray(parsed) ? parsed : [];
+  } catch {
+    return [];
+  }
+})();
+
+test("prometheus scrape: every consumer role reports up=1", async ({ page }) => {
+  test.skip(prometheusTargetRoles.length === 0, "no prometheus consumer roles in inventory");
+
+  const expectedPrometheusBaseUrl = prometheusBaseUrl.replace(/\/$/, "");
+
+  // Authenticate as administrator via the direct prometheus URL flow.
+  // Same shape as scenario II's biber path, just with admin credentials
+  // so the OAuth2-Proxy callback succeeds (302 -> prometheus).
+  await page.goto(`${expectedPrometheusBaseUrl}/`, { waitUntil: "domcontentloaded" });
+  if (page.url().includes("openid-connect/auth")) {
+    await performOidcLogin(page, adminUsername, adminPassword);
+  }
+  await expect
+    .poll(() => page.url(), {
+      timeout: 60_000,
+      message: `Expected admin to land on the prometheus surface (${expectedPrometheusBaseUrl})`,
+    })
+    .toContain(expectedPrometheusBaseUrl);
+
+  // Query `up` once; iterate the consumer list against the same result
+  // set so failures report which role's target is missing or down.
+  const queryUrl = `${expectedPrometheusBaseUrl}/api/v1/query?query=${encodeURIComponent("up")}`;
+  const response = await page.request.get(queryUrl, { ignoreHTTPSErrors: true });
+  expect(
+    response.status(),
+    `prometheus /api/v1/query MUST respond < 400 (got ${response.status()})`
+  ).toBeLessThan(400);
+
+  const body = await response.json();
+  expect(body?.status, "prometheus query API MUST report 'success'").toBe("success");
+
+  const results = Array.isArray(body?.data?.result) ? body.data.result : [];
+  const failures = [];
+
+  for (const target of prometheusTargetRoles) {
+    const needles = [target.id.toLowerCase(), String(target.canonical_domain || "").toLowerCase()].filter(Boolean);
+    const matching = results.filter((entry) => {
+      const labels = entry?.metric || {};
+      const haystack = `${labels.job || ""} ${labels.instance || ""}`.toLowerCase();
+      return needles.some((needle) => needle && haystack.includes(needle));
+    });
+    if (matching.length === 0) {
+      failures.push(`${target.id}: no matching prometheus scrape target found (job/instance must mention "${target.id}" or "${target.canonical_domain}")`);
+      continue;
+    }
+    const down = matching.filter((entry) => !Array.isArray(entry.value) || entry.value[1] !== "1");
+    if (down.length > 0) {
+      failures.push(`${target.id}: ${down.length} matching target(s) reporting up != 1`);
+    }
+  }
+
+  expect(
+    failures,
+    `prometheus scrape failures:\n  - ${failures.join("\n  - ")}`
+  ).toEqual([]);
 });
 
 // Persona scenarios (req 019 Rule 3).

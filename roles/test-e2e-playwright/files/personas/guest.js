@@ -20,7 +20,6 @@ const { normalizeUrl, readEnv, safeIsEnabled, assertCspInjections } = require(".
 
 async function runGuestFlow(page, opts = {}) {
   const appBaseUrl = normalizeUrl(process.env.APP_BASE_URL);
-  const dashboardBaseUrl = normalizeUrl(process.env.DASHBOARD_BASE_URL);
   const canonicalDomain = readEnv("CANONICAL_DOMAIN");
 
   // Persona-collapse exception (req 019): roles whose env does not
@@ -35,17 +34,17 @@ async function runGuestFlow(page, opts = {}) {
     );
     return;
   }
-  if (!appBaseUrl && !dashboardBaseUrl) {
+  if (!appBaseUrl) {
     test.skip(
       true,
-      "Auth-less role with no public surface — guest persona scenario collapsed per req 019.",
+      "Auth-less role with no public surface (no APP_BASE_URL) — guest persona scenario collapsed per req 019.",
     );
     return;
   }
 
   test.setTimeout(60_000);
 
-  const startUrl = appBaseUrl || `${dashboardBaseUrl}/`;
+  const startUrl = appBaseUrl;
 
   await page.context().clearCookies();
 

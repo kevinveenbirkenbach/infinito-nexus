@@ -1,16 +1,23 @@
 /**
- * `biber` persona: single-app journey + cross-service deny-checks.
+ * `biber` persona: single-app authenticated journey.
  *
- * dashboard → click role tile → role auth (OIDC if applicable)
- *           → CSP injection check
- *           → (gated) navigate to prometheus tile, expect deny
- *           → (gated) navigate to matomo tile, expect deny
- *           → in-app logout → unauthenticated landing assertion.
+ *   appBaseUrl → (OIDC if applicable) → CSP injection check
+ *              → role-specific interaction → in-app logout
+ *              → unauthenticated landing assertion.
  *
- * The deny-checks prove that biber's OIDC account does NOT carry the
- * operator/admin claims required to enter the prometheus or matomo
- * admin surfaces. Biber MUST be a regular end-user identity in the
- * Keycloak realm; matomo and prometheus are admin-only by default.
+ * Cross-service surface checks (prometheus deny, matomo deny,
+ * dashboard tile reachability) are owned by the dedicated provider
+ * specs and no longer run as part of every role's biber persona:
+ *
+ *   - `roles/web-app-prometheus/files/playwright.spec.js` parameterises
+ *     scrape-target presence + admin reach + biber denial.
+ *   - `roles/web-app-matomo/files/playwright.spec.js` parameterises
+ *     tracker-site presence + admin reach + biber denial.
+ *   - `roles/web-app-dashboard/files/playwright.spec.js` parameterises
+ *     dashboard-tile reachability per consumer role.
+ *
+ * Each role's biber scenario therefore visits its OWN canonical URL
+ * directly (no dashboard tile click) and exercises only that role.
  */
 
 const { test, expect } = require("@playwright/test");
@@ -19,12 +26,9 @@ const {
   readEnv,
   safeIsEnabled,
   performKeycloakLogin,
-  clickRoleTileFromDashboard,
   inAppLogout,
   assertUnauthenticatedLanding,
   assertCspInjections,
-  assertPrometheusForbiddenForBiber,
-  assertMatomoForbiddenForBiber,
   runRoleInteraction,
 } = require("./utils");
 
@@ -35,9 +39,6 @@ async function runBiberFlow(page, opts = {}) {
   // control is unreachable to the generic helper, ...) declare
   // `PERSONA_BIBER_BLOCKED=true` in `templates/playwright.env.j2`
   // with a documented rationale in the role's TODO.md or README.md.
-  // The check sits at the top of the flow so the opt-out shortcuts
-  // the entire dashboard → app → logout journey, not just the
-  // auth-surface detection.
   if ((process.env.PERSONA_BIBER_BLOCKED || "").toLowerCase() === "true") {
     test.skip(
       true,
@@ -46,40 +47,43 @@ async function runBiberFlow(page, opts = {}) {
     return;
   }
 
-  // Test B parity: every role's env declares OAUTH2/LOGOUT/DASHBOARD
+  // Test B parity: every role's env declares OAUTH2/LOGOUT/MATOMO
   // _SERVICE_ENABLED (the auth chain runs through oauth2-proxy, the
-  // post-flow universal-logout JS rewrites the role's own logout button,
-  // and the persona's first action is always a dashboard tile click
-  // driven by process.env.DASHBOARD_BASE_URL). All three flags are
-  // genuinely consumed by the persona surface; reference them via
-  // safeIsEnabled so the env-gate parity guard recognises them as
-  // consumed by the spec via the shared persona.
+  // post-flow universal-logout JS rewrites the role's own logout
+  // button, and the shared CSP-injection helper gates on `matomo` to
+  // verify every role's CSP allows the matomo tracker host when matomo
+  // is enabled). All three flags are consumed by the persona surface;
+  // reference them via safeIsEnabled with literal arguments so the
+  // env-gate parity guard recognises them as consumed by the spec via
+  // the shared persona.
   safeIsEnabled("oauth2");
   safeIsEnabled("logout");
-  safeIsEnabled("dashboard");
+  safeIsEnabled("matomo");
 
-  const dashboardBaseUrl = normalizeUrl(process.env.DASHBOARD_BASE_URL);
-  const prometheusBaseUrl = normalizeUrl(process.env.PROMETHEUS_BASE_URL);
-  const matomoBaseUrl = normalizeUrl(process.env.MATOMO_BASE_URL);
   const canonicalDomain = readEnv("CANONICAL_DOMAIN");
   const appBaseUrl = normalizeUrl(process.env.APP_BASE_URL);
   const biberUsername = readEnv("BIBER_USERNAME");
   const biberPassword = readEnv("BIBER_PASSWORD");
 
   // Persona-collapse exception (req 019): roles whose env does not
-  // expose DASHBOARD_BASE_URL or CANONICAL_DOMAIN are auth-less by
+  // expose APP_BASE_URL or CANONICAL_DOMAIN are auth-less by
   // construction (web-svc-*, federation-only web-app-*); the persona
   // scenario MUST skip cleanly rather than fail.
-  if (!dashboardBaseUrl || !canonicalDomain) {
+  if (!appBaseUrl || !canonicalDomain) {
     test.skip(
       true,
-      "Auth-less role (no DASHBOARD_BASE_URL / CANONICAL_DOMAIN) — persona scenario collapsed per req 019.",
+      "Auth-less role (no APP_BASE_URL / CANONICAL_DOMAIN) — persona scenario collapsed per req 019.",
     );
     return;
   }
 
   await page.context().clearCookies();
-  await clickRoleTileFromDashboard(page, dashboardBaseUrl, canonicalDomain);
+
+  // Direct-app entry: bookmark-style navigation. The OAuth2-Proxy gate
+  // fires on the first request, redirecting unauthenticated requests
+  // to Keycloak; the auth chain is the same regardless of how the user
+  // arrived at the URL.
+  await page.goto(`${appBaseUrl}/`, { waitUntil: "domcontentloaded" }).catch(() => {});
 
   const oidcEnabled = safeIsEnabled("oidc");
 
@@ -99,36 +103,18 @@ async function runBiberFlow(page, opts = {}) {
   await assertCspInjections(page, { isEnabled: safeIsEnabled });
 
   // Verify biber actually reached an authenticated surface on the
-  // role. The persona contract demands a full dashboard → app →
-  // logout journey, so the post-OIDC page MUST expose a logout
-  // control or a user menu. When it does NOT, that is either:
+  // role. The persona contract demands a full app → logout journey,
+  // so the post-OIDC page MUST expose a logout control or a user menu.
+  // When it does NOT, that is either:
   //   - a real regression (OIDC mapping broken, post-login UI
   //     missing the logout button, role's auth chain misconfigured),
   //     OR
   //   - a deliberate role contract that biber has NO access to this
-  //     role at all (admin-only role like akaunting / matomo /
-  //     prometheus admin UI / fider).
-  //
-  // The deliberate case MUST be declared explicitly by the role via
-  // the env flag `PERSONA_BIBER_BLOCKED=true` (rendered in
-  // `templates/playwright.env.j2`). Without that flag the test
-  // fails loudly so a real regression cannot hide behind a silent
-  // skip.
-  // Auth-surface detection: biber is "in" when the role's canonical
-  // surface is loaded inside ANY frame of the page (outer or
-  // dashboard-wrapped iframe), with a non-error response. The check
-  // is URL-based rather than selector-based because many SPAs hide
-  // their logout / account control behind icon-only buttons that
-  // accessibility tooling can't reach reliably. The persona contract
-  // is already covered by:
-  //   - the OIDC chain itself returning the app URL (proves Keycloak
-  //     accepted biber and the proxy let the session through);
-  //   - the role's bespoke spec tests (login form, BSKY_STORAGE,
-  //     post-login DOM marker) where applicable;
-  //   - the deny-checks against prometheus / matomo (still strict).
-  // A role that genuinely refuses biber (akaunting, mailu admin,
-  // etc.) has its frames bounce to a denial page or stay on Keycloak;
-  // the URL never settles on the role's canonical domain.
+  //     role at all.
+  // The deliberate case MUST be declared explicitly via
+  // `PERSONA_BIBER_BLOCKED=true` in `templates/playwright.env.j2`.
+  // Without that flag the test fails loudly so a real regression
+  // cannot hide behind a silent skip.
   const authMarker = (surface) =>
     surface
       .getByRole("button", { name: /^(log\s*out|sign\s*out|abmelden)$/i })
@@ -178,40 +164,9 @@ async function runBiberFlow(page, opts = {}) {
 
   // Drive a real, app-specific interaction after login (or directly on
   // the role surface when no auth is required). Specs SHOULD override
-  // the default by passing a `roleInteraction` callback that exercises
+  // the default by passing a `biberInteraction` callback that exercises
   // the role's bespoke UI (post a message, open a settings tab, etc.).
   await runRoleInteraction(page, { canonicalDomain, roleInteraction: opts.biberInteraction });
-
-  if (safeIsEnabled("prometheus")) {
-    await assertPrometheusForbiddenForBiber(page, {
-      dashboardBaseUrl,
-      prometheusBaseUrl,
-      biberUsername,
-      biberPassword,
-      oidcEnabled,
-    });
-    await page.context().clearCookies();
-    // Re-establish biber session before continuing the role flow.
-    await clickRoleTileFromDashboard(page, dashboardBaseUrl, canonicalDomain);
-    if (oidcEnabled && biberUsername && biberPassword && page.url().includes("openid-connect/auth")) {
-      await performKeycloakLogin(page, biberUsername, biberPassword, canonicalDomain);
-    }
-  }
-
-  if (safeIsEnabled("matomo")) {
-    await assertMatomoForbiddenForBiber(page, {
-      dashboardBaseUrl,
-      matomoBaseUrl,
-      biberUsername,
-      biberPassword,
-      oidcEnabled,
-    });
-    await page.context().clearCookies();
-    await clickRoleTileFromDashboard(page, dashboardBaseUrl, canonicalDomain);
-    if (oidcEnabled && biberUsername && biberPassword && page.url().includes("openid-connect/auth")) {
-      await performKeycloakLogin(page, biberUsername, biberPassword, canonicalDomain);
-    }
-  }
 
   await inAppLogout(page);
   await assertUnauthenticatedLanding(page, appBaseUrl);

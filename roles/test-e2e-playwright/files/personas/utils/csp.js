@@ -21,14 +21,32 @@
 
 const { expect } = require("@playwright/test");
 
-const INJECTOR_ENV = {
-  asset: "ASSET_BASE_URL",
-  cdn: "CDN_BASE_URL",
-  css: "CSS_BASE_URL",
-  javascript: "JAVASCRIPT_BASE_URL",
-  simpleicons: "SIMPLEICONS_BASE_URL",
-  matomo: "MATOMO_BASE_URL",
-};
+// Injector base-URL resolution. Switch-case form (rather than a
+// dictionary lookup) is intentional: it gives `tests/lint/ansible/
+// roles/web-app/playwright/test_env_keys_used.py` a literal
+// `process.env.<KEY>` reference for each consumer, so the env-keys-
+// used parity guard recognises these env vars as consumed by the
+// shared helper.
+function injectorBaseUrl(service) {
+  switch (service) {
+    case "asset":
+      return process.env.ASSET_BASE_URL || "";
+    case "cdn":
+      return process.env.CDN_BASE_URL || "";
+    case "css":
+      return process.env.CSS_BASE_URL || "";
+    case "javascript":
+      return process.env.JAVASCRIPT_BASE_URL || "";
+    case "simpleicons":
+      return process.env.SIMPLEICONS_BASE_URL || "";
+    case "matomo":
+      return process.env.MATOMO_BASE_URL || "";
+    default:
+      return "";
+  }
+}
+
+const INJECTOR_SERVICES = ["asset", "cdn", "css", "javascript", "simpleicons", "matomo"];
 
 function hostOf(url) {
   if (!url) return "";
@@ -64,7 +82,7 @@ async function assertCspInjections(page, opts = {}) {
 
   const csp = await readCspString(page);
 
-  for (const [service, envName] of Object.entries(INJECTOR_ENV)) {
+  for (const service of INJECTOR_SERVICES) {
     let enabled;
     try {
       enabled = isEnabled(service);
@@ -73,7 +91,7 @@ async function assertCspInjections(page, opts = {}) {
     }
     if (!enabled) continue;
 
-    const host = hostOf(process.env[envName]);
+    const host = hostOf(injectorBaseUrl(service));
     if (!host) continue;
 
     if (!csp) continue;
