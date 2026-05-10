@@ -121,6 +121,7 @@
       "WebFetch(domain:matrix.org)",
       "WebFetch(domain:mattdyson.org)",
       "WebFetch(domain:mattermost.com)",
+      "WebFetch(domain:mcr.microsoft.com)",
       "WebFetch(domain:memcached.org)",
       "WebFetch(domain:meta.discourse.org)",
       "WebFetch(domain:micro-editor.github.io)",
