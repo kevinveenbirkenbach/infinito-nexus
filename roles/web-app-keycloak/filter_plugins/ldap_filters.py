@@ -70,9 +70,7 @@ class FilterModule:
                 "ldap_roles_mapper_payload: 'desired_group_mapper' must be a dict"
             )
         if not isinstance(ldap_cmp_id, str):
-            raise TypeError(
-                "ldap_roles_mapper_payload: 'ldap_cmp_id' must be a string"
-            )
+            raise TypeError("ldap_roles_mapper_payload: 'ldap_cmp_id' must be a string")
 
         payload = deepcopy(desired_group_mapper)
         payload.update(
