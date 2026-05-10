@@ -7,9 +7,6 @@ file:
   mem_limit: 256m
   pids_limit: 128
   lifecycle: beta
-dashboard:
-  enabled: "{{ 'web-app-dashboard' in group_names }}"
-  shared: "{{ 'web-app-dashboard' in group_names }}"
 matomo:
   enabled: "{{ 'web-app-matomo' in group_names }}"
   shared: "{{ 'web-app-matomo' in group_names }}"

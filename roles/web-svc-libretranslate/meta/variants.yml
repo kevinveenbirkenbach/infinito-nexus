@@ -6,9 +6,6 @@
 # matrix exercises the in-group_names branch of web-svc-libretranslate.
 
 - services:
-    dashboard:
-      enabled: true
-      shared: true
     matomo:
       enabled: true
       shared: true
@@ -19,9 +16,6 @@
       enabled: true
       shared: true
 - services:
-    dashboard:
-      enabled: false
-      shared: false
     matomo:
       enabled: false
       shared: false

@@ -35,9 +35,6 @@ oauth2:
 logout:
   enabled: false
   shared: false
-dashboard:
-  enabled: "{{ 'web-app-dashboard' in group_names }}"
-  shared: "{{ 'web-app-dashboard' in group_names }}"
 matomo:
   enabled: "{{ 'web-app-matomo' in group_names }}"
   shared: "{{ 'web-app-matomo' in group_names }}"
