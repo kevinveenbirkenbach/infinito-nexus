@@ -53,7 +53,7 @@ PORT_BANDS:
       end: 4099
     oauth2:
       start: 16480
-      end: 16499
+      end: 16514
     database:
       start: 3306
       end: 5432
