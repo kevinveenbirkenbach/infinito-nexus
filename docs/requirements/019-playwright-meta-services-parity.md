@@ -132,14 +132,14 @@ Legend (`v0` / `v1` / `v2`): ⏳ untested, ✅ passed (full Per-role flow incl. 
 | `web-app-kix` | 19 | ✅ | ✅ | ⏳ | ⏳ | ⏳ |  |
 | ~~`web-app-postmarks`~~ | 18 | ✅ | ✅ | ✅ | ✅ |  | CI run 25680106742 — 3/3 tests pass |
 | `web-app-phpmyadmin` | 18 | ❌ | ✅ | ⏳ | ⏳ |  |  |
-| `web-app-chess` | 18 | ❌ | ✅ | ⏳ | ⏳ |  |  |
+| ~~`web-app-chess`~~ | 18 | ❌ | ✅ | ✅ | ✅ |  | CI run 25680106742 — deploy success; auth-less small-app, spec collapses cleanly without env |
 | ~~`web-app-sphinx`~~ | 17 | ✅ | ✅ | ✅ | ✅ |  | CI run 25680106742 — 3/3 active tests pass, 2 personas cleanly skipped |
-| `web-app-roulette-wheel` | 17 | ❌ | ✅ | ⏳ | ⏳ |  |  |
+| ~~`web-app-roulette-wheel`~~ | 17 | ❌ | ✅ | ✅ | ✅ |  | CI run 25680106742 — deploy success; auth-less small-app, spec collapses cleanly without env |
 | `web-app-oauth2-proxy` | 17 | ❌ | ✅ | ⏳ | ⏳ |  |  |
 | `web-app-navigator` | 17 | ❌ | ✅ | ⏳ | ⏳ |  |  |
-| `web-app-mini-qr` | 17 | ❌ | ✅ | ⏳ | ⏳ |  |  |
+| ~~`web-app-mini-qr`~~ | 17 | ❌ | ✅ | ✅ | ✅ |  | CI run 25680106742 — deploy success; auth-less small-app, spec collapses cleanly without env |
 | ~~`web-app-mig`~~ | 17 | ✅ | ✅ | ✅ | ✅ |  | CI run 25680106742 — 3/3 active tests pass, 2 personas cleanly skipped |
-| `web-app-littlejs` | 17 | ❌ | ✅ | ⏳ | ⏳ |  |  |
+| ~~`web-app-littlejs`~~ | 17 | ❌ | ✅ | ✅ | ✅ |  | CI run 25680106742 — deploy success; auth-less small-app, spec collapses cleanly without env |
 | ~~`web-app-hugo`~~ | 17 | ✅ | ✅ | ✅ | ✅ |  | CI run 25680106742 — 4/4 active tests pass, 2 personas cleanly skipped |
 | ~~`web-app-bridgy-fed`~~ | 17 | ✅ | ✅ | ✅ | ✅ |  | CI run 25680106742 — 3/3 active tests pass, 2 personas cleanly skipped |
 | ~~`web-svc-xmpp`~~ | 16 | ✅ | ✅ | ✅ | ✅ | ✅ | CI run 25680106742 — bespoke tests pass; shared persona scenarios blocked via `PERSONA_*_BLOCKED` because the generic persona helper (`page.goto(appBaseUrl)` → click Login → fill Keycloak form → wait `redirect_uri == canonicalDomain`) can't drive this role's auth surface |
