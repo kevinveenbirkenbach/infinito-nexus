@@ -1,6 +1,6 @@
 const { test, expect } = require("@playwright/test");
 
-const { assertCspMetaParity, assertCspResponseHeader, decodeDotenvQuotedValue, expectNoCspViolations, installCspViolationObserver, normalizeBaseUrl, runAdminFlow, runBiberFlow, runGuestFlow } = require("./personas");
+const { assertCspMetaParity, assertCspResponseHeader, decodeDotenvQuotedValue, expectNoCspViolations, installCspViolationObserver, normalizeBaseUrl, runAdminFlow, runBiberFlow, runGuestFlow, safeSkipUnlessEnabled } = require("./personas");
 test.use({ ignoreHTTPSErrors: true });
 
 // -----------------------------------------------------------------------------
@@ -197,6 +197,7 @@ test("normal-realm administrator logs in through account interface and logs out"
 });
 
 test("normal-realm biber logs in through account interface and logs out", async ({ page }) => {
+  safeSkipUnlessEnabled("ldap");
   const diagnostics = attachDiagnostics(page);
 
   const accountUrl = `${appBaseUrl}/realms/${realmName}/account/`;
