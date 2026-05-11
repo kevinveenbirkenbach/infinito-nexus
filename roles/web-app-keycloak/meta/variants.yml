@@ -32,6 +32,9 @@
 - credentials:
     administrator_password: "'$tr0ng€xampl3PW!"
   services:
+    keycloak:
+      realm:
+        totp_enabled: false
     dashboard:
       enabled: false
       shared: false
