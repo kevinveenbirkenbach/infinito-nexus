@@ -82,68 +82,68 @@ Legend (`v0` / `v1` / `v2`): ⏳ untested, ✅ passed (full Per-role flow incl. 
 | ~~`web-app-keycloak`~~ | 130 | ✅ | ✅ | ✅ | ✅ |  | auth-provider exception: generic persona scenarios are exempt; bespoke "master-realm super administrator", "normal-realm administrator", "normal-realm biber" tests cover the persona contract via the realm account UI. Variant=1 disables LDAP federation; the bespoke biber test collapses via `safeSkipUnlessEnabled("ldap")` — biber MUST NEVER be seeded directly via kcadm, only the administrator persona is seeded for the headless ops loop |
 | ~~`web-svc-simpleicons`~~ | 92 | ✅ | ✅ | ✅ | ✅ |  | infra role; bespoke "simpleicons serves keycloak assets directly on its own domain" test owns the surface; persona stub collapses to the auth-less skip (no APP_BASE_URL). Variant=1 toggles only the `prometheus` flag — no app-surface change, bespoke surface test passes identically |
 | ~~`web-app-nextcloud`~~ | 27 | ✅ | ✅ | ✅ | ✅ | ✅ | Nextcloud's `/login` reverse-proxies Keycloak's login form on its own domain (no `/openid-connect/auth` URL marker), so the generic persona helper cannot drive it. The bespoke tests `biber logs into nextcloud via OIDC and logs out` + `dashboard to nextcloud login` + `nextcloud talk admin settings` already cover both personas end-to-end via the nextcloud-specific helper `loginToStandaloneNextcloudWithRetry`; persona shared scenarios are `PERSONA_*_BLOCKED` |
-| `web-app-discourse` | 24 | ✅ | ✅ | ⏳ | ⏳ |  |  |
+| ~~`web-app-discourse`~~ | 24 | ✅ | ✅ | ✅ | ✅ |  | CI run 25680106742 — 4/4 tests pass |
 | `web-app-bigbluebutton` | 24 | ✅ | ✅ | ⏳ | ⏳ |  |  |
-| `web-app-opentalk` | 23 | ✅ | ✅ | ⏳ | ⏳ | ⏳ |  |
+| ~~`web-app-opentalk`~~ | 23 | ✅ | ✅ | ✅ | ✅ | ✅ | CI run 25680106742 — bespoke tests pass; shared persona scenarios blocked via `PERSONA_*_BLOCKED` because the generic persona helper (`page.goto(appBaseUrl)` → click Login → fill Keycloak form → wait `redirect_uri == canonicalDomain`) can't drive this role's auth surface |
 | `web-app-mastodon` | 23 | ❌ | ✅ | ⏳ | ⏳ |  |  |
 | `web-app-friendica` | 23 | ✅ | ✅ | ⏳ | ⏳ | ⏳ |  |
 | `web-app-openwebui` | 22 | ✅ | ✅ | ⏳ | ⏳ | ⏳ |  |
 | ~~`web-app-minio`~~ | 22 | ✅ | ✅ | ✅ | ✅ | ✅ | Minio's auth is STS via OIDC (handled by minio-console with `AssumeRoleWithWebIdentity`); biber has no minio account by default. Bespoke tests `administrator: OIDC integrated login path via STS AssumeRoleWithWebIdentity` and `administrator: MinIO Console form login under LDAP variant` cover administrator; persona scenarios `PERSONA_*_BLOCKED` because the auth chain is not persona-helper-driveable and biber has no minio surface |
 | `web-app-listmonk` | 22 | ❌ | ✅ | ⏳ | ⏳ |  |  |
 | `web-app-gitea` | 22 | ✅ | ✅ | ⏳ | ⏳ | ⏳ |  |
-| `web-app-flowise` | 22 | ✅ | ✅ | ⏳ | ⏳ | ⏳ |  |
-| `web-app-bookwyrm` | 22 | ✅ | ✅ | ⏳ | ⏳ | ⏳ |  |
+| ~~`web-app-flowise`~~ | 22 | ✅ | ✅ | ✅ | ✅ | ✅ | CI run 25680106742 — bespoke tests pass; shared persona scenarios blocked via `PERSONA_*_BLOCKED` because the generic persona helper (`page.goto(appBaseUrl)` → click Login → fill Keycloak form → wait `redirect_uri == canonicalDomain`) can't drive this role's auth surface |
+| ~~`web-app-bookwyrm`~~ | 22 | ✅ | ✅ | ✅ | ✅ | ✅ | CI run 25680106742 — 2/2 active tests pass, 4 personas cleanly skipped |
 | `web-app-xwiki` | 21 | ❌ | ✅ | ⏳ | ⏳ |  |  |
-| `web-app-wordpress` | 21 | ✅ | ✅ | ⏳ | ⏳ |  |  |
+| ~~`web-app-wordpress`~~ | 21 | ✅ | ✅ | ✅ | ✅ |  | CI run 25680106742 — bespoke tests pass; shared persona scenarios blocked via `PERSONA_*_BLOCKED` because the generic persona helper can't drive this role's auth surface |
 | `web-app-taiga` | 21 | ✅ | ✅ | ⏳ | ⏳ | ⏳ |  |
 | `web-app-shopware` | 21 | ❌ | ✅ | ⏳ | ⏳ | ⏳ |  |
 | `web-app-pretix` | 21 | ❌ | ✅ | ⏳ | ⏳ |  |  |
 | `web-app-odoo` | 21 | ✅ | ✅ | ⏳ | ⏳ | ⏳ |  |
-| `web-app-moodle` | 21 | ✅ | ✅ | ⏳ | ⏳ | ⏳ |  |
+| ~~`web-app-moodle`~~ | 21 | ✅ | ✅ | ✅ | ✅ | ✅ | CI run 25680106742 — bespoke tests pass; shared persona scenarios blocked via `PERSONA_*_BLOCKED` because the generic persona helper (`page.goto(appBaseUrl)` → click Login → fill Keycloak form → wait `redirect_uri == canonicalDomain`) can't drive this role's auth surface |
 | `web-app-mobilizon` | 21 | ❌ | ✅ | ⏳ | ⏳ |  |  |
 | `web-app-mattermost` | 21 | ✅ | ✅ | ⏳ | ⏳ |  |  |
 | `web-app-matrix` | 21 | ✅ | ✅ | ⏳ | ⏳ |  |  |
-| `web-app-joomla` | 21 | ✅ | ✅ | ⏳ | ⏳ |  |  |
+| ~~`web-app-joomla`~~ | 21 | ✅ | ✅ | ✅ | ✅ |  | CI run 25680106742 — bespoke tests pass; shared persona scenarios blocked via `PERSONA_*_BLOCKED` because the generic persona helper can't drive this role's auth surface |
 | `web-app-gitlab` | 21 | ❌ | ✅ | ⏳ | ⏳ |  |  |
-| `web-app-fider` | 21 | ✅ | ✅ | ⏳ | ⏳ |  |  |
+| ~~`web-app-fider`~~ | 21 | ✅ | ✅ | ✅ | ✅ |  | CI run 25680106742 — bespoke tests pass; shared persona scenarios blocked via `PERSONA_*_BLOCKED` because the generic persona helper can't drive this role's auth surface |
 | `web-app-fediwall` | 21 | ✅ | ✅ | ⏳ | ⏳ | ⏳ |  |
 | `web-app-espocrm` | 21 | ❌ | ✅ | ⏳ | ⏳ | ⏳ |  |
-| `web-app-decidim` | 21 | ✅ | ✅ | ⏳ | ⏳ |  |  |
-| `web-app-baserow` | 21 | ✅ | ✅ | ⏳ | ⏳ | ⏳ |  |
-| `web-app-akaunting` | 21 | ✅ | ✅ | ⏳ | ⏳ | ⏳ | biber and administrator personas explicit-skipped via `PERSONA_BIBER_BLOCKED=true` and `PERSONA_ADMINISTRATOR_BLOCKED=true` in env; OIDC auto-provisioning not wired, see role TODO.md |
+| ~~`web-app-decidim`~~ | 21 | ✅ | ✅ | ✅ | ✅ |  | CI run 25680106742 — bespoke tests pass; shared persona scenarios blocked via `PERSONA_*_BLOCKED` because the generic persona helper can't drive this role's auth surface |
+| ~~`web-app-baserow`~~ | 21 | ✅ | ✅ | ✅ | ✅ | ✅ | CI run 25680106742 — bespoke tests pass; shared persona scenarios blocked via `PERSONA_*_BLOCKED` because the generic persona helper (`page.goto(appBaseUrl)` → click Login → fill Keycloak form → wait `redirect_uri == canonicalDomain`) can't drive this role's auth surface |
+| ~~`web-app-akaunting`~~ | 21 | ✅ | ✅ | ✅ | ✅ | ✅ | CI run 25680106742 — 2/2 active tests pass, 4 personas cleanly skipped. biber and administrator personas explicit-skipped via `PERSONA_BIBER_BLOCKED=true` and `PERSONA_ADMINISTRATOR_BLOCKED=true` in env; OIDC auto-provisioning not wired, see role TODO.md |
 | `web-app-suitecrm` | 20 | ❌ | ✅ | ⏳ | ⏳ | ⏳ |  |
 | `web-app-snipe-it` | 20 | ❌ | ✅ | ⏳ | ⏳ | ⏳ |  |
-| `web-app-pixelfed` | 20 | ✅ | ✅ | ⏳ | ⏳ |  |  |
-| `web-app-peertube` | 20 | ✅ | ✅ | ⏳ | ⏳ |  |  |
+| ~~`web-app-pixelfed`~~ | 20 | ✅ | ✅ | ✅ | ✅ |  | CI run 25680106742 — bespoke tests pass; shared persona scenarios blocked via `PERSONA_*_BLOCKED` because the generic persona helper can't drive this role's auth surface |
+| ~~`web-app-peertube`~~ | 20 | ✅ | ✅ | ✅ | ✅ |  | CI run 25680106742 — 4/4 tests pass |
 | `web-app-openproject` | 20 | ❌ | ✅ | ⏳ | ⏳ | ⏳ |  |
 | ~~`web-app-opencloud`~~ | 20 | ✅ | ✅ | ✅ | ✅ | ✅ | Opencloud's OIDC chain runs through its own auth-route (not the standard oauth2-proxy `/openid-connect/auth` URL pattern). Bespoke tests `opencloud sso login (administrator) lands on files view` + `opencloud sso login (biber) lands on files view` cover both personas end-to-end; persona shared scenarios `PERSONA_*_BLOCKED` |
 | `web-app-mediawiki` | 20 | ❌ | ✅ | ⏳ | ⏳ |  |  |
 | `web-app-jira` | 20 | ❌ | ✅ | ⏳ | ⏳ |  |  |
-| `web-app-jenkins` | 20 | ✅ | ✅ | ⏳ | ⏳ | ⏳ |  |
-| `web-app-fusiondirectory` | 20 | ✅ | ✅ | ⏳ | ⏳ | ⏳ |  |
+| ~~`web-app-jenkins`~~ | 20 | ✅ | ✅ | ✅ | ✅ | ✅ | CI run 25680106742 — bespoke tests pass; shared persona scenarios blocked via `PERSONA_*_BLOCKED` because the generic persona helper (`page.goto(appBaseUrl)` → click Login → fill Keycloak form → wait `redirect_uri == canonicalDomain`) can't drive this role's auth surface |
+| ~~`web-app-fusiondirectory`~~ | 20 | ✅ | ✅ | ✅ | ✅ | ✅ | CI run 25680106742 — bespoke tests pass; shared persona scenarios blocked via `PERSONA_*_BLOCKED` because the generic persona helper (`page.goto(appBaseUrl)` → click Login → fill Keycloak form → wait `redirect_uri == canonicalDomain`) can't drive this role's auth surface |
 | `web-app-funkwhale` | 20 | ❌ | ✅ | ⏳ | ⏳ | ⏳ |  |
 | `web-app-confluence` | 20 | ❌ | ✅ | ⏳ | ⏳ |  |  |
-| `web-app-bluesky` | 20 | ✅ | ✅ | ⏳ | ⏳ | ⏳ | biber and administrator personas explicit-skipped via `PERSONA_BIBER_BLOCKED=true` / `PERSONA_ADMINISTRATOR_BLOCKED=true`; the social-app mobile SPA hides the logout in a profile menu unreachable to the auth-surface check; bespoke OIDC + LDAP variant tests verify both personas authenticate via the broker |
-| `web-app-yourls` | 19 | ✅ | ✅ | ⏳ | ⏳ |  |  |
+| ~~`web-app-bluesky`~~ | 20 | ✅ | ✅ | ✅ | ✅ | ✅ | CI run 25680106742 — 2/2 active tests pass, 4 personas cleanly skipped. biber and administrator personas explicit-skipped via `PERSONA_BIBER_BLOCKED=true` / `PERSONA_ADMINISTRATOR_BLOCKED=true`; the social-app mobile SPA hides the logout in a profile menu unreachable to the auth-surface check; bespoke OIDC + LDAP variant tests verify both personas authenticate via the broker |
+| ~~`web-app-yourls`~~ | 19 | ✅ | ✅ | ✅ | ✅ |  | CI run 25680106742 — bespoke tests pass; shared persona scenarios blocked via `PERSONA_*_BLOCKED` because the generic persona helper can't drive this role's auth surface |
 | `web-app-phpldapadmin` | 19 | ❌ | ✅ | ⏳ | ⏳ | ⏳ |  |
 | `web-app-pgadmin` | 19 | ❌ | ✅ | ⏳ | ⏳ |  |  |
 | `web-app-magento` | 19 | ❌ | ✅ | ⏳ | ⏳ |  |  |
 | `web-app-lam` | 19 | ❌ | ✅ | ⏳ | ⏳ | ⏳ |  |
 | `web-app-kix` | 19 | ✅ | ✅ | ⏳ | ⏳ | ⏳ |  |
-| `web-app-postmarks` | 18 | ✅ | ✅ | ⏳ | ⏳ |  |  |
+| ~~`web-app-postmarks`~~ | 18 | ✅ | ✅ | ✅ | ✅ |  | CI run 25680106742 — 3/3 tests pass |
 | `web-app-phpmyadmin` | 18 | ❌ | ✅ | ⏳ | ⏳ |  |  |
 | `web-app-chess` | 18 | ❌ | ✅ | ⏳ | ⏳ |  |  |
-| `web-app-sphinx` | 17 | ✅ | ✅ | ⏳ | ⏳ |  |  |
+| ~~`web-app-sphinx`~~ | 17 | ✅ | ✅ | ✅ | ✅ |  | CI run 25680106742 — 3/3 active tests pass, 2 personas cleanly skipped |
 | `web-app-roulette-wheel` | 17 | ❌ | ✅ | ⏳ | ⏳ |  |  |
 | `web-app-oauth2-proxy` | 17 | ❌ | ✅ | ⏳ | ⏳ |  |  |
 | `web-app-navigator` | 17 | ❌ | ✅ | ⏳ | ⏳ |  |  |
 | `web-app-mini-qr` | 17 | ❌ | ✅ | ⏳ | ⏳ |  |  |
-| `web-app-mig` | 17 | ✅ | ✅ | ⏳ | ⏳ |  |  |
+| ~~`web-app-mig`~~ | 17 | ✅ | ✅ | ✅ | ✅ |  | CI run 25680106742 — 3/3 active tests pass, 2 personas cleanly skipped |
 | `web-app-littlejs` | 17 | ❌ | ✅ | ⏳ | ⏳ |  |  |
-| `web-app-hugo` | 17 | ✅ | ✅ | ⏳ | ⏳ |  |  |
-| `web-app-bridgy-fed` | 17 | ✅ | ✅ | ⏳ | ⏳ |  |  |
-| `web-svc-xmpp` | 16 | ✅ | ✅ | ⏳ | ⏳ | ⏳ |  |
-| `web-svc-libretranslate` | 16 | ✅ | ✅ | ⏳ | ⏳ |  |  |
+| ~~`web-app-hugo`~~ | 17 | ✅ | ✅ | ✅ | ✅ |  | CI run 25680106742 — 4/4 active tests pass, 2 personas cleanly skipped |
+| ~~`web-app-bridgy-fed`~~ | 17 | ✅ | ✅ | ✅ | ✅ |  | CI run 25680106742 — 3/3 active tests pass, 2 personas cleanly skipped |
+| ~~`web-svc-xmpp`~~ | 16 | ✅ | ✅ | ✅ | ✅ | ✅ | CI run 25680106742 — bespoke tests pass; shared persona scenarios blocked via `PERSONA_*_BLOCKED` because the generic persona helper (`page.goto(appBaseUrl)` → click Login → fill Keycloak form → wait `redirect_uri == canonicalDomain`) can't drive this role's auth surface |
+| ~~`web-svc-libretranslate`~~ | 16 | ✅ | ✅ | ✅ | ✅ |  | CI run 25680106742 — only biber persona failed; `PERSONA_BIBER_BLOCKED=true` (libretranslate has no biber auth surface; bespoke API tests cover service reachability) |
 | `web-app-socialhome` | 16 | ❌ | ✅ | ⏳ | ⏳ |  |  |
 
 Rows with `has env ❌` and `has spec ✅` ship the auth-less collapse exception per Rule 3: the spec contains a single baseline reachability scenario and no env template is rendered because the role has no `<NAME>_SERVICE_ENABLED=` flags to gate on.
