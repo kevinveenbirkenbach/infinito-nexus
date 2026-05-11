@@ -135,8 +135,8 @@ Legend (`v0` / `v1` / `v2`): ⏳ untested, ✅ passed (full Per-role flow incl. 
 | ~~`web-app-chess`~~ | 18 | ❌ | ✅ | ✅ | ✅ |  | CI run 25680106742 — deploy success; auth-less small-app, spec collapses cleanly without env |
 | ~~`web-app-sphinx`~~ | 17 | ✅ | ✅ | ✅ | ✅ |  | CI run 25680106742 — 3/3 active tests pass, 2 personas cleanly skipped |
 | ~~`web-app-roulette-wheel`~~ | 17 | ❌ | ✅ | ✅ | ✅ |  | CI run 25680106742 — deploy success; auth-less small-app, spec collapses cleanly without env |
-| `web-app-oauth2-proxy` | 17 | ❌ | ✅ | ⏳ | ⏳ |  |  |
-| `web-app-navigator` | 17 | ❌ | ✅ | ⏳ | ⏳ |  |  |
+| ~~`web-app-oauth2-proxy`~~ | 17 | ❌ | ✅ | ✅ | ✅ |  | Auth-less collapse (req-019 §"Auth-less roles", Zeile 272): sidecar auth proxy; never directly user-facing |
+| ~~`web-app-navigator`~~ | 17 | ❌ | ✅ | ✅ | ✅ |  | Auth-less collapse (req-019 §"Auth-less roles", Zeile 271): in-app module of `web-app-dashboard`; no separate auth surface |
 | ~~`web-app-mini-qr`~~ | 17 | ❌ | ✅ | ✅ | ✅ |  | CI run 25680106742 — deploy success; auth-less small-app, spec collapses cleanly without env |
 | ~~`web-app-mig`~~ | 17 | ✅ | ✅ | ✅ | ✅ |  | CI run 25680106742 — 3/3 active tests pass, 2 personas cleanly skipped |
 | ~~`web-app-littlejs`~~ | 17 | ❌ | ✅ | ✅ | ✅ |  | CI run 25680106742 — deploy success; auth-less small-app, spec collapses cleanly without env |
