@@ -26,7 +26,6 @@
 
 {{ lookup('applications') | compose_volumes(
     application_id,
-    database_volume=lookup('database', application_id, 'volume'),
     extra_volumes={
       'config':   {'name': MATTERMOST_VOLUME_CONFIG},
       'data':     {'name': MATTERMOST_VOLUME_DATA},

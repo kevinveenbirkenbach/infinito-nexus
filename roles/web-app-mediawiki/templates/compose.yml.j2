@@ -20,7 +20,6 @@
 
 {{ lookup('applications') | compose_volumes(
     application_id,
-    database_volume=lookup('database', application_id, 'volume'),
     extra_volumes={'extensions': {'name': MEDIAWIKI_VOLUME_EXTENSIONS}, 'images': {'name': MEDIAWIKI_VOLUME_IMAGES}}
 ) }}
 {% include 'roles/sys-svc-compose/templates/networks.yml.j2' %}

@@ -91,7 +91,6 @@
 
 {{ lookup('applications') | compose_volumes(
     application_id,
-    database_volume=lookup('database', application_id, 'volume'),
     extra_volumes={
       'data':   {'name': OPENTALK_DATA_VOLUME},
       'config': {'name': OPENTALK_CONFIG_VOLUME},

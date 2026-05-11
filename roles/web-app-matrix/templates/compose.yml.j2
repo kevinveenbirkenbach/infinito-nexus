@@ -102,7 +102,6 @@
 {% endif %}
 {{ lookup('applications') | compose_volumes(
     application_id,
-    database_volume=lookup('database', application_id, 'volume'),
     extra_volumes=_extra_volumes
 ) }}
 
