@@ -85,6 +85,16 @@ def _run_deploy(
     if services_disabled:
         extra_env["SERVICES_DISABLED"] = services_disabled
 
+    for key in (
+        "GH_TOKEN",
+        "GITHUB_TOKEN",
+        "GITHUB_REPOSITORY_OWNER",
+        "GITHUB_REPOSITORY",
+    ):
+        val = os.environ.get(key)
+        if val:
+            extra_env[key] = val
+
     # The Playwright E2E gate now keys on `RUNTIME` from the inventory's
     # host_vars (baked at init time by `cli.deploy.development.init`).
     # We no longer need to forward GITHUB_ACTIONS / ACT /
