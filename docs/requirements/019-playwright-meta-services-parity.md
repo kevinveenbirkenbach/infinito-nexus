@@ -187,7 +187,7 @@ The matrix tracks flag closure; the iteration tracks role closure.
 
 For each role in the [Iteration order](#iteration-order) below:
 
-1. Run `make test`.
+1. Run `make test` before EVERY deploy and EVERY redeploy in this loop — no exceptions, no per-test cherry-picking. `make test` IS the test gate; individual lint / integration test invocations are absorbed by it.
    On failure, fix the underlying issue if it is rollout-related; per [Autonomy](#autonomy), unrelated failures are ignored.
 2. Run `make deploy-fresh-purged-apps APPS=<role> FULL_CYCLE=true` to establish a fresh full-cycle baseline WITHOUT `SERVICES_DISABLED`.
    For matrix-variant roles, iterate through every variant declared in `roles/<role>/meta/variants.yml` via `VARIANT=<idx>` per [Role Loop → Matrix variants](../agents/action/iteration/role.md#matrix-variants); the role is NOT role-closed until every variant has produced a passing deploy plus passing Playwright spec.
@@ -200,7 +200,7 @@ For each role in the [Iteration order](#iteration-order) below:
    - A new variant is required to exercise a service-off path that the matrix does not yet cover (e.g. an LDAP-only variant pinning `oidc.enabled: false` plus `ldap.enabled: true` per [018](018-playwright-ldap-coverage.md), or a variant that disables `matomo` to validate the skip-on-disabled contract).
    - An existing variant pins service flags that conflict with the spec's gates (e.g. the variant pins `oauth2.enabled: true` while the role's spec only ever drives the `oidc` path); fix the variant to match what the spec actually exercises.
    - A variant references a service key that is no longer declared in `meta/services.yml`; remove the override.
-   Variants edits MUST keep [test_auth_coverage.py](../../tests/integration/roles/meta/variants/test_auth_coverage.py) and [test_services_match.py](../../tests/integration/roles/meta/variants/test_services_match.py) green; the agent re-runs both after every `meta/variants.yml` change.
+   Variants edits MUST keep `make test` green; the next `make test` invocation (which runs before the next deploy or redeploy per step 1) is the gate, not a per-test re-run.
    Variants edits are part of the same role-closure scope and do NOT trigger a separate commit.
 6. **Inspect the Playwright logs after every deploy cycle for this role** per [Rule 14](#rules), even when the deploy and the spec both exit `0`.
    The agent MUST confirm via the `list` reporter, `playwright-report/index.html`, and the trace / video captured under `PLAYWRIGHT_KEEP_ALL=true` (set per [Role Loop](../agents/action/iteration/role.md)) that:
@@ -215,8 +215,7 @@ For each role in the [Iteration order](#iteration-order) below:
    - the Playwright spec passed for every variant, AND
    - the post-deploy log inspection in step 6 is clean for every variant, AND
    - the role's `files/playwright.spec.js` ships the three persona scenarios per [Rule 3](#rules) (or the auth-less single-scenario collapse for `web-svc-*` and the auth-less `web-app-*` exceptions), AND
-   - both [test_playwright_env_services_match.py](../../tests/integration/roles/test_playwright_env_services_match.py) and [test_playwright_spec_env_gates.py](../../tests/integration/roles/test_playwright_spec_env_gates.py) are green for the role, AND
-   - if `meta/variants.yml` was edited, [test_auth_coverage.py](../../tests/integration/roles/meta/variants/test_auth_coverage.py) and [test_services_match.py](../../tests/integration/roles/meta/variants/test_services_match.py) are green.
+   - `make test` is green (the rules-table tests in [Rules](#rules) are all part of `make test` and are not invoked individually).
 8. **Strike the role through in the matrix** as the progress marker (see [Resumability](#resumability)) and move to the next role.
 
 ### Pattern transfer
@@ -297,14 +296,7 @@ The agent MUST NOT redo deploys for already-role-closed roles unless a later edi
 
 ## Verification
 
-- [ ] Test A green tree-wide.
-- [ ] Test B green tree-wide.
-- [ ] [test_env_keys_used.py](../../tests/lint/ansible/roles/web-app/playwright/test_env_keys_used.py) green throughout the rollout.
-- [ ] [test_no_stub_tests.py](../../tests/lint/ansible/roles/web-app/playwright/test_no_stub_tests.py) green tree-wide. Every persona scenario and every contract test drives a real user flow; no stub bodies survive.
-- [ ] [test_naming.py](../../tests/lint/ansible/roles/web-app/playwright/persona/test_naming.py) green tree-wide. Every `web-app-*` role's `files/playwright.spec.js` contains a `guest: <flow>` test, a `biber: <flow>` test, AND an `administrator: <flow>` test (or the auth-less collapse exception, or an explicit `PERSONA_<X>_BLOCKED=true` opt-out per Rule 11).
-- [ ] [test_required_envs.py](../../tests/lint/ansible/roles/web-app/playwright/persona/test_required_envs.py) green tree-wide. Roles that ship the auth-less collapse MUST be auth-less by construction (no `CANONICAL_DOMAIN` / `APP_BASE_URL`); any role pinning a persona-blocked flag MUST document the rationale in its README/TODO.
-- [ ] [test_strict_mode.py](../../tests/lint/ansible/roles/web-app/playwright/persona/test_strict_mode.py) green tree-wide. Persona helpers fail loudly on un-executable journeys (Rule 11) and deny-check helpers validate the response body on a 200 (Rule 12).
-- [ ] [test_dashboard_integration_scope.py](../../tests/integration/roles/test_dashboard_integration_scope.py) green tree-wide. No non-`web-app-*` role declares `dashboard:` with a truthy `enabled`/`shared` flag (Rule 1, dashboard-scope sub-rule).
+- [ ] `make test` green tree-wide. Every rule-enforcing lint and integration test listed in the [Rules](#rules) table is part of `make test`; this requirement does NOT invoke them individually.
 - [ ] `SERVICES_DISABLED=<svc>` reports every gated scenario as `skipped: <NAME>_SERVICE_ENABLED=false`, never `failed`. MUST cover ≥1 scenario each for `oidc`, `ldap`, `email`, `logout`, `matomo`. The `dashboard` exemption (Rule 1) means consumers do not render `DASHBOARD_SERVICE_ENABLED=`; coverage for that service runs through web-app-dashboard's parameterised tile-reachability test (Rule 13).
 - [ ] No-`SERVICES_DISABLED` run produces ≥1 `passed` scenario per in-scope `(role, service)` pair. Empty-skip = fail.
 - [ ] `grep 'process.env\.[A-Z_]*_SERVICE_ENABLED'` over the spec tree (excluding `service-gating.js`) returns zero hits.
