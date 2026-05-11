@@ -423,6 +423,9 @@ const dashboardJsBaseUrl = normalizeBaseUrl(process.env.DASHBOARD_JS_BASE_URL ||
 const matomoBaseUrl = normalizeBaseUrl(process.env.MATOMO_BASE_URL || "");
 const matomoEnabled = (process.env.MATOMO_ENABLED || "").toLowerCase() === "true";
 const cssEnabled = process.env.CSS_ENABLED.toLowerCase() === "true";
+const oidcEnabled = (process.env.OIDC_SERVICE_ENABLED || "").toLowerCase() === "true";
+const cdnEnabled = (process.env.CDN_SERVICE_ENABLED || "").toLowerCase() === "true";
+const logoutEnabled = (process.env.LOGOUT_SERVICE_ENABLED || "").toLowerCase() === "true";
 const canonicalDomain = decodeDotenvQuotedValue(process.env.CANONICAL_DOMAIN);
 
 const sharedCssPrefix = buildAssetPathPrefix(cdnBaseUrl, "/_shared/css");
@@ -467,6 +470,8 @@ test("dashboard enforces Content-Security-Policy and exposes canonical domain fr
 
 test("dashboard loads core css, javascript, simpleicons, and logo assets", async ({ page }) => {
   test.skip(!cssEnabled, "Skipped: shared CSS service is disabled in this deployment");
+  test.skip(!cdnEnabled, "Skipped: shared CDN service is disabled in this deployment");
+  test.skip(!logoutEnabled, "Skipped: shared logout service is disabled in this deployment");
 
   const diagnostics = attachDiagnostics(page);
   const documentResponse = await page.goto("/");
@@ -572,6 +577,7 @@ test("dashboard integrates matomo tracking assets", async ({ page }) => {
 });
 
 test("dashboard login automatically switches Login to Account and exposes Logout under Account", async ({ page }) => {
+  test.skip(!oidcEnabled, "Skipped: OIDC service is disabled in this deployment");
   const diagnostics = attachDiagnostics(page);
 
   await page.goto("/");

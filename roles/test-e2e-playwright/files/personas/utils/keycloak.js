@@ -27,6 +27,13 @@
 
 const { expect } = require("@playwright/test");
 
+// SPOT for the role-side OIDC adapter readiness contract. A role whose
+// `templates/javascript/oidc.js.j2` wraps its Login link in a JS click
+// handler (e.g. `keycloak.login()` with PKCE) MUST set this flag on
+// `window` after the click interceptor is wired, so persona helpers can
+// click the link without racing the adapter.
+const OIDC_LOGIN_READY_FLAG = "__oidcLoginReady";
+
 async function performKeycloakLoginForm(target, username, password) {
   const usernameField = target
     .getByRole("textbox", { name: /username|email/i })
@@ -59,6 +66,34 @@ async function performKeycloakLogin(page, username, password, canonicalDomain) {
     .toContain(canonicalDomain);
 }
 
+// Click a role's in-app Login link to start the OIDC chain. Waits for
+// the role's adapter to signal readiness (OIDC_LOGIN_READY_FLAG) before
+// clicking, so the click hits the JS-wrapped handler (which stores
+// PKCE state) and not the raw `href` (which would skip PKCE and break
+// the post-login token exchange on PKCE-enforced clients). The 15s
+// fallback covers roles whose Login link is purely static. Returns
+// true when the navigation reached `openid-connect/auth`.
+async function clickOidcLoginLink(page, loginLink) {
+  const linkVisible = await loginLink
+    .waitFor({ state: "visible", timeout: 20_000 })
+    .then(() => true)
+    .catch(() => false);
+  if (!linkVisible) return false;
+
+  await page
+    .waitForFunction(
+      (flag) => window[flag] === true,
+      OIDC_LOGIN_READY_FLAG,
+      { timeout: 15_000 },
+    )
+    .catch(() => {});
+  await loginLink.click().catch(() => {});
+  await page
+    .waitForURL(/openid-connect\/auth/, { timeout: 15_000 })
+    .catch(() => {});
+  return page.url().includes("openid-connect/auth");
+}
+
 async function performKeycloakLoginExpectingDenial(page, username, password, canonicalDomain) {
   await performKeycloakLoginForm(page, username, password);
 
@@ -81,7 +116,9 @@ async function performKeycloakLoginExpectingDenial(page, username, password, can
 }
 
 module.exports = {
+  OIDC_LOGIN_READY_FLAG,
   performKeycloakLoginForm,
   performKeycloakLogin,
+  clickOidcLoginLink,
   performKeycloakLoginExpectingDenial,
 };

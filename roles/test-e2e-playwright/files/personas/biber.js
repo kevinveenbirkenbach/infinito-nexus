@@ -26,6 +26,7 @@ const {
   readEnv,
   safeIsEnabled,
   performKeycloakLogin,
+  clickOidcLoginLink,
   inAppLogout,
   assertUnauthenticatedLanding,
   assertCspInjections,
@@ -95,40 +96,17 @@ async function runBiberFlow(page, opts = {}) {
   let keycloakRoundTripCompleted = false;
   if (biberUsername && biberPassword) {
     if (oidcEnabled && !page.url().includes("openid-connect/auth")) {
+      // Substring match (NO `^...$` anchors) — Bootstrap's `data-bs-toggle="tooltip"`
+      // moves the `title` attribute into `data-bs-original-title` and the
+      // accessibility tree picks that into the link's accessible name (e.g.
+      // "Login to Infinito.Nexus on infinito.example"). An anchored regex
+      // misses such links entirely. The `\s*` between `log` and `in` keeps the
+      // pattern from matching "Logout"/"logoff" etc.
       const loginLink = page
-        .getByRole("link", { name: /^\s*(log\s*in|sign\s*in|login|sso)\s*$/i })
-        .or(page.getByRole("button", { name: /^\s*(log\s*in|sign\s*in|login|sso)\s*$/i }))
+        .getByRole("link", { name: /log\s*in|sign\s*in|sso/i })
+        .or(page.getByRole("button", { name: /log\s*in|sign\s*in|sso/i }))
         .first();
-      // `Locator.isVisible(options)` is a snapshot check that does NOT
-      // poll for visibility — the `timeout` option there only governs
-      // locator resolution. `waitFor` is the polling primitive, so use
-      // it here so an OIDC-driven UI (e.g. the dashboard, where
-      // oidc.js renders the Login link asynchronously after the
-      // runtime JS loader fetches the script from the CDN) has time to
-      // surface the link before we try to read its href.
-      const linkVisible = await loginLink
-        .waitFor({ state: "visible", timeout: 20_000 })
-        .then(() => true)
-        .catch(() => false);
-      if (linkVisible) {
-        // The role's own UI may intercept clicks asynchronously (e.g.
-        // dashboard's oidc.js wraps the Login link in a JS handler that
-        // calls keycloak.login() once the adapter has loaded). When the
-        // adapter isn't ready yet the click falls through to the native
-        // href which already points at openid-connect/auth. Prefer the
-        // direct navigation when the href is exposed, and fall back to
-        // a real click otherwise; then wait for the OIDC URL to appear
-        // either way.
-        const href = await loginLink.getAttribute("href").catch(() => null);
-        if (href && /openid-connect\/auth/.test(href)) {
-          await page.goto(href, { waitUntil: "domcontentloaded" }).catch(() => {});
-        } else {
-          await loginLink.click().catch(() => {});
-          await page
-            .waitForURL(/openid-connect\/auth/, { timeout: 15_000 })
-            .catch(() => {});
-        }
-      }
+      await clickOidcLoginLink(page, loginLink);
     }
     if (page.url().includes("openid-connect/auth")) {
       await performKeycloakLogin(page, biberUsername, biberPassword, canonicalDomain);
