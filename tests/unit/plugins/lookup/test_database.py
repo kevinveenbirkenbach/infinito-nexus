@@ -129,6 +129,7 @@ class DatabaseLookupTests(unittest.TestCase):
                 "services": {
                     "postgres": {
                         "name": "postgres-central",
+                        "image": "postgis/postgis",
                         "version": "16",
                         "ports": {"local": {"postgres": "5432"}},
                     }
@@ -170,7 +171,7 @@ class DatabaseLookupTests(unittest.TestCase):
         self.assertEqual(out["url_jdbc"], "jdbc:postgresql://database:5432/foo")
         self.assertEqual(out["url_full"], "postgres://foo:pw@database:5432/foo")
         self.assertEqual(out["volume"], "foo_database")
-        self.assertEqual(out["image"], "postgres")
+        self.assertEqual(out["image"], "postgis/postgis")
         self.assertEqual(out["version"], "16")
         self.assertEqual(out["reach_host"], "127.0.0.1")
         self.assertEqual(out["instance"], "foo")

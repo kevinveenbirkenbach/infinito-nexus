@@ -152,6 +152,15 @@ class LookupModule(LookupBase):
             default=default_version,
         )
 
+        image = get(
+            applications,
+            db_id,
+            f"services.{dbtype}.image",
+            strict=False,
+            default=dbtype,
+            skip_missing_app=True,
+        )
+
         # env path without compose dict
         env_dir = f"{path_instances}{get_entity_name(consumer_id)}/.env/"
         env = f"{env_dir}{dbtype}.env"
@@ -179,7 +188,7 @@ class LookupModule(LookupBase):
             "url_jdbc": url_jdbc,
             "url_full": url_full,
             "volume": volume,
-            "image": dbtype,
+            "image": image,
             "version": version,
             "reach_host": "127.0.0.1",
         }
