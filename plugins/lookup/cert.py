@@ -1,5 +1,3 @@
-# lookup_plugins/cert.py
-#
 # Certificate planning lookup for Infinito.Nexus:
 # - Computes certificate file paths (cert/key/ca)
 # - Computes effective SAN list (domains.san)

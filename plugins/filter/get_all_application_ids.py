@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# filter_plugins/get_all_application_ids.py
 
 import glob
 from pathlib import Path

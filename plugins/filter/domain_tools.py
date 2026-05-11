@@ -1,4 +1,3 @@
-# filter_plugins/domain_tools.py
 # Returns the DNS zone (SLD.TLD) from a hostname.
 # Pure-Python, no external deps; handles simple cases. For exotic TLDs use tldextract (see note).
 from ansible.errors import AnsibleFilterError

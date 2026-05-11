@@ -1,5 +1,3 @@
-# lookup_plugins/tls.py
-#
 # STRICT TLS resolver (without SAN/cert identity planning).
 #
 # Certificate identity planning (SAN list, cert/key paths) is moved to:

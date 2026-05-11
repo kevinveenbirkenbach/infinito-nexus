@@ -1,4 +1,3 @@
-# filter_plugins/timeout_start_sec_for_domains.py (nur Kern geändert)
 from ansible.errors import AnsibleFilterError
 
 

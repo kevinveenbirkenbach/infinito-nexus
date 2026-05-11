@@ -1,5 +1,3 @@
-# filter_plugins/has_domain.py
-#
 # Simple, dependency-free "has_domain" filter.
 #
 # Goal:

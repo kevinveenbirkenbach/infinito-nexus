@@ -1,5 +1,3 @@
-# lookup_plugins/cdn.py
-#
 # Returns the CDN path and URL structure for a given application_id as a single dict.
 # Paths are at the top level; URLs are nested under the 'urls' key.
 # The application_id is always resolved at call time — no scope dependency.

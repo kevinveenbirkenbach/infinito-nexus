@@ -1,4 +1,3 @@
-# filter_plugins/node_autosize.py
 # Reuse app config to derive sensible Node.js heap sizes for containers.
 #
 # Usage example (Jinja):

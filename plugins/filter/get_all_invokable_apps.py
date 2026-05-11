@@ -1,4 +1,3 @@
-# filter_plugins/get_all_invokable_apps.py
 from __future__ import annotations
 
 from utils.roles.validation.invokable import list_invokable_app_ids

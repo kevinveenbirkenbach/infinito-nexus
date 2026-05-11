@@ -1,5 +1,3 @@
-# filter_plugins/merge_mapping.py
-
 from ansible.errors import AnsibleFilterError
 
 

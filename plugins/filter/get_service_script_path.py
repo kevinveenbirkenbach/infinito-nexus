@@ -1,4 +1,3 @@
-# filter_plugins/get_service_script_path.py
 # Custom Ansible filter to generate service script paths.
 
 

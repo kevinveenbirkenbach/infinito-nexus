@@ -1,5 +1,3 @@
-# lookup_plugins/unit_name.py
-#
 # Ansible lookup plugin to build versioned systemd unit names.
 #
 # Target format:

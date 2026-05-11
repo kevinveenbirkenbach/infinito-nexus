@@ -1,5 +1,3 @@
-# lookup_plugins/compose_file_args.py
-#
 # Build compose "-f <file>" arguments for an application instance.
 #
 # HARD FAIL PRINCIPLE:

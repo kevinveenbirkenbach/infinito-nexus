@@ -1,5 +1,3 @@
-# lookup_plugins/nginx.py
-#
 # Resolve nginx path configuration (lowercase keys) and (optionally) a domain-specific
 # server config path placed under:
 #
