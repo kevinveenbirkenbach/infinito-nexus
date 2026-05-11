@@ -81,14 +81,14 @@ Legend (`v0` / `v1` / `v2`): ⏳ untested, ✅ passed (full Per-role flow incl. 
 | ~~`web-app-mailu`~~ | 139 | ✅ | ✅ | ✅ | ✅ |  | bespoke `dashboard → mailu sso → admin → logout` and `biber → email → administrator → receives` tests own the persona coverage (they exercise mailu's iframe-wrapped auth chain directly), both `safeSkipUnlessEnabled("oidc")`-gated so the no-OIDC variant collapses cleanly; the shared persona scenarios route through the dashboard main-frame Account menu and depend on the dashboard OIDC silent-SSO that is currently in escape, so PERSONA_BIBER_BLOCKED + PERSONA_ADMINISTRATOR_BLOCKED collapse them cleanly |
 | ~~`web-app-keycloak`~~ | 130 | ✅ | ✅ | ✅ | ✅ |  | auth-provider exception: generic persona scenarios are exempt; bespoke "master-realm super administrator", "normal-realm administrator", "normal-realm biber" tests cover the persona contract via the realm account UI. Variant=1 disables LDAP federation; the bespoke biber test collapses via `safeSkipUnlessEnabled("ldap")` — biber MUST NEVER be seeded directly via kcadm, only the administrator persona is seeded for the headless ops loop |
 | ~~`web-svc-simpleicons`~~ | 92 | ✅ | ✅ | ✅ | ✅ |  | infra role; bespoke "simpleicons serves keycloak assets directly on its own domain" test owns the surface; persona stub collapses to the auth-less skip (no APP_BASE_URL). Variant=1 toggles only the `prometheus` flag — no app-surface change, bespoke surface test passes identically |
-| `web-app-nextcloud` | 27 | ✅ | ✅ | ⏳ | ⏳ | ⏳ |  |
+| ~~`web-app-nextcloud`~~ | 27 | ✅ | ✅ | ✅ | ✅ | ✅ | Nextcloud's `/login` reverse-proxies Keycloak's login form on its own domain (no `/openid-connect/auth` URL marker), so the generic persona helper cannot drive it. The bespoke tests `biber logs into nextcloud via OIDC and logs out` + `dashboard to nextcloud login` + `nextcloud talk admin settings` already cover both personas end-to-end via the nextcloud-specific helper `loginToStandaloneNextcloudWithRetry`; persona shared scenarios are `PERSONA_*_BLOCKED` |
 | `web-app-discourse` | 24 | ✅ | ✅ | ⏳ | ⏳ |  |  |
 | `web-app-bigbluebutton` | 24 | ✅ | ✅ | ⏳ | ⏳ |  |  |
 | `web-app-opentalk` | 23 | ✅ | ✅ | ⏳ | ⏳ | ⏳ |  |
 | `web-app-mastodon` | 23 | ❌ | ✅ | ⏳ | ⏳ |  |  |
 | `web-app-friendica` | 23 | ✅ | ✅ | ⏳ | ⏳ | ⏳ |  |
 | `web-app-openwebui` | 22 | ✅ | ✅ | ⏳ | ⏳ | ⏳ |  |
-| `web-app-minio` | 22 | ✅ | ✅ | ⏳ | ⏳ | ⏳ |  |
+| ~~`web-app-minio`~~ | 22 | ✅ | ✅ | ✅ | ✅ | ✅ | Minio's auth is STS via OIDC (handled by minio-console with `AssumeRoleWithWebIdentity`); biber has no minio account by default. Bespoke tests `administrator: OIDC integrated login path via STS AssumeRoleWithWebIdentity` and `administrator: MinIO Console form login under LDAP variant` cover administrator; persona scenarios `PERSONA_*_BLOCKED` because the auth chain is not persona-helper-driveable and biber has no minio surface |
 | `web-app-listmonk` | 22 | ❌ | ✅ | ⏳ | ⏳ |  |  |
 | `web-app-gitea` | 22 | ✅ | ✅ | ⏳ | ⏳ | ⏳ |  |
 | `web-app-flowise` | 22 | ✅ | ✅ | ⏳ | ⏳ | ⏳ |  |
@@ -116,7 +116,7 @@ Legend (`v0` / `v1` / `v2`): ⏳ untested, ✅ passed (full Per-role flow incl. 
 | `web-app-pixelfed` | 20 | ✅ | ✅ | ⏳ | ⏳ |  |  |
 | `web-app-peertube` | 20 | ✅ | ✅ | ⏳ | ⏳ |  |  |
 | `web-app-openproject` | 20 | ❌ | ✅ | ⏳ | ⏳ | ⏳ |  |
-| `web-app-opencloud` | 20 | ✅ | ✅ | ⏳ | ⏳ | ⏳ |  |
+| ~~`web-app-opencloud`~~ | 20 | ✅ | ✅ | ✅ | ✅ | ✅ | Opencloud's OIDC chain runs through its own auth-route (not the standard oauth2-proxy `/openid-connect/auth` URL pattern). Bespoke tests `opencloud sso login (administrator) lands on files view` + `opencloud sso login (biber) lands on files view` cover both personas end-to-end; persona shared scenarios `PERSONA_*_BLOCKED` |
 | `web-app-mediawiki` | 20 | ❌ | ✅ | ⏳ | ⏳ |  |  |
 | `web-app-jira` | 20 | ❌ | ✅ | ⏳ | ⏳ |  |  |
 | `web-app-jenkins` | 20 | ✅ | ✅ | ⏳ | ⏳ | ⏳ |  |

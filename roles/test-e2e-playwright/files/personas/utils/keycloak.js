@@ -73,12 +73,28 @@ async function performKeycloakLogin(page, username, password, canonicalDomain) {
 // the post-login token exchange on PKCE-enforced clients). The 15s
 // fallback covers roles whose Login link is purely static. Returns
 // true when the navigation reached `openid-connect/auth`.
-async function clickOidcLoginLink(page, loginLink) {
-  const linkVisible = await loginLink
+//
+// The persona MUST pass `strictLink` (exact-match locator, e.g. accessible
+// name `^\s*login\s*$/i`) AND `looseLink` (substring locator). The helper
+// prefers the strict match — that targets the role's OWN Login button
+// (e.g. nextcloud's plain `<a>Login</a>`) — and only falls back to the
+// loose match when no strict candidate is visible. Without this two-pass
+// approach, `sys-front-inj-all`-injected dashboard navbars in oauth2-proxy
+// roles trap the substring match and redirect the persona to the dashboard
+// flow instead of the role's own auth chain.
+async function clickOidcLoginLink(page, strictLink, looseLink) {
+  const strictVisible = await strictLink
     .waitFor({ state: "visible", timeout: 20_000 })
     .then(() => true)
     .catch(() => false);
-  if (!linkVisible) return false;
+  const loginLink = strictVisible ? strictLink : looseLink;
+  if (!strictVisible) {
+    const looseVisible = await loginLink
+      .waitFor({ state: "visible", timeout: 5_000 })
+      .then(() => true)
+      .catch(() => false);
+    if (!looseVisible) return false;
+  }
 
   await page
     .waitForFunction(

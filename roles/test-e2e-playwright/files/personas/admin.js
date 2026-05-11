@@ -95,17 +95,23 @@ async function runAdminFlow(page, opts = {}) {
   let keycloakRoundTripCompleted = false;
   if (adminUsername && adminPassword) {
     if (oidcEnabled && !page.url().includes("openid-connect/auth")) {
-      // Substring match (NO `^...$` anchors) — Bootstrap's `data-bs-toggle="tooltip"`
-      // moves the `title` attribute into `data-bs-original-title` and the
-      // accessibility tree picks that into the link's accessible name (e.g.
-      // "Login to Infinito.Nexus on infinito.example"). An anchored regex
-      // misses such links entirely. The `\s*` between `log` and `in` keeps the
-      // pattern from matching "Logout"/"logoff" etc.
-      const loginLink = page
+      // Two-pass: strict anchored regex targets the role's OWN Login button
+      // (e.g. nextcloud's plain `<a>Login</a>`); loose substring regex covers
+      // roles whose Login link gets a Bootstrap tooltip
+      // (`data-bs-toggle="tooltip"` moves `title` into
+      // `data-bs-original-title`, which the accessibility tree pulls into the
+      // link's accessible name — anchored regex misses such links). The
+      // `\s*` between `log` and `in` keeps both patterns from matching
+      // `Logout`/`logoff`.
+      const strictLogin = page
+        .getByRole("link", { name: /^\s*(log\s*in|sign\s*in|login|sso|admin)\s*$/i })
+        .or(page.getByRole("button", { name: /^\s*(log\s*in|sign\s*in|login|sso|admin)\s*$/i }))
+        .first();
+      const looseLogin = page
         .getByRole("link", { name: /log\s*in|sign\s*in|sso|admin/i })
         .or(page.getByRole("button", { name: /log\s*in|sign\s*in|sso|admin/i }))
         .first();
-      await clickOidcLoginLink(page, loginLink);
+      await clickOidcLoginLink(page, strictLogin, looseLogin);
     }
     if (page.url().includes("openid-connect/auth")) {
       await performKeycloakLogin(page, adminUsername, adminPassword, canonicalDomain);
