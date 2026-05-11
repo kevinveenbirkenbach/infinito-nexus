@@ -71,15 +71,24 @@ async function tryLogoutFrom(scope) {
   return false;
 }
 
-async function waitForAnyLogoutCandidate(page, timeoutMs = 10_000) {
-  // Poll the candidate set until ANY visible logout-shaped element
-  // surfaces or the deadline passes. Required because the universal
-  // logout helper injects its fallback button asynchronously (after
-  // DOMContentLoaded plus a MutationObserver settle), so a strict
-  // snapshot check fails on slow upstreams.
+function menuTriggerCandidatesOn(scope) {
+  return [
+    scope.getByRole("button", { name: ACCOUNT_MENU_NAME_RE }),
+    scope.getByRole("link", { name: ACCOUNT_MENU_NAME_RE }),
+    scope.locator(
+      "[data-bs-toggle='dropdown'], .dropdown-toggle, [aria-haspopup='menu'], [aria-haspopup='true'], [data-region='user-menu-toggle'], .user-menu-toggle, .usermenu, [aria-label*='user menu' i], [aria-label*='account' i], [data-testid*='user' i]",
+    ),
+  ];
+}
+
+async function waitForAnyLogoutCandidate(page, timeoutMs = 30_000) {
+  // Returns true on the first visible logout-shaped element OR menu trigger
+  // (Account/Profile). Async-rendered post-login UIs (e.g. dashboard's
+  // CDN-loaded keycloak-js + token exchange) routinely exceed 10s before
+  // the Account dropdown is even visible — bumped from 10s to 30s.
   const deadline = Date.now() + timeoutMs;
   while (Date.now() < deadline) {
-    for (const loc of logoutCandidatesOn(page)) {
+    for (const loc of [...logoutCandidatesOn(page), ...menuTriggerCandidatesOn(page)]) {
       const count = await loc.count().catch(() => 0);
       for (let i = 0; i < count; i++) {
         const cand = loc.nth(i);
@@ -94,25 +103,16 @@ async function waitForAnyLogoutCandidate(page, timeoutMs = 10_000) {
 }
 
 async function inAppLogout(page) {
-  // Settle any OIDC return-redirects before the first attempt.
   await page.waitForLoadState("domcontentloaded", { timeout: 30_000 }).catch(() => {});
 
-  // Give the universal-logout JS (and any role-local JS that mounts
-  // the navbar asynchronously) time to surface a logout candidate.
-  await waitForAnyLogoutCandidate(page, 10_000);
+  await waitForAnyLogoutCandidate(page);
 
   if (await tryLogoutFrom(page)) {
     await page.waitForLoadState("domcontentloaded", { timeout: 30_000 }).catch(() => {});
     return;
   }
 
-  const menuTriggers = [
-    page.getByRole("button", { name: ACCOUNT_MENU_NAME_RE }),
-    page.getByRole("link", { name: ACCOUNT_MENU_NAME_RE }),
-    page.locator(
-      "[data-bs-toggle='dropdown'], .dropdown-toggle, [aria-haspopup='menu'], [aria-haspopup='true'], [data-region='user-menu-toggle'], .user-menu-toggle, .usermenu, [aria-label*='user menu' i], [aria-label*='account' i], [data-testid*='user' i]",
-    ),
-  ];
+  const menuTriggers = menuTriggerCandidatesOn(page);
 
   // Try every visible trigger — the first match is not necessarily the
   // one wrapping the logout entry (Bootstrap navbars often render
