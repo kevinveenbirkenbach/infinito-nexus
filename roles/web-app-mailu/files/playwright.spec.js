@@ -1,6 +1,6 @@
 const { test, expect } = require("@playwright/test");
 
-const { decodeDotenvQuotedValue, performKeycloakLoginForm, runAdminFlow, runBiberFlow, runGuestFlow } = require("./personas");
+const { decodeDotenvQuotedValue, performKeycloakLoginForm, runAdminFlow, runBiberFlow, runGuestFlow, safeSkipUnlessEnabled } = require("./personas");
 test.use({
   ignoreHTTPSErrors: true
 });
@@ -81,6 +81,7 @@ test.beforeEach(() => {
 
 // Scenario I: dashboard → click Mailu → SSO login → webinterface → admin interface → logout
 test("dashboard to mailu: sso login, open admin interface, logout", async ({ page }) => {
+  safeSkipUnlessEnabled("oidc");
   const expectedOidcAuthUrl  = `${oidcIssuerUrl.replace(/\/$/, "")}/protocol/openid-connect/auth`;
   const expectedMailuBaseUrl = mailuBaseUrl.replace(/\/$/, "");
 
@@ -175,6 +176,7 @@ test("dashboard to mailu: sso login, open admin interface, logout", async ({ pag
 // Using isolated browser contexts models this correctly: no shared cookies, no shared
 // Keycloak SSO session. This avoids any logout/session-cleanup race condition entirely.
 test("mailu: biber sends email to administrator, administrator receives it", async ({ browser }) => {
+  safeSkipUnlessEnabled("oidc");
   const expectedOidcAuthUrl = `${oidcIssuerUrl.replace(/\/$/, "")}/protocol/openid-connect/auth`;
   const testSubject         = `Playwright test ${Date.now()}`;
 
