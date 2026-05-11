@@ -25,6 +25,9 @@ coturn:
         start: 20000
         end: 39999
   lifecycle: beta
+gateway:
+  image: nginx
+  version: alpine
 # nocheck: dynamic-flag
 redis:
   backup:

@@ -24,6 +24,8 @@ MAILU_HOSTNAME_DNS_ZONE: "{{ MAILU_HOSTNAME | to_zone }}"
 ## Docker
 MAILU_VERSION: "{{ lookup('config', application_id, 'services.mailu.version') }}"
 MAILU_CONTAINER: "{{ lookup('config', application_id, 'services.mailu.name') }}"
+MAILU_ANTIVIRUS_IMAGE: "{{ lookup('config', application_id, 'services.antivirus.image') }}"
+MAILU_ANTIVIRUS_VERSION: "{{ lookup('config', application_id, 'services.antivirus.version') }}"
 MAILU_FRONT_SERVICE: "front"
 ## Volumes
 MAILU_SMTP_QUEUE_VOLUME: "mailu_smtp_queue"

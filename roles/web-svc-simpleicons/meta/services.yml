@@ -40,6 +40,11 @@ simpleicons:
     local:
       http: 8044
   lifecycle: beta
+# nocheck: dynamic-flag
+# nocheck: playwright-service-flag — local build tag for the application container
+application:
+  image: simpleicons-server
+  version: latest
 prometheus:
   enabled: "{{ 'web-app-prometheus' in group_names }}"
   shared: "{{ 'web-app-prometheus' in group_names }}"

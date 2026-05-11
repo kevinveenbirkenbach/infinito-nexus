@@ -92,6 +92,8 @@ antispam:
 antivirus:
   enabled: true
   shared: false
+  image: clamav/clamav-debian
+  version: latest
   cpus: "0.6"
   mem_reservation: 2g
   mem_limit: 3g

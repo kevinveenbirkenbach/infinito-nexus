@@ -9,6 +9,8 @@ domain: "{{ lookup('domain',application_id) }}"
 ## Docker 
 COTURN_VERSION: "{{ lookup('config', application_id, 'services.' ~ entity_name ~ '.version') }}"
 COTURN_IMAGE: "{{ lookup('config', application_id, 'services.' ~ entity_name ~ '.image') }}"
+COTURN_GATEWAY_IMAGE: "{{ lookup('config', application_id, 'services.gateway.image') }}"
+COTURN_GATEWAY_VERSION: "{{ lookup('config', application_id, 'services.gateway.version') }}"
 COTURN_VOLUME: "{{ entity_name }}_data"
 COTURN_CONTAINER: "{{ entity_name }}"
 COTURN_REALM: "{{ domain }}"

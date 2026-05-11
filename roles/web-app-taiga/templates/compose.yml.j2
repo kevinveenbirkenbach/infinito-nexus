@@ -85,7 +85,7 @@ pull_policy: never
 {% set service_name = TAIGA_ASYNC_RABBITMQ_SERVICE %}
   {{ service_name }}:
     container_name: {{ TAIGA_CONTAINER }}-{{ service_name }}
-    image: rabbitmq:3.8-management-alpine
+    image: "{{ TAIGA_DOCKER_IMAGE_ASYNC_RABBITMQ }}:{{ TAIGA_DOCKER_VERSION_ASYNC_RABBITMQ }}"
     hostname: "{{ TAIGA_ASYNC_RABBITMQ_SERVICE }}"
     volumes:
       - async-rabbitmq-data:/var/lib/rabbitmq
@@ -127,7 +127,7 @@ pull_policy: never
 {% set service_name = TAIGA_EVENTS_SERVICE %}
   {{ service_name }}:
     container_name: {{ TAIGA_CONTAINER }}-{{ service_name }}
-    image: taigaio/taiga-events:latest
+    image: "{{ TAIGA_DOCKER_IMAGE_EVENTS }}:{{ TAIGA_DOCKER_VERSION_EVENTS }}"
 {% include 'roles/sys-svc-container/templates/base.yml.j2' %}
     healthcheck:
       test: ["CMD-SHELL", "nc -z 127.0.0.1 8888"]
@@ -144,7 +144,7 @@ pull_policy: never
 {% set service_name = TAIGA_EVENTS_RABBITMQ_SERVICE %}
   {{ service_name }}:
     container_name: {{ TAIGA_CONTAINER }}-{{ service_name }}
-    image: rabbitmq:3.8-management-alpine
+    image: "{{ TAIGA_DOCKER_IMAGE_EVENTS_RABBITMQ }}:{{ TAIGA_DOCKER_VERSION_EVENTS_RABBITMQ }}"
     hostname: {{ service_name }}
     volumes:
       - events-rabbitmq-data:/var/lib/rabbitmq
@@ -161,7 +161,7 @@ pull_policy: never
 {% set service_name = 'protected' %}
   {{ service_name }}:
     container_name: {{ TAIGA_CONTAINER }}-{{ service_name }}
-    image: taigaio/taiga-protected:latest
+    image: "{{ TAIGA_DOCKER_IMAGE_PROTECTED }}:{{ TAIGA_DOCKER_VERSION_PROTECTED }}"
 {% include 'roles/sys-svc-container/templates/base.yml.j2' %}
     healthcheck:
       test: ["CMD", "python", "-c", "import socket; socket.create_connection(('127.0.0.1',8003),5).close()"]
@@ -176,7 +176,7 @@ pull_policy: never
 {% set container_port = 80 %}
   {{ service_name }}:
     container_name: {{ TAIGA_CONTAINER }}-{{ service_name }}
-    image: nginx:alpine
+    image: "{{ TAIGA_DOCKER_IMAGE_GATEWAY }}:{{ TAIGA_DOCKER_VERSION_GATEWAY }}"
     ports:
       - "{{ DOCKER_BIND_HOST }}:{{ lookup('config', application_id, 'services.taiga.ports.local.http') }}:{{ container_port }}"
     volumes:

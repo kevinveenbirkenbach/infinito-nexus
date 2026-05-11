@@ -126,7 +126,7 @@
   antivirus:
 {% set service_name = 'antivirus' %}
     container_name: {{ MAILU_CONTAINER }}_antivirus
-    image: clamav/clamav-debian:latest
+    image: {{ MAILU_ANTIVIRUS_IMAGE }}:{{ MAILU_ANTIVIRUS_VERSION }}
 {% include 'roles/sys-svc-container/templates/base.yml.j2' %}
     volumes:
       - "clamav_db:/var/lib/clamav"
