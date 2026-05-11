@@ -97,8 +97,35 @@ async function runAdminFlow(page, opts = {}) {
         .getByRole("link", { name: /^\s*(log\s*in|sign\s*in|login|sso|admin)\s*$/i })
         .or(page.getByRole("button", { name: /^\s*(log\s*in|sign\s*in|login|sso|admin)\s*$/i }))
         .first();
-      if (await loginLink.isVisible({ timeout: 5_000 }).catch(() => false)) {
-        await loginLink.click().catch(() => {});
+      // `Locator.isVisible(options)` is a snapshot check that does NOT
+      // poll for visibility — the `timeout` option there only governs
+      // locator resolution. `waitFor` is the polling primitive, so use
+      // it here so an OIDC-driven UI (e.g. the dashboard, where
+      // oidc.js renders the Login link asynchronously after the
+      // runtime JS loader fetches the script from the CDN) has time to
+      // surface the link before we try to read its href.
+      const linkVisible = await loginLink
+        .waitFor({ state: "visible", timeout: 20_000 })
+        .then(() => true)
+        .catch(() => false);
+      if (linkVisible) {
+        // The role's own UI may intercept clicks asynchronously (e.g.
+        // dashboard's oidc.js wraps the Login link in a JS handler that
+        // calls keycloak.login() once the adapter has loaded). When the
+        // adapter isn't ready yet the click falls through to the native
+        // href which already points at openid-connect/auth. Prefer the
+        // direct navigation when the href is exposed, and fall back to
+        // a real click otherwise; then wait for the OIDC URL to appear
+        // either way.
+        const href = await loginLink.getAttribute("href").catch(() => null);
+        if (href && /openid-connect\/auth/.test(href)) {
+          await page.goto(href, { waitUntil: "domcontentloaded" }).catch(() => {});
+        } else {
+          await loginLink.click().catch(() => {});
+          await page
+            .waitForURL(/openid-connect\/auth/, { timeout: 15_000 })
+            .catch(() => {});
+        }
       }
     }
     if (page.url().includes("openid-connect/auth")) {
@@ -116,13 +143,20 @@ async function runAdminFlow(page, opts = {}) {
   // skip.
   const adminAuthMarker = (surface) =>
     surface
-      .getByRole("button", { name: /^(log\s*out|sign\s*out|abmelden)$/i })
-      .or(surface.getByRole("link", { name: /^(log\s*out|sign\s*out|abmelden)$/i }))
-      .or(surface.getByRole("button", { name: /^(account|profile|user.?menu|menu)$/i }))
-      .or(surface.locator("[data-region='user-menu-toggle'], .user-menu-toggle, .usermenu, [aria-label*='user menu' i]"));
-  let adminReachedAuthenticated = await adminAuthMarker(page).first().isVisible({ timeout: 10_000 }).catch(() => false);
+      .getByRole("button", { name: /log\s*out|sign\s*out|sign-out|abmelden/i })
+      .or(surface.getByRole("link", { name: /log\s*out|sign\s*out|sign-out|abmelden/i }))
+      .or(surface.getByRole("menuitem", { name: /log\s*out|sign\s*out|sign-out|abmelden/i }))
+      .or(surface.getByRole("button", { name: /(account|profile|user.?menu|^menu$|signed\s*in)/i }))
+      .or(surface.getByRole("link", { name: /(account|profile|user.?menu|^menu$|signed\s*in)/i }))
+      .or(
+        surface.locator(
+          "[data-region='user-menu-toggle'], .user-menu-toggle, .usermenu, [aria-label*='user menu' i], [aria-label*='account' i], [data-testid*='user' i], a[href*='logout' i], a[href*='end_session' i], a[href*='end-session' i]",
+        ),
+      );
+  let adminReachedAuthenticated = await adminAuthMarker(page).first().isVisible({ timeout: 15_000 }).catch(() => false);
   if (!adminReachedAuthenticated) {
     for (const frame of page.frames()) {
+      if (frame === page.mainFrame()) continue;
       const fUrl = frame.url();
       if (!fUrl || fUrl === "about:blank") continue;
       if (await adminAuthMarker(frame).first().isVisible({ timeout: 1_000 }).catch(() => false)) {
@@ -132,10 +166,11 @@ async function runAdminFlow(page, opts = {}) {
     }
   }
   if (!adminReachedAuthenticated) {
-    // URL-based fallback: any nested frame parked on the role's
-    // canonical surface (not on Keycloak / oauth2-proxy denial /
-    // about:blank) counts as the administrator reaching the app.
+    // URL-based fallback for NESTED frames only: see biber.js — the
+    // main frame can park on the canonical domain without an
+    // authenticated session, so URL alone is not proof of auth.
     for (const frame of page.frames()) {
+      if (frame === page.mainFrame()) continue;
       const fUrl = frame.url();
       if (!fUrl || fUrl === "about:blank") continue;
       if (/openid-connect\/auth|\/oauth2\/(?:start|sign_in|callback)/.test(fUrl)) continue;

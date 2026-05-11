@@ -19,53 +19,91 @@
  *      surface (link or button matching `logout` / `sign out` /
  *      `sign-out` / `abmelden`).
  *   2. If the logout control sits behind a user / account menu, open
- *      the menu first, then click the logout control inside it.
+ *      every plausible menu trigger and try again. Triggers include
+ *      role=button / role=link elements whose accessible name contains
+ *      `account` / `profile` / `user menu` / `menu`, plus
+ *      framework-specific patterns (Bootstrap `data-bs-toggle="dropdown"`,
+ *      `.dropdown-toggle`, ARIA `aria-haspopup="menu"`, etc.).
  *
- * No further fallback. If neither step finds a control, the test fails
- * — the role's authenticated surface MUST expose an in-app logout.
+ * No further fallback. If no trigger surfaces a logout control, the
+ * test fails — the role's authenticated surface MUST expose an in-app
+ * logout.
  */
 
 const { expect } = require("@playwright/test");
 
 const LOGOUT_NAME_RE = /log\s*out|sign\s*out|sign-out|abmelden/i;
-const ACCOUNT_MENU_NAME_RE = /^(account|profile|user.?menu|menu)$/i;
+const ACCOUNT_MENU_NAME_RE = /(account|profile|user.?menu|^menu$|sign\s*in|signed\s*in)/i;
 
-async function clickFirstVisible(loc) {
-  const visible = await loc.first().isVisible({ timeout: 3_000 }).catch(() => false);
-  if (visible) {
-    await loc.first().click().catch(() => {});
-    return true;
+async function clickFirstVisible(loc, { timeout = 5_000 } = {}) {
+  const count = await loc.count().catch(() => 0);
+  for (let i = 0; i < count; i++) {
+    const cand = loc.nth(i);
+    if (await cand.isVisible({ timeout }).catch(() => false)) {
+      await cand.click({ timeout: 5_000 }).catch(() => {});
+      return true;
+    }
+  }
+  return false;
+}
+
+function logoutCandidatesOn(scope) {
+  return [
+    scope.getByRole("menuitem", { name: LOGOUT_NAME_RE }),
+    scope.getByRole("link", { name: LOGOUT_NAME_RE }),
+    scope.getByRole("button", { name: LOGOUT_NAME_RE }),
+    scope.locator(
+      "a[href*='logout' i], a[href*='signout' i], a[href*='sign-out' i], a[href*='end_session' i], a[href*='end-session' i]",
+    ),
+  ];
+}
+
+async function tryLogoutFrom(scope) {
+  for (const loc of logoutCandidatesOn(scope)) {
+    if (await clickFirstVisible(loc)) return true;
   }
   return false;
 }
 
 async function inAppLogout(page) {
-  const logoutCandidates = [
-    page.getByRole("link", { name: LOGOUT_NAME_RE }),
-    page.getByRole("button", { name: LOGOUT_NAME_RE }),
-    page.locator("a[href*='logout' i], a[href*='signout' i], a[href*='sign-out' i]"),
-  ];
+  // Settle any OIDC return-redirects before the first attempt.
+  await page.waitForLoadState("domcontentloaded", { timeout: 30_000 }).catch(() => {});
 
-  for (const loc of logoutCandidates) {
-    if (await clickFirstVisible(loc)) {
-      await page.waitForLoadState("domcontentloaded", { timeout: 30_000 }).catch(() => {});
-      return;
-    }
+  if (await tryLogoutFrom(page)) {
+    await page.waitForLoadState("domcontentloaded", { timeout: 30_000 }).catch(() => {});
+    return;
   }
 
   const menuTriggers = [
     page.getByRole("button", { name: ACCOUNT_MENU_NAME_RE }),
-    page.locator("[data-region='user-menu-toggle'], .user-menu-toggle, .usermenu, [aria-label*='user menu' i]"),
+    page.getByRole("link", { name: ACCOUNT_MENU_NAME_RE }),
+    page.locator(
+      "[data-bs-toggle='dropdown'], .dropdown-toggle, [aria-haspopup='menu'], [aria-haspopup='true'], [data-region='user-menu-toggle'], .user-menu-toggle, .usermenu, [aria-label*='user menu' i], [aria-label*='account' i], [data-testid*='user' i]",
+    ),
   ];
-  for (const trigger of menuTriggers) {
-    if (await clickFirstVisible(trigger)) {
-      await page.waitForTimeout(500);
-      for (const loc of logoutCandidates) {
-        if (await clickFirstVisible(loc)) {
-          await page.waitForLoadState("domcontentloaded", { timeout: 30_000 }).catch(() => {});
-          return;
-        }
+
+  // Try every visible trigger — the first match is not necessarily the
+  // one wrapping the logout entry (Bootstrap navbars often render
+  // multiple dropdown toggles).
+  const tried = new Set();
+  for (const triggerLoc of menuTriggers) {
+    const count = await triggerLoc.count().catch(() => 0);
+    for (let i = 0; i < count; i++) {
+      const trigger = triggerLoc.nth(i);
+      if (!(await trigger.isVisible({ timeout: 1_000 }).catch(() => false))) continue;
+      const key = await trigger.evaluate((el) => el.outerHTML.slice(0, 200)).catch(() => "");
+      if (key && tried.has(key)) continue;
+      tried.add(key);
+      await trigger.click({ timeout: 5_000 }).catch(() => {});
+      // Give the dropdown / popover time to render its items.
+      await page.waitForTimeout(750);
+      if (await tryLogoutFrom(page)) {
+        await page.waitForLoadState("domcontentloaded", { timeout: 30_000 }).catch(() => {});
+        return;
       }
+      // Close again before trying the next trigger so overlay menus do
+      // not stack and hide each other.
+      await trigger.click({ timeout: 2_000 }).catch(() => {});
     }
   }
 
