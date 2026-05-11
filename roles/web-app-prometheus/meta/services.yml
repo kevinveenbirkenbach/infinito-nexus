@@ -27,11 +27,11 @@ email:
 css:
   enabled: true
   shared: true
-# nocheck: dynamic-flag — runtime DOM patch, always-on with the role
+# nocheck: dynamic-flag — gated on services.oauth2.enabled, not on group_names
 # nocheck: playwright-service-flag — runtime DOM patch, no probe-able surface flag
 javascript:
-  enabled: true
-  shared: true
+  enabled: "{{ lookup('config', 'web-app-prometheus', 'services.oauth2.enabled', False) | bool }}"
+  shared: "{{ lookup('config', 'web-app-prometheus', 'services.oauth2.enabled', False) | bool }}"
 # nocheck: playwright-service-flag — self-provider
 prometheus:
   enabled: true

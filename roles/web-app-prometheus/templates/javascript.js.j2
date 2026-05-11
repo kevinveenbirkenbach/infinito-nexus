@@ -1,4 +1,3 @@
-{% if lookup('config', application_id, 'services.oauth2.enabled') | bool %}
 (function () {
   const LOGOUT_URL =
     "{{ OIDC.CLIENT.LOGOUT_URL }}?redirect_uri=" +
@@ -42,29 +41,55 @@
     const anchor = findIconGroupAnchor();
     if (!anchor) return;
 
-    const btn = document.createElement("a");
+    // Clone the styling of an existing sibling icon button so the
+    // injected logout matches the role's theme (box, padding, hover
+    // state, border-radius) without us guessing per-app design tokens.
+    const sibling = anchor.querySelector(
+      ":scope > button, :scope > a, :scope > li > button, :scope > li > a",
+    );
+
+    const btn = document.createElement(
+      sibling && sibling.tagName === "BUTTON" ? "button" : "a",
+    );
     btn.setAttribute(INJECTED_ATTR, "true");
-    btn.setAttribute("href", LOGOUT_URL);
+    if (btn.tagName === "A") btn.setAttribute("href", LOGOUT_URL);
     btn.setAttribute("title", "Logout");
     btn.setAttribute("aria-label", "Logout");
-    btn.setAttribute("role", "button");
+    btn.setAttribute("type", btn.tagName === "BUTTON" ? "button" : "");
+    if (sibling) {
+      btn.className = sibling.className;
+      const cs = window.getComputedStyle(sibling);
+      btn.style.cssText = [
+        "display:" + (cs.display === "inline" ? "inline-flex" : cs.display),
+        "align-items:center",
+        "justify-content:center",
+        "width:" + cs.width,
+        "height:" + cs.height,
+        "padding:" + cs.padding,
+        "background:" + cs.backgroundColor,
+        "color:" + cs.color,
+        "border:" + cs.border,
+        "border-radius:" + cs.borderRadius,
+        "cursor:pointer",
+        "text-decoration:none",
+      ].join(";");
+    } else {
+      btn.style.cssText = [
+        "display:inline-flex",
+        "align-items:center",
+        "justify-content:center",
+        "width:32px",
+        "height:32px",
+        "padding:4px",
+        "background:rgba(127,127,127,0.18)",
+        "color:inherit",
+        "border:1px solid rgba(127,127,127,0.25)",
+        "border-radius:6px",
+        "cursor:pointer",
+        "text-decoration:none",
+      ].join(";");
+    }
     btn.innerHTML = LOGOUT_SVG;
-    btn.style.cssText = [
-      "display:inline-flex",
-      "align-items:center",
-      "justify-content:center",
-      "width:38px",
-      "height:38px",
-      "margin-left:6px",
-      "padding:0",
-      "background:transparent",
-      "color:inherit",
-      "border:0",
-      "border-radius:6px",
-      "cursor:pointer",
-      "text-decoration:none",
-      "vertical-align:middle",
-    ].join(";");
     btn.addEventListener(
       "click",
       (e) => {
@@ -94,4 +119,3 @@
     start();
   }
 })();
-{% endif %}

@@ -1,6 +1,6 @@
 const { test, expect } = require("@playwright/test");
 
-const { decodeDotenvQuotedValue, performKeycloakLoginForm, runAdminFlow, runBiberFlow, runGuestFlow } = require("./personas");
+const { decodeDotenvQuotedValue, performKeycloakLoginForm, runAdminFlow, runBiberFlow, runGuestFlow, safeSkipUnlessEnabled } = require("./personas");
 test.use({
   ignoreHTTPSErrors: true
 });
@@ -72,6 +72,7 @@ test("metricz endpoint is accessible and returns prometheus text format", async 
 // own spec, so this test no longer exercises that
 // click path — keeping admin-reach SPOT-clean.
 test("prometheus: admin sso login, verify ui, logout", async ({ page }) => {
+  safeSkipUnlessEnabled("oauth2");
   const expectedOidcAuthUrl       = `${oidcIssuerUrl.replace(/\/$/, "")}/protocol/openid-connect/auth`;
   const expectedPrometheusBaseUrl = prometheusBaseUrl.replace(/\/$/, "");
 
@@ -121,6 +122,7 @@ test("prometheus: admin sso login, verify ui, logout", async ({ page }) => {
 // After successfully authenticating with Keycloak, oauth2-proxy checks the groups claim and
 // returns HTTP 403 — biber must never reach the Prometheus UI.
 test("prometheus: biber is denied access after sso login", async ({ browser }) => {
+  safeSkipUnlessEnabled("oauth2");
   const expectedOidcAuthUrl       = `${oidcIssuerUrl.replace(/\/$/, "")}/protocol/openid-connect/auth`;
   const expectedPrometheusBaseUrl = prometheusBaseUrl.replace(/\/$/, "");
 
