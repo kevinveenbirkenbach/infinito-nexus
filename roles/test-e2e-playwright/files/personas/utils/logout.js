@@ -49,6 +49,12 @@ async function clickFirstVisible(loc, { timeout = 5_000 } = {}) {
 
 function logoutCandidatesOn(scope) {
   return [
+    // The universal-logout JS injects a top-right fallback button when
+    // the role's own surface has no logout control AND oauth2-proxy is
+    // active. It marks the injected element with `data-injected-logout`
+    // — check that first so oauth2-proxy-gated roles (Prometheus,
+    // upstream-only UIs) have a guaranteed logout entry point.
+    scope.locator("[data-injected-logout]"),
     scope.getByRole("menuitem", { name: LOGOUT_NAME_RE }),
     scope.getByRole("link", { name: LOGOUT_NAME_RE }),
     scope.getByRole("button", { name: LOGOUT_NAME_RE }),
@@ -65,9 +71,35 @@ async function tryLogoutFrom(scope) {
   return false;
 }
 
+async function waitForAnyLogoutCandidate(page, timeoutMs = 10_000) {
+  // Poll the candidate set until ANY visible logout-shaped element
+  // surfaces or the deadline passes. Required because the universal
+  // logout helper injects its fallback button asynchronously (after
+  // DOMContentLoaded plus a MutationObserver settle), so a strict
+  // snapshot check fails on slow upstreams.
+  const deadline = Date.now() + timeoutMs;
+  while (Date.now() < deadline) {
+    for (const loc of logoutCandidatesOn(page)) {
+      const count = await loc.count().catch(() => 0);
+      for (let i = 0; i < count; i++) {
+        const cand = loc.nth(i);
+        if (await cand.isVisible({ timeout: 500 }).catch(() => false)) {
+          return true;
+        }
+      }
+    }
+    await page.waitForTimeout(250);
+  }
+  return false;
+}
+
 async function inAppLogout(page) {
   // Settle any OIDC return-redirects before the first attempt.
   await page.waitForLoadState("domcontentloaded", { timeout: 30_000 }).catch(() => {});
+
+  // Give the universal-logout JS (and any role-local JS that mounts
+  // the navbar asynchronously) time to surface a logout candidate.
+  await waitForAnyLogoutCandidate(page, 10_000);
 
   if (await tryLogoutFrom(page)) {
     await page.waitForLoadState("domcontentloaded", { timeout: 30_000 }).catch(() => {});

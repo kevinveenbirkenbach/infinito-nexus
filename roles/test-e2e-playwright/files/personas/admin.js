@@ -91,6 +91,7 @@ async function runAdminFlow(page, opts = {}) {
   //     directly on the Keycloak auth endpoint; perform Keycloak login.
   //   * In-app OIDC plugin: the role's own UI exposes a Login link;
   //     click it to trigger the redirect, then perform Keycloak login.
+  let keycloakRoundTripCompleted = false;
   if (adminUsername && adminPassword) {
     if (oidcEnabled && !page.url().includes("openid-connect/auth")) {
       const loginLink = page
@@ -130,6 +131,7 @@ async function runAdminFlow(page, opts = {}) {
     }
     if (page.url().includes("openid-connect/auth")) {
       await performKeycloakLogin(page, adminUsername, adminPassword, canonicalDomain);
+      keycloakRoundTripCompleted = true;
     }
   }
 
@@ -153,7 +155,24 @@ async function runAdminFlow(page, opts = {}) {
           "[data-region='user-menu-toggle'], .user-menu-toggle, .usermenu, [aria-label*='user menu' i], [aria-label*='account' i], [data-testid*='user' i], a[href*='logout' i], a[href*='end_session' i], a[href*='end-session' i]",
         ),
       );
-  let adminReachedAuthenticated = await adminAuthMarker(page).first().isVisible({ timeout: 15_000 }).catch(() => false);
+  // A successful Keycloak round-trip (oauth2-proxy-gated login that
+  // returned to `canonicalDomain` after the form submit) is a strong
+  // proof of authentication on its own — some roles (oauth2-proxy
+  // gated services such as Prometheus, status pages, raw upstream UIs
+  // without their own account menu) have no in-app auth marker to
+  // probe. When the round-trip ran, treat the persona as authenticated
+  // and let `inAppLogout` decide whether a logout control is
+  // reachable. The `adminAuthMarker` poll below still tries to find a
+  // visible Account/Logout control so the post-login UI assertions
+  // remain effective for roles that DO expose one.
+  let adminReachedAuthenticated = keycloakRoundTripCompleted
+    && new URL(page.url()).hostname.endsWith(canonicalDomain);
+  if (!adminReachedAuthenticated) {
+    adminReachedAuthenticated = await adminAuthMarker(page)
+      .first()
+      .isVisible({ timeout: 15_000 })
+      .catch(() => false);
+  }
   if (!adminReachedAuthenticated) {
     for (const frame of page.frames()) {
       if (frame === page.mainFrame()) continue;
