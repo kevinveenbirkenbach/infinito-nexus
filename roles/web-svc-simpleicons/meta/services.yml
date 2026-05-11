@@ -31,6 +31,8 @@ simpleicons:
   shared: true
   image: node
   version: latest
+  local_image: simpleicons-server
+  local_version: latest
   min_storage: 1GB
   cpus: 0.5
   mem_reservation: 126m
@@ -40,11 +42,6 @@ simpleicons:
     local:
       http: 8044
   lifecycle: beta
-# nocheck: dynamic-flag
-# nocheck: playwright-service-flag — local build tag for the application container
-application:
-  image: simpleicons-server
-  version: latest
 prometheus:
   enabled: "{{ 'web-app-prometheus' in group_names }}"
   shared: "{{ 'web-app-prometheus' in group_names }}"
