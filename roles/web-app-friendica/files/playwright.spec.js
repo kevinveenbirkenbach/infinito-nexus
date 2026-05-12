@@ -23,9 +23,15 @@ async function performFriendicaLogin(page, baseUrl, username, password) {
 
   // Friendica renders a `btn form-button-search` submit in the topbar before
   // the main login form, so a generic `button[type='submit']` selector picks
-  // up the search button. Target the login form's own "Sign in" button by
-  // accessible role + exact name instead.
-  const signInButton = page.getByRole("button", { name: "Sign in", exact: true });
+  // up the search button. Scope the submit click to the form that owns the
+  // password field, and accept any common submit label upstream may render
+  // (`Sign in`, `Login`, `Anmelden`, …) to stay resilient against theme
+  // / locale changes on Friendica's login template.
+  const loginForm = page.locator("form").filter({ has: passwordField });
+  const signInButton = loginForm
+    .locator("button[type='submit'], input[type='submit']")
+    .or(loginForm.getByRole("button", { name: /sign\s*in|log\s*in|anmelden|connexion|iniciar|entrar/i }))
+    .first();
 
   await usernameField.waitFor({ state: "visible", timeout: 60_000 });
   await usernameField.fill(username);

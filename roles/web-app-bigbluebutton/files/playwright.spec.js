@@ -1,4 +1,5 @@
 const { test, expect } = require("@playwright/test");
+const { skipUnlessServiceEnabled } = require("./service-gating");
 
 const { assertCspResponseHeader, decodeDotenvQuotedValue, expectNoCspViolations, installCspViolationObserver, normalizeBaseUrl, performKeycloakLoginForm, runGuestFlow } = require("./personas");
 test.use({ ignoreHTTPSErrors: true });
@@ -82,6 +83,22 @@ async function signInViaBbbOidc(page, username, password, personaLabel) {
 
   await page.goto(`${bbbBaseUrl}/?sso=true`);
 
+  // Greenlight's autoSignIn (App.jsx) fires on the SPA root when `?sso=true`
+  // is present. Older Greenlight versions or first-render races may drop the
+  // user on `/signin` instead. Fall back to clicking the explicit OIDC button
+  // that Greenlight renders when `OPENID_CONNECT_*` env is set.
+  await page
+    .waitForURL((u) => u.toString().includes(expectedOidcAuthUrl), { timeout: 10_000 })
+    .catch(async () => {
+      const oidcButton = page
+        .locator("a, button")
+        .filter({ hasText: /sign\s*in\s*with|openid|oidc|sso|single\s*sign[-\s]*on/i })
+        .first();
+      if (await oidcButton.isVisible({ timeout: 5_000 }).catch(() => false)) {
+        await oidcButton.click().catch(() => {});
+      }
+    });
+
   await page.waitForURL((u) => u.toString().includes(expectedOidcAuthUrl), {
     timeout: 120_000
   });
@@ -138,6 +155,7 @@ async function assertLoggedOut(page, bbbBaseUrl, personaLabel) {
 }
 
 test("administrator: dashboard to bigbluebutton OIDC login and logout", async ({ page }) => {
+  skipUnlessServiceEnabled("oidc");
   const diagnostics = attachDiagnostics(page);
   await signInViaBbbOidc(page, adminUsername, adminPassword, "administrator");
   await bbbLogout(page, bbbBaseUrl);
@@ -146,6 +164,7 @@ test("administrator: dashboard to bigbluebutton OIDC login and logout", async ({
 });
 
 test("biber: dashboard to bigbluebutton OIDC login and logout", async ({ page }) => {
+  skipUnlessServiceEnabled("oidc");
   const diagnostics = attachDiagnostics(page);
   await signInViaBbbOidc(page, biberUsername, biberPassword, "biber");
   await bbbLogout(page, bbbBaseUrl);

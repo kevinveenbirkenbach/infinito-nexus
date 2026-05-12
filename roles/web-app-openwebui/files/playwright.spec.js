@@ -1,4 +1,5 @@
 const { test, expect } = require("@playwright/test");
+const { skipUnlessServiceEnabled } = require("./service-gating");
 
 const { assertCspMetaParity, assertCspResponseHeader, decodeDotenvQuotedValue, expectNoCspViolations, installCspViolationObserver, normalizeBaseUrl, performKeycloakLoginForm, runGuestFlow } = require("./personas");
 test.use({ ignoreHTTPSErrors: true });
@@ -117,6 +118,7 @@ async function signInViaDashboardOidc(page, username, password, personaLabel) {
 }
 
 test("administrator: dashboard to openwebui OIDC login and logout", async ({ page }) => {
+  skipUnlessServiceEnabled("oidc");
   const diagnostics = attachDiagnostics(page);
 
   await signInViaDashboardOidc(page, adminUsername, adminPassword, "administrator");
@@ -146,6 +148,7 @@ test("administrator: dashboard to openwebui OIDC login and logout", async ({ pag
 });
 
 test("biber: dashboard to openwebui OIDC login and logout", async ({ page }) => {
+  skipUnlessServiceEnabled("oidc");
   const diagnostics = attachDiagnostics(page);
 
   await signInViaDashboardOidc(page, biberUsername, biberPassword, "biber");

@@ -105,9 +105,13 @@ async function logoutFromDashboardIfNeeded(page) {
   const nav = page.locator("nav");
   const loginItem = page.locator("nav").getByText("Login", { exact: true });
   const logoutItem = page.locator("nav").getByText("Logout", { exact: true });
+  // Prefer the specific Account dropdown trigger (matches the dashboard role's
+  // own header contract) so we don't accidentally click a theme toggle or a
+  // hamburger that doesn't expose Logout on click.
   const accountMenuTriggerLocators = [
-    nav.locator("button"),
+    nav.getByRole("button", { name: /account/i }),
     nav.locator("[aria-haspopup='true']"),
+    nav.locator("button"),
     nav.getByRole("button")
   ];
 

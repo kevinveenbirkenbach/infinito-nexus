@@ -147,6 +147,10 @@ test.beforeEach(() => {
 // bearer tokens or OAuth2. If this test returns 401/403, the nginx ACL whitelist
 // for /metricz is misconfigured.
 test("metricz endpoint exposes mattermost metrics when prometheus is loaded as dependency", async ({ request }) => {
+  if (!prometheusBaseUrl) {
+    test.skip(true, "PROMETHEUS_BASE_URL is unset — prometheus not deployed alongside mattermost in this variant.");
+    return;
+  }
   const metriczUrl = `${prometheusBaseUrl.replace(/\/$/, "")}/metricz`;
 
   const response = await request.get(metriczUrl);
@@ -188,6 +192,10 @@ test("metricz endpoint exposes mattermost metrics when prometheus is loaded as d
 //   - PROMETHEUS_BASE_URL or OIDC_ISSUER_URL are unset (prometheus not deployed)
 //   - The query returns no results (native_metrics.enabled=false in this deployment)
 test("prometheus scrapes mattermost native metrics — job target is up", async ({ browser, request }) => {
+  if (!prometheusBaseUrl) {
+    test.skip(true, "PROMETHEUS_BASE_URL is unset — prometheus not deployed alongside mattermost in this variant.");
+    return;
+  }
   const metriczPreflight = await request.get(`${prometheusBaseUrl.replace(/\/$/, "")}/metricz`);
   if (metriczPreflight.status() === 404) {
     test.skip(true, "Prometheus nginx vhost not deployed in this CI run (deploy web-app-prometheus explicitly to enable this test)");

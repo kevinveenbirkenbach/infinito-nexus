@@ -106,13 +106,12 @@ Columns immediately after `Role`:
 | `web-app-magento` | 19 | 18 | 5% | ❌ | ✅ | ⏳ | ⏳ |  |  |
 | `web-app-lam` | 19 | 18 | 5% | ❌ | ✅ | ⏳ | ⏳ | ⏳ |  |
 | `web-app-kix` | 19 | 18 | 5% | ✅ | ✅ | ⏳ | ⏳ | ⏳ |  |
-| `web-app-bigbluebutton` | 24 | 17 | 30% | ✅ | ✅ | ⏳ | ⏳ |  |  |
+| `web-app-bigbluebutton` | 24 | 17 | 30% | ✅ | ✅ | ⏳ | ⏳ |  | `skipUnlessServiceEnabled("oidc")` gate added; Greenlight `?sso=true` autoSignIn fallback clicks explicit OIDC button after 10s timeout. v1 (OIDC off) skips cleanly; v0 needs deploy verify. Guest 502 separate deploy-side issue |
 | `web-app-phpmyadmin` | 18 | 17 | 5% | ❌ | ✅ | ⏳ | ⏳ |  |  |
-| `web-app-friendica` | 23 | 16 | 30% | ✅ | ✅ | ⏳ | ⏳ | ⏳ |  |
-| `web-app-openwebui` | 22 | 15 | 30% | ✅ | ✅ | ⏳ | ⏳ | ⏳ |  |
-| `web-app-taiga` | 21 | 15 | 30% | ✅ | ✅ | ⏳ | ⏳ | ⏳ |  |
-| `web-app-mattermost` | 21 | 15 | 30% | ✅ | ✅ | ⏳ | ⏳ |  |  |
-| `web-app-fediwall` | 21 | 15 | 30% | ✅ | ✅ | ⏳ | ⏳ | ⏳ |  |
+| `web-app-friendica` | 23 | 16 | 30% | ✅ | ✅ | ⏳ | ⏳ | ⏳ | Bespoke admin/biber login Sign-in button locator scoped to login form + broadened label regex (Sign in / Login / Anmelden / connexion / iniciar / entrar) so the test stays resilient to Keycloak-vs-Friendica form landing. Persona scenarios' Keycloak round-trip not returning to social.* — Deep, needs OIDC client redirect_uri verify |
+| `web-app-openwebui` | 22 | 15 | 30% | ✅ | ✅ | ⏳ | ⏳ | ⏳ | `skipUnlessServiceEnabled("oidc")` gate added to both OIDC tests; v1/v2 (OIDC off) skip cleanly; v0 `/oauth/oidc/login` 404 needs deploy verify. Guest 502 separate deploy-side issue |
+| `web-app-taiga` | 21 | 15 | 30% | ✅ | ✅ | ⏳ | ⏳ | ⏳ | Dashboard account-menu trigger locator now prefers `getByRole("button", { name: /account/i })` first (matches the dashboard role's own header contract); fixes the dashboard-logout assertion in 2/4 failing tests. Universal-logout Keycloak round-trip not returning to taiga.kanban.* remains Deep |
+| `web-app-mattermost` | 21 | 15 | 30% | ✅ | ✅ | ⏳ | ⏳ |  | `PROMETHEUS_BASE_URL` rendered conditionally in env (only when web-app-prometheus is in `group_names`) + `test.skip` guards added to the two prometheus scrape tests so they no longer crash on undefined. Bespoke DM-UI selector + universal-logout Keycloak round-trip remain |
 | `web-app-socialhome` | 16 | 15 | 5% | ❌ | ✅ | ⏳ | ⏳ |  |  |
 | `web-app-opentalk` | 23 | 6 | 75% | ✅ | ✅ | ⏳ | ⏳ | ⏳ | CI run 25680106742 — deploy FAILED. `PERSONA_*_BLOCKED` env fix applied locally (commit f1898dd77) but not yet verified against a fresh CI run |
 | `web-app-flowise` | 22 | 6 | 75% | ✅ | ✅ | ⏳ | ⏳ | ⏳ | CI run 25680106742 — deploy FAILED. `PERSONA_*_BLOCKED` env fix applied locally (commit f1898dd77) but not yet verified against a fresh CI run |
@@ -131,6 +130,7 @@ Columns immediately after `Role`:
 | `web-app-akaunting` | 21 | 5 | 75% | ✅ | ✅ | ✅ | ✅ | ✅ | CI run 25680106742 — 2/2 active tests pass, 4 personas cleanly skipped. biber and administrator personas explicit-skipped via `PERSONA_BIBER_BLOCKED=true` and `PERSONA_ADMINISTRATOR_BLOCKED=true` in env; OIDC auto-provisioning not wired, see role TODO.md |
 | `web-app-peertube` | 20 | 5 | 75% | ✅ | ✅ | ✅ | ✅ |  | CI run 25680106742 — 4/4 tests pass |
 | `web-app-bluesky` | 20 | 5 | 75% | ✅ | ✅ | ✅ | ✅ | ✅ | CI run 25680106742 — 2/2 active tests pass, 4 personas cleanly skipped. biber and administrator personas explicit-skipped via `PERSONA_BIBER_BLOCKED=true` / `PERSONA_ADMINISTRATOR_BLOCKED=true`; the social-app mobile SPA hides the logout in a profile menu unreachable to the auth-surface check; bespoke OIDC + LDAP variant tests verify both personas authenticate via the broker |
+| `web-app-fediwall` | 21 | 5 | 75% | ✅ | ✅ | ⏳ | ⏳ | ⏳ | `PERSONA_BIBER_BLOCKED=true` and `PERSONA_ADMINISTRATOR_BLOCKED=true` rendered in env: static Vue SPA, no backend / accounts / auth surface (see role README). Biber is covered separately by the cross-fediverse scenario (biber posts to Mastodon and Friendica via the same SSO/LDAP UI; the wall renders the post); administrator has no admin surface to drive. Awaiting fresh CI verification |
 | `web-svc-xmpp` | 16 | 4 | 75% | ✅ | ✅ | ⏳ | ⏳ | ⏳ | CI run 25680106742 — deploy FAILED. `PERSONA_*_BLOCKED` env fix applied locally (commit f1898dd77) but not yet verified against a fresh CI run |
 | `web-svc-libretranslate` | 16 | 4 | 75% | ✅ | ✅ | ⏳ | ⏳ |  | CI run 25680106742 — deploy FAILED. `PERSONA_BIBER_BLOCKED=true` env fix applied locally (commit f1898dd77) but not yet verified against a fresh CI run |
 | `web-app-postmarks` | 18 | 4 | 75% | ✅ | ✅ | ✅ | ✅ |  | CI run 25680106742 — 3/3 tests pass |
