@@ -73,6 +73,7 @@ Legend (`has env` / `has spec`): ✅ present, ❌ missing.
 Legend (`v0` / `v1` / `v2`): ⏳ untested, ✅ passed (full Per-role flow incl. log inspection), empty = variant not declared.
 
 Columns immediately after `Role`:
+
 - **`total`** — original priority signal (consumer fan-out from `meta/services.yml` cross-references); higher = more downstream impact.
 - **`complexity`** — remaining work estimate, computed as `round(total × (1 − conf/100))`. Data rows are sorted DESC by this column so the highest remaining work is at the top.
 - **`conf`** — confidence that the role passes against current HEAD code, no further fixes needed:
@@ -138,7 +139,7 @@ Columns immediately after `Role`:
 | `web-app-navigator` | 17 | 4 | 75% | ❌ | ✅ | ✅ | ✅ |  | Auth-less collapse (req-019 §"Auth-less roles", Zeile 271): in-app module of `web-app-dashboard`; no separate auth surface |
 | ~~`web-app-nextcloud`~~ | 27 | 0 | 100% | ✅ | ✅ | ✅ | ✅ | ✅ | Local fresh-purged FULL matrix deploy `/tmp/deploy-bundleA3.log` v0+v1 ✓ (3/3 bespoke pass; persona scenarios cleanly skipped via `PERSONA_*_BLOCKED`). Nextcloud's `/login` reverse-proxies Keycloak's login form on its own domain (no `/openid-connect/auth` URL marker); bespoke `biber logs into nextcloud via OIDC and logs out` + `dashboard to nextcloud login` + `nextcloud talk admin settings` cover personas end-to-end via `loginToStandaloneNextcloudWithRetry`. Awaiting next CI run for cross-verification |
 | ~~`web-app-minio`~~ | 22 | 0 | 100% | ✅ | ✅ | ✅ | ✅ | ✅ | Local fresh-purged FULL matrix deploy `/tmp/deploy-bundleA3.log` v0+v1 ✓. Bespoke `administrator: OIDC integrated login path via STS AssumeRoleWithWebIdentity` + `administrator: MinIO Console form login under LDAP variant` cover administrator; biber `PERSONA_BLOCKED` (no minio account by default, STS chain not persona-driveable). Awaiting next CI run for cross-verification |
-| ~~`web-app-opencloud`~~ | 20 | 0 | 100% | ✅ | ✅ | ✅ | ✅ | ✅ | Local fresh-purged FULL matrix deploy `/tmp/deploy-bundleA3.log` v0+v1 ✓. Bespoke `opencloud sso login (administrator|biber) lands on files view` covers both personas end-to-end via opencloud's own auth-route (not the standard oauth2-proxy `/openid-connect/auth` pattern); persona shared scenarios `PERSONA_*_BLOCKED`. Awaiting next CI run for cross-verification |
+| ~~`web-app-opencloud`~~ | 20 | 0 | 100% | ✅ | ✅ | ✅ | ✅ | ✅ | Local fresh-purged FULL matrix deploy `/tmp/deploy-bundleA3.log` v0+v1 ✓. Bespoke `opencloud sso login (administrator/biber) lands on files view` covers both personas end-to-end via opencloud's own auth-route (not the standard oauth2-proxy `/openid-connect/auth` pattern); persona shared scenarios `PERSONA_*_BLOCKED`. Awaiting next CI run for cross-verification |
 | ~~`web-app-chess`~~ | 18 | 0 | 100% | ❌ | ✅ | ✅ | ✅ |  | CI run 25680106742 — deploy success; auth-less small-app, spec collapses cleanly without env |
 | ~~`web-app-sphinx`~~ | 17 | 0 | 100% | ✅ | ✅ | ✅ | ✅ |  | CI run 25680106742 — 3/3 active tests pass, 2 personas cleanly skipped |
 | ~~`web-app-roulette-wheel`~~ | 17 | 0 | 100% | ❌ | ✅ | ✅ | ✅ |  | CI run 25680106742 — deploy success; auth-less small-app, spec collapses cleanly without env |
