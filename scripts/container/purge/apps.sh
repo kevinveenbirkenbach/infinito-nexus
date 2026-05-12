@@ -75,4 +75,5 @@ for entity in "${entities[@]}"; do
 	bash "${ENTITY_DIR}/db.sh" "${entity}" || true
 	bash "${ENTITY_DIR}/compose.sh" "${entity}" || true
 	bash "${ENTITY_DIR}/dir.sh" "${entity}" || true
+	bash "${ENTITY_DIR}/nginx.sh" "${entity}" || true
 done
