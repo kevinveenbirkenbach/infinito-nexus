@@ -8,6 +8,9 @@ oidc:
   enabled: false
   shared: false
 oauth2:
+  origin:
+    host: web
+    port: "8000"
   enabled: "{{ 'web-app-keycloak' in group_names }}"
   shared: "{{ 'web-app-keycloak' in group_names }}"
 ldap:
@@ -42,6 +45,7 @@ shopware:
   title: "{{ SOFTWARE_NAME }} Shop"
   ports:
     local:
+      oauth2: 16503
       http: 8060
   run_after:
     - web-app-keycloak
