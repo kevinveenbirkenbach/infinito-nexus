@@ -8,6 +8,9 @@ oidc:
   enabled: false
   shared: false
 oauth2:
+  origin:
+    host: nginx
+    port: "8080"
   enabled: "{{ 'web-app-keycloak' in group_names }}"
   shared: "{{ 'web-app-keycloak' in group_names }}"
 dashboard:
@@ -74,6 +77,7 @@ prometheus:
 magento:
   ports:
     local:
+      oauth2: 16504
       http: 8052
   run_after:
     - web-app-keycloak
