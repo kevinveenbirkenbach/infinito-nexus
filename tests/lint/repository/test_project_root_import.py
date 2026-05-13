@@ -52,7 +52,7 @@ import unittest
 from pathlib import Path
 
 from utils.annotations.suppress import is_suppressed_at
-from utils.cache.files import iter_project_files, read_text
+from utils.cache.files import iter_non_ignored_files, read_text
 
 SUPPRESS_RULE: str = "project-root-import"
 
@@ -303,8 +303,11 @@ def _check_init_project_root(path: Path) -> list[str]:
 
 class TestProjectRootImport(unittest.TestCase):
     def test_no_local_project_root_computation(self):
+        # Walk only non-gitignored files so vendored skill packages under
+        # `.agents/` and `.claude/skills/` (which carry their own
+        # `parents[N]` boilerplate by upstream design) do NOT count.
         offenders: list[str] = []
-        for path_str in iter_project_files(extensions=(".py",)):
+        for path_str in iter_non_ignored_files(extensions=(".py",)):
             path = Path(path_str)
             offenders.extend(_scan_file(path))
             offenders.extend(_check_init_project_root(path))

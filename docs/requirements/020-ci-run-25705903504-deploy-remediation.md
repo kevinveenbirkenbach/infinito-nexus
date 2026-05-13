@@ -152,7 +152,7 @@ Sorted DESC by `total` (carried over from [019](019-playwright-meta-services-par
 Two recent change-sets interact:
 
 1. `820fb0a22 fix(purge): clear stale nginx vhosts between matrix-deploy rounds` — extends the inter-round purge with an nginx-vhost primitive. The purge is correct in intent.
-2. `f102c229f refactor(inventory): split monolith into SRP submodules + variant-only mode` — the new variant-only resolver in [cli/administration/deploy/development/inventory/variants.py](../../cli/administration/deploy/development/inventory/variants.py) builds each round's include list strictly from the variant's pinned `services:` block. Roles whose variants pin `postgres: shared: false` (25 `variants.yml` files do this for variant 1) drop their postgres dependency from the round.
+2. `f102c229f refactor(inventory): split monolith into SRP submodules + variant-only mode` — the new variant-only resolver added in `cli/administration/deploy/development/inventory/variants.py` (removed again in commit `c7bacbab5`; see [inventory/](../../cli/administration/deploy/development/inventory/__init__.py) for the current package layout) built each round's include list strictly from the variant's pinned `services:` block. Roles whose variants pin `postgres: shared: false` (25 `variants.yml` files do this for variant 1) dropped their postgres dependency from the round.
 
 Effect in CI Run 25705903504, round 1 for any postgres consumer:
 

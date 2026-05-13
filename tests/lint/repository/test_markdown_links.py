@@ -16,7 +16,7 @@ import unittest
 from pathlib import Path
 from typing import NamedTuple
 
-from utils.cache.files import iter_project_files, read_text
+from utils.cache.files import iter_non_ignored_files, read_text
 
 from . import PROJECT_ROOT
 
@@ -54,7 +54,10 @@ def _tracked_md_files(root: Path) -> list[Path]:
         rel_paths = [p for p in out.decode("utf-8", errors="replace").split("\0") if p]
         return [root / rel for rel in rel_paths if rel.endswith(".md")]
     except Exception:
-        return [Path(p) for p in iter_project_files(extensions=(".md",))]
+        # Fallback path (e.g. sandbox without git subprocess): walk the
+        # worktree but skip gitignored files so vendored skill packages
+        # under `.agents/` and `.claude/skills/` do NOT count.
+        return [Path(p) for p in iter_non_ignored_files(extensions=(".md",))]
 
 
 def _is_checkable_link(target: str) -> bool:
