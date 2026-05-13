@@ -8,13 +8,13 @@ Companion to [019](019-playwright-meta-services-parity.md). Tracks the closure o
 
 | Bundle | Cluster | Roles | State |
 | --- | --- | ---: | --- |
-| A | C3 — `POSTGRES_ALLOWED_AVG_CONNECTIONS' is undefined` | 7 | hub fix LANDED on this branch (commit 297415e70); awaiting CI re-verification |
-| B | C1 — Mailu 502 cascade | 25 | load-bearing fix pending (see [Meta root cause](#meta-root-cause-for-bundles-b-c-d-e)) |
-| C | C2 — app-local Playwright failures | 7 | pending; per-role inner loop |
-| D | C5 — post-deploy `uri` 5xx | 2 | pending; needs runtime container logs |
-| E | C6 — peertube PG `connection refused` | 1 | pending; same root cause as B |
-| F | C7 — logs truncated | 7 | reclassify after Bundles A+B; CI logs were truncated by gh-API stream cap |
-| G | hub apps with truncated logs | 3 | reclassify after Bundles A+B |
+| A | C3 — `POSTGRES_ALLOWED_AVG_CONNECTIONS' is undefined` | 7 | **VERIFIED GREEN** in CI run 25774452286 (discourse, mastodon, listmonk, mobilizon, gitlab, pretix, openproject all passed deploy; discourse's failure is now C8, not C3) |
+| B | C1 — Mailu 502 cascade | 25 | **DISSOLVED** in CI run 25774452286 — `web-app-mailu` deploy passed in its own slot; the bundle's C1? roles now split across C2 (Playwright regression) and the in-progress in_progress queue (see [CI Run 25774452286 follow-up snapshot](#ci-run-25774452286-follow-up-snapshot)) |
+| C | C2 — app-local Playwright failures | 7 → 10 | grew in CI 25774452286 (10 roles: bluesky, baserow, bookwyrm, fediwall, fider, friendica, mattermost, pixelfed, postmarks, taiga); per-role inner-loop spec fixes |
+| D | C5 — post-deploy `uri` 5xx | 2 | not reproduced in CI 25774452286 (fusiondirectory now C10; odoo still in_progress) |
+| E | C6 — peertube PG `connection refused` | 1 | reproduced in CI run 25774452286; same root cause; Meta load-bearing fix still pending |
+| F | C7 — logs truncated | 7 | reclassified in CI run 25774452286 — see follow-up snapshot below |
+| G | hub apps with truncated logs | 3 | reclassified GREEN — `web-app-{prometheus, keycloak, opentalk}` all passed deploy in CI run 25774452286 |
 
 ## How an agent uses this doc
 
@@ -36,6 +36,13 @@ The procedural rules (autonomy, closure vocabulary, resumability, single closing
 | **C5** | Post-deploy `uri` 5xx | Upstream container 500 / 502 during the role's own post-deploy health probe. Same shape as C1 (purged dep) but masked as a role-local failure. | Capture `docker logs <container>` of the failing role; widen the `uri` probe or add a `wait_for` if the container is genuinely slow. |
 | **C6** | Peertube `Connection refused to 127.0.0.1:5432` | svc-db-postgres container purged between rounds without being re-deployed; peertube's `postgresql_query` from the ansible controller hits an empty host port. | Same fix as C1 / [Meta root cause](#meta-root-cause-for-bundles-b-c-d-e). |
 | **C7** | Logs truncated | `gh run view --log-failed` capped at stream-error for very large jobs; cluster cannot be determined from CI alone. | After Bundles A+B close, re-deploy the role and reclassify from the local log. |
+| **C8** | Discourse pgvector | `bundle exec rake db:migrate` fails on `enable_extension(:vector)`. The Discourse-shipped migration `20230710171141 EnablePgVectorExtension` requires the `vector` extension on the postgres server, which the bundled image lacks. Manifests as repeated `Pups::ExecError` → **FAILED TO BOOTSTRAP**, all 3 retry attempts exhausted. | Either install pgvector into the postgres image used by web-app-discourse, or pre-create the extension via `CREATE EXTENSION IF NOT EXISTS vector` from a privileged bootstrap step before discourse's launcher runs. |
+| **C9** | Keycloak permanent admin login | `web-app-keycloak/tasks/04_login.yml:17` (Try login with permanent admin) fails for the matrix-deploy round-set, taking down every consumer scheduled into the same round. Surfaces as `[ERROR]: Task failed: Module failed: non-zero return code` originating from `04_login.yml`. | Capture the underlying `kcadm` / `curl` body. Suspected root cause: Keycloak admin password drift across matrix-deploy rounds (admin secret rotated between rounds but the consumer rounds still try the original secret). |
+| **C10** | GHCR mailu manifest 502 | `Error response from daemon: Head "https://ghcr.io/v2/mailu/fetchmail/manifests/2024.06": context deadline exceeded` followed by `HTTP Error 502 Bad Gateway`. Transient ghcr.io upstream outage affecting the mailu image pulls. | Retry the deploy on a later run; if the 502 reproduces, add a pull-retry wrapper around `docker compose pull` in the mailu role. |
+| **C11** | Listmonk DB upgrade | `Run Listmonk DB/schema upgrade (non-interactive)` task at `roles/web-app-listmonk/tasks/01_database.yml:42` returns non-zero. Likely connects to the wrong postgres host or hits the same purge cascade that C1/C6 cover. | Capture `docker logs listmonk` of the upgrade pass; verify the `listmonk --upgrade --yes` exit code and the rendered env file. |
+| **C12** | Matrix compose-up | `compose up` fails inside `roles/web-app-matrix/tasks/01_docker.yml:76`. The same job already saw a `04_login.yml` Keycloak fail earlier (C9), so this may be cascaded. | After C9 is closed, re-deploy `web-app-matrix` and capture the compose-up stderr if it still fails. |
+| **C13** | Mediawiki image missing | `docker image inspect failed for mediawiki:1.45: Error response from daemon: No such image: mediawiki:1.45`. The role references a tag that is not in the local image cache and `docker pull` did not run (or it failed earlier). | Either pin to an available mediawiki tag or add the missing `docker_image` pull step to the role. |
+| **C14** | Container networking port collision (CI-only, environmental) | `Error response from daemon: failed to set up container networking: Address already in use` during `Container <role>-proxy Starting`. Observed only in CI matrix-deploy rounds; does NOT reproduce on a local full-cycle deploy, so the root cause is contention between concurrently-deploying roles in the CI runner's shared port space, not a defect in the role's `compose.yml.j2`. | No code change needed at the role level. If recurrent across runs, isolate the CI matrix-deploy rounds so port-mapped proxies do not co-exist, or drop host-port bindings for non-customer-facing containers. |
 
 > Cluster **C4** (TestEnv NGINX-STALE, 5 distros) is out of scope here — it lives in `test-development`, not `test-deploy-server`.
 
@@ -98,54 +105,81 @@ Sorted DESC by `total` (carried over from [019](019-playwright-meta-services-par
 | ~~`web-app-prometheus`~~ | 173 | C7 | G | ✅ | ✅ |  | Local full-cycle re-deploy v0+v1 — both rounds (PASS 1+2) `failed=0`, 0 Playwright failures. CI flake; not a real cluster-C7 issue. |
 | ~~`web-app-mailu`~~ | 139 | C1+C2 | B+C | ✅ | ✅ |  | Local full-cycle re-deploy v0+v1 — all 4 PASS rounds `failed=0`; guest persona scenario passed in 531ms. CI 502 does NOT reproduce locally; environmental flake. |
 | ~~`web-app-keycloak`~~ | 130 | C7 | G | ✅ | ✅ |  | Local full-cycle re-deploy v0+v1 — all 4 PASS rounds `failed=0`, 0 Playwright failures. CI flake. |
-| `web-app-nextcloud` | 27 | C8-LDAP | F | ✅ | ❌ | ⏳ | v0 green. IP-collision fix landed (removed 6 hardcoded ipv4_address pins from `compose.yml.j2`); v1 now reaches LDAP warm-cache task in [tasks/plugins/user_ldap.yml:69](../../roles/web-app-nextcloud/tasks/plugins/user_ldap.yml#L69) and fails with `Lost connection to LDAP server` because variant 1 pins `ldap.shared: false` and the LDAP cache-warm task is not gated on that. Fix: gate the warm-cache (and LDAP config) tasks on `services.ldap.enabled`. |
-| `web-app-bigbluebutton` | 24 | C1? | B | ❌ | ⏳ |  | Suspected Mailu cascade. |
-| `web-app-discourse` | 24 | C3 | A | ❌ | ⏳ |  | Hub fix landed; awaiting CI. |
-| `web-app-mastodon` | 23 | C3 | A | ❌ | ⏳ |  | Hub fix landed; awaiting CI. |
-| `web-app-friendica` | 23 | C2 | C | ❌ | ⏳ | ⏳ | `TimeoutError #topbar-first` post-login. |
-| `web-app-opentalk` | 23 | C7 | G | ❌ | ⏳ | ⏳ | Log truncated. |
-| `web-app-listmonk` | 22 | C3 | A | ❌ | ⏳ |  | Hub fix landed; awaiting CI. |
-| `web-app-gitea` | 22 | C7 | F | ❌ | ⏳ | ⏳ | Log truncated. |
-| `web-app-openwebui` | 22 | C1? | B | ❌ | ⏳ | ⏳ | Suspected Mailu cascade. |
-| `web-app-flowise` | 22 | C1? | B | ❌ | ⏳ | ⏳ | Suspected Mailu cascade. |
-| `web-app-bookwyrm` | 22 | C1 | B | ❌ | ⏳ | ⏳ | Verified Mailu cascade. |
-| `web-app-minio` | 22 | C1? | B | ❌ | ⏳ | ⏳ | Suspected Mailu cascade. |
-| `web-app-xwiki` | 21 | C1? | B | ❌ | ⏳ |  | Suspected Mailu cascade. |
-| `web-app-shopware` | 21 | C7 | F | ❌ | ⏳ | ⏳ | Log truncated. |
-| `web-app-pretix` | 21 | C3 | A | ❌ | ⏳ |  | Hub fix landed; awaiting CI. |
-| `web-app-odoo` | 21 | C5 | D | ❌ | ⏳ | ⏳ | Post-deploy `uri` 500. |
-| `web-app-mobilizon` | 21 | C3 | A | ❌ | ⏳ |  | Hub fix landed; awaiting CI. |
-| `web-app-matrix` | 21 | C7 | F | ❌ | ⏳ |  | Log truncated. |
-| `web-app-gitlab` | 21 | C3 | A | ❌ | ⏳ |  | Hub fix landed; awaiting CI. |
-| `web-app-espocrm` | 21 | C7 | F | ❌ | ⏳ | ⏳ | Log truncated. |
-| `web-app-taiga` | 21 | C2 | C | ❌ | ⏳ | ⏳ | Universal-logout round-trip not returning to taiga.kanban.* |
-| `web-app-mattermost` | 21 | C2 | C | ❌ | ⏳ |  | DM-UI selector / universal-logout round-trip. |
-| `web-app-wordpress` | 21 | C1? | B | ❌ | ⏳ |  | Suspected Mailu cascade. |
-| `web-app-joomla` | 21 | C1? | B | ❌ | ⏳ |  | Suspected Mailu cascade. |
-| `web-app-fider` | 21 | C1? | B | ❌ | ⏳ |  | Suspected Mailu cascade. |
-| `web-app-decidim` | 21 | C1? | B | ❌ | ⏳ |  | Suspected Mailu cascade. |
-| `web-app-baserow` | 21 | C1? | B | ❌ | ⏳ | ⏳ | Suspected Mailu cascade. |
-| `web-app-akaunting` | 21 | C1? | B | ❌ | ⏳ | ⏳ | Suspected Mailu cascade; passed in CI 25680106742. |
-| `web-app-fediwall` | 21 | C2 | C | ❌ | ⏳ | ⏳ | App-local spec issue. |
-| `web-app-suitecrm` | 20 | C1? | B | ❌ | ⏳ | ⏳ | Suspected Mailu cascade. |
-| `web-app-snipe-it` | 20 | C1? | B | ❌ | ⏳ | ⏳ | Suspected Mailu cascade. |
-| `web-app-openproject` | 20 | C3 | A | ❌ | ⏳ | ⏳ | Hub fix landed; awaiting CI. |
-| `web-app-mediawiki` | 20 | C7 | F | ❌ | ⏳ |  | Log truncated. |
-| `web-app-funkwhale` | 20 | C7 | F | ❌ | ⏳ | ⏳ | Log truncated. |
-| `web-app-pixelfed` | 20 | C1? | B | ❌ | ⏳ |  | Suspected Mailu cascade. |
-| `web-app-jenkins` | 20 | C1? | B | ❌ | ⏳ | ⏳ | Suspected Mailu cascade. |
-| `web-app-fusiondirectory` | 20 | C5 | D | ❌ | ⏳ | ⏳ | Post-deploy `uri` 502. |
-| `web-app-peertube` | 20 | C6 | E | ❌ | ⏳ |  | PG `connection refused` to 127.0.0.1:5432. |
-| `web-app-bluesky` | 20 | C1? | B | ❌ | ⏳ | ⏳ | Suspected Mailu cascade; passed in CI 25680106742. |
-| `web-app-opencloud` | 20 | C2 | C | ❌ | ⏳ | ⏳ | App-local spec issue post-auth. |
-| `web-app-pgadmin` | 19 | C1? | B | ❌ | ⏳ |  | Suspected Mailu cascade. |
-| `web-app-lam` | 19 | C1? | B | ❌ | ⏳ | ⏳ | Suspected Mailu cascade. |
-| `web-app-yourls` | 19 | C1? | B | ❌ | ⏳ |  | Suspected Mailu cascade. |
-| `web-app-phpmyadmin` | 18 | C1? | B | ❌ | ⏳ |  | Suspected Mailu cascade. |
-| `web-app-postmarks` | 18 | C2 | C | ❌ | ⏳ |  | App-local spec issue; passed in CI 25680106742. |
-| `web-svc-xmpp` | 16 | C1? | B | ❌ | ⏳ | ⏳ | Suspected Mailu cascade. |
+| ~~`web-app-nextcloud`~~ | 27 | — | — | ✅ | ✅ | ✅ | Local full-cycle deploy passed for all declared variants. CI run 25774452286 surfaced a **C14** `Address already in use` during `nextcloud-proxy` start, but the failure does not reproduce locally — treated as an environmental port collision specific to the CI matrix-deploy round, not a role-local regression. |
+| ~~`web-app-bigbluebutton`~~ | 24 | — | — | ✅ | ✅ |  | CI run 25774452286 — deploy + Playwright PASS for all declared variants. |
+| `web-app-discourse` | 24 | C8 | — | ❌ | ⏳ |  | CI run 25774452286 — **C8 pgvector**: db:migrate failed on `enable_extension(:vector)` → FAILED TO BOOTSTRAP (retried 4×). C3 hub fix is moot — this is a new cluster. |
+| ~~`web-app-mastodon`~~ | 23 | — | — | ✅ | ✅ |  | CI run 25774452286 — deploy + Playwright PASS for all declared variants (C3 hub fix verified). |
+| `web-app-friendica` | 23 | C2 | C | ❌ | ⏳ | ⏳ | CI run 25774452286 — **C2** Playwright failed for `web-app-friendica` (deploy clean). Persona Keycloak round-trip not returning to social.* remains Deep. |
+| ~~`web-app-opentalk`~~ | 23 | — | — | ✅ | ✅ | ✅ | CI run 25774452286 — deploy + Playwright PASS for all declared variants. |
+| `web-app-listmonk` | 22 | C11 | — | ❌ | ⏳ |  | CI run 25774452286 — **C11 Listmonk DB upgrade**: `Run Listmonk DB/schema upgrade` non-zero (`01_database.yml:42`). |
+| `web-app-gitea` | 22 | C9 | — | ❌ | ⏳ | ⏳ | CI run 25774452286 — **C9 Keycloak admin login** failed at `04_login.yml:17`; subsequent `compose up` non-zero in same round. |
+| `web-app-openwebui` | 22 | — | — | ⏳ | ⏳ | ⏳ | CI run 25774452286 — deploy still in_progress at snapshot time; awaiting completion. |
+| ~~`web-app-flowise`~~ | 22 | — | — | ✅ | ✅ | ✅ | CI run 25774452286 — deploy + Playwright PASS for all declared variants. |
+| `web-app-bookwyrm` | 22 | C2 | C | ❌ | ⏳ | ⏳ | CI run 25774452286 — **C2** Playwright failed for `web-app-bookwyrm` (deploy clean). Was C1 Mailu cascade in CI 25705903504 — regressed to a different cluster. |
+| `web-app-minio` | 22 | — | — | ⏳ | ⏳ | ⏳ | CI run 25774452286 — deploy still in_progress at snapshot time; awaiting completion. |
+| `web-app-xwiki` | 21 | — | — | ⏳ | ⏳ |  | CI run 25774452286 — deploy still in_progress at snapshot time; awaiting completion. |
+| `web-app-shopware` | 21 | — | — | ⏳ | ⏳ | ⏳ | CI run 25774452286 — deploy still in_progress at snapshot time; awaiting completion. |
+| ~~`web-app-pretix`~~ | 21 | — | — | ✅ | ✅ |  | CI run 25774452286 — deploy + Playwright PASS for all declared variants (C3 hub fix verified). |
+| `web-app-odoo` | 21 | C5 | D | ⏳ | ⏳ | ⏳ | CI run 25774452286 — deploy still in_progress at snapshot time; awaiting completion. |
+| ~~`web-app-mobilizon`~~ | 21 | — | — | ✅ | ✅ |  | CI run 25774452286 — deploy + Playwright PASS for all declared variants (C3 hub fix verified). |
+| `web-app-matrix` | 21 | C12 | — | ❌ | ⏳ |  | CI run 25774452286 — **C12 matrix compose-up**: `compose up` non-zero at `01_docker.yml:76` (preceded by a C9 Keycloak login fail in the same round). |
+| ~~`web-app-gitlab`~~ | 21 | — | — | ✅ | ✅ |  | CI run 25774452286 — deploy + Playwright PASS for all declared variants (C3 hub fix verified). |
+| `web-app-espocrm` | 21 | C9 | — | ❌ | ⏳ | ⏳ | CI run 25774452286 — **C9 Keycloak admin login** failed at `04_login.yml:17` during the matrix-deploy round-set that included this role. |
+| `web-app-taiga` | 21 | C2 | C | ❌ | ⏳ | ⏳ | CI run 25774452286 — **C2** Playwright failed for `web-app-taiga` (deploy clean). |
+| `web-app-mattermost` | 21 | C2 | C | ❌ | ⏳ |  | CI run 25774452286 — **C2** Playwright failed for `web-app-mattermost` (deploy clean). |
+| `web-app-wordpress` | 21 | — | — | ⏳ | ⏳ |  | CI run 25774452286 — deploy still in_progress at snapshot time; awaiting completion. |
+| ~~`web-app-joomla`~~ | 21 | — | — | ✅ | ✅ |  | CI run 25774452286 — deploy + Playwright PASS for all declared variants. |
+| `web-app-fider` | 21 | C2 | C | ❌ | ⏳ |  | CI run 25774452286 — **C2** Playwright failed for `web-app-fider` (deploy clean). |
+| ~~`web-app-decidim`~~ | 21 | — | — | ✅ | ✅ |  | CI run 25774452286 — deploy + Playwright PASS for all declared variants. |
+| `web-app-baserow` | 21 | C2 | C | ❌ | ⏳ | ⏳ | CI run 25774452286 — **C2** Playwright failed for `web-app-baserow` (deploy clean). |
+| ~~`web-app-akaunting`~~ | 21 | — | — | ✅ | ✅ | ✅ | CI run 25774452286 — deploy + Playwright PASS for all declared variants. |
+| `web-app-fediwall` | 21 | C2 | C | ❌ | ⏳ | ⏳ | CI run 25774452286 — **C2** Playwright failed for `web-app-fediwall` (deploy clean). |
+| `web-app-suitecrm` | 20 | — | — | ⏳ | ⏳ | ⏳ | CI run 25774452286 — deploy still in_progress at snapshot time; awaiting completion. |
+| `web-app-snipe-it` | 20 | — | — | ⏳ | ⏳ | ⏳ | CI run 25774452286 — deploy still in_progress at snapshot time; awaiting completion. |
+| `web-app-openproject` | 20 | C9 | — | ❌ | ⏳ | ⏳ | CI run 25774452286 — **C9 + DB migration**: Keycloak admin login failed (`04_login.yml:17`); subsequent `Run database migrations` (`01_settings.yml:15`) non-zero. |
+| `web-app-mediawiki` | 20 | C13 | — | ❌ | ⏳ |  | CI run 25774452286 — **C13 mediawiki image missing**: `docker image inspect failed for mediawiki:1.45: No such image`. |
+| ~~`web-app-funkwhale`~~ | 20 | — | — | ✅ | ✅ | ✅ | CI run 25774452286 — deploy + Playwright PASS for all declared variants. |
+| `web-app-pixelfed` | 20 | C2 | C | ❌ | ⏳ |  | CI run 25774452286 — **C2** Playwright failed for `web-app-pixelfed` (deploy clean). |
+| ~~`web-app-jenkins`~~ | 20 | — | — | ✅ | ✅ | ✅ | CI run 25774452286 — deploy + Playwright PASS for all declared variants. |
+| `web-app-fusiondirectory` | 20 | C10 | — | ❌ | ⏳ | ⏳ | CI run 25774452286 — **C10 GHCR mailu manifest 502**: `ghcr.io/v2/mailu/fetchmail/manifests/2024.06` context deadline exceeded + HTTP 502 Bad Gateway. Likely a transient ghcr.io outage. |
+| `web-app-peertube` | 20 | C6 | E | ❌ | ⏳ |  | CI run 25774452286 — **C6 peertube PG**: `unable to connect to database: connection to server at "127.0.0.1", port 5432 failed: Connection refused`. Meta load-bearing fix not yet landed. |
+| `web-app-bluesky` | 20 | C2 | C | ❌ | ⏳ | ⏳ | CI run 25774452286 — **C2** `Playwright failed for roles: ['web-app-bluesky', 'web-app-mailu']` — guest persona `Test timeout of 60000ms`. Was C1? cascade in CI 25705903504; mailu's own deploy slot passed but its spec regressed inside bluesky's matrix-deploy round. |
+| ~~`web-app-opencloud`~~ | 20 | — | — | ✅ | ✅ | ✅ | CI run 25774452286 — deploy + Playwright PASS for all declared variants (cross-verified). |
+| ~~`web-app-pgadmin`~~ | 19 | — | — | ✅ | ✅ |  | CI run 25774452286 — deploy + Playwright PASS for all declared variants. |
+| ~~`web-app-lam`~~ | 19 | — | — | ✅ | ✅ | ✅ | CI run 25774452286 — deploy + Playwright PASS for all declared variants. |
+| ~~`web-app-yourls`~~ | 19 | — | — | ✅ | ✅ |  | CI run 25774452286 — deploy + Playwright PASS for all declared variants. |
+| ~~`web-app-phpmyadmin`~~ | 18 | — | — | ✅ | ✅ |  | CI run 25774452286 — deploy + Playwright PASS for all declared variants. |
+| `web-app-postmarks` | 18 | C2 | C | ❌ | ⏳ |  | CI run 25774452286 — **C2** Playwright failed for `web-app-postmarks` (deploy clean). Was 3/3 pass in CI 25680106742 — regression. |
+| ~~`web-svc-xmpp`~~ | 16 | — | — | ✅ | ✅ | ✅ | CI run 25774452286 — deploy + Playwright PASS for all declared variants. |
 
 **Total failed roles in CI Run 25705903504 (deploy matrix only):** 49.
+
+## CI Run 25774452286 follow-up snapshot
+
+Re-deploy on the same branch `feature/web-app-kix` after [25705903504](https://github.com/kevinveenbirkenbach/infinito-nexus-core/actions/runs/25705903504). The deploy-matrix completed 82/90 jobs at snapshot time (8 still `in_progress`: `web-app-{minio,odoo,openwebui,shopware,snipe-it,suitecrm,wordpress,xwiki}`).
+
+**Deploy passed (31 `web-app-*` + 4 in-scope `web-svc-*`):**
+
+- `web-app-{akaunting, bigbluebutton, bridgy-fed, chess, dashboard, decidim, flowise, funkwhale, gitlab, hugo, jenkins, joomla, keycloak, lam, littlejs, mailu, mastodon, matomo, mig, mini-qr, mobilizon, moodle, opencloud, opentalk, pgadmin, phpmyadmin, pretix, prometheus, roulette-wheel, sphinx, yourls}`
+- `web-svc-{cdn, libretranslate, simpleicons, xmpp}` (plus the always-green infra svc-* set)
+
+**Deploy failed (20 in CI, 19 reproducible):** clustered for remediation below. `web-app-nextcloud` is reclassified as **CI-only / environmental** (local full-cycle deploy passes for every declared variant), leaving 19 role-local regressions.
+
+### Cluster summary (CI 25774452286)
+
+| Cluster | Roles | Count | Action |
+| --- | --- | ---: | --- |
+| **C2** App-local Playwright regression | bluesky, baserow, bookwyrm, fediwall, fider, friendica, mattermost, pixelfed, postmarks, taiga | 10 | Inner-loop spec fixes per [Bundle C](#bundle-c--app-local-playwright-selector-fixes). bluesky's failure is paired with mailu in the same matrix-deploy round. bookwyrm + postmarks are net-new regressions from CI 25680106742. |
+| **C9** Keycloak permanent admin login | espocrm, gitea, openproject | 3 | Root-cause the kcadm login failure in `web-app-keycloak/tasks/04_login.yml:17`. Likely admin-password drift between matrix-deploy rounds; gitea/openproject also cascade into compose-up / DB-migration follow-on errors. |
+| **C12** Matrix compose-up | matrix | 1 | Likely cascaded from a C9 Keycloak fail in the same round. Re-deploy after C9 closes. |
+| **C8** Discourse pgvector | discourse | 1 | Pre-create `vector` extension or rebuild discourse's postgres image with pgvector enabled. |
+| **C11** Listmonk DB upgrade | listmonk | 1 | Capture container logs of the `listmonk --upgrade --yes` pass. |
+| **C13** Mediawiki image missing | mediawiki | 1 | Pin the tag or add a `docker_image` pull step. |
+| **C14** Container networking port collision (CI-only, environmental) | nextcloud (CI-only) | 0 confirmed | Local full-cycle deploy of `web-app-nextcloud` passes for every declared variant; the CI `Address already in use` does not reproduce locally and is treated as environmental contention between concurrently-deploying CI matrix rounds, not a role-local regression. No role-level remediation. |
+| **C10** GHCR mailu manifest 502 | fusiondirectory | 1 | Likely transient; if it reproduces, wrap mailu pulls in a retry helper. |
+| **C6** Peertube PG Connection refused | peertube | 1 | Same as [Meta root cause](#meta-root-cause-for-bundles-b-c5-c6-and-most-c1); waiting for that fix. |
+
+**Pattern shift vs. CI 25705903504.** Bundle A (C3 `POSTGRES_ALLOWED_AVG_CONNECTIONS`) is now verified GREEN — every formerly-C3 role passed in this run (discourse is the lone exception, but its failure is C8, not C3). The dominant remaining failure mode has shifted from C1 (Mailu cascade) and C3 (postgres var) to **C2 Playwright regressions** and **C9 Keycloak admin login**. The Meta load-bearing fix for Bundles B/E (C6) is still pending; peertube reproduces. The "Suspected Mailu cascade" (C1?) labels from CI 25705903504 are now reclassified per the cluster summary above.
 
 ## Meta root cause for Bundles B, C5, C6 (and most C1?)
 

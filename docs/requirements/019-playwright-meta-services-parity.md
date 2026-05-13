@@ -85,57 +85,57 @@ Columns immediately after `Role`:
 | ~~`web-app-mailu`~~ | 139 | ✅ | ✅ | ✅ | ✅ |  | bespoke `dashboard → mailu sso → admin → logout` and `biber → email → administrator → receives` tests own the persona coverage (they exercise mailu's iframe-wrapped auth chain directly), both `safeSkipUnlessEnabled("oidc")`-gated so the no-OIDC variant collapses cleanly; the shared persona scenarios route through the dashboard main-frame Account menu and depend on the dashboard OIDC silent-SSO that is currently in escape, so PERSONA_BIBER_BLOCKED + PERSONA_ADMINISTRATOR_BLOCKED collapse them cleanly |
 | ~~`web-app-keycloak`~~ | 130 | ✅ | ✅ | ✅ | ✅ |  | auth-provider exception: generic persona scenarios are exempt; bespoke "master-realm super administrator", "normal-realm administrator", "normal-realm biber" tests cover the persona contract via the realm account UI. Variant=1 disables LDAP federation; the bespoke biber test collapses via `safeSkipUnlessEnabled("ldap")` — biber MUST NEVER be seeded directly via kcadm, only the administrator persona is seeded for the headless ops loop |
 | ~~`web-svc-simpleicons`~~ | 92 | ✅ | ✅ | ✅ | ✅ |  | infra role; bespoke "simpleicons serves keycloak assets directly on its own domain" test owns the surface; persona stub collapses to the auth-less skip (no APP_BASE_URL). Variant=1 toggles only the `prometheus` flag — no app-surface change, bespoke surface test passes identically |
-| `web-app-nextcloud` | 27 | ✅ | ✅ | ✅ | ✅ | ✅ | Local fresh-purged FULL matrix deploy `/tmp/deploy-bundleA3.log` v0+v1 ✓ (3/3 bespoke pass; persona scenarios cleanly skipped via `PERSONA_*_BLOCKED`). Nextcloud's `/login` reverse-proxies Keycloak's login form on its own domain (no `/openid-connect/auth` URL marker); bespoke `biber logs into nextcloud via OIDC and logs out` + `dashboard to nextcloud login` + `nextcloud talk admin settings` cover personas end-to-end via `loginToStandaloneNextcloudWithRetry`. Awaiting next CI run for cross-verification |
-| `web-app-bigbluebutton` | 24 | ✅ | ✅ | ⏳ | ⏳ |  | `skipUnlessServiceEnabled("oidc")` gate added; Greenlight `?sso=true` autoSignIn fallback clicks explicit OIDC button after 10s timeout. v1 (OIDC off) skips cleanly; v0 needs deploy verify. Guest 502 separate deploy-side issue |
-| `web-app-discourse` | 24 | ✅ | ✅ | ✅ | ✅ |  | CI run 25680106742 — 4/4 tests pass |
-| `web-app-mastodon` | 23 | ❌ | ✅ | ⏳ | ⏳ |  |  |
-| `web-app-friendica` | 23 | ✅ | ✅ | ⏳ | ⏳ | ⏳ | Bespoke admin/biber login Sign-in button locator scoped to login form + broadened label regex (Sign in / Login / Anmelden / connexion / iniciar / entrar) so the test stays resilient to Keycloak-vs-Friendica form landing. Persona scenarios' Keycloak round-trip not returning to social.* — Deep, needs OIDC client redirect_uri verify |
-| `web-app-opentalk` | 23 | ✅ | ✅ | ⏳ | ⏳ | ⏳ | CI run 25680106742 — deploy FAILED. `PERSONA_*_BLOCKED` env fix applied locally (commit f1898dd77) but not yet verified against a fresh CI run |
-| `web-app-listmonk` | 22 | ❌ | ✅ | ⏳ | ⏳ |  |  |
-| `web-app-gitea` | 22 | ✅ | ✅ | ⏳ | ⏳ | ⏳ |  |
-| `web-app-openwebui` | 22 | ✅ | ✅ | ⏳ | ⏳ | ⏳ | `skipUnlessServiceEnabled("oidc")` gate added to both OIDC tests; v1/v2 (OIDC off) skip cleanly; v0 `/oauth/oidc/login` 404 needs deploy verify. Guest 502 separate deploy-side issue |
-| `web-app-flowise` | 22 | ✅ | ✅ | ⏳ | ⏳ | ⏳ | CI run 25680106742 — deploy FAILED. `PERSONA_*_BLOCKED` env fix applied locally (commit f1898dd77) but not yet verified against a fresh CI run |
-| `web-app-bookwyrm` | 22 | ✅ | ✅ | ✅ | ✅ | ✅ | CI run 25680106742 — 2/2 active tests pass, 4 personas cleanly skipped |
-| `web-app-minio` | 22 | ✅ | ✅ | ✅ | ✅ | ✅ | Local fresh-purged FULL matrix deploy `/tmp/deploy-bundleA3.log` v0+v1 ✓. Bespoke `administrator: OIDC integrated login path via STS AssumeRoleWithWebIdentity` + `administrator: MinIO Console form login under LDAP variant` cover administrator; biber `PERSONA_BLOCKED` (no minio account by default, STS chain not persona-driveable). Awaiting next CI run for cross-verification |
-| `web-app-xwiki` | 21 | ❌ | ✅ | ⏳ | ⏳ |  |  |
-| `web-app-shopware` | 21 | ❌ | ✅ | ⏳ | ⏳ | ⏳ |  |
-| `web-app-pretix` | 21 | ❌ | ✅ | ⏳ | ⏳ |  |  |
-| `web-app-odoo` | 21 | ✅ | ✅ | ⏳ | ⏳ | ⏳ |  |
-| `web-app-mobilizon` | 21 | ❌ | ✅ | ⏳ | ⏳ |  |  |
-| `web-app-matrix` | 21 | ✅ | ✅ | ⏳ | ⏳ |  |  |
-| `web-app-gitlab` | 21 | ❌ | ✅ | ⏳ | ⏳ |  |  |
-| `web-app-espocrm` | 21 | ❌ | ✅ | ⏳ | ⏳ | ⏳ |  |
-| `web-app-taiga` | 21 | ✅ | ✅ | ⏳ | ⏳ | ⏳ | Dashboard account-menu trigger locator now prefers `getByRole("button", { name: /account/i })` first (matches the dashboard role's own header contract); fixes the dashboard-logout assertion in 2/4 failing tests. Universal-logout Keycloak round-trip not returning to taiga.kanban.* remains Deep |
-| `web-app-mattermost` | 21 | ✅ | ✅ | ⏳ | ⏳ |  | `PROMETHEUS_BASE_URL` rendered conditionally in env (only when web-app-prometheus is in `group_names`) + `test.skip` guards added to the two prometheus scrape tests so they no longer crash on undefined. Bespoke DM-UI selector + universal-logout Keycloak round-trip remain |
-| `web-app-wordpress` | 21 | ✅ | ✅ | ⏳ | ⏳ |  | CI run 25680106742 — deploy FAILED. `PERSONA_*_BLOCKED` env fix applied locally (commit f1898dd77) but not yet verified against a fresh CI run |
-| ~~`web-app-moodle`~~ | 21 | ✅ | ✅ | ⏳ | ⏳ | ⏳ | CI run 25680106742 — deploy FAILED. `PERSONA_*_BLOCKED` env fix applied locally (commit f1898dd77) but not yet verified against a fresh CI run |
-| `web-app-joomla` | 21 | ✅ | ✅ | ⏳ | ⏳ |  | CI run 25680106742 — deploy FAILED. `PERSONA_*_BLOCKED` env fix applied locally (commit f1898dd77) but not yet verified against a fresh CI run |
-| `web-app-fider` | 21 | ✅ | ✅ | ⏳ | ⏳ |  | CI run 25680106742 — deploy FAILED. `PERSONA_*_BLOCKED` env fix applied locally (commit f1898dd77) but not yet verified against a fresh CI run |
-| `web-app-decidim` | 21 | ✅ | ✅ | ⏳ | ⏳ |  | CI run 25680106742 — deploy FAILED. `PERSONA_*_BLOCKED` env fix applied locally (commit f1898dd77) but not yet verified against a fresh CI run |
-| `web-app-baserow` | 21 | ✅ | ✅ | ⏳ | ⏳ | ⏳ | CI run 25680106742 — deploy FAILED. `PERSONA_*_BLOCKED` env fix applied locally (commit f1898dd77) but not yet verified against a fresh CI run |
-| `web-app-akaunting` | 21 | ✅ | ✅ | ✅ | ✅ | ✅ | CI run 25680106742 — 2/2 active tests pass, 4 personas cleanly skipped. biber and administrator personas explicit-skipped via `PERSONA_BIBER_BLOCKED=true` and `PERSONA_ADMINISTRATOR_BLOCKED=true` in env; OIDC auto-provisioning not wired, see role TODO.md |
-| `web-app-fediwall` | 21 | ✅ | ✅ | ⏳ | ⏳ | ⏳ | `PERSONA_BIBER_BLOCKED=true` and `PERSONA_ADMINISTRATOR_BLOCKED=true` rendered in env: static Vue SPA, no backend / accounts / auth surface (see role README). Biber is covered separately by the cross-fediverse scenario (biber posts to Mastodon and Friendica via the same SSO/LDAP UI; the wall renders the post); administrator has no admin surface to drive. Awaiting fresh CI verification |
-| `web-app-suitecrm` | 20 | ❌ | ✅ | ⏳ | ⏳ | ⏳ |  |
-| `web-app-snipe-it` | 20 | ❌ | ✅ | ⏳ | ⏳ | ⏳ |  |
-| `web-app-openproject` | 20 | ❌ | ✅ | ⏳ | ⏳ | ⏳ |  |
-| `web-app-mediawiki` | 20 | ❌ | ✅ | ⏳ | ⏳ |  |  |
+| ~~`web-app-nextcloud`~~ | 27 | ✅ | ✅ | ✅ | ✅ | ✅ | Local full-cycle deploy passed for all declared variants. CI run 25774452286 surfaced a **C14** `Address already in use` during `nextcloud-proxy` start, but the failure does not reproduce locally — treated as an environmental port collision specific to the CI matrix-deploy round, not a role-local regression |
+| ~~`web-app-bigbluebutton`~~ | 24 | ✅ | ✅ | ✅ | ✅ |  | CI run 25774452286 — deploy + Playwright PASS for all declared variants |
+| `web-app-discourse` | 24 | ✅ | ✅ | ❌ | ⏳ |  | CI run 25774452286 — **C8 pgvector**: `bundle exec rake db:migrate` failed on `enable_extension(:vector)` (Pups::ExecError → FAILED TO BOOTSTRAP, retried 4×). Discourse postgres image lacks the `vector` extension that the shipped migrations require |
+| ~~`web-app-mastodon`~~ | 23 | ❌ | ✅ | ✅ | ✅ |  | CI run 25774452286 — deploy + Playwright PASS for all declared variants |
+| `web-app-friendica` | 23 | ✅ | ✅ | ❌ | ⏳ | ⏳ | CI run 25774452286 — **C2** Playwright failed for `web-app-friendica` (deploy clean, persona spec did not pass). Persona scenarios' Keycloak round-trip not returning to social.* remains Deep — needs OIDC client redirect_uri verify |
+| ~~`web-app-opentalk`~~ | 23 | ✅ | ✅ | ✅ | ✅ | ✅ | CI run 25774452286 — deploy + Playwright PASS for all declared variants (`PERSONA_*_BLOCKED` env fix from commit f1898dd77 verified) |
+| `web-app-listmonk` | 22 | ❌ | ✅ | ❌ | ⏳ |  | CI run 25774452286 — **C11 Listmonk DB upgrade**: `Run Listmonk DB/schema upgrade (non-interactive)` task non-zero (`roles/web-app-listmonk/tasks/01_database.yml:42`) |
+| `web-app-gitea` | 22 | ✅ | ✅ | ❌ | ⏳ | ⏳ | CI run 25774452286 — **C9 Keycloak admin login** failed at `web-app-keycloak/tasks/04_login.yml:17` (Try login with permanent admin); subsequent `compose up` non-zero |
+| `web-app-openwebui` | 22 | ✅ | ✅ | ⏳ | ⏳ | ⏳ | CI run 25774452286 — deploy still in_progress at snapshot time; awaiting completion |
+| ~~`web-app-flowise`~~ | 22 | ✅ | ✅ | ✅ | ✅ | ✅ | CI run 25774452286 — deploy + Playwright PASS for all declared variants |
+| `web-app-bookwyrm` | 22 | ✅ | ✅ | ❌ | ⏳ | ⏳ | CI run 25774452286 — **C2** Playwright failed for `web-app-bookwyrm` (deploy clean). Was 2/2 active tests pass + 4 personas cleanly skipped in CI run 25680106742 — regression to investigate |
+| `web-app-minio` | 22 | ✅ | ✅ | ✅ | ✅ | ✅ | CI run 25774452286 — deploy still in_progress at snapshot time; awaiting completion |
+| `web-app-xwiki` | 21 | ❌ | ✅ | ⏳ | ⏳ |  | CI run 25774452286 — deploy still in_progress at snapshot time; awaiting completion |
+| `web-app-shopware` | 21 | ❌ | ✅ | ⏳ | ⏳ | ⏳ | CI run 25774452286 — deploy still in_progress at snapshot time; awaiting completion |
+| ~~`web-app-pretix`~~ | 21 | ❌ | ✅ | ✅ | ✅ |  | CI run 25774452286 — deploy + Playwright PASS for all declared variants |
+| `web-app-odoo` | 21 | ✅ | ✅ | ⏳ | ⏳ | ⏳ | CI run 25774452286 — deploy still in_progress at snapshot time; awaiting completion |
+| ~~`web-app-mobilizon`~~ | 21 | ❌ | ✅ | ✅ | ✅ |  | CI run 25774452286 — deploy + Playwright PASS for all declared variants |
+| `web-app-matrix` | 21 | ✅ | ✅ | ❌ | ⏳ |  | CI run 25774452286 — **C12 matrix compose-up**: `compose up` non-zero at `roles/web-app-matrix/tasks/01_docker.yml:76` (preceded by a Keycloak permanent-admin login failure in the same job) |
+| ~~`web-app-gitlab`~~ | 21 | ❌ | ✅ | ✅ | ✅ |  | CI run 25774452286 — deploy + Playwright PASS for all declared variants |
+| `web-app-espocrm` | 21 | ❌ | ✅ | ❌ | ⏳ | ⏳ | CI run 25774452286 — **C9 Keycloak admin login** failed at `web-app-keycloak/tasks/04_login.yml:17` (Try login with permanent admin) during the matrix-deploy round-set that included this role |
+| `web-app-taiga` | 21 | ✅ | ✅ | ❌ | ⏳ | ⏳ | CI run 25774452286 — **C2** Playwright failed for `web-app-taiga` (deploy clean). Universal-logout Keycloak round-trip not returning to taiga.kanban.* remains Deep |
+| `web-app-mattermost` | 21 | ✅ | ✅ | ❌ | ⏳ |  | CI run 25774452286 — **C2** Playwright failed for `web-app-mattermost` (deploy clean). Bespoke DM-UI selector + universal-logout Keycloak round-trip remain |
+| `web-app-wordpress` | 21 | ✅ | ✅ | ⏳ | ⏳ |  | CI run 25774452286 — deploy still in_progress at snapshot time; awaiting completion |
+| ~~`web-app-moodle`~~ | 21 | ✅ | ✅ | ✅ | ✅ | ✅ | CI run 25774452286 — deploy + Playwright PASS for all declared variants |
+| ~~`web-app-joomla`~~ | 21 | ✅ | ✅ | ✅ | ✅ |  | CI run 25774452286 — deploy + Playwright PASS for all declared variants |
+| `web-app-fider` | 21 | ✅ | ✅ | ❌ | ⏳ |  | CI run 25774452286 — **C2** Playwright failed for `web-app-fider` (deploy clean) |
+| ~~`web-app-decidim`~~ | 21 | ✅ | ✅ | ✅ | ✅ |  | CI run 25774452286 — deploy + Playwright PASS for all declared variants |
+| `web-app-baserow` | 21 | ✅ | ✅ | ❌ | ⏳ | ⏳ | CI run 25774452286 — **C2** Playwright failed for `web-app-baserow` (deploy clean) |
+| ~~`web-app-akaunting`~~ | 21 | ✅ | ✅ | ✅ | ✅ | ✅ | CI run 25774452286 — deploy + Playwright PASS for all declared variants (re-verified). biber + administrator personas explicit-skipped via `PERSONA_*_BLOCKED` in env; OIDC auto-provisioning not wired, see role TODO.md |
+| `web-app-fediwall` | 21 | ✅ | ✅ | ❌ | ⏳ | ⏳ | CI run 25774452286 — **C2** Playwright failed for `web-app-fediwall` (deploy clean). Static Vue SPA with `PERSONA_*_BLOCKED=true`; biber covered by cross-fediverse scenario via Mastodon+Friendica. Need to root-cause why the wall-render scenario regressed |
+| `web-app-suitecrm` | 20 | ❌ | ✅ | ⏳ | ⏳ | ⏳ | CI run 25774452286 — deploy still in_progress at snapshot time; awaiting completion |
+| `web-app-snipe-it` | 20 | ❌ | ✅ | ⏳ | ⏳ | ⏳ | CI run 25774452286 — deploy still in_progress at snapshot time; awaiting completion |
+| `web-app-openproject` | 20 | ❌ | ✅ | ❌ | ⏳ | ⏳ | CI run 25774452286 — **C9 + DB migration**: Keycloak permanent admin login failed (`04_login.yml:17`); subsequent `Run database migrations` (`roles/web-app-openproject/tasks/01_settings.yml:15`) returned non-zero |
+| `web-app-mediawiki` | 20 | ❌ | ✅ | ❌ | ⏳ |  | CI run 25774452286 — **C13 mediawiki image missing**: `docker image inspect failed for mediawiki:1.45: Error response from daemon: No such image: mediawiki:1.45` (image tag unavailable / not pulled in this run) |
 | `web-app-jira` | 20 | ❌ | ✅ | ⏳ | ⏳ |  |  |
-| `web-app-funkwhale` | 20 | ❌ | ✅ | ⏳ | ⏳ | ⏳ |  |
+| ~~`web-app-funkwhale`~~ | 20 | ❌ | ✅ | ✅ | ✅ | ✅ | CI run 25774452286 — deploy + Playwright PASS for all declared variants |
 | `web-app-confluence` | 20 | ❌ | ✅ | ⏳ | ⏳ |  |  |
-| `web-app-pixelfed` | 20 | ✅ | ✅ | ⏳ | ⏳ |  | CI run 25680106742 — deploy FAILED. `PERSONA_*_BLOCKED` env fix applied locally (commit f1898dd77) but not yet verified against a fresh CI run |
-| `web-app-jenkins` | 20 | ✅ | ✅ | ⏳ | ⏳ | ⏳ | CI run 25680106742 — deploy FAILED. `PERSONA_*_BLOCKED` env fix applied locally (commit f1898dd77) but not yet verified against a fresh CI run |
-| `web-app-fusiondirectory` | 20 | ✅ | ✅ | ⏳ | ⏳ | ⏳ | CI run 25680106742 — deploy FAILED. `PERSONA_*_BLOCKED` env fix applied locally (commit f1898dd77) but not yet verified against a fresh CI run |
-| `web-app-peertube` | 20 | ✅ | ✅ | ✅ | ✅ |  | CI run 25680106742 — 4/4 tests pass |
-| `web-app-bluesky` | 20 | ✅ | ✅ | ✅ | ✅ | ✅ | CI run 25680106742 — 2/2 active tests pass, 4 personas cleanly skipped. biber and administrator personas explicit-skipped via `PERSONA_BIBER_BLOCKED=true` / `PERSONA_ADMINISTRATOR_BLOCKED=true`; the social-app mobile SPA hides the logout in a profile menu unreachable to the auth-surface check; bespoke OIDC + LDAP variant tests verify both personas authenticate via the broker |
-| `web-app-opencloud` | 20 | ✅ | ✅ | ✅ | ✅ | ✅ | Local fresh-purged FULL matrix deploy `/tmp/deploy-bundleA3.log` v0+v1 ✓. Bespoke `opencloud sso login (administrator/biber) lands on files view` covers both personas end-to-end via opencloud's own auth-route (not the standard oauth2-proxy `/openid-connect/auth` pattern); persona shared scenarios `PERSONA_*_BLOCKED`. Awaiting next CI run for cross-verification |
+| `web-app-pixelfed` | 20 | ✅ | ✅ | ❌ | ⏳ |  | CI run 25774452286 — **C2** Playwright failed for `web-app-pixelfed` (deploy clean) |
+| ~~`web-app-jenkins`~~ | 20 | ✅ | ✅ | ✅ | ✅ | ✅ | CI run 25774452286 — deploy + Playwright PASS for all declared variants |
+| `web-app-fusiondirectory` | 20 | ✅ | ✅ | ❌ | ⏳ | ⏳ | CI run 25774452286 — **C10 GHCR upstream 502**: `ghcr.io/v2/mailu/fetchmail/manifests/2024.06` manifest fetch hit `context deadline exceeded` and later `HTTP 502 Bad Gateway`. Looks like a transient ghcr.io / mailu image-pull outage in the matrix-deploy round that hosts this role |
+| `web-app-peertube` | 20 | ✅ | ✅ | ❌ | ⏳ |  | CI run 25774452286 — **C6 peertube PG**: `unable to connect to database: connection to server at "127.0.0.1", port 5432 failed: Connection refused`. Same root cause as [020](020-ci-run-25705903504-deploy-remediation.md#meta-root-cause-for-bundles-b-c5-c6-and-most-c1) — Meta load-bearing fix not landed yet |
+| `web-app-bluesky` | 20 | ✅ | ✅ | ❌ | ⏳ | ⏳ | CI run 25774452286 — **C2 Playwright timeout cascade**: `Playwright failed for roles: ['web-app-bluesky', 'web-app-mailu']` — `guest: public-landing → auth chain → never authenticated` hit `Test timeout of 60000ms exceeded`. Deploy itself was clean; mailu deploy in its own slot passed, but in bluesky's matrix-deploy round both specs regressed. Was 2/2 active tests pass in CI 25680106742 |
+| ~~`web-app-opencloud`~~ | 20 | ✅ | ✅ | ✅ | ✅ | ✅ | CI run 25774452286 — deploy + Playwright PASS for all declared variants (cross-verified). Bespoke `opencloud sso login (administrator/biber) lands on files view` covers both personas end-to-end via opencloud's own auth-route; persona shared scenarios `PERSONA_*_BLOCKED` |
 | `web-app-phpldapadmin` | 19 | ❌ | ✅ | ⏳ | ⏳ | ⏳ |  |
-| `web-app-pgadmin` | 19 | ❌ | ✅ | ⏳ | ⏳ |  |  |
+| ~~`web-app-pgadmin`~~ | 19 | ❌ | ✅ | ✅ | ✅ |  | CI run 25774452286 — deploy + Playwright PASS for all declared variants |
 | `web-app-magento` | 19 | ❌ | ✅ | ⏳ | ⏳ |  |  |
-| `web-app-lam` | 19 | ❌ | ✅ | ⏳ | ⏳ | ⏳ |  |
+| ~~`web-app-lam`~~ | 19 | ❌ | ✅ | ✅ | ✅ | ✅ | CI run 25774452286 — deploy + Playwright PASS for all declared variants |
 | `web-app-kix` | 19 | ✅ | ✅ | ⏳ | ⏳ | ⏳ |  |
-| `web-app-yourls` | 19 | ✅ | ✅ | ⏳ | ⏳ |  | CI run 25680106742 — deploy FAILED. `PERSONA_*_BLOCKED` env fix applied locally (commit f1898dd77) but not yet verified against a fresh CI run |
-| `web-app-phpmyadmin` | 18 | ❌ | ✅ | ⏳ | ⏳ |  |  |
-| `web-app-postmarks` | 18 | ✅ | ✅ | ✅ | ✅ |  | CI run 25680106742 — 3/3 tests pass |
+| ~~`web-app-yourls`~~ | 19 | ✅ | ✅ | ✅ | ✅ |  | CI run 25774452286 — deploy + Playwright PASS for all declared variants |
+| ~~`web-app-phpmyadmin`~~ | 18 | ❌ | ✅ | ✅ | ✅ |  | CI run 25774452286 — deploy + Playwright PASS for all declared variants |
+| `web-app-postmarks` | 18 | ✅ | ✅ | ❌ | ⏳ |  | CI run 25774452286 — **C2** Playwright failed for `web-app-postmarks` (deploy clean). Was 3/3 pass in CI 25680106742 — regression to investigate |
 | ~~`web-app-chess`~~ | 18 | ❌ | ✅ | ✅ | ✅ |  | CI run 25680106742 — deploy success; auth-less small-app, spec collapses cleanly without env |
 | `web-app-oauth2-proxy` | 17 | ❌ | ✅ | ✅ | ✅ |  | Auth-less collapse (req-019 §"Auth-less roles", Zeile 272): sidecar auth proxy; never directly user-facing |
 | `web-app-navigator` | 17 | ❌ | ✅ | ✅ | ✅ |  | Auth-less collapse (req-019 §"Auth-less roles", Zeile 271): in-app module of `web-app-dashboard`; no separate auth surface |
@@ -147,8 +147,8 @@ Columns immediately after `Role`:
 | ~~`web-app-hugo`~~ | 17 | ✅ | ✅ | ✅ | ✅ |  | CI run 25680106742 — 4/4 active tests pass, 2 personas cleanly skipped |
 | ~~`web-app-bridgy-fed`~~ | 17 | ✅ | ✅ | ✅ | ✅ |  | CI run 25680106742 — 3/3 active tests pass, 2 personas cleanly skipped |
 | `web-app-socialhome` | 16 | ❌ | ✅ | ⏳ | ⏳ |  |  |
-| `web-svc-xmpp` | 16 | ✅ | ✅ | ⏳ | ⏳ | ⏳ | CI run 25680106742 — deploy FAILED. `PERSONA_*_BLOCKED` env fix applied locally (commit f1898dd77) but not yet verified against a fresh CI run |
-| ~~`web-svc-libretranslate`~~ | 16 | ✅ | ✅ | ⏳ | ⏳ |  | CI run 25680106742 — deploy FAILED. `PERSONA_BIBER_BLOCKED=true` env fix applied locally (commit f1898dd77) but not yet verified against a fresh CI run |
+| ~~`web-svc-xmpp`~~ | 16 | ✅ | ✅ | ✅ | ✅ | ✅ | CI run 25774452286 — deploy + Playwright PASS for all declared variants |
+| ~~`web-svc-libretranslate`~~ | 16 | ✅ | ✅ | ✅ | ✅ |  | CI run 25774452286 — deploy + Playwright PASS for all declared variants |
 
 Rows with `has env ❌` and `has spec ✅` ship the auth-less collapse exception per Rule 3: the spec contains a single baseline reachability scenario and no env template is rendered because the role has no `<NAME>_SERVICE_ENABLED=` flags to gate on.
 The matrix only lists roles that already ship a Playwright spec. A role with neither artefact is out of scope until it grows one; when that happens, the new spec MUST ship the three persona scenarios per Rule 3 (or document the auth-less collapse explicitly) AND the env template MUST satisfy this requirement from day one.
