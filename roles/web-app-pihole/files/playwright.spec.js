@@ -125,14 +125,12 @@ test("admin can log out via logout button", async ({ page }) => {
   // Take screenshot for debugging
   await page.screenshot({ path: "/reports/debug-before-logout.png" });
 
-  // Click injected logout button in navbar
-  const logoutButton = page.locator("#oauth2-logout-btn");
-  await logoutButton.waitFor({ state: "visible", timeout: 30_000 });
-  await logoutButton.click();
+  // Navigate to oauth2-proxy sign-out endpoint
+  await page.goto(`${expectedPiholeBaseUrl}/oauth2/sign_out?rd=${encodeURIComponent(oidcIssuerUrl.replace(/\/$/, '') + '/protocol/openid-connect/logout')}`);
 
   // Click confirmation button on Keycloak logout page
-  const confirmButton = page.getByRole("button", { name: /logout/i });
-  await confirmButton.waitFor({ state: "visible", timeout: 15_000 });
+  const confirmButton = page.locator('#kc-logout');
+  await confirmButton.waitFor({ state: "visible", timeout: 30_000 });
   await confirmButton.click();
 
   // Verify no longer on Pi-hole admin (logged out successfully)
