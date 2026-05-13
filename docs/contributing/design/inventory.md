@@ -10,7 +10,7 @@ The build pipeline runs entirely on the operator's host, before any Ansible play
 
 | Stage | Code path | Output |
 |---|---|---|
-| 1. Variant resolution | [applications.py (cache)](../../../utils/cache/applications.py) `_build_variants`, [inventory.py](../../../cli/administration/deploy/development/inventory.py) `_resolve_variant_payloads` | Per-app payload = `meta/services.yml` deep-merged with the round's `meta/variants.yml` entry. Jinja strings are preserved verbatim. |
+| 1. Variant resolution | [applications.py (cache)](../../../utils/cache/applications.py) `_build_variants`, [inventory/payload.py](../../../cli/administration/deploy/development/inventory/payload.py) `_resolve_variant_payloads` | Per-app payload = `meta/services.yml` deep-merged with the round's `meta/variants.yml` entry. Jinja strings are preserved verbatim. |
 | 2. Group materialisation | [cli.administration.inventory.devices](../../../cli/administration/inventory/devices/command.py), [filters.py](../../../cli/administration/inventory/provision/filters.py) `filter_dynamic_inventory` | Inventory file lists one group per included `application_id`, with the host as a member. |
 | 3. Host-vars baking | [cli.administration.inventory.provision](../../../cli/administration/inventory/provision/cli.py) `apply_vars_overrides`, [host_vars.py](../../../cli/administration/inventory/provision/host_vars.py) | `host_vars/<host>.yml` carries the variant-resolved `applications.<app>` block plus connection vars, become password, etc. |
 
@@ -82,7 +82,7 @@ The fallback Jinja string in the base `meta/services.yml` is the safety net for 
 | [applications.py (cache)](../../../utils/cache/applications.py) | `get_variants`, `get_application_defaults`, `get_merged_applications`. Stage 1 variant loader and the runtime renderer. |
 | [service_registry.py](../../../utils/roles/applications/services/registry.py) | `build_service_registry_from_roles_dir`, `resolve_service_dependency_roles_from_config`. Strict-identity auto-include. |
 | [in_group_deps.py](../../../utils/roles/applications/in_group_deps.py) | `applications_if_group_and_all_deps`. Recursive walk over Ansible meta `dependencies:` plus shared-service deps. |
-| [inventory.py](../../../cli/administration/deploy/development/inventory.py) | `_resolve_variant_payloads`, `_bake_overrides`, `build_dev_inventory`. Stage 1 variant resolution and stage 3 host-vars baking. |
+| [inventory/](../../../cli/administration/deploy/development/inventory/__init__.py) | Package root re-exporting the public API. Per-submodule split: [`payload.py`](../../../cli/administration/deploy/development/inventory/payload.py) (`_resolve_variant_payloads`, `_bake_overrides`) and [`builder.py`](../../../cli/administration/deploy/development/inventory/builder.py) (`build_dev_inventory`). Stage 1 variant resolution and stage 3 host-vars baking. |
 | [cli.administration.inventory.devices](../../../cli/administration/inventory/devices/command.py) | Stage 2 group materialisation: emits one group per invokable `application_id` for the given host. |
 | [filters.py](../../../cli/administration/inventory/provision/filters.py) | `filter_dynamic_inventory`. Restricts the materialised groups to the `--include` set. |
 | [host_vars.py](../../../cli/administration/inventory/provision/host_vars.py) | Connection vars, `DOMAIN_PRIMARY`, become-password handling. |

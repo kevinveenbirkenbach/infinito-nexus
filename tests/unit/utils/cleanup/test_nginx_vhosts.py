@@ -79,7 +79,7 @@ class NginxVhostsTestBase(unittest.TestCase):
         return f
 
 
-class TestIterVhostFiles(NginxVhostsTestBase):
+class TestIterVhostFiles(NginxVhostsTestBase, unittest.TestCase):
     def test_yields_existing_files_only(self) -> None:
         self._mk_role(
             "web-app-matomo",
@@ -138,7 +138,7 @@ class TestIterVhostFiles(NginxVhostsTestBase):
         self.assertEqual(got, [])
 
 
-class TestPurgeVhostFiles(NginxVhostsTestBase):
+class TestPurgeVhostFiles(NginxVhostsTestBase, unittest.TestCase):
     def test_removes_only_matching_vhosts(self) -> None:
         self._mk_role(
             "web-app-matomo",
@@ -211,7 +211,7 @@ class TestPurgeVhostFiles(NginxVhostsTestBase):
         self.assertFalse(dashboard_https.exists())
 
 
-class TestMainShim(NginxVhostsTestBase):
+class TestMainShim(NginxVhostsTestBase, unittest.TestCase):
     def test_no_argv_prints_usage_and_returns_2(self) -> None:
         stderr = io.StringIO()
         with redirect_stderr(stderr):
