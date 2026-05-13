@@ -18,7 +18,7 @@ postgres:
   enabled: true
 decidim:
   image: ghcr.io/decidim/decidim
-  version: 0.31.4
+  version: 0.31.5
   min_storage: 10GB
   name: decidim
   cpus: '1.0'
