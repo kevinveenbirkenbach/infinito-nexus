@@ -12,14 +12,10 @@ from ansible.errors import AnsibleFilterError
 def load_filter_module(repo_root: str) -> ModuleType:
     """
     Load the filter plugin from:
-      roles/svc-db-postgres/filter_plugins/split_postgres_connections.py
+      plugins/filter/split_postgres_connections.py
     """
     plugin_path = str(
-        Path(repo_root)
-        / "roles"
-        / "svc-db-postgres"
-        / "filter_plugins"
-        / "split_postgres_connections.py"
+        Path(repo_root) / "plugins" / "filter" / "split_postgres_connections.py"
     )
     if not Path(plugin_path).is_file():
         raise FileNotFoundError(f"Filter plugin not found at {plugin_path}")
@@ -67,20 +63,17 @@ class SplitPostgresConnectionsTests(unittest.TestCase):
         write_role_vars(self.repo, "app_c", "mysql")
         write_role_vars(self.repo, "app_d", None)
 
-        # Copy the real plugin into this temp repo structure, preserving your path layout.
-        # (Adjust src_plugin_path if your test runner runs from a different CWD.)
+        # Copy the real plugin into this temp repo structure, preserving the
+        # project layout (plugins/filter/).
         src_plugin_path = str(
             Path(str(Path.cwd()))
-            / "roles"
-            / "svc-db-postgres"
-            / "filter_plugins"
+            / "plugins"
+            / "filter"
             / "split_postgres_connections.py"
         )
         if not Path(src_plugin_path).is_file():
             self.skipTest(f"Source plugin not found at {src_plugin_path}")
-        dst_plugin_dir = str(
-            Path(self.repo) / "roles" / "svc-db-postgres" / "filter_plugins"
-        )
+        dst_plugin_dir = str(Path(self.repo) / "plugins" / "filter")
         Path(dst_plugin_dir).mkdir(parents=True, exist_ok=True)
         shutil.copy2(
             src_plugin_path,
