@@ -15,8 +15,7 @@
       - {{ NEXTCLOUD_SERVICE }}
 {% include 'roles/sys-svc-container/templates/healthcheck/curl.yml.j2'  %}
     networks:
-      default:
-        ipv4_address: 192.168.102.67
+      - default
 {% if NEXTCLOUD_HPB_NETWORK_MODE == 'host' %}
     extra_hosts:
       - "host.docker.internal:host-gateway"
@@ -42,7 +41,6 @@
 {% include 'roles/sys-svc-container/templates/base.yml.j2' %}
 {% include 'roles/sys-svc-container/templates/depends_on/dmbs_excl.yml.j2' %}
 {% include 'roles/sys-svc-container/templates/networks.yml.j2' %}
-        ipv4_address: 192.168.102.69
 
 {% if NEXTCLOUD_HPB_SIGNALING_ENABLED | bool %}
 {% set service_name = NEXTCLOUD_HPB_SERVICE %}
@@ -64,8 +62,7 @@
     expose:
       - "{{ container_port }}"
     networks:
-      default:
-        ipv4_address: 192.168.102.68
+      - default
 {% else %}
   network_mode: {{ NEXTCLOUD_HPB_NETWORK_MODE }}
 {% endif %}
@@ -92,8 +89,7 @@
       - "{{ container_port }}"
     shm_size: 1g
     networks:
-      default:
-        ipv4_address: 192.168.102.71
+      - default
     depends_on:
       redis:
         condition: service_healthy
@@ -119,7 +115,6 @@
       retries: 3
 {% include 'roles/sys-svc-container/templates/depends_on/dmbs_excl.yml.j2' %}
 {% include 'roles/sys-svc-container/templates/networks.yml.j2' %}
-        ipv4_address: 192.168.102.70
 
 {% if NEXTCLOUD_RECORDING_ENABLED | bool %}
 {% set service_name = 'talk_recording' %}
@@ -136,8 +131,7 @@
     expose:
       - "{{ NEXTCLOUD_RECORDING_PORT }}"
     networks:
-      default:
-        ipv4_address: 192.168.102.72
+      - default
     volumes:
       - talk_recording_tmp:/tmp
 {% endif %}

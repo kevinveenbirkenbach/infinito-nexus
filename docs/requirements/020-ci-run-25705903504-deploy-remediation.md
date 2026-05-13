@@ -95,10 +95,10 @@ Sorted DESC by `total` (carried over from [019](019-playwright-meta-services-par
 
 | Role | total | cluster | bundle | v0 | v1 | v2 | notes |
 | --- | ---: | --- | --- | --- | --- | --- | --- |
-| `web-app-prometheus` | 173 | C7 | G | ❌ | ⏳ |  | Log truncated; reclassify after A+B. |
-| `web-app-mailu` | 139 | C1+C2 | B+C | ❌ | ⏳ |  | Root of the cascade; admin vhost 502. |
-| `web-app-keycloak` | 130 | C7 | G | ❌ | ⏳ |  | Log truncated; reclassify after A+B. |
-| `web-app-nextcloud` | 27 | C7 | F | ❌ | ⏳ | ⏳ | Log truncated. |
+| ~~`web-app-prometheus`~~ | 173 | C7 | G | ✅ | ✅ |  | Local full-cycle re-deploy v0+v1 — both rounds (PASS 1+2) `failed=0`, 0 Playwright failures. CI flake; not a real cluster-C7 issue. |
+| ~~`web-app-mailu`~~ | 139 | C1+C2 | B+C | ✅ | ✅ |  | Local full-cycle re-deploy v0+v1 — all 4 PASS rounds `failed=0`; guest persona scenario passed in 531ms. CI 502 does NOT reproduce locally; environmental flake. |
+| ~~`web-app-keycloak`~~ | 130 | C7 | G | ✅ | ✅ |  | Local full-cycle re-deploy v0+v1 — all 4 PASS rounds `failed=0`, 0 Playwright failures. CI flake. |
+| `web-app-nextcloud` | 27 | C8-LDAP | F | ✅ | ❌ | ⏳ | v0 green. IP-collision fix landed (removed 6 hardcoded ipv4_address pins from `compose.yml.j2`); v1 now reaches LDAP warm-cache task in [tasks/plugins/user_ldap.yml:69](../../roles/web-app-nextcloud/tasks/plugins/user_ldap.yml#L69) and fails with `Lost connection to LDAP server` because variant 1 pins `ldap.shared: false` and the LDAP cache-warm task is not gated on that. Fix: gate the warm-cache (and LDAP config) tasks on `services.ldap.enabled`. |
 | `web-app-bigbluebutton` | 24 | C1? | B | ❌ | ⏳ |  | Suspected Mailu cascade. |
 | `web-app-discourse` | 24 | C3 | A | ❌ | ⏳ |  | Hub fix landed; awaiting CI. |
 | `web-app-mastodon` | 23 | C3 | A | ❌ | ⏳ |  | Hub fix landed; awaiting CI. |
