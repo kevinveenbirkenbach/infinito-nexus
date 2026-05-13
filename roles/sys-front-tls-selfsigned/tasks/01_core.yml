@@ -123,7 +123,7 @@
   when: >-
     {{
       (not (_ss_cert_stat.stat.exists | default(false))) or
-      ((_ss_wanted_sans | difference(_ss_existing_sans) | length) > 0)
+      (_ss_wanted_sans != _ss_existing_sans)
     }}
 
 - include_tasks: utils/once/flag.yml
