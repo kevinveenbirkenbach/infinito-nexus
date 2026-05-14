@@ -37,6 +37,9 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "${SCRIPT_DIR}/../../../../.." && pwd)"
 cd "${REPO_ROOT}"
 
+# shellcheck source=scripts/meta/env/all.sh
+source "scripts/meta/env/all.sh"
+
 # shellcheck source=scripts/tests/deploy/local/utils/cache-retry.sh
 source "${SCRIPT_DIR}/../utils/cache-retry.sh"
 

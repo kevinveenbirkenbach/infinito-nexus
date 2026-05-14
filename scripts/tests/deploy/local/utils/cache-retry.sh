@@ -1,55 +1,76 @@
 #!/usr/bin/env bash
-# Source-able helper for local deploy/update scripts:
-#
-#   deploy_with_cache_retry <label> -- <cmd> [args...]
-#
-# Runs the wrapped command and watches its combined stdout+stderr for the
-# stale-apt signature
-#
-#   "Release file ... is expired"  /  "Valid-Until ... expired"
-#
-# which surfaces when the registry-cache or package-cache (Nexus / nginx
-# frontend) serves apt repository metadata whose `Valid-Until` window has
-# elapsed — usually because the cache has not refreshed since the last
-# `apt-get update` ran upstream, or the host clock has drifted past the
-# Release file's validity. The result is a Docker-build failure like
-#
-#   E: Release file for http://deb.debian.org/debian/dists/bookworm-updates/InRelease
-#      is expired (invalid since 5h 30min 54s).
-#
-# On match, the helper wipes BOTH cache stacks via `make cache-clean`
-# (registry-cache + package-cache via scripts/system/cache/clean.sh),
-# prunes the local Docker builder cache + unused images, and re-runs the
-# wrapped command exactly once. Stale-cache detection is the ONLY retry
-# trigger; any other failure bubbles straight up so the deploy/update
-# script's existing error handling is preserved.
-#
-# The wrapped command MUST be idempotent enough to tolerate a single
-# re-execution. Both `python -m cli.administration.deploy.development
-# deploy` and the pre-cleanup steps in our deploy scripts satisfy that.
-
 # shellcheck shell=bash
+#
+# Wraps a command and, on apt "Release expired" / "Valid-Until expired"
+# failure, invalidates the Nexus apt-proxy caches via REST and re-runs once.
+# Usage: deploy_with_cache_retry "<label>" -- <cmd> [args...]
+
+_CACHE_RETRY_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+_CACHE_RETRY_REPO_ROOT="$(cd "${_CACHE_RETRY_DIR}/../../../../.." && pwd)"
 
 _cache_retry_stale_pattern='Release file .*is expired|Valid-Until.*expired'
 
-cache_retry_wipe_all() {
-	local repo_root="${1:-${PWD}}"
-	echo "[cache-retry] make cache-clean (registry-cache + package-cache)..."
-	(cd "${repo_root}" && make cache-clean) || true
-	echo "[cache-retry] docker builder prune -af (drop cached build layers)..."
+# Used when the Nexus API discovery call fails; mirrors scripts/docker/cache/package.sh.
+_CACHE_RETRY_FALLBACK_REPOS=(apt-debian apt-debian-security apt-ubuntu apt-ubuntu-security)
+
+_cache_retry_nexus_invalidate() {
+	local repo="$1"
+	local rest="http://127.0.0.1:8081/service/rest/v1/repositories/${repo}/invalidate-cache"
+	local code
+	code="$(docker exec infinito-package-cache curl -sS -o /dev/null -w '%{http_code}' \
+		-u "admin:${INFINITO_PACKAGE_CACHE_ADMIN_PASSWORD}" \
+		-X POST "${rest}" 2>/dev/null || echo 000)"
+	if [[ "${code}" =~ ^2[0-9][0-9]$ ]]; then
+		echo "[cache-retry] invalidate-cache OK (${code}): ${repo}"
+	else
+		echo "[cache-retry] WARN: invalidate-cache failed (${code}) for ${repo} — continuing"
+	fi
+}
+
+_cache_retry_list_apt_proxy_repos() {
+	local json
+	json="$(docker exec infinito-package-cache curl -sS \
+		-u "admin:${INFINITO_PACKAGE_CACHE_ADMIN_PASSWORD}" \
+		"http://127.0.0.1:8081/service/rest/v1/repositories" 2>/dev/null)" || return 1
+	[[ -z "${json}" ]] && return 1
+	printf '%s' "${json}" |
+		"${PYTHON:-python3}" "${_CACHE_RETRY_REPO_ROOT}/utils/nexus/list_apt_proxy_repos.py" \
+			2>/dev/null ||
+		return 1
+	return 0
+}
+
+cache_retry_recover() {
+	# Defensive re-source: helper may be invoked outside the wrapping deploy script.
+	# shellcheck disable=SC1091  # path is runtime-resolved through REPO_ROOT
+	source "${REPO_ROOT:-${PWD}}/scripts/meta/env/cache/package.sh"
+
+	local repos=()
+	local discovered
+	if discovered="$(_cache_retry_list_apt_proxy_repos)"; then
+		while IFS= read -r _line; do
+			[[ -n "${_line}" ]] && repos+=("${_line}")
+		done <<<"${discovered}"
+		echo "[cache-retry] discovered apt-proxy repos from Nexus: ${repos[*]}"
+	else
+		repos=("${_CACHE_RETRY_FALLBACK_REPOS[@]}")
+		echo "[cache-retry] WARN: could not query Nexus — using fallback list: ${repos[*]}"
+	fi
+
+	local repo
+	for repo in "${repos[@]}"; do
+		echo "[cache-retry] Nexus invalidate-cache: ${repo}"
+		_cache_retry_nexus_invalidate "${repo}"
+	done
+
+	echo "[cache-retry] docker builder prune -af..."
 	docker builder prune -af >/dev/null 2>&1 || true
-	echo "[cache-retry] docker image prune -af (drop unused base images)..."
+	echo "[cache-retry] docker image prune -af..."
 	docker image prune -af >/dev/null 2>&1 || true
 }
 
-# Run `"$@" 2>&1 | tee <log>` defensively: the caller's `set -e` plus the
-# global `set -o pipefail` would otherwise kill the script the moment the
-# wrapped command exits non-zero — *before* the helper can decide whether
-# the failure matches the stale-cache signature. Toggle `set +e` only
-# around the pipeline and restore the caller's original errexit state so
-# the helper never silently changes it.
-#
-# Sets globals: __cache_retry_rc (wrapped command's true exit code).
+# Toggle errexit around the pipeline so a wrapped non-zero exit reaches the caller
+# instead of killing the script before the stale-cache match is evaluated.
 _cache_retry_run_capture() {
 	local log="$1"
 	shift
@@ -63,13 +84,11 @@ _cache_retry_run_capture() {
 	return 0
 }
 
-# Usage: deploy_with_cache_retry "<label>" -- "$@"
 deploy_with_cache_retry() {
 	local label="${1:-deploy}"
 	shift
 	if [[ "${1:-}" == "--" ]]; then shift; fi
 
-	local repo_root="${REPO_ROOT:-${PWD}}"
 	local log
 	log="$(mktemp -t "deploy-${label//[^A-Za-z0-9._-]/-}.XXXXXX.log")"
 
@@ -82,16 +101,14 @@ deploy_with_cache_retry() {
 	fi
 
 	if ! grep -qE "${_cache_retry_stale_pattern}" "${log}" 2>/dev/null; then
-		# Non-stale-cache failure: bubble up as-is.
 		rm -f "${log}"
 		return "${rc}"
 	fi
 
 	echo
 	echo "[cache-retry] Stale apt Release file detected in '${label}' output."
-	echo "[cache-retry] Wiping registry+package cache, Docker builder cache, unused images,"
-	echo "[cache-retry] then re-running the command exactly once."
-	cache_retry_wipe_all "${repo_root}"
+	echo "[cache-retry] Invalidating Nexus apt-proxy caches, pruning Docker caches, re-running once."
+	cache_retry_recover
 
 	echo
 	echo "[cache-retry] Re-running: ${label}"
