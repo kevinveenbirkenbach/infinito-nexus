@@ -1,16 +1,17 @@
 ---
 # Matrix-deploy variant overrides for web-app-phpldapadmin.
 # See docs/contributing/artefact/files/role/variants.md for the file format.
+#
+# `ldap` is pinned in `services.yml` (`enabled: true`, `shared: true`)
+# because LDAP IS the storage backend for phpLDAPadmin — every variant
+# inherits it, so the variant blocks below don't override it.
 
-# variant pinning every dynamic services.yml flag to true so the
-# matrix exercises the in-group_names branch of web-app-phpldapadmin.
+# variant 0: every dynamic flag on so the matrix exercises the
+# in-group_names branch.
 - services:
     dashboard:
       enabled: true
       shared: true
-    ldap:
-      shared: true
-      enabled: true
     logout:
       enabled: true
       shared: true
@@ -24,15 +25,11 @@
       enabled: true
       shared: true
 
-# variant pinning every dynamic services.yml flag to false so the
-# matrix also exercises the out-of-group_names branch.
+# variant 1: Keycloak/federation surface off; LDAP-backed only.
 - services:
     dashboard:
       enabled: false
       shared: false
-    ldap:
-      shared: false
-      enabled: false
     logout:
       enabled: false
       shared: false
@@ -45,10 +42,9 @@
     prometheus:
       enabled: false
       shared: false
+
+# variant 2: LDAP-only path explicitly disables oauth2.
 - services:
-    ldap:
-      enabled: true
-      shared: true
     oauth2:
       enabled: false
       shared: false

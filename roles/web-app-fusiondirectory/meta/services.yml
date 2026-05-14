@@ -16,7 +16,7 @@ matomo:
   shared: "{{ 'web-app-matomo' in group_names }}"
 ldap:
   enabled: true # nocheck: dynamic-flag
-  shared: "{{ 'svc-db-openldap' in group_names }}"
+  shared: true # nocheck: dynamic-flag — LDAP IS the storage backend, never local
 oauth2:
   enabled: "{{ 'web-app-keycloak' in group_names }}"
   shared: "{{ 'web-app-keycloak' in group_names }}"
