@@ -27,7 +27,7 @@
   register: _mw_db_health
   retries: 60
   delay: 2
-  until: (_mw_db_health.stdout | default('') | trim) == 'healthy'
+  until: (_mw_db_health.stdout | trim) == 'healthy'
   changed_when: false
 
 - name: "Load extensions procedures for '{{ application_id }}''"
