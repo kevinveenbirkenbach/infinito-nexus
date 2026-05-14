@@ -77,9 +77,9 @@ CAPTCHA:
     KEY: ""
     SECRET: ""
 
-RECAPTCHA_ENABLED: "{{ (CAPTCHA.RECAPTCHA.KEY   | default('') | length > 0) and (CAPTCHA.RECAPTCHA.SECRET | default('') | length > 0) }}"
+RECAPTCHA_ENABLED: "{{ (CAPTCHA.RECAPTCHA.KEY | length > 0) and (CAPTCHA.RECAPTCHA.SECRET | length > 0) }}"
 
-HCAPTCHA_ENABLED: "{{ (CAPTCHA.HCAPTCHA.KEY   | default('') | length > 0) and (CAPTCHA.HCAPTCHA.SECRET | default('') | length > 0) }}"
+HCAPTCHA_ENABLED: "{{ (CAPTCHA.HCAPTCHA.KEY | length > 0) and (CAPTCHA.HCAPTCHA.SECRET | length > 0) }}"
 
 # User of the workstation, change it to the productive user before setup
 WORKSTATION_USER: "administrator"

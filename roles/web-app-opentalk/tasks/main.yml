@@ -81,7 +81,7 @@
       secret: "{{ OPENTALK_CTRL_OIDC_CLIENT_SECRET }}"
     kcadm_exec: "container exec -i {{ lookup('config', 'web-app-keycloak', 'services.keycloak.name') }} /opt/keycloak/bin/kcadm.sh"
     realm: "{{ OIDC.CLIENT.REALM }}"
-    assert_mode: "{{ MODE_ASSERT | default(false) }}"
+    assert_mode: "{{ MODE_ASSERT | bool }}"
   no_log: "{{ MASK_CREDENTIALS_IN_LOGS | bool }}"
 
 - name: "Upsert dedicated confidential Keycloak client for the OpenTalk recorder"
@@ -112,7 +112,7 @@
       secret: "{{ OPENTALK_RECORDER_OIDC_CLIENT_SECRET }}"
     kcadm_exec: "container exec -i {{ lookup('config', 'web-app-keycloak', 'services.keycloak.name') }} /opt/keycloak/bin/kcadm.sh"
     realm: "{{ OIDC.CLIENT.REALM }}"
-    assert_mode: "{{ MODE_ASSERT | default(false) }}"
+    assert_mode: "{{ MODE_ASSERT | bool }}"
   no_log: "{{ MASK_CREDENTIALS_IN_LOGS | bool }}"
 
 - name: "Grant the OpenTalk controller's service account the realm-management `view-users` role"

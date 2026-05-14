@@ -30,9 +30,9 @@ CA_ROOT:
   # Subject defaults
   subject:
     C: "DE"
-    O: "{{ DOMAIN_PRIMARY | default('Infinito.Nexus') }}"
+    O: "{{ DOMAIN_PRIMARY }}"
     OU: "Infinito.Nexus Root CA"
-    CN: "{{ DOMAIN_PRIMARY | default('infinito.local') }} Root CA"
+    CN: "{{ DOMAIN_PRIMARY }} Root CA"
 CA_TRUST:
   cert_host: "{{ CA_ROOT.cert_host }}"
   trust_name: "{{ DOMAIN_PRIMARY | lower }}"

@@ -8,10 +8,10 @@
     _playwright_reports_dir: "{{ TEST_E2E_PLAYWRIGHT_REPORTS_BASE_DIR }}/{{ application_id }}"
     _playwright_default_package_template: "{{ playbook_dir }}/roles/test-e2e-playwright/templates/package.json.j2"
     _playwright_default_config_js: "{{ playbook_dir }}/roles/test-e2e-playwright/files/playwright.config.js"
-    _playwright_ca_required: "{{ (TLS_MODE | default('') | lower) == 'self_signed' }}"
-    _playwright_ca_cert_host: "{{ (CA_TRUST | default({})).cert_host | default('') }}"
-    _playwright_ca_wrapper_host: "{{ (CA_TRUST | default({})).wrapper_host | default('') }}"
-    _playwright_ca_trust_name: "{{ (CA_TRUST | default({})).trust_name | default('') }}"
+    _playwright_ca_required: "{{ (TLS_MODE | lower) == 'self_signed' }}"
+    _playwright_ca_cert_host: "{{ CA_TRUST.cert_host }}"
+    _playwright_ca_wrapper_host: "{{ CA_TRUST.wrapper_host }}"
+    _playwright_ca_trust_name: "{{ CA_TRUST.trust_name }}"
 
 - name: Validate CA_TRUST configuration for self-signed TLS
   ansible.builtin.fail:
