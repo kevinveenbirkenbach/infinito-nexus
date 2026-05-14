@@ -45,10 +45,17 @@ true | false) ;;
 	;;
 esac
 
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+REPO_ROOT="$(cd "${SCRIPT_DIR}/../../../../.." && pwd)"
+
+# shellcheck source=scripts/tests/deploy/local/utils/cache-retry.sh
+source "${SCRIPT_DIR}/../utils/cache-retry.sh"
+
 echo "=== rapid deploy: type=${TEST_DEPLOY_TYPE} app=${APPS} container=${INFINITO_CONTAINER} debug=${DEBUG} ==="
 echo "inventory_dir=${INVENTORY_DIR}"
 
-docker exec \
+deploy_with_cache_retry "reuse-${APPS//[^A-Za-z0-9._-]/-}" -- \
+	docker exec \
 	-e SERVICES_DISABLED="${SERVICES_DISABLED:-}" \
 	-e INVENTORY_FILE="${INVENTORY_FILE}" \
 	-e APPS="${APPS}" \

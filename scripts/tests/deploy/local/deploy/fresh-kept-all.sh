@@ -7,6 +7,9 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "${SCRIPT_DIR}/../../../../.." && pwd)"
 cd "${REPO_ROOT}"
 
+# shellcheck source=scripts/tests/deploy/local/utils/cache-retry.sh
+source "${SCRIPT_DIR}/../utils/cache-retry.sh"
+
 # ---------------------------------------------------------------------------
 # Required environment
 # ---------------------------------------------------------------------------
@@ -102,7 +105,8 @@ echo
 # ---------------------------------------------------------------------------
 echo ">>> Running entry/init + inventory + deploy inside infinito container via development exec"
 
-"${PYTHON}" -m cli.administration.deploy.development exec \
+deploy_with_cache_retry "fresh-kept-all" -- \
+	"${PYTHON}" -m cli.administration.deploy.development exec \
 	--env "INVENTORY_DIR=${INVENTORY_DIR}" \
 	--env "INVENTORY_FILE=${INVENTORY_FILE}" \
 	--env "INVENTORY_VARS_FILE=${INVENTORY_VARS_FILE}" \

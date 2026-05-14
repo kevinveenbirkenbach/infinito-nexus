@@ -20,6 +20,8 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 # shellcheck source=scripts/tests/deploy/local/utils/lib.sh
 source "${SCRIPT_DIR}/../utils/lib.sh"
+# shellcheck source=scripts/tests/deploy/local/utils/cache-retry.sh
+source "${SCRIPT_DIR}/../utils/cache-retry.sh"
 
 REPO_ROOT="$(cd "${SCRIPT_DIR}/../../../../.." && pwd)"
 cd "${REPO_ROOT}"
@@ -92,7 +94,8 @@ echo "apps_sample=$(
 echo
 
 # Run deploy inside container
-"${PYTHON}" -m cli.administration.deploy.development exec \
+deploy_with_cache_retry "reuse-all" -- \
+	"${PYTHON}" -m cli.administration.deploy.development exec \
 	--env "INVENTORY_FILE=${inv_file}" \
 	--env "PW_FILE=${pw_file}" \
 	--env "LIMIT_HOST=${LIMIT_HOST}" \

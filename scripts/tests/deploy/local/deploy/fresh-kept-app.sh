@@ -20,6 +20,8 @@ REPO_ROOT="$(cd "${SCRIPT_DIR}/../../../../.." && pwd)"
 
 # shellcheck source=scripts/tests/deploy/local/utils/lib.sh
 source "${SCRIPT_DIR}/../utils/lib.sh"
+# shellcheck source=scripts/tests/deploy/local/utils/cache-retry.sh
+source "${SCRIPT_DIR}/../utils/cache-retry.sh"
 
 cd "${REPO_ROOT}"
 
@@ -130,7 +132,7 @@ fi
 deploy_cmd+=(-- --skip-backup --skip-cleanup --limit "${LIMIT_HOST}")
 
 echo ">>> Deploying app '${APPS}'"
-"${deploy_cmd[@]}"
+deploy_with_cache_retry "deploy-${APPS//[^A-Za-z0-9._-]/-}-kept" -- "${deploy_cmd[@]}"
 
 echo
 echo "✅ Finished. Stack and inventory remain on disk (no teardown)."

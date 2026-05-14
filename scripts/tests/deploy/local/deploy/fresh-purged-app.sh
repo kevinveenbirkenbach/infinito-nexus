@@ -37,6 +37,9 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "${SCRIPT_DIR}/../../../../.." && pwd)"
 cd "${REPO_ROOT}"
 
+# shellcheck source=scripts/tests/deploy/local/utils/cache-retry.sh
+source "${SCRIPT_DIR}/../utils/cache-retry.sh"
+
 echo "=== LOCAL: distro=${INFINITO_DISTRO} type=${TEST_DEPLOY_TYPE} app=${APPS} full_cycle=${FULL_CYCLE} ==="
 echo "limit_host=${LIMIT_HOST}"
 echo "inventory_dir=${INVENTORY_DIR}"
@@ -88,10 +91,14 @@ fi
 
 if [[ "${FULL_CYCLE}" == "true" ]]; then
 	echo ">>> deploy (PASS 1 sync + PASS 2 async per variant, FULL_CYCLE=true)"
-	"${PYTHON}" -m cli.administration.deploy.development deploy "${deploy_args[@]}" --full-cycle
+	deploy_with_cache_retry "deploy-${APPS//[^A-Za-z0-9._-]/-}-full-cycle" -- \
+		"${PYTHON}" -m cli.administration.deploy.development deploy \
+		"${deploy_args[@]}" --full-cycle
 else
 	echo ">>> deploy (PASS 1 sync only, FULL_CYCLE=false)"
-	"${PYTHON}" -m cli.administration.deploy.development deploy "${deploy_args[@]}"
+	deploy_with_cache_retry "deploy-${APPS//[^A-Za-z0-9._-]/-}" -- \
+		"${PYTHON}" -m cli.administration.deploy.development deploy \
+		"${deploy_args[@]}"
 fi
 
 echo
