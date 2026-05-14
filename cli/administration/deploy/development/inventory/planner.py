@@ -77,22 +77,40 @@ def plan_dev_inventory_matrix(
     total_rounds = max(primary_variant_counts.values(), default=1)
     base = str(base_inventory_dir).rstrip("/")
 
-    plan: list[PlanEntry] = []
+    # Round include = union of every variant's closure, so a variant pinning `shared: false` does not drop a backbone the next round still needs.
+    per_variant_includes: list[tuple[str, ...]] = []
+    primary_round_variants_per_round: list[dict[str, int]] = []
     for round_index in range(total_rounds):
         primary_round_variants = {
             app_id: round_index if round_index < count else 0
             for app_id, count in primary_variant_counts.items()
         }
+        primary_round_variants_per_round.append(primary_round_variants)
 
         services_overrides = legacy_resolver._build_services_overrides_for_round(
             roles_dir=roles_dir,
             round_index=round_index,
             primary_app_variants=primary_round_variants,
         )
-        round_include = legacy_resolver._resolve_round_include(
-            primary_apps=primary_apps,
-            services_overrides=services_overrides,
+        per_variant_includes.append(
+            legacy_resolver._resolve_round_include(
+                primary_apps=primary_apps,
+                services_overrides=services_overrides,
+            )
         )
+
+    seen_union: set[str] = set()
+    round_include_union: list[str] = []
+    for variant_include in per_variant_includes:
+        for dep in variant_include:
+            if dep not in seen_union:
+                seen_union.add(dep)
+                round_include_union.append(dep)
+    round_include: tuple[str, ...] = tuple(round_include_union)
+
+    plan: list[PlanEntry] = []
+    for round_index in range(total_rounds):
+        primary_round_variants = primary_round_variants_per_round[round_index]
 
         # Extend round_variants with discovered deps' variants so deploy.py
         # and the inventory baker decide variant-cleanly per dep too.
