@@ -19,6 +19,17 @@
   until: _mw_exists.rc == 0
   changed_when: false
 
+# The database lives in a separate compose project (svc-db-mariadb) when shared,
+# so compose-level `depends_on: condition: service_healthy` cannot reach it.
+# Gate the install step on the database container's own healthcheck instead.
+- name: "MEDIAWIKI | Wait until database container is healthy"
+  ansible.builtin.command: "container inspect --format={% raw %}{{.State.Health.Status}}{% endraw %} {{ MEDIAWIKI_NETWORK_DATABASE }}"
+  register: _mw_db_health
+  retries: 60
+  delay: 2
+  until: (_mw_db_health.stdout | default('') | trim) == 'healthy'
+  changed_when: false
+
 - name: "Load extensions procedures for '{{ application_id }}''"
   include_tasks: "02_extensions.yml"
   when: MEDIAWIKI_OIDC_ENABLED | bool
