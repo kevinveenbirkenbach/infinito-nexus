@@ -62,6 +62,15 @@ export INFINITO_PACKAGE_CACHE_FRONTEND_CERTS_DIR
 : "${INFINITO_PACKAGE_CACHE_FRONTEND_IP:=172.30.0.4}"
 export INFINITO_PACKAGE_CACHE_FRONTEND_IP
 
-# Cache freshness in minutes; 129600 = 90 days.
-: "${INFINITO_PACKAGE_CACHE_MAX_AGE_MIN:=129600}"
+# Cache freshness in minutes. Default 6 days (= 6 * 24 * 60 = 8640).
+#
+# Stays strictly below the 7-day `Valid-Until` window that Debian /
+# Ubuntu generate by default in their apt `Release` files — Nexus
+# re-validates every cached `Release` against upstream after at most
+# 6 days, so apt never sees an expired manifest and `apt-get update`
+# never aborts with "Release file ... is expired".
+#
+# Override via `INFINITO_PACKAGE_CACHE_MAX_AGE_MIN=<minutes>` if a
+# specific environment needs longer or shorter freshness.
+: "${INFINITO_PACKAGE_CACHE_MAX_AGE_MIN:=8640}"
 export INFINITO_PACKAGE_CACHE_MAX_AGE_MIN

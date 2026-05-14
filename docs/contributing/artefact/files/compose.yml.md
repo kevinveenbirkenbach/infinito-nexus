@@ -73,7 +73,7 @@ The env-var contracts each service expects strictly via `${VAR:?…}` (consumed 
 | `INFINITO_PACKAGE_CACHE_HEAP`           | none (required)  | JVM heap (`-Xms`/`-Xmx`). Default half free RAM, capped at `2g`, floor `1g`. |
 | `INFINITO_PACKAGE_CACHE_DIRECT_MEM`     | none (required)  | `MaxDirectMemorySize`. Default mirrors `INFINITO_PACKAGE_CACHE_HEAP`. |
 | `INFINITO_PACKAGE_CACHE_BLOBSTORE_MAX`  | none (required)  | Soft quota for the default blobstore. Default half free disk at the cache path, floor `2g`. |
-| `INFINITO_PACKAGE_CACHE_MAX_AGE_MIN`    | `129600` (= 90 days) | Cache freshness window in minutes, applied to every Nexus proxy repo (`contentMaxAge`/`metadataMaxAge`/negative-cache TTL). |
+| `INFINITO_PACKAGE_CACHE_MAX_AGE_MIN`    | `8640` (= 6 days)    | Cache freshness window in minutes, applied to every Nexus proxy repo (`contentMaxAge`/`metadataMaxAge`/negative-cache TTL). Default stays strictly below the 7-day `Valid-Until` window Debian / Ubuntu generate in their apt `Release` files, so `apt-get update` never aborts with "Release file ... is expired". |
 | `INFINITO_PACKAGE_CACHE_ADMIN_PASSWORD` | none (required)  | Target value for the rotated Nexus admin password. Default is a stable per-host hash. |
 | `INFINITO_PACKAGE_CACHE_PORT`           | `8081`           | Host-side port mapped to Nexus REST/UI. Bound to `${BIND_IP}` only. |
 | `INFINITO_PACKAGE_CACHE_PIP_CONF`       | `/dev/null`      | Bind source for `/etc/pip.conf`. Set to `compose/package-cache/pip.conf` under `cache`. |

@@ -90,7 +90,7 @@ The host-side env-vars live in [scripts/meta/env/cache/registry.sh](../../../scr
 
 Per-variable defaults and purposes are in [compose.yml.md](../artefact/files/compose.yml.md) under the cache section.
 
-`INFINITO_PACKAGE_CACHE_MAX_AGE_MIN` (default `129600` = 90 days) controls how long every Nexus proxy repo holds an upstream response before revalidating. The bootstrap helper applies it as `contentMaxAge`, `metadataMaxAge`, and `negativeCache.timeToLive`. Lower it for fast-moving upstreams (`apt-debian-security`, branch-pinned tarballs) when staleness becomes visible.
+`INFINITO_PACKAGE_CACHE_MAX_AGE_MIN` (default `8640` = 6 days) controls how long every Nexus proxy repo holds an upstream response before revalidating. The bootstrap helper applies it as `contentMaxAge`, `metadataMaxAge`, and `negativeCache.timeToLive`. The default is intentionally one day below the 7-day `Valid-Until` window Debian and Ubuntu generate in their apt `Release` files, so Nexus always refreshes the manifest before `apt-get update` would see it expired. Raise it for slow-moving upstreams when staleness is preferable to upstream load; lower it further for fast-moving feeds (`apt-debian-security`, branch-pinned tarballs) when staleness becomes visible.
 
 ## Operations 🛠️
 
