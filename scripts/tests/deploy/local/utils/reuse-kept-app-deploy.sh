@@ -22,6 +22,19 @@ pw_file="${inv_dir}/.password"
 
 if [[ ! -f "${INVENTORY_FILE}" ]]; then
 	echo "ERROR: inventory not found: ${INVENTORY_FILE}" >&2
+	parent_dir="$(dirname "${inv_dir}")"
+	if [[ -d "${parent_dir}" ]]; then
+		shopt -s nullglob
+		suggestions=()
+		for sibling in "${parent_dir}"/*/devices.yml; do
+			[[ "${sibling}" != "${INVENTORY_FILE}" ]] && suggestions+=("${sibling}")
+		done
+		shopt -u nullglob
+		if ((${#suggestions[@]} > 0)); then
+			echo "Did you mean one of:" >&2
+			printf '  - %s\n' "${suggestions[@]}" >&2
+		fi
+	fi
 	exit 2
 fi
 
