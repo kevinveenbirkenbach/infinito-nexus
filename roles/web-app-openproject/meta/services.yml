@@ -25,7 +25,9 @@ web:
     no_stop_required: true
   cpus: "3.0"
   mem_reservation: 3g
-  mem_limit: 4g
+  # `rails db:migrate` from the existing web container peaks ~5 GB during
+  # asset/class-load on a fresh schema; CI hit rc=137 (OOM) at 4g limit.
+  mem_limit: 6g
   pids_limit: 2048
   min_storage: 5GB
 seeder:
