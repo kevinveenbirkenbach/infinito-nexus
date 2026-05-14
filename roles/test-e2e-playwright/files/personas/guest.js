@@ -48,9 +48,17 @@ async function runGuestFlow(page = {}) {
 
   await page.context().clearCookies();
 
-  const response = await page
-    .goto(startUrl, { waitUntil: "domcontentloaded", timeout: 30_000 })
-    .catch(() => null);
+  let response;
+  try {
+    response = await page.goto(startUrl, {
+      waitUntil: "domcontentloaded",
+      timeout: 30_000,
+    });
+  } catch (err) {
+    throw new Error(
+      `guest: page.goto(${startUrl}) failed before the 30s navigation timeout: ${err.message}`,
+    );
+  }
 
   if (response) {
     expect(response.status(), "guest visit must not 5xx").toBeLessThan(500);

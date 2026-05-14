@@ -61,7 +61,9 @@ async function readCspString(page) {
   const currentUrl = page.url();
   if (!currentUrl || currentUrl === "about:blank") return "";
 
-  const fresh = await page.request.get(currentUrl, { ignoreHTTPSErrors: true }).catch(() => null);
+  const fresh = await page.request
+    .get(currentUrl, { ignoreHTTPSErrors: true, timeout: 10_000 })
+    .catch(() => null);
   if (fresh) {
     const headers = fresh.headers();
     const fromHeader = headers["content-security-policy"] || headers["content-security-policy-report-only"];
