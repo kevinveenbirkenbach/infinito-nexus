@@ -1,11 +1,4 @@
-"""Unit tests for the deploy-side matrix iteration in
-`cli.administration.deploy.development.deploy.handler`.
-
-The init step builds N inventory folders (one per round, with the
-per-app variant data baked in); the deploy handler re-derives the same
-plan via `plan_dev_inventory_matrix` and deploys against each folder in
-turn, purging only the apps whose variant changed between rounds. These
-tests pin both the iteration order and the cleanup decisions."""
+"""Unit tests for the deploy-side matrix iteration: each round deploys its own variant-closure (``include``); between rounds the wrapper wipes the union (``purge_set``)."""
 
 from __future__ import annotations
 
@@ -55,14 +48,14 @@ def _entry(
     inv_dir: str,
     round_variants: dict[str, int],
     include: tuple[str, ...] | None = None,
-) -> tuple[int, str, dict[str, int], tuple[str, ...]]:
-    """Build a 4-tuple plan entry. Defaults `include` to the keys of
-    `round_variants` so existing test fixtures stay terse — round 0 of
-    the deploy loop deploys whatever is in include, and the variant-aware
-    planner naturally emits the same set."""
+    purge_set: tuple[str, ...] | None = None,
+) -> tuple[int, str, dict[str, int], tuple[str, ...], tuple[str, ...]]:
+    """5-tuple plan entry. Defaults: include=round_variants.keys(), purge_set=include — pass purge_set explicitly when round closures differ."""
     if include is None:
         include = tuple(round_variants.keys())
-    return (round_index, inv_dir, round_variants, include)
+    if purge_set is None:
+        purge_set = include
+    return (round_index, inv_dir, round_variants, include, purge_set)
 
 
 def _make_compose_mock() -> MagicMock:
@@ -268,31 +261,30 @@ class TestHandlerMatrixDeploy(unittest.TestCase):
         autospec=True,
     )
     @patch("cli.administration.deploy.development.deploy.make_compose", autospec=True)
-    def test_round_transition_purges_previous_include_even_when_dep_falls_out(
+    def test_round_transition_purges_union_when_variant_closures_differ(
         self,
         make_compose_mock: MagicMock,
         plan_mock: MagicMock,
         run_deploy_mock: MagicMock,
         purge_mock: MagicMock,
     ) -> None:
-        # Round 0 pulls a dep (web-svc-coturn) via the variant-0 closure,
-        # round 1 disables that dep so it falls out of the include set.
-        # The purge MUST cover the previous round's full include — coturn
-        # included — so round 1 boots from a host that does not carry
-        # leftover coturn state.
+        # WHY: round 1 must deploy only its own closure (no coturn), yet the inter-round purge must wipe the union (coturn included).
         make_compose_mock.return_value = _make_compose_mock()
+        union = ("web-app-nextcloud", "web-svc-coturn")
         plan_mock.return_value = [
             _entry(
                 0,
                 "/srv/inv-0",
                 {"web-app-nextcloud": 0},
                 include=("web-app-nextcloud", "web-svc-coturn"),
+                purge_set=union,
             ),
             _entry(
                 1,
                 "/srv/inv-1",
                 {"web-app-nextcloud": 1},
                 include=("web-app-nextcloud",),
+                purge_set=union,
             ),
         ]
         run_deploy_mock.return_value = 0
@@ -301,7 +293,12 @@ class TestHandlerMatrixDeploy(unittest.TestCase):
 
         self.assertEqual(rc, 0)
         self.assertEqual(run_deploy_mock.call_count, 2)
+        round_zero_deploy_ids = run_deploy_mock.call_args_list[0].kwargs["deploy_ids"]
         round_one_deploy_ids = run_deploy_mock.call_args_list[1].kwargs["deploy_ids"]
+        self.assertEqual(
+            sorted(round_zero_deploy_ids),
+            ["web-app-nextcloud", "web-svc-coturn"],
+        )
         self.assertEqual(round_one_deploy_ids, ["web-app-nextcloud"])
         purge_mock.assert_called_once()
         self.assertEqual(

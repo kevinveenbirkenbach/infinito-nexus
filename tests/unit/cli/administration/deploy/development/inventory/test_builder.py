@@ -252,18 +252,20 @@ class TestBuildDevInventoryMatrix(unittest.TestCase):
         )
 
         self.assertEqual(
-            [(idx, inv, vs, inc) for idx, inv, vs, inc in plan],
+            [(idx, inv, vs, inc, purge) for idx, inv, vs, inc, purge in plan],
             [
                 (
                     0,
                     "/srv/inv-0",
                     {"web-app-multi": 0, "web-app-keycloak": 0},
                     ("web-app-multi", "web-app-keycloak"),
+                    ("web-app-multi", "web-app-keycloak"),
                 ),
                 (
                     1,
                     "/srv/inv-1",
                     {"web-app-multi": 1, "web-app-keycloak": 0},
+                    ("web-app-multi", "web-app-keycloak"),
                     ("web-app-multi", "web-app-keycloak"),
                 ),
             ],
@@ -272,7 +274,7 @@ class TestBuildDevInventoryMatrix(unittest.TestCase):
         # active_variants matches the round's plan entry and whose include
         # is the round's variant-resolved include set.
         self.assertEqual(build_inventory_mock.call_count, 2)
-        for (_round_idx, inv_dir, round_vars, round_include), call in zip(
+        for (_round_idx, inv_dir, round_vars, round_include, _purge), call in zip(
             plan, build_inventory_mock.call_args_list, strict=False
         ):
             spec_arg = call.args[1]

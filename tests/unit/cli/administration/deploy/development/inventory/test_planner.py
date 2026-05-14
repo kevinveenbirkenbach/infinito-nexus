@@ -54,6 +54,7 @@ class TestPlanDevInventoryMatrix(unittest.TestCase):
                     "/srv/inv",
                     {"web-app-foo": 0, "web-app-bar": 0},
                     ("web-app-foo", "web-app-bar"),
+                    ("web-app-foo", "web-app-bar"),
                 )
             ],
         )
@@ -98,11 +99,13 @@ class TestPlanDevInventoryMatrix(unittest.TestCase):
                     "/srv/inv-0",
                     {"web-app-multi": 0, "web-app-keycloak": 0},
                     ("web-app-multi", "web-app-keycloak"),
+                    ("web-app-multi", "web-app-keycloak"),
                 ),
                 (
                     1,
                     "/srv/inv-1",
                     {"web-app-multi": 1, "web-app-keycloak": 0},
+                    ("web-app-multi", "web-app-keycloak"),
                     ("web-app-multi", "web-app-keycloak"),
                 ),
             ],
@@ -151,11 +154,13 @@ class TestPlanDevInventoryMatrix(unittest.TestCase):
                     "/srv/inv-0",
                     {"web-app-three": 0, "web-app-two": 0},
                     ("web-app-three", "web-app-two"),
+                    ("web-app-three", "web-app-two"),
                 ),
                 (
                     1,
                     "/srv/inv-1",
                     {"web-app-three": 1, "web-app-two": 1},
+                    ("web-app-three", "web-app-two"),
                     ("web-app-three", "web-app-two"),
                 ),
                 (
@@ -163,9 +168,48 @@ class TestPlanDevInventoryMatrix(unittest.TestCase):
                     "/srv/inv-2",
                     {"web-app-three": 2, "web-app-two": 0},
                     ("web-app-three", "web-app-two"),
+                    ("web-app-three", "web-app-two"),
                 ),
             ],
         )
+
+    @patch(
+        "cli.administration.deploy.development.inventory.legacy_resolver._resolve_round_include",
+        autospec=True,
+    )
+    @patch(
+        "cli.administration.deploy.development.inventory.legacy_resolver._build_services_overrides_for_round",
+        autospec=True,
+        return_value={},
+    )
+    @patch(
+        "cli.administration.deploy.development.inventory.planner.get_variants",
+        autospec=True,
+    )
+    def test_purge_set_is_union_when_variants_differ(
+        self,
+        get_variants_mock: MagicMock,
+        _overrides_mock: MagicMock,
+        resolve_include_mock: MagicMock,
+    ) -> None:
+        # WHY: per-round include must stay variant-specific while purge_set must be the union, otherwise the inter-round wipe leaks coturn into round 1.
+        get_variants_mock.return_value = {
+            "web-app-nextcloud": [{"shared_coturn": True}, {"shared_coturn": False}],
+        }
+        resolve_include_mock.side_effect = [
+            ("web-app-nextcloud", "web-svc-coturn"),
+            ("web-app-nextcloud",),
+        ]
+        plan = plan_dev_inventory_matrix(
+            roles_dir="/roles",
+            primary_apps=["web-app-nextcloud"],
+            base_inventory_dir="/srv/inv",
+        )
+        self.assertEqual(plan[0][3], ("web-app-nextcloud", "web-svc-coturn"))
+        self.assertEqual(plan[1][3], ("web-app-nextcloud",))
+        union = ("web-app-nextcloud", "web-svc-coturn")
+        self.assertEqual(plan[0][4], union)
+        self.assertEqual(plan[1][4], union)
 
     def test_empty_primary_apps_rejected(self):
         with self.assertRaises(ValueError):
@@ -183,11 +227,13 @@ class TestFilterPlanToVariant(unittest.TestCase):
             "/srv/inv-0",
             {"web-app-multi": 0, "web-app-keycloak": 0},
             ("web-app-multi", "web-app-keycloak"),
+            ("web-app-multi", "web-app-keycloak"),
         ),
         (
             1,
             "/srv/inv-1",
             {"web-app-multi": 1, "web-app-keycloak": 0},
+            ("web-app-multi", "web-app-keycloak"),
             ("web-app-multi", "web-app-keycloak"),
         ),
     ]

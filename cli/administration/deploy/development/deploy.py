@@ -268,33 +268,22 @@ def handler(args: argparse.Namespace) -> int:
     container_name = resolve_container()
 
     rc = 0
-    previous_round_include: list[str] = []
-    for round_index, inv_dir, round_variants, include_R in plan:
-        # Apply SERVICES_DISABLED filter to the round's include set so
-        # disabled provider roles are not handed to ansible just because
-        # the variant-aware resolver pulled them in via service edges.
+    for plan_index, (
+        round_index,
+        inv_dir,
+        round_variants,
+        include_R,
+        purge_set_R,
+    ) in enumerate(plan):
         round_include = [role for role in include_R if role not in disabled_app_ids]
-        # Every round deploys the full include set — the round's
-        # variant-aware closure. Round R starts from a clean host
-        # (the previous round's include is fully purged below) so
-        # every dep that round R needs MUST be redeployed; there is
-        # no "skip variant-unchanged apps" optimisation any more, the
-        # old optimisation left cross-round state residue when a
-        # variant dropped a dep that the previous round had pulled in.
         round_deploy_ids = round_include
 
-        # Between rounds the wrapper purges every app from the previous
-        # round's include set, so the next round boots from an empty
-        # host. This is the SPOT for cross-round state coherence:
-        # nothing the previous round deployed (whether it stayed in the
-        # current round's closure or fell out) can leak into round R.
-        # `previous_round_include` only becomes truthy after the first
-        # iteration completes, so single-folder modes (N=1 or
-        # `--variant` pinned) skip the purge entirely.
-        if previous_round_include:
-            _purge_app_entities(
-                container=container_name, app_ids=previous_round_include
-            )
+        # WHY purge_set (= union across all rounds) and not previous_round_include: a variant pinning `services.<X>.shared: false` would otherwise leak its bundled provider into the next round's host.
+        if plan_index > 0:
+            purge_targets = [
+                role for role in purge_set_R if role not in disabled_app_ids
+            ]
+            _purge_app_entities(container=container_name, app_ids=purge_targets)
 
         pass_label = (
             f"matrix-deploy: round {round_index + 1}/{len(plan)} "
@@ -328,7 +317,5 @@ def handler(args: argparse.Namespace) -> int:
             )
             if rc != 0:
                 return rc
-
-        previous_round_include = round_include
 
     return rc

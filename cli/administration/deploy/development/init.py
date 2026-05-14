@@ -160,7 +160,7 @@ def handler(args: argparse.Namespace) -> int:
 
     runtime = os.environ.get("RUNTIME") or detect_runtime()
     services_disabled = os.environ.get("SERVICES_DISABLED", "")
-    for _round_index, inv_dir, round_variants, include_R in plan:
+    for _round_index, inv_dir, round_variants, include_R, _purge_set in plan:
         round_include = tuple(
             role for role in include_R if role not in disabled_app_ids
         )
@@ -182,7 +182,7 @@ def handler(args: argparse.Namespace) -> int:
         build_dev_inventory(compose, spec)
 
     if len(plan) == 1:
-        _, inv_dir, round_variants, include_R = plan[0]
+        _, inv_dir, round_variants, include_R, _purge_set = plan[0]
         non_zero = {a: i for a, i in round_variants.items() if i}
         suffix = f" variants={non_zero}" if non_zero else ""
         print(
@@ -196,7 +196,7 @@ def handler(args: argparse.Namespace) -> int:
             f"(primary_apps={','.join(primary_apps)} "
             f"storage_constrained={storage_constrained}):"
         )
-        for round_index, inv_dir, round_variants, include_R in plan:
+        for round_index, inv_dir, round_variants, include_R, _purge_set in plan:
             non_zero = {a: i for a, i in round_variants.items() if i}
             print(
                 f"    [round {round_index}] {inv_dir} "

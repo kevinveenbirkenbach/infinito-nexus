@@ -598,10 +598,11 @@ class TestImportableWithoutAnsible(unittest.TestCase):
             "    base_inventory_dir='/tmp/_inv_unused',\n"
             ")\n"
             "assert len(plan) > 0\n"
-            "round_index, inv_dir, round_variants, include_R = plan[0]\n"
+            "round_index, inv_dir, round_variants, include_R, purge_set_R = plan[0]\n"
             "assert round_index == 0\n"
             "assert sample[0] in round_variants\n"
             "assert sample[0] in include_R\n"
+            "assert sample[0] in purge_set_R\n"
             "print('OK')\n"
         )
         self.assertEqual(rc, 0, msg=f"stderr=\n{err}\nstdout=\n{out}")

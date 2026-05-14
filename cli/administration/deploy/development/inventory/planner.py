@@ -51,21 +51,7 @@ def plan_dev_inventory_matrix(
     primary_apps: Sequence[str],
     base_inventory_dir: str,
 ) -> list[PlanEntry]:
-    """Return ``[(round_index, inventory_dir, round_variants, include), ...]``.
-
-    ``total_rounds = max(variant_count)`` across the **primary** apps the
-    user named. In round R every primary uses variant R clamped to its
-    own count; transitive deps discovered for that round use R clamped
-    to their own count too. The variant-aware resolver is invoked per
-    round so the include set reflects the variant-merged topology —
-    apps a variant pulls in via ``services.<X>.enabled: true`` appear
-    in the include for that round (and not for rounds where they are
-    not pulled).
-
-    Inventory paths are suffixed with ``-<round>`` only when
-    ``total_rounds > 1``, so single-variant deploys keep the historical
-    unsuffixed path.
-    """
+    """Return ``[(round_index, inventory_dir, round_variants, include, purge_set), ...]`` — per-round variant-closure plus a plan-constant union for the inter-round wipe."""
     if not primary_apps:
         raise ValueError("plan_dev_inventory_matrix: primary_apps must not be empty")
 
@@ -77,7 +63,7 @@ def plan_dev_inventory_matrix(
     total_rounds = max(primary_variant_counts.values(), default=1)
     base = str(base_inventory_dir).rstrip("/")
 
-    # Round include = union of every variant's closure, so a variant pinning `shared: false` does not drop a backbone the next round still needs.
+    # WHY split: per-round include is variant-specific; purge_set is the union so the inter-round wipe clears every variant's footprint, not just the previous round's slice.
     per_variant_includes: list[tuple[str, ...]] = []
     primary_round_variants_per_round: list[dict[str, int]] = []
     for round_index in range(total_rounds):
@@ -100,20 +86,19 @@ def plan_dev_inventory_matrix(
         )
 
     seen_union: set[str] = set()
-    round_include_union: list[str] = []
+    union_apps: list[str] = []
     for variant_include in per_variant_includes:
         for dep in variant_include:
             if dep not in seen_union:
                 seen_union.add(dep)
-                round_include_union.append(dep)
-    round_include: tuple[str, ...] = tuple(round_include_union)
+                union_apps.append(dep)
+    purge_set: tuple[str, ...] = tuple(union_apps)
 
     plan: list[PlanEntry] = []
     for round_index in range(total_rounds):
         primary_round_variants = primary_round_variants_per_round[round_index]
+        round_include = per_variant_includes[round_index]
 
-        # Extend round_variants with discovered deps' variants so deploy.py
-        # and the inventory baker decide variant-cleanly per dep too.
         round_variants = dict(primary_round_variants)
         for dep in round_include:
             if dep in round_variants:
@@ -123,6 +108,6 @@ def plan_dev_inventory_matrix(
             round_variants[dep] = round_index if round_index < dep_count else 0
 
         inv_dir = f"{base}-{round_index}" if total_rounds > 1 else base
-        plan.append((round_index, inv_dir, round_variants, round_include))
+        plan.append((round_index, inv_dir, round_variants, round_include, purge_set))
 
     return plan

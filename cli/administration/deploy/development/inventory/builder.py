@@ -104,7 +104,7 @@ def build_dev_inventory_matrix(
         base_inventory_dir=base_inventory_dir,
     )
     allow: set[str] | None = set(include_filter) if include_filter is not None else None
-    for _round_index, inv_dir, round_variants, raw_include in plan:
+    for _round_index, inv_dir, round_variants, raw_include, _purge_set in plan:
         round_include = (
             tuple(role for role in raw_include if role in allow)
             if allow is not None

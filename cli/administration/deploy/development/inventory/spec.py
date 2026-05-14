@@ -15,7 +15,8 @@ from typing import TYPE_CHECKING, Any
 if TYPE_CHECKING:
     from collections.abc import Mapping
 
-PlanEntry = tuple[int, str, dict[str, int], tuple[str, ...]]
+# (round_index, inventory_dir, round_variants, include, purge_set) — include is the round's variant-closure (what to deploy); purge_set is the union over all rounds (what the inter-round wipe clears).
+PlanEntry = tuple[int, str, dict[str, int], tuple[str, ...], tuple[str, ...]]
 
 
 @dataclass(frozen=True)
