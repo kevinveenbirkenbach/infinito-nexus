@@ -93,12 +93,12 @@ Columns immediately after `Role`:
 | ~~`web-app-opentalk`~~ | 23 | ✅ | ✅ | ✅ | ✅ | ✅ | CI run 25774452286 — deploy + Playwright PASS for all declared variants (`PERSONA_*_BLOCKED` env fix from commit f1898dd77 verified) |
 | `web-app-listmonk` | 22 | ❌ | ✅ | ✅ | ⏳ |  | Local FULL_CYCLE v0 ✅ (PASS1 ok=2413 failed=0, PASS2 ok=2230 failed=0, total 50min). CI **C11 DB upgrade** does not reproduce locally — likely was a one-off race between matrix-deploy rounds in CI. v1 verification pending |
 | `web-app-gitea` | 22 | ✅ | ✅ | ❌ | ⏳ | ⏳ | CI "compose up" network-label failure resolved by the new orphan-default-network purge primitive `scripts/container/purge/entity/network.sh` + global `docker network prune -f` at the end of `scripts/container/purge/apps.sh` (commit `c6affc96f`). `PROMETHEUS_BASE_URL` + `PROMETHEUS_SERVICE_ENABLED` now rendered in `templates/playwright.env.j2` (commit `1e5a47f67`) so the spec's `beforeEach` no longer aborts on `Received: undefined`. Local v0 deploy PASS 1 reaches Playwright; remaining failures are gitea-specific spec issues: (a) `prometheus scrapes gitea native metrics — job target is up` still fails on the scrape contract itself, (b) `biber/administrator: dashboard → prometheus → app → universal logout` time out after 1.4 min (universal-logout Keycloak round-trip not returning to gitea.* — Deep). |
-| `web-app-openwebui` | 22 | ✅ | ✅ | ⏳ | ⏳ | ⏳ | CI run 25774452286 — deploy still in_progress at snapshot time; awaiting completion |
+| ~~`web-app-openwebui`~~ | 22 | ✅ | ✅ | ✅ | ✅ | ✅ | CI run 25797277810 — deploy + Playwright PASS for all declared variants |
 | ~~`web-app-flowise`~~ | 22 | ✅ | ✅ | ✅ | ✅ | ✅ | CI run 25774452286 — deploy + Playwright PASS for all declared variants |
 | `web-app-bookwyrm` | 22 | ✅ | ✅ | ❌ | ⏳ | ⏳ | CI run 25774452286 — **C2** Playwright failed for `web-app-bookwyrm` (deploy clean). Was 2/2 active tests pass + 4 personas cleanly skipped in CI run 25680106742 — regression to investigate |
-| `web-app-minio` | 22 | ✅ | ✅ | ✅ | ✅ | ✅ | CI run 25774452286 — deploy still in_progress at snapshot time; awaiting completion |
-| `web-app-xwiki` | 21 | ❌ | ✅ | ⏳ | ⏳ |  | CI run 25774452286 — deploy still in_progress at snapshot time; awaiting completion |
-| `web-app-shopware` | 21 | ❌ | ✅ | ⏳ | ⏳ | ⏳ | CI run 25774452286 — deploy still in_progress at snapshot time; awaiting completion |
+| ~~`web-app-minio`~~ | 22 | ✅ | ✅ | ✅ | ✅ | ✅ | CI run 25797277810 — deploy + Playwright PASS for all declared variants |
+| ~~`web-app-xwiki`~~ | 21 | ❌ | ✅ | ✅ | ✅ |  | CI run 25797277810 — deploy + Playwright PASS for all declared variants |
+| ~~`web-app-shopware`~~ | 21 | ❌ | ✅ | ✅ | ✅ | ✅ | CI run 25797277810 — deploy + Playwright PASS for all declared variants |
 | ~~`web-app-pretix`~~ | 21 | ❌ | ✅ | ✅ | ✅ |  | CI run 25774452286 — deploy + Playwright PASS for all declared variants |
 | `web-app-odoo` | 21 | ✅ | ✅ | ⏳ | ⏳ | ⏳ | CI run 25774452286 — deploy still in_progress at snapshot time; awaiting completion |
 | ~~`web-app-mobilizon`~~ | 21 | ❌ | ✅ | ✅ | ✅ |  | CI run 25774452286 — deploy + Playwright PASS for all declared variants |
@@ -107,7 +107,7 @@ Columns immediately after `Role`:
 | ~~`web-app-espocrm`~~ | 21 | ❌ | ✅ | ✅ | ✅ | ✅ | Local FULL_CYCLE v0+v1+v2 ✅ (failed=0 both passes for every variant). Root cause for the CI fail was a **duplicate `depends_on:` block** in `roles/web-app-espocrm/templates/compose.yml.j2` (websocket service rendered both the `dmbs_excl.yml.j2` include AND a manual `depends_on:` → `failed to parse compose.yml: yaml: mapping key "depends_on" already defined`); commits `eaa51b39d` then `1f5689e44` consolidate daemon + websocket services to use the `dmbs_incl.yml.j2` include so the DB/redis deps and the manual espocrm-service dep live under a single `depends_on:` key. |
 | `web-app-taiga` | 21 | ✅ | ✅ | ❌ | ⏳ | ⏳ | CI run 25774452286 — **C2** Playwright failed for `web-app-taiga` (deploy clean). Universal-logout Keycloak round-trip not returning to taiga.kanban.* remains Deep |
 | `web-app-mattermost` | 21 | ✅ | ✅ | ❌ | ⏳ |  | CI run 25774452286 — **C2** Playwright failed for `web-app-mattermost` (deploy clean). Bespoke DM-UI selector + universal-logout Keycloak round-trip remain |
-| `web-app-wordpress` | 21 | ✅ | ✅ | ⏳ | ⏳ |  | CI run 25774452286 — deploy still in_progress at snapshot time; awaiting completion |
+| ~~`web-app-wordpress`~~ | 21 | ✅ | ✅ | ✅ | ✅ |  | CI run 25797277810 — deploy + Playwright PASS for all declared variants |
 | ~~`web-app-moodle`~~ | 21 | ✅ | ✅ | ✅ | ✅ | ✅ | CI run 25774452286 — deploy + Playwright PASS for all declared variants |
 | ~~`web-app-joomla`~~ | 21 | ✅ | ✅ | ✅ | ✅ |  | CI run 25774452286 — deploy + Playwright PASS for all declared variants |
 | `web-app-fider` | 21 | ✅ | ✅ | ❌ | ⏳ |  | CI run 25774452286 — **C2** Playwright failed for `web-app-fider` (deploy clean) |
@@ -115,8 +115,8 @@ Columns immediately after `Role`:
 | `web-app-baserow` | 21 | ✅ | ✅ | ❌ | ⏳ | ⏳ | CI run 25774452286 — **C2** Playwright failed for `web-app-baserow` (deploy clean) |
 | ~~`web-app-akaunting`~~ | 21 | ✅ | ✅ | ✅ | ✅ | ✅ | CI run 25774452286 — deploy + Playwright PASS for all declared variants (re-verified). biber + administrator personas explicit-skipped via `PERSONA_*_BLOCKED` in env; OIDC auto-provisioning not wired, see role TODO.md |
 | `web-app-fediwall` | 21 | ✅ | ✅ | ❌ | ⏳ | ⏳ | CI run 25774452286 — **C2** Playwright failed for `web-app-fediwall` (deploy clean). Static Vue SPA with `PERSONA_*_BLOCKED=true`; biber covered by cross-fediverse scenario via Mastodon+Friendica. Need to root-cause why the wall-render scenario regressed |
-| `web-app-suitecrm` | 20 | ❌ | ✅ | ⏳ | ⏳ | ⏳ | CI run 25774452286 — deploy still in_progress at snapshot time; awaiting completion |
-| `web-app-snipe-it` | 20 | ❌ | ✅ | ⏳ | ⏳ | ⏳ | CI run 25774452286 — deploy still in_progress at snapshot time; awaiting completion |
+| ~~`web-app-suitecrm`~~ | 20 | ❌ | ✅ | ✅ | ✅ | ✅ | CI run 25797277810 — deploy + Playwright PASS for all declared variants |
+| ~~`web-app-snipe-it`~~ | 20 | ❌ | ✅ | ✅ | ✅ | ✅ | CI run 25797277810 — deploy + Playwright PASS for all declared variants |
 | `web-app-openproject` | 20 | ❌ | ✅ | ❌ | ⏳ | ⏳ | CI run 25774452286 — `Run database migrations` (`roles/web-app-openproject/tasks/01_settings.yml:15`) returned `rc=137` (cgroup OOM) after 9.5 min and 30 retries: the `rails db:migrate` peak exceeded `web.mem_limit=4g`. Commit `bdd59b9db` bumps `web.mem_limit` to 6g (peak observed ~5g + headroom; comfortable on the 16 GB public CI runner). Awaiting next CI verification. |
 | `web-app-mediawiki` | 20 | ❌ | ✅ | ❌ | ⏳ |  | CI run 25774452286 — **C13 mediawiki image missing**: `docker image inspect failed for mediawiki:1.45: Error response from daemon: No such image: mediawiki:1.45` (image tag unavailable / not pulled in this run) |
 | `web-app-jira` | 20 | ❌ | ✅ | ⏳ | ⏳ |  |  |

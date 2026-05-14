@@ -113,12 +113,12 @@ Sorted DESC by `total` (carried over from [019](019-playwright-meta-services-par
 | ~~`web-app-opentalk`~~ | 23 | — | — | ✅ | ✅ | ✅ | CI run 25774452286 — deploy + Playwright PASS for all declared variants. |
 | `web-app-listmonk` | 22 | C11 | — | ✅ | ⏳ |  | Local FULL_CYCLE v0 ✅. CI C11 did not reproduce — environmental race in CI matrix-deploy round; v1 pending. |
 | `web-app-gitea` | 22 | C9b/C2 | — | ❌ | ⏳ | ⏳ | Network-label `compose up` failure resolved by the new orphan-default-network purge primitive `scripts/container/purge/entity/network.sh` + global `docker network prune -f` after the entity loop in `apps.sh` (commit `c6affc96f`). Spec env extended with `PROMETHEUS_BASE_URL` + `PROMETHEUS_SERVICE_ENABLED` (commit `1e5a47f67`). Remaining: gitea-specific Playwright failures (prometheus scrape contract + universal-logout round-trip timeout). |
-| `web-app-openwebui` | 22 | — | — | ⏳ | ⏳ | ⏳ | CI run 25774452286 — deploy still in_progress at snapshot time; awaiting completion. |
+| ~~`web-app-openwebui`~~ | 22 | — | — | ✅ | ✅ | ✅ | CI run 25797277810 — deploy + Playwright PASS for all declared variants. |
 | ~~`web-app-flowise`~~ | 22 | — | — | ✅ | ✅ | ✅ | CI run 25774452286 — deploy + Playwright PASS for all declared variants. |
 | `web-app-bookwyrm` | 22 | C2 | C | ❌ | ⏳ | ⏳ | CI run 25774452286 — **C2** Playwright failed for `web-app-bookwyrm` (deploy clean). Was C1 Mailu cascade in CI 25705903504 — regressed to a different cluster. |
-| `web-app-minio` | 22 | — | — | ⏳ | ⏳ | ⏳ | CI run 25774452286 — deploy still in_progress at snapshot time; awaiting completion. |
-| `web-app-xwiki` | 21 | — | — | ⏳ | ⏳ |  | CI run 25774452286 — deploy still in_progress at snapshot time; awaiting completion. |
-| `web-app-shopware` | 21 | — | — | ⏳ | ⏳ | ⏳ | CI run 25774452286 — deploy still in_progress at snapshot time; awaiting completion. |
+| ~~`web-app-minio`~~ | 22 | — | — | ✅ | ✅ | ✅ | CI run 25797277810 — deploy + Playwright PASS for all declared variants. |
+| ~~`web-app-xwiki`~~ | 21 | — | — | ✅ | ✅ |  | CI run 25797277810 — deploy + Playwright PASS for all declared variants. |
+| ~~`web-app-shopware`~~ | 21 | — | — | ✅ | ✅ | ✅ | CI run 25797277810 — deploy + Playwright PASS for all declared variants. |
 | ~~`web-app-pretix`~~ | 21 | — | — | ✅ | ✅ |  | CI run 25774452286 — deploy + Playwright PASS for all declared variants (C3 hub fix verified). |
 | `web-app-odoo` | 21 | C5 | D | ⏳ | ⏳ | ⏳ | CI run 25774452286 — deploy still in_progress at snapshot time; awaiting completion. |
 | ~~`web-app-mobilizon`~~ | 21 | — | — | ✅ | ✅ |  | CI run 25774452286 — deploy + Playwright PASS for all declared variants (C3 hub fix verified). |
@@ -127,15 +127,15 @@ Sorted DESC by `total` (carried over from [019](019-playwright-meta-services-par
 | ~~`web-app-espocrm`~~ | 21 | C9 | — | ✅ | ✅ | ✅ | Local FULL_CYCLE v0+v1+v2 ✅. Real root cause was a **duplicate `depends_on:` block** in `templates/compose.yml.j2` (websocket service rendered both the `dmbs_excl.yml.j2` include AND a manual `depends_on:`); commits `eaa51b39d` then `1f5689e44` consolidate daemon + websocket to the `dmbs_incl.yml.j2` include pattern. The earlier "C9 Keycloak admin login fatal" in the CI log was just the rescue-block noise — not the actual cluster. |
 | `web-app-taiga` | 21 | C2 | C | ❌ | ⏳ | ⏳ | CI run 25774452286 — **C2** Playwright failed for `web-app-taiga` (deploy clean). |
 | `web-app-mattermost` | 21 | C2 | C | ❌ | ⏳ |  | CI run 25774452286 — **C2** Playwright failed for `web-app-mattermost` (deploy clean). |
-| `web-app-wordpress` | 21 | — | — | ⏳ | ⏳ |  | CI run 25774452286 — deploy still in_progress at snapshot time; awaiting completion. |
+| ~~`web-app-wordpress`~~ | 21 | — | — | ✅ | ✅ |  | CI run 25797277810 — deploy + Playwright PASS for all declared variants. |
 | ~~`web-app-joomla`~~ | 21 | — | — | ✅ | ✅ |  | CI run 25774452286 — deploy + Playwright PASS for all declared variants. |
 | `web-app-fider` | 21 | C2 | C | ❌ | ⏳ |  | CI run 25774452286 — **C2** Playwright failed for `web-app-fider` (deploy clean). |
 | ~~`web-app-decidim`~~ | 21 | — | — | ✅ | ✅ |  | CI run 25774452286 — deploy + Playwright PASS for all declared variants. |
 | `web-app-baserow` | 21 | C2 | C | ❌ | ⏳ | ⏳ | CI run 25774452286 — **C2** Playwright failed for `web-app-baserow` (deploy clean). |
 | ~~`web-app-akaunting`~~ | 21 | — | — | ✅ | ✅ | ✅ | CI run 25774452286 — deploy + Playwright PASS for all declared variants. |
 | `web-app-fediwall` | 21 | C2 | C | ❌ | ⏳ | ⏳ | CI run 25774452286 — **C2** Playwright failed for `web-app-fediwall` (deploy clean). |
-| `web-app-suitecrm` | 20 | — | — | ⏳ | ⏳ | ⏳ | CI run 25774452286 — deploy still in_progress at snapshot time; awaiting completion. |
-| `web-app-snipe-it` | 20 | — | — | ⏳ | ⏳ | ⏳ | CI run 25774452286 — deploy still in_progress at snapshot time; awaiting completion. |
+| ~~`web-app-suitecrm`~~ | 20 | — | — | ✅ | ✅ | ✅ | CI run 25797277810 — deploy + Playwright PASS for all declared variants. |
+| ~~`web-app-snipe-it`~~ | 20 | — | — | ✅ | ✅ | ✅ | CI run 25797277810 — deploy + Playwright PASS for all declared variants. |
 | `web-app-openproject` | 20 | C9 | — | ❌ | ⏳ | ⏳ | CI run 25774452286 — `Run database migrations` (`01_settings.yml:15`) returned `rc=137` (cgroup OOM) after 9.5 min / 30 retries. Commit `bdd59b9db` bumps `web.mem_limit` 4g → 6g (peak observed ~5g + headroom; comfortable on the 16 GB public runner). Awaiting CI re-verification. The earlier "C9 Keycloak admin login fatal" was rescue-block noise — not the cluster. |
 | `web-app-mediawiki` | 20 | C13 | — | ❌ | ⏳ |  | CI run 25774452286 — **C13 mediawiki image missing**: `docker image inspect failed for mediawiki:1.45: No such image`. |
 | ~~`web-app-funkwhale`~~ | 20 | — | — | ✅ | ✅ | ✅ | CI run 25774452286 — deploy + Playwright PASS for all declared variants. |
