@@ -119,26 +119,20 @@ Columns immediately after `Role`:
 | ~~`web-app-snipe-it`~~ | 20 | ❌ | ✅ | ✅ | ✅ | ✅ | CI run 25797277810 — deploy + Playwright PASS for all declared variants |
 | `web-app-openproject` | 20 | ❌ | ✅ | ❌ | ⏳ | ⏳ | CI run 25774452286 — `Run database migrations` (`roles/web-app-openproject/tasks/01_settings.yml:15`) returned `rc=137` (cgroup OOM) after 9.5 min and 30 retries: the `rails db:migrate` peak exceeded `web.mem_limit=4g`. Commit `bdd59b9db` bumps `web.mem_limit` to 6g (peak observed ~5g + headroom; comfortable on the 16 GB public CI runner). Awaiting next CI verification. |
 | `web-app-mediawiki` | 20 | ❌ | ✅ | ❌ | ⏳ |  | CI run 25774452286 — **C13 mediawiki image missing**: `docker image inspect failed for mediawiki:1.45: Error response from daemon: No such image: mediawiki:1.45` (image tag unavailable / not pulled in this run) |
-| `web-app-jira` | 20 | ❌ | ✅ | ⏳ | ⏳ |  |  |
 | ~~`web-app-funkwhale`~~ | 20 | ❌ | ✅ | ✅ | ✅ | ✅ | CI run 25774452286 — deploy + Playwright PASS for all declared variants |
-| `web-app-confluence` | 20 | ❌ | ✅ | ⏳ | ⏳ |  |  |
 | `web-app-pixelfed` | 20 | ✅ | ✅ | ❌ | ⏳ |  | CI run 25774452286 — **C2** Playwright failed for `web-app-pixelfed` (deploy clean) |
 | ~~`web-app-jenkins`~~ | 20 | ✅ | ✅ | ✅ | ✅ | ✅ | CI run 25774452286 — deploy + Playwright PASS for all declared variants |
 | `web-app-fusiondirectory` | 20 | ✅ | ✅ | ✅ | ❌ | ⏳ | Local FULL_CYCLE v0 ✅ (the CI **C10 ghcr.io mailu manifest 502** was indeed transient — clean re-run passes). Commit `b3d5bf466` pins `services.ldap.{enabled,shared}: true` in `meta/services.yml` (LDAP IS the storage backend — never `shared: false`) and drops the `ldap:` override from every variant in `meta/variants.yml`, so v1's "everything off" no longer accidentally tears out LDAP. v1 still ❌: `Wait until application is ready` returns HTTP 502 because the oauth2-proxy vhost is rendered even when `services.oauth2.enabled: false` — the upstream needs oauth2-vhost gating, which is a separate deep fix. |
 | `web-app-peertube` | 20 | ✅ | ✅ | ❌ | ⏳ |  | CI run 25774452286 — **C6 peertube PG**: `unable to connect to database: connection to server at "127.0.0.1", port 5432 failed: Connection refused`. Same root cause as [020](020-ci-run-25705903504-deploy-remediation.md#meta-root-cause-for-bundles-b-c5-c6-and-most-c1) — Meta load-bearing fix not landed yet |
 | `web-app-bluesky` | 20 | ✅ | ✅ | ❌ | ⏳ | ⏳ | CI run 25774452286 — **C2 Playwright timeout cascade**: `Playwright failed for roles: ['web-app-bluesky', 'web-app-mailu']` — `guest: public-landing → auth chain → never authenticated` hit `Test timeout of 60000ms exceeded`. Deploy itself was clean; mailu deploy in its own slot passed, but in bluesky's matrix-deploy round both specs regressed. Was 2/2 active tests pass in CI 25680106742 |
 | ~~`web-app-opencloud`~~ | 20 | ✅ | ✅ | ✅ | ✅ | ✅ | CI run 25774452286 — deploy + Playwright PASS for all declared variants (cross-verified). Bespoke `opencloud sso login (administrator/biber) lands on files view` covers both personas end-to-end via opencloud's own auth-route; persona shared scenarios `PERSONA_*_BLOCKED` |
-| `web-app-phpldapadmin` | 19 | ❌ | ✅ | ⏳ | ⏳ | ⏳ | Commit `b3d5bf466` pins `services.ldap.{enabled,shared}: true` in `meta/services.yml` (LDAP IS the storage backend for phpLDAPadmin) and drops the `ldap:` variant overrides so every variant inherits the pin. Local FULL_CYCLE verification pending. |
 | ~~`web-app-pgadmin`~~ | 19 | ❌ | ✅ | ✅ | ✅ |  | CI run 25774452286 — deploy + Playwright PASS for all declared variants |
-| `web-app-magento` | 19 | ❌ | ✅ | ⏳ | ⏳ |  |  |
 | ~~`web-app-lam`~~ | 19 | ❌ | ✅ | ✅ | ✅ | ✅ | CI run 25774452286 — deploy + Playwright PASS for all declared variants. Commit `b3d5bf466` additionally pins `services.ldap.{enabled,shared}: true` and drops the `ldap:` variant overrides (LDAP IS the storage backend for LAM). |
 | `web-app-kix` | 19 | ✅ | ✅ | ⏳ | ⏳ | ⏳ |  |
 | ~~`web-app-yourls`~~ | 19 | ✅ | ✅ | ✅ | ✅ |  | CI run 25774452286 — deploy + Playwright PASS for all declared variants |
 | ~~`web-app-phpmyadmin`~~ | 18 | ❌ | ✅ | ✅ | ✅ |  | CI run 25774452286 — deploy + Playwright PASS for all declared variants |
 | `web-app-postmarks` | 18 | ✅ | ✅ | ❌ | ⏳ |  | CI run 25774452286 — **C2** Playwright failed for `web-app-postmarks` (deploy clean). Was 3/3 pass in CI 25680106742 — regression to investigate |
 | ~~`web-app-chess`~~ | 18 | ❌ | ✅ | ✅ | ✅ |  | CI run 25680106742 — deploy success; auth-less small-app, spec collapses cleanly without env |
-| `web-app-oauth2-proxy` | 17 | ❌ | ✅ | ✅ | ✅ |  | Auth-less collapse (req-019 §"Auth-less roles", Zeile 272): sidecar auth proxy; never directly user-facing |
-| `web-app-navigator` | 17 | ❌ | ✅ | ✅ | ✅ |  | Auth-less collapse (req-019 §"Auth-less roles", Zeile 271): in-app module of `web-app-dashboard`; no separate auth surface |
 | ~~`web-app-sphinx`~~ | 17 | ✅ | ✅ | ✅ | ✅ |  | CI run 25680106742 — 3/3 active tests pass, 2 personas cleanly skipped |
 | ~~`web-app-roulette-wheel`~~ | 17 | ❌ | ✅ | ✅ | ✅ |  | CI run 25680106742 — deploy success; auth-less small-app, spec collapses cleanly without env |
 | ~~`web-app-mini-qr`~~ | 17 | ❌ | ✅ | ✅ | ✅ |  | CI run 25680106742 — deploy success; auth-less small-app, spec collapses cleanly without env |
@@ -146,7 +140,6 @@ Columns immediately after `Role`:
 | ~~`web-app-littlejs`~~ | 17 | ❌ | ✅ | ✅ | ✅ |  | CI run 25680106742 — deploy success; auth-less small-app, spec collapses cleanly without env |
 | ~~`web-app-hugo`~~ | 17 | ✅ | ✅ | ✅ | ✅ |  | CI run 25680106742 — 4/4 active tests pass, 2 personas cleanly skipped |
 | ~~`web-app-bridgy-fed`~~ | 17 | ✅ | ✅ | ✅ | ✅ |  | CI run 25680106742 — 3/3 active tests pass, 2 personas cleanly skipped |
-| `web-app-socialhome` | 16 | ❌ | ✅ | ⏳ | ⏳ |  |  |
 | ~~`web-svc-xmpp`~~ | 16 | ✅ | ✅ | ✅ | ✅ | ✅ | CI run 25774452286 — deploy + Playwright PASS for all declared variants |
 | ~~`web-svc-libretranslate`~~ | 16 | ✅ | ✅ | ✅ | ✅ |  | CI run 25774452286 — deploy + Playwright PASS for all declared variants |
 
