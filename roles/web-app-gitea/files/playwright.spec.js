@@ -1,6 +1,7 @@
 const { test, expect } = require("@playwright/test");
 
 const { decodeDotenvQuotedValue, performKeycloakLoginForm, runAdminFlow, runBiberFlow, runGuestFlow } = require("./personas");
+const { skipUnlessServiceEnabled } = require("./service-gating");
 test.use({
   ignoreHTTPSErrors: true
 });
@@ -34,6 +35,7 @@ test.beforeEach(() => {
 // bearer tokens or OAuth2. If this test returns 401/403, the nginx ACL whitelist
 // for /metricz is misconfigured.
 test("metricz endpoint exposes gitea metrics when prometheus is loaded as dependency", async ({ request }) => {
+  skipUnlessServiceEnabled("prometheus");
   const metriczUrl = `${prometheusBaseUrl.replace(/\/$/, "")}/metricz`;
 
   const response = await request.get(metriczUrl);
@@ -75,6 +77,7 @@ test("metricz endpoint exposes gitea metrics when prometheus is loaded as depend
 //   - PROMETHEUS_BASE_URL or OIDC_ISSUER_URL are unset (prometheus not deployed)
 //   - The query returns no results (native_metrics.enabled=false in this deployment)
 test("prometheus scrapes gitea native metrics — job target is up", async ({ browser, request }) => {
+  skipUnlessServiceEnabled("prometheus");
   if (!prometheusBaseUrl || !oidcIssuerUrl) {
     test.skip(true, "PROMETHEUS_BASE_URL or OIDC_ISSUER_URL not set — prometheus not deployed in this CI run");
     return;
