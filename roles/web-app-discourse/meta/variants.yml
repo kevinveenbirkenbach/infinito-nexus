@@ -1,10 +1,13 @@
 ---
 # Matrix-deploy variant overrides for web-app-discourse.
 # See docs/contributing/artefact/files/role/variants.md for the file format.
+#
+# `postgres` is pinned in `services.yml` (`shared: true`) because
+# Discourse's `EnablePgVectorExtension` migration requires the `vector`
+# extension which only the central `svc-db-postgres` image carries
+# (bundled launcher postgres is vanilla). Variants below don't override.
 
-# variant pinning every dynamic services.yml flag to true so the
-# matrix exercises the in-group_names branch of web-app-discourse.
-
+# variant 0: every dynamic flag on (exercises the in-group_names branch).
 - services:
     asset:
       enabled: true
@@ -23,12 +26,13 @@
       shared: true
     oidc:
       enabled: true
-      shared: true
-    postgres:
       shared: true
     prometheus:
       enabled: true
       shared: true
+
+# variant 1: every dynamic flag off; postgres stays shared by design
+# (pinned in services.yml — see comment above).
 - services:
     asset:
       enabled: false
@@ -47,8 +51,6 @@
       shared: false
     oidc:
       enabled: false
-      shared: false
-    postgres:
       shared: false
     prometheus:
       enabled: false

@@ -25,7 +25,13 @@ email:
 # nocheck: playwright-service-flag — DB engine, covered by role-local integration tests
 postgres:
   enabled: true # nocheck: dynamic-flag
-  shared: "{{ 'svc-db-postgres' in group_names }}"
+  # Pinned `shared: true` — Discourse's `EnablePgVectorExtension` migration
+  # requires the `vector` extension at the postgres server level. The
+  # central `svc-db-postgres` image is built with pgvector compiled in
+  # (`roles/svc-db-postgres/templates/Dockerfile.j2`), while Discourse's
+  # bundled launcher postgres is vanilla and lacks the extension —
+  # `bundle exec rake db:migrate` fails with `FAILED TO BOOTSTRAP`.
+  shared: true # nocheck: dynamic-flag
 # nocheck: shared
 # nocheck: dynamic-flag
 # nocheck: playwright-service-flag — DB engine, covered by role-local integration tests

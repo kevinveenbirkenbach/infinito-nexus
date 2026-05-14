@@ -121,6 +121,10 @@ async function signInViaDashboardOidc(page, username, password, personaLabel) {
 }
 
 test("administrator: dashboard to discourse OIDC login and logout", async ({ page }) => {
+  test.skip(
+    String(process.env.OIDC_SERVICE_ENABLED || "").toLowerCase() !== "true",
+    "skipped: OIDC_SERVICE_ENABLED=false"
+  );
   const diagnostics = attachDiagnostics(page);
 
   await signInViaDashboardOidc(page, adminUsername, adminPassword, "administrator");
@@ -150,6 +154,10 @@ test("administrator: dashboard to discourse OIDC login and logout", async ({ pag
 });
 
 test("biber: dashboard to discourse OIDC login and logout", async ({ page }) => {
+  test.skip(
+    String(process.env.OIDC_SERVICE_ENABLED || "").toLowerCase() !== "true",
+    "skipped: OIDC_SERVICE_ENABLED=false"
+  );
   const diagnostics = attachDiagnostics(page);
 
   await signInViaDashboardOidc(page, biberUsername, biberPassword, "biber");
