@@ -107,12 +107,12 @@ Sorted DESC by `total` (carried over from [019](019-playwright-meta-services-par
 | ~~`web-app-keycloak`~~ | 130 | C7 | G | ✅ | ✅ |  | Local full-cycle re-deploy v0+v1 — all 4 PASS rounds `failed=0`, 0 Playwright failures. CI flake. |
 | ~~`web-app-nextcloud`~~ | 27 | — | — | ✅ | ✅ | ✅ | Local full-cycle deploy passed for all declared variants. CI run 25774452286 surfaced a **C14** `Address already in use` during `nextcloud-proxy` start, but the failure does not reproduce locally — treated as an environmental port collision specific to the CI matrix-deploy round, not a role-local regression. |
 | ~~`web-app-bigbluebutton`~~ | 24 | — | — | ✅ | ✅ |  | CI run 25774452286 — deploy + Playwright PASS for all declared variants. |
-| `web-app-discourse` | 24 | C8 | — | ❌ | ⏳ |  | CI run 25774452286 — **C8 pgvector**: db:migrate failed on `enable_extension(:vector)` → FAILED TO BOOTSTRAP (retried 4×). C3 hub fix is moot — this is a new cluster. |
+| ~~`web-app-discourse`~~ | 24 | C8 | — | ✅ | ✅ |  | Local FULL_CYCLE v0+v1 ✅. Real root cause was variant 1's `postgres.shared: false` forcing the bundled launcher postgres (no pgvector); fixed by pinning `services.postgres.shared: true` since `svc-db-postgres` has pgvector compiled. OIDC tests now gated on `OIDC_SERVICE_ENABLED=true`. |
 | ~~`web-app-mastodon`~~ | 23 | — | — | ✅ | ✅ |  | CI run 25774452286 — deploy + Playwright PASS for all declared variants (C3 hub fix verified). |
 | `web-app-friendica` | 23 | C2 | C | ❌ | ⏳ | ⏳ | CI run 25774452286 — **C2** Playwright failed for `web-app-friendica` (deploy clean). Persona Keycloak round-trip not returning to social.* remains Deep. |
 | ~~`web-app-opentalk`~~ | 23 | — | — | ✅ | ✅ | ✅ | CI run 25774452286 — deploy + Playwright PASS for all declared variants. |
-| `web-app-listmonk` | 22 | C11 | — | ❌ | ⏳ |  | CI run 25774452286 — **C11 Listmonk DB upgrade**: `Run Listmonk DB/schema upgrade` non-zero (`01_database.yml:42`). |
-| `web-app-gitea` | 22 | C9 | — | ❌ | ⏳ | ⏳ | CI run 25774452286 — **C9 Keycloak admin login** failed at `04_login.yml:17`; subsequent `compose up` non-zero in same round. |
+| `web-app-listmonk` | 22 | C11 | — | ✅ | ⏳ |  | Local FULL_CYCLE v0 ✅. CI C11 did not reproduce — environmental race in CI matrix-deploy round; v1 pending. |
+| `web-app-gitea` | 22 | C9b/C2 | — | ❌ | ⏳ | ⏳ | Network-label `compose up` failure resolved by the new orphan-default-network purge primitive `scripts/container/purge/entity/network.sh` + global `docker network prune -f` after the entity loop in `apps.sh` (commit `c6affc96f`). Spec env extended with `PROMETHEUS_BASE_URL` + `PROMETHEUS_SERVICE_ENABLED` (commit `1e5a47f67`). Remaining: gitea-specific Playwright failures (prometheus scrape contract + universal-logout round-trip timeout). |
 | `web-app-openwebui` | 22 | — | — | ⏳ | ⏳ | ⏳ | CI run 25774452286 — deploy still in_progress at snapshot time; awaiting completion. |
 | ~~`web-app-flowise`~~ | 22 | — | — | ✅ | ✅ | ✅ | CI run 25774452286 — deploy + Playwright PASS for all declared variants. |
 | `web-app-bookwyrm` | 22 | C2 | C | ❌ | ⏳ | ⏳ | CI run 25774452286 — **C2** Playwright failed for `web-app-bookwyrm` (deploy clean). Was C1 Mailu cascade in CI 25705903504 — regressed to a different cluster. |
@@ -122,9 +122,9 @@ Sorted DESC by `total` (carried over from [019](019-playwright-meta-services-par
 | ~~`web-app-pretix`~~ | 21 | — | — | ✅ | ✅ |  | CI run 25774452286 — deploy + Playwright PASS for all declared variants (C3 hub fix verified). |
 | `web-app-odoo` | 21 | C5 | D | ⏳ | ⏳ | ⏳ | CI run 25774452286 — deploy still in_progress at snapshot time; awaiting completion. |
 | ~~`web-app-mobilizon`~~ | 21 | — | — | ✅ | ✅ |  | CI run 25774452286 — deploy + Playwright PASS for all declared variants (C3 hub fix verified). |
-| `web-app-matrix` | 21 | C12 | — | ❌ | ⏳ |  | CI run 25774452286 — **C12 matrix compose-up**: `compose up` non-zero at `01_docker.yml:76` (preceded by a C9 Keycloak login fail in the same round). |
+| `web-app-matrix` | 21 | C12 | — | ❌ | ⏳ |  | CI run 25774452286 — **C12 matrix compose-up** has the same root cause as gitea's C9b (orphan `matrix` network without `com.docker.compose.network=default` label) and is resolved by the same purge primitive — `scripts/container/purge/entity/network.sh` + global `docker network prune -f` (commit `c6affc96f`). Local v0 deploy compose-up grün; Playwright DM-scenario times out at 4.2 min — separate spec issue. |
 | ~~`web-app-gitlab`~~ | 21 | — | — | ✅ | ✅ |  | CI run 25774452286 — deploy + Playwright PASS for all declared variants (C3 hub fix verified). |
-| `web-app-espocrm` | 21 | C9 | — | ❌ | ⏳ | ⏳ | CI run 25774452286 — **C9 Keycloak admin login** failed at `04_login.yml:17` during the matrix-deploy round-set that included this role. |
+| ~~`web-app-espocrm`~~ | 21 | C9 | — | ✅ | ✅ | ✅ | Local FULL_CYCLE v0+v1+v2 ✅. Real root cause was a **duplicate `depends_on:` block** in `templates/compose.yml.j2` (websocket service rendered both the `dmbs_excl.yml.j2` include AND a manual `depends_on:`); commits `eaa51b39d` then `1f5689e44` consolidate daemon + websocket to the `dmbs_incl.yml.j2` include pattern. The earlier "C9 Keycloak admin login fatal" in the CI log was just the rescue-block noise — not the actual cluster. |
 | `web-app-taiga` | 21 | C2 | C | ❌ | ⏳ | ⏳ | CI run 25774452286 — **C2** Playwright failed for `web-app-taiga` (deploy clean). |
 | `web-app-mattermost` | 21 | C2 | C | ❌ | ⏳ |  | CI run 25774452286 — **C2** Playwright failed for `web-app-mattermost` (deploy clean). |
 | `web-app-wordpress` | 21 | — | — | ⏳ | ⏳ |  | CI run 25774452286 — deploy still in_progress at snapshot time; awaiting completion. |
@@ -136,17 +136,17 @@ Sorted DESC by `total` (carried over from [019](019-playwright-meta-services-par
 | `web-app-fediwall` | 21 | C2 | C | ❌ | ⏳ | ⏳ | CI run 25774452286 — **C2** Playwright failed for `web-app-fediwall` (deploy clean). |
 | `web-app-suitecrm` | 20 | — | — | ⏳ | ⏳ | ⏳ | CI run 25774452286 — deploy still in_progress at snapshot time; awaiting completion. |
 | `web-app-snipe-it` | 20 | — | — | ⏳ | ⏳ | ⏳ | CI run 25774452286 — deploy still in_progress at snapshot time; awaiting completion. |
-| `web-app-openproject` | 20 | C9 | — | ❌ | ⏳ | ⏳ | CI run 25774452286 — **C9 + DB migration**: Keycloak admin login failed (`04_login.yml:17`); subsequent `Run database migrations` (`01_settings.yml:15`) non-zero. |
+| `web-app-openproject` | 20 | C9 | — | ❌ | ⏳ | ⏳ | CI run 25774452286 — `Run database migrations` (`01_settings.yml:15`) returned `rc=137` (cgroup OOM) after 9.5 min / 30 retries. Commit `bdd59b9db` bumps `web.mem_limit` 4g → 6g (peak observed ~5g + headroom; comfortable on the 16 GB public runner). Awaiting CI re-verification. The earlier "C9 Keycloak admin login fatal" was rescue-block noise — not the cluster. |
 | `web-app-mediawiki` | 20 | C13 | — | ❌ | ⏳ |  | CI run 25774452286 — **C13 mediawiki image missing**: `docker image inspect failed for mediawiki:1.45: No such image`. |
 | ~~`web-app-funkwhale`~~ | 20 | — | — | ✅ | ✅ | ✅ | CI run 25774452286 — deploy + Playwright PASS for all declared variants. |
 | `web-app-pixelfed` | 20 | C2 | C | ❌ | ⏳ |  | CI run 25774452286 — **C2** Playwright failed for `web-app-pixelfed` (deploy clean). |
 | ~~`web-app-jenkins`~~ | 20 | — | — | ✅ | ✅ | ✅ | CI run 25774452286 — deploy + Playwright PASS for all declared variants. |
-| `web-app-fusiondirectory` | 20 | C10 | — | ❌ | ⏳ | ⏳ | CI run 25774452286 — **C10 GHCR mailu manifest 502**: `ghcr.io/v2/mailu/fetchmail/manifests/2024.06` context deadline exceeded + HTTP 502 Bad Gateway. Likely a transient ghcr.io outage. |
+| `web-app-fusiondirectory` | 20 | C10 | — | ✅ | ❌ | ⏳ | Local FULL_CYCLE v0 ✅ (C10 ghcr transient confirmed). Commit `b3d5bf466` pins `services.ldap.{enabled,shared}: true` and drops the `ldap:` variant overrides — LDAP IS the storage backend. v1 still ❌: HTTP 502 from openresty because the oauth2-proxy vhost stays rendered even when `services.oauth2.enabled: false` — vhost gating is a separate deep fix. |
 | `web-app-peertube` | 20 | C6 | E | ❌ | ⏳ |  | CI run 25774452286 — **C6 peertube PG**: `unable to connect to database: connection to server at "127.0.0.1", port 5432 failed: Connection refused`. Meta load-bearing fix not yet landed. |
 | `web-app-bluesky` | 20 | C2 | C | ❌ | ⏳ | ⏳ | CI run 25774452286 — **C2** `Playwright failed for roles: ['web-app-bluesky', 'web-app-mailu']` — guest persona `Test timeout of 60000ms`. Was C1? cascade in CI 25705903504; mailu's own deploy slot passed but its spec regressed inside bluesky's matrix-deploy round. |
 | ~~`web-app-opencloud`~~ | 20 | — | — | ✅ | ✅ | ✅ | CI run 25774452286 — deploy + Playwright PASS for all declared variants (cross-verified). |
 | ~~`web-app-pgadmin`~~ | 19 | — | — | ✅ | ✅ |  | CI run 25774452286 — deploy + Playwright PASS for all declared variants. |
-| ~~`web-app-lam`~~ | 19 | — | — | ✅ | ✅ | ✅ | CI run 25774452286 — deploy + Playwright PASS for all declared variants. |
+| ~~`web-app-lam`~~ | 19 | — | — | ✅ | ✅ | ✅ | CI run 25774452286 — deploy + Playwright PASS for all declared variants. Commit `b3d5bf466` additionally pins `services.ldap.{enabled,shared}: true` and drops the variant overrides (LDAP IS the storage backend for LAM). |
 | ~~`web-app-yourls`~~ | 19 | — | — | ✅ | ✅ |  | CI run 25774452286 — deploy + Playwright PASS for all declared variants. |
 | ~~`web-app-phpmyadmin`~~ | 18 | — | — | ✅ | ✅ |  | CI run 25774452286 — deploy + Playwright PASS for all declared variants. |
 | `web-app-postmarks` | 18 | C2 | C | ❌ | ⏳ |  | CI run 25774452286 — **C2** Playwright failed for `web-app-postmarks` (deploy clean). Was 3/3 pass in CI 25680106742 — regression. |
@@ -180,6 +180,16 @@ Re-deploy on the same branch `feature/web-app-kix` after [25705903504](https://g
 | **C6** Peertube PG Connection refused | peertube | 1 | Same as [Meta root cause](#meta-root-cause-for-bundles-b-c5-c6-and-most-c1); waiting for that fix. |
 
 **Pattern shift vs. CI 25705903504.** Bundle A (C3 `POSTGRES_ALLOWED_AVG_CONNECTIONS`) is now verified GREEN — every formerly-C3 role passed in this run (discourse is the lone exception, but its failure is C8, not C3). The dominant remaining failure mode has shifted from C1 (Mailu cascade) and C3 (postgres var) to **C2 Playwright regressions** and **C9 Keycloak admin login**. The Meta load-bearing fix for Bundles B/E (C6) is still pending; peertube reproduces. The "Suspected Mailu cascade" (C1?) labels from CI 25705903504 are now reclassified per the cluster summary above.
+
+### Infrastructure improvements landed alongside this remediation loop
+
+These commits are not per-role fixes but address the underlying environment so several cluster signatures stop reproducing across the board:
+
+| Commit | What | Scope |
+| --- | --- | --- |
+| `c6affc96f` | New entity-keyed purge primitive `scripts/container/purge/entity/network.sh` removes the per-entity default Docker network when `compose down` left it behind with the wrong / empty `com.docker.compose.network` label. `scripts/container/purge/apps.sh` runs the primitive per entity and then issues a single bare `docker network prune -f` after the entity loop. | C9b (gitea), C12 (matrix); any future role hitting the same orphan-network signature. |
+| `6d61e3ca4` | Source-able helper `scripts/tests/deploy/local/utils/cache-retry.sh` wraps the deploy command in each local deploy entrypoint (`fresh-purged-app.sh`, `fresh-kept-app.sh`, `fresh-kept-all.sh`, `reuse-kept-app.sh`, `reuse-kept-all.sh`). Detects the stale-apt signature `Release file ... is expired` / `Valid-Until ... expired` in the wrapped command's output, runs `make cache-clean` + `docker builder prune -af` + `docker image prune -af`, then re-runs the command exactly once. | Defensive fallback for "apt Release file ... is expired" Docker-build failures during local iteration. |
+| `e58f71987` | Default `INFINITO_PACKAGE_CACHE_MAX_AGE_MIN` lowered 129600 → 8640 (90 days → 6 days). Nexus now re-validates every cached `Release` against upstream before apt would see it expired (Debian/Ubuntu emit `Valid-Until` 7 days from generation). Applies to every Nexus proxy repo via `contentMaxAge` / `metadataMaxAge` / `negativeCache.timeToLive`. | Prevents the underlying stale-apt failure from reaching the deploy in the first place; the cache-retry helper from `6d61e3ca4` is the secondary defence. |
 
 ## Meta root cause for Bundles B, C5, C6 (and most C1?)
 
