@@ -21,10 +21,12 @@
     login_password: "{{ lookup('database', application_id, 'password') }}"
     login_host: "{{ lookup('database', application_id, 'reach_host') }}"
     login_port: "{{ lookup('database', application_id, 'port') }}"
+    # Odoo 19: res.company.ldap stores Many2ones as `company` / `user`
+    # (no `_id` suffix in the DB).
     query: >
       UPDATE res_company_ldap SET
         sequence = %(sequence)s,
-        company_id = %(company_id)s,
+        company = %(company_id)s,
         ldap_server_port = %(ldap_server_port)s,
         ldap_binddn = %(ldap_binddn)s,
         ldap_password = %(ldap_password)s,
@@ -58,7 +60,7 @@
     login_port: "{{ lookup('database', application_id, 'port') }}"
     query: >
       INSERT INTO res_company_ldap
-      (sequence, company_id, ldap_server, ldap_server_port, ldap_binddn, ldap_password,
+      (sequence, company, ldap_server, ldap_server_port, ldap_binddn, ldap_password,
        ldap_base, ldap_filter, "user", create_user, ldap_tls, create_date, write_date)
       VALUES (
         %(sequence)s,
