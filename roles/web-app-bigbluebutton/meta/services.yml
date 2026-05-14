@@ -38,6 +38,10 @@ bigbluebutton:
   run_after:
     - web-app-keycloak
   lifecycle: beta
+  cpus: "4.0"
+  mem_reservation: "2g"
+  mem_limit: "6g"
+  pids_limit: 4096
 # nocheck: dynamic-flag
 # nocheck: playwright-service-flag — DB engine, covered by role-local integration tests
 postgres:

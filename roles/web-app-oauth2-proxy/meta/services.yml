@@ -22,6 +22,10 @@ oauth2-proxy:
   ports:
     inter: 4180
   lifecycle: pre-alpha
+  cpus: "0.25"
+  mem_reservation: "64m"
+  mem_limit: "128m"
+  pids_limit: 256
 prometheus:
   enabled: "{{ 'web-app-prometheus' in group_names }}"
   shared: "{{ 'web-app-prometheus' in group_names }}"

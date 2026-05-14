@@ -4,6 +4,11 @@ legal:
   enabled: false
   shared: false
   lifecycle: beta
+  min_storage: "50MB"
+  cpus: "0.1"
+  mem_reservation: "32m"
+  mem_limit: "64m"
+  pids_limit: 64
 # nocheck: dynamic-flag
 html:
   enabled: true

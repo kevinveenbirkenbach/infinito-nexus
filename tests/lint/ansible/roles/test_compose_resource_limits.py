@@ -1,7 +1,7 @@
 """Lint compose service resource limits in role configs.
 
-Every role's primary compose service (``services.<entity_name>``)
-should declare the host-resource guard rails:
+Every **invokable** role's primary compose service (``services.<entity_name>``)
+MUST declare the host-resource guard rails:
 
 - ``min_storage``
 - ``cpus``
@@ -9,10 +9,14 @@ should declare the host-resource guard rails:
 - ``mem_limit``
 - ``pids_limit``
 
-Missing keys currently emit one ``::warning`` annotation each so CI highlights
-them without blocking merges. When every role has caught up the test flips to
-failing: that is the signal to switch this rule from warn-only to strict mode
-(convert the warnings into assertions).
+Scope: only roles whose directory name starts with an invokable prefix from
+``roles/categories.yml`` (resolved via
+``plugins.filter.invokable_paths.get_invokable_paths``) are checked. Non-
+invokable categories (``sys-*``, ``dev-*``, …) are infrastructural and ship
+no top-level compose service of their own.
+
+Missing keys emit a ``::warning`` annotation each so CI annotates the source
+line and **fail the test** so the regression blocks the merge.
 """
 
 from __future__ import annotations
@@ -24,6 +28,7 @@ from typing import TYPE_CHECKING
 
 import yaml
 
+from plugins.filter.invokable_paths import get_invokable_paths
 from utils.annotations.message import in_github_actions, warning
 from utils.cache.files import read_text
 from utils.cache.yaml import load_yaml_any
@@ -80,8 +85,11 @@ def _find_service_line(config_path: Path, service_name: str) -> int:
 def _collect_findings(root: Path) -> list[MissingKeyFinding]:
     findings: list[MissingKeyFinding] = []
     roles_dir = root / "roles"
+    invokable_prefixes = tuple(get_invokable_paths(suffix="-"))
     for role_dir in sorted(roles_dir.iterdir()):
         if not role_dir.is_dir():
+            continue
+        if not role_dir.name.startswith(invokable_prefixes):
             continue
         config_path = role_dir / ROLE_FILE_META_SERVICES
         if not config_path.is_file():
@@ -140,8 +148,8 @@ def _print_summary(findings: list[MissingKeyFinding], root: Path) -> None:
 
 class TestComposeResourceLimits(unittest.TestCase):
     def test_primary_services_declare_resource_limits(self) -> None:
-        """Warn per missing resource key on every role's primary compose service.
-        Fails once nothing is missing so the rule gets flipped to strict mode.
+        """Fail loudly when an invokable role's primary compose service is
+        missing one of the required resource keys.
         """
         root = PROJECT_ROOT
         findings = _collect_findings(root)
@@ -152,15 +160,17 @@ class TestComposeResourceLimits(unittest.TestCase):
         if not in_github_actions():
             _print_summary(findings, root)
 
-        self.assertGreater(
-            len(findings),
-            0,
-            "All primary compose services declare every required resource key "
-            f"({', '.join(REQUIRED_KEYS)}). Switch this test from warn-only to "
-            "strict mode: replace the `assertGreater` sentinel with "
-            "`assertEqual(len(findings), 0, ...)` so future regressions fail "
-            "the build instead of emitting warnings.",
-        )
+        if findings:
+            lines = [
+                f"{f.config_path.relative_to(root).as_posix()}:{f.line}: "
+                f"services.{f.service}.{f.key} is not set ({f.role})"
+                for f in findings
+            ]
+            self.fail(
+                f"Missing required compose-service resource keys "
+                f"({', '.join(REQUIRED_KEYS)}) on {len(findings)} entries:\n"
+                + "\n".join(lines)
+            )
 
 
 if __name__ == "__main__":
