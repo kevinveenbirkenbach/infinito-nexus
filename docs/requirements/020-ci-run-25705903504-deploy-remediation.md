@@ -149,7 +149,7 @@ Sorted DESC by `total` (carried over from [019](019-playwright-meta-services-par
 | ~~`web-app-lam`~~ | 19 | — | — | ✅ | ✅ | ✅ | CI run 25774452286 — deploy + Playwright PASS for all declared variants. Commit `b3d5bf466` additionally pins `services.ldap.{enabled,shared}: true` and drops the variant overrides (LDAP IS the storage backend for LAM). |
 | ~~`web-app-yourls`~~ | 19 | — | — | ✅ | ✅ |  | CI run 25774452286 — deploy + Playwright PASS for all declared variants. |
 | ~~`web-app-phpmyadmin`~~ | 18 | — | — | ✅ | ✅ |  | CI run 25774452286 — deploy + Playwright PASS for all declared variants. |
-| `web-app-postmarks` | 18 | C2 | C | ❌ | ⏳ |  | CI run 25774452286 — **C2** Playwright failed for `web-app-postmarks` (deploy clean). Was 3/3 pass in CI 25680106742 — regression. |
+| ~~`web-app-postmarks`~~ | 18 | — | — | ✅ | ✅ |  | CI run 25868178119 — deploy + Playwright PASS for all declared variants (prior C2 regression resolved by persona-helper fast-fail + `PERSONA_BIBER_BLOCKED`). |
 | ~~`web-svc-xmpp`~~ | 16 | — | — | ✅ | ✅ | ✅ | CI run 25774452286 — deploy + Playwright PASS for all declared variants. |
 
 **Total failed roles in CI Run 25705903504 (deploy matrix only):** 49.

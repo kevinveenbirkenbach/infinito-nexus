@@ -131,7 +131,7 @@ Columns immediately after `Role`:
 | `web-app-kix` | 19 | ✅ | ✅ | ⏳ | ⏳ | ⏳ |  |
 | ~~`web-app-yourls`~~ | 19 | ✅ | ✅ | ✅ | ✅ |  | CI run 25774452286 — deploy + Playwright PASS for all declared variants |
 | ~~`web-app-phpmyadmin`~~ | 18 | ❌ | ✅ | ✅ | ✅ |  | CI run 25774452286 — deploy + Playwright PASS for all declared variants |
-| `web-app-postmarks` | 18 | ✅ | ✅ | ❌ | ⏳ |  | CI run 25774452286 — **C2** Playwright failed for `web-app-postmarks` (deploy clean). Was 3/3 pass in CI 25680106742 — regression to investigate |
+| ~~`web-app-postmarks`~~ | 18 | ✅ | ✅ | ✅ | ✅ |  | CI run 25868178119 — deploy + Playwright PASS for all declared variants (prior C2 regression resolved by persona-helper fast-fail + `PERSONA_BIBER_BLOCKED`) |
 | ~~`web-app-chess`~~ | 18 | ❌ | ✅ | ✅ | ✅ |  | CI run 25680106742 — deploy success; auth-less small-app, spec collapses cleanly without env |
 | ~~`web-app-sphinx`~~ | 17 | ✅ | ✅ | ✅ | ✅ |  | CI run 25680106742 — 3/3 active tests pass, 2 personas cleanly skipped |
 | ~~`web-app-roulette-wheel`~~ | 17 | ❌ | ✅ | ✅ | ✅ |  | CI run 25680106742 — deploy success; auth-less small-app, spec collapses cleanly without env |
