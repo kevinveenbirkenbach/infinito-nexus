@@ -33,8 +33,8 @@
     "venv/**",
     ".venv/**",
     "**/__pycache__/**",
-    "tests/**/fixtures/**",
     ".github/PULL_REQUEST_TEMPLATE/**",
-    "docs/changelog/archive/**"
+    ".agents/skills/**",
+    ".claude/skills/**"
   ]
 }
