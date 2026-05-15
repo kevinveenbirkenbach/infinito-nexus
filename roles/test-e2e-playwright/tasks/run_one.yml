@@ -267,6 +267,7 @@
       - /bin/bash
       - -lc
       - "{{ TEST_E2E_PLAYWRIGHT_COMMAND }}"
+  timeout: "{{ TEST_E2E_PLAYWRIGHT_RUN_TIMEOUT | int }}"
   environment: >-
     {{
       {
