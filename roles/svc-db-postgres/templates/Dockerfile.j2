@@ -6,6 +6,7 @@ RUN apt-get update \
       build-essential \
       git \
       postgresql-server-dev-{{ POSTGRES_VERSION_MAJOR | default('all', true) }} \
+{# nocheck: repository-declared — pgvector is an extension source, not the role's primary repo #}
  && git clone https://github.com/pgvector/pgvector.git /tmp/pgvector \
  && cd /tmp/pgvector \
  && make \

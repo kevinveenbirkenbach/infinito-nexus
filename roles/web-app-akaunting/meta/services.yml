@@ -31,6 +31,8 @@ akaunting:
     no_stop_required: true
   image: docker.io/akaunting/akaunting
   version: latest
+  repository: https://github.com/akaunting/docker.git
+  ref: master
   name: akaunting
   min_storage: 8GB
   company:

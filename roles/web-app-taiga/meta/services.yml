@@ -2,6 +2,8 @@
 oidc:
   enabled: "{{ 'web-app-keycloak' in group_names }}"
   shared: "{{ 'web-app-keycloak' in group_names }}"
+  repository: https://github.com/infinito-nexus/taiga-oidc.git
+  ref: c623b753047ce9923f3e38614d86e81fc5eb2bb1
 ldap:
   enabled: false # nocheck: dynamic-flag
   shared: "{{ 'svc-db-openldap' in group_names }}"

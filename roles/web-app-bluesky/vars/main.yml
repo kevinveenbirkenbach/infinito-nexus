@@ -6,6 +6,8 @@ application_id: "web-app-bluesky"
 
 ## Social App
 BLUESKY_SOCIAL_APP_DIR: "{{ [ lookup('container', application_id, 'directories.services'), 'social-app' ] | path_join  }}"
+BLUESKY_SOCIAL_APP_REPOSITORY: "{{ lookup('config', application_id, 'services.view.repository') }}"
+BLUESKY_SOCIAL_APP_REF: "{{ lookup('config', application_id, 'services.view.ref') }}"
 BLUESKY_GEOLOCATION_PATH: "{{ [ BLUESKY_SOCIAL_APP_DIR,'src/geolocation/index.tsx' ] | path_join }}"
 
 # This should be removed when the following issue is closed:

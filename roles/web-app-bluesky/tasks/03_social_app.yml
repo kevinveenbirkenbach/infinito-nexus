@@ -1,14 +1,9 @@
 ---
 - name: clone social app repository
   git:
-    # Pin to a tagged stable release; tracking `main` would silently
-    # break the broker's `BSKY_STORAGE` localStorage handoff every
-    # time upstream changes the persistent-state schema. Bump this
-    # pin deliberately when bumping social-app (and re-verify the
-    # handoff in Playwright).
-    repo: "https://github.com/bluesky-social/social-app.git"
+    repo: "{{ BLUESKY_SOCIAL_APP_REPOSITORY }}"
     dest: "{{ BLUESKY_SOCIAL_APP_DIR }}"
-    version: "1.121.0"
+    version: "{{ BLUESKY_SOCIAL_APP_REF }}"
     force: true
   notify:
     - compose up

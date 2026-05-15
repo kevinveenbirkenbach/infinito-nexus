@@ -2,7 +2,8 @@
 # Variables for Kevin's Package Manager installation
 
 # The Git repository URL for Kevin's Package Manager
-PKGMGR_REPO_URL: "https://github.com/kevinveenbirkenbach/package-manager.git"
+PKGMGR_REPO_URL: "{{ lookup('config', role_name, 'services.' ~ role_name ~ '.repository') }}"
+PKGMGR_REF: "{{ lookup('config', role_name, 'services.' ~ role_name ~ '.ref') }}"
 
 # The directory where executable aliases will be installed (ensure it's in your PATH)
 PKGMGR_BINARIES_DIR: "/usr/local/bin"

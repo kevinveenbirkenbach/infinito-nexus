@@ -36,7 +36,8 @@
   become: true
   become_user: "{{ AUR_BUILDER_USER }}"
   git:
-    repo: https://aur.archlinux.org/yay.git # nocheck: url — git clone URL, not a browser link
+    repo: "{{ AUR_YAY_REPOSITORY }}"
+    version: "{{ AUR_YAY_REF }}"
     dest: "/home/{{ AUR_BUILDER_USER }}/yay"
     clone: true
     update: true

@@ -1,3 +1,5 @@
 ---
 aur:
   lifecycle: beta
+  repository: https://aur.archlinux.org/yay.git
+  ref: master

@@ -9,6 +9,8 @@ database_password: "{{ lookup('config', application_id, 'credentials.database_pa
 AKAUNTING_URL: "{{ lookup('tls', application_id, 'url.base') }}"
 AKAUNTING_VERSION: "{{ lookup('config', application_id, 'services.akaunting.version') }}"
 AKAUNTING_IMAGE: "{{ lookup('config', application_id, 'services.akaunting.image') }}"
+AKAUNTING_REPOSITORY: "{{ lookup('config', application_id, 'services.akaunting.repository') }}"
+AKAUNTING_REF: "{{ lookup('config', application_id, 'services.akaunting.ref') }}"
 AKAUNTING_CONTAINER: "{{ lookup('config', application_id, 'services.akaunting.name') }}"
 AKAUNTING_VOLUME: "{{ lookup('config', application_id, 'volumes.data') }}"
 AKAUNTING_COMPANY_NAME: "{{ lookup('config', application_id, 'services.akaunting.company.name') }}"

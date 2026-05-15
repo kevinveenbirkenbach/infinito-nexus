@@ -138,7 +138,7 @@ hooks:
 {% endfor %}     
 
 {% if DISCOURSE_LDAP_ENABLED | bool %}
-          - git clone --depth=1 https://github.com/jonmbake/discourse-ldap-auth.git
+          - git clone --depth=1 --branch {{ DISCOURSE_LDAP_AUTH_PLUGIN_REF }} {{ DISCOURSE_LDAP_AUTH_PLUGIN_REPOSITORY }}
 {% endif %}
 
 ## Any custom commands to run after building

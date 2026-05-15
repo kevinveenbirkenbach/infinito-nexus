@@ -27,6 +27,8 @@ css:
 roulette-wheel:
   image: node
   version: latest
+  repository: https://github.com/kevinveenbirkenbach/roulette-wheel.git
+  ref: master
   min_storage: 1GB
   cpus: 0.5
   mem_reservation: 126m
