@@ -61,13 +61,13 @@ unless the line carries the suppression marker.
 
 from __future__ import annotations
 
-import os
 import re
-import sys
 import unittest
 import warnings
 from pathlib import Path
 
+from utils.annotations.message import in_github_actions
+from utils.annotations.message import warning as gha_warning
 from utils.annotations.suppress import is_suppressed_at
 from utils.cache.files import iter_project_files, read_text
 
@@ -87,6 +87,8 @@ _RULE = "pkgmgr-deprecated"
 
 _THIS_FILE = Path(__file__).resolve()
 
+_TITLE = "Deprecated pkgmgr role include"
+
 _MIGRATION_HINT = (
     "Prefer pip: pkgmgr -> 'pip install kpmx'; "
     "doli -> 'pip install docoli'; "
@@ -100,28 +102,22 @@ class PkgmgrDeprecatedWarning(DeprecationWarning):
     """Warning category for deprecated ``pkgmgr`` role includes."""
 
 
-def _running_in_github_actions() -> bool:
-    return os.environ.get("GITHUB_ACTIONS", "").lower() == "true"
-
-
 def _emit(path_rel: str, line_no: int, snippet: str) -> None:
     body = (
-        f"{path_rel}:{line_no}: deprecated 'pkgmgr' / 'pkgmgr-install' "
-        f"role include. {_MIGRATION_HINT} Line: {snippet}"
+        f"deprecated 'pkgmgr' / 'pkgmgr-install' role include "
+        f"({snippet}). {_MIGRATION_HINT}"
     )
     # Local: pytest renders this in its end-of-session "warnings summary"
     # block regardless of capture mode.
-    warnings.warn(body, PkgmgrDeprecatedWarning, stacklevel=2)
-    # CI: GitHub Actions parses ``::warning file=…,line=…::…`` directives
-    # from stdout/stderr and renders them as PR-side annotations. Write
-    # to ``sys.__stderr__`` so pytest's capture plugin does not swallow
-    # the line before Actions sees it.
-    if _running_in_github_actions():
-        print(
-            f"::warning file={path_rel},line={line_no}::{body}",
-            file=sys.__stderr__,
-            flush=True,
-        )
+    warnings.warn(
+        f"{path_rel}:{line_no}: {body}", PkgmgrDeprecatedWarning, stacklevel=2
+    )
+    # CI: shared annotation helper writes a structured
+    # ``::warning title=...,file=...,line=...::body`` directive that
+    # Actions renders with title / file / line columns — matching every
+    # other lint's PR-side annotation surface.
+    if in_github_actions():
+        gha_warning(body, title=_TITLE, file=path_rel, line=line_no)
 
 
 class TestPkgmgrDeprecated(unittest.TestCase):
