@@ -1,7 +1,14 @@
 const { test, expect } = require("@playwright/test");
 const { skipUnlessServiceEnabled } = require("./service-gating");
 
-const { decodeDotenvQuotedValue, normalizeBaseUrl, runAdminFlow, runBiberFlow, runGuestFlow } = require("./personas");
+const {
+  decodeDotenvQuotedValue,
+  normalizeBaseUrl,
+  performKeycloakLoginForm,
+  runAdminFlow,
+  runBiberFlow,
+  runGuestFlow,
+} = require("./personas");
 test.use({ ignoreHTTPSErrors: true });
 
 const appBaseUrl = normalizeBaseUrl(process.env.APP_BASE_URL || "");
@@ -99,22 +106,6 @@ test("fediwall default slug mounts its Vue SPA into the document body", async ({
 //               Mastodon (friendica post must be absent there).
 // -----------------------------------------------------------------------------
 
-// Keycloak login form — same selector set the keycloak role's playwright spec
-// uses (input[name='username'] / input[name='password'] / input#kc-login).
-async function fillKeycloakLoginIfPresent(page, username, password) {
-  const usernameField = page.locator("input[name='username'], input#username").first();
-  if (!(await usernameField.isVisible({ timeout: 30_000 }).catch(() => false))) {
-    return false;
-  }
-  await usernameField.fill(username);
-  await page.locator("input[name='password'], input#password").first().fill(password);
-  await page
-    .locator("input#kc-login, button#kc-login, button[type='submit'], input[type='submit']")
-    .first()
-    .click();
-  return true;
-}
-
 // Drive Mastodon's OIDC login flow as biber. Lands on the Mastodon home
 // timeline once Keycloak redirects back. First-time login auto-creates
 // biber's local Mastodon account through the openid_connect plugin.
@@ -158,8 +149,7 @@ async function loginToMastodonViaOidc(page, baseUrl) {
     }),
   ]);
 
-  const filled = await fillKeycloakLoginIfPresent(page, biberUsername, biberPassword);
-  expect(filled, "Expected Keycloak login form to render after OIDC redirect").toBe(true);
+  await performKeycloakLoginForm(page, biberUsername, biberPassword);
 
   // First-time OIDC login on Mastodon 4.x renders a "Profile setup"
   // wizard (display name + bio + discoverability) modally over the
