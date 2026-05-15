@@ -20,7 +20,7 @@ from typing import Any
 # does NOT have the project's `utils/` package on PYTHONPATH, so direct
 # yaml.safe_load / yaml.safe_dump are the only option here. Each call
 # below carries an explicit `# nocheck: direct-yaml` marker that the lint
-# `tests/lint/repository/test_no_direct_yaml_calls.py` honours.
+# `tests/lint/repository/yaml/test_no_direct_calls.py` honours.
 import yaml
 
 

@@ -92,7 +92,7 @@ Role templates and tasks that consume the lookup MUST follow these rules:
 ## Mailu Dependency Detection 🚨
 
 Roles that call `lookup('email', ...)` are treated as dependents of Mailu.
-The integration check [test_mailu_dependency.py](../../../../../tests/integration/services/test_mailu_dependency.py) scans every role for the `lookup('email'` pattern and fails if such a role does not declare `services.email` with `enabled: true` and `shared: true` at the file root of its `meta/services.yml`.
+The integration check [test_mailu_dependency.py](../../../../../tests/integration/infrastructure/services/test_mailu_dependency.py) scans every role for the `lookup('email'` pattern and fails if such a role does not declare `services.email` with `enabled: true` and `shared: true` at the file root of its `meta/services.yml`.
 A new email consumer MUST declare that service block in its role's `meta/services.yml`.
 
 ## See Also 🔗

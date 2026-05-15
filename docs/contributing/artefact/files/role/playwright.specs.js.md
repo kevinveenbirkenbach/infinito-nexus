@@ -310,7 +310,7 @@ The teardown MUST:
 
 - All `<NAME>_SERVICE_ENABLED` reads go through the `service-gating.js` helper, never `process.env` directly.
 - The helper hard-fails on unknown service names.
-  Adding a new gate requires both the env-template flag and at least one `skipUnlessServiceEnabled('<svc>')` call in the spec; the parity guards [test_playwright_env_services_match.py](../../../../../tests/integration/roles/test_playwright_env_services_match.py) and [test_playwright_spec_env_gates.py](../../../../../tests/integration/roles/test_playwright_spec_env_gates.py) enforce that contract.
+  Adding a new gate requires both the env-template flag and at least one `skipUnlessServiceEnabled('<svc>')` call in the spec; the parity guards [test_env_services_match.py](../../../../../tests/integration/roles/playwright/test_env_services_match.py) and [test_spec_env_gates.py](../../../../../tests/integration/roles/playwright/test_spec_env_gates.py) enforce that contract.
 
 ## Final state ✅
 

@@ -2,7 +2,7 @@
 """Sort the curated string arrays in ``.claude/settings.json``.
 
 The lint test in
-``tests/lint/repository/test_claude_settings_sorted.py`` requires every
+``tests/lint/repository/settings/test_claude_sorted.py`` requires every
 hand-curated array to stay ASCII-sorted ascending so diffs stay
 reviewable and merge conflicts stay minimal. Tools that auto-extend the
 file (e.g. permission auto-allowlists) tend to append unsorted; this
