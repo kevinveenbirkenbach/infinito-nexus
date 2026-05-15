@@ -77,6 +77,13 @@ repos:
         pass_filenames: false
         files: \.md$
         stages: [pre-commit]
+      - id: make-lint
+        name: Run make lint (pre-push gate)
+        entry: make lint
+        language: system
+        pass_filenames: false
+        always_run: true
+        stages: [pre-push]
       - id: make-test-external
         name: Run make test-external (pre-push gate)
         entry: make test-external
