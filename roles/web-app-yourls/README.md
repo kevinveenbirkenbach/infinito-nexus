@@ -20,7 +20,7 @@ This containerized YOURLS solution is built on robust Docker Compose and Ansible
   Seamlessly connect to a MariaDB instance for consistent, reliable data storage and management.
 
 - **Configurable Environment:**  
-  Easily customize your YOURLS instance through environment variables—set your site URL, admin credentials, and more.
+  Easily customize your YOURLS instance through environment variables: set your site URL, admin credentials, and more.
 
 - **Secure and Scalable:**  
   Benefit from container isolation and reproducible deployments that ensure your service is both secure and scalable.

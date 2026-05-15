@@ -2,7 +2,7 @@
 
 ## Description
 
-Elevate your collaboration with Nextcloud, a vibrant self-hosted cloud solution designed for dynamic file sharing, seamless communication, and effortless teamwork. Nextcloud offers a full suite of integrated tools—including LDAP and OIDC authentication, Redis caching, and automated plugin management via OCC—to empower a secure, extensible, and production-ready cloud environment.
+Elevate your collaboration with Nextcloud, a vibrant self-hosted cloud solution designed for dynamic file sharing, seamless communication, and effortless teamwork. Nextcloud offers a full suite of integrated tools (including LDAP and OIDC authentication, Redis caching, and automated plugin management via OCC) to empower a secure, extensible, and production-ready cloud environment.
 
 ## Overview
 

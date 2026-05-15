@@ -20,7 +20,7 @@ The purpose of tthis role is to simplify the deployment and management of a pers
 ## Features
 
 - **Unified Navigation**: Central menu bar with dynamic categories for all registered applications.
-- **Customizable Tiles**: Showcase applications with title, description, and icons—fully configurable via YAML.
+- **Customizable Tiles**: Showcase applications with title, description, and icons, fully configurable via YAML.
 - **Responsive Design**: Optimized for desktop, tablet & mobile, built on Bootstrap.
 - **Interactive Icons**: Automatic integration of Simple Icons for popular brands and tools.
 - **Seamless IFrame Embedding**: Launch apps directly within the UI or open in new tabs.

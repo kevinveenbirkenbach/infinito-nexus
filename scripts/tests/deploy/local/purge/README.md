@@ -1,6 +1,6 @@
 # Local Purge Scripts
 
-This is the SPOT for cleanup helpers under `scripts/tests/deploy/local/purge/`.
+This directory holds the cleanup helpers under `scripts/tests/deploy/local/purge/`.
 For other local helpers, use [../README.md](../README.md).
 For the canonical Make target index that invokes these helpers, see [make.md](../../../../../docs/contributing/tools/make.md).
 

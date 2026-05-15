@@ -6,7 +6,7 @@ Empower your decentralized social networking with Friendica, a platform designed
 
 ## Overview
 
-This role deploys Friendica using Docker, managing the Friendica application container alongside a central MariaDB instance. It provides tools for full resets, manual and automatic database reinitialization, email and general configuration debugging, and autoinstall processes—all to ensure your Friendica installation remains reliable and easy to maintain.
+This role deploys Friendica using Docker, managing the Friendica application container alongside a central MariaDB instance. It provides tools for full resets, manual and automatic database reinitialization, email and general configuration debugging, and autoinstall processes, all to ensure your Friendica installation remains reliable and easy to maintain.
 
 For detailed administration procedures, please refer to the [Administration.md](./Administration.md) file.
 

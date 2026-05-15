@@ -18,8 +18,8 @@ End users access a web page, pick a model, and start chatting. Conversations rem
 
 ## Further Resources
 
-* Open WebUI — [https://openwebui.com](https://openwebui.com)
-* Ollama — [https://ollama.com](https://ollama.com)
+* Open WebUI: [openwebui.com](https://openwebui.com)
+* Ollama: [ollama.com](https://ollama.com)
 
 ## Credits
 

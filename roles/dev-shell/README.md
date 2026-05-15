@@ -6,7 +6,7 @@ This Ansible role ensures that [.profile](https://en.wikipedia.org/wiki/Bourne_s
 
 ## Overview
 
-By standardizing `.profile` as the central source for environment configuration, this role ensures consistent shell behavior. It does **not** manage the contents of `.profile` itself — only guarantees that it is sourced by supported shells.
+By standardizing `.profile` as the central source for environment configuration, this role ensures consistent shell behavior. It does **not** manage the contents of `.profile` itself; it only guarantees that it is sourced by supported shells.
 
 ## Purpose
 

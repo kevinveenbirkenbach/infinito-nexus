@@ -24,7 +24,7 @@ This role builds its own Moodle image from upstream Moodle source on top of the 
 ## Further Resources
 
 - [Moodle Official Website](https://moodle.org/)
-- [Moodle Developer Documentation — Docker images](https://moodledev.io/general/app/development/setup/docker-images)
+- [Moodle Developer Documentation: Docker images](https://moodledev.io/general/app/development/setup/docker-images)
 - [moodlehq/moodle-docker](https://github.com/moodlehq/moodle-docker) (extension list reference)
 
 ## Credits

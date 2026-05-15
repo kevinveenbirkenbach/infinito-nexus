@@ -13,12 +13,12 @@ The app runs as a single Docker container and requires no additional database or
 
 ## Features
 
-- **Self-hosted LittleJS environment** — run LittleJS demos and games under your own domain.
-- **Example browser integration** — direct access to the original LittleJS example browser.
-- **Tile-based launcher UI** — dynamically renders a catalog from the `exampleList` definition.
-- **Quick links for games** — navbar entries for selected games (e.g. platformer, pong, space shooter).
-- **Bootstrap-styled interface** — clean, minimalistic, and responsive layout.
-- **Docker-ready** — fully integrated into the Infinito.Nexus Docker stack.
+- **Self-hosted LittleJS environment**: run LittleJS demos and games under your own domain.
+- **Example browser integration**: direct access to the original LittleJS example browser.
+- **Tile-based launcher UI**: dynamically renders a catalog from the `exampleList` definition.
+- **Quick links for games**: navbar entries for selected games (e.g. platformer, pong, space shooter).
+- **Bootstrap-styled interface**: clean, minimalistic, and responsive layout.
+- **Docker-ready**: fully integrated into the Infinito.Nexus Docker stack.
 
 ## Further Resources
 

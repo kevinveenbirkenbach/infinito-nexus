@@ -13,7 +13,7 @@ It includes support for **dark mode**, **custom fonts**, and **extensive Bootstr
 ## Purpose
 
 The goal of this role is to provide a **single source of truth for theming** across your infrastructure.  
-It makes all applications feel like part of the same ecosystem — visually and functionally.
+It makes all applications feel like part of the same ecosystem, visually and functionally.
 
 ## Features
 

@@ -1,6 +1,6 @@
 # Local Deploy Scripts
 
-This is the SPOT for executable local deploy flows under `scripts/tests/deploy/local/deploy/`.
+This directory holds the executable local deploy flows under `scripts/tests/deploy/local/deploy/`.
 
 For other local helpers, use [../README.md](../README.md).
 For the canonical Make target index that invokes these helpers, see [make.md](../../../../../docs/contributing/tools/make.md).

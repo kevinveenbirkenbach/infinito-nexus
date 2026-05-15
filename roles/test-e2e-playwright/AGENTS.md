@@ -1,4 +1,4 @@
-# Agent Instructions — test-e2e-playwright
+# Agent Instructions: test-e2e-playwright
 
 This role is the **shared Playwright runner** for all end-to-end tests in the repository.
 Changes here affect every application role that uses it.

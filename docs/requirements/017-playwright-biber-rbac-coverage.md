@@ -23,7 +23,7 @@ absent).
 A static-analysis pass (added in
 [tests/lint/ansible/roles/web-app/playwright/test_env_keys_used.py](../../tests/lint/ansible/roles/web-app/playwright/test_env_keys_used.py))
 surfaced multiple roles that **declared** the `BIBER_*` env keys but
-never read them in the spec — the env file was prepared, the spec was
+never read them in the spec; the env file was prepared, the spec was
 never written. The most prominent example is `web-app-joomla`: it
 ships an OIDC variant (`plg_system_keycloak`) and an LDAP variant
 (core LDAP auth plugin) per
@@ -56,7 +56,7 @@ rather than role by role.
 - [ ] The biber scenario MUST end on a deterministic post-login
   surface (a URL, a heading, or a stable role-specific selector) that
   is observable to a non-admin user. Asserting on admin-only UI from
-  the biber session is forbidden — the point of the scenario is to
+  the biber session is forbidden. The point of the scenario is to
   prove the non-admin path works, not to re-test admin.
 - [ ] Where the role's RBAC contract maps biber to a specific
   application role (e.g. `editor`, `member`), the assertion SHOULD
@@ -95,30 +95,30 @@ commit message why the role is exempt and removing it from this list.
 
 #### In-scope: biber scenario MUST be added
 
-- [ ] [web-app-joomla](../../roles/web-app-joomla/) — OIDC
+- [ ] [web-app-joomla](../../roles/web-app-joomla/): OIDC
   (`plg_system_keycloak`) AND LDAP variants per
   [006](006-playwright-service-gated-tests.md). Smoking gun for this
   requirement: env keys were declared, never consumed.
-- [ ] [web-app-baserow](../../roles/web-app-baserow/) — confirm OIDC/LDAP scope.
-- [ ] [web-app-bookwyrm](../../roles/web-app-bookwyrm/) — has both `oidc` and `ldap` gated paths in the spec; biber should ride one of them.
-- [ ] [web-app-bluesky](../../roles/web-app-bluesky/) — variant-A+ login-broker. Biber MAY require the broker's app-password handoff; document the outcome of the audit.
-- [ ] [web-app-flowise](../../roles/web-app-flowise/) — OIDC via oauth2-proxy.
-- [ ] [web-app-jenkins](../../roles/web-app-jenkins/) — OIDC plus LDAP variant.
-- [ ] [web-app-akaunting](../../roles/web-app-akaunting/) — OIDC plus LDAP variant.
-- [ ] [web-app-minio](../../roles/web-app-minio/) — OIDC plus LDAP variant.
-- [ ] [web-app-taiga](../../roles/web-app-taiga/) — OIDC.
-- [ ] [web-app-gitea](../../roles/web-app-gitea/) — OIDC plus optional LDAP.
-- [ ] [web-app-postmarks](../../roles/web-app-postmarks/) — confirm scope.
+- [ ] [web-app-baserow](../../roles/web-app-baserow/): confirm OIDC/LDAP scope.
+- [ ] [web-app-bookwyrm](../../roles/web-app-bookwyrm/): has both `oidc` and `ldap` gated paths in the spec; biber should ride one of them.
+- [ ] [web-app-bluesky](../../roles/web-app-bluesky/): variant-A+ login-broker. Biber MAY require the broker's app-password handoff; document the outcome of the audit.
+- [ ] [web-app-flowise](../../roles/web-app-flowise/): OIDC via oauth2-proxy.
+- [ ] [web-app-jenkins](../../roles/web-app-jenkins/): OIDC plus LDAP variant.
+- [ ] [web-app-akaunting](../../roles/web-app-akaunting/): OIDC plus LDAP variant.
+- [ ] [web-app-minio](../../roles/web-app-minio/): OIDC plus LDAP variant.
+- [ ] [web-app-taiga](../../roles/web-app-taiga/): OIDC.
+- [ ] [web-app-gitea](../../roles/web-app-gitea/): OIDC plus optional LDAP.
+- [ ] [web-app-postmarks](../../roles/web-app-postmarks/): confirm scope.
 
 #### Identity providers: separate scope
 
-- [ ] [web-app-keycloak](../../roles/web-app-keycloak/) — IS the OIDC
+- [ ] [web-app-keycloak](../../roles/web-app-keycloak/): IS the OIDC
   provider; biber's existence in Keycloak is the prerequisite for
   every other role's biber scenario. The role's spec already covers
   the realm-side flow; this requirement does NOT touch it. Audit the
   spec only to confirm no drift from
   [004](004-generic-rbac-ldap-auto-provisioning.md).
-- [ ] [web-app-fusiondirectory](../../roles/web-app-fusiondirectory/) —
+- [ ] [web-app-fusiondirectory](../../roles/web-app-fusiondirectory/):
   LDAP admin UI; biber as a *managed* user appears in the directory
   view, but the role's own login is admin-only. Audit and document.
 
@@ -126,11 +126,11 @@ commit message why the role is exempt and removing it from this list.
 
 The following roles MUST NOT carry `BIBER_*` env keys nor a biber
 scenario; closing each item is a NOOP except when a stale env-key
-shows up — in that case remove it.
+shows up; in that case remove it.
 
-- [ ] [web-svc-cdn](../../roles/web-svc-cdn/), [web-svc-simpleicons](../../roles/web-svc-simpleicons/), [web-svc-xmpp](../../roles/web-svc-xmpp/), [web-svc-libretranslate](../../roles/web-svc-libretranslate/) — backend services with no end-user UI.
-- [ ] [web-app-hugo](../../roles/web-app-hugo/), [web-app-sphinx](../../roles/web-app-sphinx/), [web-app-bridgy-fed](../../roles/web-app-bridgy-fed/), [web-app-mig](../../roles/web-app-mig/) — static or pure-publishing content with no authenticated path.
-- [ ] [web-app-dashboard](../../roles/web-app-dashboard/), [web-app-matomo](../../roles/web-app-matomo/) — own admin authentication is in scope of their own admin tests; biber-as-non-admin is not a meaningful surface here. Document and exempt.
+- [ ] [web-svc-cdn](../../roles/web-svc-cdn/), [web-svc-simpleicons](../../roles/web-svc-simpleicons/), [web-svc-xmpp](../../roles/web-svc-xmpp/), [web-svc-libretranslate](../../roles/web-svc-libretranslate/): backend services with no end-user UI.
+- [ ] [web-app-hugo](../../roles/web-app-hugo/), [web-app-sphinx](../../roles/web-app-sphinx/), [web-app-bridgy-fed](../../roles/web-app-bridgy-fed/), [web-app-mig](../../roles/web-app-mig/): static or pure-publishing content with no authenticated path.
+- [ ] [web-app-dashboard](../../roles/web-app-dashboard/), [web-app-matomo](../../roles/web-app-matomo/): own admin authentication is in scope of their own admin tests; biber-as-non-admin is not a meaningful surface here. Document and exempt.
 
 ### Verification
 

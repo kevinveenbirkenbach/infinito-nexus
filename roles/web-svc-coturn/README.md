@@ -43,10 +43,10 @@ Typical use cases:
 
 ## Further Resources
 
-* Coturn Project — [https://github.com/coturn/coturn](https://github.com/coturn/coturn)  
-* Coturn Wiki — [https://github.com/coturn/coturn/wiki](https://github.com/coturn/coturn/wiki)  
-* TURN on Wikipedia — [https://en.wikipedia.org/wiki/Traversal_Using_Relays_around_NAT](https://en.wikipedia.org/wiki/Traversal_Using_Relays_around_NAT)  
-* STUN on Wikipedia — [https://en.wikipedia.org/wiki/STUN](https://en.wikipedia.org/wiki/STUN)  
+* Coturn Project: [github.com/coturn/coturn](https://github.com/coturn/coturn)  
+* Coturn Wiki: [github.com/coturn/coturn/wiki](https://github.com/coturn/coturn/wiki)  
+* TURN on Wikipedia: [en.wikipedia.org/wiki/Traversal_Using_Relays_around_NAT](https://en.wikipedia.org/wiki/Traversal_Using_Relays_around_NAT)  
+* STUN on Wikipedia: [en.wikipedia.org/wiki/STUN](https://en.wikipedia.org/wiki/STUN)  
 
 ## Credits
 

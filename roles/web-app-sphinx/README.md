@@ -30,7 +30,7 @@ By automating the Sphinx build process and containerized deployment, this role m
   Once the build is complete, the generated HTML is served through a lightweight HTTP server. Health checks are in place to ensure the service is running reliably.
 
 - **Consistent Deployment Workflow:**  
-  The entire process—from pulling the repository to serving the final output—is automated. This reduces human error and makes it easy to update or roll back documentation builds.
+  The entire process (from pulling the repository to serving the final output) is automated. This reduces human error and makes it easy to update or roll back documentation builds.
 
 ## Further Resources
 

@@ -1,4 +1,4 @@
-# Hugo — Administration
+# Hugo: Administration
 
 ## Force a rebuild
 
@@ -41,9 +41,9 @@ make exec CMD="docker compose -f /opt/docker/web-app-hugo/docker-compose.yml bui
 
 Common causes:
 
-- **`hugo` reports unknown content / module errors** — the upstream repository moved a directory or a Hugo Module. Pin to a known-good tag in `source_version`.
-- **`hugo` reports template execution errors** — the theme's templates are incompatible with the bundled Hugo binary. Bump `services.hugo.builder_version` (e.g. to a newer `exts-<version>` tag) or pin the source repo to a tag known to build with the current Hugo.
-- **Module fetch fails (`go.mod` resolution)** — Hugo modules pull from `proxy.golang.org`. Network egress to that host must be allowed by the local firewall / proxy.
+- **`hugo` reports unknown content / module errors**: the upstream repository moved a directory or a Hugo Module. Pin to a known-good tag in `source_version`.
+- **`hugo` reports template execution errors**: the theme's templates are incompatible with the bundled Hugo binary. Bump `services.hugo.builder_version` (e.g. to a newer `exts-<version>` tag) or pin the source repo to a tag known to build with the current Hugo.
+- **Module fetch fails (`go.mod` resolution)**: Hugo modules pull from `proxy.golang.org`. Network egress to that host must be allowed by the local firewall / proxy.
 
 ## Rotating the Hugo binary
 

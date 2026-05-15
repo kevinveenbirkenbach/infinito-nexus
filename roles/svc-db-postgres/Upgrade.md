@@ -4,7 +4,7 @@ This guide explains how to safely upgrade a PostgreSQL Docker container from one
 
 ---
 
-## ⚠️ Important
+## Important ⚠️
 
 PostgreSQL data directories are **not compatible across major versions**. You cannot just point a newer version to the old data volume. You must export and re-import your data.
 
@@ -16,7 +16,7 @@ First do a backup
 
 Setup new Version and apply restore_postgres_databases.py.
 
-## 🔗 References
+## References 🔗
 
 - [PostgreSQL Backup Documentation](https://www.postgresql.org/docs/current/backup-dump.html)
 - [PostgreSQL Docker Image](https://hub.docker.com/_/postgres)

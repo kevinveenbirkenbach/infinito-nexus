@@ -1,6 +1,6 @@
 # Role Spot Tests 🎯
 
-Integration spot-checks pinned to specific roles — narrow assertions that catch regressions in a single role's templates, vars, or task layout.
+Integration spot-checks pinned to specific roles, with narrow assertions that catch regressions in a single role's templates, vars, or task layout.
 
 Tests in this directory MUST only cover role-specific invariants that do not generalize across roles. Use the filename `test_<role>_<aspect>.py`. Rules that should hold across every role MUST live in the corresponding topical cluster (e.g., [`config/`](../config/), [`compose/`](../../infrastructure/compose/), [`handlers/`](../../ansible/handlers/)).
 

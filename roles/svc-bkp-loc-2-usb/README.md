@@ -10,7 +10,7 @@ Designed for Arch Linux, this role validates configuration variables (`mount`, `
 
 ## Purpose
 
-The purpose of this role is to provide a reliable, idempotent solution for local backups to a swappable USB drive. By automating the entire workflow—from variable checks and script deployment to service orchestration and snapshot management—it reduces manual intervention and integrates seamlessly with other Infinito.Nexus roles for comprehensive system automation.
+The purpose of this role is to provide a reliable, idempotent solution for local backups to a swappable USB drive. By automating the entire workflow (from variable checks and script deployment to service orchestration and snapshot management) it reduces manual intervention and integrates seamlessly with other Infinito.Nexus roles for comprehensive system automation.
 
 ## Features
 

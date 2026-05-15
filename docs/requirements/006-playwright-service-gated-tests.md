@@ -1,6 +1,6 @@
 # 006 - Service-gated Playwright tests
 
-## Update — MODE_CI retired
+## Update: MODE_CI retired
 
 The `MODE_CI` flag introduced by this requirement was later retired in
 favour of a direct `RUNTIME` check. The Playwright include in

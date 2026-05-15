@@ -57,7 +57,7 @@ consistently across the role tree is what this requirement tracks.
   `skipped: LDAP_SERVICE_ENABLED=false`, never `failed`.
 - [ ] A role that ships BOTH `oidc.enabled` and `ldap.enabled`
   scenarios MUST keep them as **separate** test bodies. Combining the
-  two flags in a single scenario is forbidden — the matrix-deploy
+  two flags in a single scenario is forbidden. The matrix-deploy
   variants exist precisely to drive each branch in isolation, and
   bundling them defeats the variant matrix.
 - [ ] The LDAP scenario MUST exercise BOTH the canonical admin user
@@ -94,22 +94,22 @@ reachable login UI).
 
 #### In-scope: LDAP scenario MUST be added
 
-- [ ] [web-app-opencloud](../../roles/web-app-opencloud/) — trigger role for this requirement; variant 1 is LDAP-only by design but the spec gates everything on `oidcEnabled`.
-- [ ] [web-app-joomla](../../roles/web-app-joomla/) — Joomla's core LDAP authentication plugin is the LDAP-variant surface per [006 audit row](006-playwright-service-gated-tests.md). Pairs with the missing biber scenario from [017](017-playwright-biber-rbac-coverage.md).
-- [ ] [web-app-jenkins](../../roles/web-app-jenkins/) — Jenkins LDAP security realm is a separate auth provider from the OIDC plugin.
-- [ ] [web-app-bookwyrm](../../roles/web-app-bookwyrm/) — declares both `oidc` and `ldap` gates.
-- [ ] [web-app-mattermost](../../roles/web-app-mattermost/) — AD/LDAP login surface independent of OIDC.
-- [ ] [web-app-friendica](../../roles/web-app-friendica/) — LDAP module surface.
-- [ ] [web-app-bigbluebutton](../../roles/web-app-bigbluebutton/) — confirm whether the LDAP path has a Playwright-drivable surface; document the outcome.
-- [ ] [web-app-akaunting](../../roles/web-app-akaunting/) — LDAP authentication plugin.
-- [ ] [web-app-discourse](../../roles/web-app-discourse/) — LDAP plugin.
-- [ ] [web-app-minio](../../roles/web-app-minio/) — MinIO LDAP IDP.
-- [ ] [web-app-flowise](../../roles/web-app-flowise/) — confirm scope.
-- [ ] [web-app-espocrm](../../roles/web-app-espocrm/) — built-in LDAP authentication.
-- [ ] [web-app-shopware](../../roles/web-app-shopware/) — confirm scope.
-- [ ] [web-app-odoo](../../roles/web-app-odoo/) — `auth_ldap` module.
-- [ ] [web-app-mobilizon](../../roles/web-app-mobilizon/) — confirm scope.
-- [ ] [web-app-openwebui](../../roles/web-app-openwebui/) — confirm scope.
+- [ ] [web-app-opencloud](../../roles/web-app-opencloud/): trigger role for this requirement; variant 1 is LDAP-only by design but the spec gates everything on `oidcEnabled`.
+- [ ] [web-app-joomla](../../roles/web-app-joomla/): Joomla's core LDAP authentication plugin is the LDAP-variant surface per [006 audit row](006-playwright-service-gated-tests.md). Pairs with the missing biber scenario from [017](017-playwright-biber-rbac-coverage.md).
+- [ ] [web-app-jenkins](../../roles/web-app-jenkins/): Jenkins LDAP security realm is a separate auth provider from the OIDC plugin.
+- [ ] [web-app-bookwyrm](../../roles/web-app-bookwyrm/): declares both `oidc` and `ldap` gates.
+- [ ] [web-app-mattermost](../../roles/web-app-mattermost/): AD/LDAP login surface independent of OIDC.
+- [ ] [web-app-friendica](../../roles/web-app-friendica/): LDAP module surface.
+- [ ] [web-app-bigbluebutton](../../roles/web-app-bigbluebutton/): confirm whether the LDAP path has a Playwright-drivable surface; document the outcome.
+- [ ] [web-app-akaunting](../../roles/web-app-akaunting/): LDAP authentication plugin.
+- [ ] [web-app-discourse](../../roles/web-app-discourse/): LDAP plugin.
+- [ ] [web-app-minio](../../roles/web-app-minio/): MinIO LDAP IDP.
+- [ ] [web-app-flowise](../../roles/web-app-flowise/): confirm scope.
+- [ ] [web-app-espocrm](../../roles/web-app-espocrm/): built-in LDAP authentication.
+- [ ] [web-app-shopware](../../roles/web-app-shopware/): confirm scope.
+- [ ] [web-app-odoo](../../roles/web-app-odoo/): `auth_ldap` module.
+- [ ] [web-app-mobilizon](../../roles/web-app-mobilizon/): confirm scope.
+- [ ] [web-app-openwebui](../../roles/web-app-openwebui/): confirm scope.
 
 #### Out of scope: no LDAP scenario
 
@@ -118,9 +118,9 @@ test-drivable LDAP login surface (consumer-side only, infrastructural,
 or already covered by their own service-level test). Closing each
 item is a NOOP unless a stale env key shows up.
 
-- [ ] [web-app-keycloak](../../roles/web-app-keycloak/) — IS the OIDC provider; LDAP federation is tested via Keycloak's own user-storage spec, not via a per-role Playwright surface.
-- [ ] [web-app-fusiondirectory](../../roles/web-app-fusiondirectory/) — IS the LDAP admin UI; its admin login already covers the LDAP bind path by construction.
-- [ ] [svc-db-openldap](../../roles/svc-db-openldap/) — backend service with no end-user UI; covered by integration tests, not Playwright.
+- [ ] [web-app-keycloak](../../roles/web-app-keycloak/): IS the OIDC provider; LDAP federation is tested via Keycloak's own user-storage spec, not via a per-role Playwright surface.
+- [ ] [web-app-fusiondirectory](../../roles/web-app-fusiondirectory/): IS the LDAP admin UI; its admin login already covers the LDAP bind path by construction.
+- [ ] [svc-db-openldap](../../roles/svc-db-openldap/): backend service with no end-user UI; covered by integration tests, not Playwright.
 
 ### Verification
 

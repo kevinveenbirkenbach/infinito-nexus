@@ -40,7 +40,7 @@ Use this page for the fully automated triage of a GitHub Actions / CI run failur
 
 ## Playwright Failures
 
-This section is the SPOT for analyzing Playwright failures within a CI triage. Playwright assets are downloaded as part of Step 1's `gh run download` invocation and live under `/tmp/<child-run-id>-artefacts/`.
+This section describes how to analyze Playwright failures within a CI triage. Playwright assets are downloaded as part of Step 1's `gh run download` invocation and live under `/tmp/<child-run-id>-artefacts/`.
 
 - You MUST output the storage path of the Playwright assets for the affected `<child-run-id>`.
 - You MUST analyze the Playwright assets together with the matching `/tmp/<child-run-id>-job-logs.txt`.

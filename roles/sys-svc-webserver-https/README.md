@@ -21,7 +21,7 @@ When you apply **sys-svc-webserver-https**, it will:
 3. **Deploy** the Let’s Encrypt challenge-and-redirect snippet from `sys-svc-letsencrypt`.  
 4. **Reload** NGINX automatically when any template changes.
 
-All tasks are idempotent—once your certificates are in place and your configuration is set, Ansible will skip unchanged steps on subsequent runs.
+All tasks are idempotent. Once your certificates are in place and your configuration is set, Ansible will skip unchanged steps on subsequent runs.
 
 ---
 

@@ -4,7 +4,7 @@ In order to foster a welcoming, open, and respectful community for everyone, we 
 
 ## Our Pledge
 
-We are committed to creating a friendly, safe, and inclusive environment for all members of our community—regardless of age, race, gender, sexual orientation, disability, religion, or any other status. We pledge to treat everyone with respect and courtesy.
+We are committed to creating a friendly, safe, and inclusive environment for all members of our community, regardless of age, race, gender, sexual orientation, disability, religion, or any other status. We pledge to treat everyone with respect and courtesy.
 
 ## Expected Behavior
 

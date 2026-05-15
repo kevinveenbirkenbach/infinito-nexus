@@ -1,6 +1,6 @@
 # Act Deploy Scripts
 
-This is the SPOT for executable act deploy flows under `scripts/tests/deploy/act/`.
+This directory holds the executable act deploy flows under `scripts/tests/deploy/act/`.
 
 For local deploy flows, use [../local/README.md](../local/README.md).
 For the canonical Make target index that invokes these helpers, see [make.md](../../../../docs/contributing/tools/make.md).

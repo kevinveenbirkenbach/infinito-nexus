@@ -42,4 +42,4 @@ To customize any of these values without editing role defaults:
    database_collation: "latin1_swedish_ci"
    ```
 
-3. Run your playbook—Ansible’s variable precedence ensures your overrides take effect.
+3. Run your playbook. Ansible’s variable precedence ensures your overrides take effect.

@@ -18,6 +18,6 @@ applications without hitting an external resolver.
 
 ## Files 📄
 
-- `Corefile.tmpl` — `envsubst` template processed at stack start.
-- `Corefile` — rendered output, bind-mounted read-only into the
+- `Corefile.tmpl`: `envsubst` template processed at stack start.
+- `Corefile`: rendered output, bind-mounted read-only into the
   `coredns` container at `/Corefile`.

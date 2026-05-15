@@ -4,7 +4,7 @@ IAM(Identity and Access Management) is setup via Keycloak and LDAP.
 
 ## OpenID Connect (OIDC) Support 🔐
 
-OIDC is supported in this role—for example, via **Keycloak**. OIDC-specific tasks are included when enabled, allowing integration of external authentication providers seamlessly.
+OIDC is supported in this role (for example, via **Keycloak**). OIDC-specific tasks are included when enabled, allowing integration of external authentication providers seamlessly.
 
 ### Verify OIDC Configuration
 

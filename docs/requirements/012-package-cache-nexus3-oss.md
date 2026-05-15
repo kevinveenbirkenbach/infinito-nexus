@@ -124,7 +124,7 @@ Therefore:
       inside the runner pulls through
       `http://package-cache:8081/repository/apt-…/`.
 - [ ] When the `cache` profile is INACTIVE, the override is omitted
-      and package managers default to upstream — no failed deploys.
+      and package managers default to upstream (no failed deploys).
 
 ### Coexistence with `registry-cache`
 

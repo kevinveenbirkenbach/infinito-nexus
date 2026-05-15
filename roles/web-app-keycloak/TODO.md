@@ -3,7 +3,7 @@
 - Implement working logout for all applications
 - Implement general logout button
 
-## Req 019 rollout — deploy gate
+## Req 019 rollout: deploy gate
 
 - During the autonomous req 019 rollout, `make deploy-fresh-purged-apps APPS=web-app-keycloak FULL_CYCLE=true` failed with two unrelated assertions:
   - `kcadm.sh config credentials` failed during the keycloak admin login phase (likely transient or env-scoped).

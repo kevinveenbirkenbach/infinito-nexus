@@ -1,4 +1,4 @@
-# 015 — Self-built Moodle image (replaces `bitnamilegacy/moodle`)
+# 015: Self-built Moodle image (replaces `bitnamilegacy/moodle`)
 
 ## User Story
 
@@ -64,7 +64,7 @@ listed in [Profile-field mapping](#profile-field-mapping-keycloak-↔-ldap-↔-m
 The variants differ only in the **login** path and in whether
 Keycloak is part of the topology at all.
 
-### Variant 0 — `auth_oidc` + `auth_ldap` sync-only (hybrid)
+### Variant 0: `auth_oidc` + `auth_ldap` sync-only (hybrid)
 
 - [x] `auth_oidc` is enabled and set as the **primary login method**
       (`config_plugin auth_oidc`, plus `auth = 'oidc,ldap'` global
@@ -101,7 +101,7 @@ Keycloak is part of the topology at all.
 - [x] On idempotent re-deploy, both `auth_oidc` and `auth_ldap`
       configuration MUST report `changed=0`.
 
-### Variant 1 — `auth_ldap` only (no OIDC)
+### Variant 1: `auth_ldap` only (no OIDC)
 
 - [x] `auth_oidc` is **disabled** (`disable_plugin auth_oidc`),
       and `services.oidc.enabled` in this variant's
@@ -328,12 +328,12 @@ cron natively, so the role MUST add a dedicated sidecar.
       <https://moodledev.io/general/app/development/setup/docker-images>.
 - [x] The role's `Administration.md` is removed (no Bitnami paths
       to retarget; the operator-facing CLI lives at `MOODLE_CLI_DIR`
-      which is the SPOT in
+      defined in
       [vars/main.yml](../../roles/web-app-moodle/vars/main.yml)).
 - [x] The role's `TODO.md` is removed: the Bitnami-issue link is
       gone, and the only residual concern (sendmail availability for
-      `mail()`) is now covered by the msmtp install + healthcheck —
-      no follow-up is outstanding against the self-built layout.
+      `mail()`) is now covered by the msmtp install + healthcheck.
+      No follow-up is outstanding against the self-built layout.
 
 ## OIDC end-to-end coverage
 
@@ -361,9 +361,9 @@ The role MUST enforce the following layered contract:
    in the [mapping table](#mapping-table). Every other component
    in the system reads from LDAP (directly or transitively) and
    never holds an authoritative copy that can drift from it.
-2. **Definition of attribute correspondence (the SPOT)**: the
-   **Keycloak LDAP user-federation mapper** is the single source
-   of truth for "which LDAP attribute backs which Keycloak user-
+2. **Definition of attribute correspondence**: the
+   **Keycloak LDAP user-federation mapper** owns the binding from
+   "which LDAP attribute backs which Keycloak user-
    profile attribute". All other consumers MUST derive their
    field-name pairing from this mapper:
    - `auth_ldap` in Moodle MUST bind each Moodle column to the
@@ -375,7 +375,7 @@ The role MUST enforce the following layered contract:
    The
    [mapping table](#mapping-table) in this document MUST stay in
    sync with the Keycloak federation mapper definition; the
-   table is the documented expression of the same SPOT.
+   table is the documented expression of the same mapping.
 3. **Edit surface**: end-user edits MUST happen exclusively via
    the **Keycloak Account Console** (or its admin equivalent for
    admin-managed attributes). Moodle MUST NOT expose editable
@@ -398,10 +398,10 @@ that everything else MUST match.
 
 Goal: every Moodle user-profile field that the standard
 `mdl_user` table or a Moodle custom profile field can hold MUST
-flow from the LDAP canonical store transparently into Moodle —
+flow from the LDAP canonical store transparently into Moodle,
 through Keycloak's federation mapper for the OIDC path, and
 through Moodle's `auth_ldap` field-mapping for the LDAP-sync
-path — both bound to the **same** LDAP attribute names.
+path, both bound to the **same** LDAP attribute names.
 
 The mapped surface MUST cover at minimum the following Moodle
 fields, all of which are exposed as configurable claim mappings
@@ -512,7 +512,7 @@ standard claims (`given_name`, `family_name`, …) which already
 do not use URNs. The role MUST NOT introduce a project-specific
 URN prefix for these claims.
 
-### Keycloak OIDC client mapping (Moodle as RP) — variant 0 only
+### Keycloak OIDC client mapping (Moodle as RP), variant 0 only
 
 The Keycloak OIDC client representing Moodle MUST be provisioned
 exclusively through the existing
@@ -586,7 +586,7 @@ Console.
       MUST configure the `auth_ldap` plugin with:
   - LDAP server URL, bind DN, bind password, user contexts,
     user attribute (`uid` / `sAMAccountName` / per-tenant), and
-    object class — all sourced from the same shared LDAP
+    object class, all sourced from the same shared LDAP
     service definition that other apps consume, so the
     connection contract is not duplicated per role.
   - field-mapping for every Moodle column whose row in the
@@ -651,7 +651,7 @@ without login (both variants), and direct LDAP-bind login
       `SERVICES_DISABLED`, and skip the LDAP cases cleanly when
       the LDAP shared service is disabled.
 
-#### Variant 0 — OIDC + LDAP sync (hybrid)
+#### Variant 0: OIDC + LDAP sync (hybrid)
 
 - [ ] After biber signs into Moodle via **Keycloak OIDC**, the
       spec MUST navigate to biber's Moodle profile page (or
@@ -683,7 +683,7 @@ without login (both variants), and direct LDAP-bind login
       altogether). Only the Account Console may edit; Moodle
       MUST refuse local edits.
 
-#### Variant 1 — LDAP-only
+#### Variant 1: LDAP-only
 
 - [x] biber MUST sign into Moodle by submitting his LDAP `uid`
       and password directly to Moodle's login form. The spec
