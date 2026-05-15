@@ -15,7 +15,7 @@ DISCOURSE_PLUGINS: "{{ lookup('config', application_id, 'services.discourse.plug
 DISCOURSE_PG_NETWORK: "{{ ('svc-db-' ~ DISCOURSE_DATABASE_TYPE) | get_entity_name }}"
 DISCOURSE_REDIS_HOST: "{{ application_id | get_entity_name }}-redis"
 DISCOURSE_REPOSITORY_URL: "{{ lookup('config', application_id, 'services.' ~ entity_name ~ '.repository') }}"
-DISCOURSE_VERSION: "{{ lookup('config', application_id, 'services.' ~ entity_name ~ '.version') }}"
+DISCOURSE_REF: "{{ lookup('config', application_id, 'services.' ~ entity_name ~ '.ref') }}"
 
 ## Database
 DISCOURSE_DATABASE: "{{ lookup('database', application_id ) }}"

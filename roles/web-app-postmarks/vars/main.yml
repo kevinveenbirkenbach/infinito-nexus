@@ -15,4 +15,4 @@ POSTMARKS_VERSION: "{{ lookup('config', application_id, 'services.application.ve
 
 # Source
 POSTMARKS_REPO_URL: "{{ lookup('config', application_id, 'services.application.repository') }}"
-POSTMARKS_REPO_BRANCH: "{{ lookup('config', application_id, 'services.application.branch') }}"
+POSTMARKS_REF: "{{ lookup('config', application_id, 'services.application.ref') }}"

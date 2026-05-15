@@ -51,7 +51,7 @@ discourse:
   shared: true
   enabled: true
   name: discourse
-  version: main
+  ref: main
   min_storage: 15GB
   repository: https://github.com/discourse/discourse_docker.git
   plugins:

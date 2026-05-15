@@ -34,7 +34,7 @@ application:
   version: 26-bookworm
   name: web-app-postmarks
   repository: https://github.com/ckolderup/postmarks.git
-  branch: main
+  ref: main
   min_storage: 1GB
   cpus: "0.5"
   mem_reservation: 256m

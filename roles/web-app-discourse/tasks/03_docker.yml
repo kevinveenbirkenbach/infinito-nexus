@@ -15,7 +15,7 @@
   git:
     repo: "{{ DISCOURSE_REPOSITORY_URL }}"
     dest: "{{ DISCOURSE_REPOSITORY_DIR }}"
-    version: "{{ DISCOURSE_VERSION }}"
+    version: "{{ DISCOURSE_REF }}"
     update: true
     depth: 1
   register: discourse_repo_pull

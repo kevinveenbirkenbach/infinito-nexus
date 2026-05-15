@@ -17,7 +17,7 @@ BRIDGY_ADMIN_EMAIL: "{{ lookup('users', 'administrator').email }}"
 
 # Source
 BRIDGY_REPO_URL: "{{ lookup('config', application_id, 'services.application.repository') }}"
-BRIDGY_REPO_BRANCH: "{{ lookup('config', application_id, 'services.application.branch') }}"
+BRIDGY_REF: "{{ lookup('config', application_id, 'services.application.ref') }}"
 
 # Runtime env defaults for Bridgy Fed (see upstream README)
 BRIDGY_APPVIEW_HOST: "api.bsky.app"

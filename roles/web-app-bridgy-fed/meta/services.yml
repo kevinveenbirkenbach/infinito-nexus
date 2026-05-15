@@ -25,7 +25,7 @@ application:
   version: 3.14-bookworm
   name: web-app-bridgy-fed
   repository: https://github.com/snarfed/bridgy-fed.git
-  branch: main
+  ref: main
   min_storage: 5GB
   cpus: "0.5"
   mem_reservation: 256m

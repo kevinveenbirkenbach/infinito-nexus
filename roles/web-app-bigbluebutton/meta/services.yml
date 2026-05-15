@@ -19,7 +19,7 @@ email:
   shared: "{{ 'web-app-mailu' in group_names }}"
 bigbluebutton:
   repository: https://github.com/bigbluebutton/docker.git
-  version: main
+  ref: main
   recording:
     enabled: false
     cleanup: true
