@@ -68,14 +68,14 @@ events:
   pids_limit: 256
 async-rabbitmq:
   image: rabbitmq
-  version: "3.8-management-alpine"
+  version: "4.3-management-alpine"
   cpus: "1.0"
   mem_reservation: 1g
   mem_limit: 1.5g
   pids_limit: 512
 events-rabbitmq:
   image: rabbitmq
-  version: "3.8-management-alpine"
+  version: "4.3-management-alpine"
   cpus: "0.5"
   mem_reservation: 512m
   mem_limit: 1g
