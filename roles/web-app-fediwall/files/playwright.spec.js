@@ -207,9 +207,12 @@ async function postOnFriendicaViaUi(page, baseUrl, statusText) {
   await page.locator("input[name='username']").waitFor({ state: "visible", timeout: 60_000 });
   await page.locator("input[name='username']").fill(biberUsername);
   await page.locator("input[name='password']").fill(biberPassword);
+  // Case-insensitive match — Friendica's own form labels the submit
+  // "Sign in" while Keycloak (when oauth2-proxy intercepts /login)
+  // labels it "Sign In"; exact-match misses the latter.
   await Promise.all([
     page.waitForLoadState("domcontentloaded"),
-    page.getByRole("button", { name: "Sign in", exact: true }).click(),
+    page.getByRole("button", { name: /sign\s*in/i }).first().click(),
   ]);
 
   await page.goto(`${baseUrl}/compose`, { waitUntil: "domcontentloaded" });
