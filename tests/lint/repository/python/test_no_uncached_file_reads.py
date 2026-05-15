@@ -1,6 +1,6 @@
-"""Lint guard: tests under ``tests/`` MUST route file reads through
-``utils.cache.files.read_text`` instead of calling ``Path.read_text(...)``
-or ``Path.read_bytes(...)`` directly.
+"""Lint guard: tests and the modules they import MUST route file reads
+through ``utils.cache.files.read_text`` instead of calling
+``Path.read_text(...)`` or ``Path.read_bytes(...)`` directly.
 
 Background
 ==========
@@ -20,19 +20,28 @@ cold-cache latency that no individual test owner notices. Integration
 tests show the same pattern (e.g. one role's compose template read
 across multiple shape tests).
 
+The same logic applies to library code (``utils/``, ``cli/``,
+``plugins/``, ``library/``) when tests import those modules and call
+their functions directly: their raw reads run inside the same process
+and bypass the cache the tests just populated.
+
 See ``docs/agents/action/testing.md`` for the full rule.
 
 Scope
 =====
-Every ``.py`` file under ``tests/`` (lint, integration, unit, external)
-is scanned. Legitimate exceptions — reads from a tempdir created at
-runtime, synthetic fixtures written inside the test, files outside the
-project tree — opt out per call with ``# nocheck: cache-read``.
+Every ``.py`` file under ``tests/``, ``utils/``, ``cli/``, ``plugins/``,
+and ``library/`` is scanned. ``utils/cache/`` is excluded because it
+holds the cache implementation itself (would self-reference).
+``roles/`` is excluded because its scripts are deployed to target
+hosts without ``utils/`` on PYTHONPATH. Legitimate exceptions — reads
+from a tempdir created at runtime, synthetic fixtures written inside
+the test, files mutated in the same flow that re-reads them — opt
+out per call with ``# nocheck: cache-read``.
 
 Detection
 =========
-AST-walks every ``.py`` file under ``tests/`` and flags call
-expressions matching::
+AST-walks every ``.py`` file in scope and flags call expressions
+matching::
 
     <expr>.read_text(...)
     <expr>.read_bytes(...)
@@ -75,7 +84,16 @@ from utils.cache.files import iter_project_files, read_text
 from . import PROJECT_ROOT
 
 _RULE = "cache-read"
-_TESTS_PREFIX = "tests/"
+_SCAN_PREFIXES: tuple[str, ...] = (
+    "tests/",
+    "utils/",
+    "cli/",
+    "plugins/",
+    "library/",
+)
+# ``utils/cache/`` IS the cache implementation; routing it through itself
+# would create a circular dependency.
+_SKIP_PREFIXES: tuple[str, ...] = ("utils/cache/",)
 _FORBIDDEN_ATTRS: frozenset[str] = frozenset({"read_text", "read_bytes"})
 
 
@@ -138,9 +156,9 @@ def _scan_file(path: Path) -> list[Finding]:
 
 
 class TestNoUncachedFileReads(unittest.TestCase):
-    def test_tests_use_cached_read_text(self) -> None:
+    def test_modules_in_scope_use_cached_read_text(self) -> None:
         """Forbidden ``Path.read_text`` / ``Path.read_bytes`` calls in
-        test code without an explicit ``# nocheck: cache-read``
+        in-scope code without an explicit ``# nocheck: cache-read``
         marker. Use :func:`utils.cache.files.read_text` so the LRU
         cache is shared across the pytest session.
         """
@@ -149,7 +167,9 @@ class TestNoUncachedFileReads(unittest.TestCase):
         findings: list[Finding] = []
         for path_str in iter_project_files(extensions=(".py",)):
             rel = Path(path_str).relative_to(repo_root).as_posix()
-            if not rel.startswith(_TESTS_PREFIX):
+            if not rel.startswith(_SCAN_PREFIXES):
+                continue
+            if rel.startswith(_SKIP_PREFIXES):
                 continue
             findings.extend(_scan_file(Path(path_str)))
 
@@ -157,7 +177,7 @@ class TestNoUncachedFileReads(unittest.TestCase):
             formatted = "\n".join(f.format(repo_root) for f in findings)
             self.fail(
                 f"{len(findings)} uncached file-read call(s) under "
-                f"`tests/`:\n{formatted}\n\n"
+                f"{_SCAN_PREFIXES}:\n{formatted}\n\n"
                 "FIX: replace with `read_text` from "
                 "`utils.cache.files`:\n\n"
                 "    from utils.cache.files import read_text\n"
@@ -167,7 +187,8 @@ class TestNoUncachedFileReads(unittest.TestCase):
                 "Only opt out per call with `# nocheck: cache-read` when "
                 "the read is genuinely outside the project tree "
                 "(tempdirs, synthetic fixtures written inside the same "
-                "test, etc.) and a short inline comment explains why."
+                "test, files mutated in the same flow that re-reads "
+                "them, etc.) and a short inline comment explains why."
             )
 
 

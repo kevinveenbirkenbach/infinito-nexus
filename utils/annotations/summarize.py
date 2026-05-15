@@ -20,6 +20,8 @@ from collections import defaultdict
 from dataclasses import dataclass
 from pathlib import Path
 
+from utils.cache.files import read_text
+
 ANNOTATION_RE = re.compile(r"^::(warning|error|notice)(?:\s([^:]*))?::(.*)$")
 PROP_RE = re.compile(r"(\w+)=([^,]*)")
 
@@ -43,7 +45,11 @@ def parse_props(props_str: str) -> dict[str, str]:
 
 def parse_log(path: Path) -> list[Annotation]:
     annotations: list[Annotation] = []
-    for raw in path.read_text(errors="replace").splitlines():
+    try:
+        content = read_text(str(path))
+    except UnicodeDecodeError:
+        return annotations
+    for raw in content.splitlines():
         m = ANNOTATION_RE.match(raw.strip())
         if not m:
             continue

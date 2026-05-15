@@ -11,6 +11,7 @@ from cli.core.discovery import (
     discover_commands,
     iter_dir_entries,
 )
+from utils.cache.files import read_text
 
 if TYPE_CHECKING:
     from pathlib import Path
@@ -87,7 +88,7 @@ def read_folder_title(folder: Path) -> str | None:
     if not readme.is_file():
         return None
     try:
-        text = readme.read_text(encoding="utf-8")
+        text = read_text(str(readme))
     except Exception:
         return None
     for line in text.splitlines():
@@ -109,7 +110,7 @@ def read_folder_description(folder: Path) -> str:
     if not readme.is_file():
         return "-"
     try:
-        text = readme.read_text(encoding="utf-8")
+        text = read_text(str(readme))
     except Exception:
         return "-"
 

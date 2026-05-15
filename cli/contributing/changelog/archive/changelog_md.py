@@ -90,7 +90,9 @@ def trim_and_archive(
     list of newly-written or to-be-written archive files (empty when
     no entry was displaced past *keep*).
     """
-    content = changelog_path.read_text(encoding="utf-8")
+    content = changelog_path.read_text(
+        encoding="utf-8"
+    )  # nocheck: cache-read — function reads then rewrites changelog_path; cached value would go stale on subsequent calls
     entries, _existing_trailing = split_into_entries(content)
 
     keep_entries = entries[:keep]

@@ -299,7 +299,9 @@ def update_config_versions(config_path: Path, service_versions: dict[str, str]) 
     wrapper), so the walker tracks one nesting level: top-level service keys
     and their immediate ``version:`` field.
     """
-    lines = config_path.read_text(encoding="utf-8").splitlines(keepends=True)
+    lines = config_path.read_text(  # nocheck: cache-read — function reads then rewrites config_path; cached value would go stale on subsequent calls
+        encoding="utf-8"
+    ).splitlines(keepends=True)
     changed = False
 
     services_indent: int = 0

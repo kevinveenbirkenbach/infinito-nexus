@@ -5,6 +5,8 @@ import argparse
 import json
 from pathlib import Path
 
+from utils.cache.files import read_text
+
 from .resolver import CombinedResolver
 from .tree import print_tree
 
@@ -20,7 +22,7 @@ def _load_services_overrides(path: str | None) -> dict[str, dict]:
     """
     if not path:
         return {}
-    raw = Path(path).read_text(encoding="utf-8")
+    raw = read_text(str(Path(path)))
     if not raw.strip():
         return {}
     data = json.loads(raw)

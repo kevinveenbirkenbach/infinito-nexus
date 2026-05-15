@@ -93,7 +93,9 @@ def main(argv: list[str] | None = None) -> int:
     # entries (which become the package-changelog source); the trim
     # call writes new archive files, then the package mirror reads the
     # archive directory to populate its trailing notice.
-    content = changelog_path.read_text(encoding="utf-8")
+    content = changelog_path.read_text(
+        encoding="utf-8"
+    )  # nocheck: cache-read — CLI entry; downstream trim_and_archive rewrites changelog_path in same flow
     all_entries, _ = split_into_entries(content)
     keep_full = all_entries[: args.keep]
     kept_for_mirror = [(v, d, md_body_after_header(body)) for v, d, body in keep_full]

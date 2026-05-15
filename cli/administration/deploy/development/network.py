@@ -27,7 +27,9 @@ def detect_outer_network_mtu(
         return None
 
     try:
-        daemon_config = json.loads(daemon_config_path.read_text())
+        # nocheck below: single-shot CLI read; tests mock Path.read_text directly
+        raw = daemon_config_path.read_text()  # nocheck: cache-read
+        daemon_config = json.loads(raw)
     except (json.JSONDecodeError, OSError):
         return None
 

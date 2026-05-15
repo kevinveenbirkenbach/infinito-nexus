@@ -102,8 +102,11 @@ def mirror_to_debian_changelog(
         new_content += build_package_footer(archived)
     if dry_run:
         return True
-    if path.is_file() and path.read_text(encoding="utf-8") == new_content:
-        return True
+    if path.is_file():
+        # nocheck below: idempotency check immediately before write; cache would mask non-idempotency
+        current = path.read_text(encoding="utf-8")  # nocheck: cache-read
+        if current == new_content:
+            return True
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(new_content, encoding="utf-8")
     return True
@@ -128,7 +131,9 @@ def mirror_to_rpm_spec_changelog(
     """
     if not entries or not path.is_file():
         return False
-    content = path.read_text(encoding="utf-8")
+    content = path.read_text(
+        encoding="utf-8"
+    )  # nocheck: cache-read — function reads spec file then rewrites it; cached value would go stale on subsequent calls
     section = _RPM_CHANGELOG_RE.search(content)
     if section is None:
         return False

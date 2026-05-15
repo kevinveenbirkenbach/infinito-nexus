@@ -3,6 +3,7 @@ from typing import Any
 import yaml
 from yaml.loader import SafeLoader
 
+from utils.cache.files import read_text
 from utils.handler.vault import VaultScalar
 
 
@@ -10,7 +11,7 @@ class YamlHandler:
     @staticmethod
     def load_yaml(path) -> dict:
         """Load the YAML file and wrap existing !vault entries."""
-        text = path.read_text()
+        text = read_text(str(path))
         # Custom Loader subclass wraps !vault scalars; the path-keyed
         # cache cannot preserve that wrapping, so go direct here.
         data = yaml.load(text, Loader=SafeLoader) or {}  # nocheck: direct-yaml

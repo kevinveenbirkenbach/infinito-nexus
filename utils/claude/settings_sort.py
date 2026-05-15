@@ -42,7 +42,9 @@ def _resolve(data: dict, path: tuple[str, ...]):
 
 def main() -> int:
     try:
-        raw = SETTINGS_PATH.read_text(encoding="utf-8")
+        raw = SETTINGS_PATH.read_text(
+            encoding="utf-8"
+        )  # nocheck: cache-read — CLI reads SETTINGS_PATH then writes back sorted; cache would mask the rewrite
     except OSError as exc:
         print(f"error: cannot read {SETTINGS_PATH}: {exc}", file=sys.stderr)
         return 1
