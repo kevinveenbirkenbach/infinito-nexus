@@ -1,6 +1,6 @@
 """Forbid `community.postgresql.postgresql_query` / `community.mysql.mysql_query`
 in role tasks; redirect callers to the project's `database_query` module
-(``plugins/modules/database_query.py``).
+(``library/database_query.py``).
 
 Rationale
 =========
@@ -90,7 +90,7 @@ class TestNoRawDbQueryModuleUsage(unittest.TestCase):
                 "Found raw `community.postgresql.postgresql_query` / "
                 "`community.mysql.mysql_query` module calls in role tasks.\n\n"
                 "Migrate them to the project-local `database_query` module "
-                "(`plugins/modules/database_query.py`) so the same task works in "
+                "(`library/database_query.py`) so the same task works in "
                 "shared and non-shared DB modes via `container exec`:\n\n"
                 "    - name: <something>\n"
                 "      database_query:\n"

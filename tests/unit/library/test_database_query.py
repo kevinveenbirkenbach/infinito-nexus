@@ -1,4 +1,4 @@
-"""Unit tests for plugins.modules.database_query.
+"""Unit tests for library/database_query.py.
 
 Exercises the building blocks (`_build_cmd`, `_parse_rows`,
 `_is_read_only`, `_redact_password_env`, `_escape_value`,
@@ -20,14 +20,14 @@ from . import PROJECT_ROOT
 if TYPE_CHECKING:
     from types import ModuleType
 
-MODULE_PATH = PROJECT_ROOT / "plugins" / "modules" / "database_query.py"
+MODULE_PATH = PROJECT_ROOT / "library" / "database_query.py"
 
 sys.path.insert(0, str(PROJECT_ROOT))
 
 
 def _load_database_query() -> ModuleType:
     spec = importlib.util.spec_from_file_location(
-        "plugins_modules_database_query", str(MODULE_PATH)
+        "library_database_query", str(MODULE_PATH)
     )
     if spec is None or spec.loader is None:
         raise ImportError(f"Could not load: {MODULE_PATH}")
