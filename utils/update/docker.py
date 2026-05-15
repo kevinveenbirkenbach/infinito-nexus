@@ -171,7 +171,7 @@ def suppressed_services(config_path: Path) -> set[str]:
         index
         for index, line in enumerate(lines)
         if re.search(r"^\s+version\s*:", line)
-        and is_suppressed_at(lines, index + 1, "docker-version", mode="line-above")
+        and is_suppressed_at(lines, index + 1, "docker-version")
     }
 
     if not suppressed_lines:

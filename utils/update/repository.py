@@ -141,7 +141,7 @@ def suppressed_ref_lines(config_path: Path) -> set[int]:
     lines = raw.splitlines()
     suppressed: set[int] = set()
     for line_no, _ref_value in _ref_lines(lines):
-        if is_suppressed_at(lines, line_no, _NOCHECK_MARKER, mode="line-above"):
+        if is_suppressed_at(lines, line_no, _NOCHECK_MARKER):
             suppressed.add(line_no)
     return suppressed
 
