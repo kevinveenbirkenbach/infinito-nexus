@@ -1,7 +1,7 @@
 # Build BookWyrm from source (no upstream image available)
-ARG BOOKWYRM_BASE_IMAGE
-ARG BOOKWYRM_BASE_VERSION
-FROM ${BOOKWYRM_BASE_IMAGE}:${BOOKWYRM_BASE_VERSION} AS builder
+ARG BOOKWYRM_IMAGE
+ARG BOOKWYRM_VERSION
+FROM ${BOOKWYRM_IMAGE}:${BOOKWYRM_VERSION} AS builder
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
     git build-essential libpq-dev \
@@ -10,15 +10,16 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 
 WORKDIR /src
 # Shallow clone the chosen tag/branch
-ARG BOOKWYRM_VERSION
-RUN git clone --depth=1 --branch "${BOOKWYRM_VERSION}" https://github.com/bookwyrm-social/bookwyrm.git .
+ARG BOOKWYRM_REPOSITORY
+ARG BOOKWYRM_REF
+RUN git clone --depth=1 --branch "${BOOKWYRM_REF}" "${BOOKWYRM_REPOSITORY}" .
 
 # Pre-install Python deps to a wheelhouse for faster final image
 RUN pip install --upgrade pip \
  && pip wheel --wheel-dir /wheels -r requirements.txt \
  && pip wheel --wheel-dir /wheels gunicorn
 
-FROM ${BOOKWYRM_BASE_IMAGE}:${BOOKWYRM_BASE_VERSION}
+FROM ${BOOKWYRM_IMAGE}:${BOOKWYRM_VERSION}
 ENV PYTHONUNBUFFERED=1
 WORKDIR /app
 

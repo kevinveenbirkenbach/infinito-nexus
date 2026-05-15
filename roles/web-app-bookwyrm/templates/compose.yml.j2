@@ -11,9 +11,10 @@
       '
     {{ lookup('template', 'roles/sys-svc-container/templates/build.yml.j2') | indent(4) }}
       args:
-        BOOKWYRM_BASE_IMAGE:   "{{ BOOKWYRM_BASE_IMAGE }}"
-        BOOKWYRM_BASE_VERSION: "{{ BOOKWYRM_BASE_VERSION }}"
-        BOOKWYRM_VERSION:      "{{ BOOKWYRM_VERSION }}"
+        BOOKWYRM_IMAGE:      "{{ BOOKWYRM_IMAGE }}"
+        BOOKWYRM_VERSION:    "{{ BOOKWYRM_VERSION }}"
+        BOOKWYRM_REPOSITORY: "{{ BOOKWYRM_REPOSITORY }}"
+        BOOKWYRM_REF:        "{{ BOOKWYRM_REF }}"
     image: "{{ BOOKWYRM_CUSTOM_IMAGE }}"
     container_name: "{{ BOOKWYRM_CONTAINER }}"
     hostname: "{{ BOOKWYRM_HOSTNAME }}"
