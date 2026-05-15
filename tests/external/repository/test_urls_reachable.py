@@ -32,7 +32,7 @@ import requests
 
 from utils.annotations.message import error, warning
 from utils.annotations.suppress import is_suppressed_at
-from utils.cache.files import iter_non_ignored_files
+from utils.cache.files import iter_non_ignored_files, read_text
 
 from . import PROJECT_ROOT
 
@@ -231,8 +231,8 @@ def _extract_urls(path: Path) -> list[UrlOccurrence]:
         return []
 
     try:
-        lines = path.read_text(encoding="utf-8", errors="replace").splitlines()
-    except OSError:
+        lines = read_text(str(path)).splitlines()
+    except (OSError, UnicodeDecodeError):
         return []
 
     occurrences: list[UrlOccurrence] = []

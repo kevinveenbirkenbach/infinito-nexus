@@ -3,6 +3,7 @@ import sys
 import unittest
 
 from plugins.filter.invokable_paths import get_invokable_paths
+from utils.cache.files import read_text
 
 from . import PROJECT_ROOT
 
@@ -24,7 +25,7 @@ class TestMetaRolesIntegration(unittest.TestCase):
         # Read all playbook YAML contents under tasks/stages
         cls.playbook_contents = {}
         for path in STAGES_DIR.rglob("*.yml"):  # nocheck: project-walk
-            cls.playbook_contents[path] = path.read_text(encoding="utf-8")
+            cls.playbook_contents[path] = read_text(str(path))
 
         # Regex for include_tasks line with {{ <loop_var> }}-roles.yml
         cls.include_pattern = re.compile(

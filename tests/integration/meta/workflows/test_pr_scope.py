@@ -6,6 +6,8 @@ import textwrap
 import unittest
 from pathlib import Path
 
+from utils.cache.files import read_text
+
 from . import PROJECT_ROOT
 
 SCRIPT_PATH = PROJECT_ROOT / "scripts" / "meta" / "resolve" / "pr" / "scope.sh"
@@ -64,7 +66,7 @@ class TestPullRequestScope(unittest.TestCase):
             )
 
             outputs = {}
-            for line in output_file.read_text(encoding="utf-8").splitlines():
+            for line in read_text(str(output_file)).splitlines():
                 if "=" not in line:
                     continue
                 key, value = line.split("=", 1)

@@ -7,7 +7,7 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import TYPE_CHECKING
 
-from utils.cache.files import iter_project_files
+from utils.cache.files import iter_project_files, read_text
 
 from . import PROJECT_ROOT
 
@@ -211,23 +211,15 @@ def is_whitelisted(path: Path, root: Path) -> bool:
     return bool(any(fragment in rel_wrapped for fragment in WHITELIST_PATH_FRAGMENTS))
 
 
-def is_probably_text(data: bytes) -> bool:
-    return b"\x00" not in data
-
-
 def scan_file(path: Path, root: Path) -> list[Finding]:
     findings: list[Finding] = []
     rel = path.relative_to(root).as_posix()
 
     try:
-        raw = path.read_bytes()
-    except Exception:
+        text = read_text(str(path))
+    except (OSError, UnicodeDecodeError):
         return findings
 
-    if not is_probably_text(raw):
-        return findings
-
-    text = raw.decode("utf-8", errors="replace")
     for idx, line in enumerate(text.splitlines(), start=1):
         # Only flag when it looks like a command invocation.
         for rule_name, pattern, suggestion in RULES:

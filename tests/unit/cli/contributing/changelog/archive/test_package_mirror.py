@@ -12,6 +12,7 @@ from cli.contributing.changelog.archive.package_mirror import (
     mirror_to_debian_changelog,
     mirror_to_rpm_spec_changelog,
 )
+from utils.cache.files import read_text
 
 from ._helpers import TempRepoMixin, kept_for_mirror
 
@@ -45,7 +46,7 @@ class TestMirrorToDebianChangelog(TempRepoMixin, unittest.TestCase):
             ]
         )
         mirror_to_debian_changelog(self._path(), entries, [])
-        text = self._path().read_text(encoding="utf-8")
+        text = read_text(str(self._path()))
         for v, _d, _b in entries:
             self.assertIn(f"infinito-nexus ({v}-1) unstable; urgency=medium", text)
         self.assertIn(DEFAULT_MAINTAINER, text)
@@ -54,14 +55,14 @@ class TestMirrorToDebianChangelog(TempRepoMixin, unittest.TestCase):
     def test_first_body_line_gets_two_space_indent(self) -> None:
         entries = kept_for_mirror([("1.0.0", "2026-01-01", "summary line")])
         mirror_to_debian_changelog(self._path(), entries, [])
-        text = self._path().read_text(encoding="utf-8")
+        text = read_text(str(self._path()))
         self.assertIn("  * summary line", text)
 
     def test_archived_versions_appear_in_footer_without_links(self) -> None:
         entries = kept_for_mirror([("3.0.0", "2026-01-03", "third")])
         archived = [("2.0.0", "2026-01-02"), ("1.0.0", "2026-01-01")]
         mirror_to_debian_changelog(self._path(), entries, archived)
-        text = self._path().read_text(encoding="utf-8")
+        text = read_text(str(self._path()))
         self.assertIn(FOOTER_REFERENCE, text)
         for v, d in archived:
             self.assertIn(f"  {v} ({d})", text)
@@ -72,9 +73,12 @@ class TestMirrorToDebianChangelog(TempRepoMixin, unittest.TestCase):
             [("2.0.0", "2026-01-02", "two"), ("1.0.0", "2026-01-01", "one")]
         )
         mirror_to_debian_changelog(self._path(), entries, [])
-        first = self._path().read_text(encoding="utf-8")
+        first = read_text(str(self._path()))
         mirror_to_debian_changelog(self._path(), entries, [])
-        self.assertEqual(self._path().read_text(encoding="utf-8"), first)
+        second = self._path().read_text(
+            encoding="utf-8"
+        )  # nocheck: cache-read — second read after second mirror; cache would mask non-idempotency
+        self.assertEqual(second, first)
 
 
 class TestMirrorToRpmSpecChangelog(TempRepoMixin, unittest.TestCase):
@@ -101,7 +105,8 @@ class TestMirrorToRpmSpecChangelog(TempRepoMixin, unittest.TestCase):
         entries = kept_for_mirror([("1.0.0", "2026-01-01", "x")])
         wrote = mirror_to_rpm_spec_changelog(path, entries, [])
         self.assertFalse(wrote)
-        self.assertEqual(path.read_text(encoding="utf-8"), "Name: infinito-nexus\n")
+        content = read_text(str(path))
+        self.assertEqual(content, "Name: infinito-nexus\n")
 
     def test_replaces_changelog_section_and_preserves_head(self) -> None:
         self._write_spec_skeleton()
@@ -109,7 +114,7 @@ class TestMirrorToRpmSpecChangelog(TempRepoMixin, unittest.TestCase):
             [("2.0.0", "2026-01-02", "two"), ("1.0.0", "2026-01-01", "one")]
         )
         mirror_to_rpm_spec_changelog(self._path(), entries, [])
-        text = self._path().read_text(encoding="utf-8")
+        text = read_text(str(self._path()))
         self.assertTrue(text.startswith("Name:           infinito-nexus\n"))
         self.assertIn("%changelog", text)
         self.assertNotIn("stale entry", text)
@@ -120,7 +125,7 @@ class TestMirrorToRpmSpecChangelog(TempRepoMixin, unittest.TestCase):
         self._write_spec_skeleton()
         entries = kept_for_mirror([("1.0.0", "2026-01-01", "summary line")])
         mirror_to_rpm_spec_changelog(self._path(), entries, [])
-        text = self._path().read_text(encoding="utf-8")
+        text = read_text(str(self._path()))
         self.assertIn("- * summary line", text)
 
     def test_archived_versions_appear_in_footer(self) -> None:
@@ -128,7 +133,7 @@ class TestMirrorToRpmSpecChangelog(TempRepoMixin, unittest.TestCase):
         entries = kept_for_mirror([("3.0.0", "2026-01-03", "third")])
         archived = [("2.0.0", "2026-01-02"), ("1.0.0", "2026-01-01")]
         mirror_to_rpm_spec_changelog(self._path(), entries, archived)
-        text = self._path().read_text(encoding="utf-8")
+        text = read_text(str(self._path()))
         self.assertIn(FOOTER_REFERENCE, text)
         for v, d in archived:
             self.assertIn(f"  {v} ({d})", text)

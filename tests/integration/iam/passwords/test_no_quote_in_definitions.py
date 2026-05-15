@@ -6,6 +6,8 @@ import unittest
 from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
+from utils.cache.files import read_text
+
 from . import PROJECT_ROOT
 
 if TYPE_CHECKING:
@@ -43,7 +45,10 @@ def _iter_roles_yml_files(repo_root: Path) -> Iterable[Path]:
 
 
 def _scan_file(path: Path) -> list[Finding]:
-    text = path.read_text(encoding="utf-8", errors="replace")
+    try:
+        text = read_text(str(path))
+    except UnicodeDecodeError:
+        return []
     findings: list[Finding] = []
 
     for idx, line in enumerate(text.splitlines(), start=1):

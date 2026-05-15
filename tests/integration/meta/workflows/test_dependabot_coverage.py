@@ -4,7 +4,7 @@ import unittest
 from collections.abc import Iterable
 from pathlib import Path
 
-from utils.cache.files import iter_non_ignored_files
+from utils.cache.files import iter_non_ignored_files, read_text
 from utils.cache.yaml import load_yaml_any
 
 from . import PROJECT_ROOT
@@ -175,7 +175,7 @@ def _load_gitignore_patterns() -> list[str]:
     if not GITIGNORE_PATH.is_file():
         return []
     patterns: list[str] = []
-    for raw in GITIGNORE_PATH.read_text().splitlines():
+    for raw in read_text(str(GITIGNORE_PATH)).splitlines():
         line = raw.strip()
         if not line or line.startswith(("#", "!")):
             continue

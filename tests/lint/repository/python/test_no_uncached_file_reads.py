@@ -1,33 +1,37 @@
-"""Lint guard: tests under ``tests/lint/`` MUST route file reads through
+"""Lint guard: tests under ``tests/`` MUST route file reads through
 ``utils.cache.files.read_text`` instead of calling ``Path.read_text(...)``
 or ``Path.read_bytes(...)`` directly.
 
 Background
 ==========
-Pytest runs every test in one process. The lint suite alone reads the
-same role/task YAML, Dockerfile, packaging spec, etc. dozens of times
-across sibling tests. ``utils.cache.files.read_text`` is an LRU-cached
-UTF-8 read keyed on absolute path — every duplicate scan after the
-first one returns from memory. A raw ``path.read_text(...)`` call
-bypasses that cache and re-reads the file from disk every time.
+Pytest runs every test in one process. The test suite reads the
+same role/task YAML, Dockerfile, packaging spec, compose template,
+nginx conf, etc. dozens of times across sibling tests.
+``utils.cache.files.read_text`` is an LRU-cached UTF-8 read keyed on
+absolute path — every duplicate scan after the first one returns from
+memory. A raw ``path.read_text(...)`` call bypasses that cache and
+re-reads the file from disk every time.
 
 The cost is invisible at the call site but measurable at suite level:
 each non-cached read is one ``open() + read() + decode + close()``
 syscall round-trip per test that asks for it. On the lint pass alone
 (20+ scanners, ~250 role trees) the wasted reads add up to seconds of
-cold-cache latency that no individual test owner notices.
+cold-cache latency that no individual test owner notices. Integration
+tests show the same pattern (e.g. one role's compose template read
+across multiple shape tests).
 
 See ``docs/agents/action/testing.md`` for the full rule.
 
 Scope
 =====
-Only ``tests/lint/`` is scanned. Lint tests are the ones that walk the
-whole project tree and re-read the same files; integration/unit tests
-typically read a single fixture once and gain little from the cache.
+Every ``.py`` file under ``tests/`` (lint, integration, unit, external)
+is scanned. Legitimate exceptions — reads from a tempdir created at
+runtime, synthetic fixtures written inside the test, files outside the
+project tree — opt out per call with ``# nocheck: cache-read``.
 
 Detection
 =========
-AST-walks every ``.py`` file under ``tests/lint/`` and flags call
+AST-walks every ``.py`` file under ``tests/`` and flags call
 expressions matching::
 
     <expr>.read_text(...)
@@ -71,7 +75,7 @@ from utils.cache.files import iter_project_files, read_text
 from . import PROJECT_ROOT
 
 _RULE = "cache-read"
-_TESTS_PREFIX = "tests/lint/"
+_TESTS_PREFIX = "tests/"
 _FORBIDDEN_ATTRS: frozenset[str] = frozenset({"read_text", "read_bytes"})
 
 
@@ -134,9 +138,9 @@ def _scan_file(path: Path) -> list[Finding]:
 
 
 class TestNoUncachedFileReads(unittest.TestCase):
-    def test_lint_tests_use_cached_read_text(self) -> None:
+    def test_tests_use_cached_read_text(self) -> None:
         """Forbidden ``Path.read_text`` / ``Path.read_bytes`` calls in
-        lint test code without an explicit ``# nocheck: cache-read``
+        test code without an explicit ``# nocheck: cache-read``
         marker. Use :func:`utils.cache.files.read_text` so the LRU
         cache is shared across the pytest session.
         """
@@ -152,8 +156,8 @@ class TestNoUncachedFileReads(unittest.TestCase):
         if findings:
             formatted = "\n".join(f.format(repo_root) for f in findings)
             self.fail(
-                f"{len(findings)} uncached file-read call(s) in "
-                f"`tests/lint/`:\n{formatted}\n\n"
+                f"{len(findings)} uncached file-read call(s) under "
+                f"`tests/`:\n{formatted}\n\n"
                 "FIX: replace with `read_text` from "
                 "`utils.cache.files`:\n\n"
                 "    from utils.cache.files import read_text\n"

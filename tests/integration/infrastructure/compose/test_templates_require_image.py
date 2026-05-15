@@ -19,6 +19,8 @@ import unittest
 from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
+from utils.cache.files import read_text
+
 from . import PROJECT_ROOT
 
 if TYPE_CHECKING:
@@ -114,7 +116,10 @@ def _has_image_same_indent(
 
 
 def _scan_file_for_missing_image(path: Path) -> list[Finding]:
-    text = path.read_text(encoding="utf-8", errors="replace")
+    try:
+        text = read_text(str(path))
+    except UnicodeDecodeError:
+        return []
     lines = text.splitlines()
 
     findings: list[Finding] = []

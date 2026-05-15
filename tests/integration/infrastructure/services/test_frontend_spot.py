@@ -1,6 +1,7 @@
 import unittest
 from pathlib import Path
 
+from utils.cache.files import read_text
 from utils.roles.applications.services.registry import (
     build_service_registry_from_roles_dir,
     load_applications_from_roles_dir,
@@ -48,8 +49,8 @@ class TestFrontendServiceSpot(unittest.TestCase):
         self.assertLess(self._index("web-app-mailu"), self._index("web-app-keycloak"))
 
     def test_front_proxy_falls_back_to_canonical_port_and_domain(self):
-        content = Path(f"roles/sys-stk-front-proxy/{ROLE_FILE_TASKS_MAIN}").read_text(
-            encoding="utf-8"
+        content = read_text(
+            str(Path(f"roles/sys-stk-front-proxy/{ROLE_FILE_TASKS_MAIN}"))
         )
         self.assertIn(
             "lookup('config', application_id,",

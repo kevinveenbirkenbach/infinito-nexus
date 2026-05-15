@@ -2,6 +2,8 @@ import re
 import unittest
 from typing import ClassVar
 
+from utils.cache.files import read_text
+
 from . import PROJECT_ROOT
 
 
@@ -36,7 +38,7 @@ class TestDockerComposeTemplates(unittest.TestCase):
 
         for template_path in template_paths:
             with self.subTest(template=template_path):
-                content = template_path.read_text(encoding="utf-8")
+                content = read_text(str(template_path))
                 lines = content.splitlines()
 
                 # BASE_INCLUDE must always occur exactly once

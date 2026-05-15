@@ -10,6 +10,7 @@ from cli.contributing.changelog.archive.changelog_md import (
     trim_and_archive,
 )
 from cli.contributing.changelog.archive.versioning import archive_filename
+from utils.cache.files import read_text
 
 from ._helpers import TempRepoMixin, make_changelog_md
 
@@ -61,14 +62,15 @@ class TestTrimAndArchive(TempRepoMixin, unittest.TestCase):
         return versions
 
     def test_short_changelog_is_noop(self) -> None:
-        self._write_changelog(3)
-        before = self.changelog.read_text(encoding="utf-8")
+        versions = self._write_changelog(3)
+        before = make_changelog_md(versions)
         kept, paths = trim_and_archive(
             self.changelog, self.archive_dir, self.repo_root, keep=7
         )
         self.assertEqual(kept, 3)
         self.assertEqual(paths, [])
-        self.assertEqual(self.changelog.read_text(encoding="utf-8"), before)
+        after = read_text(str(self.changelog))
+        self.assertEqual(after, before)
         self.assertFalse(self.archive_dir.exists())
 
     def test_archives_older_releases_one_file_each(self) -> None:
@@ -82,14 +84,14 @@ class TestTrimAndArchive(TempRepoMixin, unittest.TestCase):
         self.assertEqual([p.name for p in paths], expected)
         for path, (version, date, _) in zip(paths, versions[7:], strict=True):
             self.assertTrue(path.is_file())
-            text = path.read_text(encoding="utf-8")
+            text = read_text(str(path))
             self.assertTrue(text.startswith(f"# {version} ({date})\n"))
             self.assertIn(f"## [{version}] - {date}", text)
 
     def test_kept_changelog_links_archives_at_bottom(self) -> None:
         self._write_changelog(10)
         trim_and_archive(self.changelog, self.archive_dir, self.repo_root, keep=7)
-        new = self.changelog.read_text(encoding="utf-8")
+        new = read_text(str(self.changelog))
         archive_pos = new.index("## Older Releases")
         self.assertIn("## [4.0.0]", new)
         self.assertLess(new.index("## [4.0.0]"), archive_pos)
@@ -98,8 +100,8 @@ class TestTrimAndArchive(TempRepoMixin, unittest.TestCase):
             self.assertIn(f"({rel})", new)
 
     def test_dry_run_writes_nothing(self) -> None:
-        self._write_changelog(10)
-        before = self.changelog.read_text(encoding="utf-8")
+        versions = self._write_changelog(10)
+        before = make_changelog_md(versions)
         kept, paths = trim_and_archive(
             self.changelog,
             self.archive_dir,
@@ -109,19 +111,23 @@ class TestTrimAndArchive(TempRepoMixin, unittest.TestCase):
         )
         self.assertEqual(kept, 7)
         self.assertEqual(len(paths), 3)
-        self.assertEqual(self.changelog.read_text(encoding="utf-8"), before)
+        after = read_text(str(self.changelog))
+        self.assertEqual(after, before)
         self.assertFalse(self.archive_dir.exists())
 
     def test_idempotent_second_run(self) -> None:
         self._write_changelog(10)
         trim_and_archive(self.changelog, self.archive_dir, self.repo_root, keep=7)
-        first = self.changelog.read_text(encoding="utf-8")
+        first = read_text(str(self.changelog))
         kept, paths = trim_and_archive(
             self.changelog, self.archive_dir, self.repo_root, keep=7
         )
         self.assertEqual(kept, 7)
         self.assertEqual(paths, [])
-        self.assertEqual(self.changelog.read_text(encoding="utf-8"), first)
+        second = self.changelog.read_text(
+            encoding="utf-8"
+        )  # nocheck: cache-read — second read after possibly non-idempotent trim; cache would mask the bug
+        self.assertEqual(second, first)
 
     def test_existing_archive_files_are_not_overwritten(self) -> None:
         versions = self._write_changelog(10)
@@ -132,12 +138,13 @@ class TestTrimAndArchive(TempRepoMixin, unittest.TestCase):
         existing.write_text(sentinel, encoding="utf-8")
 
         trim_and_archive(self.changelog, self.archive_dir, self.repo_root, keep=7)
-        self.assertEqual(existing.read_text(encoding="utf-8"), sentinel)
+        existing_after = read_text(str(existing))
+        self.assertEqual(existing_after, sentinel)
 
     def test_subsequent_run_appends_new_archive_and_relinks_all(self) -> None:
         self._write_changelog(10)
         trim_and_archive(self.changelog, self.archive_dir, self.repo_root, keep=7)
-        kept_text = self.changelog.read_text(encoding="utf-8")
+        kept_text = read_text(str(self.changelog))
         cut = kept_text.index("## Older Releases")
         new_release = "## [11.0.0] - 2026-02-01\n* fresh\n\n"
         self.changelog.write_text(
@@ -151,7 +158,9 @@ class TestTrimAndArchive(TempRepoMixin, unittest.TestCase):
         self.assertEqual(kept, 7)
         self.assertEqual(len(paths), 1)
         self.assertEqual(paths[0].name, archive_filename("4.0.0", "2026-01-04"))
-        new_changelog = self.changelog.read_text(encoding="utf-8")
+        new_changelog = self.changelog.read_text(
+            encoding="utf-8"
+        )  # nocheck: cache-read
         self.assertTrue(new_changelog.startswith("## [11.0.0]"))
         archives_on_disk = sorted(
             (p for p in self.archive_dir.iterdir() if p.is_file()),
@@ -179,17 +188,20 @@ class TestTrimAndArchive(TempRepoMixin, unittest.TestCase):
         """
         self._write_changelog(10)
         trim_and_archive(self.changelog, self.archive_dir, self.repo_root, keep=7)
-        text = self.changelog.read_text(encoding="utf-8")
+        text = read_text(str(self.changelog))
         cut = text.index("## Older Releases")
         self.changelog.write_text(text[:cut].rstrip() + "\n", encoding="utf-8")
-        self.assertNotIn("Older Releases", self.changelog.read_text(encoding="utf-8"))
+        current = self.changelog.read_text(
+            encoding="utf-8"
+        )  # nocheck: cache-read — fresh read after intermediate write_text in same test
+        self.assertNotIn("Older Releases", current)
 
         kept, paths = trim_and_archive(
             self.changelog, self.archive_dir, self.repo_root, keep=7
         )
         self.assertEqual(kept, 7)
         self.assertEqual(paths, [])
-        restored = self.changelog.read_text(encoding="utf-8")
+        restored = self.changelog.read_text(encoding="utf-8")  # nocheck: cache-read
         self.assertIn("## Older Releases", restored)
         for archive in self.archive_dir.iterdir():
             rel = archive.relative_to(self.repo_root).as_posix()

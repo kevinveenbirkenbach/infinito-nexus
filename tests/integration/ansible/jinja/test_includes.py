@@ -1,6 +1,8 @@
 import re
 import unittest
 
+from utils.cache.files import read_text
+
 from . import PROJECT_ROOT
 
 
@@ -23,7 +25,7 @@ class TestJinjaIncludePaths(unittest.TestCase):
 
         missing = []
         for tpl in template_paths:
-            text = tpl.read_text(encoding="utf-8")
+            text = read_text(str(tpl))
             for stmt in self.INCLUDE_STMT_RE.finditer(text):
                 expr = stmt.group(1).strip()
                 m = self.LITERAL_PATH_RE.match(expr)

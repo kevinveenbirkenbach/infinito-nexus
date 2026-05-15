@@ -2,6 +2,7 @@ import re
 import unittest
 from pathlib import Path
 
+from utils.cache.files import read_text
 from utils.cache.yaml import load_yaml_any
 from utils.roles.mapping import ROLE_FILE_META_SERVICES
 
@@ -26,8 +27,8 @@ def _scan_role(role_path: Path) -> tuple[bool, bool]:
         if not path.is_file() or path.suffix not in _SCAN_EXTENSIONS:
             continue
         try:
-            text = path.read_text(encoding="utf-8", errors="ignore")
-        except OSError:
+            text = read_text(str(path))
+        except (OSError, UnicodeDecodeError):
             continue
         if not refs_mailu and _MAILU_REF_RE.search(text):
             refs_mailu = True

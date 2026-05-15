@@ -1,6 +1,7 @@
 import unittest
 from pathlib import Path
 
+from utils.cache.files import read_text
 from utils.cache.yaml import load_yaml_all_str
 
 
@@ -15,7 +16,7 @@ class HandlerNameIntegrationTest(unittest.TestCase):
         handler_files = Path("roles").glob("*/handlers/*.yml")
         for handler_file in handler_files:
             with self.subTest(handler_file=str(handler_file)):
-                content = handler_file.read_text(encoding="utf-8")
+                content = read_text(str(handler_file))
                 # Load all documents in the YAML file
                 documents = list(load_yaml_all_str(content))
                 for index, doc in enumerate(documents):

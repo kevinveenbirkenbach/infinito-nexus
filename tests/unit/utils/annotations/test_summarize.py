@@ -14,6 +14,7 @@ from utils.annotations.summarize import (
     parse_props,
     render_markdown,
 )
+from utils.cache.files import read_text
 
 
 class TestParseProps(unittest.TestCase):
@@ -163,7 +164,7 @@ class TestMain(unittest.TestCase):
         finally:
             sys.argv = old_argv
 
-        content = Path(summary_path).read_text()
+        content = read_text(summary_path)
         self.assertIn("Test Title", content)
         self.assertIn("msg", content)
 

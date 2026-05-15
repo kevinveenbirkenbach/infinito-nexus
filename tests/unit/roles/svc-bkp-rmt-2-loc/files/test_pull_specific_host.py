@@ -4,6 +4,8 @@ import types
 import unittest
 from unittest.mock import patch
 
+from utils.cache.files import read_text
+
 from . import PROJECT_ROOT
 
 
@@ -19,7 +21,7 @@ def load_module():
     if not target_path.exists():
         raise FileNotFoundError(f"Cannot find script at {target_path}")
     spec = types.ModuleType("pull_specific_host_module")
-    code = target_path.read_text(encoding="utf-8")
+    code = read_text(str(target_path))
     exec(compile(code, str(target_path), "exec"), spec.__dict__)
     return spec
 

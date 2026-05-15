@@ -3,6 +3,8 @@ from __future__ import annotations
 import re
 import unittest
 
+from utils.cache.files import read_text
+
 from . import PROJECT_ROOT
 
 COMPOSE_VOLUMES_CALL_RE = re.compile(r"\|\s*compose_volumes\s*\(")
@@ -14,7 +16,10 @@ class TestComposeVolumesCallRequired(unittest.TestCase):
         offenders: list[str] = []
 
         for compose_template in sorted(roles_dir.glob("*/templates/compose.yml.j2")):
-            text = compose_template.read_text(encoding="utf-8", errors="replace")
+            try:
+                text = read_text(str(compose_template))
+            except UnicodeDecodeError:
+                continue
             if COMPOSE_VOLUMES_CALL_RE.search(text):
                 continue
             offenders.append(f"- {compose_template.relative_to(PROJECT_ROOT)}")

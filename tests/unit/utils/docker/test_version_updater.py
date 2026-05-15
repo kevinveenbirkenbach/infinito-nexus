@@ -4,6 +4,7 @@ import tempfile
 import unittest
 from pathlib import Path
 
+from utils.cache.files import read_text
 from utils.docker.version_updater import (
     is_semver,
     latest_semver,
@@ -78,7 +79,7 @@ nginx:
             changed = update_config_versions(config_path, {"moodle": "5.0"})
 
             self.assertTrue(changed)
-            updated = config_path.read_text(encoding="utf-8")
+            updated = read_text(str(config_path))
             self.assertIn('version:            "5.0" # Keep comment', updated)
             self.assertIn("version:            alpine", updated)
             self.assertNotIn('version:            "4.5" # Keep comment', updated)

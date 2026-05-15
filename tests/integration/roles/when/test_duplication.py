@@ -3,6 +3,7 @@ from collections.abc import Iterable
 from pathlib import Path
 from typing import Any
 
+from utils.cache.files import read_text
 from utils.cache.yaml import load_yaml_all_str
 
 from . import PROJECT_ROOT
@@ -81,7 +82,7 @@ def _load_yaml_documents(path: Path) -> list[Any]:
     - If YAML fails due to Jinja syntax, we still raise, because a broken file
       should be fixed in the repo.
     """
-    text = path.read_text(encoding="utf-8")
+    text = read_text(str(path))
     return list(load_yaml_all_str(text))  # may return [None] if empty
 
 

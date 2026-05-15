@@ -7,6 +7,8 @@ import unittest
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 
+from utils.cache.files import read_text
+
 from . import PROJECT_ROOT
 
 
@@ -129,7 +131,7 @@ class TestGetUrlRetryActionPluginIntegration(unittest.TestCase):
                     check=False,
                 )
 
-                default_content = default_dest.read_text(encoding="utf-8")
+                default_content = read_text(str(default_dest))
                 override_exists = override_dest.exists()
 
                 return result, counters, default_content, override_exists

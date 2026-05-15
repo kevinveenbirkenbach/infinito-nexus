@@ -6,6 +6,8 @@ import textwrap
 import unittest
 from pathlib import Path
 
+from utils.cache.files import read_text
+
 from . import PROJECT_ROOT
 
 SCRIPT_PATH = PROJECT_ROOT / "scripts" / "github" / "cancel_pull_request_runs.sh"
@@ -119,7 +121,7 @@ class TestCancelPullRequestRuns(unittest.TestCase):
             if cancel_log.exists():
                 cancelled = [
                     line.strip()
-                    for line in cancel_log.read_text(encoding="utf-8").splitlines()
+                    for line in read_text(str(cancel_log)).splitlines()
                     if line.strip()
                 ]
             return result, cancelled

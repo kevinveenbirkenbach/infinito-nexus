@@ -6,6 +6,8 @@ import unittest
 from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
+from utils.cache.files import read_text
+
 from . import PROJECT_ROOT
 
 if TYPE_CHECKING:
@@ -149,7 +151,10 @@ class TestPasswordQuoteInShellTasks(unittest.TestCase):
 
         all_findings: list[Finding] = []
         for yml in _iter_roles_yml_files(repo_root):
-            text = yml.read_text(encoding="utf-8", errors="replace")
+            try:
+                text = read_text(str(yml))
+            except UnicodeDecodeError:
+                continue
             for start_line, block in _collect_shell_blocks(text):
                 all_findings.extend(_scan_shell_block(yml, start_line, block))
 

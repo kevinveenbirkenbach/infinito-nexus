@@ -2,6 +2,8 @@ import re
 import unittest
 from pathlib import Path
 
+from utils.cache.files import read_text
+
 from . import PROJECT_ROOT
 
 BUILD_LOOKUP_RE = re.compile(
@@ -89,7 +91,7 @@ class TestComposeBuildTemplateRequiresImageTag(unittest.TestCase):
         violations: list[str] = []
 
         for path in compose_files:
-            text = path.read_text(encoding="utf-8")
+            text = read_text(str(path))
             if not BUILD_LOOKUP_RE.search(text):
                 continue
 
