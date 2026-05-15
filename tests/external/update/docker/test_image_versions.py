@@ -1,4 +1,4 @@
-"""Check Docker image versions in roles/web-*/meta/services.yml.
+"""Check Docker image versions in roles/*/meta/services.yml.
 
 For each service with a semver-compatible version tag the latest available
 tag on Docker Hub is fetched and compared. Outdated versions are reported as
@@ -31,19 +31,21 @@ import unittest
 
 from utils.annotations.message import warning
 from utils.docker.image.discovery import iter_role_images
-from utils.docker.version_updater import (
-    fetch_dockerhub_tags,
-    fetch_ghcr_tags,
-    is_dockerhub,
-    is_ghcr,
+from utils.roles.mapping import ROLE_FILE_META_SERVICES
+from utils.update.base import (
     is_semver,
     latest_semver,
-    suppressed_services,
     version_depth,
     version_flavor,
     version_key,
 )
-from utils.roles.mapping import ROLE_FILE_META_SERVICES
+from utils.update.docker import (
+    fetch_dockerhub_tags,
+    fetch_ghcr_tags,
+    is_dockerhub,
+    is_ghcr,
+    suppressed_services,
+)
 
 from . import PROJECT_ROOT
 
@@ -52,12 +54,9 @@ _ROLES_ROOT = _REPO_ROOT / "roles"
 
 
 def _collect_entries() -> list[dict]:
-    """Collect (role, service, image, version, config_path) for semver versions in web-* roles."""
+    """Collect (role, service, image, version, config_path) for semver versions across all roles."""
     entries: list[dict] = []
     for ref in iter_role_images(_REPO_ROOT):
-        # Only web-* roles
-        if not ref.role.startswith("web-"):
-            continue
         # Only semver versions (pure or `<semver>-<flavor>`)
         if not is_semver(ref.version):
             continue
@@ -108,7 +107,7 @@ def _emit_unchecked_annotation(
 
 
 class TestDockerImageVersions(unittest.TestCase):
-    """Warn about outdated live Docker image versions in roles/web-*/meta/services.yml."""
+    """Warn about outdated live Docker image versions in roles/*/meta/services.yml."""
 
     def test_image_versions_are_current(self) -> None:
         entries = _collect_entries()

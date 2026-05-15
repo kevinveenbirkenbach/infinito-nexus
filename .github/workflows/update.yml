@@ -30,7 +30,7 @@ jobs:
         run: bash scripts/github/install_update_python.sh
 
       - name: Update Docker image versions
-        run: bash scripts/github/update_docker_image_versions.sh
+        run: bash scripts/github/update/image_versions.sh
 
       - name: Check for changes
         id: diff
@@ -43,7 +43,41 @@ jobs:
           UPDATE_BRANCH_PREFIX: update/docker-image-versions
           UPDATE_COMMIT_MESSAGE: "update(images): update Docker image versions"
           UPDATE_PR_TITLE: "update(images): update Docker image versions"
-          UPDATE_PR_BODY: "Automated update of semver-based Docker image versions in `roles/web-*/config/main.yml`."
+          UPDATE_PR_BODY: "Automated update of semver-based Docker image versions in `roles/*/meta/services.yml`."
+          UPDATE_BASE_BRANCH: main
+        run: bash scripts/github/open_update_pr.sh roles
+
+  update-repository-refs:
+    name: 🌿 Update repository refs
+    if: vars.CI_ENABLE_AUTO_UPDATES == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+
+      - name: Install update dependencies
+        run: bash scripts/github/install_update_python.sh
+
+      - name: Update repository refs
+        run: bash scripts/github/update/repository_refs.sh
+
+      - name: Check for changes
+        id: diff
+        run: bash scripts/github/check_git_changes.sh roles
+
+      - name: Open PR if repository refs changed
+        if: steps.diff.outputs.changed == 'true'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          UPDATE_BRANCH_PREFIX: update/repository-refs
+          UPDATE_COMMIT_MESSAGE: "update(repos): bump git refs to latest semver tags"
+          UPDATE_PR_TITLE: "update(repos): bump git refs to latest semver tags"
+          UPDATE_PR_BODY: "Automated update of semver-based git `ref:` values in `roles/*/meta/services.yml`. Upstream tags resolved via `git ls-remote --tags`."
           UPDATE_BASE_BRANCH: main
         run: bash scripts/github/open_update_pr.sh roles
 

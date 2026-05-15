@@ -4,14 +4,16 @@ from __future__ import annotations
 import argparse
 from pathlib import Path
 
-from utils.docker.version_updater import apply_updates, find_outdated_updates
+from utils.update.repository import apply_updates, find_outdated_updates
 
 from . import PROJECT_ROOT
 
 
 def main() -> int:
     parser = argparse.ArgumentParser(
-        description="Update semver-based Docker image versions in web-*/meta/services.yml."
+        description=(
+            "Update semver-based git `ref:` values in roles/*/meta/services.yml."
+        )
     )
     parser.add_argument(
         "--repo-root",
@@ -30,15 +32,16 @@ def main() -> int:
     updates = find_outdated_updates(repo_root)
 
     if not updates:
-        print("Docker image versions are already up to date.")
+        print("Repository refs are already up to date.")
         return 0
 
-    print("Planned Docker image updates:")
+    print("Planned repository ref updates:")
     for update in updates:
         rel_path = update.entry.config_path.relative_to(repo_root)
+        entity = ".".join(update.entry.entity_path) or "<root>"
         print(
-            f"- {rel_path}:{update.entry.service} "
-            f"{update.entry.image} {update.entry.version} -> {update.latest}"
+            f"- {rel_path}:{update.entry.line} {update.entry.role}/{entity} "
+            f"{update.entry.repository} {update.entry.ref} -> {update.latest}"
         )
 
     if args.dry_run:
@@ -51,7 +54,6 @@ def main() -> int:
             print(f"- {path.relative_to(repo_root)}")
     else:
         print("\nNo files changed.")
-
     return 0
 
 

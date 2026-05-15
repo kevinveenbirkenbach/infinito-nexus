@@ -1,21 +1,17 @@
 from __future__ import annotations
 
-import tempfile
 import unittest
-from pathlib import Path
 
-from utils.cache.files import read_text
-from utils.docker.version_updater import (
+from utils.update.base import (
     is_semver,
     latest_semver,
-    update_config_versions,
     version_depth,
     version_flavor,
     version_key,
 )
 
 
-class TestDockerVersionUpdater(unittest.TestCase):
+class TestUpdateBase(unittest.TestCase):
     def test_latest_semver_respects_depth(self) -> None:
         tags = ["4", "4.5", "4.6", "4.5.1", "5"]
 
@@ -61,28 +57,6 @@ class TestDockerVersionUpdater(unittest.TestCase):
         )
         # Flavor-less current version MUST stay in the unflavored lane.
         self.assertEqual(latest_semver(tags, 3, ""), "5.4.7")
-
-    def test_update_config_versions_updates_only_target_services(self) -> None:
-        # Per the file root of meta/services.yml IS the services map
-        # (no `compose.services` envelope), so service keys are at indent 0.
-        original = """moodle:
-  version:            "4.5" # Keep comment
-  image:              bitnamilegacy/moodle
-nginx:
-  version:            alpine
-  image:              nginx
-"""
-        with tempfile.TemporaryDirectory() as tmpdir:
-            config_path = Path(tmpdir) / "main.yml"
-            config_path.write_text(original, encoding="utf-8")
-
-            changed = update_config_versions(config_path, {"moodle": "5.0"})
-
-            self.assertTrue(changed)
-            updated = read_text(str(config_path))
-            self.assertIn('version:            "5.0" # Keep comment', updated)
-            self.assertIn("version:            alpine", updated)
-            self.assertNotIn('version:            "4.5" # Keep comment', updated)
 
 
 if __name__ == "__main__":

@@ -291,7 +291,7 @@ the old `compose.…` or top-level paths.
         deep-merge over the assembled payload, just as they used to over
         `config/main.yml`.)
       - `utils/cache/base.py`
-      - `utils/docker/version_updater.py`
+      - `utils/update/docker.py`
       - `utils/docker/image/discovery.py`
       - `plugins/filter/native_metrics_target.py`
       - `plugins/lookup/config.py` (the `config` lookup itself)
@@ -304,7 +304,7 @@ the old `compose.…` or top-level paths.
       - `plugins/lookup/nginx.py`
       - `plugins/lookup/application_gid.py`
       - `plugins/lookup/rbac_group_path.py`
-      - `cli/contributing/docker/update_versions/__main__.py`
+      - `cli/contributing/update/docker/__main__.py`
       - `cli/administration/deploy/development/inventory.py`
       - `cli/meta/roles/applications/resolution/combined/role_introspection.py`
       - `utils/roles/applications/services/resolver.py`

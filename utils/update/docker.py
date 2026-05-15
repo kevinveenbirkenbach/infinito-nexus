@@ -1,3 +1,15 @@
+"""Detect and rewrite outdated Docker image `version:` tags in
+`roles/*/meta/services.yml`.
+
+Counterpart to :mod:`utils.update.repository` (which handles git refs).
+Both share the semver primitives in :mod:`utils.update.base`; this
+module owns the Docker-Hub / GHCR registry lookups and the YAML
+walker that rewrites the matching ``version:`` line.
+
+Suppress a check by placing ``# nocheck: docker-version`` on the line
+directly above the ``version:`` key.
+"""
+
 from __future__ import annotations
 
 import json
@@ -20,19 +32,22 @@ from utils.docker.image.ref import (
     split_registry_and_name,
 )
 from utils.roles.mapping import ROLE_FILE_META_SERVICES
+from utils.update.base import (
+    is_semver,
+    latest_semver,
+    version_depth,
+    version_flavor,
+    version_key,
+)
 
 if TYPE_CHECKING:
     from pathlib import Path
 
-_SEMVER_CORE = r"v?\d+(?:\.\d+){0,3}"
-# Tags that extend a semver with a `-<flavor>` suffix, e.g. the Docker
-# Official image tag `5.4.5-php8.3-apache`. The flavor is treated as an
-# opaque discriminator: tags are only considered upgrade candidates for
-# each other when their flavor strings match.
-_VERSIONED_TAG_RE = re.compile(rf"^(?P<semver>{_SEMVER_CORE})(?P<flavor>-\S+)?$")
 _KEY_RE = re.compile(r"^(?P<indent>\s*)(?P<key>[A-Za-z0-9_-]+):(?P<rest>.*)$")
 _VERSION_VALUE_RE = re.compile(
-    r"^(?P<prefix>\s*version\s*:\s*)(?P<quote>[\"']?)(?P<value>[^\"'#\s]+)(?P=quote)(?P<suffix>\s*(?:#.*)?)$"
+    r"^(?P<prefix>\s*version\s*:\s*)"
+    r"(?P<quote>[\"']?)(?P<value>[^\"'#\s]+)(?P=quote)"
+    r"(?P<suffix>\s*(?:#.*)?)$"
 )
 
 
@@ -49,57 +64,6 @@ class DockerImageVersionEntry:
 class DockerImageVersionUpdate:
     entry: DockerImageVersionEntry
     latest: str
-
-
-def _parse_versioned_tag(tag: str) -> tuple[str, str] | None:
-    match = _VERSIONED_TAG_RE.match(str(tag).strip())
-    if match is None:
-        return None
-    return match.group("semver"), match.group("flavor") or ""
-
-
-def is_semver(value: str) -> bool:
-    return _parse_versioned_tag(value) is not None
-
-
-def version_key(tag: str) -> tuple[int, ...]:
-    parsed = _parse_versioned_tag(tag)
-    if parsed is None:
-        return (0,) * 4
-    semver, _flavor = parsed
-    parts = tuple(int(part) for part in semver.lstrip("v").split("."))
-    return parts + (0,) * (4 - len(parts))
-
-
-def version_depth(tag: str) -> int:
-    parsed = _parse_versioned_tag(tag)
-    if parsed is None:
-        return 0
-    semver, _flavor = parsed
-    return len(semver.lstrip("v").split("."))
-
-
-def version_flavor(tag: str) -> str:
-    """Return the `-<flavor>` suffix of a versioned tag, or "" when none.
-
-    Only tags that share the same flavor are considered upgrade candidates
-    for one another, so that e.g. `5.4.5-php8.3-apache` is never
-    auto-bumped to `5.4.6-php8.4-apache` (different runtime flavor) or to
-    `5.4.6-php8.3-fpm` (different webserver flavor).
-    """
-    parsed = _parse_versioned_tag(tag)
-    return parsed[1] if parsed else ""
-
-
-def latest_semver(tags: list[str], depth: int, flavor: str = "") -> str | None:
-    candidates = [
-        tag
-        for tag in tags
-        if is_semver(tag)
-        and version_depth(tag) == depth
-        and version_flavor(tag) == flavor
-    ]
-    return max(candidates, key=version_key, default=None)
 
 
 def is_dockerhub(image: str) -> bool:
@@ -194,11 +158,11 @@ def fetch_ghcr_tags(image: str) -> list[str]:
 
 
 def suppressed_services(config_path: Path) -> set[str]:
-    """Return service names whose `version:` line is annotated with the
-    unified ``# nocheck: docker-version`` marker.
+    """Return service names whose ``version:`` line is annotated with
+    the unified ``# nocheck: docker-version`` marker.
 
-    The file root of `meta/services.yml` IS the services map. There
-    is no `services.` wrapper to walk into.
+    The file root of ``meta/services.yml`` IS the services map; there
+    is no ``services.`` wrapper to walk into.
     """
     raw = read_text(str(config_path))
     lines = raw.splitlines()
@@ -235,8 +199,6 @@ def collect_entries(repo_root: Path) -> list[DockerImageVersionEntry]:
     entries: list[DockerImageVersionEntry] = []
 
     for ref in iter_role_images(repo_root):
-        if not ref.role.startswith("web-"):
-            continue
         if ref.source_file != ROLE_FILE_META_SERVICES:
             continue
         if not is_semver(ref.version):
@@ -293,13 +255,13 @@ def find_outdated_updates(repo_root: Path) -> list[DockerImageVersionUpdate]:
 
 
 def update_config_versions(config_path: Path, service_versions: dict[str, str]) -> bool:
-    """Rewrite each ``<service>.version:`` value in `meta/services.yml`.
+    """Rewrite each ``<service>.version:`` value in ``meta/services.yml``.
 
-    The file root IS the services map (no `services.`
-    wrapper), so the walker tracks one nesting level: top-level service keys
-    and their immediate ``version:`` field.
+    The file root IS the services map (no ``services.`` wrapper), so the
+    walker tracks one nesting level: top-level service keys and their
+    immediate ``version:`` field.
     """
-    lines = config_path.read_text(  # nocheck: cache-read — function reads then rewrites config_path; cached value would go stale on subsequent calls
+    lines = config_path.read_text(  # nocheck: cache-read — read-then-write of the same file; cached read would go stale
         encoding="utf-8"
     ).splitlines(keepends=True)
     changed = False
