@@ -17,7 +17,7 @@ as a ``repository:`` value in ``roles/<role>/meta/services.yml``.
 
 Detection
 =========
-* `https://github.com/foo/bar.git` literal in source → fail unless
+* `https://example.com/foo/bar.git` literal in source → fail unless
   declared in the role's services.yml.
 * The same role MAY reference the URL in multiple files; each
   reference is fine as long as the URL itself is declared once in
