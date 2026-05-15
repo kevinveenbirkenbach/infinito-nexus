@@ -42,8 +42,13 @@ class TestPythonShebangs(unittest.TestCase):
     def _is_ansible_custom_module(path: Path, repo_root: Path) -> bool:
         rel = path.relative_to(repo_root)
         parts = rel.parts
-        # Custom Ansible modules live in a `library/` directory.
-        return parts[0] == "library" or "library" in parts[1:]
+        # Custom Ansible modules live in a `library/` directory (per-role
+        # / per-playbook layout) or in `plugins/modules/` (collection-
+        # style layout). Both paths get their interpreter rewritten by
+        # Ansible, so `#!/usr/bin/python` is the correct shebang.
+        if parts[0] == "library" or "library" in parts[1:]:
+            return True
+        return len(parts) >= 2 and parts[0] == "plugins" and parts[1] == "modules"
 
     def test_python_shebangs_are_portable(self):
         portable_violations: list[str] = []

@@ -76,13 +76,11 @@
           code, logs, stats, host memory, and dmesg OOM-killer evidence.
 
 - name: "Update the settings column of the auth-openid-connect plugin"
-  community.postgresql.postgresql_query:
-    db: "{{ lookup('database', application_id, 'name') }}"
-    login_user: "{{ lookup('database', application_id, 'username') }}"
-    login_password: "{{ lookup('database', application_id, 'password') }}"
-    login_host: "{{ lookup('database', application_id, 'reach_host') }}"
-    login_port: "{{ lookup('database', application_id, 'port') }}"
-    query: "{{ lookup('template', 'upsert-oidc-plugin.sql.j2') }}"
+  database_query:
+    config: "{{ lookup('database', application_id) }}"
+    query_file: "{{ role_path }}/files/sql/upsert-oidc-plugin.sql"
+    named_args:
+      settings: "{{ oidc_settings | to_json }}"
   register: _peertube_oidc_update
   retries: 5
   delay: 3

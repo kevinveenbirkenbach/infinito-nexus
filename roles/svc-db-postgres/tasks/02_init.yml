@@ -80,6 +80,7 @@
 - name: "POSTGRES | Ensure LOGIN for role {{ database_username }} (with debug on failure)"
   block:
     - name: "POSTGRES | Enable login for role {{ database_username }}"
+      # nocheck: database-query — svc-db-postgres bootstraps its own DB; the `database_query` module's `lookup('database', ...)` indirection isn't usable from inside the role that provides the lookup target.
       community.postgresql.postgresql_query:
         db: postgres
         login_user: postgres
@@ -267,6 +268,7 @@
 
 # 6) Grant USAGE/CREATE on schema and set default privileges
 - name: "Set comprehensive schema privileges for {{ database_username }}"
+  # nocheck: database-query — svc-db-postgres bootstraps its own DB; the `database_query` module's `lookup('database', ...)` indirection isn't usable from inside the role that provides the lookup target.
   community.postgresql.postgresql_query:
     db: "{{ database_name }}"
     login_user: postgres
