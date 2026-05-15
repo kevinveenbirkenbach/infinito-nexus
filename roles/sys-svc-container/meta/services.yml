@@ -3,7 +3,7 @@ svc-container:
   lifecycle: beta
 busybox:
   image: busybox
-  version: "1.36"
+  version: "1.37"
 node:
   image: node
-  version: "20-alpine"
+  version: "26-alpine"
