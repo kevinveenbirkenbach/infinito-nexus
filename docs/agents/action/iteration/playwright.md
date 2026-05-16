@@ -44,6 +44,10 @@ You MUST load the following pages before editing any file, in this order:
    1. If the failure needs a change **outside** `files/playwright.spec.js` (role tasks, templates, vars, config, `javascript.js`, `style.css`, or any other role asset the deploy materializes), go to [Escape](#escape).
    2. Otherwise, adjust the spec and return to step 2.
 
+## Debugging in the nested docker daemon
+
+To validate a hypothesis without redeploying — e.g. rerun the Playwright image with a patched env or grep — use `make run IMAGE=<ref> [CMD=...] [RUN_FLAGS=...]`. You MAY hand-edit `/tmp/test-e2e-playwright/<role>/.env` for the diagnosis run only, but you MUST mirror any fix back into `roles/<role>/templates/playwright.env.j2` before the next deploy.
+
 ## Exit
 
 You MUST NOT report the task complete until all of the following hold:

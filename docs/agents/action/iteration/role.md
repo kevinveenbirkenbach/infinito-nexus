@@ -50,5 +50,6 @@ For the matrix-variant mechanism (folder layout, round semantics, `--variant` / 
 
 - Before you redeploy, you MUST complete all available inspections first. Check the live local output, local logs, and current browser state so the original state stays visible.
 - To inspect files or run commands inside a running container, use `make exec`.
-- When a local deploy fails, you SHOULD first inspect and, where practical, validate a fix inside the running container with `make exec` before starting another deploy. Use that live investigation to identify the concrete root cause and save iteration time.
+- To run a one-off sidecar image against the same docker daemon (e.g. a Playwright runner with a patched `.env`), use `make run IMAGE=<ref> [CMD=...] [RUN_FLAGS=...]`.
+- When a local deploy fails, you SHOULD first inspect and, where practical, validate a fix inside the running container with `make exec` / `make run` before starting another deploy. Use that live investigation to identify the concrete root cause and save iteration time.
 - Once the root cause is understood, you MUST apply the real fix in the repository files and then continue the redeploy loop with the usual commands from this page. In-container fixes are only for diagnosis or short validation and MUST NOT replace the repo change.

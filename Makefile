@@ -150,6 +150,10 @@ refresh:
 exec:
 	@bash scripts/tests/deploy/local/exec/container.sh
 
+# Run a one-off `docker run` inside the running container.
+run:
+	@bash scripts/tests/deploy/local/exec/run.sh
+
 # Start the development stack.
 up: install
 	@"$${PYTHON}" -m cli.administration.deploy.development up
