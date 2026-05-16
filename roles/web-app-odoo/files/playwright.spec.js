@@ -1,4 +1,5 @@
 const { test, expect } = require("@playwright/test");
+const { skipUnlessServiceEnabled } = require("./service-gating");
 
 const { decodeDotenvQuotedValue, isVisible, performKeycloakLoginForm, runAdminFlow, runBiberFlow, runGuestFlow, waitForFrameUrl } = require("./personas");
 test.use({
@@ -7,8 +8,9 @@ test.use({
 
 // `docker --env-file` preserves the quotes emitted by `dotenv_quote`,
 // so normalize these values before building URLs or typing credentials.
-const oidcIssuerUrl  = decodeDotenvQuotedValue(process.env.OIDC_ISSUER_URL);
-const odooBaseUrl    = decodeDotenvQuotedValue(process.env.ODOO_BASE_URL);
+const oidcIssuerUrl     = decodeDotenvQuotedValue(process.env.OIDC_ISSUER_URL);
+const odooBaseUrl       = decodeDotenvQuotedValue(process.env.ODOO_BASE_URL);
+const dashboardBaseUrl  = decodeDotenvQuotedValue(process.env.DASHBOARD_BASE_URL || "").replace(/\/$/, "");
 const adminUsername  = decodeDotenvQuotedValue(process.env.ADMIN_USERNAME);
 const adminPassword  = decodeDotenvQuotedValue(process.env.ADMIN_PASSWORD);
 const biberUsername  = decodeDotenvQuotedValue(process.env.BIBER_USERNAME);
@@ -145,12 +147,13 @@ test.beforeEach(() => {
 // user clicks "Login with SSO" → Keycloak login page loads inside the iframe →
 // after login the iframe navigates back to Odoo authenticated.
 test("dashboard to odoo: admin sso login, verify ui, logout", async ({ page }) => {
+  skipUnlessServiceEnabled("dashboard");
   const expectedOdooBaseUrl = odooBaseUrl.replace(/\/$/, "");
   const odooLoginUrl = `${expectedOdooBaseUrl}/web/login`;
 
   // 1. Navigate to dashboard with the Odoo login URL pre-loaded in the iframe.
   // The dashboard's ?iframe= parameter auto-opens the given URL in #main iframe.
-  await page.goto(`/?iframe=${encodeURIComponent(odooLoginUrl)}`);
+  await page.goto(`${dashboardBaseUrl}/?iframe=${encodeURIComponent(odooLoginUrl)}`);
 
   // 2. Wait for the iframe to appear and load the Odoo login URL
   await expect(page.locator("#main iframe")).toBeVisible({ timeout: 30_000 });
@@ -228,7 +231,7 @@ test("dashboard to odoo: admin sso login, verify ui, logout", async ({ page }) =
     .toBe(true);
 
   // 12. Return to dashboard and verify logged out state
-  await page.goto("/");
+  await page.goto(dashboardBaseUrl);
   await logoutFromDashboardIfNeeded(page);
 });
 
@@ -238,11 +241,12 @@ test("dashboard to odoo: admin sso login, verify ui, logout", async ({ page }) =
 // Biber is a standard user without admin privileges - this confirms OIDC works
 // for all Keycloak users, not just the administrator.
 test("dashboard to odoo: biber sso login, verify ui, logout", async ({ page }) => {
+  skipUnlessServiceEnabled("dashboard");
   const expectedOdooBaseUrl = odooBaseUrl.replace(/\/$/, "");
   const odooLoginUrl = `${expectedOdooBaseUrl}/web/login`;
 
   // 1. Navigate to dashboard with the Odoo login URL pre-loaded in the iframe.
-  await page.goto(`/?iframe=${encodeURIComponent(odooLoginUrl)}`);
+  await page.goto(`${dashboardBaseUrl}/?iframe=${encodeURIComponent(odooLoginUrl)}`);
 
   // 2. Wait for the iframe to appear and load the Odoo login URL
   await expect(page.locator("#main iframe")).toBeVisible({ timeout: 30_000 });
@@ -318,7 +322,7 @@ test("dashboard to odoo: biber sso login, verify ui, logout", async ({ page }) =
     .toBe(true);
 
   // 12. Return to dashboard and verify logged out state
-  await page.goto("/");
+  await page.goto(dashboardBaseUrl);
   await logoutFromDashboardIfNeeded(page);
 });
 
