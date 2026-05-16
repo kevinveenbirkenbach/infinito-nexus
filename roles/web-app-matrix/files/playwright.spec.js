@@ -1,4 +1,5 @@
 const { test, expect } = require("@playwright/test");
+const { skipUnlessServiceEnabled } = require("./service-gating");
 
 const { assertCspResponseHeader, decodeDotenvQuotedValue, expectNoCspViolations, installCspViolationObserver, normalizeBaseUrl, performKeycloakLoginForm, runGuestFlow } = require("./personas");
 test.use({ ignoreHTTPSErrors: true });
@@ -48,6 +49,7 @@ const adminPassword = decodeDotenvQuotedValue(process.env.ADMIN_PASSWORD);
 const biberUsername = decodeDotenvQuotedValue(process.env.BIBER_USERNAME);
 const biberPassword = decodeDotenvQuotedValue(process.env.BIBER_PASSWORD);
 const canonicalDomain = decodeDotenvQuotedValue(process.env.CANONICAL_DOMAIN);
+const oidcServiceEnabled = (process.env.OIDC_SERVICE_ENABLED || "true").toLowerCase() === "true";
 
 test.beforeEach(async ({ page }) => {
   await page.setViewportSize({ width: 1440, height: 1100 });
@@ -151,7 +153,8 @@ async function signInViaElementOidc(page, username, password, personaLabel) {
     if (url.includes("/_matrix/")) return false;
     if (url.includes(expectedOidcAuthUrl)) return false;
     if (/#\/login(\/|$|\?)/.test(url)) return false;
-    if (/#\/welcome/.test(url) || /#\/home/.test(url) || /#\/room/.test(url) || url === `${elementBaseUrl}/` || url === `${elementBaseUrl}/#/`) return true;
+    if (/#\/welcome/.test(url) || /#\/home/.test(url) || /#\/room/.test(url)) return true;
+    if (u.pathname === "/" && (!u.hash || u.hash === "#" || u.hash === "#/")) return true;
     return false;
   }, { timeout: 120_000 });
 
@@ -356,13 +359,110 @@ async function signInViaElementOidc(page, username, password, personaLabel) {
     .toBe(true);
 }
 
+// Native password / LDAP-backed login on Element's #/login form (m.login.password).
+// Used when OIDC is disabled on the Synapse homeserver. Synapse may back the
+// password verification with native users or an `ldap_auth_provider` —
+// indistinguishable from Element's side. Skip-verification + service-worker
+// dismissal mirror the OIDC path; Synapse SSO consent does not apply.
+async function signInViaElementPassword(page, username, password, personaLabel) {
+  await page.goto(`${elementBaseUrl}/#/login`);
+
+  const userField = page
+    .locator('input[name="username"], #mx_LoginForm_username, input[name="mxid"], input[data-testid="login_field_mx_id"]')
+    .first();
+  await expect(userField, `${personaLabel}: Element password login username field must appear`).toBeVisible({ timeout: 30_000 });
+  await userField.fill(username);
+
+  const pwField = page
+    .locator('input[name="password"], #mx_LoginForm_password, input[type="password"]')
+    .first();
+  await pwField.fill(password);
+
+  const submitBtn = page
+    .locator('.mx_Login_submit, button[type="submit"], [data-testid="login-submit-button"]')
+    .first();
+  await submitBtn.click();
+
+  const skipBtn = page.getByRole("button", { name: /skip\s+verification\s+for\s+now/i }).first();
+  async function authenticatedSignalPresent() {
+    return await page.evaluate(() => {
+      if (document.querySelector(".mx_RoomList, .mx_UserMenu")) return true;
+      const byAccessibleName = (roles, nameRegex) => {
+        const selector = roles.map(r => `[role="${r}"]`).join(",");
+        for (const n of document.querySelectorAll(selector)) {
+          const name = (n.getAttribute("aria-label") || n.textContent || "").trim();
+          if (nameRegex.test(name)) return true;
+        }
+        return false;
+      };
+      if (byAccessibleName(["button"], /^user menu$/i)) return true;
+      if (byAccessibleName(["navigation"], /^room list$/i)) return true;
+      if (byAccessibleName(["tree"], /^spaces$/i)) return true;
+      for (const h of document.querySelectorAll("h1")) {
+        if (/^\s*welcome\s+/i.test(h.textContent || "")) return true;
+      }
+      return false;
+    }).catch(() => false);
+  }
+  async function credentialRejectionMessage() {
+    return await page.evaluate(() => {
+      const sel = ".mx_Login_error, .mx_Login_field_error, [role='alert']";
+      for (const n of document.querySelectorAll(sel)) {
+        const t = (n.textContent || "").trim();
+        if (/invalid|incorrect|forbidden|unauthorized/i.test(t)) return t;
+      }
+      return null;
+    }).catch(() => null);
+  }
+
+  const deadline = Date.now() + 180_000;
+  while (Date.now() < deadline) {
+    if (await authenticatedSignalPresent()) break;
+    const rejection = await credentialRejectionMessage();
+    if (rejection) {
+      throw new Error(`${personaLabel}: Element rejected credentials: "${rejection}"`);
+    }
+    if (await skipBtn.isVisible().catch(() => false)) {
+      await skipBtn.click({ timeout: 5_000 }).catch(() => {});
+      const confirmSkip = page
+        .getByRole("button", { name: /^\s*(skip(\s+anyway)?|i'?ll\s+verify\s+later|continue)\s*$/i })
+        .first();
+      await confirmSkip.waitFor({ state: "visible", timeout: 5_000 }).catch(() => {});
+      if (await confirmSkip.isVisible().catch(() => false)) {
+        await confirmSkip.click({ timeout: 5_000 }).catch(() => {});
+      }
+      await page.waitForTimeout(2_000);
+      continue;
+    }
+    await page.waitForTimeout(2_000);
+  }
+
+  await expect
+    .poll(authenticatedSignalPresent, {
+      timeout: 60_000,
+      message: `${personaLabel}: authenticated Element UI (user menu / room list / welcome) must render after password auth`
+    })
+    .toBe(true);
+}
+
+// Auth-mode dispatcher: pick OIDC when Keycloak is wired up for this
+// matrix deployment, fall back to native/LDAP password auth otherwise.
+async function signInViaElement(page, username, password, personaLabel) {
+  if (oidcServiceEnabled) {
+    return signInViaElementOidc(page, username, password, personaLabel);
+  }
+  return signInViaElementPassword(page, username, password, personaLabel);
+}
+
 test("administrator: dashboard to matrix element OIDC login and logout", async ({ page }) => {
+  skipUnlessServiceEnabled("oidc");
   const diagnostics = attachDiagnostics(page);
   await signInViaElementOidc(page, adminUsername, adminPassword, "administrator");
   await expectNoCspViolations(page, diagnostics, "matrix element administrator OIDC");
 });
 
 test("biber: dashboard to matrix element OIDC login and logout", async ({ page }) => {
+  skipUnlessServiceEnabled("oidc");
   const diagnostics = attachDiagnostics(page);
   await signInViaElementOidc(page, biberUsername, biberPassword, "biber");
   await expectNoCspViolations(page, diagnostics, "matrix element biber OIDC");
@@ -400,11 +500,11 @@ test.describe("matrix DM", () => {
     // cycling through consent↔M_LIMIT_EXCEEDED retries. Running the DM
     // test in isolation doesn't need this, but the extra wait is cheap.
     await adminPage.waitForTimeout(120_000);
-    await signInViaElementOidc(adminPage, adminUsername, adminPassword, "administrator");
+    await signInViaElement(adminPage, adminUsername, adminPassword, "administrator");
     // Same reasoning between admin and biber: two back-to-back SSO
     // logins easily exhaust rc_login. 30s lets the burst refill.
     await adminPage.waitForTimeout(30_000);
-    await signInViaElementOidc(biberPage, biberUsername, biberPassword, "biber");
+    await signInViaElement(biberPage, biberUsername, biberPassword, "biber");
 
   const marker = `hello-from-admin-${Date.now()}`;
   // MXIDs use the Synapse server_name (a.k.a. MATRIX_SERVER_NAME, typically
