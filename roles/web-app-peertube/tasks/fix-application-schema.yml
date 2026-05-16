@@ -30,6 +30,7 @@
 
 - name: "PEERTUBE | Wait for peertube to create the `application` table"
   database_query:
+    mask_values: "{{ MASK_CREDENTIALS_IN_LOGS | bool }}"
     config: "{{ lookup('database', application_id) }}"
     query_file: "{{ role_path }}/files/sql/check-application-table.sql"
     expect_rows: true
@@ -44,6 +45,7 @@
 
 - name: "PEERTUBE | Back-fill column defaults so the bootstrap INSERT does not violate NOT NULL"
   database_query:
+    mask_values: "{{ MASK_CREDENTIALS_IN_LOGS | bool }}"
     config: "{{ lookup('database', application_id) }}"
     query_file: "{{ role_path }}/files/sql/backfill-application-defaults.sql"
   register: _peertube_app_defaults

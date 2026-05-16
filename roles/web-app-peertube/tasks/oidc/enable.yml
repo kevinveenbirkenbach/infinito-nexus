@@ -77,6 +77,7 @@
 
 - name: "Update the settings column of the auth-openid-connect plugin"
   database_query:
+    mask_values: "{{ MASK_CREDENTIALS_IN_LOGS | bool }}"
     config: "{{ lookup('database', application_id) }}"
     query_file: "{{ role_path }}/files/sql/upsert-oidc-plugin.sql"
     named_args:

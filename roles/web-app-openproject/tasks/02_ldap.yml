@@ -5,6 +5,7 @@
 
 - name: Check if LDAP source exists
   database_query:
+    mask_values: "{{ MASK_CREDENTIALS_IN_LOGS | bool }}"
     config: "{{ lookup('database', application_id) }}"
     query_file: "{{ role_path }}/files/sql/select-ldap-auth-source-exists.sql"
     named_args:
@@ -14,6 +15,7 @@
 
 - name: Update existing LDAP auth source
   database_query:
+    mask_values: "{{ MASK_CREDENTIALS_IN_LOGS | bool }}"
     config: "{{ lookup('database', application_id) }}"
     query_file: "{{ role_path }}/files/sql/update-ldap-auth-source.sql"
     named_args:
@@ -34,11 +36,10 @@
       tls_certificate_string: "{{ OPENPROJECT_LDAP.tls_certificate_string }}"
       name: "{{ OPENPROJECT_LDAP.name }}"
   when: ldap_check.rows | length > 0
-  async: "{{ ASYNC_TIME if ASYNC_ENABLED | bool else omit }}"
-  poll: "{{ ASYNC_POLL if ASYNC_ENABLED | bool else omit }}"
 
 - name: Create new LDAP auth source
   database_query:
+    mask_values: "{{ MASK_CREDENTIALS_IN_LOGS | bool }}"
     config: "{{ lookup('database', application_id) }}"
     query_file: "{{ role_path }}/files/sql/insert-ldap-auth-source.sql"
     named_args:
@@ -59,5 +60,3 @@
       verify_peer: "{{ OPENPROJECT_LDAP.verify_peer }}"
       tls_certificate_string: "{{ OPENPROJECT_LDAP.tls_certificate_string }}"
   when: ldap_check.rows | length == 0
-  async: "{{ ASYNC_TIME if ASYNC_ENABLED | bool else omit }}"
-  poll: "{{ ASYNC_POLL if ASYNC_ENABLED | bool else omit }}"

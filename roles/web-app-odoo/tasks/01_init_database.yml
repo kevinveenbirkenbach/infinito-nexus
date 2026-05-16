@@ -4,6 +4,7 @@
 
 - name: Check if Odoo schema is initialized (ir_module_module table exists)
   database_query:
+    mask_values: "{{ MASK_CREDENTIALS_IN_LOGS | bool }}"
     config: "{{ lookup('database', application_id) }}"
     query_file: "{{ role_path }}/files/sql/select-ir-module-module-table-exists.sql"
     expect_rows: true

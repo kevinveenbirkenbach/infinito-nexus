@@ -249,16 +249,28 @@ def _redact_password_env(cmd: list[str]) -> list[str]:
 def main() -> None:
     module = AnsibleModule(
         argument_spec={
-            "config": {"type": "dict", "required": True, "no_log": True},
+            "config": {"type": "dict", "required": True},
             "query": {"type": "str"},
             "query_file": {"type": "path"},
-            "named_args": {"type": "dict", "default": {}, "no_log": True},
+            "named_args": {"type": "dict", "default": {}},
             "expect_rows": {"type": "bool", "default": False},
+            "mask_values": {"type": "bool", "default": True},
         },
         mutually_exclusive=[("query", "query_file")],
         required_one_of=[("query", "query_file")],
         supports_check_mode=False,
     )
+
+    if module.params["mask_values"]:
+        for value in (module.params["config"] or {}).values():
+            if isinstance(value, str) and value:
+                module.no_log_values.add(value)
+        for value in (module.params["named_args"] or {}).values():
+            if value is None or isinstance(value, bool):
+                continue
+            text = str(value)
+            if text:
+                module.no_log_values.add(text)
 
     config = module.params["config"]
     missing = [key for key in _REQUIRED_CONFIG_KEYS if not config.get(key)]
