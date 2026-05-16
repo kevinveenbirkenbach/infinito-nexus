@@ -14,7 +14,7 @@ def _to_role_set(raw: Iterable[str] | str | None, var_name: str) -> set[str]:
         return set()
 
     if isinstance(raw, str):
-        # Support CLI-style CSV extra-vars, e.g. allowed_applications=app1,app2
+        # Support CLI-style CSV extra-vars, e.g. APPLICATIONS_WHITELIST=app1,app2
         return {item.strip() for item in raw.split(",") if item.strip()}
 
     try:

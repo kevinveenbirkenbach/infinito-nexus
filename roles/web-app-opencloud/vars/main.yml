@@ -31,5 +31,5 @@ OPENCLOUD_TRANSFER_SECRET: "{{ lookup('config', application_id, 'credentials.tra
 # `tls` lookup raises when the role is not in scope, so gate the URL behind
 # the group_names check and fall back to an empty string when OpenTalk is
 # not part of the current host's role set.
-OPENCLOUD_OPENTALK_ENABLED: "{{ 'web-app-opentalk' in (group_names | default([])) | lower }}"
+OPENCLOUD_OPENTALK_ENABLED: "{{ ('web-app-opentalk' in group_names) | lower }}"
 OPENCLOUD_OPENTALK_URL: "{{ lookup('tls', 'web-app-opentalk', 'url.base') if OPENCLOUD_OPENTALK_ENABLED | bool else '' }}"

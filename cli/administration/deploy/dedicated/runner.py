@@ -94,7 +94,7 @@ def run_ansible_playbook(
     # Wrapper-provided extra-vars first; user can override via passthrough -e later.
     if allowed_applications:
         joined = ",".join(allowed_applications)
-        cmd.extend(["-e", f"allowed_applications={joined}"])
+        cmd.extend(["-e", f"APPLICATIONS_WHITELIST={joined}"])
 
     for key, value in modes.items():
         val = str(value).lower() if isinstance(value, bool) else str(value)

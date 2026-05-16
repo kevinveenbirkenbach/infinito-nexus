@@ -180,7 +180,7 @@ def gen_condi_role_incl(roles_dir, prefixes=None):
         app_id = role['application_id']
         entries.append(
             f"- name: setup {app_id}\n"
-            f"  when: ('{app_id}' | application_allowed(group_names, allowed_applications))\n"
+            f"  when: ('{app_id}' | application_allowed(group_names, lookup('status').whitelist))\n"
             f"  include_role:\n"
             f"    name: {role_name}\n"
         )

@@ -134,7 +134,7 @@ class TestRunAnsiblePlaybook(unittest.TestCase):
 
         # Allowed applications extra var
         last_cmd_str = " ".join(last_cmd)
-        self.assertIn("allowed_applications=web-app-foo,web-app-bar", last_cmd_str)
+        self.assertIn("APPLICATIONS_WHITELIST=web-app-foo,web-app-bar", last_cmd_str)
 
         # MODE_* variables
         self.assertIn("MODE_CLEANUP=true", last_cmd_str)
@@ -183,7 +183,7 @@ class TestRunAnsiblePlaybook(unittest.TestCase):
             "--tags",
             "deploy",
             "-e",
-            "allowed_applications=override-app",
+            "APPLICATIONS_WHITELIST=override-app",
             "-e",
             "MODE_DEBUG=true",
         ]
@@ -215,8 +215,8 @@ class TestRunAnsiblePlaybook(unittest.TestCase):
 
         # Ensure both wrapper and override extra-vars are present (override later wins)
         cmd_str = " ".join(last_cmd)
-        self.assertIn("allowed_applications=web-app-foo", cmd_str)
-        self.assertIn("allowed_applications=override-app", cmd_str)
+        self.assertIn("APPLICATIONS_WHITELIST=web-app-foo", cmd_str)
+        self.assertIn("APPLICATIONS_WHITELIST=override-app", cmd_str)
 
     @unittest.mock.patch("subprocess.run")
     def test_run_ansible_playbook_failure_exits_with_code_and_skips_phases(

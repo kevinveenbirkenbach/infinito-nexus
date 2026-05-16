@@ -20,6 +20,8 @@ KEYCLOAK_SERVER_INTERNAL_URL: "http://127.0.0.1:8080"
 # RBAC
 KEYCLOAK_RBAC_GROUP_CLAIM: "{{ RBAC.GROUP.CLAIM }}"
 KEYCLOAK_RBAC_GROUP_NAME: "{{ RBAC.GROUP.NAME }}"
+KEYCLOAK_RBAC_ALL_APP_IDS: "{{ lookup('status').groups | rbac_app_ids }}"
+KEYCLOAK_RBAC_RUN_APP_IDS: "{{ lookup('status').running | rbac_app_ids }}"
 
 # RBAC | Per-application group-ldap-mapper payload.
 # Single SPOT for the per-app mapper definition: takes the canonical

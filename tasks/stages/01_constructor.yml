@@ -12,9 +12,7 @@
 - name: Display selected initial host vars
   ansible.builtin.debug:
     msg: |
-      group_names:
-      {{ group_names | to_nice_yaml(indent=2) }}
-      allowed_applications: {{ allowed_applications }}
+      status: {{ lookup('status') | to_nice_yaml(indent=2) }}
       RUNTIME: {{ RUNTIME }}
       DOCKER_IN_CONTAINER: {{ DOCKER_IN_CONTAINER }}
       TLS_ENABLED: {{ TLS_ENABLED }}

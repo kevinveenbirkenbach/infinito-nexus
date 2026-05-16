@@ -42,7 +42,7 @@ def _passthrough_explanation() -> str:
         "  are NOT parsed by this wrapper and are forwarded 1:1 to ansible-playbook.\n"
         "\n"
         "Important behavior:\n"
-        "  - The wrapper injects its own -e variables first (MODE_*, allowed_applications, ...).\n"
+        "  - The wrapper injects its own -e variables first (MODE_*, APPLICATIONS_WHITELIST, ...).\n"
         "  - Your own ansible-playbook options come last and can therefore override them,\n"
         "    e.g. -e MODE_DEBUG=true.\n"
         "\n"

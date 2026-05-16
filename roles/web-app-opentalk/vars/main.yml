@@ -82,7 +82,7 @@ OPENTALK_KEYCLOAK_CLIENT_SECRET: "{{ OPENTALK_CTRL_OIDC_CLIENT_SECRET }}"
 # `tls` lookup raises when the role is not in scope, so gate the URL behind
 # the group_names check and fall back to an empty string when OpenCloud is
 # not part of the current host's role set.
-OPENTALK_OPENCLOUD_ENABLED: "{{ 'web-app-opencloud' in (group_names | default([])) | lower }}"
+OPENTALK_OPENCLOUD_ENABLED: "{{ ('web-app-opencloud' in group_names) | lower }}"
 OPENTALK_OPENCLOUD_URL: "{{ lookup('tls', 'web-app-opencloud', 'url.base') if OPENTALK_OPENCLOUD_ENABLED | bool else '' }}"
 
 # TURN credentials reuse from existing web-svc-coturn
