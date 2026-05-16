@@ -5,7 +5,7 @@ oidc:
   repository: https://github.com/infinito-nexus/taiga-oidc.git
   ref: c623b753047ce9923f3e38614d86e81fc5eb2bb1
 ldap:
-  enabled: false # nocheck: dynamic-flag
+  enabled: "{{ 'svc-db-openldap' in group_names }}"
   shared: "{{ 'svc-db-openldap' in group_names }}"
 # nocheck: dynamic-flag
 oauth2:

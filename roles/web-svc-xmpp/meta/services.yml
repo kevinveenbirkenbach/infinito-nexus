@@ -10,7 +10,7 @@ oidc:
   enabled: "{{ 'web-app-keycloak' in group_names }}"
   shared: "{{ 'web-app-keycloak' in group_names }}"
 ldap:
-  enabled: true # nocheck: dynamic-flag
+  enabled: "{{ 'svc-db-openldap' in group_names }}"
   shared: "{{ 'svc-db-openldap' in group_names }}"
 xmpp:
   image: ejabberd/ecs

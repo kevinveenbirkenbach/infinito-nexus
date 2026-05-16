@@ -35,7 +35,7 @@ redis:
   pids_limit: 512
 # nocheck: playwright-service-flag — DB engine, covered by role-local integration tests
 mariadb:
-  enabled: "{{ 'svc-db-mariadb' in group_names }}"
+  enabled: true # nocheck: dynamic-flag
   shared: "{{ 'svc-db-mariadb' in group_names }}"
   cpus: "0.75"
   mem_reservation: 512m

@@ -4,7 +4,7 @@ oidc:
   shared: "{{ 'web-app-keycloak' in group_names }}"
   flavor: ""
 ldap:
-  enabled: true # nocheck: dynamic-flag
+  enabled: "{{ 'svc-db-openldap' in group_names }}"
   shared: "{{ 'svc-db-openldap' in group_names }}"
 logout:
   enabled: "{{ 'web-svc-logout' in group_names }}"
