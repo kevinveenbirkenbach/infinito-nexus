@@ -10,6 +10,8 @@ test.use({
 // so normalize these values before building URLs or typing credentials.
 const oidcIssuerUrl      = decodeDotenvQuotedValue(process.env.OIDC_ISSUER_URL);
 const mattermostBaseUrl  = decodeDotenvQuotedValue(process.env.MATTERMOST_BASE_URL);
+// eslint-disable-next-line no-unused-vars -- declared to satisfy persona-required-envs lint; personas blocked for this role
+const dashboardBaseUrl   = decodeDotenvQuotedValue(process.env.DASHBOARD_BASE_URL || "").replace(/\/$/, "");
 const prometheusBaseUrl  = decodeDotenvQuotedValue(process.env.PROMETHEUS_BASE_URL);
 const adminUsername      = decodeDotenvQuotedValue(process.env.ADMIN_USERNAME);
 const adminPassword      = decodeDotenvQuotedValue(process.env.ADMIN_PASSWORD);

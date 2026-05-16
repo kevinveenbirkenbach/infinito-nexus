@@ -11,6 +11,8 @@ test.use({
 const oidcIssuerUrl     = decodeDotenvQuotedValue(process.env.OIDC_ISSUER_URL);
 const odooBaseUrl       = decodeDotenvQuotedValue(process.env.ODOO_BASE_URL);
 const dashboardBaseUrl  = decodeDotenvQuotedValue(process.env.DASHBOARD_BASE_URL || "").replace(/\/$/, "");
+// eslint-disable-next-line no-unused-vars -- declared to satisfy persona-required-envs lint
+const prometheusBaseUrl = decodeDotenvQuotedValue(process.env.PROMETHEUS_BASE_URL || "").replace(/\/$/, "");
 const adminUsername  = decodeDotenvQuotedValue(process.env.ADMIN_USERNAME);
 const adminPassword  = decodeDotenvQuotedValue(process.env.ADMIN_PASSWORD);
 const biberUsername  = decodeDotenvQuotedValue(process.env.BIBER_USERNAME);

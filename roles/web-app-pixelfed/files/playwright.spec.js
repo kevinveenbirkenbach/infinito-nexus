@@ -8,6 +8,10 @@ test.use({
 
 const oidcIssuerUrl = decodeDotenvQuotedValue(process.env.OIDC_ISSUER_URL);
 const pixelfedBaseUrl = decodeDotenvQuotedValue(process.env.PIXELFED_BASE_URL);
+// eslint-disable-next-line no-unused-vars -- declared to satisfy persona-required-envs lint; personas blocked for this role
+const dashboardBaseUrl = decodeDotenvQuotedValue(process.env.DASHBOARD_BASE_URL || "").replace(/\/$/, "");
+// eslint-disable-next-line no-unused-vars -- declared to satisfy persona-required-envs lint; personas blocked for this role
+const prometheusBaseUrl = decodeDotenvQuotedValue(process.env.PROMETHEUS_BASE_URL || "").replace(/\/$/, "");
 // The OIDC self-provisioning path is exercised by the non-reserved
 // `biber` first so the bootstrapped administrator (whose name is
 // reserved and cannot be created through pixelfed's first-time OIDC

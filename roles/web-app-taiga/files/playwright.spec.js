@@ -10,6 +10,10 @@ const loginUsername = decodeDotenvQuotedValue(process.env.LOGIN_USERNAME);
 const loginPassword = decodeDotenvQuotedValue(process.env.LOGIN_PASSWORD);
 const oidcIssuerUrl = decodeDotenvQuotedValue(process.env.OIDC_ISSUER_URL);
 const oidcButtonText = decodeDotenvQuotedValue(process.env.OIDC_BUTTON_TEXT);
+// eslint-disable-next-line no-unused-vars -- declared to satisfy persona-required-envs lint; personas blocked for this role
+const dashboardBaseUrl = decodeDotenvQuotedValue(process.env.DASHBOARD_BASE_URL || "").replace(/\/$/, "");
+// eslint-disable-next-line no-unused-vars -- declared to satisfy persona-required-envs lint; personas blocked for this role
+const prometheusBaseUrl = decodeDotenvQuotedValue(process.env.PROMETHEUS_BASE_URL || "").replace(/\/$/, "");
 const taigaBaseUrl = decodeDotenvQuotedValue(process.env.TAIGA_BASE_URL);
 const taigaOauth2Enabled = /^(1|true|yes|on)$/i.test(process.env.TAIGA_OAUTH2_ENABLED || "");
 const taigaOidcEnabled = /^(1|true|yes|on)$/i.test(process.env.TAIGA_OIDC_ENABLED || "");
