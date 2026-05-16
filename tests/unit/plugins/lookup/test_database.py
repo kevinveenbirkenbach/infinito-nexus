@@ -98,6 +98,7 @@ class DatabaseLookupTests(unittest.TestCase):
         self.assertEqual(out["name"], "foo")
         self.assertEqual(out["username"], "foo")
         self.assertEqual(out["host"], "")
+        self.assertEqual(out["network"], "")
         self.assertEqual(out["port"], "")
         self.assertEqual(out["env"], "")
         self.assertEqual(out["url_jdbc"], "")
@@ -165,6 +166,7 @@ class DatabaseLookupTests(unittest.TestCase):
         self.assertEqual(out["username"], "foo")
         self.assertEqual(out["host"], "database")
         self.assertEqual(out["container"], "foo-database")
+        self.assertEqual(out["network"], "foo")
         self.assertEqual(out["password"], "pw")
         self.assertEqual(out["port"], "5432")
         self.assertEqual(out["env"], "/opt/compose/foo/.env/postgres.env")
@@ -236,6 +238,7 @@ class DatabaseLookupTests(unittest.TestCase):
 
         # database_container = _dbtype when central_enabled
         self.assertEqual(out["container"], "postgres")
+        self.assertEqual(out["network"], "postgres")
 
         # database_volume: no "<entity>_" prefix when shared, just host
         self.assertEqual(out["volume"], "postgres-central")

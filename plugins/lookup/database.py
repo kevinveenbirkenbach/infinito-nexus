@@ -84,6 +84,7 @@ class LookupModule(LookupBase):
                 "instance": "",
                 "host": "",
                 "container": "",
+                "network": "",
                 "username": consumer_entity,
                 "password": "",
                 "port": "",
@@ -115,6 +116,7 @@ class LookupModule(LookupBase):
         instance = central_name if central_enabled else name
         host = central_name if central_enabled else "database"
         container = dbtype if central_enabled else f"{consumer_entity}-database"
+        network = dbtype if central_enabled else consumer_entity
         username = consumer_entity
 
         password = get(
@@ -180,6 +182,7 @@ class LookupModule(LookupBase):
             "instance": instance,
             "host": host,
             "container": container,
+            "network": network,
             "username": username,
             "password": password,
             "port": port,
