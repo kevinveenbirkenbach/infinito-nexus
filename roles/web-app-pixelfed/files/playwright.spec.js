@@ -1,4 +1,5 @@
 const { test, expect } = require("@playwright/test");
+const { skipUnlessServiceEnabled } = require("./service-gating");
 
 const { decodeDotenvQuotedValue, findFirstVisibleCandidate, runAdminFlow, runBiberFlow, runGuestFlow } = require("./personas");
 test.use({
@@ -518,6 +519,7 @@ test.beforeEach(() => {
 
 for (const loginScenario of loginScenarios) {
   test(`dashboard to pixelfed oidc login (${loginScenario.label})`, async ({ page }) => {
+    skipUnlessServiceEnabled("dashboard");
     await loginToPixelfedViaDashboard(page, loginScenario);
     await logoutFromPixelfed(page, loginScenario);
   });

@@ -1,4 +1,5 @@
 const { test, expect } = require("@playwright/test");
+const { skipUnlessServiceEnabled } = require("./service-gating");
 
 const { decodeDotenvQuotedValue, performKeycloakLoginForm, runAdminFlow, runBiberFlow, runGuestFlow } = require("./personas");
 test.use({
@@ -55,6 +56,7 @@ test.beforeEach(() => {
 // internally (e.g. to Keycloak and back). All navigation checks must target the iframe
 // content directly rather than polling page.url() for an encoded inner URL.
 test("dashboard to fider: admin sso login, verify ui, logout", async ({ page }) => {
+  skipUnlessServiceEnabled("dashboard");
   const expectedFiderBaseUrl = fiderBaseUrl.replace(/\/$/, "");
 
   // 1. Navigate to dashboard and open Fider

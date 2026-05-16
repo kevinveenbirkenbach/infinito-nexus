@@ -1,4 +1,5 @@
 const { test, expect } = require("@playwright/test");
+const { skipUnlessServiceEnabled } = require("./service-gating");
 
 const { decodeDotenvQuotedValue, escapeRegex, isVisible, runAdminFlow, runBiberFlow, runGuestFlow, waitForFrameUrl } = require("./personas");
 test.use({
@@ -541,6 +542,7 @@ test.beforeEach(() => {
 });
 
 test("dashboard to taiga login and logout", async ({ page }) => {
+  skipUnlessServiceEnabled("dashboard");
   test.skip(
     !taigaOauth2Enabled && !taigaOidcEnabled,
     "Taiga auth flow requires oauth2 or oidc to be enabled."
@@ -634,6 +636,7 @@ test("taiga public discover keeps the themed surface and hides local login field
 });
 
 test("taiga themed routes stay aligned across stable routes", async ({ page }) => {
+  skipUnlessServiceEnabled("dashboard");
   const session = await loginToTaigaFromDashboard(page);
 
   const routeChecks = [

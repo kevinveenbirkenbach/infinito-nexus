@@ -1,4 +1,5 @@
 const { test, expect } = require("@playwright/test");
+const { skipUnlessServiceEnabled } = require("./service-gating");
 
 const { decodeDotenvQuotedValue, performKeycloakLoginForm, runAdminFlow, runBiberFlow, runGuestFlow } = require("./personas");
 test.use({
@@ -271,6 +272,7 @@ test("prometheus scrapes mattermost native metrics — job target is up", async 
 // in one assertion path; a button regression fails this test before
 // the OIDC code is even reached.
 test("dashboard to mattermost: sso login, verify channel view, logout", async ({ page }) => {
+  skipUnlessServiceEnabled("dashboard");
   const expectedOidcAuthUrl       = `${oidcIssuerUrl.replace(/\/$/, "")}/protocol/openid-connect/auth`;
   const expectedMattermostBaseUrl = mattermostBaseUrl.replace(/\/$/, "");
 
