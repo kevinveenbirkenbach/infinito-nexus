@@ -100,6 +100,43 @@ class TestStatusLookup(unittest.TestCase):
         # invokable lookup runs only once for identical (whitelist, group)
         self.assertEqual(mock_list.call_count, 1)
 
+    @patch("plugins.lookup.status.list_invokable_app_ids")
+    def test_whitelist_csv_string_tokenized(self, mock_list):
+        mock_list.return_value = []
+        result = LookupModule().run(
+            [],
+            variables={
+                "APPLICATIONS_WHITELIST": "web-app-foo,web-app-bar",
+                "group_names": [],
+            },
+        )
+        self.assertEqual(result[0]["whitelist"], ["web-app-foo", "web-app-bar"])
+        self.assertEqual(result[0]["running"], ["web-app-foo", "web-app-bar"])
+
+    @patch("plugins.lookup.status.list_invokable_app_ids")
+    def test_groups_csv_string_tokenized(self, mock_list):
+        mock_list.return_value = []
+        result = LookupModule().run(
+            [],
+            variables={
+                "APPLICATIONS_WHITELIST": [],
+                "group_names": "a,b,c",
+            },
+        )
+        self.assertEqual(result[0]["groups"], ["a", "b", "c"])
+
+    @patch("plugins.lookup.status.list_invokable_app_ids")
+    def test_whitelist_csv_string_whitespace_trimmed(self, mock_list):
+        mock_list.return_value = []
+        result = LookupModule().run(
+            [],
+            variables={
+                "APPLICATIONS_WHITELIST": " app1 , app2 ,, ",
+                "group_names": [],
+            },
+        )
+        self.assertEqual(result[0]["whitelist"], ["app1", "app2"])
+
 
 if __name__ == "__main__":
     unittest.main()

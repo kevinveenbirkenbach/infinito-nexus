@@ -83,6 +83,27 @@ class TestDiscoverPlaywrightRoles(unittest.TestCase):
         self.assertIn("discover_playwright_roles", registry)
         self.assertTrue(callable(registry["discover_playwright_roles"]))
 
+    def test_only_roles_accepts_python_list_repr_string(self):
+        self._create_role("web-app-a", with_marker=True)
+        self._create_role("web-app-b", with_marker=True)
+        self._create_role("web-app-c", with_marker=True)
+
+        result = _plugin.discover_playwright_roles(
+            str(self.playbook_dir),
+            only_roles="['web-app-a', 'web-app-c']",
+        )
+        self.assertEqual(result, ["web-app-a", "web-app-c"])
+
+    def test_skip_roles_accepts_python_list_repr_string(self):
+        self._create_role("web-app-a", with_marker=True)
+        self._create_role("web-app-b", with_marker=True)
+
+        result = _plugin.discover_playwright_roles(
+            str(self.playbook_dir),
+            skip_roles="['web-app-b']",
+        )
+        self.assertEqual(result, ["web-app-a"])
+
 
 if __name__ == "__main__":
     unittest.main()

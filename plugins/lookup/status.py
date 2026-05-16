@@ -13,6 +13,15 @@ def _reset_cache_for_tests() -> None:
     _STATUS_CACHE.clear()
 
 
+def _coerce_to_list(raw: Any) -> list[str]:
+    # CSV input (`-e APPLICATIONS_WHITELIST=a,b`) → tokenise; `list(str)` would yield chars.
+    if raw is None:
+        return []
+    if isinstance(raw, str):
+        return [item.strip() for item in raw.split(",") if item.strip()]
+    return [str(item) for item in raw]
+
+
 class LookupModule(LookupBase):
     def run(
         self,
@@ -22,8 +31,8 @@ class LookupModule(LookupBase):
     ) -> list[dict[str, list[str]]]:
         vars_ = variables or getattr(self._templar, "available_variables", {}) or {}
 
-        whitelist = list(vars_.get("APPLICATIONS_WHITELIST") or [])
-        groups = list(vars_.get("group_names") or [])
+        whitelist = _coerce_to_list(vars_.get("APPLICATIONS_WHITELIST"))
+        groups = _coerce_to_list(vars_.get("group_names"))
         key = (tuple(whitelist), tuple(groups))
 
         cached = _STATUS_CACHE.get(key)

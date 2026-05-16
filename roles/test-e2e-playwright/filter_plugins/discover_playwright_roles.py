@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import ast
 from pathlib import Path
 from typing import TYPE_CHECKING
 
@@ -14,7 +15,15 @@ def _to_role_set(raw: Iterable[str] | str | None, var_name: str) -> set[str]:
         return set()
 
     if isinstance(raw, str):
-        # Support CLI-style CSV extra-vars, e.g. APPLICATIONS_WHITELIST=app1,app2
+        # Non-native-Jinja2 stringifies `"{{ <list> }}"` to its Python repr.
+        stripped = raw.strip()
+        if stripped.startswith("[") and stripped.endswith("]"):
+            try:
+                parsed = ast.literal_eval(stripped)
+            except (ValueError, SyntaxError):
+                parsed = None
+            if isinstance(parsed, (list, tuple, set)):
+                return {str(item).strip() for item in parsed if str(item).strip()}
         return {item.strip() for item in raw.split(",") if item.strip()}
 
     try:
