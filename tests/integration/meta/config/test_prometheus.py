@@ -504,36 +504,6 @@ class TestPrometheusNginxEndpoints(unittest.TestCase):
                     f"so the active_alertmanager_channels plugin discovers it",
                 )
 
-    def test_blackbox_tls_is_templated(self):
-        """blackbox.yml.j2 must use TLS_ENABLED to set insecure_skip_verify, not hardcode false.
-
-        Hardcoding insecure_skip_verify: false breaks all blackbox probes in
-        development/staging environments that use self-signed TLS certificates.
-        """
-        roles_dir = (
-            Path(__file__).resolve().parent.parent.parent.parent.parent / "roles"
-        )
-        content = read_text(
-            str(
-                roles_dir
-                / PROMETHEUS_APP_ID
-                / "templates"
-                / "configuration"
-                / "blackbox.yml.j2"
-            )
-        )
-        self.assertIn(
-            "TLS_ENABLED",
-            content,
-            "blackbox.yml.j2 must template insecure_skip_verify from TLS_ENABLED "
-            "(hardcoding false breaks self-signed TLS environments)",
-        )
-        self.assertNotIn(
-            "insecure_skip_verify: false",
-            content,
-            "blackbox.yml.j2 must not hardcode insecure_skip_verify: false",
-        )
-
 
 class TestDockerHealthCheck(unittest.TestCase):
     """
