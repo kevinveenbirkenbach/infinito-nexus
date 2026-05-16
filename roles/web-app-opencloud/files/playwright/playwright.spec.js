@@ -7,6 +7,7 @@
 const { test, expect } = require("@playwright/test");
 
 const { decodeDotenvQuotedValue, runAdminFlow, runBiberFlow, runGuestFlow } = require("./personas");
+const { skipUnlessServiceEnabled } = require("./service-gating");
 test.use({ ignoreHTTPSErrors: true });
 
 const baseUrl = decodeDotenvQuotedValue(process.env.APP_BASE_URL);
@@ -15,7 +16,6 @@ const adminUsername = decodeDotenvQuotedValue(process.env.LOGIN_USERNAME);
 const adminPassword = decodeDotenvQuotedValue(process.env.LOGIN_PASSWORD);
 const biberUsername = decodeDotenvQuotedValue(process.env.BIBER_USERNAME);
 const biberPassword = decodeDotenvQuotedValue(process.env.BIBER_PASSWORD);
-const oidcEnabled = (process.env.OPENCLOUD_OIDC_ENABLED || "true").toLowerCase() === "true";
 
 const issuerHost = new URL(issuerUrl).host;
 const issuerPattern = new RegExp(`^https?://${issuerHost.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}`);
@@ -137,7 +137,7 @@ async function ssoLoginAndAssertUsername(page, username, password) {
 }
 
 test("opencloud sso login (administrator) lands on files view", async ({ page }) => {
-  test.skip(!oidcEnabled, "OIDC not enabled for this deployment");
+  skipUnlessServiceEnabled("oidc");
   expect(adminUsername, "LOGIN_USERNAME must be set").toBeTruthy();
   expect(adminPassword, "LOGIN_PASSWORD must be set").toBeTruthy();
 
@@ -145,7 +145,7 @@ test("opencloud sso login (administrator) lands on files view", async ({ page })
 });
 
 test("opencloud sso login (biber) lands on files view", async ({ page }) => {
-  test.skip(!oidcEnabled, "OIDC not enabled for this deployment");
+  skipUnlessServiceEnabled("oidc");
   expect(biberUsername, "BIBER_USERNAME must be set").toBeTruthy();
   expect(biberPassword, "BIBER_PASSWORD must be set").toBeTruthy();
 

@@ -13,6 +13,7 @@
 const { test, expect } = require("@playwright/test");
 
 const { decodeDotenvQuotedValue, findFirstVisibleCandidate, runAdminFlow, runBiberFlow, runGuestFlow } = require("./personas");
+const { isServiceEnabled } = require("./service-gating");
 // `ignoreHTTPSErrors` is needed because the local stack typically uses the
 // self-signed CA set up by `make trust-ca`, which the Playwright container
 // does not trust by default.
@@ -58,10 +59,8 @@ const nextcloudCredentialSubmitPattern = /sign in|log in/i;
 //   - OIDC only    -> "sociallogin" (nextcloud/sociallogin shows a
 //                                    "Log in with Keycloak" entry first)
 //   - no OIDC      -> "native"      (no Keycloak handoff; NC credential form)
-const nextcloudOidcEnabled =
-  (process.env.NEXTCLOUD_OIDC_ENABLED || "true").toLowerCase() === "true";
-const nextcloudLdapEnabled =
-  (process.env.NEXTCLOUD_LDAP_ENABLED || "false").toLowerCase() === "true";
+const nextcloudOidcEnabled = isServiceEnabled("oidc");
+const nextcloudLdapEnabled = isServiceEnabled("ldap");
 const nextcloudLoginFlavor = !nextcloudOidcEnabled
   ? "native"
   : nextcloudLdapEnabled

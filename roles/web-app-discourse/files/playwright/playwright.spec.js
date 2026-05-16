@@ -1,6 +1,7 @@
 const { test, expect } = require("@playwright/test");
 
 const { assertCspMetaParity, assertCspResponseHeader, decodeDotenvQuotedValue, expectNoCspViolations, installCspViolationObserver, normalizeBaseUrl, performKeycloakLoginForm, runGuestFlow } = require("./personas");
+const { skipUnlessServiceEnabled } = require("./service-gating");
 test.use({ ignoreHTTPSErrors: true });
 
 function attachDiagnostics(page) {
@@ -116,10 +117,7 @@ async function signInViaDashboardOidc(page, username, password, personaLabel) {
 }
 
 test("administrator: discourse OIDC login and logout", async ({ page }) => {
-  test.skip(
-    String(process.env.OIDC_SERVICE_ENABLED || "").toLowerCase() !== "true",
-    "skipped: OIDC_SERVICE_ENABLED=false"
-  );
+  skipUnlessServiceEnabled("oidc");
   const diagnostics = attachDiagnostics(page);
 
   await signInViaDashboardOidc(page, adminUsername, adminPassword, "administrator");
@@ -149,10 +147,7 @@ test("administrator: discourse OIDC login and logout", async ({ page }) => {
 });
 
 test("biber: discourse OIDC login and logout", async ({ page }) => {
-  test.skip(
-    String(process.env.OIDC_SERVICE_ENABLED || "").toLowerCase() !== "true",
-    "skipped: OIDC_SERVICE_ENABLED=false"
-  );
+  skipUnlessServiceEnabled("oidc");
   const diagnostics = attachDiagnostics(page);
 
   await signInViaDashboardOidc(page, biberUsername, biberPassword, "biber");

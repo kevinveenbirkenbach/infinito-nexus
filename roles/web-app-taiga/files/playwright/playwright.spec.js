@@ -1,6 +1,7 @@
 const { test, expect } = require("@playwright/test");
 
 const { decodeDotenvQuotedValue, escapeRegex, runAdminFlow, runBiberFlow, runGuestFlow } = require("./personas");
+const { isServiceEnabled, skipUnlessServiceEnabled } = require("./service-gating");
 test.use({
   ignoreHTTPSErrors: true
 });
@@ -12,8 +13,8 @@ const oidcButtonText = decodeDotenvQuotedValue(process.env.OIDC_BUTTON_TEXT);
 // eslint-disable-next-line no-unused-vars -- declared to satisfy persona-required-envs lint; personas blocked for this role
 const prometheusBaseUrl = decodeDotenvQuotedValue(process.env.PROMETHEUS_BASE_URL || "").replace(/\/$/, "");
 const taigaBaseUrl = decodeDotenvQuotedValue(process.env.TAIGA_BASE_URL);
-const taigaOauth2Enabled = /^(1|true|yes|on)$/i.test(process.env.TAIGA_OAUTH2_ENABLED || "");
-const taigaOidcEnabled = /^(1|true|yes|on)$/i.test(process.env.TAIGA_OIDC_ENABLED || "");
+const taigaOauth2Enabled = isServiceEnabled("oauth2");
+const taigaOidcEnabled = isServiceEnabled("oidc");
 
 async function findFirstVisible(locators) {
   for (const locator of locators) {
@@ -427,17 +428,16 @@ test.beforeEach(() => {
 });
 
 test("taiga login and logout", async ({ page }) => {
-  test.skip(
-    !taigaOauth2Enabled && !taigaOidcEnabled,
-    "Taiga auth flow requires oauth2 or oidc to be enabled."
-  );
+  if (!taigaOauth2Enabled && !taigaOidcEnabled) {
+    test.skip(true, "Taiga auth flow requires oauth2 or oidc to be enabled.");
+  }
 
   const session = await loginToTaiga(page);
   await logoutFromTaiga(page, session);
 });
 
 test("taiga public discover keeps the themed surface and hides local login fields when oidc is active", async ({ page }) => {
-  test.skip(!taigaOidcEnabled, "This scenario only applies when the Taiga OIDC integration is enabled.");
+  skipUnlessServiceEnabled("oidc");
 
   const taigaUrls = getTaigaUrls();
 

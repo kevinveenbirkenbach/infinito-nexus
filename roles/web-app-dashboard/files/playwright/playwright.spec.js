@@ -2,6 +2,7 @@ const { test, expect } = require("@playwright/test");
 
 const { assertCspMetaParity, assertCspResponseHeader, decodeDotenvQuotedValue, escapeRegex, expectNoCspViolations, installCspViolationObserver, isVisible, normalizeBaseUrl, runAdminFlow, runBiberFlow, runGuestFlow } = require("./personas");
 const { runDashboardCardScenario } = require("./dashboard-card-flow");
+const { skipUnlessServiceEnabled } = require("./service-gating");
 test.use({
   ignoreHTTPSErrors: true
 });
@@ -422,11 +423,6 @@ const loginPassword = decodeDotenvQuotedValue(process.env.LOGIN_PASSWORD);
 const cdnBaseUrl = normalizeBaseUrl(process.env.CDN_BASE_URL || "");
 const dashboardJsBaseUrl = normalizeBaseUrl(process.env.DASHBOARD_JS_BASE_URL || "");
 const matomoBaseUrl = normalizeBaseUrl(process.env.MATOMO_BASE_URL || "");
-const matomoEnabled = (process.env.MATOMO_ENABLED || "").toLowerCase() === "true";
-const cssEnabled = process.env.CSS_ENABLED.toLowerCase() === "true";
-const oidcEnabled = (process.env.OIDC_SERVICE_ENABLED || "").toLowerCase() === "true";
-const cdnEnabled = (process.env.CDN_SERVICE_ENABLED || "").toLowerCase() === "true";
-const logoutEnabled = (process.env.LOGOUT_SERVICE_ENABLED || "").toLowerCase() === "true";
 const canonicalDomain = decodeDotenvQuotedValue(process.env.CANONICAL_DOMAIN);
 
 const sharedCssPrefix = buildAssetPathPrefix(cdnBaseUrl, "/_shared/css");
@@ -469,48 +465,64 @@ test("dashboard enforces Content-Security-Policy and exposes canonical domain fr
   await expectNoCspViolations(page, null, "dashboard landing");
 });
 
-test("dashboard loads core css, javascript, simpleicons, and logo assets", async ({ page }) => {
-  test.skip(!cssEnabled, "Skipped: shared CSS service is disabled in this deployment");
-  test.skip(!cdnEnabled, "Skipped: shared CDN service is disabled in this deployment");
-  test.skip(!logoutEnabled, "Skipped: shared logout service is disabled in this deployment");
+test("dashboard injects shared CSS assets when css service is enabled", async ({ page }) => {
+  skipUnlessServiceEnabled("css");
 
   const diagnostics = attachDiagnostics(page);
   const documentResponse = await page.goto("/");
-
-  expect(documentResponse, "Expected the dashboard document response to exist").toBeTruthy();
-  expect(documentResponse.status(), "Expected the dashboard document response to be successful").toBeLessThan(400);
+  expect(documentResponse.status()).toBeLessThan(400);
 
   const documentHtml = await documentResponse.text();
-
   await waitForDashboardReady(page);
   await waitForResourceResponse(diagnostics.responses, "/_shared/css/default.css", "shared default CSS");
   await waitForResourceResponse(diagnostics.responses, "/_shared/css/bootstrap.css", "shared bootstrap CSS");
-  await waitForResourceResponse(diagnostics.responses, "/roles/web-app-dashboard/latest/css/style.css", "dashboard role CSS");
-  await waitForResourceResponse(diagnostics.responses, "/_shared/js/logout.js", "logout injector script");
-  await waitForResourceResponse(diagnostics.responses, `${dashboardJsBaseUrl}/iframe.js`, "dashboard iframe sync script");
-  await waitForResourceResponse(diagnostics.responses, `${dashboardJsBaseUrl}/oidc.js`, "dashboard oidc script");
 
   expect(documentHtml).toContain(sharedCssPrefix);
   expect(documentHtml).toContain(`${sharedCssPrefix}/default.css`);
   expect(documentHtml).toContain(`${sharedCssPrefix}/bootstrap.css`);
-  expect(documentHtml).toContain(`${roleCssPrefix}/style.css`);
-  expect(documentHtml).toContain(`${sharedJsPrefix}/logout.js`);
-  expect(documentHtml).toContain("loadScriptSequential");
-  expect(documentHtml).toContain(dashboardJsBaseUrl);
-  expect(documentHtml).toContain('"iframe.js"');
-  expect(documentHtml).toContain('"oidc.js"');
   await expectDashboardCssEffects(page);
 
-  const headerLogo = page.locator("header.header img[alt='logo']").first();
-  const navbarLogo = page.locator("#navbar_logo img").first();
+  expectNoUnexpectedDiagnostics(diagnostics, { ignoreMatomoConsoleNoise: true });
+});
 
-  await expectImageLoaded(headerLogo, "Header logo");
-  await expectImageLoaded(navbarLogo, "Navbar logo");
+test("dashboard CDN serves role-local stylesheet when cdn service is enabled", async ({ page }) => {
+  skipUnlessServiceEnabled("cdn");
 
-  const headerLogoSrc = await getCurrentImageSource(headerLogo);
-  const navbarLogoSrc = await getCurrentImageSource(navbarLogo);
+  const diagnostics = attachDiagnostics(page);
+  const documentResponse = await page.goto("/");
+  expect(documentResponse.status()).toBeLessThan(400);
 
-  expect(headerLogoSrc).toBe(navbarLogoSrc);
+  const documentHtml = await documentResponse.text();
+  await waitForDashboardReady(page);
+  await waitForResourceResponse(diagnostics.responses, "/roles/web-app-dashboard/latest/css/style.css", "dashboard role CSS");
+
+  expect(documentHtml).toContain(`${roleCssPrefix}/style.css`);
+
+  expectNoUnexpectedDiagnostics(diagnostics, { ignoreMatomoConsoleNoise: true });
+});
+
+test("dashboard injects logout.js when logout service is enabled", async ({ page }) => {
+  skipUnlessServiceEnabled("logout");
+
+  const diagnostics = attachDiagnostics(page);
+  const documentResponse = await page.goto("/");
+  expect(documentResponse.status()).toBeLessThan(400);
+
+  const documentHtml = await documentResponse.text();
+  await waitForDashboardReady(page);
+  await waitForResourceResponse(diagnostics.responses, "/_shared/js/logout.js", "logout injector script");
+
+  expect(documentHtml).toContain(`${sharedJsPrefix}/logout.js`);
+
+  expectNoUnexpectedDiagnostics(diagnostics, { ignoreMatomoConsoleNoise: true });
+});
+
+test("dashboard renders simpleicon-backed cards when simpleicons service is enabled", async ({ page }) => {
+  skipUnlessServiceEnabled("simpleicons");
+
+  const diagnostics = attachDiagnostics(page);
+  await page.goto("/");
+  await waitForDashboardReady(page);
 
   const simpleiconCard = page
     .locator(".card")
@@ -528,27 +540,48 @@ test("dashboard loads core css, javascript, simpleicons, and logo assets", async
   ).toBeVisible({ timeout: 60_000 });
   await expectStableCardHover(page, "Keycloak");
 
+  expectNoUnexpectedDiagnostics(diagnostics, { ignoreMatomoConsoleNoise: true });
+});
+
+test("dashboard loads role-core JavaScript modules and renders header/navbar logos", async ({ page }) => {
+  const diagnostics = attachDiagnostics(page);
+  const documentResponse = await page.goto("/");
+  expect(documentResponse.status()).toBeLessThan(400);
+
+  const documentHtml = await documentResponse.text();
+  await waitForDashboardReady(page);
+  await waitForResourceResponse(diagnostics.responses, `${dashboardJsBaseUrl}/iframe.js`, "dashboard iframe sync script");
+  await waitForResourceResponse(diagnostics.responses, `${dashboardJsBaseUrl}/oidc.js`, "dashboard oidc script");
+
+  expect(documentHtml).toContain("loadScriptSequential");
+  expect(documentHtml).toContain(dashboardJsBaseUrl);
+  expect(documentHtml).toContain('"iframe.js"');
+  expect(documentHtml).toContain('"oidc.js"');
+
+  const headerLogo = page.locator("header.header img[alt='logo']").first();
+  const navbarLogo = page.locator("#navbar_logo img").first();
+  await expectImageLoaded(headerLogo, "Header logo");
+  await expectImageLoaded(navbarLogo, "Navbar logo");
+  expect(await getCurrentImageSource(headerLogo)).toBe(await getCurrentImageSource(navbarLogo));
+
+  expectNoUnexpectedDiagnostics(diagnostics, { ignoreMatomoConsoleNoise: true });
+});
+
+test("dashboard iframe sync JavaScript responds to iframeLocationChange events", async ({ page }) => {
+  const diagnostics = attachDiagnostics(page);
+  await page.goto("/");
+  await waitForDashboardReady(page);
+
   const iframeTargetUrl = `${matomoBaseUrl}/?playwright-iframe-sync=1`;
-
   await page.evaluate(({ href, origin }) => {
-    const event = new MessageEvent("message", {
+    window.dispatchEvent(new MessageEvent("message", {
       origin,
-      data: {
-        type: "iframeLocationChange",
-        href
-      }
-    });
-
-    window.dispatchEvent(event);
-  }, {
-    href: iframeTargetUrl,
-    origin: new URL(iframeTargetUrl).origin
-  });
+      data: { type: "iframeLocationChange", href }
+    }));
+  }, { href: iframeTargetUrl, origin: new URL(iframeTargetUrl).origin });
 
   await expect
-    .poll(() => {
-      return page.evaluate(() => new URL(window.location.href).searchParams.get("iframe"));
-    }, {
+    .poll(() => page.evaluate(() => new URL(window.location.href).searchParams.get("iframe")), {
       timeout: 10_000,
       message: "Expected dashboard iframe sync JavaScript to update the iframe query parameter"
     })
@@ -558,7 +591,7 @@ test("dashboard loads core css, javascript, simpleicons, and logo assets", async
 });
 
 test("dashboard integrates matomo tracking assets", async ({ page }) => {
-  test.skip(!matomoEnabled, "Skipped: Matomo tracking is disabled in this deployment");
+  skipUnlessServiceEnabled("matomo");
 
   const diagnostics = attachDiagnostics(page);
   const documentResponse = await page.goto("/");
@@ -578,7 +611,7 @@ test("dashboard integrates matomo tracking assets", async ({ page }) => {
 });
 
 test("dashboard login automatically switches Login to Account and exposes Logout under Account", async ({ page }) => {
-  test.skip(!oidcEnabled, "Skipped: OIDC service is disabled in this deployment");
+  skipUnlessServiceEnabled("oidc");
   const diagnostics = attachDiagnostics(page);
 
   await page.goto("/");

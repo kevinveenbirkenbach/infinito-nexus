@@ -1,6 +1,7 @@
 const { test, expect } = require("@playwright/test");
 
 const { decodeDotenvQuotedValue, installCspViolationObserver, normalizeBaseUrl, runAdminFlow, runGuestFlow } = require("./personas");
+const { isServiceEnabled } = require("./service-gating");
 test.use({ ignoreHTTPSErrors: true });
 
 // -----------------------------------------------------------------------------
@@ -18,10 +19,9 @@ const biberUsername   = decodeDotenvQuotedValue(process.env.BIBER_USERNAME);
 const biberPassword   = decodeDotenvQuotedValue(process.env.BIBER_PASSWORD);
 const canonicalDomain = decodeDotenvQuotedValue(process.env.CANONICAL_DOMAIN);
 
-// Service-gating env flags.
-const oidcEnabled = String(process.env.SERVICE_OIDC || "").toLowerCase() === "true";
-const ldapEnabled = String(process.env.SERVICE_LDAP || "").toLowerCase() === "true";
-const lamEnabled  = String(process.env.SERVICE_LAM  || "").toLowerCase() === "true";
+const oidcEnabled = isServiceEnabled("oidc");
+const ldapEnabled = isServiceEnabled("ldap");
+const lamEnabled  = isServiceEnabled("lam");
 
 const lamBaseUrl  = normalizeBaseUrl(process.env.LAM_BASE_URL || "");
 const lamPassword = decodeDotenvQuotedValue(process.env.LAM_PASSWORD);
@@ -286,7 +286,7 @@ test.describe("moodle keycloak scope wiring (variant 0)", () => {
 
 test.describe("keycloak → ldap write-through, verified via LAM", () => {
   test.skip(!oidcEnabled, "OIDC shared service disabled");
-  test.skip(!lamEnabled,  "LAM not deployed (SERVICE_LAM=false)");
+  test.skip(!lamEnabled,  "LAM not deployed (LAM_SERVICE_ENABLED=false)");
 
   test("middleName edited in Keycloak appears in LDAP via LAM", async ({ page, context }) => {
     expect(oidcIssuerUrl, "OIDC_ISSUER_URL must be set in env").toBeTruthy();
