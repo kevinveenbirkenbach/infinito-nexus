@@ -6,7 +6,7 @@
     volumes:
       - html:{{ FRIENDICA_APPLICATION_DIR }}
       - data:/var/www/data # I assume that this one is unnessecarry
-      - {{ FRIENDICA_LDAP_CONFIG_HOST }}:{{ FRIENDICA_LDAP_CONFIG_DOCKER }}:ro 
+      - {{ FRIENDICA_LDAP_CONFIG_HOST }}:{{ FRIENDICA_LDAP_CONFIG_DOCKER }}:ro
     ports:
       - "{{ DOCKER_BIND_HOST }}:{{ lookup('config', application_id, 'services.friendica.ports.local.http') }}:80"
 

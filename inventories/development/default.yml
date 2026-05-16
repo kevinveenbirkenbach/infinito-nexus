@@ -35,7 +35,7 @@ users:
     firstname: "Harry"
     lastname: "Beaver"
     website: "https://www.infinito.nexus/"
-    email: "contact@infinito.nexus"
+    email: "biber@infinito.example"
     gpg: "DUMMY-GPG-KEY-NOT-SET"
     password: "VeryUnsecurePassword"
 

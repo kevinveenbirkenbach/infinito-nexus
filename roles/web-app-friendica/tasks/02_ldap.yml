@@ -8,3 +8,26 @@
     group: 33
     force: true
   notify: compose up
+
+# Upstream `ldap_createaccount` returns the raw `User::create()` result
+# (`['user' => UserRow, 'password' => '']`), but the `authenticate` hook
+# only sets `authenticated = 1` when `$user['uid']` is non-empty — which
+# is never true for the autocreate path. The fix unwraps `$user['user']`
+# so the freshly-created user's uid is visible to the hook. Without it
+# every first-login LDAP user (e.g. biber) silently fails to start a
+# session despite the row being inserted; the next request still serves
+# the login form. See web-app-friendica/TODO.md for the SAML migration
+# that would remove this whole code path.
+- name: "Patch upstream friendica-addons/ldapauth autocreate return shape"
+  script: >-
+    patch_ldapauth_autocreate.sh
+    "{{ BIN_COMPOSE }} exec -T --user root {{ FRIENDICA_SERVICE }}"
+    "{{ FRIENDICA_APPLICATION_DIR }}/addon/ldapauth/ldapauth.php"
+  args:
+    chdir: "{{ lookup('container', application_id, 'directories.instance') }}"
+    executable: /bin/bash
+  register: friendica_ldapauth_patch
+  changed_when: "'PATCHED' in friendica_ldapauth_patch.stdout"
+  retries: 30
+  delay: 2
+  until: friendica_ldapauth_patch.rc == 0

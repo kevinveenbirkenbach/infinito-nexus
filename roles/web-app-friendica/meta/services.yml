@@ -7,7 +7,10 @@ friendica:
   version: latest
   min_storage: 10GB
   addons:
-    keycloakpassword: {}
+    # SSO is owned by the oauth2-proxy gate in front of the friendica vhost
+    # (services.oauth2.enabled=keycloak below). `ldapauth` stays enabled
+    # because friendica has no header-trusted autocreate mechanism — the
+    # ldap bind is the only path that materialises a friendica.user row.
     ldapauth: {}
   ports:
     local:
@@ -25,7 +28,7 @@ logout:
   enabled: "{{ 'web-svc-logout' in group_names }}"
   shared: "{{ 'web-svc-logout' in group_names }}"
 ldap:
-  enabled: true # nocheck: dynamic-flag
+  enabled: "{{ 'svc-db-openldap' in group_names }}"
   shared: "{{ 'svc-db-openldap' in group_names }}"
 oidc:
   enabled: "{{ 'web-app-keycloak' in group_names }}"

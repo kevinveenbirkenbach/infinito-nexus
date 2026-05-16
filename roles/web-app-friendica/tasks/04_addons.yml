@@ -10,9 +10,7 @@
         + [{
             'name': item.key,
             'enabled': (
-              FRIENDICA_OIDC_ENABLED
-                if item.key == 'keycloakpassword'
-              else FRIENDICA_LDAP_ENABLED
+              FRIENDICA_LDAP_ENABLED
                 if item.key == 'ldapauth'
               else (item.value.enabled if item.value is mapping and 'enabled' in item.value else False)
             )

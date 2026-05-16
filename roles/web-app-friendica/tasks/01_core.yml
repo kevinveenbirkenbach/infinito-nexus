@@ -9,7 +9,7 @@
 
 - name: Integrate LDAP
   include_tasks: 02_ldap.yml
-  when: lookup('config',application_id, 'services.ldap.enabled')
+  when: FRIENDICA_LDAP_ENABLED | bool
 
 # General
 - name: "flush handlers to ensure that '{{ FRIENDICA_CONTAINER }}' is up before executing container tasks"
@@ -28,3 +28,7 @@
 
 - name: Add Friendica Add Ons
   include_tasks: 04_addons.yml
+
+- name: Bootstrap Friendica administrator user (only when no LDAP provider is wired to provision them)
+  include_tasks: 06_user_bootstrap.yml
+  when: not (FRIENDICA_LDAP_ENABLED | bool)

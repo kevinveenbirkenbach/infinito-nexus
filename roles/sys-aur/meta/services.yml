@@ -1,5 +1,5 @@
 ---
 aur:
   lifecycle: beta
-  repository: https://aur.archlinux.org/yay.git  # nocheck: url
+  repository: https://aur.archlinux.org/yay.git # nocheck: url
   ref: master
