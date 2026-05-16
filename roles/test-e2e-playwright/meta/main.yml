@@ -1,8 +1,7 @@
 ---
 galaxy_info:
   author: Kevin Veen-Birkenbach
-  description: Generic E2E Playwright runner. Auto-discovers application roles providing templates/playwright.env.j2 and files/playwright/playwright.spec.js, renders a
-    .env file, optionally waits for the app to be reachable, and runs Playwright in a pinned container.
+  description: Runs end-to-end Playwright tests against deployed applications.
   license: Infinito.Nexus Community License (Non-Commercial)
   company: |
     Kevin Veen-Birkenbach
