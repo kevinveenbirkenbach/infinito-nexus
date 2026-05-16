@@ -38,7 +38,7 @@
   delay: 5
   until: >-
     _peertube_app_table_check is succeeded
-    and (_peertube_app_table_check.rows | default([]))
+    and (_peertube_app_table_check.rows | default([]) | length) > 0
     and (_peertube_app_table_check.rows[0][0] | default('')) == 'application'
   changed_when: false
 
