@@ -25,7 +25,7 @@ See [README.md](./files/joomla-oidc-plugin/README.md) for the OIDC plugin's mani
 
 ## End-to-end tests
 
-The Playwright spec at [files/playwright.spec.js](./files/playwright.spec.js) currently exercises the **administrator** path only: Keycloak SSO into the admin backend plus the local form-login emergency hatch (`?fallback=local`). The non-admin RBAC path via the canonical `biber` user is not yet covered.
+The Playwright spec at [files/playwright/playwright.spec.js](./files/playwright/playwright.spec.js) currently exercises the **administrator** path only: Keycloak SSO into the admin backend plus the local form-login emergency hatch (`?fallback=local`). The non-admin RBAC path via the canonical `biber` user is not yet covered.
 
 Until the biber path is added:
 

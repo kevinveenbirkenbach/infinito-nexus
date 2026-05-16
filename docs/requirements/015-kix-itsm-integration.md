@@ -15,7 +15,7 @@ As an operator running an Infinito.Nexus stack, I want [KIX Start](https://www.k
 - [x] LDAP is wired as KIX's user-directory backend against `svc-db-openldap` (`Auth::LDAP` + `Auth::Sync::LDAP`): when a user authenticates against KIX their profile (display name, email, role group) is sourced from LDAP, so no manual KIX-side user pre-creation is required.
 - [x] The `web-app-dashboard` role surfaces a card for KIX that links to its canonical URL, with the logo / title resolved via the standard `lookup('config', 'web-app-kix', ...)` path used by every other dashboard tile.
 - [x] The universal logout endpoint terminates a KIX session like any other Infinito.Nexus app: the KIX session cookie is cleared and the browser lands on the project logout page.
-- [x] An end-to-end Playwright spec at `roles/web-app-kix/files/playwright.spec.js` covers the in-scope flow: TLS root + HSTS at `kix.{{ DOMAIN_PRIMARY }}`; anonymous request to the canonical URL redirects into the OAuth2-proxy / Keycloak chain (the realm-level 2FA step is exercised by the shared `web-app-keycloak` Playwright suite, not duplicated per-app).
+- [x] An end-to-end Playwright spec at `roles/web-app-kix/files/playwright/playwright.spec.js` covers the in-scope flow: TLS root + HSTS at `kix.{{ DOMAIN_PRIMARY }}`; anonymous request to the canonical URL redirects into the OAuth2-proxy / Keycloak chain (the realm-level 2FA step is exercised by the shared `web-app-keycloak` Playwright suite, not duplicated per-app).
 
 ## Deferred (KIX 18 OSS frontend limitation)
 

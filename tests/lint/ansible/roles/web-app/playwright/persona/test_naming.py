@@ -1,4 +1,4 @@
-"""Lint: every `web-app-*` role's `files/playwright.spec.js` MUST
+"""Lint: every `web-app-*` role's `files/playwright/playwright.spec.js` MUST
 contain the three persona scenarios named per the SPOT contract in
 [playwright.specs.js.md](../../../../../../docs/contributing/artefact/files/role/playwright.specs.js.md):
 
@@ -37,6 +37,7 @@ import re
 import unittest
 
 from utils.cache.files import read_text
+from utils.roles.mapping import ROLE_FILE_PLAYWRIGHT_SPEC
 
 from . import PROJECT_ROOT
 
@@ -78,7 +79,7 @@ class TestPersonaNaming(unittest.TestCase):
             role_name = role_dir.name
             if not role_name.startswith("web-app-"):
                 continue
-            spec_path = role_dir / "files" / "playwright.spec.js"
+            spec_path = role_dir / ROLE_FILE_PLAYWRIGHT_SPEC
             if not spec_path.is_file():
                 continue
             env_path = role_dir / "templates" / "playwright.env.j2"
@@ -94,7 +95,7 @@ class TestPersonaNaming(unittest.TestCase):
             if missing:
                 missing_sorted = sorted(missing)
                 offenders.append(
-                    f"{role_name}: files/playwright.spec.js has no "
+                    f"{role_name}: {ROLE_FILE_PLAYWRIGHT_SPEC} has no "
                     f'`test("<persona>: …")` for personas {missing_sorted}; '
                     f"add the scenario(s) using `runGuestFlow` / "
                     f"`runBiberFlow` / `runAdminFlow` from `./personas`, OR "

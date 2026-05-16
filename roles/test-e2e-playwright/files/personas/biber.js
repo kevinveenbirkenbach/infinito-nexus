@@ -9,11 +9,11 @@
  * dashboard tile reachability) are owned by the dedicated provider
  * specs and no longer run as part of every role's biber persona:
  *
- *   - `roles/web-app-prometheus/files/playwright.spec.js` parameterises
+ *   - `roles/web-app-prometheus/files/playwright/playwright.spec.js` parameterises
  *     scrape-target presence + admin reach + biber denial.
- *   - `roles/web-app-matomo/files/playwright.spec.js` parameterises
+ *   - `roles/web-app-matomo/files/playwright/playwright.spec.js` parameterises
  *     tracker-site presence + admin reach + biber denial.
- *   - `roles/web-app-dashboard/files/playwright.spec.js` parameterises
+ *   - `roles/web-app-dashboard/files/playwright/playwright.spec.js` parameterises
  *     dashboard-tile reachability per consumer role.
  *
  * Each role's biber scenario therefore visits its OWN canonical URL

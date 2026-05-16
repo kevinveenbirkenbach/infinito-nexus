@@ -32,7 +32,7 @@ SSO with auto-account-creation, which collapses the chain to a single
    Attribute mappers, SP-metadata import, signing certificate alignment.
 5. Drop `services.oauth2.enabled` for friendica — SAML handles SSO end-to-
    end, oauth2-proxy in front would double-gate.
-6. Rewrite `files/playwright.spec.js` to use the generic admin/biber
+6. Rewrite `files/playwright/playwright.spec.js` to use the generic admin/biber
    persona flows (remove `PERSONA_*_BLOCKED=true` from
    `templates/playwright.env.j2`, drop the bespoke `loginViaOauth2ProxyAndFriendica`
    helper, drop the FRIENDICA_BASE_URL env var).

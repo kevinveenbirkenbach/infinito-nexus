@@ -31,7 +31,7 @@ The procedural rules (autonomy, closure vocabulary, resumability, single closing
 | ID | Name | Root cause (one-liner) | Fix anchor |
 | --- | --- | --- | --- |
 | **C1** | Mailu Playwright 502 cascade | Shared mailu / dashboard container purged by inter-round purge but not redeployed; consumer specs land on a 502 vhost. Manifests as `Error: guest visit must not 5xx; Received: 502` from `personas/guest.js:56`. | [Meta root cause](#meta-root-cause-for-bundles-b-c-d-e): fix the variant-only closure. |
-| **C2** | App-local Playwright failures | Role-specific selector drift after Keycloak round-trip (e.g. Friendica `#topbar-first` no longer matches). | Per role: `roles/web-app-<id>/files/playwright.spec.js`. |
+| **C2** | App-local Playwright failures | Role-specific selector drift after Keycloak round-trip (e.g. Friendica `#topbar-first` no longer matches). | Per role: `roles/web-app-<id>/files/playwright/playwright.spec.js`. |
 | **C2a** | C2 sub-cluster: universal-logout/Keycloak round-trip timeout | The persona finishes the auth chain but the universal-logout step never returns to the role's own domain; `Test timeout` fires on the post-logout navigation. | Verify Keycloak's `post_logout_redirect_uris` for the role, the universal-logout JS injection, and the end-session endpoint. |
 | **C2b** | C2 sub-cluster: missing in-app selector after auth | After the auth chain settles the spec cannot find the expected UI element (`Explore <App>` dashboard tile, role's own `Sign in` link, etc.). The page rendered is the upstream marketing site or an autoindex `"Index of /"`. | Almost always deploy-side (dashboard nav injection / role front-page docroot drift). Compare with a known-good role's nginx vhost + dashboard tile manifest. |
 | **C2c** | C2 sub-cluster: deploy-side gap surfaced via guest probe | Guest probe lands on a non-200 response or on an oauth2-proxy refusal banner (`Missing X-Forwarded-User from oauth2-proxy. Refusing handoff.`, `ECONNREFUSED <upstream-port>`, bare PDS banner). | Inspect `docker logs <role>-app` for the upstream container; check the oauth2-proxy / nginx upstream wiring. |
@@ -72,7 +72,7 @@ Roles: `web-app-mailu` (verified), `web-app-bookwyrm` (verified), plus 21 suspec
 Per role, inner-loop work via [Playwright Spec Loop](../agents/action/iteration/playwright.md):
 
 1. Establish a baseline deploy.
-2. Update the role's `files/playwright.spec.js` selectors to match the live UI.
+2. Update the role's `files/playwright/playwright.spec.js` selectors to match the live UI.
 3. Re-run `scripts/tests/e2e/rerun-spec.sh <role>` until green.
 
 Roles: `web-app-mailu`, `web-app-opencloud`, `web-app-friendica`, `web-app-mattermost`, `web-app-taiga`, `web-app-fediwall`, `web-app-postmarks`.
@@ -140,7 +140,7 @@ Sorted DESC by `total` (carried over from [019](019-playwright-meta-services-par
 | ~~`web-app-decidim`~~ | 21 | n/a | n/a | ✅ | ✅ |  | CI run 25774452286: deploy + Playwright PASS for all declared variants. |
 | `web-app-baserow` | 21 | C2c | C | ❌ | ⏳ | ⏳ | CI run 25890032686: **C2c (deploy-side gap)**: nginx upstream returns `heading 'connect ECONNREFUSED 127.0.0.1:8000'`; Baserow Django backend never came up; both baseline + guest tests fail `Expected: < 500  Received: 500`. Root cause is deploy-side, not Playwright. |
 | ~~`web-app-akaunting`~~ | 21 | n/a | n/a | ✅ | ✅ | ✅ | CI run 25774452286: deploy + Playwright PASS for all declared variants. |
-| `web-app-fediwall` | 21 | C2b | C | ❌ | ⏳ | ⏳ | CI run 25890032686: **C2b (per-spec missing submit step)**: single failing test `each wall surfaces biber's posts according to its servers list`. Flow stuck on Keycloak login form with biber+password pre-filled but Sign In never clicked. Add the submit step to the wall-iteration loop in `roles/web-app-fediwall/files/playwright.spec.js`. |
+| `web-app-fediwall` | 21 | C2b | C | ❌ | ⏳ | ⏳ | CI run 25890032686: **C2b (per-spec missing submit step)**: single failing test `each wall surfaces biber's posts according to its servers list`. Flow stuck on Keycloak login form with biber+password pre-filled but Sign In never clicked. Add the submit step to the wall-iteration loop in `roles/web-app-fediwall/files/playwright/playwright.spec.js`. |
 | ~~`web-app-suitecrm`~~ | 20 | n/a | n/a | ✅ | ✅ | ✅ | CI run 25797277810: deploy + Playwright PASS for all declared variants. |
 | ~~`web-app-snipe-it`~~ | 20 | n/a | n/a | ✅ | ✅ | ✅ | CI run 25797277810: deploy + Playwright PASS for all declared variants. |
 | `web-app-openproject` | 20 | C9-OOM | n/a | ❌ | ⏳ | ⏳ | CI run 25890032686: OOM still reproducing: `01_settings.yml:15` still exits `rc=137` after 30 retries despite `bdd59b9db` bumping `web.mem_limit` 4g → 6g. Consider a further bump to 8g and/or breaking the migration into smaller transactions. |

@@ -403,7 +403,7 @@ updates and another does not.
   task produces exactly the expected hierarchical DNs while
   preserving group members.
 - [x] The existing Playwright spec
-  [playwright.spec.js](../../roles/web-app-yourls/files/playwright.spec.js)
+  [playwright.spec.js](../../roles/web-app-yourls/files/playwright/playwright.spec.js)
   in [web-app-yourls](../../roles/web-app-yourls/) MUST verify the
   new RBAC layout end to end for a non-tenant single-role app. YOURLS
   is the smallest meaningful consumer of the scheme: it has one

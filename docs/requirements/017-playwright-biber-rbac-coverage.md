@@ -39,7 +39,7 @@ rather than role by role.
 
 ### Policy
 
-- [ ] Any role whose `roles/<role>/files/playwright.spec.js` exercises
+- [ ] Any role whose `roles/<role>/files/playwright/playwright.spec.js` exercises
   an authenticated path AND whose `meta/services.yml` declares
   `oidc.enabled` OR `ldap.enabled` (literally or via the dynamic
   `"{{ '<role>' in group_names }}"` form per
@@ -85,7 +85,7 @@ rather than role by role.
 ### Per-role audit
 
 The list below was produced by grepping each
-`roles/<role>/files/playwright.spec.js` for `biber|BIBER`. A role
+`roles/<role>/files/playwright/playwright.spec.js` for `biber|BIBER`. A role
 appears under "missing" iff it has a Playwright spec, no biber
 references, AND its policy classification (next column) says one is
 expected. Each checkbox MUST be closed by reading the spec end to

@@ -1,7 +1,7 @@
 """Integration guard: every ``<NAME>_SERVICE_ENABLED=`` flag declared
 in a role's ``templates/playwright.env.j2`` MUST be gated by at least
 one ``service-gating`` helper call in the role's
-``files/playwright.spec.js``.
+``files/playwright/playwright.spec.js``.
 
 Scope
 -----
@@ -54,6 +54,7 @@ from typing import TYPE_CHECKING
 
 from utils.annotations.suppress import is_suppressed_at
 from utils.cache.files import iter_project_files, read_text
+from utils.roles.mapping import ROLE_FILE_PLAYWRIGHT_SPEC
 
 from . import PROJECT_ROOT
 
@@ -65,7 +66,7 @@ ROLES_DIR = PROJECT_ROOT / "roles"
 _RULE = "playwright-service-gate"
 
 _ENV_TEMPLATE_REL = "templates/playwright.env.j2"  # nocheck: role-file-spot
-_SPEC_FILE_REL = "files/playwright.spec.js"  # nocheck: role-file-spot
+_SPEC_FILE_REL = ROLE_FILE_PLAYWRIGHT_SPEC
 _SHARED_PERSONAS_DIR = "roles/test-e2e-playwright/files/personas"
 _PERSONA_RUNNERS: tuple[str, ...] = ("runGuestFlow", "runBiberFlow", "runAdminFlow")
 

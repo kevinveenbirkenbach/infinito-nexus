@@ -1,4 +1,4 @@
-"""Lint: every `test()` body in `roles/<role>/files/playwright.spec.js`
+"""Lint: every `test()` body in `roles/<role>/files/playwright/playwright.spec.js`
 MUST simulate a real user flow.
 
 Stub bodies are forbidden by the spec contract in
@@ -27,6 +27,7 @@ import re
 import unittest
 
 from utils.cache.files import read_text
+from utils.roles.mapping import ROLE_FILE_PLAYWRIGHT_SPEC
 
 from . import PROJECT_ROOT
 
@@ -196,7 +197,7 @@ class TestNoStubTests(unittest.TestCase):
     def test_persona_and_contract_tests_simulate_real_flows(self):
         offenders: list[str] = []
         for role_dir in sorted(p for p in ROLES_DIR.iterdir() if p.is_dir()):
-            spec = role_dir / "files" / "playwright.spec.js"
+            spec = role_dir / ROLE_FILE_PLAYWRIGHT_SPEC
             if not spec.is_file():
                 continue
             text = read_text(str(spec))

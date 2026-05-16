@@ -34,7 +34,7 @@ re-provisioning, or the category-mapping defaults can ship silently.
 ### Scope
 
 - [x] A new scenario MUST be added to
-  [roles/web-app-wordpress/files/playwright.spec.js](../../roles/web-app-wordpress/files/playwright.spec.js)
+  [roles/web-app-wordpress/files/playwright/playwright.spec.js](../../roles/web-app-wordpress/files/playwright/playwright.spec.js)
   that publishes a WordPress post via the WP admin UI and asserts
   that the corresponding Discourse topic exists.
 - [x] The scenario MUST be gated on the `discourse` shared service

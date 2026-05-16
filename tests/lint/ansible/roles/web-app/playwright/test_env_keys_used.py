@@ -4,7 +4,7 @@ is actually consumed by at least one Playwright JS file.
 Two failure modes are collected and reported as one aggregated list:
 
 * A role ships ``templates/playwright.env.j2`` but no
-  ``files/playwright.spec.js`` next to it. The env file would render
+  ``files/playwright/playwright.spec.js`` next to it. The env file would render
   variables that nothing in the role's spec can read — likely a
   half-finished port.
 * A specific ``KEY=`` declaration in the env file is never referenced
@@ -24,6 +24,7 @@ import unittest
 from typing import TYPE_CHECKING
 
 from utils.cache.files import iter_project_files, read_text
+from utils.roles.mapping import ROLE_FILE_PLAYWRIGHT_SPEC
 
 from . import PROJECT_ROOT
 
@@ -122,7 +123,7 @@ class TestPlaywrightEnvKeysUsed(unittest.TestCase):
             # nocheck: project-root-import  walking from a discovered glob match (<role>/templates/...) up to its role dir, not the repo root
             role_dir = env_path.parents[1]
             role_name = role_dir.name
-            spec_path = role_dir / "files" / "playwright.spec.js"
+            spec_path = role_dir / ROLE_FILE_PLAYWRIGHT_SPEC
             env_rel = env_path.relative_to(root).as_posix()
             spec_rel = spec_path.relative_to(root).as_posix()
 

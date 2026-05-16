@@ -1,6 +1,6 @@
 # `playwright.spec.js` 🎭
 
-This page describes what every role's `roles/<role>/files/playwright.spec.js` MUST contain: file placement, the two persona flows, per-service assertions, technical rules, and final-state guarantees.
+This page describes what every role's `roles/<role>/files/playwright/playwright.spec.js` MUST contain: file placement, the two persona flows, per-service assertions, technical rules, and final-state guarantees.
 
 For framework and runner mechanics see [Playwright Tests](../../../actions/testing/playwright.md).
 For the authoring procedure see [Agent `playwright.spec.js`](../../../../agents/files/role/playwright.spec.js.md).
@@ -8,7 +8,8 @@ For the env contract see [Agent `playwright.env.j2`](../../../../agents/files/ro
 
 ## File placement 📁
 
-- The spec MUST be at `roles/<role>/files/playwright.spec.js`.
+- The spec MUST be at `roles/<role>/files/playwright/playwright.spec.js`. The role-relative path is the SPOT constant `ROLE_FILE_PLAYWRIGHT_SPEC` in [utils/roles/mapping.py](../../../../../utils/roles/mapping.py); registered as optional on `ROLE_TYPE_APPLICATION`, disallowed elsewhere.
+- Companion `.js` helpers (role-local utility modules, like `web-app-dashboard/files/playwright/dashboard-card-flow.js`) MAY live next to the spec under the same `files/playwright/` directory. The runner (`roles/test-e2e-playwright/tasks/run_one.yml`) globs every `*.js` in that directory and stages them into the same `tests/` tree, so the spec can `require("./<helper>")` without any further wiring.
 - `playwright.config.js` and `package.json` are central, NOT per-role. See [Playwright Tests → Role-Local Files](../../../actions/testing/playwright.md#role-local-files-).
 
 ## Three personas, fixed flow 🚶
@@ -60,7 +61,8 @@ Documentation MUST be brought into alignment, not the other way around.
 ```
 
 Cross-service probes (biber denied at prometheus, biber denied at matomo, dashboard tile reachability) are NOT part of the per-role biber persona.
-They live in the provider's own spec (`web-app-{prometheus,matomo,dashboard}/files/playwright.spec.js`), parameterised once over the provider's `<NAME>_TARGET_ROLES_JSON` manifest.
+They live in the provider's own spec (`web-app-{prometheus,matomo,dashboard}/files/playwright/playwright.spec.js`), parameterised once over the provider's `<NAME>_TARGET_ROLES_JSON` manifest.
+For the dashboard, the parameterised scenario delegates to `web-app-dashboard/files/playwright/dashboard-card-flow.js::runDashboardCardScenario(page, context, target)`, which owns the tile visibility / iframe-embed / "Tab" pop-out assertions in one SPOT.
 
 ### `administrator`: single-app authenticated journey
 
@@ -81,9 +83,9 @@ They live in the provider's own spec (`web-app-{prometheus,matomo,dashboard}/fil
 ```
 
 Cross-service probes are NOT part of the per-role administrator persona.
-Dashboard tile reachability is owned by `web-app-dashboard/files/playwright.spec.js`.
-Prometheus admin-reach and scrape parity are owned by `web-app-prometheus/files/playwright.spec.js`.
-Matomo admin-reach and tracker presence are owned by `web-app-matomo/files/playwright.spec.js`.
+Dashboard tile reachability is owned by `web-app-dashboard/files/playwright/playwright.spec.js`, which delegates the per-target body to the `runDashboardCardScenario` helper in `dashboard-card-flow.js` (tile visible → click loads in `#main iframe` → header "Tab" button pops the embed into a fresh browser tab). That helper is the SPOT for dashboard-tile mechanics; consumer specs MUST NOT reimplement any of those assertions.
+Prometheus admin-reach and scrape parity are owned by `web-app-prometheus/files/playwright/playwright.spec.js`.
+Matomo admin-reach and tracker presence are owned by `web-app-matomo/files/playwright/playwright.spec.js`.
 Each provider parameterises the assertion over its `<NAME>_TARGET_ROLES_JSON` manifest.
 
 ### Test-body template
@@ -148,7 +150,7 @@ A `200 OK` is acceptable ONLY when the body contains provider-specific markers p
 For prometheus, the markers are `prometheus_build_info` or `<title>Prometheus</title>`.
 For matomo, the markers are matomo's login-form markers or `piwik` and `matomo` strings in the body.
 Any 200 with a non-matching body is treated as a misconfigured proxy or a denial-as-200 surface and fails loudly.
-The deny-checks live in the provider's own spec (`web-app-prometheus/files/playwright.spec.js` and `web-app-matomo/files/playwright.spec.js`).
+The deny-checks live in the provider's own spec (`web-app-prometheus/files/playwright/playwright.spec.js` and `web-app-matomo/files/playwright/playwright.spec.js`).
 
 ### Invariants (every spec, every role)
 
@@ -188,7 +190,7 @@ The deny-checks live in the provider's own spec (`web-app-prometheus/files/playw
 
 ## No stub tests 🚫
 
-Every `test()` body in `files/playwright.spec.js` MUST simulate the user flow the title promises and assert on a user-visible state.
+Every `test()` body in `files/playwright/playwright.spec.js` MUST simulate the user flow the title promises and assert on a user-visible state.
 Stubs are forbidden:
 
 - A body that contains only `skipUnlessServiceEnabled(...)` (or any combination of helper calls) without at least one `expect(...)`, `await <fn>(...)`, or equivalent real-flow step is rejected.
@@ -231,14 +233,14 @@ Non-exhaustive; new services inherit the same shape (real end-to-end check that 
 
 | Service | Assertion at the gate |
 | --- | --- |
-| `dashboard` | The consumer role's spec does NOT exercise the dashboard tile. `web-app-dashboard/files/playwright.spec.js` parameterises one tile-reachability test per consumer over `DASHBOARD_TARGET_ROLES_JSON` (locate `a[href*="<canonical>"]`, assert presence and `href`, click, assert landing on `CANONICAL_DOMAIN`). |
+| `dashboard` | The consumer role's spec does NOT exercise the dashboard tile. `web-app-dashboard/files/playwright/playwright.spec.js` parameterises one tile-reachability test per consumer over `DASHBOARD_TARGET_ROLES_JSON` and delegates the body to `runDashboardCardScenario(page, context, target)` from the sibling `dashboard-card-flow.js` SPOT (tile visibility, click → `#main iframe` embed, header "Tab" button → new browser tab). Consumer specs MUST NOT reimplement any tile / iframe / tab assertions. |
 | `oidc` | Visit protected URL, assert redirect to Keycloak's `openid-connect/auth`, log in, assert redirect back, assert authenticated UI. |
 | `ldap` | LDAP-bind path. MUST exercise admin AND `biber`. |
 | `oauth2` | Protected path triggers oauth2-proxy → Keycloak → callback; `/oauth2/sign_out` re-engages the gate. |
 | `email` | Send / receive via the role's mail surface, OR verify rendered notification body via the test mailbox. |
 | `logout` | Universal-logout endpoint clears role + SSO session; next protected request re-engages auth. |
-| `matomo` | The consumer role asserts only that the matomo tracking snippet is in the HTML and that navigation generates the expected `/matomo.php` request (covered by `assertCspInjections` in the persona-helper). Matomo admin-reach, biber denial, and per-consumer tracker-site registration live in `web-app-matomo/files/playwright.spec.js` only. |
-| `prometheus` | The consumer role asserts only that `/metrics` is reachable at the documented path (where applicable). Prometheus admin-reach, biber denial, and per-consumer `up=1` verification live in `web-app-prometheus/files/playwright.spec.js` only, parameterised over `PROMETHEUS_TARGET_ROLES_JSON`. |
+| `matomo` | The consumer role asserts only that the matomo tracking snippet is in the HTML and that navigation generates the expected `/matomo.php` request (covered by `assertCspInjections` in the persona-helper). Matomo admin-reach, biber denial, and per-consumer tracker-site registration live in `web-app-matomo/files/playwright/playwright.spec.js` only. |
+| `prometheus` | The consumer role asserts only that `/metrics` is reachable at the documented path (where applicable). Prometheus admin-reach, biber denial, and per-consumer `up=1` verification live in `web-app-prometheus/files/playwright/playwright.spec.js` only, parameterised over `PROMETHEUS_TARGET_ROLES_JSON`. |
 | CSP / injectors | When any injector service (`asset`, `cdn`, `css`, `javascript`, `simpleicons`, `matomo`) is enabled, the role's `Content-Security-Policy` header MUST list the injector's host. The shared module `personas/utils/csp.js` exposes the full CSP test surface: `assertCspInjections` for the per-injector parity check, `assertCspResponseHeader` and `assertCspMetaParity` for header / meta validation, plus `installCspViolationObserver` / `readCspViolations` / `expectNoCspViolations` for the runtime `securitypolicyviolation` stream. Specs require these helpers from `./personas`. |
 | `discourse` | WordPress to Discourse post round-trip and analogous role-pair flows. |
 | Static assets (`simpleicons`, `cdn`, `css`, `javascript`, `asset`) | The role's HTML references the expected asset host AND a request returns < 400 with the right content-type. |

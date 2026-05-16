@@ -1,4 +1,4 @@
-"""Lint that every env key referenced by ``roles/<role>/files/playwright.spec.js``
+"""Lint that every env key referenced by ``roles/<role>/files/playwright/playwright.spec.js``
 is declared in the sibling ``roles/<role>/templates/playwright.env.j2``.
 
 Counterpart to ``test_env_keys_used.py``: that one catches *dead*
@@ -25,6 +25,7 @@ import unittest
 from typing import TYPE_CHECKING
 
 from utils.cache.files import read_text
+from utils.roles.mapping import ROLE_FILE_PLAYWRIGHT_SPEC
 
 from . import PROJECT_ROOT
 
@@ -119,9 +120,12 @@ class TestPlaywrightSpecEnvKeysDeclared(unittest.TestCase):
         roles_dir = PROJECT_ROOT / "roles"
         missing: list[str] = []
 
-        for spec_path in sorted(roles_dir.glob("*/files/playwright.spec.js")):
-            # nocheck: project-root-import  walking up from a discovered glob match (<role>/files/...) to the role dir
-            role_dir = spec_path.parents[1]
+        for role_dir in sorted(roles_dir.iterdir()):
+            if not role_dir.is_dir():
+                continue
+            spec_path = role_dir / ROLE_FILE_PLAYWRIGHT_SPEC
+            if not spec_path.is_file():
+                continue
             role_name = role_dir.name
             env_path = role_dir / "templates" / "playwright.env.j2"
             spec_rel = spec_path.relative_to(PROJECT_ROOT).as_posix()

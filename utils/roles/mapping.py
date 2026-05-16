@@ -168,6 +168,13 @@ ROLE_FILE_META_SCHEMA = "meta/schema.yml"
 ROLE_FILE_META_INFO = "meta/info.yml"
 ROLE_FILE_META_USERS = "meta/users.yml"
 
+# Playwright spec: every role's E2E spec ships at this path. Companion
+# `.js` helpers MAY live alongside under the same directory; the runner
+# (`roles/test-e2e-playwright/tasks/run_one.yml`) globs every `*.js` in
+# the directory and stages them into the same tests tree, so a role can
+# ship additional modules without further wiring.
+ROLE_FILE_PLAYWRIGHT_SPEC = "files/playwright/playwright.spec.js"
+
 
 # === Per-file scoping =======================================================
 # Each entry maps a path constant (the role-relative path) to its
@@ -314,5 +321,17 @@ ROLE_FILES: dict[str, dict[str, object]] = {
             "Reserved-username declarations consumed by the user-management layer."
         ),
         "types": _all(mandatory=False),
+    },
+    ROLE_FILE_PLAYWRIGHT_SPEC: {
+        "description": (
+            "E2E Playwright spec staged by the test-e2e-playwright role. "
+            "Companion `.js` helpers MAY live alongside under "
+            "``files/playwright/`` and are staged into the same tests "
+            "directory automatically."
+        ),
+        "types": [
+            {"type": ROLE_TYPE_APPLICATION, "mandatory": False, "entries": []},
+            *_all(allowed=False),
+        ],
     },
 }

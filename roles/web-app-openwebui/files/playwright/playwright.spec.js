@@ -1,0 +1,182 @@
+const { test, expect } = require("@playwright/test");
+const { skipUnlessServiceEnabled } = require("./service-gating");
+
+const { assertCspMetaParity, assertCspResponseHeader, decodeDotenvQuotedValue, expectNoCspViolations, installCspViolationObserver, normalizeBaseUrl, performKeycloakLoginForm, runGuestFlow } = require("./personas");
+test.use({ ignoreHTTPSErrors: true });
+
+function attachDiagnostics(page) {
+  const consoleErrors = [];
+  const pageErrors = [];
+  const cspRelated = [];
+
+  page.on("console", (message) => {
+    if (message.type() === "error") {
+      consoleErrors.push(message.text());
+    }
+
+    if (/content security policy|csp/i.test(message.text())) {
+      cspRelated.push({ source: "console", text: message.text() });
+    }
+  });
+
+  page.on("pageerror", (error) => {
+    const text = String(error);
+    pageErrors.push(text);
+
+    if (/content security policy|csp/i.test(text)) {
+      cspRelated.push({ source: "pageerror", text });
+    }
+  });
+
+  return { consoleErrors, pageErrors, cspRelated };
+}
+
+async function openwebuiLogout(page, openwebuiBaseUrl) {
+  await page
+    .goto(`${openwebuiBaseUrl}/logout`, { waitUntil: "commit" })
+    .catch(() => {});
+}
+
+const oidcIssuerUrl = normalizeBaseUrl(process.env.OIDC_ISSUER_URL || "");
+const openwebuiBaseUrl = normalizeBaseUrl(process.env.OPENWEBUI_BASE_URL || "");
+const adminUsername = decodeDotenvQuotedValue(process.env.ADMIN_USERNAME);
+const adminPassword = decodeDotenvQuotedValue(process.env.ADMIN_PASSWORD);
+const biberUsername = decodeDotenvQuotedValue(process.env.BIBER_USERNAME);
+const biberPassword = decodeDotenvQuotedValue(process.env.BIBER_PASSWORD);
+const canonicalDomain = decodeDotenvQuotedValue(process.env.CANONICAL_DOMAIN);
+
+test.beforeEach(async ({ page }) => {
+  await page.setViewportSize({ width: 1440, height: 1100 });
+
+  expect(oidcIssuerUrl, "OIDC_ISSUER_URL must be set").toBeTruthy();
+  expect(openwebuiBaseUrl, "OPENWEBUI_BASE_URL must be set").toBeTruthy();
+  expect(adminUsername, "ADMIN_USERNAME must be set").toBeTruthy();
+  expect(adminPassword, "ADMIN_PASSWORD must be set").toBeTruthy();
+  expect(biberUsername, "BIBER_USERNAME must be set").toBeTruthy();
+  expect(biberPassword, "BIBER_PASSWORD must be set").toBeTruthy();
+  expect(canonicalDomain, "CANONICAL_DOMAIN must be set").toBeTruthy();
+
+  await page.context().clearCookies();
+  await installCspViolationObserver(page);
+});
+
+test("openwebui enforces Content-Security-Policy and exposes canonical domain from applications lookup", async ({ page }) => {
+  const diagnostics = attachDiagnostics(page);
+
+  const response = await page.goto(`${openwebuiBaseUrl}/`);
+  expect(response, "Expected openwebui landing response").toBeTruthy();
+  expect(response.status(), "Expected openwebui landing response to be successful").toBeLessThan(400);
+
+  const directives = assertCspResponseHeader(response, "openwebui landing");
+  await assertCspMetaParity(page, directives, "openwebui landing");
+
+  const documentUrl = response.url();
+  expect(
+    documentUrl.includes(canonicalDomain),
+    `Expected canonical domain "${canonicalDomain}" (from applications lookup) to back the openwebui URL`
+  ).toBe(true);
+
+  await expectNoCspViolations(page, diagnostics, "openwebui landing");
+});
+
+async function signInViaDashboardOidc(page, username, password, personaLabel) {
+  const expectedOidcAuthUrl = `${oidcIssuerUrl}/protocol/openid-connect/auth`;
+
+  await page.goto(`${openwebuiBaseUrl}/`);
+
+  const oidcSignIn = page
+    .locator("a, button")
+    .filter({ hasText: /sign\s*in\s+with\s+oidc|sign\s*in\s+with\s+sso|continue\s+with\s+oidc|continue\s+with\s+sso|single\s+sign[-\s]*on/i })
+    .first();
+
+  if ((await oidcSignIn.count().catch(() => 0)) > 0) {
+    await oidcSignIn.click();
+  } else {
+    await page.goto(`${openwebuiBaseUrl}/oauth/oidc/login`).catch(() => {});
+  }
+
+  await expect
+    .poll(() => page.url(), {
+      timeout: 60_000,
+      message: `${personaLabel}: expected redirect to Keycloak OIDC auth (${expectedOidcAuthUrl})`
+    })
+    .toContain(expectedOidcAuthUrl);
+
+  await performKeycloakLoginForm(page, username, password);
+
+  await expect
+    .poll(() => page.url(), {
+      timeout: 60_000,
+      message: `${personaLabel}: expected redirect back to openwebui at ${openwebuiBaseUrl}`
+    })
+    .toContain(openwebuiBaseUrl);
+}
+
+test("administrator: openwebui OIDC login and logout", async ({ page }) => {
+  skipUnlessServiceEnabled("oidc");
+  const diagnostics = attachDiagnostics(page);
+
+  await signInViaDashboardOidc(page, adminUsername, adminPassword, "administrator");
+
+  await expect(page.locator("body")).toContainText(/new chat|chat|welcome|sign|prompt/i, { timeout: 60_000 });
+
+  await openwebuiLogout(page, openwebuiBaseUrl);
+
+  await page.goto(`${openwebuiBaseUrl}/`);
+  await expect
+    .poll(
+      async () =>
+        (await page
+          .locator("a, button")
+          .filter({ hasText: /sign\s*in|log\s*in|anmelden|continue\s+with/i })
+          .first()
+          .count()
+          .catch(() => 0)) > 0,
+      {
+        timeout: 60_000,
+        message: "Expected openwebui to require a new sign-in after logout"
+      }
+    )
+    .toBe(true);
+
+  await expectNoCspViolations(page, diagnostics, "openwebui administrator OIDC");
+});
+
+test("biber: openwebui OIDC login and logout", async ({ page }) => {
+  skipUnlessServiceEnabled("oidc");
+  const diagnostics = attachDiagnostics(page);
+
+  await signInViaDashboardOidc(page, biberUsername, biberPassword, "biber");
+
+  await expect(page.locator("body")).toContainText(/new chat|chat|welcome|sign|prompt/i, { timeout: 60_000 });
+
+  await openwebuiLogout(page, openwebuiBaseUrl);
+
+  await page.goto(`${openwebuiBaseUrl}/`);
+  await expect
+    .poll(
+      async () =>
+        (await page
+          .locator("a, button")
+          .filter({ hasText: /sign\s*in|log\s*in|anmelden|continue\s+with/i })
+          .first()
+          .count()
+          .catch(() => 0)) > 0,
+      {
+        timeout: 60_000,
+        message: "Expected openwebui to require a new sign-in after logout"
+      }
+    )
+    .toBe(true);
+
+  await expectNoCspViolations(page, diagnostics, "openwebui biber OIDC");
+});
+
+
+// Persona scenarios.
+// Bodies live in the shared persona helpers under
+// roles/test-e2e-playwright/files/personas/{guest,biber,admin}.js.
+
+test("guest: public-landing → auth chain → never authenticated", async ({ page }) => {
+  await runGuestFlow(page);
+});

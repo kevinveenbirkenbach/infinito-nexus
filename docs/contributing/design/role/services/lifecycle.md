@@ -60,7 +60,7 @@ The role deploys end-to-end on the project's reference distribution and is cover
 A role tagged `alpha`:
 
 - MUST deploy cleanly via `make deploy-fresh-purged-apps` against the reference distribution.
-- MUST ship `templates/playwright.env.j2` and `files/playwright.spec.js`, with at least one assertion that covers the role's canonical landing surface.
+- MUST ship `templates/playwright.env.j2` and `files/playwright/playwright.spec.js`, with at least one assertion that covers the role's canonical landing surface.
 - MUST be exercised by the matrix-deploy on every push.
 - MAY have known minor issues documented in its `README.md` or in an open issue.
 

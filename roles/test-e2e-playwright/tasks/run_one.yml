@@ -2,7 +2,8 @@
 - name: Define per-role paths
   ansible.builtin.set_fact:
     _playwright_env_template: "{{ playbook_dir }}/roles/{{ application_id }}/templates/playwright.env.j2"
-    _playwright_spec_src: "{{ playbook_dir }}/roles/{{ application_id }}/files/playwright.spec.js"
+    _playwright_files_dir: "{{ playbook_dir }}/roles/{{ application_id }}/files/playwright"
+    _playwright_spec_src: "{{ playbook_dir }}/roles/{{ application_id }}/files/playwright/playwright.spec.js"
     _playwright_stage_dir: "{{ TEST_E2E_PLAYWRIGHT_STAGE_BASE_DIR }}/{{ application_id }}"
     _playwright_stage_tests_dir: "{{ TEST_E2E_PLAYWRIGHT_STAGE_BASE_DIR }}/{{ application_id }}/tests"
     _playwright_reports_dir: "{{ TEST_E2E_PLAYWRIGHT_REPORTS_BASE_DIR }}/{{ application_id }}"
@@ -147,11 +148,13 @@
     dest: "{{ _playwright_stage_dir }}/playwright.config.js"
     mode: "0644"
 
-- name: Copy role Playwright spec into staging tests directory
+- name: Copy role Playwright files (spec + companion modules) into staging tests directory
   ansible.builtin.copy:
-    src: "{{ _playwright_spec_src }}"
-    dest: "{{ _playwright_stage_tests_dir }}/playwright.spec.js"
+    src: "{{ item }}"
+    dest: "{{ _playwright_stage_tests_dir }}/{{ item | basename }}"
     mode: "0644"
+  with_fileglob:
+    - "{{ _playwright_files_dir }}/*.js"
 
 # Stage the shared service-gating helper next to the spec so the spec can
 # `require("./service-gating")`.

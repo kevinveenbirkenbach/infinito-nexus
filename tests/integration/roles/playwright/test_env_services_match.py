@@ -43,7 +43,7 @@ are globally exempt: every consumer role declares them in
 env templates intentionally do NOT render the
 ``<NAME>_SERVICE_ENABLED=`` flag because the persona scenarios no
 longer gate on them. The provider specs
-(``roles/web-app-{dashboard,prometheus}/files/playwright.spec.js``)
+(``roles/web-app-{dashboard,prometheus}/files/playwright/playwright.spec.js``)
 parameterise one assertion per consumer using the
 ``DASHBOARD_TARGET_ROLES_JSON`` / ``PROMETHEUS_TARGET_ROLES_JSON``
 manifests rendered by the ``roles_with_service`` filter.

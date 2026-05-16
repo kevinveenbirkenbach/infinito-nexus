@@ -4,7 +4,7 @@ This page covers Playwright end-to-end test requirements, runner integration, an
 For implementation guidance when writing or updating role-local files, see
 [Agent `playwright.spec.js`](../../../agents/files/role/playwright.spec.js.md) and
 [Agent `playwright.env.j2`](../../../agents/files/role/playwright.env.j2.md).
-For what the `files/playwright.spec.js` of a role MUST contain, see
+For what the `files/playwright/playwright.spec.js` of a role MUST contain, see
 [`playwright.spec.js` (role file rules)](../../artefact/files/role/playwright.specs.js.md).
 
 ## Framework 🧰
@@ -25,7 +25,7 @@ Every Playwright-enabled role MUST provide exactly these two files:
 
 | File | Purpose |
 |---|---|
-| `files/playwright.spec.js` | Test scenarios executed by the Playwright runner |
+| `files/playwright/playwright.spec.js` | Test scenarios executed by the Playwright runner |
 | `templates/playwright.env.j2` | Rendered `.env` passed to the Playwright container |
 
 `playwright.config.js` MUST remain centralized in `roles/test-e2e-playwright/files/` and `package.json` in `roles/test-e2e-playwright/templates/package.json.j2` (rendered per-deploy into the staging dir). You MUST NOT duplicate or override either per role.
@@ -45,7 +45,7 @@ The `test-e2e-playwright` role discovers Playwright-enabled roles through the pr
 
 1. stages the test project
 2. renders `.env` from `playwright.env.j2`
-3. copies `files/playwright.spec.js` into the project as `tests/playwright.spec.js`
+3. copies `files/playwright/playwright.spec.js` into the project as `tests/playwright.spec.js`
 4. renders the central `templates/package.json.j2` and copies the central `files/playwright.config.js` into the staging dir
 5. waits until the app is reachable
 6. runs Playwright in Docker
@@ -114,7 +114,7 @@ make replay
 ./scripts/replay.sh recordings/login.spec.ts
 ```
 
-Generated files are persisted in the local workspace (git-ignored). Copy the relevant parts into `files/playwright.spec.js` and adapt them.
+Generated files are persisted in the local workspace (git-ignored). Copy the relevant parts into `files/playwright/playwright.spec.js` and adapt them.
 
 ## Development Procedure 📋
 

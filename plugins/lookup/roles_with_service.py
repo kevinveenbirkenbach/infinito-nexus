@@ -10,7 +10,7 @@ enabled, shared}`` as truthy AND that exposes a canonical domain.
 
 Used by the SPOT-owner specs (web-app-{dashboard, prometheus, matomo})
 to render a per-consumer manifest into ``templates/playwright.env.j2``.
-The provider's ``files/playwright.spec.js`` then parameterises one
+The provider's ``files/playwright/playwright.spec.js`` then parameterises one
 assertion per consumer over that manifest, owning the cross-service
 reachability assertion in one place.
 

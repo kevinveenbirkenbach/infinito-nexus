@@ -32,7 +32,7 @@ Infinito.Nexus apps routinely declare shared-service integrations in
 their role config (`compose.services.<shared>.enabled`), and a deploy
 can turn individual shared services off with `SERVICES_DISABLED=<list>`
 without breaking the rest of the stack. The per-role Playwright specs
-under `roles/<role>/files/playwright.spec.js` mix three classes of
+under `roles/<role>/files/playwright/playwright.spec.js` mix three classes of
 tests:
 
 1. __Baseline tests__ that exercise the app's own behaviour (front-page
@@ -87,7 +87,7 @@ and retroactively migrates the existing specs onto it.
 - [x] A small shared helper MUST be added at
   `roles/test-e2e-playwright/files/service-gating.js` and staged
   alongside every role spec by the same mechanism that stages the
-  spec itself, so every `roles/<role>/files/playwright.spec.js`
+  spec itself, so every `roles/<role>/files/playwright/playwright.spec.js`
   MUST import it as `require("./service-gating")` without any
   per-role setup. The helper MUST live at exactly that path; a spec
   MUST NOT inline the logic nor import a role-local copy. Its

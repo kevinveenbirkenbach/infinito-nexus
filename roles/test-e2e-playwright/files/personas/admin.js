@@ -9,11 +9,11 @@
  * Cross-service surface checks (prometheus, matomo, dashboard tile
  * reachability) are owned by the dedicated provider specs:
  *
- *   - `roles/web-app-dashboard/files/playwright.spec.js` parameterises
+ *   - `roles/web-app-dashboard/files/playwright/playwright.spec.js` parameterises
  *     dashboard-tile reachability per consumer role.
- *   - `roles/web-app-prometheus/files/playwright.spec.js` parameterises
+ *   - `roles/web-app-prometheus/files/playwright/playwright.spec.js` parameterises
  *     scrape-target presence + admin reach + biber denial.
- *   - `roles/web-app-matomo/files/playwright.spec.js` parameterises
+ *   - `roles/web-app-matomo/files/playwright/playwright.spec.js` parameterises
  *     tracker-site presence + admin reach + biber denial.
  *
  * Each role's persona scenario therefore visits its OWN canonical URL

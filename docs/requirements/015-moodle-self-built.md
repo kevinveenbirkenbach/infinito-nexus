@@ -706,7 +706,7 @@ without login (both variants), and direct LDAP-bind login
 
 ## Playwright coverage
 
-- [x] `roles/web-app-moodle/files/playwright.spec.js` is created (or
+- [x] `roles/web-app-moodle/files/playwright/playwright.spec.js` is created (or
       replaces any existing stub) and follows
       [006-playwright-service-gated-tests.md](006-playwright-service-gated-tests.md):
       every shared-service-dependent test MUST gate on the matching
@@ -783,7 +783,7 @@ applied because the role ships two identity-integration variants.
 - [ ] `make test` MUST pass before every deploy.
 - [x] When both variants' deploys are green, the agent MUST run
       [Playwright Spec Loop](../agents/action/iteration/playwright.md)
-      against `roles/web-app-moodle/files/playwright.spec.js`
+      against `roles/web-app-moodle/files/playwright/playwright.spec.js`
       pinned to each variant in turn, and confirm every spec
       scenario passes on the local stack for both variants.
 - [x] All inspection (live logs, browser, `make exec`) MUST happen

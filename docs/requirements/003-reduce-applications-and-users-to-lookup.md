@@ -43,7 +43,7 @@ As a contributor, I want all access to application and user configuration to go 
 
 ## Verification
 
-- [x] Playwright end-to-end tests exist for the following five `web-app-*` roles, each living in the role's own `files/playwright.spec.js` and wired through the existing [test-e2e-playwright](../../roles/test-e2e-playwright) role so that merged `applications` and `users` data is exercised through a real browser session. Each spec MUST follow the baseline rules in [playwright.md](../contributing/actions/testing/playwright.md) (file layout, runner integration, `when to write` scope) and SHOULD fulfill the authoring rules in [playwright.spec.js.md](../agents/files/role/playwright.spec.js.md) and [playwright.env.j2.md](../agents/files/role/playwright.env.j2.md) wherever the application under test allows it:
+- [x] Playwright end-to-end tests exist for the following five `web-app-*` roles, each living in the role's own `files/playwright/playwright.spec.js` and wired through the existing [test-e2e-playwright](../../roles/test-e2e-playwright) role so that merged `applications` and `users` data is exercised through a real browser session. Each spec MUST follow the baseline rules in [playwright.md](../contributing/actions/testing/playwright.md) (file layout, runner integration, `when to write` scope) and SHOULD fulfill the authoring rules in [playwright.spec.js.md](../agents/files/role/playwright.spec.js.md) and [playwright.env.j2.md](../agents/files/role/playwright.env.j2.md) wherever the application under test allows it:
   - [x] [web-app-keycloak](../../roles/web-app-keycloak)
   - [x] [web-app-dashboard](../../roles/web-app-dashboard)
   - [x] [web-app-matomo](../../roles/web-app-matomo)
@@ -65,7 +65,7 @@ As a contributor, I want all access to application and user configuration to go 
 
 The following decisions bind the Verification work above. They were captured during implementation and supersede ambiguous reads of the checkboxes.
 
-- **Dashboard spec scope**: extend the existing [playwright.spec.js](../../roles/web-app-dashboard/files/playwright.spec.js); do NOT rewrite.
+- **Dashboard spec scope**: extend the existing [playwright.spec.js](../../roles/web-app-dashboard/files/playwright/playwright.spec.js); do NOT rewrite.
 - **Keycloak personas and realms**: the Keycloak super administrator MUST sign in to the master realm, the `biber` and `administrator` personas MUST sign in to the normal realm. All three flows MUST use the Keycloak login interface directly, NOT an OIDC round-trip through another app.
 - **Matomo persona**: the `administrator` MUST sign in with the local Matomo login, NOT via OIDC.
 - **CSP threshold rule**: a directive is asserted if and only if [csp_filters.build_csp_header](../../plugins/filter/csp_filters.py) emits it. Missing directives that are expected by the helper MUST cause the spec to fail. Directives that the helper does not emit today (`form-action`, `base-uri`, `object-src`) are out of scope until the helper is extended.

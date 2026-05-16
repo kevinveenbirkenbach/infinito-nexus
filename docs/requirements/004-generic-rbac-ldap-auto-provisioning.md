@@ -105,7 +105,7 @@ stay in lockstep without a per-role manual provisioning step.
 ### Verification - Playwright test for WordPress
 
 - [x] The existing [web-app-wordpress Playwright
-  spec](../../roles/web-app-wordpress/files/playwright.spec.js) is extended
+  spec](../../roles/web-app-wordpress/files/playwright/playwright.spec.js) is extended
   (not replaced) to cover RBAC-auto-provisioning end-to-end. The baseline
   playwright requirements from
   [playwright.specs.js.md](../contributing/artefact/files/role/playwright.specs.js.md)

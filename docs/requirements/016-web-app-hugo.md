@@ -203,7 +203,7 @@ fail explicitly if more than one canonical domain is configured.
 
 ### Tests
 
-- [x] `roles/web-app-hugo/files/playwright.spec.js` exercises:
+- [x] `roles/web-app-hugo/files/playwright/playwright.spec.js` exercises:
       - front-page reachability of the canonical domain (HTTP < 400,
         canonical-domain check, HSTS present),
       - non-empty `<title>` + Hugo content sentinel (rejects nginx

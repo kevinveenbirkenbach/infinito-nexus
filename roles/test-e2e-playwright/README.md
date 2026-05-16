@@ -8,7 +8,7 @@ for the Infinito.Nexus ecosystem.
 It automatically discovers roles that ship a Playwright test project under:
 
 - `roles/<application_id>/templates/playwright.env.j2`
-- `roles/<application_id>/files/playwright.spec.js`
+- `roles/<application_id>/files/playwright/playwright.spec.js`
 
 A role is considered Playwright-enabled if it provides:
 
@@ -26,7 +26,7 @@ This role:
 - Supports allow-/deny-lists via `TEST_E2E_PLAYWRIGHT_ONLY_ROLES` and `TEST_E2E_PLAYWRIGHT_SKIP_ROLES`
 - Stages each Playwright project into `TEST_E2E_PLAYWRIGHT_STAGE_BASE_DIR/<application_id>`
 - Renders the central `package.json` template into each staged project and injects the central `playwright.config.js`
-- Copies role-specific `files/playwright.spec.js` into the staged `tests/playwright.spec.js`
+- Copies role-specific `files/playwright/playwright.spec.js` into the staged `tests/playwright.spec.js`
 - Renders `.env` from `templates/playwright.env.j2` using Ansible variables (`application_id`, `domains`, `users`, `applications`)
 - Optionally waits until the application responds with HTTP `200` or `302`
 - Injects CA trust automatically for `TLS_MODE=self_signed` (via `CA_TRUST.*`), so Playwright accepts self-signed cert chains
@@ -53,7 +53,7 @@ A Playwright-enabled role must provide:
 ```
 roles/<application_id>/
     templates/playwright.env.j2
-    files/playwright.spec.js
+    files/playwright/playwright.spec.js
 ```
 
 For the file-level contract, use [Contributing `playwright.env.j2`](../../docs/agents/files/role/playwright.env.j2.md) and [Contributing `playwright.spec.js`](../../docs/contributing/artefact/files/role/playwright.specs.js.md).
@@ -108,7 +108,7 @@ Both are used as central defaults for every app role.
 
 1. Add the two app-specific files:
    - `roles/<application_id>/templates/playwright.env.j2`
-   - `roles/<application_id>/files/playwright.spec.js`
+   - `roles/<application_id>/files/playwright/playwright.spec.js`
    Follow [Contributing `playwright.env.j2`](../../docs/agents/files/role/playwright.env.j2.md) and [Contributing `playwright.spec.js`](../../docs/contributing/artefact/files/role/playwright.specs.js.md) while creating them.
 2. Run deployment and include your app in `allowed_applications` (or leave it empty to run all discovered apps).
 3. Keep `package.json` and `playwright.config.js` centralized in `roles/test-e2e-playwright/` (`templates/package.json.j2` and `files/playwright.config.js`).

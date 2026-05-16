@@ -33,7 +33,7 @@ but the corresponding spec scenario does not exist yet.
 `web-app-opencloud` is the trigger role for this requirement: its
 `services.yml` was migrated to the dynamic-flag form for
 `ldap.enabled`, both variants pin the LDAP branch on, but
-[files/playwright.spec.js](../../roles/web-app-opencloud/files/playwright.spec.js)
+[files/playwright/playwright.spec.js](../../roles/web-app-opencloud/files/playwright/playwright.spec.js)
 has only `test.skip(!oidcEnabled, …)` gates. Closing the gap
 consistently across the role tree is what this requirement tracks.
 
