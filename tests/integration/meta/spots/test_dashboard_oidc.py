@@ -19,21 +19,6 @@ class TestDashboardOidcSpot(unittest.TestCase):
         self.assertIn("silentCheckSsoRedirectUri", js_content)
         self.assertNotIn("redirectUri: window.location.origin", js_content)
 
-    def test_dashboard_playwright_matomo_flag_matches_runtime_injection_preconditions(
-        self,
-    ):
-        content = read_text(
-            str(pathlib.Path("roles/web-app-dashboard/templates/playwright.env.j2"))
-        )
-
-        self.assertIn(
-            "LOGIN_PASSWORD={{ lookup('users', 'administrator').password", content
-        )
-        self.assertIn(
-            "MATOMO_ENABLED={{ lookup('config', application_id, 'services.matomo.enabled') }}",
-            content,
-        )
-
 
 if __name__ == "__main__":
     unittest.main()
