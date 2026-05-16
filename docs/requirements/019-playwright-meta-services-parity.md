@@ -128,7 +128,7 @@ Columns immediately after `Role`:
 | ~~`web-app-opencloud`~~ | 20 | ✅ | ✅ | ✅ | ✅ | ✅ | CI run 25774452286: deploy + Playwright PASS for all declared variants (cross-verified). Bespoke `opencloud sso login (administrator/biber) lands on files view` covers both personas end-to-end via opencloud's own auth-route; persona shared scenarios `PERSONA_*_BLOCKED` |
 | ~~`web-app-pgadmin`~~ | 19 | ❌ | ✅ | ✅ | ✅ |  | CI run 25774452286: deploy + Playwright PASS for all declared variants |
 | ~~`web-app-lam`~~ | 19 | ❌ | ✅ | ✅ | ✅ | ✅ | CI run 25774452286: deploy + Playwright PASS for all declared variants. Commit `b3d5bf466` additionally pins `services.ldap.{enabled,shared}: true` and drops the `ldap:` variant overrides (LDAP IS the storage backend for LAM). |
-| `web-app-kix` | 19 | ✅ | ✅ | ⏳ | ⏳ | ⏳ |  |
+| ~~`web-app-kix`~~ | 19 | ✅ | ✅ | ✅ | ✅ | ✅ |  |
 | ~~`web-app-yourls`~~ | 19 | ✅ | ✅ | ✅ | ✅ |  | CI run 25774452286: deploy + Playwright PASS for all declared variants |
 | ~~`web-app-phpmyadmin`~~ | 18 | ❌ | ✅ | ✅ | ✅ |  | CI run 25774452286: deploy + Playwright PASS for all declared variants |
 | ~~`web-app-postmarks`~~ | 18 | ✅ | ✅ | ✅ | ✅ |  | CI run 25868178119: deploy + Playwright PASS for all declared variants (prior C2 regression resolved by persona-helper fast-fail + `PERSONA_BIBER_BLOCKED`) |
