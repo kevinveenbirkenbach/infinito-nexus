@@ -86,10 +86,29 @@ async function ssoLoginAndAssertUsername(page, username, password) {
 
   await page.locator('input[name="username"], #username').fill(username);
   await page.locator('input[name="password"], #password').fill(password);
-  // Submitting via Enter on the password field avoids Playwright's
-  // post-click stability wait that fails when the Sign-In button gets
-  // detached during the multi-redirect chain back to OpenCloud.
-  await page.locator('input[name="password"], #password').press("Enter");
+  // Press race-detaches when Keycloak unmounts the form mid-submit;
+  // swallow the retry and wait for navigation off the Keycloak host instead.
+  const leftKeycloak = page
+    .waitForURL((url) => !issuerPattern.test(url.toString()), { timeout: 60_000 })
+    .catch(() => {});
+  await page
+    .locator('input[name="password"], #password')
+    .press("Enter")
+    .catch(() => {});
+  await leftKeycloak;
+
+  // Fast-fail on a Keycloak credential rejection: the form re-renders with
+  // `#input-error` / `.alert-error` instead of redirecting to the callback,
+  // and the 90s banner wait below would otherwise bury the real cause.
+  const credentialError = page
+    .locator('#input-error, .alert-error, .kc-feedback-text')
+    .first();
+  if (await credentialError.isVisible({ timeout: 5_000 }).catch(() => false)) {
+    const message = ((await credentialError.textContent().catch(() => "")) || "").trim();
+    throw new Error(
+      `Keycloak rejected credentials for ${username}: "${message || "<no message>"}" (final URL: ${page.url()})`,
+    );
+  }
 
   // Wait for the redirect chain back to OpenCloud to finish before
   // asserting on SPA elements. Without this the banner assertion races
