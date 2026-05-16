@@ -1,23 +1,8 @@
-"""Lookup plugin: enumerate consumer roles for a given service.
+"""Enumerate consumer roles for a given service.
 
-Usage::
-
-    {{ lookup('roles_with_service', 'dashboard') | to_json }}
-
-Returns a sorted list of dicts ``[{id, canonical_domain}, …]``, one per
-role whose merged applications config declares ``services.<service>.{
-enabled, shared}`` as truthy AND that exposes a canonical domain.
-
-Used by the SPOT-owner specs (web-app-{dashboard, prometheus, matomo})
-to render a per-consumer manifest into ``templates/playwright.env.j2``.
-The provider's ``files/playwright/playwright.spec.js`` then parameterises one
-assertion per consumer over that manifest, owning the cross-service
-reachability assertion in one place.
-
-The lookup reuses ``get_merged_applications`` (the same helper
-``lookup('applications', ...)`` uses) so the data is already rendered
-against the inventory's ``group_names`` at runtime — no template-side
-``for`` loops or filter logic required.
+Returns ``[{id, canonical_domain, canonical_url}, …]`` for every role
+whose merged applications config declares
+``services.<service>.{enabled, shared}`` as truthy.
 """
 
 from __future__ import annotations
@@ -25,6 +10,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, Any
 
 from ansible.errors import AnsibleError
+from ansible.plugins.loader import lookup_loader
 from ansible.plugins.lookup import LookupBase
 
 from utils.cache.applications import get_merged_applications
@@ -74,6 +60,10 @@ class LookupModule(LookupBase):
             templar=getattr(self, "_templar", None),
         )
 
+        tls_lookup = lookup_loader.get(
+            "tls", loader=self._loader, templar=self._templar
+        )
+
         results: list[dict[str, str]] = []
         for role_id, app_config in applications.items():
             if not isinstance(app_config, dict):
@@ -91,7 +81,15 @@ class LookupModule(LookupBase):
             canonical = _resolve_canonical_domain(app_config)
             if not canonical:
                 continue
-            results.append({"id": str(role_id), "canonical_domain": canonical})
+            resolved = tls_lookup.run([str(role_id), "url.base"], variables=variables)
+            canonical_url = str(resolved[0]).rstrip("/")
+            results.append(
+                {
+                    "id": str(role_id),
+                    "canonical_domain": canonical,
+                    "canonical_url": canonical_url,
+                }
+            )
 
         results.sort(key=lambda r: r["id"])
         return [results]

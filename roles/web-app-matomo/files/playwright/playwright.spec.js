@@ -347,6 +347,41 @@ test("matomo SitesManager registers a tracker site for every consumer role", asy
   void cookies;
 });
 
+const matomoCanonicalDomain = (() => {
+  try {
+    return new URL(appBaseUrl).hostname;
+  } catch {
+    return "";
+  }
+})();
+
+for (const target of matomoTargetRoles) {
+  test(`matomo tracker injected in ${target.id} (${target.canonical_domain})`, async ({ page }) => {
+    expect(
+      target.canonical_url,
+      `Expected canonical_url in MATOMO_TARGET_ROLES_JSON entry for ${target.id}`
+    ).toBeTruthy();
+    const targetUrl = `${target.canonical_url}/`;
+    await page.goto(targetUrl, { waitUntil: "domcontentloaded" });
+    const html = await page.content();
+
+    expect(
+      html,
+      `Expected matomo tracker '_paq' marker in ${target.id} HTML body`
+    ).toContain("_paq");
+    expect(
+      html,
+      `Expected matomo tracker URL ('matomo.php') in ${target.id} HTML body`
+    ).toContain("matomo.php");
+    if (matomoCanonicalDomain) {
+      expect(
+        html,
+        `Expected matomo host '${matomoCanonicalDomain}' referenced in ${target.id} HTML body`
+      ).toContain(matomoCanonicalDomain);
+    }
+  });
+}
+
 // Persona scenarios.
 // Bodies live in the shared helper roles/test-e2e-playwright/files/personas.js
 // so every role's persona flow stays consistent.

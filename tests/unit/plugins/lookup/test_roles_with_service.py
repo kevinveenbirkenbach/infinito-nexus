@@ -42,11 +42,22 @@ class RolesWithServiceLookupTests(unittest.TestCase):
         return lm
 
     def _run(self, terms, applications: dict, vars_: dict | None = None):
-        """Run the lookup with `get_merged_applications` patched to return
-        the given applications dict so the tests stay hermetic."""
+        """Run the lookup with `get_merged_applications` and the `tls`
+        sub-lookup patched to stay hermetic. The stubbed tls resolves
+        ``[role_id, "url.base"]`` to a deterministic URL so the lookup
+        can finish building each result entry without the real domain
+        machinery."""
         lookup = self._make_lookup(vars_ or {})
-        with patch.object(
-            self.mod, "get_merged_applications", return_value=applications
+
+        class _StubTls:
+            def run(self, terms_, variables=None, **kwargs):
+                return [f"https://{terms_[0]}.example.com"]
+
+        with (
+            patch.object(
+                self.mod, "get_merged_applications", return_value=applications
+            ),
+            patch.object(self.mod.lookup_loader, "get", return_value=_StubTls()),
         ):
             return lookup.run(terms, variables=vars_ or {})
 
@@ -74,7 +85,15 @@ class RolesWithServiceLookupTests(unittest.TestCase):
         result = self._run(["dashboard"], applications)
         self.assertEqual(
             result,
-            [[{"id": "web-app-foo", "canonical_domain": "foo.example.com"}]],
+            [
+                [
+                    {
+                        "id": "web-app-foo",
+                        "canonical_domain": "foo.example.com",
+                        "canonical_url": "https://web-app-foo.example.com",
+                    }
+                ]
+            ],
         )
 
     def test_falsy_enabled_excludes_role(self):
@@ -131,7 +150,15 @@ class RolesWithServiceLookupTests(unittest.TestCase):
         result = self._run(["dashboard"], applications)
         self.assertEqual(
             result,
-            [[{"id": "web-app-foo", "canonical_domain": "foo.example.com"}]],
+            [
+                [
+                    {
+                        "id": "web-app-foo",
+                        "canonical_domain": "foo.example.com",
+                        "canonical_url": "https://web-app-foo.example.com",
+                    }
+                ]
+            ],
         )
 
     def test_results_are_sorted_by_role_id(self):
