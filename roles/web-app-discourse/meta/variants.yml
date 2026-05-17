@@ -1,3 +1,4 @@
+---
 # Matrix-deploy variant overrides for web-app-discourse.
 # See docs/contributing/artefact/files/role/variants.md for the file format.
 #
@@ -30,8 +31,8 @@
       enabled: true
       shared: true
 
-# variant 1: every dynamic flag off; postgres stays shared by design
-# (pinned in services.yml — see comment above).
+    # variant 1: every dynamic flag off; postgres stays shared by design
+    # (pinned in services.yml — see comment above).
     css:
       enabled: true
       shared: true

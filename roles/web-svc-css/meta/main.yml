@@ -1,7 +1,8 @@
 ---
 galaxy_info:
   author: Kevin Veen-Birchenbach
-  description: Canonical provider role for shared CSS assets. Owns the `css` service flag so consumer roles can gate their CSS-dependent surfaces on `'web-svc-css' in group_names`.
+  description: Canonical provider role for shared CSS assets. Owns the `css` service flag so consumer roles can gate their CSS-dependent surfaces on
+    `'web-svc-css' in group_names`.
   license: Infinito.Nexus Community License (Non-Commercial)
   company: |
     Kevin Veen-Birkenbach
