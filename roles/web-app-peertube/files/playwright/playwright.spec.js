@@ -1,7 +1,10 @@
 const { test, expect } = require("@playwright/test");
 
 const { decodeDotenvQuotedValue, normalizeBaseUrl, performKeycloakLoginForm, runGuestFlow } = require("./personas");
+const { isServiceEnabled } = require("./service-gating");
 test.use({ ignoreHTTPSErrors: true });
+
+const oidcEnabled = isServiceEnabled("oidc");
 
 async function peertubeLogout(page, peertubeBaseUrl) {
   await page
@@ -112,6 +115,7 @@ async function signInViaDashboardOidc(page, username, password, personaLabel) {
 }
 
 test("administrator: peertube OIDC login and logout", async ({ page }) => {
+  test.skip(!oidcEnabled, "OIDC shared service disabled");
   await signInViaDashboardOidc(page, adminUsername, adminPassword, "administrator");
 
   await peertubeLogout(page, peertubeBaseUrl);
@@ -136,6 +140,7 @@ test("administrator: peertube OIDC login and logout", async ({ page }) => {
 });
 
 test("biber: peertube OIDC login and logout", async ({ page }) => {
+  test.skip(!oidcEnabled, "OIDC shared service disabled");
   await signInViaDashboardOidc(page, biberUsername, biberPassword, "biber");
 
   await peertubeLogout(page, peertubeBaseUrl);

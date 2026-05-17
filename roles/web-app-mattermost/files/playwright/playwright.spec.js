@@ -1,9 +1,12 @@
 const { test, expect } = require("@playwright/test");
 
 const { decodeDotenvQuotedValue, performKeycloakLoginForm, runAdminFlow, runBiberFlow, runGuestFlow } = require("./personas");
+const { isServiceEnabled } = require("./service-gating");
 test.use({
   ignoreHTTPSErrors: true
 });
+
+const oidcEnabled = isServiceEnabled("oidc");
 
 // `docker --env-file` preserves the quotes emitted by `dotenv_quote`,
 // so normalize these values before building URLs or typing credentials.
@@ -141,6 +144,7 @@ test.beforeEach(() => {
 // in one assertion path; a button regression fails this test before
 // the OIDC code is even reached.
 test("mattermost: sso login, verify channel view, logout", async ({ page }) => {
+  test.skip(!oidcEnabled, "OIDC shared service disabled");
   const expectedOidcAuthUrl       = `${oidcIssuerUrl.replace(/\/$/, "")}/protocol/openid-connect/auth`;
   const expectedMattermostBaseUrl = mattermostBaseUrl.replace(/\/$/, "");
 
@@ -194,6 +198,7 @@ test("mattermost: sso login, verify channel view, logout", async ({ page }) => {
 // Using isolated browser contexts models two separate users on separate machines:
 // no shared cookies, no shared Keycloak SSO session.
 test("mattermost: biber sends direct message to administrator, administrator receives it", async ({ browser }) => {
+  test.skip(!oidcEnabled, "OIDC shared service disabled");
   const expectedOidcAuthUrl       = `${oidcIssuerUrl.replace(/\/$/, "")}/protocol/openid-connect/auth`;
   const expectedMattermostBaseUrl = mattermostBaseUrl.replace(/\/$/, "");
   const testMessage               = `Playwright test ${Date.now()}`;

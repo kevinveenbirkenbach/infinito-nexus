@@ -1,7 +1,11 @@
 const { test, expect, request } = require("@playwright/test");
 
 const { decodeDotenvQuotedValue, performKeycloakLoginForm, runBiberFlow, runGuestFlow } = require("./personas");
+const { isServiceEnabled } = require("./service-gating");
 test.use({ ignoreHTTPSErrors: true });
+
+const oauth2Enabled = isServiceEnabled("oauth2");
+const ldapEnabled   = isServiceEnabled("ldap");
 
 const appBaseUrl         = decodeDotenvQuotedValue(process.env.APP_BASE_URL         || "").replace(/\/$/, "");
 const canonicalDomain    = decodeDotenvQuotedValue(process.env.CANONICAL_DOMAIN     || "");
@@ -148,10 +152,14 @@ async function runKixLoginLogoutFlow(page, username, password) {
 }
 
 test("administrator: full login flow (KIX → OAuth2-proxy → Keycloak → KIX-LDAP login → KIX UI → universal logout)", async ({ page }) => {
+  test.skip(!oauth2Enabled, "OAuth2 shared service disabled");
+  test.skip(!ldapEnabled,   "LDAP shared service disabled");
   await runKixLoginLogoutFlow(page, adminUsername, adminPassword);
 });
 
 test("biber (granted web-app-kix-user via Keycloak): full login flow (KIX → OAuth2-proxy → Keycloak → KIX-LDAP login → KIX UI → universal logout)", async ({ page }) => {
+  test.skip(!oauth2Enabled, "OAuth2 shared service disabled");
+  test.skip(!ldapEnabled,   "LDAP shared service disabled");
   await ensureUserInGroup(biberUsername, kixUserGroupPath);
   await runKixLoginLogoutFlow(page, biberUsername, biberPassword);
 });

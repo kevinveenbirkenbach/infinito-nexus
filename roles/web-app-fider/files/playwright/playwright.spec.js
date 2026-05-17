@@ -1,9 +1,12 @@
 const { test, expect } = require("@playwright/test");
 
 const { decodeDotenvQuotedValue, performKeycloakLoginForm, runAdminFlow, runBiberFlow, runGuestFlow } = require("./personas");
+const { isServiceEnabled } = require("./service-gating");
 test.use({
   ignoreHTTPSErrors: true
 });
+
+const oidcEnabled = isServiceEnabled("oidc");
 
 // `docker --env-file` preserves the quotes emitted by `dotenv_quote`,
 // so normalize these values before building URLs or typing credentials.
@@ -44,6 +47,7 @@ test.beforeEach(() => {
 // Scenario I: Fider → SSO login as admin → verify admin UI → logout
 // (dashboard-iframe mechanics covered by web-app-dashboard SPOT)
 test("fider: admin sso login, verify ui, logout", async ({ page }) => {
+  test.skip(!oidcEnabled, "OIDC shared service disabled");
   const expectedFiderBaseUrl = fiderBaseUrl.replace(/\/$/, "");
 
   // 1. Navigate directly to Fider
@@ -75,6 +79,7 @@ test("fider: admin sso login, verify ui, logout", async ({ page }) => {
 // This test verifies that the SSO flow works for non-admin users and that they land
 // on the Fider main page (not an admin panel).
 test("fider: biber sso login as regular user, verify access, logout", async ({ browser }) => {
+  test.skip(!oidcEnabled, "OIDC shared service disabled");
   const expectedOidcAuthUrl  = `${oidcIssuerUrl.replace(/\/$/, "")}/protocol/openid-connect/auth`;
   const expectedFiderBaseUrl = fiderBaseUrl.replace(/\/$/, "");
 

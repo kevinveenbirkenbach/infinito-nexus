@@ -1,9 +1,12 @@
 const { test, expect } = require("@playwright/test");
 
 const { decodeDotenvQuotedValue, isVisible, performKeycloakLoginForm, runAdminFlow, runBiberFlow, runGuestFlow } = require("./personas");
+const { isServiceEnabled } = require("./service-gating");
 test.use({
   ignoreHTTPSErrors: true
 });
+
+const oidcEnabled = isServiceEnabled("oidc");
 
 // `docker --env-file` preserves the quotes emitted by `dotenv_quote`,
 // so normalize these values before building URLs or typing credentials.
@@ -92,6 +95,7 @@ test.beforeEach(() => {
 // Scenario I: Odoo → SSO login as admin → verify authenticated → logout
 // (dashboard-iframe mechanics covered by web-app-dashboard SPOT)
 test("odoo: admin sso login, verify ui, logout", async ({ page }) => {
+  test.skip(!oidcEnabled, "OIDC shared service disabled");
   const expectedOdooBaseUrl = odooBaseUrl.replace(/\/$/, "");
   const odooLoginUrl = `${expectedOdooBaseUrl}/web/login`;
 
@@ -153,6 +157,7 @@ test("odoo: admin sso login, verify ui, logout", async ({ page }) => {
 // Biber is a standard user without admin privileges - this confirms OIDC works
 // for all Keycloak users, not just the administrator.
 test("odoo: biber sso login, verify ui, logout", async ({ page }) => {
+  test.skip(!oidcEnabled, "OIDC shared service disabled");
   const expectedOdooBaseUrl = odooBaseUrl.replace(/\/$/, "");
   const odooLoginUrl = `${expectedOdooBaseUrl}/web/login`;
 
