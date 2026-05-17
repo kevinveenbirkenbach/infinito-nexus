@@ -24,10 +24,6 @@ exports.register = function (shared) {
     // First login can show one or more stacked onboarding dialogs that block clicks.
     await shared.dismissBlockingNextcloudModals(page, page);
 
-    // Talk admin verification still applies on the native variant when
-    // the env flag is on; otherwise this is a no-op.
-    await shared.verifyNextcloudTalkAdminSettings(page.context());
-
     await shared.logoutStandaloneNextcloud(page);
   });
 };

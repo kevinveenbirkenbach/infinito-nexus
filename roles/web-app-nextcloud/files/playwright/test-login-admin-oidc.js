@@ -20,11 +20,6 @@ exports.register = function (shared) {
     // First login can show one or more stacked onboarding dialogs that block clicks.
     await shared.dismissBlockingNextcloudModals(page, page);
 
-    // Reuse the authenticated context to verify the Talk admin chrome
-    // (HPB / STUN / TURN values plus the spreed reachability buttons).
-    // No-op when NEXTCLOUD_TALK_SETTINGS_CHECK_ENABLED is false.
-    await shared.verifyNextcloudTalkAdminSettings(page.context());
-
     await shared.logoutStandaloneNextcloud(page);
   });
 };

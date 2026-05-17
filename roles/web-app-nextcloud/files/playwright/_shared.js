@@ -1,8 +1,8 @@
 // Shared Nextcloud Playwright spec state: env vars, locator helpers, modal
-// dismissal, login/logout flow, Talk admin verification, and the
-// `beforeEach` env-presence guard. `playwright.spec.js` wires the
-// lifecycle hook and `require()`s one test module per scenario so each
-// test stays atomar.
+// dismissal, login/logout flow, and the `beforeEach` env-presence guard.
+// `playwright.spec.js` wires the lifecycle hook and `require()`s one test
+// module per scenario so each test stays atomar. Talk-admin-specific
+// helpers and env decoding live in `test-talk-admin-settings.js`.
 
 const { expect } = require("@playwright/test");
 const { decodeDotenvQuotedValue, findFirstVisibleCandidate, runAdminFlow, runBiberFlow, runGuestFlow } = require("./personas");
@@ -11,11 +11,9 @@ const { isServiceEnabled } = require("./service-gating");
 // ---------------------------------------------------------------------------
 // Env decoding
 //
-// All values originate from the rendered `.env` under the staging dir. The
-// Talk-related values are optional and gate the talk-admin test via
-// `nextcloudTalkSettingsCheckEnabled`. `docker --env-file` preserves the
-// quotes emitted by `dotenv_quote`, so normalize these values before
-// building URLs or typing credentials.
+// All values originate from the rendered `.env` under the staging dir.
+// `docker --env-file` preserves the quotes emitted by `dotenv_quote`, so
+// normalize these values before building URLs or typing credentials.
 // ---------------------------------------------------------------------------
 const loginUsername = decodeDotenvQuotedValue(process.env.LOGIN_USERNAME);
 const loginPassword = decodeDotenvQuotedValue(process.env.LOGIN_PASSWORD);
@@ -24,13 +22,6 @@ const biberPassword = decodeDotenvQuotedValue(process.env.BIBER_PASSWORD);
 const nextcloudDirectLoginPassword = decodeDotenvQuotedValue(process.env.NEXTCLOUD_DIRECT_LOGIN_PASSWORD) || loginPassword;
 const oidcIssuerUrl = decodeDotenvQuotedValue(process.env.OIDC_ISSUER_URL);
 const nextcloudBaseUrl = decodeDotenvQuotedValue(process.env.NEXTCLOUD_BASE_URL);
-const nextcloudTalkSettingsCheckEnabled = decodeDotenvQuotedValue(process.env.NEXTCLOUD_TALK_SETTINGS_CHECK_ENABLED) === "true";
-const nextcloudTalkSettingsUrl = decodeDotenvQuotedValue(process.env.NEXTCLOUD_TALK_SETTINGS_URL);
-const nextcloudTalkExpectedSignalingUrl = decodeDotenvQuotedValue(process.env.NEXTCLOUD_TALK_EXPECTED_SIGNALING_URL);
-const nextcloudTalkExpectedStunServer = decodeDotenvQuotedValue(process.env.NEXTCLOUD_TALK_EXPECTED_STUN_SERVER);
-const nextcloudTalkExpectedTurnServer = decodeDotenvQuotedValue(process.env.NEXTCLOUD_TALK_EXPECTED_TURN_SERVER);
-const nextcloudTalkUnexpectedStunServer = decodeDotenvQuotedValue(process.env.NEXTCLOUD_TALK_UNEXPECTED_STUN_SERVER);
-const nextcloudTalkUnexpectedTurnServer = decodeDotenvQuotedValue(process.env.NEXTCLOUD_TALK_UNEXPECTED_TURN_SERVER);
 const nextcloudUsernameFieldPattern = /account name or email|username or email/i;
 const nextcloudCredentialSubmitPattern = /sign in|log in/i;
 
@@ -185,62 +176,6 @@ async function clickUserMenuWithModalRetry(page, nextcloudFrame, userMenuLocator
       await page.waitForTimeout(500);
     }
   }
-}
-
-// ---------------------------------------------------------------------------
-// Settings-page assertions
-//
-// Talk admin settings are partly rendered as plain text and partly as
-// `<input value="...">` fields. `innerText()` alone would miss the input
-// values, so collect both text and form values before asserting presence or
-// absence of configured / legacy endpoints.
-// ---------------------------------------------------------------------------
-
-async function collectNextcloudSettingsText(target) {
-  const bodyText = await target.locator("body").innerText().catch(() => "");
-  const formValues = await target.locator("input, textarea, select").evaluateAll((elements) => {
-    return elements.flatMap((element) => {
-      const values = [];
-      const value = typeof element.value === "string" ? element.value.trim() : "";
-      const text = typeof element.textContent === "string" ? element.textContent.trim() : "";
-
-      if (value) {
-        values.push(value);
-      }
-
-      if (text) {
-        values.push(text);
-      }
-
-      return values;
-    });
-  }).catch(() => []);
-
-  return [bodyText, ...formValues].filter(Boolean).join("\n");
-}
-
-async function expectNextcloudSettingValue(page, expectedValue, label) {
-  await expect
-    .poll(
-      async () => collectNextcloudSettingsText(page),
-      {
-        timeout: 30_000,
-        message: `Expected ${label} to be visible in the Nextcloud Talk admin settings: ${expectedValue}`
-      }
-    )
-    .toContain(expectedValue);
-}
-
-async function expectNextcloudSettingAbsent(page, unexpectedValue, label) {
-  await expect
-    .poll(
-      async () => collectNextcloudSettingsText(page),
-      {
-        timeout: 30_000,
-        message: `Expected ${label} to stay absent in the Nextcloud Talk admin settings: ${unexpectedValue}`
-      }
-    )
-    .not.toContain(unexpectedValue);
 }
 
 // ---------------------------------------------------------------------------
@@ -444,157 +379,6 @@ async function loginToStandaloneNextcloudWithRetry(adminPage, username, password
   }
 }
 
-// ---------------------------------------------------------------------------
-// Talk admin verification
-//
-// Open a fresh page in the given context, SSO-login, navigate to the Talk
-// admin settings URL, and assert the deployed HPB / STUN / TURN values are
-// present while the known legacy onboard values are absent. Then click every
-// "Test server" / "Test this server" button and fail if any of the known
-// spreed error strings show up (Cannot connect, No working ICE, etc.).
-// ---------------------------------------------------------------------------
-
-// Error strings emitted by the spreed admin UI when a signaling / STUN / TURN
-// test button reports a failure. Kept in one place so the list stays easy to
-// audit against the spreed source.
-const talkTestServerErrorPatterns = [
-  /Error:\s*Cannot connect to server/i,
-  /Error:\s*No working ICE candidates returned by the TURN server/i,
-  /Error:\s*Server seems to be a Signaling server/i,
-  /Testing server seems to be broken/i
-];
-
-// Positive success marker emitted by the spreed admin UI. Both the HPB
-// signaling-server row (SignalingServer.vue) and the recording-backend row
-// (RecordingServer.vue) render their reachability result inline via
-// `<span class="test-connection">{{ connectionState }}</span>`, where
-// connectionState becomes `"OK: Running version: <version>"` once the
-// auto-mounted check (or our explicit Test-button click) succeeds.
-//
-// We require at least ONE successful row, not two: <RecordingServer> is
-// `v-if="server && checked"` AND its parent <RecordingServers> only renders
-// when `hasSignalingServers === true`, so the recording row can legitimately
-// be absent on a stack that does not yet have an HPB signaling row stored
-// (typical first-deploy ordering). Asserting two OK markers in that
-// situation would false-fail on a healthy install.
-const talkTestServerRequiredOkPattern = /OK:\s*Running version:\s*\S+/i;
-
-async function clickAllTalkTestServerButtonsAndVerify(page) {
-  // Spreed renders the test result inside `<span class="test-connection">`
-  // and the explicit re-test button (icon-only NcButton with
-  // aria-label "Test this server") is `v-if="server && checked"` — i.e. it
-  // only appears AFTER the auto-mount `checkServerVersion()` call returns,
-  // and at that point the connectionState text is already in the span.
-  // Wait for the result span to exist before measuring buttons so we do not
-  // race the conditional render and silently click zero buttons.
-  const connectionSpans = page.locator("span.test-connection");
-  await connectionSpans
-    .first()
-    .waitFor({ state: "attached", timeout: 60_000 })
-    .catch(() => {
-      // Continue — the assertion below will surface the real diagnostic.
-    });
-
-  // Re-trigger the check by clicking every Test button we can find. Spreed's
-  // accessible name (English) is "Test this server" for both HPB signaling
-  // and recording rows; older releases used "Test server", so match both.
-  const testButtons = page.getByRole("button", { name: /^test( this)? server$/i });
-  const total = await testButtons.count();
-  for (let i = 0; i < total; i += 1) {
-    const button = testButtons.nth(i);
-    if (!(await button.isVisible().catch(() => false))) {
-      continue;
-    }
-    await button.scrollIntoViewIfNeeded().catch(() => {});
-    await button.click({ timeout: 5_000 }).catch(() => {});
-  }
-
-  // Read the test-connection span texts directly instead of `document.body
-  // .innerText`. innerText can omit content inside collapsed admin panels
-  // and the explicit locator surfaces the exact element where spreed writes
-  // the result, so failure messages name the actual rendered string.
-  const readConnectionTexts = async () =>
-    connectionSpans.allInnerTexts().catch(() => []);
-
-  await expect
-    .poll(readConnectionTexts, {
-      timeout: 60_000,
-      message:
-        "Expected at least one Talk admin row (.test-connection span) to render " +
-        "'OK: Running version: <ver>' after the auto-check / Test-button click. " +
-        "Empty array means the row was never rendered (HPB signaling server " +
-        "config missing); a 'Status: Checking connection' value means the " +
-        "auto-check is still pending; an 'Error:' value means HPB unreachable."
-    })
-    .toEqual(expect.arrayContaining([expect.stringMatching(talkTestServerRequiredOkPattern)]));
-
-  // Then assert NONE of the rendered rows reports a known spreed error.
-  // Iterate connection-span texts so the failure message points at the
-  // exact row that broke instead of dumping the whole admin chrome.
-  const texts = await readConnectionTexts();
-  for (const text of texts) {
-    for (const pattern of talkTestServerErrorPatterns) {
-      expect(
-        text,
-        `Talk admin row reported a connection error matching ${pattern}: ${text}`
-      ).not.toMatch(pattern);
-    }
-  }
-}
-
-async function verifyNextcloudTalkAdminSettings(browserContext) {
-  if (!nextcloudTalkSettingsCheckEnabled) {
-    return;
-  }
-
-  const expectedTalkSettingsUrl = new URL(nextcloudTalkSettingsUrl);
-  const adminPage = await browserContext.newPage();
-
-  try {
-    await loginToStandaloneNextcloud(adminPage);
-    await adminPage.goto(nextcloudTalkSettingsUrl, {
-      waitUntil: "domcontentloaded",
-      timeout: 60_000
-    });
-    await expect
-      .poll(
-        async () => {
-          const currentUrl = new URL(adminPage.url());
-
-          return {
-            pathname: currentUrl.pathname,
-            search: currentUrl.search
-          };
-        },
-        {
-          timeout: 30_000,
-          message: `Expected Nextcloud admin Talk settings page to load: ${nextcloudTalkSettingsUrl}`
-        }
-      )
-      .toMatchObject({
-        pathname: expectedTalkSettingsUrl.pathname,
-        search: expectedTalkSettingsUrl.search
-      });
-
-    await dismissBlockingNextcloudModals(adminPage, adminPage);
-    await expectNextcloudSettingValue(adminPage, nextcloudTalkExpectedSignalingUrl, "Talk signaling URL");
-    await expectNextcloudSettingValue(adminPage, nextcloudTalkExpectedStunServer, "Talk STUN server");
-    await expectNextcloudSettingValue(adminPage, nextcloudTalkExpectedTurnServer, "Talk TURN server");
-
-    if (nextcloudTalkUnexpectedStunServer) {
-      await expectNextcloudSettingAbsent(adminPage, nextcloudTalkUnexpectedStunServer, "legacy Talk STUN server");
-    }
-
-    if (nextcloudTalkUnexpectedTurnServer) {
-      await expectNextcloudSettingAbsent(adminPage, nextcloudTalkUnexpectedTurnServer, "legacy Talk TURN server");
-    }
-
-    await clickAllTalkTestServerButtonsAndVerify(adminPage);
-  } finally {
-    await adminPage.close().catch(() => {});
-  }
-}
-
 // Fail fast with a clear message if the rendered `.env` is missing any of
 // the values the tests rely on, instead of timing out mid-flow.
 function beforeEach() {
@@ -604,13 +388,6 @@ function beforeEach() {
   expect(loginPassword, "LOGIN_PASSWORD must be set in the Playwright env file").toBeTruthy();
   expect(biberUsername, "BIBER_USERNAME must be set in the Playwright env file").toBeTruthy();
   expect(biberPassword, "BIBER_PASSWORD must be set in the Playwright env file").toBeTruthy();
-
-  if (nextcloudTalkSettingsCheckEnabled) {
-    expect(nextcloudTalkSettingsUrl, "NEXTCLOUD_TALK_SETTINGS_URL must be set when Talk admin checks are enabled").toBeTruthy();
-    expect(nextcloudTalkExpectedSignalingUrl, "NEXTCLOUD_TALK_EXPECTED_SIGNALING_URL must be set when Talk admin checks are enabled").toBeTruthy();
-    expect(nextcloudTalkExpectedStunServer, "NEXTCLOUD_TALK_EXPECTED_STUN_SERVER must be set when Talk admin checks are enabled").toBeTruthy();
-    expect(nextcloudTalkExpectedTurnServer, "NEXTCLOUD_TALK_EXPECTED_TURN_SERVER must be set when Talk admin checks are enabled").toBeTruthy();
-  }
 }
 
 module.exports = {
@@ -620,7 +397,6 @@ module.exports = {
     biberUsername,
     biberPassword,
     nextcloudBaseUrl,
-    nextcloudTalkSettingsCheckEnabled,
     nextcloudUsernameFieldPattern,
     nextcloudCredentialSubmitPattern,
     nextcloudOidcEnabled,
@@ -636,7 +412,6 @@ module.exports = {
   loginToStandaloneNextcloud,
   logoutStandaloneNextcloud,
   loginToStandaloneNextcloudWithRetry,
-  verifyNextcloudTalkAdminSettings,
   findFirstVisibleCandidate,
   runAdminFlow,
   runBiberFlow,
