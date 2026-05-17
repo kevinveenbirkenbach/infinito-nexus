@@ -17,22 +17,7 @@ PIXELFED_ENV_FILE: "{{ lookup('container', application_id, 'files.env') }}"
 PIXELFED_ENTRYPOINT_FILE: "docker-entrypoint.sh"
 PIXELFED_ENTRYPOINT_HOST_ABS: "{{ [PIXELFED_INSTANCE_DIR, PIXELFED_ENTRYPOINT_FILE] | path_join }}"
 PIXELFED_ENTRYPOINT_DOCKER: "/infinito-pixelfed-entrypoint.sh"
-PIXELFED_DB_CONTAINER: "{{ lookup('database', application_id, 'container') }}"
 PIXELFED_DB_NAME: "{{ lookup('database', application_id, 'name') }}"
-PIXELFED_DB_USERNAME: "{{ lookup('database', application_id, 'username') }}"
-PIXELFED_DB_PASSWORD: "{{ lookup('database', application_id, 'password') }}"
-PIXELFED_MARIADB_ARGS:
-  - container
-  - exec
-  - -i
-  - "{{ PIXELFED_DB_CONTAINER }}"
-  - mariadb
-  - -N
-  - -s
-  - -u
-  - "{{ PIXELFED_DB_USERNAME }}"
-  - "-p{{ PIXELFED_DB_PASSWORD }}"
-  - "{{ PIXELFED_DB_NAME }}"
 PIXELFED_ADMIN_USER_KEY: "administrator"
 PIXELFED_ADMIN_USERNAME: "{{ lookup('users', PIXELFED_ADMIN_USER_KEY).username }}"
 PIXELFED_ADMIN_EMAIL: "{{ lookup('users', PIXELFED_ADMIN_USER_KEY).email }}"

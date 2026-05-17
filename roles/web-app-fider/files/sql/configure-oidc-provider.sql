@@ -1,13 +1,5 @@
 -- Idempotent UPSERT of the `_keycloak` OAuth provider row in Fider's
 -- `oauth_providers` table. Driven by ON CONFLICT (tenant_id, provider).
---
--- Required psql variables (pass via -v):
---   display_name   Display name shown on the Fider sign-in screen
---   client_id      Keycloak OIDC client ID
---   client_secret  Keycloak OIDC client secret
---   authorize_url  OIDC authorization endpoint
---   token_url      OIDC token endpoint
---   profile_url    OIDC userinfo endpoint
 
 INSERT INTO oauth_providers (
     tenant_id, provider, display_name, status,
@@ -19,13 +11,13 @@ INSERT INTO oauth_providers (
 ) VALUES (
     (SELECT id FROM tenants LIMIT 1),
     '_keycloak',
-    :'display_name',
+    %(display_name)s,
     2,
-    :'client_id',
-    :'client_secret',
-    :'authorize_url',
-    :'token_url',
-    :'profile_url',
+    %(client_id)s,
+    %(client_secret)s,
+    %(authorize_url)s,
+    %(token_url)s,
+    %(profile_url)s,
     'openid profile email',
     'sub', 'name', 'email',
     '', true
