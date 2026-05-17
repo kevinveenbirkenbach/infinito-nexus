@@ -1,3 +1,4 @@
+---
 # Matrix-deploy variant overrides for this role.
 #
 # Variant 0 — defaults from meta/services.yml. Single wall, polls all
@@ -33,9 +34,9 @@
       enabled: true
       shared: true
 
-# Variant 2 (false-pinning) — siblings opted out so the
-# variant-coverage matrix exercises the out-of-group_names branch
-# of every dynamic services flag.
+    # Variant 2 (false-pinning) — siblings opted out so the
+    # variant-coverage matrix exercises the out-of-group_names branch
+    # of every dynamic services flag.
     css:
       enabled: true
       shared: true
@@ -61,53 +62,53 @@
       # Variants replace lists wholesale (not deep-merged), so every
       # wall.config field is restated here — no template fallbacks.
       walls:
-      - slug: default
-        config:
-          servers:
-          - "{{ lookup('domain', 'web-app-mastodon') }}"
-          - "{{ lookup('domain', 'web-app-friendica') }}"
-          tags: []
-          accounts: []
-          loadPublic: true
-          loadFederated: false
-          loadTrends: false
-          languages: []
-          badWords: []
-          hideSensitive: true
-          hideBots: true
-          hideReplies: true
-          hideBoosts: false
-          limit: 20
-          interval: 10
-          title: Fediwall
-          theme: auto
-          showInfobar: true
-          showText: true
-          showMedia: true
-          playVideos: true
-      - slug: mastodon
-        config:
-          servers:
-          - "{{ lookup('domain', 'web-app-mastodon') }}"
-          tags: []
-          accounts: []
-          loadPublic: true
-          loadFederated: false
-          loadTrends: false
-          languages: []
-          badWords: []
-          hideSensitive: true
-          hideBots: true
-          hideReplies: true
-          hideBoosts: false
-          limit: 20
-          interval: 10
-          title: Mastodon
-          theme: auto
-          showInfobar: true
-          showText: true
-          showMedia: true
-          playVideos: true
+        - slug: default
+          config:
+            servers:
+              - "{{ lookup('domain', 'web-app-mastodon') }}"
+              - "{{ lookup('domain', 'web-app-friendica') }}"
+            tags: []
+            accounts: []
+            loadPublic: true
+            loadFederated: false
+            loadTrends: false
+            languages: []
+            badWords: []
+            hideSensitive: true
+            hideBots: true
+            hideReplies: true
+            hideBoosts: false
+            limit: 20
+            interval: 10
+            title: Fediwall
+            theme: auto
+            showInfobar: true
+            showText: true
+            showMedia: true
+            playVideos: true
+        - slug: mastodon
+          config:
+            servers:
+              - "{{ lookup('domain', 'web-app-mastodon') }}"
+            tags: []
+            accounts: []
+            loadPublic: true
+            loadFederated: false
+            loadTrends: false
+            languages: []
+            badWords: []
+            hideSensitive: true
+            hideBots: true
+            hideReplies: true
+            hideBoosts: false
+            limit: 20
+            interval: 10
+            title: Mastodon
+            theme: auto
+            showInfobar: true
+            showText: true
+            showMedia: true
+            playVideos: true
     css:
       enabled: false
       shared: false

@@ -1,3 +1,4 @@
+---
 # Matrix-deploy variant overrides for web-app-shopware.
 # See docs/contributing/artefact/files/role/variants.md for the file format.
 
@@ -28,8 +29,8 @@
       enabled: true
       shared: true
 
-# variant pinning every dynamic services.yml flag to false so the
-# matrix also exercises the out-of-group_names branch.
+    # variant pinning every dynamic services.yml flag to false so the
+    # matrix also exercises the out-of-group_names branch.
     css:
       enabled: true
       shared: true
@@ -58,8 +59,8 @@
       enabled: false
       shared: false
 
-# LDAP-only variant: ldap on, oauth2 off so the
-# Playwright spec exercises the LDAP-bind login path.
+    # LDAP-only variant: ldap on, oauth2 off so the
+    # Playwright spec exercises the LDAP-bind login path.
     css:
       enabled: false
       shared: false
