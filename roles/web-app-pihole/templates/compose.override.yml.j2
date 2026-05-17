@@ -1,0 +1,4 @@
+services:
+  oauth2-proxy:
+    extra_hosts:
+      - "{{ lookup('domain', 'web-app-keycloak') }}:host-gateway"
