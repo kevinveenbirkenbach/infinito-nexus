@@ -42,8 +42,10 @@ from utils.update.base import (
 from utils.update.docker import (
     fetch_dockerhub_tags,
     fetch_ghcr_tags,
+    fetch_mcr_tags,
     is_dockerhub,
     is_ghcr,
+    is_mcr,
     suppressed_services,
 )
 
@@ -123,12 +125,14 @@ class TestDockerImageVersions(unittest.TestCase):
                 image_tags[img] = fetch_dockerhub_tags(img)
             elif is_ghcr(img):
                 image_tags[img] = fetch_ghcr_tags(img)
+            elif is_mcr(img):
+                image_tags[img] = fetch_mcr_tags(img)
 
         outdated: list[dict] = []
         unchecked: list[dict] = []
         for e in entries:
             img = e["image"]
-            if not is_dockerhub(img) and not is_ghcr(img):
+            if not is_dockerhub(img) and not is_ghcr(img) and not is_mcr(img):
                 unchecked.append(e)
                 continue
             tags = image_tags.get(img, [])

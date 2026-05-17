@@ -29,6 +29,7 @@ from utils.docker.image.discovery import iter_role_images
 from utils.docker.image.ref import (
     DOCKER_HUB_REGISTRIES,
     GHCR_REGISTRY,
+    MCR_REGISTRY,
     split_registry_and_name,
 )
 from utils.roles.mapping import ROLE_FILE_META_SERVICES
@@ -157,6 +158,49 @@ def fetch_ghcr_tags(image: str) -> list[str]:
     return body.get("tags") or []
 
 
+def is_mcr(image: str) -> bool:
+    parsed = split_registry_and_name(image)
+    return parsed is not None and parsed[0] == MCR_REGISTRY
+
+
+def mcr_repo(image: str) -> str:
+    parsed = split_registry_and_name(image)
+    if parsed is None or parsed[0] != MCR_REGISTRY:
+        raise ValueError(f"Image is not an MCR reference: {image!r}")
+    return parsed[1]
+
+
+_LINK_NEXT_RE = re.compile(r'<([^>]+)>\s*;\s*rel="next"', re.IGNORECASE)
+
+
+def fetch_mcr_tags(image: str, max_pages: int = 10) -> list[str]:
+    # MCR speaks the standard Docker Registry V2 API (anonymous for public
+    # repos). Tag pages are returned in 100-tag chunks; the next page
+    # location ships via the standard RFC 5988 `Link: <…>; rel="next"`
+    # response header.
+    name = mcr_repo(image)
+    base = f"https://{MCR_REGISTRY}"
+    url = f"{base}/v2/{quote(name, safe='/')}/tags/list?n=100"
+    tags: list[str] = []
+    for _ in range(max_pages):
+        req = urllib.request.Request(  # noqa: S310
+            url, headers={"User-Agent": "infinito-nexus-version-updater"}
+        )
+        try:
+            with urllib.request.urlopen(req, timeout=15) as resp:  # noqa: S310
+                body = json.loads(resp.read().decode())
+                link_header = resp.headers.get("Link", "")
+        except (urllib.error.URLError, OSError, json.JSONDecodeError):
+            break
+        tags.extend(body.get("tags") or [])
+        match = _LINK_NEXT_RE.search(link_header)
+        if not match:
+            break
+        next_link = match.group(1)
+        url = next_link if next_link.startswith("http") else f"{base}{next_link}"
+    return tags
+
+
 def suppressed_services(config_path: Path) -> set[str]:
     """Return service names whose ``version:`` line is annotated with
     the unified ``# nocheck: docker-version`` marker.
@@ -238,6 +282,8 @@ def find_outdated_updates(repo_root: Path) -> list[DockerImageVersionUpdate]:
             image_tags[entry.image] = fetch_dockerhub_tags(entry.image)
         elif is_ghcr(entry.image):
             image_tags[entry.image] = fetch_ghcr_tags(entry.image)
+        elif is_mcr(entry.image):
+            image_tags[entry.image] = fetch_mcr_tags(entry.image)
 
     for entry in entries:
         tags = image_tags.get(entry.image, [])
