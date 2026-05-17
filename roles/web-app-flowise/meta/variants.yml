@@ -1,3 +1,4 @@
+---
 # Matrix-deploy variant overrides for this role. Both auth-flow variants ride the same
 # `web-app-oauth2-proxy` sidecar in front of the Flowise web UI;
 # variant 0 is the canonical OIDC variant (Keycloak with local user

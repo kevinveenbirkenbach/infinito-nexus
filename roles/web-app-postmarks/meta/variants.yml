@@ -1,3 +1,4 @@
+---
 # Matrix-deploy variant overrides for this role. Postmarks has no first-party OIDC or
 # LDAP integration, both auth-flow variants ride the same
 # `web-app-oauth2-proxy` sidecar in front of the Postmarks web UI.
