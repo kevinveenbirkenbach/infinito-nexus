@@ -1,4 +1,3 @@
----
 # Matrix-deploy variant overrides for web-app-dashboard.
 # See docs/contributing/artefact/files/role/variants.md for the file format.
 
@@ -27,6 +26,9 @@
     simpleicons:
       enabled: true
       shared: true
+    css:
+      enabled: true
+      shared: true
 - services:
     asset:
       enabled: false
@@ -47,5 +49,8 @@
       enabled: false
       shared: false
     simpleicons:
+      enabled: false
+      shared: false
+    css:
       enabled: false
       shared: false

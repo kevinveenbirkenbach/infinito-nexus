@@ -544,6 +544,8 @@ test("dashboard renders simpleicon-backed cards when simpleicons service is enab
 });
 
 test("dashboard loads role-core JavaScript modules and renders header/navbar logos", async ({ page }) => {
+  skipUnlessServiceEnabled("cdn");
+
   const diagnostics = attachDiagnostics(page);
   const documentResponse = await page.goto("/");
   expect(documentResponse.status()).toBeLessThan(400);
@@ -568,6 +570,9 @@ test("dashboard loads role-core JavaScript modules and renders header/navbar log
 });
 
 test("dashboard iframe sync JavaScript responds to iframeLocationChange events", async ({ page }) => {
+  skipUnlessServiceEnabled("cdn");
+  skipUnlessServiceEnabled("matomo");
+
   const diagnostics = attachDiagnostics(page);
   await page.goto("/");
   await waitForDashboardReady(page);
