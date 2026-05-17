@@ -89,8 +89,9 @@ deploy_with_cache_retry() {
 	shift
 	if [[ "${1:-}" == "--" ]]; then shift; fi
 
-	local log
-	log="$(mktemp -t "deploy-${label//[^A-Za-z0-9._-]/-}.XXXXXX.log")"
+	local log sanitized
+	sanitized="${label//[^A-Za-z0-9._-]/-}"
+	log="$(mktemp -t "deploy-${sanitized:0:80}.XXXXXX.log")"
 
 	_cache_retry_run_capture "${log}" "$@"
 	local rc=${__cache_retry_rc}
