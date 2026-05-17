@@ -40,11 +40,10 @@ mig:
   mem_reservation: 128m
   mem_limit: 256m
   pids_limit: 256
-# nocheck: dynamic-flag
-# nocheck: playwright-service-flag — canonical:cdn alias of static-asset provider
+# nocheck: playwright-service-flag — css consumer, no Playwright surface (provider: web-svc-css)
 css:
-  enabled: true
-  shared: true
+  enabled: "{{ 'web-svc-css' in group_names }}"
+  shared: "{{ 'web-svc-css' in group_names }}"
 prometheus:
   enabled: "{{ 'web-app-prometheus' in group_names }}"
   shared: "{{ 'web-app-prometheus' in group_names }}"

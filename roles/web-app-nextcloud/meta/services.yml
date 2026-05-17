@@ -252,7 +252,7 @@ talk_recording:
   pids_limit: 1024
   min_storage: 1GB
 # nocheck: dynamic-flag
-# nocheck: playwright-service-flag — canonical:cdn alias of static-asset provider
+# nocheck: playwright-service-flag — css consumer, no Playwright surface (provider: web-svc-css)
 css:
   enabled: false
   shared: true

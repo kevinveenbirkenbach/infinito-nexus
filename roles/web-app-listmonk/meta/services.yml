@@ -41,10 +41,9 @@ listmonk:
     - web-app-keycloak
     - web-app-mailu
   lifecycle: beta
-# nocheck: dynamic-flag
 css:
-  enabled: true
-  shared: true
+  enabled: "{{ 'web-svc-css' in group_names }}"
+  shared: "{{ 'web-svc-css' in group_names }}"
 # nocheck: dynamic-flag
 hcaptcha:
   enabled: "{{ HCAPTCHA_ENABLED | bool }}"

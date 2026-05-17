@@ -35,10 +35,9 @@ oauth2:
     port: 8080
   allowed_groups:
     - "{{ lookup('rbac_group_path', application_id='web-app-phpldapadmin', role='administrator') }}"
-# nocheck: dynamic-flag
 css:
-  enabled: true
-  shared: true
+  enabled: "{{ 'web-svc-css' in group_names }}"
+  shared: "{{ 'web-svc-css' in group_names }}"
 prometheus:
   enabled: "{{ 'web-app-prometheus' in group_names }}"
   shared: "{{ 'web-app-prometheus' in group_names }}"

@@ -62,10 +62,9 @@ sidekiq:
   mem_reservation: 1g
   mem_limit: 1.5g
   pids_limit: 512
-# nocheck: dynamic-flag
 css:
-  enabled: true
-  shared: true
+  enabled: "{{ 'web-svc-css' in group_names }}"
+  shared: "{{ 'web-svc-css' in group_names }}"
 prometheus:
   enabled: "{{ 'web-app-prometheus' in group_names }}"
   shared: "{{ 'web-app-prometheus' in group_names }}"

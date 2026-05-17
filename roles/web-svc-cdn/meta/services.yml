@@ -18,12 +18,6 @@ matomo:
   shared: "{{ 'web-app-matomo' in group_names }}"
 # nocheck: playwright-service-flag — canonical:cdn alias of self-provider
 # nocheck: dynamic-flag
-css:
-  enabled: false
-  shared: true
-  canonical: cdn
-# nocheck: playwright-service-flag — canonical:cdn alias of self-provider
-# nocheck: dynamic-flag
 javascript:
   enabled: false
   shared: true

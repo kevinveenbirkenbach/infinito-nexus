@@ -1,0 +1,14 @@
+---
+css:
+  enabled: true
+  shared: true
+  lifecycle: beta
+cdn:
+  enabled: "{{ 'web-svc-cdn' in group_names }}"
+  shared: "{{ 'web-svc-cdn' in group_names }}"
+matomo:
+  enabled: "{{ 'web-app-matomo' in group_names }}"
+  shared: "{{ 'web-app-matomo' in group_names }}"
+prometheus:
+  enabled: "{{ 'web-app-prometheus' in group_names }}"
+  shared: "{{ 'web-app-prometheus' in group_names }}"

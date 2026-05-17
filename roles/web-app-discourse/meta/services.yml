@@ -75,11 +75,10 @@ discourse:
   pids_limit: 1024
   local_login_enabled: "{{ not (lookup('config', 'web-app-discourse', 'services.oidc.enabled') | bool) or (lookup('config', 'web-app-discourse', 'services.ldap.enabled')
     | bool) }}"
-# nocheck: dynamic-flag
-# nocheck: playwright-service-flag — canonical:cdn alias of static-asset provider
+# nocheck: playwright-service-flag — css consumer, no Playwright surface (provider: web-svc-css)
 css:
-  enabled: true
-  shared: true
+  enabled: "{{ 'web-svc-css' in group_names }}"
+  shared: "{{ 'web-svc-css' in group_names }}"
 prometheus:
   enabled: "{{ 'web-app-prometheus' in group_names }}"
   shared: "{{ 'web-app-prometheus' in group_names }}"

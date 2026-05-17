@@ -5,3 +5,11 @@
   ansible.builtin.copy:
     src: "{{ source_directory }}"
     dest: "{{ target_directory }}"
+
+- name: "Redirect {{ lookup('domain', 'web-svc-asset') }} to web-svc-file"
+  include_role:
+    name: web-opt-rdr-domains
+  vars:
+    redirect_domain_mappings:
+      - source: "{{ lookup('domain', 'web-svc-asset') }}"
+        target: "{{ lookup('domain', 'web-svc-file') }}"

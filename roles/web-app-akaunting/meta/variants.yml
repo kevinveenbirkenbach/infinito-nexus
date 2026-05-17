@@ -1,4 +1,3 @@
----
 # Matrix-deploy variant overrides. Both auth-flow
 # variants ride the same `web-app-oauth2-proxy` sidecar in front of
 # the Akaunting web UI.
@@ -29,6 +28,9 @@
     ldap:
       enabled: true
       shared: true
+    css:
+      enabled: true
+      shared: true
 - services:
     dashboard:
       enabled: false
@@ -53,10 +55,16 @@
     ldap:
       enabled: false
       shared: false
+    css:
+      enabled: false
+      shared: false
 - services:
     ldap:
       enabled: true
       shared: true
     oauth2:
+      enabled: false
+      shared: false
+    css:
       enabled: false
       shared: false

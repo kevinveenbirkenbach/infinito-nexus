@@ -1,4 +1,3 @@
----
 # Matrix-deploy variant overrides. `ldap` is pinned in `services.yml`
 # (`enabled: true`, `shared: true`) because LDAP IS the storage backend
 # for FusionDirectory — every variant inherits it, so the variant blocks
@@ -26,6 +25,9 @@
       shared: true
 
 # variant 1: Keycloak/federation surface off; LDAP-backed only.
+    css:
+      enabled: true
+      shared: true
 - services:
     dashboard:
       enabled: false
@@ -47,7 +49,13 @@
       shared: false
 
 # variant 2: LDAP-only path explicitly disables oauth2.
+    css:
+      enabled: false
+      shared: false
 - services:
     oauth2:
+      enabled: false
+      shared: false
+    css:
       enabled: false
       shared: false

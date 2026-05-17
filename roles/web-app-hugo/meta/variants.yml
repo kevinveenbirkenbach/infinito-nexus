@@ -1,4 +1,3 @@
----
 # Matrix-deploy variant overrides for web-app-hugo.
 # See docs/contributing/artefact/files/role/variants.md for the file format.
 
@@ -17,6 +16,9 @@
 
 # variant pinning every dynamic services.yml flag to false so the
 # matrix also exercises the out-of-group_names branch.
+    css:
+      enabled: true
+      shared: true
 - services:
     dashboard:
       enabled: false
@@ -25,5 +27,8 @@
       enabled: false
       shared: false
     prometheus:
+      enabled: false
+      shared: false
+    css:
       enabled: false
       shared: false

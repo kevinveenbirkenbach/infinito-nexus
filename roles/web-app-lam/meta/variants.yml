@@ -1,4 +1,3 @@
----
 # Matrix-deploy variant overrides for this role.
 # See docs/contributing/artefact/files/role/variants.md for the file format.
 #
@@ -28,6 +27,9 @@
       shared: true
 
 # variant 1: Keycloak/federation surface off; LDAP-backed only.
+    css:
+      enabled: true
+      shared: true
 - credentials:
     administrator_password: "'$tr0ng€xampl3PW!"
   services:
@@ -48,7 +50,13 @@
       shared: false
 
 # variant 2: LDAP-only path explicitly disables oauth2.
+    css:
+      enabled: false
+      shared: false
 - services:
     oauth2:
+      enabled: false
+      shared: false
+    css:
       enabled: false
       shared: false

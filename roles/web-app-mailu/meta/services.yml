@@ -153,7 +153,7 @@ front:
   mem_limit: 1g
   pids_limit: 512
 # nocheck: dynamic-flag
-# nocheck: playwright-service-flag — canonical:cdn alias of static-asset provider
+# nocheck: playwright-service-flag — css consumer, no Playwright surface (provider: web-svc-css)
 css:
   enabled: false
   shared: true

@@ -1,4 +1,3 @@
----
 # Matrix-deploy variant overrides for this role. Both variants ride the same OIDC →
 # login-broker → social-app handoff (variant A+); the difference is
 # whether Keycloak's user storage is local (variant 0) or LDAP-
@@ -31,6 +30,9 @@
     ldap:
       enabled: true
       shared: true
+    css:
+      enabled: true
+      shared: true
 - services:
     dashboard:
       enabled: false
@@ -53,10 +55,16 @@
     ldap:
       enabled: false
       shared: false
+    css:
+      enabled: false
+      shared: false
 - services:
     ldap:
       enabled: true
       shared: true
     oauth2:
+      enabled: false
+      shared: false
+    css:
       enabled: false
       shared: false

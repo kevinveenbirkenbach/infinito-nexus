@@ -1,4 +1,3 @@
----
 # Matrix-deploy variant overrides for web-svc-onlyoffice.
 # See docs/contributing/artefact/files/role/variants.md for the file format.
 
@@ -14,6 +13,9 @@
     prometheus:
       enabled: true
       shared: true
+    css:
+      enabled: true
+      shared: true
 - services:
     matomo:
       enabled: false
@@ -21,5 +23,8 @@
     postgres:
       shared: false
     prometheus:
+      enabled: false
+      shared: false
+    css:
       enabled: false
       shared: false

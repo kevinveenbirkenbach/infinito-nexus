@@ -1,4 +1,3 @@
----
 # Matrix-deploy variant overrides. Variant 0 is
 # the canonical OIDC variant (Jenkins's `oic-auth` plugin against
 # Keycloak). Variant 1 flips the role onto the `ldap` plugin against
@@ -25,6 +24,9 @@
     ldap:
       enabled: true
       shared: true
+    css:
+      enabled: true
+      shared: true
 - services:
     oidc:
       enabled: false
@@ -44,10 +46,16 @@
     ldap:
       enabled: false
       shared: false
+    css:
+      enabled: false
+      shared: false
 - services:
     ldap:
       enabled: true
       shared: true
     oidc:
+      enabled: false
+      shared: false
+    css:
       enabled: false
       shared: false
