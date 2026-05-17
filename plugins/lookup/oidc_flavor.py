@@ -18,11 +18,15 @@ class LookupModule(LookupBase):
     Resolves the effective OIDC plugin flavor for the Nextcloud role.
 
     Resolution order:
-      1. An explicit string value at applications['web-app-nextcloud']
+      1. "" if services.oidc.enabled is falsy (no OIDC plugin should be
+         active when the OIDC service itself is disabled — otherwise
+         Nextcloud would still hand off to Keycloak using a redirect_uri
+         that the client no longer whitelists).
+      2. An explicit string value at applications['web-app-nextcloud']
          .services.oidc.flavor (inventory override).
-      2. "oidc_login" if services.ldap.enabled is truthy
+      3. "oidc_login" if services.ldap.enabled is truthy
          (pulsejet/nextcloud-oidc-login, proxy-LDAP capable).
-      3. "sociallogin" otherwise (nextcloud/sociallogin).
+      4. "sociallogin" otherwise (nextcloud/sociallogin).
 
     Mirrors the former `_applications_nextcloud_oidc_flavor` group_vars helper
     that was removed in commit 77a0e16ea.
@@ -45,6 +49,19 @@ class LookupModule(LookupBase):
             roles_dir=kwargs.get("roles_dir"),
             templar=templar,
         )
+
+        oidc_enabled = bool(
+            get(
+                applications=applications,
+                application_id=_APPLICATION_ID,
+                config_path="services.oidc.enabled",
+                strict=False,
+                default=False,
+                skip_missing_app=True,
+            )
+        )
+        if not oidc_enabled:
+            return [""]
 
         explicit = get(
             applications=applications,

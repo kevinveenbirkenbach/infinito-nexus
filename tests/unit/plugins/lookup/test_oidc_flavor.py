@@ -33,11 +33,16 @@ def _load_module(rel_path: str, name: str):
     return mod
 
 
-def _apps(*, ldap_enabled=None, flavor=None, include_app=True):
-    """Build a minimal merged `applications` dict for the Nextcloud role."""
+def _apps(*, oidc_enabled=True, ldap_enabled=None, flavor=None, include_app=True):
+    """Build a minimal merged `applications` dict for the Nextcloud role.
+
+    `oidc_enabled` defaults to True so existing flavor-selection tests
+    stay focused on the ldap/flavor axis. The OIDC-off fast-path has
+    its own dedicated tests.
+    """
     if not include_app:
         return {}
-    oidc_block: dict = {}
+    oidc_block: dict = {"enabled": oidc_enabled}
     if flavor is not None:
         oidc_block["flavor"] = flavor
     services_block: dict = {"oidc": oidc_block}
@@ -97,10 +102,30 @@ class OidcFlavorLookupTests(unittest.TestCase):
             ["sociallogin"],
         )
 
-    def test_missing_application_defaults_to_sociallogin(self):
+    def test_missing_application_returns_empty(self):
+        # No nextcloud entry -> services.oidc.enabled defaults False ->
+        # short-circuit to "" (no OIDC plugin should be active).
         self.assertEqual(
             self._run({"some-other-app": {}}),
-            ["sociallogin"],
+            [""],
+        )
+
+    def test_oidc_disabled_returns_empty(self):
+        # With services.oidc.enabled=false, no OIDC plugin must be selected,
+        # otherwise Nextcloud still hands off to Keycloak with a redirect_uri
+        # the client no longer whitelists. Regression test for variant-1
+        # nextcloud Playwright failures ("Invalid parameter: redirect_uri").
+        self.assertEqual(
+            self._run(_apps(oidc_enabled=False)),
+            [""],
+        )
+        self.assertEqual(
+            self._run(_apps(oidc_enabled=False, ldap_enabled=True)),
+            [""],
+        )
+        self.assertEqual(
+            self._run(_apps(oidc_enabled=False, flavor="oidc_login")),
+            [""],
         )
 
     def test_explicit_flavor_overrides_ldap_fallback(self):
