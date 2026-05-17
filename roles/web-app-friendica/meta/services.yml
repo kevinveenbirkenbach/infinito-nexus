@@ -52,6 +52,48 @@ oauth2:
     port: "80"
   enabled: "{{ 'web-app-keycloak' in group_names }}"
   shared: "{{ 'web-app-keycloak' in group_names }}"
+  # Whitelist semantics: the catch-all `location /` is gated by
+  # oauth2-proxy so the SSO entry (`/login`, the authenticated home /
+  # network / settings views, the admin panel) all force the Keycloak
+  # round-trip. A blacklist that opens `/` and only gates `/login`
+  # strips the POST body on the 401 redirect and breaks ldapauth.
+  # Everything Friendica considers naturally public — federation API,
+  # ActivityPub / NodeInfo / WebFinger discovery, public profile and
+  # post pages, the community feed, media, search, the theme assets
+  # and the static instance-info pages — is whitelisted here so
+  # anonymous visitors (and the Fediwall SPA, foreign instances, and
+  # crawlers) can reach those surfaces without being bounced through
+  # Keycloak.
+  acl:
+    whitelist:
+      # Federation + discovery
+      - /api/v1/
+      - /api/v2/
+      - /.well-known/host-meta
+      - /.well-known/webfinger
+      - /.well-known/nodeinfo
+      - /nodeinfo/
+      - /poco/
+      - /xrd
+      - /noscrape/
+      # Public user-visible content
+      - /profile/
+      - /display/
+      - /community
+      - /search
+      - /photo/
+      - /attach/
+      # Theme + static assets
+      - /static/
+      - /view/
+      - /robots.txt
+      - /opensearch
+      # Static instance-info pages
+      - /friendica
+      - /help/
+      - /credits
+      - /privacy
+      - /tos
 # nocheck: dynamic-flag
 # nocheck: playwright-service-flag — css consumer, no Playwright surface (provider: web-svc-css)
 css:
