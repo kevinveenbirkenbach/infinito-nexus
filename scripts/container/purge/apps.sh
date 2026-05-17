@@ -78,4 +78,8 @@ for entity in "${entities[@]}"; do
 	fi
 done
 
-docker network prune -f
+if docker info >/dev/null 2>&1; then
+	docker network prune -f
+else
+	echo ">>> docker daemon not reachable — skipping 'docker network prune'"
+fi
