@@ -1,3 +1,4 @@
+---
 # Matrix-deploy variant overrides for this role. Variant 0 is the canonical OIDC variant
 # (default). Variant 1 flips the role onto the LDAP variant so the
 # `oidc`/`ldap` Playwright variants both run end-to-end.
