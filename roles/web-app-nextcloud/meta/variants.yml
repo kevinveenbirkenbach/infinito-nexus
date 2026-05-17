@@ -42,9 +42,6 @@
       shared: true
     talk:
       enabled: true
-
-# variant pinning every dynamic services.yml flag to false so the
-# matrix also exercises the out-of-group_names branch.
 - services:
     collabora:
       enabled: false
