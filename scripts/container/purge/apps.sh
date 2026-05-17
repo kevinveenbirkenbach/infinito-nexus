@@ -49,11 +49,6 @@ for app in "${apps[@]}"; do
 		continue
 	fi
 
-	if [[ ! -d "/opt/compose/${entity}" ]]; then
-		echo "!!! WARNING: /opt/compose/${entity} not found for APPS=${app}: skipping"
-		continue
-	fi
-
 	if [[ -z "${seen_entities[${entity}]:-}" ]]; then
 		seen_entities[${entity}]=1
 		entities+=("${entity}")
@@ -72,11 +67,15 @@ fi
 for entity in "${entities[@]}"; do
 	echo
 	echo ">>> Purging entity: ${entity}"
-	bash "${ENTITY_DIR}/db.sh" "${entity}" || true
-	bash "${ENTITY_DIR}/compose.sh" "${entity}" || true
-	bash "${ENTITY_DIR}/dir.sh" "${entity}" || true
 	bash "${ENTITY_DIR}/nginx.sh" "${entity}" || true
-	bash "${ENTITY_DIR}/network.sh" "${entity}" || true
+	if [[ -d "/opt/compose/${entity}" ]]; then
+		bash "${ENTITY_DIR}/db.sh" "${entity}" || true
+		bash "${ENTITY_DIR}/compose.sh" "${entity}" || true
+		bash "${ENTITY_DIR}/dir.sh" "${entity}" || true
+		bash "${ENTITY_DIR}/network.sh" "${entity}" || true
+	else
+		echo ">>> /opt/compose/${entity} not present — skipping compose/db/dir/network purges"
+	fi
 done
 
 docker network prune -f
