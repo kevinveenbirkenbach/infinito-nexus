@@ -100,18 +100,28 @@ def _gated_roots_in_spec(spec_path: Path) -> set[str]:
     """Return the set of env-key roots gated somewhere in the spec
     (any of the four helper APIs, with the helper's own canonicalisation).
 
+    Roles may keep the spec monolithic or split each `test(...)` block
+    into its own `test-<scenario>.js` companion module that
+    `playwright.spec.js` `require()`s; gates declared in any sibling
+    `.js` file in the role's playwright directory count as consumed
+    by the spec.
+
     When the spec imports a persona-flow runner from `./personas`
     (`runGuestFlow` / `runBiberFlow` / `runAdminFlow`), the gates
     inside the shared personas directory count as consumed by the spec
     too — every persona scenario fully drives the underlying
     `skipUnlessServiceEnabled('...')` chain via shared helpers.
     """
-    text = read_text(str(spec_path))
+    spec_dir_texts = [
+        read_text(str(js_path)) for js_path in sorted(spec_path.parent.glob("*.js"))
+    ]
+    combined_text = "\n".join(spec_dir_texts)
     roots: set[str] = {
-        _service_to_env_key_root(name) for name in _HELPER_CALL_RE.findall(text)
+        _service_to_env_key_root(name)
+        for name in _HELPER_CALL_RE.findall(combined_text)
     }
 
-    if any(runner in text for runner in _PERSONA_RUNNERS):
+    if any(runner in combined_text for runner in _PERSONA_RUNNERS):
         personas_prefix = str(PROJECT_ROOT / _SHARED_PERSONAS_DIR) + "/"
         for persona_path in sorted(iter_project_files(extensions=(".js",))):
             if not persona_path.startswith(personas_prefix):

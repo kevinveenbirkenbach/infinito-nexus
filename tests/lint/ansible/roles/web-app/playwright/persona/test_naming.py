@@ -89,7 +89,14 @@ class TestPersonaNaming(unittest.TestCase):
             if not env_path.is_file():
                 continue
 
-            seen = _persona_titles_in_spec(read_text(str(spec_path)))
+            # Roles may keep the spec monolithic, or split each `test(...)`
+            # block into its own `test-<scenario>.js` companion module that
+            # `playwright.spec.js` `require()`s. Aggregate persona titles
+            # across all sibling `.js` files in the role's playwright dir
+            # so the lint stays correct for both layouts.
+            seen: set[str] = set()
+            for js_path in sorted(spec_path.parent.glob("*.js")):
+                seen |= _persona_titles_in_spec(read_text(str(js_path)))
             blocked = _personas_blocked_in_env(read_text(str(env_path)))
             missing = set(_REQUIRED_PERSONAS) - seen - blocked
             if missing:
