@@ -12,6 +12,7 @@ profile: min
 # Paths that ansible-lint should not walk.
 exclude_paths:
   - .cache/
+  - .claude/
   - .github/
   - tests/integration/fixtures/
   - tests/lint/fixtures/
