@@ -12,6 +12,10 @@ module.exports = defineConfig({
   outputDir: "/reports/test-results",
   reporter: [
     ["list"],
+    // `github` emits ::error file=...,line=...::-annotations for failed
+    // tests when the runner exports GITHUB_ACTIONS=true, which surfaces
+    // failures inline on the workflow run page.
+    ["github"],
     ["junit", { outputFile: "/reports/playwright-junit.xml" }],
     ["html", { outputFolder: "/reports/playwright-report", open: "never" }]
   ],

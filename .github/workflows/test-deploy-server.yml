@@ -130,6 +130,16 @@ jobs:
         shell: bash
         run: ./scripts/github/dump_runner_state.sh "post-deploy failure (${{ matrix.apps }})"
 
+      - name: Playwright step summary
+        if: always()
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 utils/github/playwright_summary.py \
+            /tmp/playwright-artifacts \
+            "${{ matrix.apps }}" \
+            >> "$GITHUB_STEP_SUMMARY"
+
       - name: Upload Playwright artifacts
         if: always()
         uses: actions/upload-artifact@v7
