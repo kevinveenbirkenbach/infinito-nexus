@@ -1,7 +1,7 @@
 const { test, expect } = require("@playwright/test");
 
 const { isServiceEnabled } = require("./service-gating");
-const { assertCspMetaParity, assertCspResponseHeader, decodeDotenvQuotedValue, expectNoCspViolations, installCspViolationObserver, normalizeBaseUrl, runAdminFlow, runBiberFlow, runGuestFlow } = require("./personas");
+const { assertCspMetaParity, assertCspResponseHeader, assertInjectedAssetLoadsWithoutCspBlock, decodeDotenvQuotedValue, expectNoCspViolations, installCspViolationObserver, normalizeBaseUrl, runAdminFlow, runBiberFlow, runGuestFlow } = require("./personas");
 test.use({ ignoreHTTPSErrors: true });
 
 function attachDiagnostics(page) {
@@ -361,10 +361,33 @@ for (const target of matomoTargetRoles) {
       target.canonical_url,
       `Expected canonical_url in MATOMO_TARGET_ROLES_JSON entry for ${target.id}`
     ).toBeTruthy();
-    const targetUrl = `${target.canonical_url}/`;
-    await page.goto(targetUrl, { waitUntil: "domcontentloaded" });
-    const html = await page.content();
+    const targetUrl = `${target.canonical_url.replace(/\/$/, "")}/`;
 
+    // Strict load + CSP check: the matomo tracker snippet dynamically
+    // inserts `<script src="…matomo.js">` after DOMContentLoaded. With
+    // waitUntil: "networkidle" the helper waits for that async fetch
+    // to complete, then asserts:
+    //   1. The browser observed a successful 2xx/3xx `script` response
+    //      from the matomo canonical host (matomo.js actually loaded).
+    //   2. No `securitypolicyviolation` event names the matomo host as
+    //      the blocked URI — i.e. CSP `script-src` permits the load.
+    // Falls back to the markup-level checks below for the case where
+    // matomoCanonicalDomain is empty (defensive, should not happen).
+    if (matomoCanonicalDomain) {
+      await assertInjectedAssetLoadsWithoutCspBlock(page, {
+        url: targetUrl,
+        hostCandidates: [matomoCanonicalDomain],
+        resourceTypes: ["script"],
+        label: target.id,
+      });
+    } else {
+      await page.goto(targetUrl, { waitUntil: "domcontentloaded" });
+    }
+
+    // Markup-level reference checks: confirm the role's vhost actually
+    // renders the tracker snippet, not just that some script from the
+    // matomo host happens to load via another path.
+    const html = await page.content();
     expect(
       html,
       `Expected matomo tracker '_paq' marker in ${target.id} HTML body`

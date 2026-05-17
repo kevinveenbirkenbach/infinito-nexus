@@ -238,6 +238,83 @@ async function expectNoCspViolations(page, diagnostics, label) {
   }
 }
 
+/** Register a `response` listener that records every response whose
+ * host matches one of `hostCandidates` (case-insensitive). Optional
+ * `resourceTypes` filters by Playwright's `request.resourceType()`
+ * (e.g. `["stylesheet"]`, `["script"]`). MUST be called BEFORE
+ * `page.goto(...)` so the listener is in place when the consumer
+ * page triggers its injected asset loads. Returns the mutable array
+ * that the listener appends to. */
+function captureAssetLoads(page, { hostCandidates, resourceTypes }) {
+  const hosts = (hostCandidates || []).map((h) => String(h || "").toLowerCase());
+  const types = resourceTypes && resourceTypes.length > 0 ? resourceTypes : null;
+  const loads = [];
+  page.on("response", (response) => {
+    try {
+      const host = new URL(response.url()).host.toLowerCase();
+      if (!hosts.includes(host)) return;
+      if (types && !types.includes(response.request().resourceType())) return;
+      loads.push({
+        url: response.url(),
+        status: response.status(),
+        type: response.request().resourceType(),
+      });
+    } catch {
+      // Skip unparseable URLs; keep listening.
+    }
+  });
+  return loads;
+}
+
+/** Visit `url` and assert (a) the browser observed at least one
+ * successful (HTTP 2xx/3xx) response from one of `hostCandidates`
+ * for the requested `resourceTypes`, AND (b) no
+ * `securitypolicyviolation` event named one of `hostCandidates` as
+ * its `blockedURI` host. Use for provider specs that own the
+ * "consumer X correctly loads injected asset Y without CSP block"
+ * assertion (web-svc-css, web-svc-logout, web-app-matomo). */
+async function assertInjectedAssetLoadsWithoutCspBlock(page, {
+  url,
+  hostCandidates,
+  resourceTypes,
+  label,
+  navTimeout = 30_000,
+  waitUntil = "networkidle",
+}) {
+  const hosts = (hostCandidates || []).map((h) => String(h || "").toLowerCase());
+  const types = resourceTypes && resourceTypes.length > 0 ? resourceTypes : null;
+  const loads = captureAssetLoads(page, { hostCandidates: hosts, resourceTypes: types });
+  await installCspViolationObserver(page);
+  await page.goto(url, { waitUntil, timeout: navTimeout });
+
+  const successful = loads.filter((r) => r.status >= 200 && r.status < 400);
+  expect(
+    successful.length,
+    `${label}: browser observed no successful (2xx/3xx) response from ` +
+    `[${hosts.join(", ")}] for resourceType(s) [${(types || ["*"]).join(", ")}] ` +
+    `during navigation to ${url}. Observed loads: ${JSON.stringify(loads)}. ` +
+    `This means either the role's vhost does not inject the expected ` +
+    `<link>/<script> markup, the asset returned an error, or CSP blocked the request.`
+  ).toBeGreaterThan(0);
+
+  const violations = await readCspViolations(page);
+  const blocks = violations.filter((v) => {
+    let blockedHost = "";
+    try {
+      blockedHost = new URL(v.blockedURI).host.toLowerCase();
+    } catch {
+      return false;
+    }
+    return hosts.includes(blockedHost);
+  });
+  expect(
+    blocks,
+    `${label}: CSP blocked load from injected asset host(s) ` +
+    `[${hosts.join(", ")}] during navigation to ${url}: ${JSON.stringify(blocks)}. ` +
+    `Add the host to the relevant *-src directive in the role's CSP.`
+  ).toEqual([]);
+}
+
 module.exports = {
   assertCspInjections,
   EXPECTED_CSP_DIRECTIVES,
@@ -247,4 +324,6 @@ module.exports = {
   assertCspResponseHeader,
   assertCspMetaParity,
   expectNoCspViolations,
+  captureAssetLoads,
+  assertInjectedAssetLoadsWithoutCspBlock,
 };
