@@ -107,3 +107,16 @@
   loop: "{{ friendica_addons }}"
   loop_control:
     label: "{{ item.name }}"
+
+# First-install `addon enable ldapauth` empirically lands `enabled=1` without persisting Hook::register() rows; this task verifies and recycles to recover.
+- name: Verify ldapauth hooks are registered (re-cycle if missing)
+  script: >-
+    verify_addon_hooks.sh
+    "{{ BIN_COMPOSE }} exec -T --user {{ FRIENDICA_USER }} --workdir {{ FRIENDICA_APPLICATION_DIR }} {{ FRIENDICA_SERVICE }}"
+    ldapauth
+    2
+  args:
+    chdir: "{{ lookup('container', application_id, 'directories.instance') }}"
+    executable: /bin/bash
+  changed_when: false
+  when: FRIENDICA_LDAP_ENABLED | bool
