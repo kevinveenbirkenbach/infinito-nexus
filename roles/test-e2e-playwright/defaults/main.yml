@@ -21,3 +21,10 @@ TEST_E2E_PLAYWRIGHT_ONLY_ROLES: "{{ lookup('status').groups }}"
 TEST_E2E_PLAYWRIGHT_SKIP_ROLES: [] # e.g. ["svc-something"]
 
 TEST_E2E_PLAYWRIGHT_KEEP_ALL: "{{ lookup('env', 'PLAYWRIGHT_KEEP_ALL') }}"
+
+# 0-based matrix-deploy round id. Pushed as an Ansible extra var by
+# `cli/administration/deploy/development/deploy.py` when the matrix
+# orchestrator runs; defaults to 0 for dev / non-matrix invocations
+# so per-(variant, pass) artifact archiving still produces a valid
+# `variant-0/<sync|async>/` slot.
+VARIANT_INDEX: 0

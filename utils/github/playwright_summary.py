@@ -12,6 +12,7 @@ Usage:
 from __future__ import annotations
 
 import contextlib
+import datetime
 import sys
 import xml.etree.ElementTree as ET
 from pathlib import Path
@@ -29,6 +30,33 @@ _STATUS_EMOJI: dict[str, str] = {
     _STATUS_FAILED: "🔴",
     _STATUS_SKIPPED: "🔵",
 }
+
+
+def _to_iso_z(dt: datetime.datetime) -> str:
+    """Format ``dt`` as ``YYYY-MM-DDTHH:MM:SSZ`` (UTC, second precision)."""
+    return dt.astimezone(datetime.UTC).strftime("%Y-%m-%dT%H:%M:%SZ")
+
+
+def _parse_iso_timestamp(value: str | None) -> datetime.datetime | None:
+    """Parse a JUnit ``timestamp`` attribute. Treat tz-naive values as UTC.
+
+    Returns ``None`` when the value is empty or unparseable so callers
+    can fall back to other sources.
+    """
+    if not value:
+        return None
+    try:
+        dt = datetime.datetime.fromisoformat(value)
+    except ValueError:
+        return None
+    if dt.tzinfo is None:
+        dt = dt.replace(tzinfo=datetime.UTC)
+    return dt
+
+
+def _file_mtime_utc(path: Path) -> datetime.datetime:
+    """Last-modified time of *path* as a UTC ``datetime``."""
+    return datetime.datetime.fromtimestamp(path.stat().st_mtime, tz=datetime.UTC)
 
 
 def _format_duration(seconds: float) -> str:
@@ -90,19 +118,51 @@ def _extract_records(cases: list[ET.Element]) -> list[tuple[str, str, str, float
     return records
 
 
+_PASS_NAMES = ("sync", "async")
+
+
+def _path_info(path: Path) -> tuple[str, str, str]:
+    """Extract ``(app, variant, pass)`` from the JUnit file's location.
+
+    The role archives each run into
+    ``<app_id>/variant-<N>/<sync|async>/playwright-junit.xml``. Legacy
+    layouts without the variant or pass nesting fall back to empty
+    strings for the missing dimensions so the renderer can still emit
+    a row.
+    """
+    parent = path.parent
+    grand = parent.parent
+    if parent.name in _PASS_NAMES and grand.name.startswith("variant-"):
+        return grand.parent.name, grand.name, parent.name
+    if parent.name.startswith("variant-"):
+        return grand.name, parent.name, ""
+    return parent.name, "", ""
+
+
 def _summarize_file(path: Path) -> dict | None:
     try:
         root = ET.parse(path).getroot()  # noqa: S314
     except ET.ParseError:
         return None
-    cases: list[ET.Element] = []
+    fallback_ts = _file_mtime_utc(path)
+    enriched: list[tuple[str, str, str, str, float]] = []
     for suite in root.findall(".//testsuite"):
-        cases.extend(suite.findall("testcase"))
-    if not cases:
+        suite_ts = _parse_iso_timestamp(suite.get("timestamp", "")) or fallback_ts
+        cases = suite.findall("testcase")
+        base_records = _extract_records(cases)
+        offset_seconds = 0.0
+        for name, status, msg, duration in base_records:
+            case_start = suite_ts + datetime.timedelta(seconds=offset_seconds)
+            enriched.append((_to_iso_z(case_start), name, status, msg, duration))
+            offset_seconds += duration
+    if not enriched:
         return None
+    app, variant, pass_ = _path_info(path)
     return {
-        "label": path.parent.name,
-        "records": _extract_records(cases),
+        "app": app,
+        "variant": variant,
+        "pass": pass_,
+        "records": enriched,
     }
 
 
@@ -113,11 +173,11 @@ def _render(summaries: list[dict], context: str) -> str:
         "",
         "Status: 🟢 passed · 🔴 failed · 🔵 skipped",
         "",
-        "| App | Test | Status | Duration | Message |",
-        "|---|---|:---:|---:|---|",
+        "| Time | App | Variant | Pass | Test | Status | Duration | Message |",
+        "|---|---|---|---|---|:---:|---:|---|",
     ]
     for s in summaries:
-        for name, status, msg, duration in s["records"]:
+        for time_iso, name, status, msg, duration in s["records"]:
             emoji = _STATUS_EMOJI.get(status, "❔")
             if msg:
                 truncated = msg[:_MAX_MSG_LEN] + (
@@ -127,7 +187,8 @@ def _render(summaries: list[dict], context: str) -> str:
             else:
                 message_cell = ""
             lines.append(
-                f"| `{s['label']}` | {_md_escape_cell(name)} | {emoji} | "
+                f"| `{time_iso}` | `{s['app']}` | {s['variant']} | {s['pass']} | "
+                f"{_md_escape_cell(name)} | {emoji} | "
                 f"{_format_duration(duration)} | {message_cell} |"
             )
     return "\n".join(lines)

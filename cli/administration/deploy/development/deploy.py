@@ -289,6 +289,10 @@ def handler(args: argparse.Namespace) -> int:
             f"matrix-deploy: round {round_index + 1}/{len(plan)} "
             f"inv={inv_dir} variants={round_variants} apps={round_deploy_ids}"
         )
+        # `VARIANT_INDEX` (0-based round id) is pushed as an Ansible extra
+        # var so consumers like the test-e2e-playwright role can namespace
+        # their per-run artifacts by variant + pass and avoid overwriting
+        # earlier rounds' reports.
         print(f"=== {pass_label} PASS 1 (sync) ===")
         rc = _run_deploy(
             compose,
@@ -296,6 +300,7 @@ def handler(args: argparse.Namespace) -> int:
             debug=bool(args.debug),
             passthrough=passthrough,
             inventory_dir=inv_dir,
+            extra_ansible_vars={"VARIANT_INDEX": round_index},
         )
         if rc != 0:
             return rc
@@ -313,7 +318,10 @@ def handler(args: argparse.Namespace) -> int:
                 debug=bool(args.debug),
                 passthrough=passthrough,
                 inventory_dir=inv_dir,
-                extra_ansible_vars={"ASYNC_ENABLED": True},
+                extra_ansible_vars={
+                    "ASYNC_ENABLED": True,
+                    "VARIANT_INDEX": round_index,
+                },
             )
             if rc != 0:
                 return rc

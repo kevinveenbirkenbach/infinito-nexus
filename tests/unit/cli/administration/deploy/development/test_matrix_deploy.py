@@ -446,14 +446,16 @@ class TestHandlerFullCycle(unittest.TestCase):
             for call in run_deploy_mock.call_args_list
         ]
         # Per-variant interleave: round-0 sync, round-0 async, then
-        # round-1 sync, round-1 async.
+        # round-1 sync, round-1 async. Every call carries the
+        # zero-based VARIANT_INDEX so consumers like the
+        # test-e2e-playwright role can namespace their artifacts.
         self.assertEqual(
             sequence,
             [
-                ("/srv/inv-0", None),
-                ("/srv/inv-0", {"ASYNC_ENABLED": True}),
-                ("/srv/inv-1", None),
-                ("/srv/inv-1", {"ASYNC_ENABLED": True}),
+                ("/srv/inv-0", {"VARIANT_INDEX": 0}),
+                ("/srv/inv-0", {"ASYNC_ENABLED": True, "VARIANT_INDEX": 0}),
+                ("/srv/inv-1", {"VARIANT_INDEX": 1}),
+                ("/srv/inv-1", {"ASYNC_ENABLED": True, "VARIANT_INDEX": 1}),
             ],
         )
         # Cleanup still runs once between rounds with the full
@@ -527,8 +529,8 @@ class TestHandlerFullCycle(unittest.TestCase):
         self.assertEqual(
             sequence,
             [
-                ("/srv/inv-1", None),
-                ("/srv/inv-1", {"ASYNC_ENABLED": True}),
+                ("/srv/inv-1", {"VARIANT_INDEX": 1}),
+                ("/srv/inv-1", {"ASYNC_ENABLED": True, "VARIANT_INDEX": 1}),
             ],
         )
         purge_mock.assert_not_called()

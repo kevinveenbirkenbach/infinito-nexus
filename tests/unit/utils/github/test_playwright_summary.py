@@ -10,7 +10,9 @@ directories / no junit files / unparseable junit files.
 
 from __future__ import annotations
 
+import datetime
 import io
+import os
 import unittest
 import xml.etree.ElementTree as ET
 from pathlib import Path
@@ -21,13 +23,13 @@ from utils.github import playwright_summary as ps
 
 _TWO_SUITES_FIXTURE = """<?xml version="1.0" encoding="UTF-8"?>
 <testsuites tests="0" failures="0" skipped="0" time="0">
-  <testsuite name="suite-a" tests="2" failures="1" skipped="0" time="3.5">
+  <testsuite name="suite-a" tests="2" failures="1" skipped="0" time="3.5" timestamp="2026-05-17T12:00:00Z">
     <testcase name="passes" time="1.0"/>
     <testcase name="fails on assertion" time="2.5">
       <failure message="expected 1 got 0">stack-line-1\nstack-line-2</failure>
     </testcase>
   </testsuite>
-  <testsuite name="suite-b" tests="2" failures="0" skipped="1" time="0.5">
+  <testsuite name="suite-b" tests="2" failures="0" skipped="1" time="0.5" timestamp="2026-05-17T12:05:00Z">
     <testcase name="another pass" time="0.5"/>
     <testcase name="skipped one" time="0">
       <skipped message="persona blocked by env"/>
@@ -49,6 +51,33 @@ def _write(path: Path, content: str) -> Path:
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(content, encoding="utf-8")
     return path
+
+
+class TestToIsoZ(unittest.TestCase):
+    def test_utc_datetime_formats_with_z_suffix(self) -> None:
+        self.assertEqual(
+            ps._to_iso_z(
+                datetime.datetime(2026, 5, 17, 12, 34, 56, tzinfo=datetime.UTC)
+            ),
+            "2026-05-17T12:34:56Z",
+        )
+
+
+class TestParseIsoTimestamp(unittest.TestCase):
+    def test_empty_or_missing_returns_none(self) -> None:
+        self.assertIsNone(ps._parse_iso_timestamp(""))
+        self.assertIsNone(ps._parse_iso_timestamp(None))
+
+    def test_unparseable_returns_none(self) -> None:
+        self.assertIsNone(ps._parse_iso_timestamp("bogus"))
+
+    def test_iso_with_z_suffix(self) -> None:
+        result = ps._parse_iso_timestamp("2026-05-17T12:00:00Z")
+        self.assertEqual(ps._to_iso_z(result), "2026-05-17T12:00:00Z")
+
+    def test_naive_iso_treated_as_utc(self) -> None:
+        result = ps._parse_iso_timestamp("2026-05-17T12:00:00")
+        self.assertEqual(ps._to_iso_z(result), "2026-05-17T12:00:00Z")
 
 
 class TestFormatDuration(unittest.TestCase):
@@ -135,21 +164,125 @@ class TestExtractRecords(unittest.TestCase):
         self.assertEqual(records, [("bad-time", "passed", "", 0.0)])
 
 
+class TestPathInfo(unittest.TestCase):
+    def test_full_variant_pass_layout(self) -> None:
+        self.assertEqual(
+            ps._path_info(
+                Path("/tmp/root/web-app-foo/variant-3/async/playwright-junit.xml")
+            ),
+            ("web-app-foo", "variant-3", "async"),
+        )
+        self.assertEqual(
+            ps._path_info(
+                Path("/tmp/root/web-app-foo/variant-0/sync/playwright-junit.xml")
+            ),
+            ("web-app-foo", "variant-0", "sync"),
+        )
+
+    def test_variant_only_layout_leaves_pass_empty(self) -> None:
+        self.assertEqual(
+            ps._path_info(Path("/tmp/root/web-app-foo/variant-3/playwright-junit.xml")),
+            ("web-app-foo", "variant-3", ""),
+        )
+
+    def test_plain_layout_leaves_variant_and_pass_empty(self) -> None:
+        self.assertEqual(
+            ps._path_info(Path("/tmp/root/web-app-foo/playwright-junit.xml")),
+            ("web-app-foo", "", ""),
+        )
+
+    def test_non_variant_subdir_falls_back_to_parent_only(self) -> None:
+        # A directory whose name does not start with ``variant-`` is not
+        # treated as a variant slot; the role uses that prefix as the
+        # archive marker.
+        self.assertEqual(
+            ps._path_info(Path("/tmp/root/web-app-foo/leftover/playwright-junit.xml")),
+            ("leftover", "", ""),
+        )
+
+    def test_pass_dir_without_variant_parent_is_not_recognized(self) -> None:
+        # ``sync`` / ``async`` only count as pass markers when they sit
+        # inside a ``variant-*`` directory; otherwise treat them as a
+        # plain parent dir name.
+        self.assertEqual(
+            ps._path_info(Path("/tmp/root/web-app-foo/sync/playwright-junit.xml")),
+            ("sync", "", ""),
+        )
+
+
 class TestSummarizeFile(unittest.TestCase):
-    def test_uses_parent_dir_as_label_and_extracts_records(self) -> None:
+    def test_plain_layout_fills_only_app(self) -> None:
         with TemporaryDirectory() as tmp:
             xml_path = _write(
                 Path(tmp) / "web-app-foo" / "playwright-junit.xml", _TWO_SUITES_FIXTURE
             )
             summary = ps._summarize_file(xml_path)
         assert summary is not None
-        self.assertEqual(summary["label"], "web-app-foo")
+        self.assertEqual(summary["app"], "web-app-foo")
+        self.assertEqual(summary["variant"], "")
+        self.assertEqual(summary["pass"], "")
         self.assertEqual(len(summary["records"]), 4)
-        self.assertEqual(summary["records"][1][1], "failed")
-        self.assertEqual(summary["records"][3][1], "skipped")
-        # Durations come straight from each testcase's `time` attribute.
-        self.assertAlmostEqual(summary["records"][0][3], 1.0)
-        self.assertAlmostEqual(summary["records"][1][3], 2.5)
+        # Per-case records are now 5-tuples (time, name, status, msg, duration).
+        self.assertEqual(summary["records"][1][2], "failed")
+        self.assertEqual(summary["records"][3][2], "skipped")
+        self.assertAlmostEqual(summary["records"][0][4], 1.0)
+        self.assertAlmostEqual(summary["records"][1][4], 2.5)
+
+    def test_variant_and_pass_layout_populates_all_three_keys(self) -> None:
+        with TemporaryDirectory() as tmp:
+            xml_path = _write(
+                Path(tmp)
+                / "web-app-foo"
+                / "variant-2"
+                / "async"
+                / "playwright-junit.xml",
+                _TWO_SUITES_FIXTURE,
+            )
+            summary = ps._summarize_file(xml_path)
+        assert summary is not None
+        self.assertEqual(summary["app"], "web-app-foo")
+        self.assertEqual(summary["variant"], "variant-2")
+        self.assertEqual(summary["pass"], "async")
+
+    def test_per_case_timestamp_uses_suite_timestamp_plus_offset(self) -> None:
+        with TemporaryDirectory() as tmp:
+            xml_path = _write(
+                Path(tmp) / "web-app-foo" / "playwright-junit.xml",
+                _TWO_SUITES_FIXTURE,
+            )
+            summary = ps._summarize_file(xml_path)
+        assert summary is not None
+        records = summary["records"]
+        # Suite-a starts at 12:00:00Z. First case starts there.
+        self.assertEqual(records[0][0], "2026-05-17T12:00:00Z")
+        # Second case starts after the first case's 1.0s duration.
+        self.assertEqual(records[1][0], "2026-05-17T12:00:01Z")
+        # Suite-b starts at 12:05:00Z — third case (first in suite-b).
+        self.assertEqual(records[2][0], "2026-05-17T12:05:00Z")
+        # Fourth case starts after the third's 0.5s duration.
+        # Note: 12:05:00 + 0.5s → still 12:05:00 with second precision.
+        self.assertEqual(records[3][0], "2026-05-17T12:05:00Z")
+
+    def test_missing_timestamp_falls_back_to_file_mtime(self) -> None:
+        no_timestamp_fixture = (
+            '<?xml version="1.0" encoding="UTF-8"?>'
+            '<testsuites><testsuite name="t" time="1.0">'
+            '<testcase name="ok" time="1.0"/>'
+            "</testsuite></testsuites>"
+        )
+        with TemporaryDirectory() as tmp:
+            xml_path = _write(
+                Path(tmp) / "web-app-foo" / "playwright-junit.xml",
+                no_timestamp_fixture,
+            )
+            # Force a known mtime so the fallback is deterministic.
+            target = datetime.datetime(
+                2025, 5, 17, 5, 34, 56, tzinfo=datetime.UTC
+            ).timestamp()
+            os.utime(xml_path, (target, target))
+            summary = ps._summarize_file(xml_path)
+        assert summary is not None
+        self.assertEqual(summary["records"][0][0], "2025-05-17T05:34:56Z")
 
     def test_unparseable_returns_none(self) -> None:
         with TemporaryDirectory() as tmp:
@@ -165,9 +298,19 @@ class TestSummarizeFile(unittest.TestCase):
             self.assertIsNone(ps._summarize_file(xml_path))
 
 
+_T0 = "2026-05-17T12:00:00Z"
+
+
 class TestRender(unittest.TestCase):
-    def _summary(self, label: str, records: list[tuple[str, str, str, float]]) -> dict:
-        return {"label": label, "records": records}
+    def _summary(
+        self,
+        app: str,
+        records: list[tuple[str, str, str, str, float]],
+        *,
+        variant: str = "",
+        pass_: str = "",
+    ) -> dict:
+        return {"app": app, "variant": variant, "pass": pass_, "records": records}
 
     def test_emits_one_row_per_test_with_status_emoji(self) -> None:
         out = ps._render(
@@ -175,22 +318,36 @@ class TestRender(unittest.TestCase):
                 self._summary(
                     "web-app-foo",
                     [
-                        ("test pass", "passed", "", 0.3),
-                        ("test fail", "failed", "boom", 12.4),
-                        ("test skip", "skipped", "blocked", 0.0),
+                        (_T0, "test pass", "passed", "", 0.3),
+                        (_T0, "test fail", "failed", "boom", 12.4),
+                        (_T0, "test skip", "skipped", "blocked", 0.0),
                     ],
+                    variant="variant-1",
+                    pass_="sync",
                 ),
             ],
             "web-app-foo",
         )
         self.assertIn("### 🎭 Playwright — web-app-foo", out)
-        self.assertIn("| App | Test | Status | Duration | Message |", out)
-        self.assertIn("| `web-app-foo` | test pass | 🟢 | 0.3s |  |", out)
-        self.assertIn("| `web-app-foo` | test fail | 🔴 | 12.4s | boom |", out)
-        self.assertIn("| `web-app-foo` | test skip | 🔵 | 0.0s | blocked |", out)
+        self.assertIn(
+            "| Time | App | Variant | Pass | Test | Status | Duration | Message |",
+            out,
+        )
+        self.assertIn(
+            f"| `{_T0}` | `web-app-foo` | variant-1 | sync | test pass | 🟢 | 0.3s |  |",
+            out,
+        )
+        self.assertIn(
+            f"| `{_T0}` | `web-app-foo` | variant-1 | sync | test fail | 🔴 | 12.4s | boom |",
+            out,
+        )
+        self.assertIn(
+            f"| `{_T0}` | `web-app-foo` | variant-1 | sync | test skip | 🔵 | 0.0s | blocked |",
+            out,
+        )
 
     def test_status_legend_is_emitted(self) -> None:
-        out = ps._render([self._summary("foo", [("t", "passed", "", 1.0)])], "ctx")
+        out = ps._render([self._summary("foo", [(_T0, "t", "passed", "", 1.0)])], "ctx")
         self.assertIn("🟢 passed", out)
         self.assertIn("🔴 failed", out)
         self.assertIn("🔵 skipped", out)
@@ -198,21 +355,47 @@ class TestRender(unittest.TestCase):
     def test_multiple_apps_grouped_in_single_table(self) -> None:
         out = ps._render(
             [
-                self._summary("a", [("t1", "passed", "", 0.1)]),
-                self._summary("b", [("t2", "failed", "x", 65.0)]),
+                self._summary(
+                    "a",
+                    [(_T0, "t1", "passed", "", 0.1)],
+                    variant="variant-0",
+                    pass_="sync",
+                ),
+                self._summary(
+                    "b",
+                    [(_T0, "t2", "failed", "x", 65.0)],
+                    variant="variant-0",
+                    pass_="async",
+                ),
             ],
             "",
         )
         self.assertTrue(out.startswith("### 🎭 Playwright\n"))
-        self.assertIn("| `a` | t1 | 🟢 | 0.1s |  |", out)
-        self.assertIn("| `b` | t2 | 🔴 | 1m 5s | x |", out)
+        self.assertIn(f"| `{_T0}` | `a` | variant-0 | sync | t1 | 🟢 | 0.1s |  |", out)
+        self.assertIn(
+            f"| `{_T0}` | `b` | variant-0 | async | t2 | 🔴 | 1m 5s | x |", out
+        )
         # Should have a single combined table, not two.
-        self.assertEqual(out.count("| App | Test | Status | Duration | Message |"), 1)
+        self.assertEqual(
+            out.count(
+                "| Time | App | Variant | Pass | Test | Status | Duration | Message |"
+            ),
+            1,
+        )
+
+    def test_plain_layout_leaves_variant_and_pass_cells_empty(self) -> None:
+        out = ps._render(
+            [self._summary("foo", [(_T0, "t1", "passed", "", 1.0)])],
+            "ctx",
+        )
+        # Variant and Pass columns are present but empty for legacy/
+        # single-run layouts.
+        self.assertIn(f"| `{_T0}` | `foo` |  |  | t1 | 🟢 | 1.0s |  |", out)
 
     def test_message_is_truncated(self) -> None:
         long_msg = "x" * (ps._MAX_MSG_LEN + 50)
         out = ps._render(
-            [self._summary("foo", [("name", "failed", long_msg, 1.0)])],
+            [self._summary("foo", [(_T0, "name", "failed", long_msg, 1.0)])],
             "ctx",
         )
         truncated = "x" * ps._MAX_MSG_LEN + "…"
@@ -223,7 +406,7 @@ class TestRender(unittest.TestCase):
             [
                 self._summary(
                     "foo",
-                    [('up{job="x|y"} == 1', "failed", "got 0|1", 1.0)],
+                    [(_T0, 'up{job="x|y"} == 1', "failed", "got 0|1", 1.0)],
                 )
             ],
             "ctx",
@@ -273,19 +456,32 @@ class TestMain(unittest.TestCase):
     def test_happy_path_renders_table(self) -> None:
         with TemporaryDirectory() as tmp:
             _write(
-                Path(tmp) / "web-app-foo" / "playwright-junit.xml",
+                Path(tmp)
+                / "web-app-foo"
+                / "variant-1"
+                / "sync"
+                / "playwright-junit.xml",
                 _TWO_SUITES_FIXTURE,
             )
             rc, out, _err = self._run(tmp, "web-app-foo")
         self.assertEqual(rc, 0)
         self.assertIn("### 🎭 Playwright — web-app-foo", out)
-        self.assertIn("| `web-app-foo` | passes | 🟢 | 1.0s |  |", out)
+        # Suite-a starts at 12:00:00Z; first case sits at that timestamp.
         self.assertIn(
-            "| `web-app-foo` | fails on assertion | 🔴 | 2.5s | expected 1 got 0 |",
+            "| `2026-05-17T12:00:00Z` | `web-app-foo` | variant-1 | sync | passes | "
+            "🟢 | 1.0s |  |",
             out,
         )
         self.assertIn(
-            "| `web-app-foo` | skipped one | 🔵 | 0.0s | persona blocked by env |",
+            "| `2026-05-17T12:00:01Z` | `web-app-foo` | variant-1 | sync | "
+            "fails on assertion | 🔴 | 2.5s | expected 1 got 0 |",
+            out,
+        )
+        # Suite-b starts at 12:05:00Z; skipped case is its second testcase
+        # (after a 0.5s pass that rounds to second-precision 0).
+        self.assertIn(
+            "| `2026-05-17T12:05:00Z` | `web-app-foo` | variant-1 | sync | "
+            "skipped one | 🔵 | 0.0s | persona blocked by env |",
             out,
         )
 
