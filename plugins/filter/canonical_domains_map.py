@@ -1,11 +1,31 @@
 from collections.abc import Iterable
 from pathlib import Path
 
-from ansible.errors import AnsibleFilterError
+from ansible.errors import AnsibleError, AnsibleFilterError
 
 from utils.domains.list import render_domain_value
 from utils.roles.dependency_resolver import RoleDependencyResolver
 from utils.roles.entity_name import get_entity_name
+from utils.templating.ansible import render_ansible_strict
+
+
+def _resolve_domain_primary(domain_primary):
+    if not isinstance(domain_primary, str):
+        return domain_primary
+    if "{{" not in domain_primary and "{%" not in domain_primary:
+        return domain_primary
+    try:
+        return render_ansible_strict(
+            templar=None,
+            raw=domain_primary,
+            var_name="DOMAIN_PRIMARY",
+            err_prefix="canonical_domains_map",
+            variables={},
+        )
+    except AnsibleError as e:
+        raise AnsibleFilterError(
+            f"canonical_domains_map: failed to resolve DOMAIN_PRIMARY {domain_primary!r}: {e}"
+        ) from e
 
 
 class FilterModule:
@@ -31,6 +51,8 @@ class FilterModule:
             raise AnsibleFilterError(
                 f"'apps' must be a dict, got {type(apps).__name__}"
             )
+
+        domain_primary = _resolve_domain_primary(domain_primary)
 
         app_keys = set(apps.keys())
         seed_keys = set(seed) if seed is not None else app_keys
@@ -104,7 +126,13 @@ class FilterModule:
 
     def _add_default_domain(self, app_id, domain_primary, seen_domains, result):
         entity_name = get_entity_name(app_id)
-        default_domain = f"{entity_name}.{domain_primary}"
+        dp = str(domain_primary)
+        if "{{" in dp or "}}" in dp or "{%" in dp:
+            raise AnsibleFilterError(
+                f"canonical_domains_map: domain_primary is not rendered "
+                f"(contains Jinja expression): {domain_primary!r}"
+            )
+        default_domain = f"{entity_name}.{dp}"
         if default_domain in seen_domains:
             raise AnsibleFilterError(
                 f"Domain '{default_domain}' is already configured for "
