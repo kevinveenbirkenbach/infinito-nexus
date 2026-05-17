@@ -408,7 +408,6 @@ module.exports = {
   waitForVisibleCandidate,
   dismissBlockingNextcloudModals,
   clickUserMenuWithModalRetry,
-  enterNextcloudLoginThroughVisibleEntryPoint,
   loginToStandaloneNextcloud,
   logoutStandaloneNextcloud,
   loginToStandaloneNextcloudWithRetry,

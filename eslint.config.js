@@ -64,7 +64,7 @@ module.exports = [
   },
   {
     files: [
-      "roles/**/files/playwright/playwright.spec.js",
+      "roles/**/files/playwright/**/*.js",
       "roles/test-e2e-playwright/files/personas/**/*.js",
     ],
     plugins: { playwright },
