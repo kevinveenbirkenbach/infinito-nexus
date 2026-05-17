@@ -14,8 +14,8 @@ sit in a branch guarded by one of these allowed conditions:
   ``PERSONA_ADMINISTRATOR_BLOCKED`` / ``PERSONA_GUEST_BLOCKED``
   (matched against ``process.env.<FLAG>``),
 * an auth-less persona-collapse case: a guard that AND-combines
-  emptiness of ``canonicalDomain`` with ``appBaseUrl`` /
-  ``dashboardBaseUrl`` (persona-collapse exception),
+  emptiness of ``canonicalDomain`` with ``appBaseUrl``
+  (persona-collapse exception),
 * a service-gate skip via ``safeSkipUnlessEnabled(...)`` /
   ``skipUnlessServiceEnabled(...)``: that helper itself owns the
   skip-on-disabled-service contract.
@@ -61,7 +61,6 @@ _ALLOWED_SKIP_GUARDS: tuple[str, ...] = (
     # Auth-less persona-collapse exception:
     "!canonicalDomain",
     "!appBaseUrl",
-    "!dashboardBaseUrl",
     # Service-gate skip — the helper itself owns the contract:
     "safeSkipUnlessEnabled",
     "skipUnlessServiceEnabled",

@@ -36,6 +36,12 @@ test.beforeEach(() => {
 // It must be accessible without authentication (prometheus scrapes it without bearer tokens).
 // If this returns 401/403 the nginx ACL whitelist for /metricz is misconfigured.
 // If it returns HTML the location = /metricz block is missing from the nginx vhost config.
+//
+// The body is also asserted to carry an `app="<role_id>"` label for every consumer role
+// declared in `roles_with_service('prometheus')`. lua-resty-prometheus tags each request
+// with the vhost's role id, so a missing label means that role's vhost is not registered
+// in the shared metrics dict. This subsumes the per-app metricz-label spot checks that
+// used to live in each consumer role's own playwright.spec.js.
 test("metricz endpoint is accessible and returns prometheus text format", async ({ request }) => {
   const metriczUrl = `${prometheusBaseUrl.replace(/\/$/, "")}/metricz`;
   const response = await request.get(metriczUrl);
@@ -57,6 +63,14 @@ test("metricz endpoint is accessible and returns prometheus text format", async 
     body,
     "/metricz must expose nginx_http_requests_total — lua-resty-prometheus metric not found"
   ).toContain("nginx_http_requests_total");
+
+  for (const target of prometheusTargetRoles) {
+    expect(
+      body,
+      `/metricz must contain metrics labeled app="${target.id}" — ` +
+      `the ${target.id} vhost is not registered in lua-resty-prometheus.`
+    ).toContain(`app="${target.id}"`);
+  }
 });
 
 // Scenario II: direct goto Prometheus → SSO login (as admin) → verify Prometheus UI → logout
@@ -226,11 +240,15 @@ test("prometheus scrape: every consumer role reports up=1", async ({ page }) => 
     const needles = [target.id.toLowerCase(), String(target.canonical_domain || "").toLowerCase()].filter(Boolean);
     const matching = results.filter((entry) => {
       const labels = entry?.metric || {};
-      const haystack = `${labels.job || ""} ${labels.instance || ""}`.toLowerCase();
+      // Read labels.app so native-metrics scrape jobs (which set the
+      // app label explicitly via `roles/<role>/templates/prometheus.yml.j2`)
+      // get matched alongside blackbox-healthz targets (which match
+      // via the canonical domain on labels.instance).
+      const haystack = `${labels.job || ""} ${labels.instance || ""} ${labels.app || ""}`.toLowerCase();
       return needles.some((needle) => needle && haystack.includes(needle));
     });
     if (matching.length === 0) {
-      failures.push(`${target.id}: no matching prometheus scrape target found (job/instance must mention "${target.id}" or "${target.canonical_domain}")`);
+      failures.push(`${target.id}: no matching prometheus scrape target found (job/instance/app must mention "${target.id}" or "${target.canonical_domain}")`);
       continue;
     }
     const down = matching.filter((entry) => !Array.isArray(entry.value) || entry.value[1] !== "1");

@@ -1,18 +1,18 @@
 """Lint: every role whose `templates/playwright.env.j2` ships
-`DASHBOARD_SERVICE_ENABLED=` MUST also render `DASHBOARD_BASE_URL`,
-`PROMETHEUS_BASE_URL`, and `MATOMO_BASE_URL` so the shared persona
-helpers can actually navigate.
+`DASHBOARD_SERVICE_ENABLED=` MUST also render `MATOMO_BASE_URL` so the
+shared persona helpers can actually compose CSP allow-list checks.
 
 Why
 ---
 
-The persona helpers (`roles/test-e2e-playwright/files/personas/{biber,
-admin,guest}.js`) collapse the persona scenario when their required
-URLs are empty (the persona-collapse exception). A role
-that declares `dashboard: enabled` but forgets to render
-`DASHBOARD_BASE_URL` therefore makes the personas SILENTLY SKIP rather
-than fail — the deploy reports green but the personas never actually
-ran. This lint rejects that combination outright.
+The CSP helper at
+``roles/test-e2e-playwright/files/personas/utils/csp.js`` reads
+``process.env.MATOMO_BASE_URL`` to whitelist the Matomo origin when the
+persona navigates an SSO-gated app. A role that declares
+``dashboard: enabled`` but forgets to render ``MATOMO_BASE_URL`` makes
+that whitelist empty, which causes the persona CSP probe to flag every
+Matomo request as a violation even though Matomo is the intended
+destination.
 
 Suppression
 -----------
@@ -37,11 +37,7 @@ from . import PROJECT_ROOT
 ROLES_DIR = PROJECT_ROOT / "roles"
 _ENV_TEMPLATE_REL = "templates/playwright.env.j2"  # nocheck: role-file-spot
 _DASHBOARD_FLAG_RE = re.compile(r"^\s*DASHBOARD_SERVICE_ENABLED\s*=", re.MULTILINE)
-_REQUIRED_URLS: tuple[str, ...] = (
-    "DASHBOARD_BASE_URL",
-    "PROMETHEUS_BASE_URL",
-    "MATOMO_BASE_URL",
-)
+_REQUIRED_URLS: tuple[str, ...] = ("MATOMO_BASE_URL",)
 _RULE = "persona-required-envs"
 
 
