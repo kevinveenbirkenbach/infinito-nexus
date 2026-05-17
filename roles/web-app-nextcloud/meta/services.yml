@@ -251,11 +251,10 @@ talk_recording:
   mem_limit: 6g
   pids_limit: 1024
   min_storage: 1GB
-# nocheck: dynamic-flag
-# nocheck: playwright-service-flag — css consumer, no Playwright surface (provider: web-svc-css)
+# nocheck: playwright-service-flag — verified by web-svc-css provider spec
 css:
-  enabled: false
-  shared: true
+  enabled: "{{ 'web-svc-css' in group_names }}"
+  shared: "{{ 'web-svc-css' in group_names }}"
 # nocheck: dynamic-flag
 # nocheck: playwright-service-flag — captcha backend, infrastructural
 hcaptcha:

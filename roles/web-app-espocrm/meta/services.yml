@@ -50,10 +50,9 @@ websocket:
   mem_reservation: 0.25g
   mem_limit: 0.5g
   pids_limit: 384
-# nocheck: dynamic-flag
 css:
-  enabled: false
-  shared: true
+  enabled: "{{ 'web-svc-css' in group_names }}"
+  shared: "{{ 'web-svc-css' in group_names }}"
 # nocheck: dynamic-flag
 recaptcha:
   enabled: "{{ RECAPTCHA_ENABLED | bool }}"

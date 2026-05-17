@@ -8,6 +8,9 @@
 - services:
     phpmyadmin:
       autologin: true
+    css:
+      enabled: true
+      shared: true
     dashboard:
       enabled: true
       shared: true
@@ -26,6 +29,9 @@
       enabled: true
       shared: true
 - services:
+    css:
+      enabled: false
+      shared: false
     dashboard:
       enabled: false
       shared: false

@@ -8,6 +8,9 @@
     coturn:
       enabled: true
       shared: true
+    css:
+      enabled: true
+      shared: true
     dashboard:
       enabled: true
       shared: true
@@ -36,6 +39,9 @@
 # matrix also exercises the out-of-group_names branch.
 - services:
     coturn:
+      enabled: false
+      shared: false
+    css:
       enabled: false
       shared: false
     dashboard:

@@ -11,6 +11,9 @@
 # variant 0: canonical Single-Site deploy.
 
 - services:
+    css:
+      enabled: true
+      shared: true
     discourse:
       enabled: true
       shared: true
@@ -41,6 +44,9 @@
     wordpress:
       multisite:
         enabled: true
+    css:
+      enabled: false
+      shared: false
     discourse:
       enabled: false
       shared: false

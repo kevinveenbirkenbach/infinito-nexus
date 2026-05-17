@@ -37,10 +37,9 @@ oauth2:
     host: application
   allowed_groups:
     - "{{ lookup('rbac_group_path', application_id='web-app-phpmyadmin', role='administrator') }}"
-# nocheck: dynamic-flag
 css:
-  enabled: false
-  shared: true
+  enabled: "{{ 'web-svc-css' in group_names }}"
+  shared: "{{ 'web-svc-css' in group_names }}"
 # nocheck: email
 # nocheck: dynamic-flag
 email:

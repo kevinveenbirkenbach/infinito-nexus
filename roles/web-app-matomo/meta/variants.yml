@@ -6,6 +6,9 @@
 # matrix exercises the in-group_names branch of web-app-matomo.
 
 - services:
+    css:
+      enabled: true
+      shared: true
     dashboard:
       enabled: true
       shared: true
@@ -18,6 +21,9 @@
       enabled: true
       shared: true
 - services:
+    css:
+      enabled: false
+      shared: false
     dashboard:
       enabled: false
       shared: false

@@ -11,6 +11,9 @@
     coturn:
       enabled: true
       shared: true
+    css:
+      enabled: true
+      shared: true
     dashboard:
       enabled: true
       shared: true
@@ -47,6 +50,9 @@
       enabled: false
       shared: false
     coturn:
+      enabled: false
+      shared: false
+    css:
       enabled: false
       shared: false
     dashboard:

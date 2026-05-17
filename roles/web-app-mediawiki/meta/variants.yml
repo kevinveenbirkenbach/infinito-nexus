@@ -5,6 +5,9 @@
 # variant pinning every dynamic services.yml flag to true so the
 # matrix exercises the in-group_names branch of web-app-mediawiki.
 - services:
+    css:
+      enabled: true
+      shared: true
     dashboard:
       enabled: true
       shared: true
@@ -29,6 +32,9 @@
 # variant pinning every dynamic services.yml flag to false so the
 # matrix also exercises the out-of-group_names branch.
 - services:
+    css:
+      enabled: false
+      shared: false
     dashboard:
       enabled: false
       shared: false
