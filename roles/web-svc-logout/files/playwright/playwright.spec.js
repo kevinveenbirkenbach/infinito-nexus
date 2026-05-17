@@ -38,18 +38,6 @@ const logoutTargetRoles = (() => {
   }
 })();
 
-// Per-consumer logout-script load + CSP compliance: strict criteria
-// (covers the regression where the `<script src="…/logout.js">` is in
-// the HTML but the browser can't actually load it):
-//   1. The browser observes a successful HTTP 2xx/3xx response for a
-//      `script` resource from the shared CDN host (where logout.js
-//      lives, see sys-front-inj-logout/templates/head_sub.j2).
-//   2. No `securitypolicyviolation` event names the CDN host as the
-//      blocked URI — i.e. CSP `script-src` permits the load.
-// Consumer roles suppress the env-services match guard for `logout`
-// with `# nocheck: playwright-service-flag — verified by web-svc-logout
-// provider spec`; the parameterised assertion below is what owns the
-// per-role injection coverage.
 for (const target of logoutTargetRoles) {
   test(`universal-logout: ${target.id} actually loads logout.js without CSP block`, async ({ page }) => {
     expect(
@@ -58,9 +46,6 @@ for (const target of logoutTargetRoles) {
     ).toBeTruthy();
     const url = `${target.canonical_url.replace(/\/$/, "")}/`;
 
-    // Independent HTML reference assertion stays — confirms the
-    // injection markup is present in the response body even if the
-    // browser swaps document for an inline error page later.
     const referenceResp = await page.request.get(url, { ignoreHTTPSErrors: true });
     expect(
       referenceResp.status(),
@@ -72,7 +57,6 @@ for (const target of logoutTargetRoles) {
       `${target.id}: HTML response from ${url} does not contain a 'logout.js' script reference`
     ).toContain("logout.js");
 
-    // Strict load + CSP check via real browser navigation.
     await assertInjectedAssetLoadsWithoutCspBlock(page, {
       url,
       hostCandidates: cdnAssetHosts,

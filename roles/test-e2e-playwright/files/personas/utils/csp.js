@@ -238,13 +238,6 @@ async function expectNoCspViolations(page, diagnostics, label) {
   }
 }
 
-/** Register a `response` listener that records every response whose
- * host matches one of `hostCandidates` (case-insensitive). Optional
- * `resourceTypes` filters by Playwright's `request.resourceType()`
- * (e.g. `["stylesheet"]`, `["script"]`). MUST be called BEFORE
- * `page.goto(...)` so the listener is in place when the consumer
- * page triggers its injected asset loads. Returns the mutable array
- * that the listener appends to. */
 function captureAssetLoads(page, { hostCandidates, resourceTypes }) {
   const hosts = (hostCandidates || []).map((h) => String(h || "").toLowerCase());
   const types = resourceTypes && resourceTypes.length > 0 ? resourceTypes : null;
@@ -260,19 +253,12 @@ function captureAssetLoads(page, { hostCandidates, resourceTypes }) {
         type: response.request().resourceType(),
       });
     } catch {
-      // Skip unparseable URLs; keep listening.
+      // ignore unparseable URLs
     }
   });
   return loads;
 }
 
-/** Visit `url` and assert (a) the browser observed at least one
- * successful (HTTP 2xx/3xx) response from one of `hostCandidates`
- * for the requested `resourceTypes`, AND (b) no
- * `securitypolicyviolation` event named one of `hostCandidates` as
- * its `blockedURI` host. Use for provider specs that own the
- * "consumer X correctly loads injected asset Y without CSP block"
- * assertion (web-svc-css, web-svc-logout, web-app-matomo). */
 async function assertInjectedAssetLoadsWithoutCspBlock(page, {
   url,
   hostCandidates,

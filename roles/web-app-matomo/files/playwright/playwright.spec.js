@@ -363,16 +363,6 @@ for (const target of matomoTargetRoles) {
     ).toBeTruthy();
     const targetUrl = `${target.canonical_url.replace(/\/$/, "")}/`;
 
-    // Strict load + CSP check: the matomo tracker snippet dynamically
-    // inserts `<script src="…matomo.js">` after DOMContentLoaded. With
-    // waitUntil: "networkidle" the helper waits for that async fetch
-    // to complete, then asserts:
-    //   1. The browser observed a successful 2xx/3xx `script` response
-    //      from the matomo canonical host (matomo.js actually loaded).
-    //   2. No `securitypolicyviolation` event names the matomo host as
-    //      the blocked URI — i.e. CSP `script-src` permits the load.
-    // Falls back to the markup-level checks below for the case where
-    // matomoCanonicalDomain is empty (defensive, should not happen).
     if (matomoCanonicalDomain) {
       await assertInjectedAssetLoadsWithoutCspBlock(page, {
         url: targetUrl,
@@ -384,9 +374,6 @@ for (const target of matomoTargetRoles) {
       await page.goto(targetUrl, { waitUntil: "domcontentloaded" });
     }
 
-    // Markup-level reference checks: confirm the role's vhost actually
-    // renders the tracker snippet, not just that some script from the
-    // matomo host happens to load via another path.
     const html = await page.content();
     expect(
       html,

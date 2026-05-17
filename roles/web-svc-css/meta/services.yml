@@ -1,6 +1,5 @@
 ---
-# nocheck: playwright-service-flag — self-provider; consumer indexing
-# is verified by this role's own files/playwright/playwright.spec.js
+# nocheck: playwright-service-flag — self-provider
 css:
   enabled: true
   shared: true
