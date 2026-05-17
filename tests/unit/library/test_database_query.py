@@ -71,14 +71,22 @@ class BuildCmdMariadbTests(unittest.TestCase):
     def _mariadb_config(self):
         return dict(_BASE_CONFIG, type="mariadb", container="snipe-database")
 
-    def test_mariadb_includes_user_db_and_batch(self):
+    def test_mariadb_prefers_mariadb_binary_by_default(self):
         cmd, env = _DB_MOD._build_cmd(self._mariadb_config(), expect_rows=False)
         self.assertEqual(env, {"MYSQL_PWD": "s3cret"})
-        self.assertIn("mysql", cmd)
+        self.assertIn("mariadb", cmd)
+        self.assertNotIn("mysql", cmd)
         self.assertEqual(cmd[cmd.index("-u") + 1], "peertube")
         self.assertEqual(cmd[cmd.index("-D") + 1], "peertube")
         self.assertIn("--batch", cmd)
         self.assertNotIn("s3cret", cmd)
+
+    def test_mariadb_falls_back_to_mysql_when_explicitly_requested(self):
+        cmd, _ = _DB_MOD._build_cmd(
+            self._mariadb_config(), expect_rows=False, binary="mysql"
+        )
+        self.assertIn("mysql", cmd)
+        self.assertNotIn("mariadb", cmd)
 
     def test_mariadb_expect_rows_adds_skip_column_names(self):
         cmd, _ = _DB_MOD._build_cmd(self._mariadb_config(), expect_rows=True)
@@ -225,7 +233,7 @@ class EnginesRegistryTests(unittest.TestCase):
     """Guard the dispatch-table shape so new engines stay declarative."""
 
     REQUIRED_KEYS = (
-        "binary",
+        "binaries",
         "user_flag",
         "db_flag",
         "shared_flags",
@@ -247,6 +255,49 @@ class EnginesRegistryTests(unittest.TestCase):
             with self.subTest(engine=name):
                 for key in self.REQUIRED_KEYS:
                     self.assertIn(key, spec, f"{name!r} missing dialect key {key!r}")
+
+    def test_each_engine_binaries_is_non_empty_tuple(self):
+        for name, spec in _DB_MOD._ENGINES.items():
+            with self.subTest(engine=name):
+                self.assertIsInstance(spec["binaries"], tuple)
+                self.assertGreater(len(spec["binaries"]), 0)
+
+    def test_mariadb_prefers_mariadb_over_legacy_mysql(self):
+        self.assertEqual(_DB_MOD._ENGINES["mariadb"]["binaries"][0], "mariadb")
+        self.assertIn("mysql", _DB_MOD._ENGINES["mariadb"]["binaries"])
+
+
+class BinaryMissingTests(unittest.TestCase):
+    """Guard the narrow trigger for the mariadb→mysql fallback."""
+
+    def _proc(self, rc, stdout="", stderr=""):
+        import subprocess as _sp
+
+        return _sp.CompletedProcess(
+            args=[], returncode=rc, stdout=stdout, stderr=stderr
+        )
+
+    def test_oci_runtime_not_found_message_triggers_fallback(self):
+        proc = self._proc(
+            127,
+            stdout='OCI runtime exec failed: exec failed: unable to start container process: exec: "mariadb": executable file not found in $PATH',
+        )
+        self.assertTrue(_DB_MOD._binary_missing(proc, "mariadb"))
+
+    def test_rc_127_for_a_different_binary_is_not_matched(self):
+        proc = self._proc(
+            127,
+            stdout='OCI runtime exec failed: exec failed: unable to start container process: exec: "mysql": executable file not found in $PATH',
+        )
+        self.assertFalse(_DB_MOD._binary_missing(proc, "mariadb"))
+
+    def test_rc_127_without_not_found_string_is_not_matched(self):
+        proc = self._proc(127, stderr="ERROR 1064 (42000): syntax error near ...")
+        self.assertFalse(_DB_MOD._binary_missing(proc, "mariadb"))
+
+    def test_nonzero_rc_other_than_127_is_not_matched(self):
+        proc = self._proc(1, stderr="connection refused")
+        self.assertFalse(_DB_MOD._binary_missing(proc, "mariadb"))
 
 
 if __name__ == "__main__":  # pragma: no cover

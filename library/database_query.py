@@ -29,8 +29,9 @@ module: database_query
 short_description: Run a SQL query against a role-scoped DB via `container exec`.
 description:
   - Pipes a SQL payload — either from a file (``query_file``, preferred)
-    or a raw string (``query``, opt-in only) — to ``psql`` / ``mysql``
-    inside the role's DB container via ``container exec``.
+    or a raw string (``query``, opt-in only) — to ``psql`` / ``mariadb``
+    (falling back to ``mysql`` on images that still ship only the legacy
+    binary) inside the role's DB container via ``container exec``.
   - Substitutes ``%(name)s`` placeholders from ``named_args``
     (psycopg-style) with engine-appropriate escaping before sending
     the SQL to the engine.
@@ -107,9 +108,12 @@ _NAMED_ARG_RE = re.compile(r"%\(([A-Za-z_][A-Za-z0-9_]*)\)s")
 # Per-engine command-line + escape dialect. Each entry is consumed by
 # `_build_cmd()` and `_escape_value()`. Adding a new backend = one
 # entry here; the rest of the module is engine-agnostic.
+# `binaries`: ordered preferred→fallback; only retried on rc=127 +
+# "executable file not found" for the exact binary we tried (handles
+# MariaDB ≥11 images that dropped the `mysql` symlink).
 _ENGINES: dict[str, dict[str, object]] = {
     "postgres": {
-        "binary": "psql",
+        "binaries": ("psql",),
         "user_flag": "-U",
         "db_flag": "-d",
         "shared_flags": ["-v", "ON_ERROR_STOP=1"],
@@ -122,7 +126,7 @@ _ENGINES: dict[str, dict[str, object]] = {
         "bool_false": "FALSE",
     },
     "mariadb": {
-        "binary": "mysql",
+        "binaries": ("mariadb", "mysql"),
         "user_flag": "-u",
         "db_flag": "-D",
         "shared_flags": ["--batch"],
@@ -137,8 +141,15 @@ _ENGINES: dict[str, dict[str, object]] = {
 }
 
 
-def _build_cmd(config: dict, *, expect_rows: bool) -> tuple[list[str], dict[str, str]]:
+def _build_cmd(
+    config: dict,
+    *,
+    expect_rows: bool,
+    binary: str | None = None,
+) -> tuple[list[str], dict[str, str]]:
     engine = _ENGINES[config["type"]]
+    binaries = engine["binaries"]  # type: ignore[index]
+    chosen = binary if binary is not None else binaries[0]  # type: ignore[index]
     cmd: list[str] = [
         "container",
         "exec",
@@ -146,7 +157,7 @@ def _build_cmd(config: dict, *, expect_rows: bool) -> tuple[list[str], dict[str,
         "-e",
         str(engine["password_env"]),
         config["container"],
-        str(engine["binary"]),
+        str(chosen),
         str(engine["user_flag"]),
         config["username"],
         str(engine["db_flag"]),
@@ -157,6 +168,15 @@ def _build_cmd(config: dict, *, expect_rows: bool) -> tuple[list[str], dict[str,
         cmd.extend(list(engine["rows_flags"]))  # type: ignore[arg-type]
     env_passthrough = {str(engine["password_env"]): str(config["password"])}
     return cmd, env_passthrough
+
+
+def _binary_missing(proc: subprocess.CompletedProcess[str], binary: str) -> bool:
+    # Match narrowly on the OCI message naming the exact binary we tried —
+    # otherwise an engine-side rc=127 would silently mask real failures.
+    if proc.returncode != 127:
+        return False
+    combined = (proc.stdout or "") + (proc.stderr or "")
+    return f'"{binary}": executable file not found' in combined
 
 
 def _escape_value(value: Any, db_type: str) -> str:
@@ -304,24 +324,33 @@ def main() -> None:
         module.fail_json(msg=f"named_args substitution failed: {exc}")
 
     expect_rows = bool(module.params["expect_rows"])
-    cmd, env_passthrough = _build_cmd(config, expect_rows=expect_rows)
+    binaries = list(_ENGINES[db_type]["binaries"])  # type: ignore[index]
 
-    env = dict(os.environ)
-    env.update(env_passthrough)
-
-    try:
-        proc = subprocess.run(
-            cmd,
-            input=sql,
-            text=True,
-            capture_output=True,
-            env=env,
-            check=False,
+    proc = None
+    cmd: list[str] = []
+    for index, binary in enumerate(binaries):
+        cmd, env_passthrough = _build_cmd(
+            config, expect_rows=expect_rows, binary=binary
         )
-    except OSError as exc:
-        module.fail_json(
-            msg=f"container exec failed to launch: {exc}", cmd=_redact_password_env(cmd)
-        )
+        env = dict(os.environ)
+        env.update(env_passthrough)
+        try:
+            proc = subprocess.run(
+                cmd,
+                input=sql,
+                text=True,
+                capture_output=True,
+                env=env,
+                check=False,
+            )
+        except OSError as exc:
+            module.fail_json(
+                msg=f"container exec failed to launch: {exc}",
+                cmd=_redact_password_env(cmd),
+            )
+        if index == len(binaries) - 1 or not _binary_missing(proc, binary):
+            break
+    assert proc is not None  # noqa: S101 — loop runs at least once (binaries non-empty)
 
     result = {
         "rc": proc.returncode,
