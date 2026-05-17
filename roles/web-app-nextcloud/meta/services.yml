@@ -152,7 +152,7 @@ nextcloud:
         - user_oidc
         - oidc_login
     spreed:
-      enabled: true
+      enabled: "{{ lookup('config', 'web-app-nextcloud', 'services.talk.enabled') }}"
     tables:
       enabled: true
     tasks:
@@ -206,15 +206,15 @@ cron:
 # nocheck: dynamic-flag
 # nocheck: playwright-service-flag — infrastructural sub-component (real-time communication)
 talk:
-  enabled: "{{ lookup('config', 'web-app-nextcloud', 'plugins.spreed.enabled', False) }}"
+  enabled: "{{ 'web-svc-coturn' in group_names }}"
   name: nextcloud-talk
   image: nextcloud/aio-talk
   version: latest
   backup:
     no_stop_required: false
   turn_server:
-    onboard_enabled: false
-    standalone_enabled: true
+    onboard_enabled: "{{ not ( 'web-svc-coturn' in group_names ) }}"
+    standalone_enabled: "{{ 'web-svc-coturn' in group_names }}"
   network_mode: bridge
   cpus: "2.0"
   mem_reservation: 1g
