@@ -73,6 +73,24 @@ _FORBIDDEN_PATTERNS: tuple[tuple[str, re.Pattern[str], str], ...] = (
         "stripped",
     ),
     (
+        # Catches the chained ``.parent.parent.…`` upward walk, the
+        # attribute-access twin of ``parents[N]``. Functionally
+        # identical, so subject to the same ban: any walk of two or
+        # more ``.parent`` accesses chained directly on
+        # ``Path(__file__)`` MUST use ``parents[N]`` (with the same
+        # ``__init__.py``-only rule) or import ``PROJECT_ROOT`` from
+        # the package. The match is anchored at ``Path(__file__)`` so
+        # walks on a derived path object (e.g. ``services_file.parent
+        # .parent.name`` to extract a role name from a known
+        # ``meta/services.yml`` path) do not flag.
+        "chained `Path(__file__)…parent.parent.…` upward walk",
+        re.compile(
+            r"Path\(\s*__file__\s*\)(?:\s*\.\s*[A-Za-z_]\w*\([^)]*\))*"
+            r"(?:\s*\.\s*parent\b){2,}"
+        ),
+        "stripped",
+    ),
+    (
         # Catches the bare ``Path(__file__).resolve().parents`` chain
         # (no ``[N]`` index) used in ``for candidate in
         # Path(__file__).resolve().parents`` upward-search loops.

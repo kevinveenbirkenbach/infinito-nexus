@@ -7,26 +7,12 @@ try:
 except ImportError:  # pragma: no cover
     raise SystemExit("Please `pip install pyyaml` to run this test.") from None
 
+from utils.cache import PROJECT_ROOT
 from utils.cache.files import iter_project_files
 from utils.cache.yaml import load_yaml_all
 from utils.roles.mapping import ROLE_FILE_TASKS_MAIN
 
-# ---------- Helpers: repo + YAML parsing ----------
-
-
-def _find_repo_root_containing(relative: str, max_depth: int = 8) -> str:
-    """Walk upwards from this file to find the repo root that contains `relative`."""
-    here = str(Path(str(Path(__file__).parent)).resolve())
-    cur = here
-    for _ in range(max_depth):
-        candidate = str(Path(cur) / relative)
-        if Path(candidate).exists():
-            return cur
-        parent = str(Path(cur).parent)
-        if parent == cur:
-            break
-        cur = parent
-    raise FileNotFoundError(f"Could not find {relative!r} upwards from {here}")
+# ---------- Helpers: YAML parsing ----------
 
 
 def _load_yaml_file(path: str) -> list[dict[str, Any]]:
@@ -188,7 +174,7 @@ class PureGuardedIncludeTest(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
-        cls.repo_root = _find_repo_root_containing("roles")
+        cls.repo_root = str(PROJECT_ROOT)
 
         # Map pure guarded roles: role_name -> (guards, main_path)
         cls.pure_guarded_roles: dict[str, tuple[list[str], str]] = {}

@@ -1,9 +1,8 @@
 from __future__ import annotations
 
-from pathlib import Path
-
 import yaml
 
+from utils.cache import ROLES_DIR
 from utils.cache.yaml import load_yaml_any
 
 # Top-level keys in a role node that describe the role itself rather
@@ -12,36 +11,13 @@ from utils.cache.yaml import load_yaml_any
 _METADATA_KEYS = frozenset({"title", "description", "icon", "invokable"})
 
 
-def _find_project_root(start: Path) -> Path | None:
-    """
-    Walk upwards from `start` until we find a repository root marker.
-    We treat `roles/categories.yml` as the canonical marker for this project.
-    """
-    start = start.resolve()
-    candidates = [start, *start.parents]
-    for p in candidates:
-        if (p / "roles" / "categories.yml").is_file():
-            return p
-    return None
-
-
 def _default_roles_file() -> str:
-    """
-    Determine the default roles/categories.yml path robustly.
-    Priority:
-      1) current working directory (common for CLI usage)
-      2) location of this file (common for ansible execution from repo)
-    """
-    root = _find_project_root(Path.cwd())
-    if root is None:
-        root = _find_project_root(Path(__file__).resolve().parent)
-    if root is None:
-        # Keep the error explicit and helpful
+    categories = ROLES_DIR / "categories.yml"
+    if not categories.is_file():
         raise FileNotFoundError(
-            "Could not locate project root containing roles/categories.yml. "
-            "Run from the repo root or pass roles_file explicitly."
+            f"Could not locate {categories}. Pass roles_file explicitly."
         )
-    return str(root / "roles" / "categories.yml")
+    return str(categories)
 
 
 def get_invokable_paths(

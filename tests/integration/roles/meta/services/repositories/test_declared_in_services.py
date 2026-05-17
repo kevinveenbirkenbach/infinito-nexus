@@ -7,7 +7,7 @@ or `--branch <ref>` (clone) value that ties to a declared
 `repository:` MUST come from the same role's ``meta/services.yml``
 under `ref:`. Hardcoded git URLs / refs in task files or Dockerfiles
 silently bypass the entity contract enforced by
-``test_repository_requires_ref.py`` and the unified naming convention.
+``test_requires_ref.py`` and the unified naming convention.
 
 Scope
 =====
@@ -107,7 +107,7 @@ def _iter_role_files(role_dir):
             yield p
 
 
-class TestRepositoryDeclaredInServices(unittest.TestCase):
+class TestDeclaredInServices(unittest.TestCase):
     def test_git_urls_in_role_files_are_declared_in_services_yml(self):
         offenders: list[str] = []
 

@@ -1,12 +1,13 @@
 import unittest
-from pathlib import Path
 
 import yaml
 
 from utils.cache.yaml import load_yaml_str
 from utils.roles.mapping import ROLE_FILE_META_SERVICES
 
-ROLES_DIR = Path(__file__).resolve().parent.parent.parent.parent.parent / "roles"
+from . import PROJECT_ROOT
+
+ROLES_DIR = PROJECT_ROOT / "roles"
 
 
 class TestOidcOauth2MutualExclusion(unittest.TestCase):

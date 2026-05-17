@@ -1,18 +1,18 @@
 import unittest
-from pathlib import Path
 
 import yaml
 
 from utils.cache.yaml import load_yaml_any
 from utils.roles.mapping import ROLE_FILE_META_SERVICES, ROLE_FILE_VARS_MAIN
 
+from . import PROJECT_ROOT
+
 
 class TestDockerRoleServicesConfiguration(unittest.TestCase):
     def test_services_keys_and_templates(self):
         """For each web-app-* role, check that ``meta/services.yml`` contains
         a non-empty mapping at the file root (the services map)."""
-        repo_root = Path(__file__).resolve().parent.parent.parent.parent.parent
-        roles_dir = repo_root / "roles"
+        roles_dir = PROJECT_ROOT / "roles"
         errors = []
         warnings = []
 

@@ -1,12 +1,13 @@
 import unittest
 from collections import Counter
-from pathlib import Path
 
 import yaml
 
 from utils.cache.yaml import load_yaml_any
 
-ROLES_DIR = Path(__file__).resolve().parent.parent.parent.parent.parent / "roles"
+from . import PROJECT_ROOT
+
+ROLES_DIR = PROJECT_ROOT / "roles"
 
 
 class TestDomainsStructure(unittest.TestCase):

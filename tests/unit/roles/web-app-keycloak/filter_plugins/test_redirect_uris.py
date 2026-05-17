@@ -2,26 +2,12 @@ import importlib.util
 import sys
 import types
 import unittest
-from pathlib import Path
 
-PLUGIN_REL_PATH = str(
-    Path("roles") / "web-app-keycloak" / "filter_plugins" / "redirect_uris.py"
+from utils.cache import PROJECT_ROOT
+
+PLUGIN_PATH = (
+    PROJECT_ROOT / "roles" / "web-app-keycloak" / "filter_plugins" / "redirect_uris.py"
 )
-
-
-def _find_repo_root_containing(rel_path, max_depth=8):
-    """Walk upwards from this test file to find the repo root that contains rel_path."""
-    here = str(Path(__file__).parent)
-    cur = here
-    for _ in range(max_depth):
-        candidate = str(Path(cur) / rel_path)
-        if Path(candidate).is_file():
-            return cur
-        parent = str(Path(cur).parent)
-        if parent == cur:
-            break
-        cur = parent
-    raise FileNotFoundError(f"Could not find {rel_path} upwards from {here}")
 
 
 def _load_module_from_path(name, file_path):
@@ -79,9 +65,9 @@ class RedirectUrisTest(unittest.TestCase):
         sys.modules["utils.get_url"] = mu_geturl
 
         # Load the plugin by path
-        repo_root = _find_repo_root_containing(PLUGIN_REL_PATH)
-        plugin_path = str(Path(repo_root) / PLUGIN_REL_PATH)
-        cls.plugin = _load_module_from_path("test_target.redirect_uris", plugin_path)
+        cls.plugin = _load_module_from_path(
+            "test_target.redirect_uris", str(PLUGIN_PATH)
+        )
 
         # Keep originals for per-test monkeypatching
         cls._orig_get = cls.plugin.get

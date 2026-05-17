@@ -33,7 +33,7 @@ from . import PROJECT_ROOT
 ROLES_DIR = PROJECT_ROOT / "roles"
 
 
-class TestRepositoryRequiresRef(unittest.TestCase):
+class TestRequiresRef(unittest.TestCase):
     def test_repository_and_ref_are_both_set_or_both_absent(self):
         offenders: list[str] = []
 

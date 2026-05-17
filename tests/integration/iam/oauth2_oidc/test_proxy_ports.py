@@ -31,13 +31,13 @@ Scope
 from __future__ import annotations
 
 import unittest
-from pathlib import Path
 
 from utils.cache.yaml import load_yaml
 from utils.roles.mapping import ROLE_FILE_META_SERVICES
 
-ROOT = Path(__file__).resolve().parent.parent.parent.parent.parent
-ROLES_DIR = ROOT / "roles"
+from . import PROJECT_ROOT
+
+ROLES_DIR = PROJECT_ROOT / "roles"
 
 
 def _has_oauth2_port(services: dict) -> bool:

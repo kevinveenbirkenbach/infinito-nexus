@@ -57,6 +57,7 @@ css:
 javascript:
   enabled: true
   shared: true
+# nocheck: native-metrics — fragment ships prepared; operator flips `native_metrics.enabled` to opt in
 prometheus:
   enabled: "{{ 'web-app-prometheus' in group_names }}"
   shared: "{{ 'web-app-prometheus' in group_names }}"
