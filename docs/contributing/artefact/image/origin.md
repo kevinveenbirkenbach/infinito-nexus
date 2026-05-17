@@ -27,13 +27,18 @@ The file root IS the services map keyed by `<service-name>` (no `compose:` and n
 ## Read 📖
 
 Roles MUST use `lookup('image', ...)` instead of reading the `meta/services.yml` keys directly.
-The lookup MAY infer the current role id from `role_name`.
-If `role_name` is not available, the role id MUST be passed explicitly.
+The owning `role_id` MUST be passed explicitly as the first positional argument.
+Calls without an explicit `role_id` MUST raise an error so a lazily re-evaluated expression rendered in another role's template context cannot silently resolve the wrong role.
 
-Supported forms:
+Supported form:
 
 ```yaml
-{{ lookup('image', 'playwright', 'image') }}
+{{ lookup('image', '<role_id>', '<service_name>'[, '<want>']) }}
+```
+
+Examples:
+
+```yaml
 {{ lookup('image', 'test-e2e-playwright', 'playwright', 'image') }}
 {{ lookup('image', 'sys-ctl-hlth-csp', 'csp-checker', 'ref') }}
 ```

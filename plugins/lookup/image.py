@@ -23,9 +23,16 @@ class LookupModule(LookupBase):
     """
     Resolve role-local image declarations with optional inventory overrides.
 
-    Supported forms:
-      - lookup('image', service_name[, want])
+    Supported form:
       - lookup('image', role_id, service_name[, want])
+
+    ``role_id`` is mandatory. Inferring it from the calling role's
+    ``role_name`` is intentionally not supported: the inference silently
+    targets the wrong role whenever the calling expression is re-evaluated
+    in a different role's context (e.g. a default that ends up rendered
+    inside another role's template), which is impossible to detect at
+    write time. Pass the owning role id explicitly to keep resolution
+    stable regardless of where the expression is later rendered.
 
     Defaults are sourced from ``roles/<role_id>/meta/services.yml`` under
     the matching ``<service_name>`` entry's ``image`` and ``version``
@@ -41,33 +48,27 @@ class LookupModule(LookupBase):
         **kwargs: Any,
     ) -> list[Any]:
         terms = terms or []
-        if len(terms) not in (1, 2, 3):
-            raise AnsibleError(
-                "image: requires service_name[, want] or role_id, service_name[, want]"
-            )
+        if len(terms) not in (2, 3):
+            raise AnsibleError("image: requires role_id, service_name[, want]")
 
         vars_ = (
             variables if variables is not None else self._templar.available_variables
         )
 
-        if len(terms) == 1:
-            role_id = self._infer_role_id(vars_)
-            service_name = _non_blank_string(terms[0])
-            want = "all"
-        elif len(terms) == 2:
-            inferred_want = _non_blank_string(terms[1]).lower()
-            if inferred_want in _VALID_WANTS:
-                role_id = self._infer_role_id(vars_)
-                service_name = _non_blank_string(terms[0])
-                want = inferred_want
-            else:
-                role_id = _non_blank_string(terms[0])
-                service_name = _non_blank_string(terms[1])
-                want = "all"
-        else:
-            role_id = _non_blank_string(terms[0])
-            service_name = _non_blank_string(terms[1])
-            want = _non_blank_string(terms[2]).lower() or "all"
+        role_id = _non_blank_string(terms[0])
+        service_name = _non_blank_string(terms[1])
+        want = _non_blank_string(terms[2]).lower() if len(terms) == 3 else "all"
+
+        if len(terms) == 2 and _non_blank_string(terms[1]).lower() in _VALID_WANTS:
+            # Catch callers still using the removed
+            # ``lookup('image', service_name, want)`` form; without this guard
+            # the call would silently try to load
+            # ``roles/<service_name>/meta/services.yml`` and produce a confusing
+            # "missing file" error.
+            raise AnsibleError(
+                "image: requires role_id, service_name[, want]; "
+                "the form 'lookup(\"image\", service_name, want)' is no longer supported"
+            )
 
         if not role_id:
             raise AnsibleError("image: role_id must not be empty")
@@ -109,16 +110,6 @@ class LookupModule(LookupBase):
                 f"image: '{role_id}.{service_name}' is missing required field '{want}'"
             )
         return [value]
-
-    @staticmethod
-    def _infer_role_id(vars_: dict[str, Any]) -> str:
-        role_name = _non_blank_string(vars_.get("role_name"))
-        if role_name:
-            return role_name
-
-        raise AnsibleError(
-            "image: could not infer role_id; set role_name or pass role_id explicitly"
-        )
 
     @staticmethod
     def _load_role_services(role_id: str) -> dict[str, Any]:

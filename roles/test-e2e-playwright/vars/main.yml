@@ -1,6 +1,6 @@
 ---
-TEST_E2E_PLAYWRIGHT_IMAGE: "{{ lookup('image', 'playwright', 'ref') }}"
-TEST_E2E_PLAYWRIGHT_VERSION: "{{ lookup('image', 'playwright', 'version') | image_version }}"
+TEST_E2E_PLAYWRIGHT_IMAGE: "{{ lookup('image', 'test-e2e-playwright', 'playwright', 'ref') }}"
+TEST_E2E_PLAYWRIGHT_VERSION: "{{ lookup('image', 'test-e2e-playwright', 'playwright', 'version') | image_version }}"
 TEST_E2E_PLAYWRIGHT_APPS: >-
   {{
     playbook_dir

@@ -60,7 +60,11 @@ class TestImageLookup(unittest.TestCase):
             ["mcr.microsoft.com/playwright:v1.58.2-noble"],
         )
 
-    def test_infers_role_id_from_role_name(self) -> None:
+    def test_inferred_role_id_form_is_rejected(self) -> None:
+        # The 2-arg form (service_name, want) used to infer role_id from
+        # role_name. Lazy re-evaluation of such expressions inside another
+        # role's template silently resolved the wrong role; the form is now
+        # rejected unconditionally so the bug class cannot reoccur.
         self._write_services(
             "sys-ctl-hlth-csp",
             """
@@ -69,46 +73,20 @@ class TestImageLookup(unittest.TestCase):
               version: stable
             """,
         )
-
-        self.assertEqual(
+        with self.assertRaises(AnsibleError) as ctx:
             self.lookup.run(
                 ["csp-checker", "ref"],
                 variables={"role_name": "sys-ctl-hlth-csp"},
-            ),
-            ["ghcr.io/kevinveenbirkenbach/csp-checker:stable"],
-        )
+            )
+        self.assertIn("role_id, service_name", str(ctx.exception))
 
-    def test_role_name_wins_even_if_application_id_is_also_set(self) -> None:
-        self._write_services(
-            "web-app-nextcloud",
-            """
-            helper:
-              image: docker.io/acme/helper
-              version: 1.0.0
-            """,
-        )
-
-        variables = {
-            "role_name": "web-app-nextcloud",
-            "application_id": "nextcloud",
-            "images_overrides": {
-                "web-app-nextcloud": {
-                    "helper": {
-                        "image": "ghcr.io/acme/mirror/helper",
-                    }
-                }
-            },
-        }
-
-        self.assertEqual(
-            self.lookup.run(["helper"], variables=variables),
-            [
-                {
-                    "image": "ghcr.io/acme/mirror/helper",
-                    "version": "1.0.0",
-                }
-            ],
-        )
+    def test_single_arg_form_is_rejected(self) -> None:
+        with self.assertRaises(AnsibleError) as ctx:
+            self.lookup.run(
+                ["helper"],
+                variables={"role_name": "web-app-nextcloud"},
+            )
+        self.assertIn("role_id, service_name", str(ctx.exception))
 
     def test_override_wins_fieldwise_over_defaults(self) -> None:
         self._write_services(
@@ -121,7 +99,6 @@ class TestImageLookup(unittest.TestCase):
         )
 
         variables = {
-            "role_name": "test-e2e-playwright",
             "images_overrides": {
                 "test-e2e-playwright": {
                     "playwright": {
@@ -132,7 +109,7 @@ class TestImageLookup(unittest.TestCase):
         }
 
         self.assertEqual(
-            self.lookup.run(["playwright"], variables=variables),
+            self.lookup.run(["test-e2e-playwright", "playwright"], variables=variables),
             [
                 {
                     "image": "ghcr.io/acme/mirror/mcr.microsoft.com/playwright",
@@ -161,16 +138,6 @@ class TestImageLookup(unittest.TestCase):
                 ["nonexistent-role", "svc", "ref"],
                 variables={},
             )
-
-    def test_implicit_lookup_requires_role_name_when_only_application_id_exists(
-        self,
-    ) -> None:
-        variables = {"application_id": "web-app-nextcloud"}
-
-        with self.assertRaises(AnsibleError) as ctx:
-            self.lookup.run(["helper", "ref"], variables=variables)
-
-        self.assertIn("set role_name or pass role_id explicitly", str(ctx.exception))
 
     def test_invalid_images_overrides_type_raises(self) -> None:
         self._write_services(

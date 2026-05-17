@@ -81,7 +81,7 @@ Both are used as central defaults for every app role.
 
 ### Playwright runtime
 
-- `TEST_E2E_PLAYWRIGHT_IMAGE` (resolved in `vars/main.yml` from `meta/services.yml.playwright.image` + `.version` via `lookup('image', 'playwright', 'ref')`)
+- `TEST_E2E_PLAYWRIGHT_IMAGE` (resolved in `vars/main.yml` from `meta/services.yml.playwright.image` + `.version` via `lookup('image', 'test-e2e-playwright', 'playwright', 'ref')`)
 - `TEST_E2E_PLAYWRIGHT_IMAGE_DISTRO` (default: `noble`)
 - `TEST_E2E_PLAYWRIGHT_COMMAND` (default: `npm install --no-fund --no-audit && npx playwright test`)
 
