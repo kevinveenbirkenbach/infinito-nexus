@@ -117,6 +117,7 @@ class LookupModule(LookupBase):
         servers_https_dir = _ensure_trailing_slash(_join(servers_dir, "https"))
         maps_dir = _ensure_trailing_slash(_join(conf_dir, "maps"))
         streams_dir = _ensure_trailing_slash(_join(conf_dir, "streams"))
+        lua_dir = _ensure_trailing_slash(_join(conf_dir, "lua"))
 
         data_html_dir = _ensure_trailing_slash(_join(www_dir, "public_html"))
         data_files_dir = _ensure_trailing_slash(_join(www_dir, "public_files"))
@@ -136,6 +137,7 @@ class LookupModule(LookupBase):
             _dir_spec(servers_https_dir, "0755"),
             _dir_spec(maps_dir, "0755"),
             _dir_spec(streams_dir, "0755"),
+            _dir_spec(lua_dir, "0755"),
             _dir_spec(www_dir, "0755"),
             _dir_spec(data_html_dir, "0755"),
             _dir_spec(data_files_dir, "0755"),
@@ -156,6 +158,7 @@ class LookupModule(LookupBase):
                     "servers": servers_dir,
                     "maps": maps_dir,
                     "streams": streams_dir,
+                    "lua": lua_dir,
                     "http_includes": [
                         global_dir,
                         maps_dir,
