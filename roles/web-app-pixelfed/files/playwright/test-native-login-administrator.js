@@ -67,7 +67,11 @@ exports.register = function (shared) {
     //    exposes a Logout form (CSRF-guarded) under the User Menu; rendering
     //    the menu's dropdown can be flaky in headless mode, so we submit
     //    the POST directly with the page's current CSRF cookie.
-    const csrfToken = await csrfInput.first().getAttribute("value");
+    const csrfToken = await page.evaluate(() => {
+      const meta = document.querySelector('meta[name="csrf-token"]');
+      return meta ? meta.getAttribute("content") : null;
+    });
+    expect(csrfToken, "Expected authenticated pixelfed page to expose csrf-token meta tag").toBeTruthy();
     await page.evaluate(
       async ({ logoutUrl, token }) => {
         const form = document.createElement("form");
