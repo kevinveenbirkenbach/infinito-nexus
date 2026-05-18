@@ -51,7 +51,7 @@ moodle:
   lifecycle: beta
 nginx:
   image: nginx
-  version: 1.30-alpine
+  version: 1.31-alpine
   name: moodle-nginx
   min_storage: 1GB
   cpus: '0.2'
