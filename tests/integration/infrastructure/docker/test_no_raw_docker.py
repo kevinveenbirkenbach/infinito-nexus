@@ -10,7 +10,7 @@ wrapper. Bootstrap scripts and CI workflows live outside ``roles/`` and
 are intentionally out of scope: the wrapper is not yet (or never) on
 their PATH.
 
-Three forms are detected:
+Four forms are detected:
 
 1. Single-line shell invocations (start of line / after a shell separator)
    like `docker exec ...`, `sudo docker run ...`, `docker compose up`,
@@ -26,6 +26,14 @@ Three forms are detected:
 
 3. Inline shell/command scalars like
    `ansible.builtin.shell: "docker exec ..."`.
+
+4. The native `community.docker.docker_container_exec` Ansible module.
+   It executes a command inside an already-running container — a 1:1
+   replacement for `compose exec`/`container exec` exists, and pinning
+   to Docker via this module defeats engine-swappability. Other
+   `community.docker.*` modules (network create, host_info,
+   container start/stop with image+args) are deeper engine integrations
+   without clean wrapper equivalents and are intentionally not flagged.
 
 Suppression
 -----------
@@ -216,6 +224,17 @@ RE_YAML_KEY_DOCKER_INLINE = re.compile(
     re.IGNORECASE,
 )
 
+# Native `community.docker.docker_container_exec` Ansible module used as
+# a YAML task key. It pins the playbook to Docker just as hard as raw
+# `docker exec` CLI does and must be replaced by an
+# `ansible.builtin.command`/`shell` invocation of the `compose exec` /
+# `container exec` wrapper. Other `community.docker.*` modules
+# (network create, container start with image+args, host_info) have no
+# clean wrapper equivalent and are intentionally not flagged here.
+RE_YAML_COMMUNITY_DOCKER_MODULE = re.compile(
+    r"""^\s*(?:-\s*)?(?P<module>community\.docker\.docker_container_exec)\s*:""",
+)
+
 
 def _line_no_at(text: str, offset: int) -> int:
     return text.count("\n", 0, offset) + 1
@@ -252,6 +271,24 @@ def _scan_yaml_argv_and_inline(text: str, rel: str) -> list[Finding]:
                     suggestion=(
                         "Replace the leading 'docker <cmd>' with 'container "
                         "<cmd>' in this shell/command scalar."
+                    ),
+                )
+            )
+
+    for idx, line in enumerate(text.splitlines(), start=1):
+        match = RE_YAML_COMMUNITY_DOCKER_MODULE.search(line)
+        if match:
+            findings.append(
+                Finding(
+                    file=rel,
+                    line_no=idx,
+                    line=line.rstrip("\n"),
+                    rule="community.docker module",
+                    suggestion=(
+                        f"Replace '{match.group('module')}' with an "
+                        "'ansible.builtin.command'/'shell' invocation of the "
+                        "'container' / 'compose' wrapper so the engine stays "
+                        "swappable."
                     ),
                 )
             )
@@ -306,6 +343,9 @@ def format_findings(findings: Sequence[Finding]) -> str:
     lines.append("- 'docker <cmd> ...'              -> 'container <cmd> ...'")
     lines.append("- 'docker compose <verb> ...'     -> 'compose <verb> ...'")
     lines.append("- 'docker-compose <verb> ...'     -> 'compose <verb> ...'")
+    lines.append(
+        "- 'community.docker.docker_container_exec: ...' -> 'compose exec' / 'container exec' via ansible.builtin.command."
+    )
     lines.append("")
     lines.append("Findings:")
     for f in findings:

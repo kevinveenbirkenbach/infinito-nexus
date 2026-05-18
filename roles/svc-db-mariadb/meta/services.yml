@@ -2,7 +2,7 @@
 mariadb:
   enabled: true
   shared: true
-  version: latest
+  version: "11.8"
   image: mariadb
   name: mariadb
   min_storage: 10GB

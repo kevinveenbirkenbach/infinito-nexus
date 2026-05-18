@@ -31,25 +31,40 @@
 # ---------------------------------------------------------------------------
 - block:
     - name: "Create database: {{ database_name }} (container via mariadb CLI)"
-      community.docker.docker_container_exec:
-        container: "{{ MARIADB_NAME }}"
-        command: >-
-          mariadb -uroot -p'{{ MARIADB_ROOT_PWD }}'
-          -e "CREATE DATABASE IF NOT EXISTS `{{ database_name }}`
-              CHARACTER SET {{ MARIADB_ENCODING }}
-              COLLATE {{ MARIADB_COLLATION }};"
+      ansible.builtin.command:
+        argv:
+          - container
+          - exec
+          - -i
+          - "{{ MARIADB_NAME }}"
+          - mariadb
+          - -uroot
+          - "-p{{ MARIADB_ROOT_PWD }}"
+        stdin: |
+          SET @db_name   := '{{ database_name }}';
+          SET @charset   := '{{ MARIADB_ENCODING }}';
+          SET @collation := '{{ MARIADB_COLLATION }}';
+          {{ lookup('file', role_path ~ '/files/sql/create_database.sql') }}
       register: mariadb_create_db
+      no_log: "{{ MASK_CREDENTIALS_IN_LOGS | bool }}"
       changed_when: false
 
     - name: "Create database user + grant privileges (container via mariadb CLI)"
-      community.docker.docker_container_exec:
-        container: "{{ MARIADB_NAME }}"
-        command: >-
-          mariadb -uroot -p'{{ MARIADB_ROOT_PWD }}'
-          -e "CREATE USER IF NOT EXISTS '{{ database_username }}'@'%';
-              ALTER USER '{{ database_username }}'@'%' IDENTIFIED BY '{{ database_password }}';
-              GRANT ALL PRIVILEGES ON `{{ database_name }}`.* TO '{{ database_username }}'@'%';
-              FLUSH PRIVILEGES;"
+      ansible.builtin.command:
+        argv:
+          - container
+          - exec
+          - -i
+          - "{{ MARIADB_NAME }}"
+          - mariadb
+          - -uroot
+          - "-p{{ MARIADB_ROOT_PWD }}"
+        stdin: |
+          SET @db_user := '{{ database_username }}';
+          SET @db_pwd  := '{{ database_password | replace("'", "''") }}';
+          SET @db_name := '{{ database_name }}';
+          {{ lookup('file', role_path ~ '/files/sql/create_user_grant.sql') }}
       register: mariadb_create_user
+      no_log: "{{ MASK_CREDENTIALS_IN_LOGS | bool }}"
       changed_when: false
   when: not (MARIADB_EXPOSE_LOCAL | bool)
