@@ -31,5 +31,5 @@
     webserver_websocket_location: ""
     webserver_vhost_flavour: "basic"
     webserver_extra_configuration: ""
-    docker_git_repository_pull: false
+    compose_repository_pull: false
     docker_compose_flush_handlers: true

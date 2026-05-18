@@ -12,9 +12,9 @@
   include_role:
     name: sys-stk-full
   vars:
-    docker_git_repository_address: "{{ AKAUNTING_REPOSITORY }}"
-    docker_git_repository_pull: true
-    docker_git_repository_version: "{{ AKAUNTING_REF }}"
+    compose_repository_url: "{{ AKAUNTING_REPOSITORY }}"
+    compose_repository_pull: true
+    compose_repository_ref: "{{ AKAUNTING_REF }}"
     docker_compose_flush_handlers: true
 
 - name: "Akaunting | Create first-run marker to disable future setup"

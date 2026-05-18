@@ -4,7 +4,7 @@
     name: sys-stk-backend
   vars:
     docker_compose_flush_handlers: true
-    docker_git_repository_pull: false
+    compose_repository_pull: false
 
 - name: "Include role sys-stk-front-proxy for '{{ application_id }}'"
   include_role:

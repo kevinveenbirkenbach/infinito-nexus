@@ -1,13 +1,13 @@
 ---
-- name: Set default docker_repository_path
+- name: Set default compose_repository_path
   set_fact:
-    docker_repository_path: "{{ [ lookup('container', application_id, 'directories.services'), 'repository/' ] | path_join }}"
+    compose_repository_path: "{{ [ lookup('container', application_id, 'directories.services'), 'repository/' ] | path_join }}"
 
 - name: Pull docker repository
   git:
-    repo: "{{ docker_git_repository_address }}"
-    dest: "{{ docker_repository_path }}"
-    version: "{{ docker_git_repository_version | default('main') }}"
+    repo: "{{ compose_repository_url }}"
+    dest: "{{ compose_repository_path }}"
+    version: "{{ compose_repository_ref | default('main') }}"
     single_branch: true
     depth: 1
     update: true

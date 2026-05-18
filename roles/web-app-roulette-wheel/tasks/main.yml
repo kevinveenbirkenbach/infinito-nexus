@@ -4,6 +4,6 @@
     name: sys-stk-full
   vars:
     docker_compose_flush_handlers: true
-    docker_git_repository_address: "{{ ROULETTE_REPOSITORY }}"
-    docker_git_repository_pull: true
-    docker_git_repository_version: "{{ ROULETTE_REF }}"
+    compose_repository_url: "{{ ROULETTE_REPOSITORY }}"
+    compose_repository_pull: true
+    compose_repository_ref: "{{ ROULETTE_REF }}"

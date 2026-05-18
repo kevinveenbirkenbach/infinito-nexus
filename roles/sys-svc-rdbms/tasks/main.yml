@@ -45,7 +45,7 @@
       vars:
         application_id: "{{ _database_provider_role }}"
         database_init: true
-        docker_git_repository_pull: false
+        compose_repository_pull: false
         database_consumer_id: "{{ _database_consumer_id }}"
 
     - name: "For '{{ application_id }}': Add Entry for Backup Procedure"

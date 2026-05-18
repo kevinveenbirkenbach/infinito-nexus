@@ -4,7 +4,7 @@
     name: sys-stk-full
   vars:
     docker_compose_flush_handlers: false
-    docker_git_repository_pull: false
+    compose_repository_pull: false
 
 - name: "Ensure Fediwall build dir '{{ FEDIWALL_BUILD_DIR_ABS }}' exists"
   file:

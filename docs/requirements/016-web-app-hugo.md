@@ -154,7 +154,7 @@ fail explicitly if more than one canonical domain is configured.
 ### Build pipeline
 
 - [x] `tasks/01_core.yml` includes `sys-stk-full` and sets
-      `docker_git_repository_address` / `docker_git_repository_version`
+      `compose_repository_url` / `compose_repository_ref`
       to the inventory-resolved `source_repository` / `source_version`.
       The clone path is the standard `services/repository/` under the
       role's container directory.

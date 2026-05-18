@@ -4,27 +4,27 @@
     name: sys-stk-full
   vars:
     docker_compose_flush_handlers: false
-    docker_git_repository_address: "https://github.com/taigaio/taiga-docker"
-    docker_git_repository_pull: true
+    compose_repository_url: "https://github.com/taigaio/taiga-docker"
+    compose_repository_pull: true
 
 - name: "copy taiga gateway config with OIDC route"
   template:
     src: "taiga-gateway/taiga.conf.j2"
-    dest: "{{ [docker_repository_path, 'taiga-gateway', 'taiga.conf'] | path_join }}"
+    dest: "{{ [compose_repository_path, 'taiga-gateway', 'taiga.conf'] | path_join }}"
   when: TAIGA_OIDC_ENABLED | bool
   notify: compose up
 
 - name: "render Dockerfile.taiga-back for custom auth-enabled backend image"
   template:
     src: "Dockerfile.backend.j2"
-    dest: "{{ [docker_repository_path, 'Dockerfile.taiga-back'] | path_join }}"
+    dest: "{{ [compose_repository_path, 'Dockerfile.taiga-back'] | path_join }}"
   when: TAIGA_PLUGINS_ENABLED | bool
   notify: compose up
 
 - name: "render Dockerfile.taiga-front for custom OIDC frontend image"
   template:
     src: "Dockerfile.frontend.j2"
-    dest: "{{ [docker_repository_path, 'Dockerfile.taiga-front'] | path_join }}"
+    dest: "{{ [compose_repository_path, 'Dockerfile.taiga-front'] | path_join }}"
   when: TAIGA_OIDC_ENABLED | bool
   notify: compose up
 

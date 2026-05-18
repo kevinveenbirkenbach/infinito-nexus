@@ -2,7 +2,7 @@
 (Dockerfile, tasks, templates, files) MUST be declared as a
 `repository:` value in that role's ``meta/services.yml``.
 
-The same applies symmetrically to git refs: any `docker_git_repository_version`
+The same applies symmetrically to git refs: any `compose_repository_ref`
 or `--branch <ref>` (clone) value that ties to a declared
 `repository:` MUST come from the same role's ``meta/services.yml``
 under `ref:`. Hardcoded git URLs / refs in task files or Dockerfiles

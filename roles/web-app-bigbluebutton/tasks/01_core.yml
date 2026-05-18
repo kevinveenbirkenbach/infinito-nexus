@@ -4,9 +4,9 @@
     name: sys-stk-full
   vars:
     docker_compose_flush_handlers: false
-    docker_git_repository_pull: true
-    docker_git_repository_address: "{{ BBB_REPOSITORY }}"
-    docker_git_repository_version: "{{ BBB_REF }}"
+    compose_repository_pull: true
+    compose_repository_url: "{{ BBB_REPOSITORY }}"
+    compose_repository_ref: "{{ BBB_REF }}"
     webserver_extra_configuration: >-
       {{ lookup(
            'ansible.builtin.template',
@@ -38,9 +38,9 @@
 
 - name: "Set BBB Facts"
   set_fact:
-    BBB_ENV_FILE_LINK: "{{ [ docker_repository_path, '.env' ] | path_join }}"
+    BBB_ENV_FILE_LINK: "{{ [ compose_repository_path, '.env' ] | path_join }}"
     BBB_ENV_FILE_ORIGINE: "{{ lookup('container', application_id, 'files.env') }}"
-    BBB_COMPOSE_FILE_ORIGINE: "{{ [ docker_repository_path, 'docker-compose.yml' ] | path_join }}"
+    BBB_COMPOSE_FILE_ORIGINE: "{{ [ compose_repository_path, 'docker-compose.yml' ] | path_join }}"
     BBB_COMPOSE_FILE_FINAL: "{{ [ lookup('container', application_id, 'directories.instance'), 'compose.yml' ] | path_join }}"
 
 - name: Write compose.override.yml for BigBlueButton
