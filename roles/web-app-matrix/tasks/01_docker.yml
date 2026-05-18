@@ -102,21 +102,27 @@
 
 - name: create admin account
   command:
-    cmd: "{{ BIN_COMPOSE }} exec -it synapse register_new_matrix_user -u {{ MATRIX_ADMINISTRATOR_USERNAME }} -p {{ lookup('config', application_id, 'credentials.administrator_password')
-      }} -a -c {{ MATRIX_SYNAPSE_CONFIG_PATH_CONTAINER }} http://localhost:8008"
+    cmd: "{{ BIN_COMPOSE }} exec -T synapse register_new_matrix_user -u {{ MATRIX_ADMINISTRATOR_USERNAME | quote }} -p {{ lookup('config', application_id, 'credentials.administrator_password') | quote }} -a -c {{ MATRIX_SYNAPSE_CONFIG_PATH_CONTAINER | quote }} http://localhost:8008"
     chdir: "{{ lookup('container', application_id, 'directories.instance') }}"
-  ignore_errors: true
-  when: lookup('config', application_id, 'services.matrix.setup') | bool
+  register: matrix_create_admin
+  changed_when: matrix_create_admin.rc == 0
+  failed_when: >
+    matrix_create_admin.rc != 0 and
+    'User ID already taken' not in (matrix_create_admin.stdout + matrix_create_admin.stderr)
+  no_log: "{{ MASK_CREDENTIALS_IN_LOGS | bool }}"
   async: "{{ ASYNC_TIME if ASYNC_ENABLED | bool else omit }}"
   poll: "{{ ASYNC_POLL if ASYNC_ENABLED | bool else omit }}"
 
 - name: create chatgpt bot
   command:
-    cmd: "{{ BIN_COMPOSE }} exec -it synapse register_new_matrix_user -u chatgptbot -p {{ lookup('config', application_id, 'credentials.chatgpt_bridge_user_password')}}
-      -a -c {{ MATRIX_SYNAPSE_CONFIG_PATH_CONTAINER }} http://localhost:8008"
+    cmd: "{{ BIN_COMPOSE }} exec -T synapse register_new_matrix_user -u chatgptbot -p {{ lookup('config', application_id, 'credentials.chatgpt_bridge_user_password') | quote }} -a -c {{ MATRIX_SYNAPSE_CONFIG_PATH_CONTAINER | quote }} http://localhost:8008"
     chdir: "{{ lookup('container', application_id, 'directories.instance') }}"
-  ignore_errors: true
-  when: lookup('config', application_id, 'services.matrix.setup') | bool
+  register: matrix_create_chatgptbot
+  changed_when: matrix_create_chatgptbot.rc == 0
+  failed_when: >
+    matrix_create_chatgptbot.rc != 0 and
+    'User ID already taken' not in (matrix_create_chatgptbot.stdout + matrix_create_chatgptbot.stderr)
+  no_log: "{{ MASK_CREDENTIALS_IN_LOGS | bool }}"
   async: "{{ ASYNC_TIME if ASYNC_ENABLED | bool else omit }}"
   poll: "{{ ASYNC_POLL if ASYNC_ENABLED | bool else omit }}"
 

@@ -70,7 +70,6 @@ prometheus:
 matrix:
   playbook_tags: setup-all,start
   server_name: "{{ DOMAIN_PRIMARY }}"
-  setup: false
   plugins:
     chatgpt: false
     facebook: false
