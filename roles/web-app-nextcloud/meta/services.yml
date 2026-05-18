@@ -59,8 +59,8 @@ nextcloud:
   plugins:
     appointments:
       enabled: true
-    bbb:
-      enabled: '{{ ''web-app-bigbluebutton'' in group_names | lower }}'
+    # bbb:
+    #   enabled: '{{ ''web-app-bigbluebutton'' in group_names | lower }}'
     calendar:
       enabled: true
     collectives:
