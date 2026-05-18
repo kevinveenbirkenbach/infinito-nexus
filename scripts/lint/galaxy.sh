@@ -51,10 +51,11 @@ else
 	xargs_workers=1
 fi
 
-# Skip top-level dotfile directories under roles/ (e.g. `.claude/`), which
-# are tooling artefacts, not Ansible roles.
+# Skip top-level dotfile directories (e.g. `.claude/`) and Python dunder
+# dirs (`__pycache__/` — created whenever `roles/__init__.py` is imported).
+# Both are tooling artefacts, not Ansible roles.
 mapfile -t role_names < <(
-	find roles -mindepth 1 -maxdepth 1 -type d ! -name '.*' \
+	find roles -mindepth 1 -maxdepth 1 -type d ! -name '.*' ! -name '__*' \
 		-printf '%f\n' | sort
 )
 total=${#role_names[@]}
