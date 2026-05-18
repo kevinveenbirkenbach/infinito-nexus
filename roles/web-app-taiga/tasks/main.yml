@@ -16,14 +16,14 @@
 
 - name: "render Dockerfile.taiga-back for custom auth-enabled backend image"
   template:
-    src: "Dockerfile.back.j2"
+    src: "Dockerfile.backend.j2"
     dest: "{{ [docker_repository_path, 'Dockerfile.taiga-back'] | path_join }}"
   when: TAIGA_PLUGINS_ENABLED | bool
   notify: compose up
 
 - name: "render Dockerfile.taiga-front for custom OIDC frontend image"
   template:
-    src: "Dockerfile.front.j2"
+    src: "Dockerfile.frontend.j2"
     dest: "{{ [docker_repository_path, 'Dockerfile.taiga-front'] | path_join }}"
   when: TAIGA_OIDC_ENABLED | bool
   notify: compose up

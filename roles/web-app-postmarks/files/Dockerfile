@@ -6,7 +6,8 @@ FROM ${NODE_BASE} AS build
 ARG POSTMARKS_REPO_URL
 ARG POSTMARKS_REF
 
-RUN apt-get update && apt-get install -y --no-install-recommends \
+RUN rm -rf /var/lib/apt/lists/* && \
+    apt-get update && apt-get install -y --no-install-recommends \
     git ca-certificates && \
     rm -rf /var/lib/apt/lists/*
 

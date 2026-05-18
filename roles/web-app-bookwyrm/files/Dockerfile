@@ -4,7 +4,8 @@ ARG BOOKWYRM_VERSION
 FROM ${BOOKWYRM_IMAGE}:${BOOKWYRM_VERSION} AS builder
 
 # libsass-dev + SYSTEM_SASS=True avoids the in-tree libsass build (~25 min on arm64).
-RUN apt-get update && apt-get install -y --no-install-recommends \
+RUN rm -rf /var/lib/apt/lists/* \
+  && apt-get update && apt-get install -y --no-install-recommends \
     git build-essential libpq-dev \
     libjpeg-dev zlib1g-dev libxml2-dev libxslt1-dev libffi-dev libmagic-dev \
     libsass-dev gettext tidy \
@@ -30,7 +31,8 @@ ENV SYSTEM_SASS=True
 WORKDIR /app
 
 # libsass1 is the runtime sibling of the build-time libsass-dev.
-RUN apt-get update && apt-get install -y --no-install-recommends \
+RUN rm -rf /var/lib/apt/lists/* \
+  && apt-get update && apt-get install -y --no-install-recommends \
     libpq5 curl \
     libjpeg62-turbo zlib1g libxml2 libxslt1.1 libffi8 libmagic1 \
     libsass1 gettext tidy \
