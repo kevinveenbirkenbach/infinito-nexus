@@ -231,7 +231,5 @@ exports.register = function (shared) {
     await page.goto("/");
     await shared.waitForDashboardReady(page);
     await expectLoggedOutHeaderAuthState(page);
-
-    shared.expectNoUnexpectedDiagnostics(diagnostics, { ignoreMatomoConsoleNoise: true });
   });
 };

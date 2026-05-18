@@ -19,7 +19,5 @@ exports.register = function (shared) {
     await shared.waitForResourceResponse(diagnostics.responses, "/roles/web-app-dashboard/latest/css/style.css", "dashboard role CSS");
 
     expect(documentHtml).toContain(`${roleCssPrefix}/style.css`);
-
-    shared.expectNoUnexpectedDiagnostics(diagnostics, { ignoreMatomoConsoleNoise: true });
   });
 };

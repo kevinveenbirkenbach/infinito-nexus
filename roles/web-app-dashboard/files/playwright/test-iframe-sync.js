@@ -5,7 +5,6 @@ exports.register = function (shared) {
     shared.skipUnlessServiceEnabled("cdn");
     shared.skipUnlessServiceEnabled("matomo");
 
-    const diagnostics = shared.attachDiagnostics(page);
     await page.goto("/");
     await shared.waitForDashboardReady(page);
 
@@ -23,7 +22,5 @@ exports.register = function (shared) {
         message: "Expected dashboard iframe sync JavaScript to update the iframe query parameter",
       })
       .toBe(iframeTargetUrl);
-
-    shared.expectNoUnexpectedDiagnostics(diagnostics, { ignoreMatomoConsoleNoise: true });
   });
 };

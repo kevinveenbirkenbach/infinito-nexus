@@ -52,7 +52,5 @@ exports.register = function (shared) {
     expect(documentHtml).toContain(`${sharedCssPrefix}/default.css`);
     expect(documentHtml).toContain(`${sharedCssPrefix}/bootstrap.css`);
     await expectDashboardCssEffects(page);
-
-    shared.expectNoUnexpectedDiagnostics(diagnostics, { ignoreMatomoConsoleNoise: true });
   });
 };

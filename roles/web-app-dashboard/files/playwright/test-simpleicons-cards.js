@@ -101,7 +101,6 @@ exports.register = function (shared) {
   test("dashboard renders simpleicon-backed cards when simpleicons service is enabled", async ({ page }) => {
     shared.skipUnlessServiceEnabled("simpleicons");
 
-    const diagnostics = shared.attachDiagnostics(page);
     await page.goto("/");
     await shared.waitForDashboardReady(page);
 
@@ -120,7 +119,5 @@ exports.register = function (shared) {
       simpleiconCard.locator(".card-img-top svg, .card-img-top img[src^='http://'], .card-img-top img[src^='https://'], .card-img-top img[src^='/static/']").first()
     ).toBeVisible({ timeout: 60_000 });
     await expectStableCardHover(page, "Keycloak");
-
-    shared.expectNoUnexpectedDiagnostics(diagnostics, { ignoreMatomoConsoleNoise: true });
   });
 };

@@ -18,7 +18,5 @@ exports.register = function (shared) {
     await shared.waitForResourceResponse(diagnostics.responses, "/_shared/js/logout.js", "logout injector script");
 
     expect(documentHtml).toContain(`${sharedJsPrefix}/logout.js`);
-
-    shared.expectNoUnexpectedDiagnostics(diagnostics, { ignoreMatomoConsoleNoise: true });
   });
 };

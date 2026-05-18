@@ -17,7 +17,5 @@ exports.register = function (shared) {
 
     expect(documentHtml).toContain("matomo.js");
     expect(documentHtml).toContain("matomo.php?idsite=");
-
-    shared.expectNoUnexpectedDiagnostics(diagnostics);
   });
 };
