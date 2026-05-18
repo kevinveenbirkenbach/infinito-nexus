@@ -248,6 +248,7 @@
       "WebFetch(domain:www.gnome.org)",
       "WebFetch(domain:www.gnu.org)",
       "WebFetch(domain:www.google.com)",
+      "WebFetch(domain:www.googletagmanager.com)",
       "WebFetch(domain:www.jenkins.io)",
       "WebFetch(domain:www.joomla.org)",
       "WebFetch(domain:www.jsdelivr.com)",
