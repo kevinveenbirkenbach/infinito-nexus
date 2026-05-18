@@ -92,12 +92,7 @@
     dashboard_rendered_config: "{{ dashboard_rendered_config_raw.content | b64decode | from_yaml }}"
     # Dashboard branding should only depend on the asset abstraction, not the
     # underlying web-svc-file host that serves /assets.
-    dashboard_asset_url_base: >-
-      {{
-        ('https:' ~ lookup('config', 'web-svc-asset', 'services.asset.url'))
-        if lookup('config', 'web-svc-asset', 'services.asset.url').startswith('//')
-        else lookup('config', 'web-svc-asset', 'services.asset.url')
-      }}
+    dashboard_asset_url_base: "{{ lookup('config', 'web-svc-asset', 'services.asset.url') }}"
     dashboard_platform_logo_source: "{{ ((dashboard_rendered_config.get('platform') or {}).get('logo') or {}).get('source', '') }}"
     dashboard_platform_favicon_source: "{{ ((dashboard_rendered_config.get('platform') or {}).get('favicon') or {}).get('source', '') }}"
     dashboard_company_logo_source: "{{ ((dashboard_rendered_config.get('company') or {}).get('logo') or {}).get('source', '') }}"

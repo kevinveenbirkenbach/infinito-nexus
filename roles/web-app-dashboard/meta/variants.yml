@@ -9,9 +9,6 @@
     asset:
       enabled: true
       shared: true
-    cdn:
-      enabled: true
-      shared: true
     logout:
       enabled: true
       shared: true
@@ -32,9 +29,6 @@
       shared: true
 - services:
     asset:
-      enabled: false
-      shared: false
-    cdn:
       enabled: false
       shared: false
     logout:

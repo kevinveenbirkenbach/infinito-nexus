@@ -6,9 +6,10 @@ oidc:
 asset:
   enabled: "{{ 'web-svc-asset' in group_names }}"
   shared: "{{ 'web-svc-asset' in group_names }}"
+# nocheck: dynamic-flag — dashboard renders the CDN base URL into javascript.js (DASHBOARD_JS_BASE_URL) unconditionally; runtime JS load has no fallback, so this is a hard dependency.
 cdn:
-  enabled: "{{ 'web-svc-cdn' in group_names }}"
-  shared: "{{ 'web-svc-cdn' in group_names }}"
+  enabled: true
+  shared: true
 simpleicons:
   enabled: "{{ 'web-svc-simpleicons' in group_names }}"
   shared: "{{ 'web-svc-simpleicons' in group_names }}"

@@ -7,7 +7,7 @@ asset:
   mem_limit: 256m
   pids_limit: 128
   source_directory: "{{ playbook_dir }}/assets"
-  url: //{{ lookup('domain', 'web-svc-file') }}/assets
+  url: "{{ (lookup('tls', 'web-svc-file', 'url.base') ~ 'assets') if ('web-svc-asset' in group_names) else ('https://file.' ~ SOFTWARE_DOMAIN ~ '/assets') }}"
   run_after:
     - web-svc-file
   lifecycle: beta
