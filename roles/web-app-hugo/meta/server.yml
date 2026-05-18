@@ -13,6 +13,11 @@ csp:
       unsafe-inline: true
     script-src-attr:
       unsafe-inline: true
+  whitelist:
+    script-src-elem:
+      - https://www.googletagmanager.com
+    script-src:
+      - https://www.googletagmanager.com
 networks:
   local:
     subnet: 192.168.105.80/28
