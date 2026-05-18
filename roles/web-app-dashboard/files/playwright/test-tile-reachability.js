@@ -1,4 +1,12 @@
-const { expect } = require("@playwright/test");
+// One parameterised test per role declared as a dashboard consumer in
+// its meta/services.yml. The role list is emitted into
+// DASHBOARD_TARGET_ROLES_JSON at deploy time by the env template via the
+// `roles_with_service('dashboard')` Ansible filter, so this spec — and
+// ONLY this spec — owns the per-role tile assertion. Other roles'
+// personas no longer drive the dashboard click; they go straight to the
+// app URL.
+
+const { test, expect } = require("@playwright/test");
 
 async function findVisibleTile(page, canonicalDomain) {
   const tile = page.locator(`a[href*="${canonicalDomain}"]:visible`).first();
@@ -87,14 +95,13 @@ async function assertTabButtonOpensNewTab(page, context, target) {
   await popup.close();
 }
 
-async function runDashboardCardScenario(page, context, target) {
-  await assertTileLoadsInIframe(page, target);
-  await assertTabButtonOpensNewTab(page, context, target);
-}
-
-module.exports = {
-  findVisibleTile,
-  assertTileLoadsInIframe,
-  assertTabButtonOpensNewTab,
-  runDashboardCardScenario,
+exports.register = function (shared) {
+  for (const target of shared.env.dashboardTargetRoles) {
+    test(`dashboard tile for ${target.id} embeds ${target.canonical_domain} in iframe and opens it in a new tab`, async ({ page, context }) => {
+      await page.goto("/", { waitUntil: "domcontentloaded" });
+      await shared.waitForDashboardReady(page);
+      await assertTileLoadsInIframe(page, target);
+      await assertTabButtonOpensNewTab(page, context, target);
+    });
+  }
 };

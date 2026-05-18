@@ -58,6 +58,7 @@
       "WebFetch(domain:check.spamhaus.org)",
       "WebFetch(domain:chromewebstore.google.com)",
       "WebFetch(domain:clients2.google.com)",
+      "WebFetch(domain:cloud.veen.world)",
       "WebFetch(domain:code.claude.com)",
       "WebFetch(domain:code.jquery.com)",
       "WebFetch(domain:code.visualstudio.com)",

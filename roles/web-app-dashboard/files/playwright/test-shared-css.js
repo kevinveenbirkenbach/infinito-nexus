@@ -1,0 +1,53 @@
+const { test, expect } = require("@playwright/test");
+
+async function getComputedStyleProperty(locator, propertyName) {
+  return locator.evaluate(
+    (element, requestedProperty) => window.getComputedStyle(element).getPropertyValue(requestedProperty),
+    propertyName
+  );
+}
+
+async function expectDashboardCssEffects(page) {
+  const styledCardIcon = page.locator(".card-img-top i").first();
+
+  if ((await styledCardIcon.count().catch(() => 0)) > 0) {
+    const iconFilter = await getComputedStyleProperty(styledCardIcon, "filter");
+    expect(iconFilter, "Expected dashboard card icons to receive the role-local drop shadow style").not.toBe("none");
+    return;
+  }
+
+  const navbarToggler = page.locator(".navbar-toggler").first();
+
+  if ((await navbarToggler.count().catch(() => 0)) > 0) {
+    const backgroundColor = await getComputedStyleProperty(navbarToggler, "background-color");
+    expect(
+      backgroundColor,
+      "Expected the dashboard navbar toggler to receive the role-local background color override"
+    ).not.toBe("rgba(0, 0, 0, 0)");
+    return;
+  }
+
+  throw new Error("Expected a dashboard element that demonstrates the role-local CSS to be present");
+}
+
+exports.register = function (shared) {
+  test("dashboard injects shared CSS assets when css service is enabled", async ({ page }) => {
+    shared.skipUnlessServiceEnabled("css");
+
+    const diagnostics = shared.attachDiagnostics(page);
+    const documentResponse = await page.goto("/");
+    expect(documentResponse.status()).toBeLessThan(400);
+
+    const documentHtml = await documentResponse.text();
+    await shared.waitForDashboardReady(page);
+    await shared.waitForResourceResponse(diagnostics.responses, "/_shared/css/default.css", "shared default CSS");
+    await shared.waitForResourceResponse(diagnostics.responses, "/_shared/css/bootstrap.css", "shared bootstrap CSS");
+
+    expect(documentHtml).toContain(shared.env.sharedCssPrefix);
+    expect(documentHtml).toContain(`${shared.env.sharedCssPrefix}/default.css`);
+    expect(documentHtml).toContain(`${shared.env.sharedCssPrefix}/bootstrap.css`);
+    await expectDashboardCssEffects(page);
+
+    shared.expectNoUnexpectedDiagnostics(diagnostics, { ignoreMatomoConsoleNoise: true });
+  });
+};

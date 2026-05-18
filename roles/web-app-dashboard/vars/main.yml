@@ -51,3 +51,17 @@ DASHBOARD_OIDC_ENABLED: "{{ lookup('config', DASHBOARD_APPLICATION_ID, 'services
 DASHBOARD_CONTAINER: "{{ lookup('config', DASHBOARD_APPLICATION_ID, 'services.dashboard.name') }}"
 DASHBOARD_IMAGE: "{{ lookup('config', DASHBOARD_APPLICATION_ID, 'services.dashboard.image') }}"
 DASHBOARD_VERSION: "{{ lookup('config', DASHBOARD_APPLICATION_ID, 'services.dashboard.version') }}"
+
+## Branding
+# Resolved branding URLs — single source of truth consumed by
+# config.yaml.j2 (port-ui *.source fields) and playwright.env.j2
+# (PLATFORM_*_URL / COMPANY_*_URL, asserted exact-match in the
+# header/navbar logo + favicon test).
+# Protocol-relative `//host/path` sources get an explicit `https:` prefix
+# so port-ui's HEAD probe sees a fully qualified URL.
+DASHBOARD_PLATFORM_LOGO_SOURCE: "{{ service_provider.platform.logo | string }}"
+DASHBOARD_PLATFORM_LOGO_URL: "{{ ('https:' ~ DASHBOARD_PLATFORM_LOGO_SOURCE) if DASHBOARD_PLATFORM_LOGO_SOURCE.startswith('//') else DASHBOARD_PLATFORM_LOGO_SOURCE }}"
+DASHBOARD_PLATFORM_FAVICON_SOURCE: "{{ service_provider.platform.favicon | string }}"
+DASHBOARD_PLATFORM_FAVICON_URL: "{{ ('https:' ~ DASHBOARD_PLATFORM_FAVICON_SOURCE) if DASHBOARD_PLATFORM_FAVICON_SOURCE.startswith('//') else DASHBOARD_PLATFORM_FAVICON_SOURCE }}"
+DASHBOARD_COMPANY_LOGO_SOURCE: "{{ service_provider.company.logo | string }}"
+DASHBOARD_COMPANY_LOGO_URL: "{{ ('https:' ~ DASHBOARD_COMPANY_LOGO_SOURCE) if DASHBOARD_COMPANY_LOGO_SOURCE.startswith('//') else DASHBOARD_COMPANY_LOGO_SOURCE }}"

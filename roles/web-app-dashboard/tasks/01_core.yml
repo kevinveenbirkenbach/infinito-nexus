@@ -63,6 +63,11 @@
   register: dashboard_rendered_config_raw
 
 - name: Collect branding asset URLs served by the shared file service
+  # Reads the *actually deployed* config.yaml (which may be a
+  # host-specific override from DASHBOARD_CONFIG_INV_PATH, not the
+  # role-default template). SPOTs in vars/main.yml drive the default
+  # render path; this slurp covers the override case so the wait list
+  # always reflects what port-ui will source on startup.
   set_fact:
     dashboard_branding_asset_urls: >-
       {{
