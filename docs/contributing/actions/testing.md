@@ -43,6 +43,8 @@ Use the following table when you need realistic local deployment validation or a
 | Local deploy | `make deploy-reuse-purged-apps APPS=web-app-nextcloud` | Reuses an existing `devices.yml` inventory, purges the entity first, and redeploys one or more apps quickly. | Fast reuse path after a state reset. |
 | Local deploy and E2E | `make deploy-fresh-purged-apps APPS=web-app-matomo` | Runs a dedicated local validation flow for one or more apps against the dev stack, creating and re-initializing the inventory first. | Baseline and recovery path. |
 | Full local validation | `make deploy-fresh-kept-all` | Builds the broader local deployment flow across apps. | Broad coverage when you explicitly need it. |
+| Bundle deploy | `BUNDLES="<bundle>[,<bundle>]" make deploy-bundles` | Aggregates the role groups from one or more [inventories/bundles/](../../../inventories/bundles/) entries into `APPS` and runs the fresh-purged deploy. Set `FULL_CYCLE=true` for the async update pass. | One-shot validation of a curated app shape (e.g. `education-suite`). |
+| Bundle redeploy | `BUNDLES="<bundle>[,<bundle>]" make redeploy-bundles` | Same bundle resolution as `deploy-bundles`, but routes through the reuse-kept path (no down/up, no entity purge). | Fast iteration loop after a prior `deploy-bundles` run. |
 | Local reset | `make container-refresh-inventory` | Recreates the local inventory without deploying apps. | Use this when your local inventory is broken or you want a clean reset. |
 | Local cleanup | `make container-purge-system` | Deletes local deploy artifacts and cleanup data. | Use this only when you really want to remove local state. |
 

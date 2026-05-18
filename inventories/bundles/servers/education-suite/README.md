@@ -16,8 +16,9 @@ This bundle activates the following Infinito.Nexus roles:
 - web-app-nextcloud
 - web-app-bigbluebutton
 - web-svc-onlyoffice
+- web-app-openwebui
+- web-app-mailu
 - web-app-keycloak
-- svc-prx-openresty
 
 ## Architecture Overview
 
