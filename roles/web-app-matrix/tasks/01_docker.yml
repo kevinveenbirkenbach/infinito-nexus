@@ -100,6 +100,16 @@
   async: "{{ ASYNC_TIME if ASYNC_ENABLED | bool else omit }}"
   poll: "{{ ASYNC_POLL if ASYNC_ENABLED | bool else omit }}"
 
+- name: wait for Synapse client/versions endpoint
+  uri_retry:
+    url: "http://127.0.0.1:{{ lookup('config', application_id, 'services.synapse.ports.local.http') }}/_matrix/client/versions"
+    method: GET
+    status_code: 200
+  register: matrix_synapse_health
+  retries: 60
+  delay: 2
+  until: matrix_synapse_health.status == 200
+
 - name: create admin account
   command:
     cmd: "{{ BIN_COMPOSE }} exec -T synapse register_new_matrix_user -u {{ MATRIX_ADMINISTRATOR_USERNAME | quote }} -p {{ lookup('config', application_id, 'credentials.administrator_password') | quote }} -a -c {{ MATRIX_SYNAPSE_CONFIG_PATH_CONTAINER | quote }} http://localhost:8008"
