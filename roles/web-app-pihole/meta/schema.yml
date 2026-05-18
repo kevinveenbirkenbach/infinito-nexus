@@ -1,0 +1,5 @@
+credentials:
+  administrator_password:
+    description: Pi-hole web UI admin password (used only when OAuth2 is disabled, i.e. variant 1)
+    algorithm: alphanumeric
+    validation: ^[A-Za-z0-9]{64}$
