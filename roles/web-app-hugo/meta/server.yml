@@ -9,6 +9,8 @@ csp:
       unsafe-inline: true
     style-src-elem:
       unsafe-inline: true
+    script-src:
+      unsafe-eval: true
     script-src-elem:
       unsafe-inline: true
     script-src-attr:
