@@ -135,7 +135,11 @@ class TestRoleMapping(unittest.TestCase):
         forbidden_entries: list[str] = []
         missing_entries: list[str] = []
 
-        for role_dir in sorted(p for p in _ROLES_DIR.iterdir() if p.is_dir()):
+        for role_dir in sorted(
+            p
+            for p in _ROLES_DIR.iterdir()
+            if p.is_dir() and not p.name.startswith("__")
+        ):
             role_types = get_role_types(role_dir)
             type_label = ", ".join(sorted(role_types))
 
