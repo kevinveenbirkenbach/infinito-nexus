@@ -41,6 +41,8 @@ TAIGA_PLUGIN_PIP_INSTALL_ARGS: >-
   }}
 
 ## Docker
+TAIGA_REPOSITORY: "{{ lookup('config', application_id, 'services.taiga.repository') }}"
+TAIGA_REF: "{{ lookup('config', application_id, 'services.taiga.ref') }}"
 TAIGA_VERSION: "{{ lookup('config', application_id, 'services.taiga.version') }}"
 TAIGA_CONFIG_DIRECTORY: "{{ lookup('container', application_id, 'directories.config') }}"
 TAIGA_INSTANCE_DIRECTORY: "{{ lookup('container', application_id, 'directories.instance') }}"

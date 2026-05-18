@@ -28,6 +28,8 @@ javascript:
   enabled: true
   shared: true
 littlejs:
+  repository: https://github.com/KilledByAPixel/LittleJS.git
+  ref: main
   image: nginx
   version: alpine
   ports:

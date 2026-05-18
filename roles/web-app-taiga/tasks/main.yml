@@ -4,7 +4,8 @@
     name: sys-stk-full
   vars:
     compose_handlers_flush: false
-    compose_repository_url: "https://github.com/taigaio/taiga-docker"
+    compose_repository_url: "{{ TAIGA_REPOSITORY }}"
+    compose_repository_ref: "{{ TAIGA_REF }}"
     compose_repository_pull: true
 
 - name: "copy taiga gateway config with OIDC route"

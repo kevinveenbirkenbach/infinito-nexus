@@ -4,9 +4,9 @@
     name: sys-stk-full
   vars:
     compose_handlers_flush: false
-    compose_repository_url: "{{ LITTLEJS_REPOSITORY_BASE }}.git"
+    compose_repository_url: "{{ LITTLEJS_REPOSITORY }}"
     compose_repository_pull: true
-    compose_repository_ref: "main"
+    compose_repository_ref: "{{ LITTLEJS_REF }}"
 
 - name: "Load LittleJS example metadata"
   include_vars:

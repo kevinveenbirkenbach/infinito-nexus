@@ -83,6 +83,8 @@ prometheus:
   enabled: "{{ 'web-app-prometheus' in group_names }}"
   shared: "{{ 'web-app-prometheus' in group_names }}"
 openproject:
+  repository: https://github.com/opf/openproject-deploy
+  ref: "stable/{{ OPENPROJECT_VERSION }}"
   ldap:
     filters:
       administrators: false
