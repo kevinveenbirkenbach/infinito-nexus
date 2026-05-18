@@ -1,4 +1,3 @@
-{% raw %}
 (function () {
   // Auto-redirect Pi-hole's 403 page to /admin/
   if (document.querySelector('p') && document.body.innerText.includes("your Pi-hole")) {
@@ -33,4 +32,3 @@
     subtree: true,
   });
 })();
-{% endraw %}
