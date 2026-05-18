@@ -1,8 +1,11 @@
 const { test, expect } = require("@playwright/test");
+const { isServiceEnabled } = require("./service-gating");
 
 exports.register = function (shared) {
   test("taiga themed routes stay aligned across stable routes", async ({ page }) => {
     const session = await shared.loginToTaiga(page);
+
+    const cssEnabled = isServiceEnabled("css");
 
     const routeChecks = [
       {
@@ -26,6 +29,10 @@ exports.register = function (shared) {
     for (const routeCheck of routeChecks) {
       await page.goto(routeCheck.url);
       await expect(routeCheck.ready).toBeVisible({ timeout: 60_000 });
+
+      if (!cssEnabled) {
+        continue;
+      }
 
       await shared.expectGradientBackground(
         page.locator("div.master"),

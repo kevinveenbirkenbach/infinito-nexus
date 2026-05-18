@@ -14,7 +14,9 @@
   command: >
     compose
     -f {{ TAIGA_COMPOSE_INIT_PATH }}
-    run --rm {{ TAIGA_MANAGER_SERVICE }}
+    run --rm
+    -e DJANGO_SUPERUSER_PASSWORD={{ TAIGA_SUPERUSER_PASSWORD | quote }}
+    {{ TAIGA_MANAGER_SERVICE }}
     createsuperuser --noinput
     --username {{ TAIGA_SUPERUSER_NAME }}
     --email {{ TAIGA_SUPERUSER_EMAIL }}

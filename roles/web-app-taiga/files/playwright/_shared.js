@@ -491,7 +491,7 @@ async function logoutFromTaigaNative(page, session) {
   );
   await tryLogoutFromTaiga(page, page);
 
-  await page.goto(session.expectedTaigaBaseUrl);
+  await page.goto(`${session.expectedTaigaBaseUrl}/login`);
   await expect(page.locator("input[name='username'], input#username").first())
     .toBeVisible({ timeout: 60_000 });
 }
