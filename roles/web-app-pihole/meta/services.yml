@@ -1,6 +1,6 @@
 # noqa: shared
 oauth2:
-  enabled: "{{ 'web-app-keycloak' in group_names }}"
+  enabled: true
   shared: true
   origin:
     host: pihole
