@@ -21,12 +21,6 @@
     label: "{{ item.key }}"
 
 - name: Wait until Friendica console + composer vendor tree is fully populated
-  # `bin/console list` boots Friendica's full Composer autoloader, so it only
-  # returns rc=0 once the entrypoint rsync from /usr/src/friendica/ into the
-  # /var/www/html volume has copied every required vendor file. Probing for
-  # bin/console alone is not enough — the binary lands before vendor/ is
-  # complete and PHP then fails mid-loop with "Failed opening required
-  # vendor/.../function.php".
   command: >
     {{ BIN_COMPOSE }} exec --user {{ FRIENDICA_USER }}
     --workdir {{ FRIENDICA_APPLICATION_DIR }}
@@ -42,14 +36,6 @@
   until: friendica_console_ready.rc == 0
 
 - name: Wait until Friendica database is ready and populated
-  # `bin/console addon enable/disable` returns rc=0 even when Friendica's DB
-  # migration has not finished yet. In that case it just prints
-  # "[Error] Database isn't ready or populated yet" on stderr and silently
-  # leaves the addon state unchanged. Without an explicit DB-readiness probe
-  # that checks stderr, the addon sync below would "succeed" without doing
-  # anything, and Friendica would reject every LDAP login at runtime.
-  # `addon list all` is the cheapest command that exercises the same DB path
-  # the enable/disable commands take, so we reuse it here.
   command: >
     {{ BIN_COMPOSE }} exec --user {{ FRIENDICA_USER }}
     --workdir {{ FRIENDICA_APPLICATION_DIR }}
@@ -67,20 +53,20 @@
     - "'not ready' not in (friendica_db_ready.stderr | default(''))"
     - "'not populated' not in (friendica_db_ready.stderr | default(''))"
 
-# Upstream `ldap_createaccount` returns the raw `User::create()` result
-# (`['user' => UserRow, 'password' => '']`), but the `authenticate` hook
-# only sets `authenticated = 1` when `$user['uid']` is non-empty — which
-# is never true for the autocreate path. The fix unwraps `$user['user']`
-# so the freshly-created user's uid is visible to the hook. Without it
-# every first-login LDAP user (e.g. biber) silently fails to start a
-# session despite the row being inserted; the next request still serves
-# the login form. See web-app-friendica/TODO.md for the SAML migration
-# that would remove this whole code path. Patched here (after the
-# vendor/addon rsync probe above, before the ldapauth addon is enabled
-# below) so the file exists and we don't race the entrypoint.
+- name: Ensure Friendica DB schema is current
+  command: >
+    {{ BIN_COMPOSE }} exec --user {{ FRIENDICA_USER }}
+    --workdir {{ FRIENDICA_APPLICATION_DIR }}
+    {{ FRIENDICA_SERVICE }}
+    {{ FRIENDICA_APPLICATION_DIR }}/bin/console dbstructure update
+  args:
+    chdir: "{{ lookup('container', application_id, 'directories.instance') }}"
+  register: friendica_dbstructure_update
+  changed_when: "'No tables need to be changed' not in friendica_dbstructure_update.stdout"
+
 - name: "Patch upstream friendica-addons/ldapauth autocreate return shape"
   script: >-
-    patch_ldapauth_autocreate.sh
+    shell/patch_ldapauth_autocreate.sh
     "{{ BIN_COMPOSE }} exec -T --user root {{ FRIENDICA_SERVICE }}"
     "{{ FRIENDICA_APPLICATION_DIR }}/addon/ldapauth/ldapauth.php"
   args:
@@ -92,7 +78,7 @@
 
 - name: Ensure Friendica addons are in sync
   script: >-
-    sync_addon.sh
+    shell/sync_addon.sh
     "{{ BIN_COMPOSE }} exec -T --user {{ FRIENDICA_USER }} --workdir {{ FRIENDICA_APPLICATION_DIR }} {{ FRIENDICA_SERVICE }} {{ FRIENDICA_APPLICATION_DIR }}/bin/console"
     "{{ item.name }}"
     "{{ 'true' if item.enabled else 'false' }}"
@@ -108,12 +94,26 @@
   loop_control:
     label: "{{ item.name }}"
 
+- name: Wait until Friendica `hook` table is provisioned
+  ansible.builtin.shell: >-
+    {{ BIN_COMPOSE }} exec -T --user {{ FRIENDICA_USER }} --workdir {{ FRIENDICA_APPLICATION_DIR }} {{ FRIENDICA_SERVICE }} php --
+  args:
+    chdir: "{{ lookup('container', application_id, 'directories.instance') }}"
+    stdin: "{{ lookup('file', role_path + '/files/php/probe_hook_table.php') }}"
+  register: friendica_hook_table_ready
+  changed_when: false
+  failed_when: false
+  retries: 60
+  delay: 2
+  until: friendica_hook_table_ready.rc == 0
+  when: FRIENDICA_LDAP_ENABLED | bool
+
 # First-install `addon enable ldapauth` empirically lands `enabled=1` without persisting Hook::register() rows; this task verifies and recycles to recover.
 - name: Verify ldapauth hooks are registered (re-cycle if missing)
   ansible.builtin.shell: >-
     {{ BIN_COMPOSE }} exec -T --user {{ FRIENDICA_USER }} --workdir {{ FRIENDICA_APPLICATION_DIR }} {{ FRIENDICA_SERVICE }} php -- ldapauth 2
   args:
     chdir: "{{ lookup('container', application_id, 'directories.instance') }}"
-    stdin: "{{ lookup('file', role_path + '/files/verify_addon_hooks.php') }}"
+    stdin: "{{ lookup('file', role_path + '/files/php/verify_addon_hooks.php') }}"
   changed_when: false
   when: FRIENDICA_LDAP_ENABLED | bool

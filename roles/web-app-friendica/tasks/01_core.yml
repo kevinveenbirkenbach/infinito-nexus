@@ -15,6 +15,14 @@
 - name: "flush handlers to ensure that '{{ FRIENDICA_CONTAINER }}' is up before executing container tasks"
   meta: flush_handlers
 
+- name: "Remove stale ldapauth.config.php leftover when LDAP is disabled"
+  command: >
+    container exec --user root {{ FRIENDICA_CONTAINER }}
+    rm -f {{ FRIENDICA_LDAP_CONFIG_DOCKER }}
+  register: friendica_ldap_config_cleanup
+  changed_when: friendica_ldap_config_cleanup.rc == 0
+  when: not (FRIENDICA_LDAP_ENABLED | bool)
+
 - name: Check if Friendica local.config.php exists
   command: >
     container exec --user {{ FRIENDICA_USER }} {{ FRIENDICA_CONTAINER }} test -f {{ FRIENDICA_CONFIG_FILE }}
