@@ -12,6 +12,7 @@ pgadmin:
   run_after:
     - web-app-matomo
     - web-app-keycloak
+    - web-app-mailu
   lifecycle: beta
   cpus: "0.2"
   mem_reservation: 128m
@@ -26,6 +27,9 @@ dashboard:
 matomo:
   enabled: "{{ 'web-app-matomo' in group_names }}"
   shared: "{{ 'web-app-matomo' in group_names }}"
+email:
+  enabled: "{{ 'web-app-mailu' in group_names }}"
+  shared: "{{ 'web-app-mailu' in group_names }}"
 postgres:
   enabled: true # nocheck: dynamic-flag
   shared: "{{ 'svc-db-postgres' in group_names }}"
