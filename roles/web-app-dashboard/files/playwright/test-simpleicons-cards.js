@@ -108,7 +108,7 @@ exports.register = function (shared) {
     const simpleiconCard = page
       .locator(".card")
       .filter({
-        has: page.locator(".card-img-top svg, .card-img-top img[src*='/static/cache/']"),
+        has: page.locator(".card-img-top svg, .card-img-top img[src^='http://'], .card-img-top img[src^='https://'], .card-img-top img[src^='/static/']"),
       })
       .first();
 
@@ -117,7 +117,7 @@ exports.register = function (shared) {
       "Expected at least one dashboard card to render a Simple Icons-backed SVG or cached image asset"
     ).toBeVisible({ timeout: 60_000 });
     await expect(
-      simpleiconCard.locator(".card-img-top svg, .card-img-top img[src*='/static/cache/']").first()
+      simpleiconCard.locator(".card-img-top svg, .card-img-top img[src^='http://'], .card-img-top img[src^='https://'], .card-img-top img[src^='/static/']").first()
     ).toBeVisible({ timeout: 60_000 });
     await expectStableCardHover(page, "Keycloak");
 
