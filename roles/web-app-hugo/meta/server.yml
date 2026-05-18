@@ -15,9 +15,9 @@ csp:
       unsafe-inline: true
   whitelist:
     script-src-elem:
-      - https://www.googletagmanager.com
+      - https://www.googletagmanager.com # nocheck: url — script CDN, bare domain returns 404 by design
     script-src:
-      - https://www.googletagmanager.com
+      - https://www.googletagmanager.com # nocheck: url
 networks:
   local:
     subnet: 192.168.105.80/28
