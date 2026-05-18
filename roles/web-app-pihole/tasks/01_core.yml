@@ -6,5 +6,12 @@
   vars:
     docker_compose_flush_handlers: true
 
-- name: "Run Pi-hole setup routines"
-  include_tasks: 01_setup.yml
+- name: "Disable Pi-hole native password (OAuth2 handles auth)"
+  ansible.builtin.shell: >-
+    container exec {{ PIHOLE_CONTAINER }} pihole setpassword ''
+  register: pihole_setpassword
+  retries: 30
+  delay: 5
+  until: pihole_setpassword is succeeded
+  changed_when: false
+  when: PIHOLE_OAUTH2_ENABLED | bool
