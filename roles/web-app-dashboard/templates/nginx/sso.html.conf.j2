@@ -1,6 +1,5 @@
 location = {{ DASHBOARD_LOCATION_SILENT_CHECK }} {
     default_type text/html;
-    add_header X-Frame-Options "SAMEORIGIN";
     add_header Cache-Control "no-store";
 
     # The body MUST contain `parent.postMessage(location.href, location.origin)` —

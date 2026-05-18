@@ -10,6 +10,8 @@ csp:
   whitelist:
     frame-src:
       - "*"
+    frame-ancestors:
+      - "{{ lookup('tls', 'web-app-keycloak', 'protocols.web') }}://*.{{ DOMAIN_PRIMARY }}"
 domains:
   canonical:
     - auth.{{ DOMAIN_PRIMARY }}

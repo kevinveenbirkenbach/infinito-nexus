@@ -1,9 +1,3 @@
-// Shared dashboard Playwright spec state — only carries values and
-// helpers used by ≥ 2 ``test-*.js`` modules. Single-consumer constants,
-// helpers, and persona-flow re-exports live in the test file that
-// needs them; their existence here would be a "shared" lie that masks
-// the real consumer relationship.
-
 const { expect } = require("@playwright/test");
 
 const { normalizeBaseUrl } = require("./personas");
@@ -82,37 +76,14 @@ function isMatomoConsoleNoise(record) {
   );
 }
 
-// Keycloak JS adapter loads a hidden silent-check-sso.html iframe to
-// refresh the session in the background. In test envs the dashboard
-// origin is not whitelisted as a Keycloak frame-ancestor (CSP), so the
-// iframe load is blocked and chrome surfaces a console.error from
-// chrome-error://chromewebdata/. That is environment noise, not a
-// dashboard regression.
-function isOidcSilentCheckNoise(record) {
-  if (!record) {
-    return false;
-  }
-  const text = typeof record === "string" ? record : record.text || "";
-  const url = typeof record === "string" ? "" : record.url || "";
-  return (
-    url.startsWith("chrome-error://chromewebdata") ||
-    /^Framing '/.test(text) ||
-    /silent-check-sso/i.test(text) ||
-    /silent-check-sso/i.test(url)
-  );
-}
-
 function expectNoUnexpectedDiagnostics(
   diagnostics,
-  { ignoreMatomoConsoleNoise = false, ignoreOidcSilentCheckNoise = false } = {}
+  { ignoreMatomoConsoleNoise = false } = {}
 ) {
   expect(diagnostics.pageErrors, `Unexpected page errors: ${diagnostics.pageErrors.join("\n")}`).toEqual([]);
   let unexpectedConsoleErrors = diagnostics.consoleErrors;
   if (ignoreMatomoConsoleNoise) {
     unexpectedConsoleErrors = unexpectedConsoleErrors.filter((record) => !isMatomoConsoleNoise(record));
-  }
-  if (ignoreOidcSilentCheckNoise) {
-    unexpectedConsoleErrors = unexpectedConsoleErrors.filter((record) => !isOidcSilentCheckNoise(record));
   }
   expect(
     unexpectedConsoleErrors,
