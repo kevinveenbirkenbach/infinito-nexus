@@ -18,9 +18,11 @@ dashboard:
 matomo:
   enabled: "{{ 'web-app-matomo' in group_names }}"
   shared: "{{ 'web-app-matomo' in group_names }}"
+# nocheck: dynamic-flag
+# nocheck: email
 email:
-  enabled: "{{ 'web-app-mailu' in group_names }}"
-  shared: "{{ 'web-app-mailu' in group_names }}"
+  enabled: false
+  shared: false
 postgres:
   enabled: true # nocheck: dynamic-flag
   shared: "{{ 'svc-db-postgres' in group_names }}"
@@ -39,7 +41,6 @@ confluence:
       http: 8005
   run_after:
     - web-app-matomo
-    - web-app-mailu
   lifecycle: unsupported
 css:
   enabled: "{{ 'web-svc-css' in group_names }}"

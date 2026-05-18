@@ -17,6 +17,12 @@ oauth2:
 dashboard:
   enabled: "{{ 'web-app-dashboard' in group_names }}"
   shared: "{{ 'web-app-dashboard' in group_names }}"
+# nocheck: dynamic-flag
+# nocheck: email
+# nocheck: playwright-service-flag — email silenced, no Playwright surface
+email:
+  enabled: false
+  shared: false
 matomo:
   enabled: "{{ 'web-app-matomo' in group_names }}"
   shared: "{{ 'web-app-matomo' in group_names }}"

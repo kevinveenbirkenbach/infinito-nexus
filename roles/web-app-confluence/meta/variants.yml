@@ -8,9 +8,6 @@
     dashboard:
       enabled: true
       shared: true
-    email:
-      enabled: true
-      shared: true
     logout:
       enabled: true
       shared: true
@@ -27,9 +24,6 @@
       shared: true
 - services:
     dashboard:
-      enabled: false
-      shared: false
-    email:
       enabled: false
       shared: false
     logout:
