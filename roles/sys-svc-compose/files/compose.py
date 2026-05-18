@@ -22,6 +22,31 @@ def detect_env_file(project_dir: Path) -> Path | None:
     return None
 
 
+def _yaml_services(path: Path) -> set[str]:
+    """Return the top-level `services:` keys declared in a compose YAML file."""
+    try:
+        with path.open() as f:
+            doc = yaml.safe_load(f)  # nocheck: direct-yaml
+    except (OSError, yaml.YAMLError):
+        return set()
+    if not isinstance(doc, dict):
+        return set()
+    services = doc.get("services")
+    if not isinstance(services, dict):
+        return set()
+    return set(services.keys())
+
+
+def ca_override_is_stale(base_compose: Path, ca_override: Path) -> bool:
+    base_services = _yaml_services(base_compose)
+    if not base_services:
+        return False
+    override_services = _yaml_services(ca_override)
+    if not override_services:
+        return False
+    return bool(override_services - base_services)
+
+
 def detect_compose_files(project_dir: Path) -> list[Path]:
     """Detect Compose file stack: compose.yml + optional overrides."""
     base = project_dir / "compose.yml"
@@ -36,7 +61,14 @@ def detect_compose_files(project_dir: Path) -> list[Path]:
 
     ca_override = project_dir / "compose.ca.override.yml"
     if ca_override.is_file():
-        files.append(ca_override)
+        if ca_override_is_stale(base, ca_override):
+            print(
+                "[compose] skipping stale compose.ca.override.yml "
+                "(declares services not in compose.yml; awaiting regeneration)",
+                file=sys.stderr,
+            )
+        else:
+            files.append(ca_override)
 
     cache_override = generate_cache_override(project_dir, base)
     if cache_override is not None:
