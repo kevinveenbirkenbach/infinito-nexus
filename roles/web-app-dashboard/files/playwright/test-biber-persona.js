@@ -1,7 +1,9 @@
 const { test } = require("@playwright/test");
 
-exports.register = function (shared) {
+const { runBiberFlow } = require("./personas");
+
+exports.register = function () {
   test("biber: app → universal logout", async ({ page }) => {
-    await shared.runBiberFlow(page);
+    await runBiberFlow(page);
   });
 };

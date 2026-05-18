@@ -1,5 +1,10 @@
 const { test, expect } = require("@playwright/test");
 
+const { normalizeBaseUrl } = require("./personas");
+
+const cdnBaseUrl = normalizeBaseUrl(process.env.CDN_BASE_URL || "");
+const sharedCssPrefix = `${cdnBaseUrl.replace(/\/$/, "")}/_shared/css`;
+
 async function getComputedStyleProperty(locator, propertyName) {
   return locator.evaluate(
     (element, requestedProperty) => window.getComputedStyle(element).getPropertyValue(requestedProperty),
@@ -43,9 +48,9 @@ exports.register = function (shared) {
     await shared.waitForResourceResponse(diagnostics.responses, "/_shared/css/default.css", "shared default CSS");
     await shared.waitForResourceResponse(diagnostics.responses, "/_shared/css/bootstrap.css", "shared bootstrap CSS");
 
-    expect(documentHtml).toContain(shared.env.sharedCssPrefix);
-    expect(documentHtml).toContain(`${shared.env.sharedCssPrefix}/default.css`);
-    expect(documentHtml).toContain(`${shared.env.sharedCssPrefix}/bootstrap.css`);
+    expect(documentHtml).toContain(sharedCssPrefix);
+    expect(documentHtml).toContain(`${sharedCssPrefix}/default.css`);
+    expect(documentHtml).toContain(`${sharedCssPrefix}/bootstrap.css`);
     await expectDashboardCssEffects(page);
 
     shared.expectNoUnexpectedDiagnostics(diagnostics, { ignoreMatomoConsoleNoise: true });

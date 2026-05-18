@@ -8,6 +8,16 @@
 
 const { test, expect } = require("@playwright/test");
 
+const dashboardTargetRoles = (() => {
+  const raw = process.env.DASHBOARD_TARGET_ROLES_JSON || "[]";
+  try {
+    const parsed = JSON.parse(raw);
+    return Array.isArray(parsed) ? parsed : [];
+  } catch {
+    return [];
+  }
+})();
+
 async function findVisibleTile(page, canonicalDomain) {
   const tile = page.locator(`a[href*="${canonicalDomain}"]:visible`).first();
   const visible = await tile.isVisible({ timeout: 5_000 }).catch(() => false);
@@ -96,7 +106,7 @@ async function assertTabButtonOpensNewTab(page, context, target) {
 }
 
 exports.register = function (shared) {
-  for (const target of shared.env.dashboardTargetRoles) {
+  for (const target of dashboardTargetRoles) {
     test(`dashboard tile for ${target.id} embeds ${target.canonical_domain} in iframe and opens it in a new tab`, async ({ page, context }) => {
       await page.goto("/", { waitUntil: "domcontentloaded" });
       await shared.waitForDashboardReady(page);

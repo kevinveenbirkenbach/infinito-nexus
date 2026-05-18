@@ -13,6 +13,7 @@ test.beforeEach(shared.beforeEach);
 
 // CSP + canonical-domain baseline.
 require("./test-csp-canonical-domain").register(shared);
+require("./test-no-console-noise").register(shared);
 
 // Per-service shared / role-local asset coverage.
 require("./test-shared-css").register(shared);

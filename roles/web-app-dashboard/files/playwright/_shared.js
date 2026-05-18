@@ -1,73 +1,24 @@
-// Shared dashboard Playwright spec state: env vars, the `beforeEach`
-// env-presence guard, and helpers reused across multiple scenarios
-// (diagnostics collection, dashboard-ready wait, network-response
-// poller). `playwright.spec.js` wires the lifecycle hook and `require()`s
-// one test module per scenario so each test stays atomar and individually
-// inspectable.
+// Shared dashboard Playwright spec state — only carries values and
+// helpers used by ≥ 2 ``test-*.js`` modules. Single-consumer constants,
+// helpers, and persona-flow re-exports live in the test file that
+// needs them; their existence here would be a "shared" lie that masks
+// the real consumer relationship.
 
 const { expect } = require("@playwright/test");
 
-const {
-  assertCspMetaParity,
-  assertCspResponseHeader,
-  decodeDotenvQuotedValue,
-  expectNoCspViolations,
-  installCspViolationObserver,
-  normalizeBaseUrl,
-  runAdminFlow,
-  runBiberFlow,
-  runGuestFlow,
-} = require("./personas");
+const { normalizeBaseUrl } = require("./personas");
 const { skipUnlessServiceEnabled } = require("./service-gating");
 
-const appBaseUrl = normalizeBaseUrl(process.env.APP_BASE_URL || "");
-const oidcIssuerUrl = normalizeBaseUrl(process.env.OIDC_ISSUER_URL || "");
-const loginUsername = decodeDotenvQuotedValue(process.env.LOGIN_USERNAME);
-const loginPassword = decodeDotenvQuotedValue(process.env.LOGIN_PASSWORD);
-const cdnBaseUrl = normalizeBaseUrl(process.env.CDN_BASE_URL || "");
 const dashboardJsBaseUrl = normalizeBaseUrl(process.env.DASHBOARD_JS_BASE_URL || "");
 const matomoBaseUrl = normalizeBaseUrl(process.env.MATOMO_BASE_URL || "");
-const canonicalDomain = decodeDotenvQuotedValue(process.env.CANONICAL_DOMAIN);
-const platformLogoUrl = decodeDotenvQuotedValue(process.env.PLATFORM_LOGO_URL);
-const platformFaviconUrl = decodeDotenvQuotedValue(process.env.PLATFORM_FAVICON_URL);
-const companyLogoUrl = decodeDotenvQuotedValue(process.env.COMPANY_LOGO_URL);
-
-function buildAssetPathPrefix(baseUrl, path) {
-  return `${baseUrl.replace(/\/$/, "")}${path}`;
-}
-
-const sharedCssPrefix = buildAssetPathPrefix(cdnBaseUrl, "/_shared/css");
-const sharedJsPrefix = buildAssetPathPrefix(cdnBaseUrl, "/_shared/js");
-const roleCssPrefix = buildAssetPathPrefix(cdnBaseUrl, "/roles/web-app-dashboard/latest/css");
-const expectedOidcAuthUrl = `${oidcIssuerUrl}/protocol/openid-connect/auth`;
-
-const dashboardTargetRoles = (() => {
-  const raw = process.env.DASHBOARD_TARGET_ROLES_JSON || "[]";
-  try {
-    const parsed = JSON.parse(raw);
-    return Array.isArray(parsed) ? parsed : [];
-  } catch {
-    return [];
-  }
-})();
 
 async function beforeEach({ page }) {
   await page.setViewportSize({ width: 1440, height: 1100 });
 
-  expect(appBaseUrl, "APP_BASE_URL must be set in the Playwright env file").toBeTruthy();
-  expect(oidcIssuerUrl, "OIDC_ISSUER_URL must be set in the Playwright env file").toBeTruthy();
-  expect(loginUsername, "LOGIN_USERNAME must be set in the Playwright env file").toBeTruthy();
-  expect(loginPassword, "LOGIN_PASSWORD must be set in the Playwright env file").toBeTruthy();
-  expect(cdnBaseUrl, "CDN_BASE_URL must be set in the Playwright env file").toBeTruthy();
   expect(dashboardJsBaseUrl, "DASHBOARD_JS_BASE_URL must be set in the Playwright env file").toBeTruthy();
   expect(matomoBaseUrl, "MATOMO_BASE_URL must be set in the Playwright env file").toBeTruthy();
-  expect(canonicalDomain, "CANONICAL_DOMAIN must be set in the Playwright env file").toBeTruthy();
-  expect(platformLogoUrl, "PLATFORM_LOGO_URL must be set in the Playwright env file").toBeTruthy();
-  expect(platformFaviconUrl, "PLATFORM_FAVICON_URL must be set in the Playwright env file").toBeTruthy();
-  expect(companyLogoUrl, "COMPANY_LOGO_URL must be set in the Playwright env file").toBeTruthy();
 
   await page.context().clearCookies();
-  await installCspViolationObserver(page);
 }
 
 function attachDiagnostics(page) {
@@ -131,11 +82,38 @@ function isMatomoConsoleNoise(record) {
   );
 }
 
-function expectNoUnexpectedDiagnostics(diagnostics, { ignoreMatomoConsoleNoise = false } = {}) {
+// Keycloak JS adapter loads a hidden silent-check-sso.html iframe to
+// refresh the session in the background. In test envs the dashboard
+// origin is not whitelisted as a Keycloak frame-ancestor (CSP), so the
+// iframe load is blocked and chrome surfaces a console.error from
+// chrome-error://chromewebdata/. That is environment noise, not a
+// dashboard regression.
+function isOidcSilentCheckNoise(record) {
+  if (!record) {
+    return false;
+  }
+  const text = typeof record === "string" ? record : record.text || "";
+  const url = typeof record === "string" ? "" : record.url || "";
+  return (
+    url.startsWith("chrome-error://chromewebdata") ||
+    /^Framing '/.test(text) ||
+    /silent-check-sso/i.test(text) ||
+    /silent-check-sso/i.test(url)
+  );
+}
+
+function expectNoUnexpectedDiagnostics(
+  diagnostics,
+  { ignoreMatomoConsoleNoise = false, ignoreOidcSilentCheckNoise = false } = {}
+) {
   expect(diagnostics.pageErrors, `Unexpected page errors: ${diagnostics.pageErrors.join("\n")}`).toEqual([]);
-  const unexpectedConsoleErrors = ignoreMatomoConsoleNoise
-    ? diagnostics.consoleErrors.filter((record) => !isMatomoConsoleNoise(record))
-    : diagnostics.consoleErrors;
+  let unexpectedConsoleErrors = diagnostics.consoleErrors;
+  if (ignoreMatomoConsoleNoise) {
+    unexpectedConsoleErrors = unexpectedConsoleErrors.filter((record) => !isMatomoConsoleNoise(record));
+  }
+  if (ignoreOidcSilentCheckNoise) {
+    unexpectedConsoleErrors = unexpectedConsoleErrors.filter((record) => !isOidcSilentCheckNoise(record));
+  }
   expect(
     unexpectedConsoleErrors,
     `Unexpected console errors: ${formatConsoleErrors(unexpectedConsoleErrors)}`
@@ -163,22 +141,8 @@ async function waitForResourceResponse(records, partialUrl, label) {
 
 module.exports = {
   env: {
-    appBaseUrl,
-    oidcIssuerUrl,
-    loginUsername,
-    loginPassword,
-    cdnBaseUrl,
     dashboardJsBaseUrl,
     matomoBaseUrl,
-    canonicalDomain,
-    platformLogoUrl,
-    platformFaviconUrl,
-    companyLogoUrl,
-    sharedCssPrefix,
-    sharedJsPrefix,
-    roleCssPrefix,
-    expectedOidcAuthUrl,
-    dashboardTargetRoles,
   },
   skipUnlessServiceEnabled,
   beforeEach,
@@ -186,10 +150,4 @@ module.exports = {
   expectNoUnexpectedDiagnostics,
   waitForDashboardReady,
   waitForResourceResponse,
-  runAdminFlow,
-  runBiberFlow,
-  runGuestFlow,
-  assertCspMetaParity,
-  assertCspResponseHeader,
-  expectNoCspViolations,
 };

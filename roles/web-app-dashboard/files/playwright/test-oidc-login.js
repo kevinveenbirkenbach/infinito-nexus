@@ -1,6 +1,12 @@
 const { test, expect } = require("@playwright/test");
 
-const { isVisible } = require("./personas");
+const { decodeDotenvQuotedValue, isVisible, normalizeBaseUrl } = require("./personas");
+
+const appBaseUrl = normalizeBaseUrl(process.env.APP_BASE_URL || "");
+const oidcIssuerUrl = normalizeBaseUrl(process.env.OIDC_ISSUER_URL || "");
+const loginUsername = decodeDotenvQuotedValue(process.env.LOGIN_USERNAME);
+const loginPassword = decodeDotenvQuotedValue(process.env.LOGIN_PASSWORD);
+const expectedOidcAuthUrl = `${oidcIssuerUrl}/protocol/openid-connect/auth`;
 
 async function waitForFirstVisible(locators, timeout, errorMessage) {
   const deadline = Date.now() + timeout;
@@ -178,23 +184,23 @@ exports.register = function (shared) {
 
     await expect
       .poll(
-        async () => page.url().includes(shared.env.expectedOidcAuthUrl) || (await isVisible(usernameField)),
+        async () => page.url().includes(expectedOidcAuthUrl) || (await isVisible(usernameField)),
         {
           timeout: 60_000,
-          message: `Expected the dashboard login flow to reach the Keycloak auth page: ${shared.env.expectedOidcAuthUrl}`,
+          message: `Expected the dashboard login flow to reach the Keycloak auth page: ${expectedOidcAuthUrl}`,
         }
       )
       .toBe(true);
 
     await expect(usernameField).toBeVisible({ timeout: 60_000 });
-    await usernameField.fill(shared.env.loginUsername);
-    await passwordField.fill(shared.env.loginPassword);
+    await usernameField.fill(loginUsername);
+    await passwordField.fill(loginPassword);
     await signInButton.click();
 
     await expect
-      .poll(async () => page.url().startsWith(shared.env.appBaseUrl), {
+      .poll(async () => page.url().startsWith(appBaseUrl), {
         timeout: 60_000,
-        message: `Expected Keycloak login to redirect back to the dashboard: ${shared.env.appBaseUrl}`,
+        message: `Expected Keycloak login to redirect back to the dashboard: ${appBaseUrl}`,
       })
       .toBe(true);
 
@@ -210,7 +216,7 @@ exports.register = function (shared) {
     await expect
       .poll(
         async () =>
-          page.url().includes("/protocol/openid-connect/logout") || page.url().startsWith(shared.env.appBaseUrl),
+          page.url().includes("/protocol/openid-connect/logout") || page.url().startsWith(appBaseUrl),
         {
           timeout: 30_000,
           message: "Expected dashboard logout to reach Keycloak logout or redirect back to the dashboard",

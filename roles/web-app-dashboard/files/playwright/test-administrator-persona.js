@@ -1,8 +1,10 @@
 const { test, expect } = require("@playwright/test");
 
-exports.register = function (shared) {
+const { runAdminFlow } = require("./personas");
+
+exports.register = function () {
   test("administrator: app → universal logout", async ({ page }) => {
-    await shared.runAdminFlow(page, {
+    await runAdminFlow(page, {
       adminInteraction: async (interactivePage) => {
         // web-app-dashboard admin-only interaction: open a management surface.
         const link = interactivePage

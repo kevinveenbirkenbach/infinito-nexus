@@ -1,5 +1,10 @@
 const { test, expect } = require("@playwright/test");
 
+const { decodeDotenvQuotedValue } = require("./personas");
+
+const platformLogoUrl = decodeDotenvQuotedValue(process.env.PLATFORM_LOGO_URL);
+const platformFaviconUrl = decodeDotenvQuotedValue(process.env.PLATFORM_FAVICON_URL);
+
 async function getCurrentImageSource(locator) {
   return locator.evaluate((img) => img.currentSrc || img.src || "");
 }
@@ -40,17 +45,15 @@ exports.register = function (shared) {
 
     const headerLogo = page.locator("header.header img[alt='logo']").first();
     const navbarLogo = page.locator("#navbar_logo img").first();
-    await expectImageLoaded(headerLogo, "Header logo", shared.env.platformLogoUrl);
-    await expectImageLoaded(navbarLogo, "Navbar logo", shared.env.platformLogoUrl);
+    await expectImageLoaded(headerLogo, "Header logo", platformLogoUrl);
+    await expectImageLoaded(navbarLogo, "Navbar logo", platformLogoUrl);
     expect(await getCurrentImageSource(headerLogo)).toBe(await getCurrentImageSource(navbarLogo));
 
     // Favicon — a <link rel="icon"> is not "visible" in Playwright's sense,
     // so just assert that its href is the resolved PLATFORM_FAVICON_URL.
     const faviconHref = await page.locator('link[rel="icon"]').first().getAttribute("href");
     expect(faviconHref, "favicon link should render the resolved platform favicon URL").toBe(
-      shared.env.platformFaviconUrl
+      platformFaviconUrl
     );
-
-    shared.expectNoUnexpectedDiagnostics(diagnostics, { ignoreMatomoConsoleNoise: true });
   });
 };

@@ -1,7 +1,9 @@
 const { test } = require("@playwright/test");
 
-exports.register = function (shared) {
+const { runGuestFlow } = require("./personas");
+
+exports.register = function () {
   test("guest: public-landing → auth chain → never authenticated", async ({ page }) => {
-    await shared.runGuestFlow(page);
+    await runGuestFlow(page);
   });
 };
