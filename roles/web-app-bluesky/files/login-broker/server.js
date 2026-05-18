@@ -446,7 +446,7 @@ const server = http.createServer(async (req, res) => {
     const kcEmail = (req.headers["x-forwarded-email"] || "").toString();
     if (!kcUsername) {
       console.log(`[broker:${reqId}] missing X-Forwarded-User → 401 (${Date.now() - reqStart}ms)`);
-      endText(res, 401, "Missing X-Forwarded-User from oauth2-proxy. Refusing handoff.");
+      endHtml(res, 401, `<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"/><title>Bluesky login required</title></head><body><p>Missing X-Forwarded-User from oauth2-proxy. Refusing handoff.</p></body></html>`);
       return;
     }
 
