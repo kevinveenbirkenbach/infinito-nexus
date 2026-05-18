@@ -23,7 +23,7 @@ const nextcloudDirectLoginPassword = decodeDotenvQuotedValue(process.env.NEXTCLO
 const oidcIssuerUrl = decodeDotenvQuotedValue(process.env.OIDC_ISSUER_URL);
 const nextcloudBaseUrl = decodeDotenvQuotedValue(process.env.NEXTCLOUD_BASE_URL);
 const nextcloudUsernameFieldPattern = /account name or email|username or email/i;
-const nextcloudCredentialSubmitPattern = /sign in|log in/i;
+const nextcloudCredentialSubmitPattern = /^(sign in|log in)$/i;
 
 // Condition variables driving the login flavor. Ansible renders these from the
 // role's services.{oidc,ldap}.enabled (meta/services.yml) so the spec never has to

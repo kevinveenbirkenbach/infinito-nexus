@@ -54,7 +54,7 @@ nextcloud:
   pids_limit: 512
   default_quota: "1000000000"
   legacy_login_mask:
-    enabled: "{{ not (lookup('config', application_id, 'services.oidc.enabled') | bool) }}"
+    enabled: "{{ not (lookup('config', 'web-app-nextcloud', 'services.oidc.enabled') | bool) }}"
   performance:
     php:
       memory_limit: "{{ ((ansible_facts['memtotal_mb'] | int) / 30) | int }}M"
