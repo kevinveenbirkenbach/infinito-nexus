@@ -5,7 +5,7 @@
   include_role:
     name: sys-stk-full
   vars:
-    docker_compose_flush_handlers: false
+    compose_handlers_flush: false
 
 - name: Integrate LDAP
   include_tasks: 02_ldap.yml

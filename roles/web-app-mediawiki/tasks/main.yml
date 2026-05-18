@@ -3,7 +3,7 @@
   include_role:
     name: sys-stk-full
   vars:
-    docker_compose_flush_handlers: false
+    compose_handlers_flush: false
 
 - name: "Load install procedures for '{{ application_id }}''"
   include_tasks: 01_configuration.yml

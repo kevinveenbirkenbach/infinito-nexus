@@ -26,12 +26,12 @@ Required var:
 ### `routine.yml`: wrapper with immediate compose-up
 
 Use when the role is a self-contained single-container service whose only pre-condition for compose-up is its own network (e.g. `svc-db-mariadb`, `svc-db-postgres`, `svc-ai-ollama`).
-The wrapper loads the docker-python deps, calls `create.yml` for the role's own network (via `application_id`), and then re-includes `sys-svc-compose` with `docker_compose_flush_handlers: true` so the compose-up fires right after.
+The wrapper loads the docker-python deps, calls `create.yml` for the role's own network (via `application_id`), and then re-includes `sys-svc-compose` with `compose_handlers_flush: true` so the compose-up fires right after.
 
 ```yaml
 - include_tasks: "{{ [playbook_dir, 'roles/sys-svc-compose/tasks/utils/network/routine.yml'] | path_join }}"
   vars:
-    docker_compose_flush_handlers: true
+    compose_handlers_flush: true
 ```
 
 ## Decision rule 📌

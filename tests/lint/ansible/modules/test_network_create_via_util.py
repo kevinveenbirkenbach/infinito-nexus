@@ -16,7 +16,7 @@ canonical helpers, both under
   2. ``routine.yml`` -- wrapper that loads the docker-python deps,
      calls ``create.yml`` for the role's own network, and then
      immediately re-includes ``sys-svc-compose`` with
-     ``docker_compose_flush_handlers: true`` to fire compose-up.
+     ``compose_handlers_flush: true`` to fire compose-up.
      Use when the role is a self-contained single-container service
      whose only pre-condition for compose-up is its own network
      (mariadb, postgres, ollama).
@@ -133,7 +133,7 @@ class TestNetworkCreateViaUtil(unittest.TestCase):
 
                - include_tasks: "{{ [playbook_dir, 'roles/sys-svc-compose/tasks/utils/network/routine.yml'] | path_join }}"
                  vars:
-                   docker_compose_flush_handlers: true
+                   compose_handlers_flush: true
 
         Both derive name (``role_id | get_entity_name``) and subnet
         (``meta/server.yml.networks.local.subnet``) automatically.

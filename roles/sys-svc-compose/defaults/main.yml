@@ -1,4 +1,4 @@
 ---
-docker_compose_flush_handlers: false # Set to true in the vars/main.yml of the including role to autoflush after compose routine
+compose_handlers_flush: false # Set to true in the vars/main.yml of the including role to autoflush after compose routine
 compose_repository_pull: "{{ compose_repository_url is defined and compose_repository_url is string and compose_repository_url | length >
   0 }}"

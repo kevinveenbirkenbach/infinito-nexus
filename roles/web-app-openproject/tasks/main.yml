@@ -7,7 +7,7 @@
     compose_repository_ref: "stable/{{ OPENPROJECT_VERSION }}"
     compose_repository_url: "https://github.com/opf/openproject-deploy"
     compose_repository_pull: true
-    docker_compose_flush_handlers: false
+    compose_handlers_flush: false
     application_id: "web-app-openproject"
 
 - name: "Create {{ OPENPROJECT_PLUGINS_FOLDER }}"

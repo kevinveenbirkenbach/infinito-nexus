@@ -6,5 +6,5 @@
     name: sys-stk-full
   vars:
     compose_repository_pull: false
-    docker_compose_flush_handlers: true
+    compose_handlers_flush: true
     webserver_vhost_flavour: "basic"

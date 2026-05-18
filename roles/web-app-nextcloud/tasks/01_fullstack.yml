@@ -3,7 +3,7 @@
   include_role:
     name: sys-stk-full
   vars:
-    docker_compose_flush_handlers: false
+    compose_handlers_flush: false
     application_id: web-app-nextcloud
     # Necessary to save talk recordings
     webserver_client_max_body_size: 10G

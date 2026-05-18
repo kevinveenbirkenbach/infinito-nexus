@@ -13,7 +13,7 @@
   include_role:
     name: sys-stk-backend
   vars:
-    docker_compose_flush_handlers: true
+    compose_handlers_flush: true
 
 - name: "PEERTUBE | Patch the `application` table so the bootstrap INSERT survives fresh installs"
   include_tasks: fix-application-schema.yml

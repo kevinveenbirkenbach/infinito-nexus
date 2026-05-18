@@ -5,7 +5,7 @@
   include_role:
     name: sys-stk-full
   vars:
-    docker_compose_flush_handlers: false
+    compose_handlers_flush: false
 
 - name: "render KIX LDAP auth SysConfig fragment for '{{ application_id }}'"
   ansible.builtin.template:

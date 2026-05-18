@@ -8,7 +8,7 @@
   include_role:
     name: sys-stk-full
   vars:
-    docker_compose_flush_handlers: true
+    compose_handlers_flush: true
     webserver_vhost_flavour: "basic"
     application_id: "web-app-discourse"
 - name: Pull Discourse docker repository

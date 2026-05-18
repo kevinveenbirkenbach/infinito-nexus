@@ -10,7 +10,7 @@
     name: sys-stk-full
   vars:
     # Suppress flushing of handlers, because bootstrap file needs to be deployed first
-    docker_compose_flush_handlers: false
+    compose_handlers_flush: false
 
 - name: "Deploy '{{ MATOMO_BOOTSTRAP_ENV_FILE }}'"
   template:

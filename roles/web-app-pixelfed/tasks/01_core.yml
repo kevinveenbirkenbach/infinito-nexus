@@ -5,7 +5,7 @@
   include_role:
     name: sys-stk-full
   vars:
-    docker_compose_flush_handlers: false
+    compose_handlers_flush: false
 
 # Keep the custom entrypoint on disk before the first compose up. If this is
 # moved below the flush, Pixelfed can boot once with the upstream entrypoint and

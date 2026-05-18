@@ -5,7 +5,7 @@
   include_role:
     name: sys-stk-backend
   vars:
-    docker_compose_flush_handlers: false
+    compose_handlers_flush: false
 
 - name: "Deploy prometheus nginx http-block config to {{ lookup('nginx','directories.configuration.global') }}prometheus.conf"
   template:

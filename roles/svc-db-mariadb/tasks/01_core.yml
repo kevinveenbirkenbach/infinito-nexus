@@ -4,7 +4,7 @@
 - name: "Setup container network for {{ application_id }}"
   include_tasks: "{{ [playbook_dir, 'roles/sys-svc-compose/tasks/utils/network/routine.yml' ] | path_join }}"
   vars:
-    docker_compose_flush_handlers: true
+    compose_handlers_flush: true
 
 - name: Install MySQL Python client library via pip
   include_role:

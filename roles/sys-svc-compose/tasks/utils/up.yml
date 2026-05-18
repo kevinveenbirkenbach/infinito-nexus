@@ -24,4 +24,4 @@
 
 - name: "Flush Docker Compose Up Handlers for {{ lookup('container', application_id, 'directories.instance') }}"
   meta: flush_handlers
-  when: docker_compose_flush_handlers | bool
+  when: compose_handlers_flush | bool

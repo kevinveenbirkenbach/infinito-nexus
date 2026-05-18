@@ -15,7 +15,7 @@
     compose_repository_url: "{{ AKAUNTING_REPOSITORY }}"
     compose_repository_pull: true
     compose_repository_ref: "{{ AKAUNTING_REF }}"
-    docker_compose_flush_handlers: true
+    compose_handlers_flush: true
 
 - name: "Akaunting | Create first-run marker to disable future setup"
   ansible.builtin.file:

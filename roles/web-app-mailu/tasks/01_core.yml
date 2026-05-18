@@ -32,7 +32,7 @@
   include_role:
     name: sys-stk-full
   vars:
-    docker_compose_flush_handlers: true
+    compose_handlers_flush: true
     webserver_vhost_flavour: "basic"
     domain: "{{ MAILU_HOSTNAME }}"
 

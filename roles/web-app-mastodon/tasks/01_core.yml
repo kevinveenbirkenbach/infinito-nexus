@@ -18,7 +18,7 @@
   include_role:
     name: sys-stk-backend
   vars:
-    docker_compose_flush_handlers: false
+    compose_handlers_flush: false
 
 - name: "MASTODON | Apply overrides"
   include_tasks: 02_overrides.yml

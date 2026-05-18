@@ -4,6 +4,6 @@
       include_role:
         name: sys-stk-full
       vars:
-        docker_compose_flush_handlers: true
+        compose_handlers_flush: true
     - include_tasks: utils/once/flag.yml
   when: run_once_web_app_jira is not defined

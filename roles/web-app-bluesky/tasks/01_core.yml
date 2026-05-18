@@ -53,7 +53,7 @@
   include_role:
     name: sys-stk-backend
   vars:
-    docker_compose_flush_handlers: false
+    compose_handlers_flush: false
 
 - name: "Include front proxy for {{ BLUESKY_API_DOMAIN }}:{{ BLUESKY_API_PORT }}"
   include_role:

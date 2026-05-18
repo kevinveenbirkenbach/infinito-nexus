@@ -5,7 +5,7 @@
         name: sys-svc-webserver-https
       when: run_once_sys_svc_webserver_https is not defined
       vars:
-        docker_compose_flush_handlers: true
+        compose_handlers_flush: true
     - include_tasks: utils/once/flag.yml
 
   when: run_once_web_opt_rdr_domains is not defined

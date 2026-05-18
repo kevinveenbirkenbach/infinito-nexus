@@ -19,7 +19,7 @@
     name: sys-svc-compose
   vars:
     compose_repository_pull: false # Deactivated here to deactivate inhirement
-    docker_compose_flush_handlers: true
+    compose_handlers_flush: true
     application_id: svc-prx-openresty
 
 - name: "Verify that '{{ role_name }}' works"

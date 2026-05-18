@@ -3,7 +3,7 @@
   include_role:
     name: sys-stk-backend
   vars:
-    docker_compose_flush_handlers: false
+    compose_handlers_flush: false
 
 - name: include 02_create-and-seed-database.yml for multiple bridges
   include_tasks: 02_create-and-seed-database.yml

@@ -3,7 +3,7 @@
   include_role:
     name: sys-stk-full
   vars:
-    docker_compose_flush_handlers: true # Required so that new db pw is used
+    compose_handlers_flush: true # Required so that new db pw is used
 
 - name: "Bootstrap Baserow Django superuser '{{ BASEROW_BOOTSTRAP_ADMIN_USERNAME }}' (idempotent)"
   ansible.builtin.script:

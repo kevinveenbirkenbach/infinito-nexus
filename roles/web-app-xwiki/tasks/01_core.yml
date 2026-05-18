@@ -7,7 +7,7 @@
       include_role:
         name: sys-stk-full
       vars:
-        docker_compose_flush_handlers: false
+        compose_handlers_flush: false
 
     - name: Deploy Bootstrap Config
       include_tasks: _flush_config.yml

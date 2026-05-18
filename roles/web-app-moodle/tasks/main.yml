@@ -3,7 +3,7 @@
   include_role:
     name: sys-stk-full
   vars:
-    docker_compose_flush_handlers: false
+    compose_handlers_flush: false
 
 - name: "Populate Dockerfile build context (entrypoint, config.php, install scripts, php conf)"
   include_tasks: 01_build_context.yml
