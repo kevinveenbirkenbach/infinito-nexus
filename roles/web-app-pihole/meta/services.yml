@@ -37,6 +37,7 @@ pihole:
     local:
       http: 8041
       oauth2: 16500
+      dns: 5300
   run_after:
   - web-app-keycloak
   lifecycle: alpha

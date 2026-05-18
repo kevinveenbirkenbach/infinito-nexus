@@ -15,3 +15,34 @@
   until: pihole_setpassword is succeeded
   changed_when: false
   when: PIHOLE_OAUTH2_ENABLED | bool
+
+- name: "Check whether systemd-resolved manages host DNS"
+  ansible.builtin.command: systemctl is-active systemd-resolved
+  register: systemd_resolved_active
+  changed_when: false
+  failed_when: false
+
+- block:
+    - name: "Ensure /etc/systemd/resolved.conf.d/ exists"
+      ansible.builtin.file:
+        path: /etc/systemd/resolved.conf.d
+        state: directory
+        mode: '0755'
+
+    - name: "Route systemd-resolved upstream through Pi-hole"
+      ansible.builtin.copy:
+        dest: /etc/systemd/resolved.conf.d/pihole.conf
+        mode: '0644'
+        content: |
+          [Resolve]
+          DNS=127.0.0.1:{{ lookup('config', application_id, 'services.pihole.ports.local.dns') }}
+          Domains=~.
+      register: pihole_resolved_drop_in
+
+    - name: "Restart systemd-resolved to apply Pi-hole upstream"
+      ansible.builtin.systemd:
+        name: systemd-resolved
+        state: restarted
+      when: pihole_resolved_drop_in is changed
+  when: systemd_resolved_active.stdout.strip() == "active"
+  become: true
