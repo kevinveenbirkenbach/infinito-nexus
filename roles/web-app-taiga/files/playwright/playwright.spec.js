@@ -15,7 +15,8 @@ test.beforeEach(shared.beforeEach);
 
 require("./test-login-oidc").register(shared);
 require("./test-login-native").register(shared);
-require("./test-public-discover").register(shared);
+require("./test-public-discover-themed-surface").register(shared);
+require("./test-public-discover-hides-local-login").register(shared);
 require("./test-themed-routes").register(shared);
 require("./test-guest-persona").register(shared);
 require("./test-biber-persona").register(shared);
