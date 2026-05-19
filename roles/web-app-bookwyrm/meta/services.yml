@@ -28,7 +28,9 @@ email:
 # nocheck: playwright-service-flag — DB engine, covered by role-local integration tests
 postgres:
   enabled: true # nocheck: dynamic-flag
-  shared: "{{ 'svc-db-postgres' in group_names }}"
+  shared: true # nocheck: dynamic-flag
+  extensions:
+    - bloom
 # nocheck: shared
 # nocheck: dynamic-flag
 # nocheck: playwright-service-flag — DB engine, covered by role-local integration tests

@@ -20,8 +20,6 @@
     oidc:
       enabled: true
       shared: true
-    postgres:
-      shared: true
     prometheus:
       enabled: true
       shared: true
@@ -43,8 +41,6 @@
       shared: false
     oidc:
       enabled: false
-      shared: false
-    postgres:
       shared: false
     prometheus:
       enabled: false

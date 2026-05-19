@@ -21,8 +21,6 @@
     oauth2:
       enabled: true
       shared: true
-    postgres:
-      shared: true
     prometheus:
       enabled: true
       shared: true
@@ -50,8 +48,6 @@
       shared: false
     oauth2:
       enabled: false
-      shared: false
-    postgres:
       shared: false
     prometheus:
       enabled: false

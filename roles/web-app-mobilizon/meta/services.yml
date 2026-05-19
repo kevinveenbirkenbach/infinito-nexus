@@ -16,7 +16,11 @@ email:
   shared: "{{ 'web-app-mailu' in group_names }}"
 postgres:
   enabled: true # nocheck: dynamic-flag
-  shared: "{{ 'svc-db-postgres' in group_names }}"
+  shared: true # nocheck: dynamic-flag
+  extensions:
+    - postgis
+    - pg_trgm
+    - unaccent
 mobilizon:
   image: docker.io/kaihuri/mobilizon
   name: mobilizon

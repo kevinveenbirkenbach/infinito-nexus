@@ -281,8 +281,7 @@
   retries: "{{ POSTGRES_RETRIES }}"
   delay: "{{ POSTGRES_DELAY }}"
 
-# 7) Ensure PostGIS and related extensions are installed (if enabled)
-- name: "Ensure PostGIS-related extensions are installed"
+- name: "Ensure consumer-specific extensions ({{ database_consumer_id }})"
   community.postgresql.postgresql_ext:
     db: "{{ database_name }}"
     ext: "{{ item }}"
@@ -291,26 +290,7 @@
     login_password: "{{ postgres_login_password_string }}"
     login_host: "{{ POSTGRES_LOCAL_HOST }}"
     login_port: "{{ POSTGRES_PORT }}"
-  loop:
-    - postgis
-    - pg_trgm
-    - unaccent
-  when: postgres_gis_enabled | bool
-  register: postgresql_result
-  until: postgresql_result is succeeded
-  retries: "{{ POSTGRES_RETRIES }}"
-  delay: "{{ POSTGRES_DELAY }}"
-
-# 8) Ensure pgvector (vector) extension is installed
-- name: "Ensure pgvector (vector) extension is installed"
-  community.postgresql.postgresql_ext:
-    db: "{{ database_name }}"
-    ext: vector
-    state: present
-    login_user: postgres
-    login_password: "{{ postgres_login_password_string }}"
-    login_host: "{{ POSTGRES_LOCAL_HOST }}"
-    login_port: "{{ POSTGRES_PORT }}"
+  loop: "{{ lookup('service_extensions', 'postgres')[database_consumer_id] | default([]) }}"
   register: postgresql_result
   until: postgresql_result is succeeded
   retries: "{{ POSTGRES_RETRIES }}"

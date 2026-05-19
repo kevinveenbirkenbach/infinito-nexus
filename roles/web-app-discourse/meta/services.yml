@@ -32,6 +32,8 @@ postgres:
   # bundled launcher postgres is vanilla and lacks the extension —
   # `bundle exec rake db:migrate` fails with `FAILED TO BOOTSTRAP`.
   shared: true # nocheck: dynamic-flag
+  extensions:
+    - vector
 # nocheck: shared
 # nocheck: dynamic-flag
 # nocheck: playwright-service-flag — DB engine, covered by role-local integration tests
