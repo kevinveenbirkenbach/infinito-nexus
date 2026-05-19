@@ -228,16 +228,16 @@ updates:
   #     - "dependencies"
   #     - "go"
 
-  # maven: bluesky Keycloak event-listener SPI bridge
-  - package-ecosystem: "maven"
-    directories:
-      - "**"
-    schedule:
-      interval: "daily"
-      time: "00:00"
-    labels:
-      - "dependencies"
-      - "java"
+  # maven: no pom.xml found (bluesky SPI scaffold removed)
+  # - package-ecosystem: "maven"
+  #   directories:
+  #     - "/"
+  #   schedule:
+  #     interval: "daily"
+  #     time: "00:00"
+  #   labels:
+  #     - "dependencies"
+  #     - "java"
 
   # gradle: no build.gradle found
   # - package-ecosystem: "gradle"
