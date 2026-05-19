@@ -164,3 +164,22 @@ An inventory in Infinito.Nexus is:
 No additional bundle file format is required.
 
 The inventory itself is the bundle.
+
+---
+
+## Deploying a Bundle
+
+Two `make` targets resolve one or more bundles into the role groups declared under `all.children` and feed them into the standard local deploy flow. The resolver is [`utils.inventory.bundle_apps`](../../utils/inventory/bundle_apps.py); it deduplicates across bundles and preserves declaration order.
+
+| Command | Path | Behavior |
+|---|---|---|
+| `BUNDLES="<a>[,<b>]" make deploy-bundles` | fresh-purged | Brings the stack down/up, purges entities, then deploys every role group from the listed bundles. Set `FULL_CYCLE=true` to also run the async update pass. |
+| `BUNDLES="<a>[,<b>]" make redeploy-bundles` | reuse-kept | No down/up, no entity purge. Requires a prior `deploy-bundles` run that initialized the inventory. |
+
+Example:
+
+```bash
+BUNDLES="education-suite,startup-essentials" make deploy-bundles FULL_CYCLE=true
+```
+
+See [docs/contributing/tools/make.md](../../docs/contributing/tools/make.md) and [docs/contributing/actions/testing.md](../../docs/contributing/actions/testing.md) for the full deploy-target reference.

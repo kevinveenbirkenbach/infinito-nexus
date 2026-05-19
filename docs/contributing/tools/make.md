@@ -134,6 +134,8 @@ For rules on how to write and structure the `Makefile` itself, see [makefile.md]
 | Reuse purged apps | `make deploy-reuse-purged-apps` | Reuses an existing inventory, purges the app state first, and redeploys one or more apps quickly. | Use this when you want a fast reset-and-redeploy path. |
 | Fresh kept all | `make deploy-fresh-kept-all` | Builds the broader local deployment flow across apps. | Use this when you explicitly need broad coverage. |
 | Reuse kept all | `make deploy-reuse-kept-all` | Reuses the existing inventory and redeploys the broad app set. | Use this for the faster broad reuse path. |
+| Bundle deploy | `BUNDLES="<bundle>[,<bundle>]" make deploy-bundles` | Resolves the role groups declared in one or more [inventories/bundles/](../../../inventories/bundles/) entries, deduplicates them into `APPS`, and runs the fresh-purged deploy flow. Set `FULL_CYCLE=true` to also run the async update pass. | Use this to deploy a curated app shape (e.g. `education-suite,startup-essentials`) in a single command. |
+| Bundle redeploy | `BUNDLES="<bundle>[,<bundle>]" make redeploy-bundles` | Same bundle resolution as `deploy-bundles`, but routes through the reuse-kept path: no stack down/up and no entity purge. | Use this for the fast iteration loop after a bundle's first `deploy-bundles` run. |
 
 ## Git 🔐
 

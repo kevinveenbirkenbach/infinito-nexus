@@ -25,18 +25,18 @@ all:
     web-svc-onlyoffice:
       hosts:
         server:
+    web-app-openwebui:
+      hosts:
+        server:
+    web-app-mailu:
+      hosts:
+        server:
     web-app-keycloak:
       hosts:
         server:
     web-svc-legal:
       hosts:
         server:
-    web-svc-asset:
-      hosts:
-        server:
     web-app-dashboard:
-      hosts:
-        server:
-    svc-prx-openresty:
       hosts:
         server:
