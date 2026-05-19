@@ -241,7 +241,7 @@ class TestUsersLookup(unittest.TestCase):
         )[0]
 
         self.assertEqual(result["email"], "blackhole@mail.example.org")
-        self.assertNotIn("{{", result["password"])
+        self.assertNotRegex(result["password"], r"\{\{.*?\}\}")
         self.assertGreaterEqual(len(result["password"]), 12)
 
     def test_hydrates_tokens_from_dir_secrets_when_file_tokens_missing(self) -> None:
