@@ -21,7 +21,7 @@
 set -euo pipefail
 
 HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-DUMP="${HERE}/dump_runner_state.sh"
+DUMP="${HERE}/dump_state.sh"
 
 if [ "${SKIP_SWAP:-0}" = "1" ]; then
 	echo "SKIP_SWAP=1 — leaving default runner swap in place."

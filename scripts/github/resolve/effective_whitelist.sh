@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 #
 # Resolve the effective WHITELIST that the discover step should pass to
-# scripts/github/output_apps.sh, and write it to GITHUB_OUTPUT.
+# scripts/github/resolve/output_apps.sh, and write it to GITHUB_OUTPUT.
 #
 # Inputs via env:
 #   INPUT_WHITELIST  caller-provided whitelist (space-separated).

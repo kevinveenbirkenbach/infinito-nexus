@@ -101,7 +101,8 @@ class Finding:
             "Move the script into a file under files/ and call it from "
             "Ansible via the `script:` module (collapses the task to "
             "one line); for GitHub Actions use a sibling under "
-            "`scripts/github/` and `run: bash scripts/github/<name>.sh`."
+            "`scripts/github/<subfolder>/` and "
+            "`run: bash scripts/github/<subfolder>/<name>.sh`."
         )
 
 

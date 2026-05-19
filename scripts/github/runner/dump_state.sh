@@ -3,7 +3,7 @@
 # Intended as a diagnostic helper that can be called from anywhere
 # inside a workflow step (pre/post swap resize, post-deploy failure).
 #
-# Usage: dump_runner_state.sh [label]
+# Usage: dump_state.sh [label]
 # The label is rendered into the log group title and the step summary.
 
 set -euo pipefail

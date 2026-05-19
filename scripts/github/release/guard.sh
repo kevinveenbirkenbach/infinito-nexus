@@ -5,7 +5,7 @@
 # GITHUB_OUTPUT to true / false.
 #
 # Usage:
-#   guard_release.sh
+#   guard.sh
 #   (reads VERSION_TAG from env; writes to GITHUB_OUTPUT)
 set -euo pipefail
 

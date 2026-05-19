@@ -10,7 +10,7 @@ from utils.cache.files import read_text
 
 from . import PROJECT_ROOT
 
-SCRIPT_PATH = PROJECT_ROOT / "scripts" / "github" / "cancel_pull_request_runs.sh"
+SCRIPT_PATH = PROJECT_ROOT / "scripts" / "github" / "cancel" / "pull_request_runs.sh"
 EMPTY_RUNS_JSON = '{"workflow_runs":[]}\n'
 
 
