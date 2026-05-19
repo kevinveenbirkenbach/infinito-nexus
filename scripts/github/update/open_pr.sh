@@ -42,6 +42,45 @@ if git diff --cached --quiet; then
 fi
 
 git commit -m "${UPDATE_COMMIT_MESSAGE}"
+
+# Normalize CRLF endings so a git-produced patch hashes identically to a
+# gh-produced one regardless of which side the runner picked up.
+normalize_diff() { sed -e 's/\r$//'; }
+CURRENT_HASH="$(git diff "origin/${UPDATE_BASE_BRANCH}..HEAD" | normalize_diff | sha256sum | awk '{print $1}')"
+echo "Local diff hash: ${CURRENT_HASH}"
+
+# Dedupe across *every* open PR against this base branch (the bot must
+# skip not just sibling bot-PRs but also any human-authored PR that
+# happens to carry the same change). The current branch is excluded so
+# the check never compares us to ourselves.
+mapfile -t OPEN_PRS < <(
+	gh pr list \
+		--repo "${REPO}" \
+		--state open \
+		--base "${UPDATE_BASE_BRANCH}" \
+		--limit 100 \
+		--json number,headRefName \
+		--jq ".[] | select(.headRefName != \"${BRANCH}\") | \"\(.number)\t\(.headRefName)\""
+)
+
+DUPLICATE_PR=""
+for entry in "${OPEN_PRS[@]}"; do
+	[[ -z "${entry}" ]] && continue
+	pr_num="${entry%%$'\t'*}"
+	pr_branch="${entry##*$'\t'}"
+	pr_hash="$(gh pr diff "${pr_num}" --repo "${REPO}" | normalize_diff | sha256sum | awk '{print $1}')"
+	echo "  open PR #${pr_num} (${pr_branch}): ${pr_hash}"
+	if [[ "${pr_hash}" == "${CURRENT_HASH}" ]]; then
+		DUPLICATE_PR="${pr_num}"
+		break
+	fi
+done
+
+if [[ -n "${DUPLICATE_PR}" ]]; then
+	echo "Open PR #${DUPLICATE_PR} already carries this exact diff. Skipping push and PR creation."
+	exit 0
+fi
+
 git push --force origin "${BRANCH}"
 
 PR_NUMBER="$(
@@ -61,10 +100,30 @@ if [[ -n "${PR_NUMBER}" ]]; then
 		--body "${UPDATE_PR_BODY}"
 else
 	echo "Creating PR for ${BRANCH}"
-	gh pr create \
-		--repo "${REPO}" \
-		--title "${UPDATE_PR_TITLE}" \
-		--body "${UPDATE_PR_BODY}" \
-		--base "${UPDATE_BASE_BRANCH}" \
-		--head "${OWNER}:${BRANCH}"
+	PR_URL="$(
+		gh pr create \
+			--repo "${REPO}" \
+			--title "${UPDATE_PR_TITLE}" \
+			--body "${UPDATE_PR_BODY}" \
+			--base "${UPDATE_BASE_BRANCH}" \
+			--head "${OWNER}:${BRANCH}"
+	)"
+	PR_NUMBER="${PR_URL##*/}"
+	echo "Created PR #${PR_NUMBER}: ${PR_URL}"
 fi
+
+# Close every other open PR in the same update class as superseded. A
+# PR is in the same class when its branch starts with the configured
+# UPDATE_BRANCH_PREFIX, so e.g. an image-versions run only retires
+# stale image-versions branches and never touches repository-refs,
+# skills, or human-authored PRs.
+for entry in "${OPEN_PRS[@]}"; do
+	[[ -z "${entry}" ]] && continue
+	pr_branch="${entry##*$'\t'}"
+	[[ "${pr_branch}" == "${UPDATE_BRANCH_PREFIX}-"* ]] || continue
+	pr_num="${entry%%$'\t'*}"
+	echo "Closing superseded PR #${pr_num} (${pr_branch})"
+	gh pr close "${pr_num}" \
+		--repo "${REPO}" \
+		--comment "Superseded by #${PR_NUMBER}."
+done
