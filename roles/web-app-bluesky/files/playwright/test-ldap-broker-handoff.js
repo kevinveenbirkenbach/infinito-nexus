@@ -8,6 +8,7 @@ exports.register = function (shared) {
     // variant on the Bluesky side, so the scenario asserts the same
     // end state.
     shared.skipUnlessServiceEnabled("ldap");
+    shared.skipUnlessServiceEnabled("oidc");
     const { baseUrl, adminUsername, adminPassword } = shared.env;
     expect(adminUsername, "ADMIN_USERNAME must be set when LDAP is enabled").toBeTruthy();
     expect(adminPassword, "ADMIN_PASSWORD must be set when LDAP is enabled").toBeTruthy();

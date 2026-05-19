@@ -38,6 +38,7 @@ test("OIDC: oauth2-proxy redirects unauthenticated visitors through Keycloak (va
 
 test("LDAP: same oauth2-proxy gate when Keycloak federates user storage from LDAP (variant 1)", async ({ page }) => {
   skipUnlessServiceEnabled("ldap");
+  skipUnlessServiceEnabled("oidc");
   expect(adminUsername).toBeTruthy(); expect(adminPassword).toBeTruthy();
   const expectedBase = baseUrl.replace(/\/$/, "");
   await page.goto(`${expectedBase}/`);
