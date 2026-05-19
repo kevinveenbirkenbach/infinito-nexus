@@ -90,6 +90,7 @@ class LookupModule(LookupBase):
                 "port": "",
                 "env": "",
                 "initdb_dir": "",
+                "build_dir": "",
                 "url_jdbc": "",
                 "url_full": "",
                 "volume": "",
@@ -167,6 +168,7 @@ class LookupModule(LookupBase):
         env_dir = f"{path_instances}{get_entity_name(consumer_id)}/.env/"
         env = f"{env_dir}{dbtype}.env"
         initdb_dir = f"{path_instances}{get_entity_name(consumer_id)}/.initdb.d/"
+        build_dir = f"{path_instances}{get_entity_name(consumer_id)}/.postgres-build/"
 
         jdbc_scheme = dbtype if dbtype == "mariadb" else "postgresql"
         url_jdbc = f"jdbc:{jdbc_scheme}://{host}:{port}/{name}"
@@ -190,6 +192,7 @@ class LookupModule(LookupBase):
             "port": port,
             "env": env,
             "initdb_dir": initdb_dir,
+            "build_dir": build_dir,
             "url_jdbc": url_jdbc,
             "url_full": url_full,
             "volume": volume,

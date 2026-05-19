@@ -18,6 +18,6 @@ POSTGRES_PORT: "{{ database_port | default(lookup('config', application_id, 'ser
 POSTGRES_EXPOSE_LOCAL: true # Exposes the db to localhost, almost everytime neccessary
 POSTGRES_CUSTOM_IMAGE: "{{ entity_name }}_custom:{{ POSTGRES_VERSION }}"
 POSTGRES_LOCAL_HOST: "127.0.0.1"
-POSTGRES_VECTOR_ENABLED: true # Required by discourse, propably in a later step it makes sense to define this as a configuration option in meta/services.yml
+POSTGRES_LIBRARIES: "{{ lookup('postgres_libraries', lookup('service_extensions', 'postgres').values() | sum(start=[]) | unique | list) }}"
 POSTGRES_RETRIES: 5
 POSTGRES_EXEC_SHELL: "container exec -e PGPASSWORD={{ POSTGRES_PASSWORD | quote }} {{ POSTGRES_CONTAINER }} sh -lc"
