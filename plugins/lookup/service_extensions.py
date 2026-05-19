@@ -4,8 +4,8 @@ Usage:
   {{ lookup('service_extensions', 'postgres') }}
 
 Returns ``{consumer_id: [extension, …]}`` for every role in
-``group_names`` whose ``services.<service>`` block is enabled, shared,
-and declares a non-empty ``extensions`` list.
+``group_names`` whose ``services.<service>`` block is enabled and
+declares a non-empty ``extensions`` list.
 """
 
 from __future__ import annotations
@@ -73,18 +73,7 @@ class LookupModule(LookupBase):
             if not bool(block.get("enabled")):
                 continue
             extensions = _extract_extensions(block)
-            if not extensions:
-                continue
-            if not bool(block.get("shared")):
-                raise AnsibleError(
-                    f"service_extensions: role '{consumer_id}' declares "
-                    f"services.{service_name}.extensions but does not "
-                    f"set services.{service_name}.shared: true. Today "
-                    f"only the shared/central database path applies "
-                    f"declared extensions; pin shared: true on this "
-                    f"role's services.yml or remove the extensions "
-                    f"declaration."
-                )
-            result[consumer_id] = extensions
+            if extensions:
+                result[consumer_id] = extensions
 
         return [result]

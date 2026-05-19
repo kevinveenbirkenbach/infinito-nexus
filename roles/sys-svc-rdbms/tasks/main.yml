@@ -12,16 +12,31 @@
   changed_when: false
 
 - block:
-    - name: "Ensure env dir exists: {{ lookup('container', application_id, 'directories.env') }}"
+    - name: "Ensure env dir exists: {{ _container_env_dir }}"
       ansible.builtin.file:
-        path: "{{ lookup('container', application_id, 'directories.env') }}"
+        path: "{{ _container_env_dir }}"
         state: directory
         mode: "0755"
-    - name: "For '{{ application_id }}/{{ _database_consumer_id }}': Create {{ lookup('database', _database_consumer_id, 'env') }}"
+    - name: "For '{{ application_id }}/{{ _database_consumer_id }}': Create {{ _database_env }}"
       template:
-        src: "env/{{ lookup('database', _database_consumer_id, 'type') }}.env.j2"
-        dest: "{{ lookup('database', _database_consumer_id, 'env') }}"
+        src: "env/{{ _database_type }}.env.j2"
+        dest: "{{ _database_env }}"
       notify: compose up
+    - block:
+        - name: "Ensure initdb.d dir exists: {{ _database_initdb_dir }}"
+          ansible.builtin.file:
+            path: "{{ _database_initdb_dir }}"
+            state: directory
+            mode: "0755"
+        - name: "For '{{ application_id }}/{{ _database_consumer_id }}': Render extensions.sql for dedicated postgres"
+          template:
+            src: "initdb.d/extensions.sql.j2"
+            dest: "{{ _database_initdb_dir }}extensions.sql"
+            mode: "0644"
+          notify: compose up
+      when:
+        - _database_type == 'postgres'
+        - (lookup('service_extensions', 'postgres').get(_database_consumer_id, []) | length) > 0
   when: not (_sys_svc_rdbms_central_db_enabled | bool)
 
 - name: Central Database Logic
@@ -53,7 +68,7 @@
   vars:
     _database_provider_role: "{{ lookup('database', _database_consumer_id, 'id') }}"
     database_consumer_id: "{{ _database_consumer_id }}"
-    database_type: "{{ lookup('database', _database_consumer_id, 'type') }}"
+    database_type: "{{ _database_type }}"
     database_instance: "{{ lookup('database', _database_consumer_id, 'instance') }}"
     database_host: "{{ lookup('database', _database_consumer_id, 'host') }}"
     database_port: "{{ lookup('database', _database_consumer_id, 'port') }}"

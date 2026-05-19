@@ -1,6 +1,6 @@
 {# This template needs to be included in compose.yml, which depend on a postgres database #}
 
-{% if not lookup('database', application_id, 'shared') %}  
+{% if not lookup('database', application_id, 'shared') %}
   {{ lookup('database', application_id, 'host') }}:
     image: {{ lookup('database', application_id, 'image') }}:{{ lookup('database', application_id, 'version') }}
     container_name: {{ application_id | get_entity_name }}-database
@@ -16,6 +16,12 @@
       - type:   volume
         source: database
         target: /var/lib/postgresql/data
+{% if (lookup('service_extensions', 'postgres').get(application_id, []) | length) > 0 %}
+      - type:   bind
+        source: {{ lookup('database', application_id, 'initdb_dir') }}
+        target: /docker-entrypoint-initdb.d
+        read_only: true
+{% endif %}
     networks:
       - default
 {% endif %}

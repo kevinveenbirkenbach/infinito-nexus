@@ -83,7 +83,6 @@ class ServiceExtensionsLookupTests(unittest.TestCase):
                 "services": {
                     "postgres": {
                         "enabled": True,
-                        "shared": True,
                         "extensions": ["bloom"],
                     },
                 },
@@ -92,7 +91,7 @@ class ServiceExtensionsLookupTests(unittest.TestCase):
         result = self._run(["postgres"], applications, ["web-app-bookwyrm"])
         self.assertEqual(result, [{"web-app-bookwyrm": ["bloom"]}])
 
-    def test_role_with_extensions_but_not_shared_raises(self):
+    def test_role_with_extensions_and_shared_false_is_included(self):
         applications = {
             "web-app-bookwyrm": {
                 "services": {
@@ -104,24 +103,8 @@ class ServiceExtensionsLookupTests(unittest.TestCase):
                 },
             },
         }
-        with self.assertRaises(AnsibleError) as ctx:
-            self._run(["postgres"], applications, ["web-app-bookwyrm"])
-        self.assertIn("shared: true", str(ctx.exception))
-        self.assertIn("web-app-bookwyrm", str(ctx.exception))
-
-    def test_role_with_extensions_but_missing_shared_raises(self):
-        applications = {
-            "web-app-bookwyrm": {
-                "services": {
-                    "postgres": {
-                        "enabled": True,
-                        "extensions": ["bloom"],
-                    },
-                },
-            },
-        }
-        with self.assertRaises(AnsibleError):
-            self._run(["postgres"], applications, ["web-app-bookwyrm"])
+        result = self._run(["postgres"], applications, ["web-app-bookwyrm"])
+        self.assertEqual(result, [{"web-app-bookwyrm": ["bloom"]}])
 
     def test_role_not_in_group_names_is_skipped(self):
         applications = {
@@ -177,7 +160,6 @@ class ServiceExtensionsLookupTests(unittest.TestCase):
                 "services": {
                     "postgres": {
                         "enabled": True,
-                        "shared": True,
                         "extensions": ["bloom"],
                     },
                 },
@@ -186,7 +168,6 @@ class ServiceExtensionsLookupTests(unittest.TestCase):
                 "services": {
                     "postgres": {
                         "enabled": True,
-                        "shared": True,
                         "extensions": ["pg_trgm", "vector"],
                     },
                 },
@@ -213,12 +194,10 @@ class ServiceExtensionsLookupTests(unittest.TestCase):
                 "services": {
                     "postgres": {
                         "enabled": True,
-                        "shared": True,
                         "extensions": ["bloom"],
                     },
                     "mariadb": {
                         "enabled": True,
-                        "shared": True,
                         "extensions": ["someplugin"],
                     },
                 },
@@ -236,7 +215,6 @@ class ServiceExtensionsLookupTests(unittest.TestCase):
                 "services": {
                     "postgres": {
                         "enabled": True,
-                        "shared": True,
                         "extensions": ["bloom"],
                     },
                 },
@@ -255,7 +233,6 @@ class ServiceExtensionsLookupTests(unittest.TestCase):
                 "services": {
                     "postgres": {
                         "enabled": True,
-                        "shared": True,
                         "extensions": ["bloom", "  ", ""],
                     },
                 },

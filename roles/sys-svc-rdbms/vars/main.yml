@@ -1,0 +1,5 @@
+---
+_container_env_dir: "{{ lookup('container', application_id, 'directories.env') }}"
+_database_env: "{{ lookup('database', _database_consumer_id, 'env') }}"
+_database_type: "{{ lookup('database', _database_consumer_id, 'type') }}"
+_database_initdb_dir: "{{ lookup('database', _database_consumer_id, 'initdb_dir') }}"

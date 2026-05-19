@@ -170,6 +170,7 @@ class DatabaseLookupTests(unittest.TestCase):
         self.assertEqual(out["password"], "pw")
         self.assertEqual(out["port"], "5432")
         self.assertEqual(out["env"], "/opt/compose/foo/.env/postgres.env")
+        self.assertEqual(out["initdb_dir"], "/opt/compose/foo/.initdb.d/")
         self.assertEqual(out["url_jdbc"], "jdbc:postgresql://database:5432/foo")
         self.assertEqual(out["url_full"], "postgres://foo:pw@database:5432/foo")
         self.assertEqual(out["volume"], "foo_database")
