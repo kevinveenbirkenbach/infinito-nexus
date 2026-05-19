@@ -29,7 +29,7 @@ NEXTCLOUD_HOST_NGINX_PATH: "{{ [ lookup('container', application_id, 'directorie
 
 ## Control Node
 NEXTCLOUD_CNODE_PLUGIN_VARS_PATH: "{{ [role_path, 'vars/plugins/'] | path_join }}" # Folder in which the files for the plugin configuration are stored
-NEXTCLOUD_CNODE_PLUGIN_TASKS_PATH: "{{ [role_path, 'tasks/plugins/'] | path_join }}" # Folder which contains the files for extra plugin configuration tasks
+NEXTCLOUD_CNODE_PLUGIN_TASKS_PATH: "{{ [role_path, 'tasks/plugin/hooks/'] | path_join }}" # Folder which contains the files for extra plugin configuration tasks
 
 ## Internal Paths
 NEXTCLOUD_DOCKER_WORK_DIRECTORY: "/var/www/html/" # Name of the workdir in which the application is stored

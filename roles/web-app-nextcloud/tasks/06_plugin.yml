@@ -1,6 +1,6 @@
 ---
 - block:
-    - include_tasks: _plugin_a_routines.yml
+    - include_tasks: plugin/01_install.yml
   when: plugin_value.enabled | bool
 
 - name: disable {{ plugin_key }} nextcloud plugin

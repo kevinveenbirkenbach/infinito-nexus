@@ -30,7 +30,7 @@
     loop_var: nextcloud_step
 
 - name: Setup Nextcloud Plugins
-  include_tasks: 06_setup_plugin.yml
+  include_tasks: 06_plugin.yml
   loop: "{{ NEXTCLOUD_PLUGIN_ITEMS }}"
   loop_control:
     loop_var: plugin_item

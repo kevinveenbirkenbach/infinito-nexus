@@ -1,9 +1,4 @@
 ---
-- name: enable {{ plugin_key }} nextcloud plugin
-  command: "{{ NEXTCLOUD_DOCKER_EXEC_OCC }} app:enable {{ plugin_key }}"
-  register: enable_result
-  changed_when: enable_result.rc == 0 and ("already enabled" not in enable_result.stdout)
-
 - name: Check if {{ plugin_vars_path }} exists
   stat:
     path: "{{ plugin_vars_path }}"
