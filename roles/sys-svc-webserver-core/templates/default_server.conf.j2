@@ -17,9 +17,5 @@ server {
     listen 443 ssl default_server;
     listen [::]:443 ssl default_server;
 
-    ssl_certificate     {{ lookup('cert', DOMAIN_PRIMARY, 'files.cert') }};
-    ssl_certificate_key {{ lookup('cert', DOMAIN_PRIMARY, 'files.key') }};
-
-    default_type text/plain;
-    return 421 "Misdirected Request: no vhost is configured for $host.\n";
+    ssl_reject_handshake on;
 }
