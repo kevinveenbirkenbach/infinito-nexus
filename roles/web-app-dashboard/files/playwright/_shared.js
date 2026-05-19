@@ -1,7 +1,7 @@
 const { expect } = require("@playwright/test");
 
 const { normalizeBaseUrl } = require("./personas");
-const { skipUnlessServiceEnabled } = require("./service-gating");
+const { isServiceEnabled, skipUnlessServiceEnabled } = require("./service-gating");
 
 const dashboardJsBaseUrl = normalizeBaseUrl(process.env.DASHBOARD_JS_BASE_URL || "");
 const matomoBaseUrl = normalizeBaseUrl(process.env.MATOMO_BASE_URL || "");
@@ -115,6 +115,7 @@ module.exports = {
     dashboardJsBaseUrl,
     matomoBaseUrl,
   },
+  isServiceEnabled,
   skipUnlessServiceEnabled,
   beforeEach,
   attachDiagnostics,

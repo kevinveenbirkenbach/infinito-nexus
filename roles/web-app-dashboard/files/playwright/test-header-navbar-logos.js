@@ -36,12 +36,15 @@ exports.register = function (shared) {
     const documentHtml = await documentResponse.text();
     await shared.waitForDashboardReady(page);
     await shared.waitForResourceResponse(diagnostics.responses, `${shared.env.dashboardJsBaseUrl}/iframe.js`, "dashboard iframe sync script");
-    await shared.waitForResourceResponse(diagnostics.responses, `${shared.env.dashboardJsBaseUrl}/oidc.js`, "dashboard oidc script");
 
     expect(documentHtml).toContain("loadScriptSequential");
     expect(documentHtml).toContain(shared.env.dashboardJsBaseUrl);
     expect(documentHtml).toContain('"iframe.js"');
-    expect(documentHtml).toContain('"oidc.js"');
+
+    if (shared.isServiceEnabled("oidc")) {
+      await shared.waitForResourceResponse(diagnostics.responses, `${shared.env.dashboardJsBaseUrl}/oidc.js`, "dashboard oidc script");
+      expect(documentHtml).toContain('"oidc.js"');
+    }
 
     const headerLogo = page.locator("header.header img[alt='logo']").first();
     const navbarLogo = page.locator("#navbar_logo img").first();
