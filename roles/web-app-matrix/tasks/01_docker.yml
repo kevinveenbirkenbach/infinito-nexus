@@ -120,8 +120,6 @@
     matrix_create_admin.rc != 0 and
     'User ID already taken' not in (matrix_create_admin.stdout + matrix_create_admin.stderr)
   no_log: "{{ MASK_CREDENTIALS_IN_LOGS | bool }}"
-  async: "{{ ASYNC_TIME if ASYNC_ENABLED | bool else omit }}"
-  poll: "{{ ASYNC_POLL if ASYNC_ENABLED | bool else omit }}"
 
 - name: create chatgpt bot
   command:
@@ -133,8 +131,6 @@
     matrix_create_chatgptbot.rc != 0 and
     'User ID already taken' not in (matrix_create_chatgptbot.stdout + matrix_create_chatgptbot.stderr)
   no_log: "{{ MASK_CREDENTIALS_IN_LOGS | bool }}"
-  async: "{{ ASYNC_TIME if ASYNC_ENABLED | bool else omit }}"
-  poll: "{{ ASYNC_POLL if ASYNC_ENABLED | bool else omit }}"
 
 - name: Flush all handlers after docker setup so that they don't intervine with openresty
   meta: flush_handlers
