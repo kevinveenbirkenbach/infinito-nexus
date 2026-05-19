@@ -84,12 +84,8 @@ nextcloud:
       enabled: true
     external:
       enabled: true
-    # Marketplace upstream lags Nextcloud version: deploy fails with
-    # `App "BPM Files" cannot be installed because it is not compatible
-    # with this version of the server.` Re-enable when the plugin
-    # ships a release matching the pinned Nextcloud major.
-    # files_bpm:
-    #   enabled: true
+    files_bpm:
+      enabled: true
     files_linkeditor:
       enabled: true
     fileslibreofficeedit:
@@ -119,11 +115,7 @@ nextcloud:
     mail:
       enabled: true
     metadata:
-      # Disabled: upstream "Metadata" app is not compatible with the currently
-      # pinned Nextcloud server version (occ app:enable returns "App 'Metadata'
-      # cannot be installed because it is not compatible with this version of
-      # the server."). Re-enable once a compatible release ships.
-      enabled: false
+      enabled: true
     news:
       enabled: true
     oidc_login:
