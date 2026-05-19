@@ -7,8 +7,15 @@
 # Output (single line on stdout):
 #   __ALL__                          full deploy needed. Emitted when:
 #                                      * the diff is empty, OR
-#                                      * any changed path lives outside
-#                                        roles/<role>/, OR
+#                                      * any changed path outside
+#                                        roles/<role>/ is not a Markdown
+#                                        or reStructuredText file (the
+#                                        `.md`/`.rst` skip-list mirrors
+#                                        scripts/meta/resolve/pr/scope.sh's
+#                                        `is_markdown_or_rst`), OR
+#                                      * the diff contains only such
+#                                        skipped paths and no role seeds
+#                                        could be derived, OR
 #                                      * any seed role is non-modellable
 #                                        in the reverse resolver
 #                                        (resolver exit 2), OR
@@ -77,6 +84,11 @@ declare -A seed_roles=()
 for path in "${changed_paths[@]}"; do
 	[[ -z "${path}" ]] && continue
 	if [[ "${path}" != roles/*/* ]]; then
+		case "${path}" in
+		*.md | *.rst)
+			continue
+			;;
+		esac
 		emit_all
 	fi
 	role="${path#roles/}"
