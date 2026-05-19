@@ -42,6 +42,19 @@ async function runGuestFlow(page = {}) {
     return;
   }
 
+  // Dashboard vhost is purged between variants; skip before any I/O
+  // when APP_BASE_URL routes through a disabled dashboard frame.
+  if (new URL(appBaseUrl).hostname.toLowerCase().startsWith("dashboard.")) {
+    const dashboardEnabled = (process.env.DASHBOARD_SERVICE_ENABLED || "").toLowerCase();
+    if (dashboardEnabled === "false") {
+      test.skip(
+        true,
+        "guest persona collapsed: APP_BASE_URL routes via the dashboard frame but DASHBOARD_SERVICE_ENABLED=false for this variant.",
+      );
+      return;
+    }
+  }
+
   test.setTimeout(60_000);
 
   const startUrl = appBaseUrl;
