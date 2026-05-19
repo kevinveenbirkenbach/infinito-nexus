@@ -17,5 +17,5 @@ echo "Verifying matomo is now reachable after its dedicated deploy."
 assert_http_status 200 "${MATOMO_URL}"
 
 echo "Verifying the dashboard is no longer reachable after the matomo-only fresh deploy."
-# Expect 000 because curl aborts in TLS before HTTP when the removed hostname is missing from the certificate SANs.
-assert_http_status 000 "${DASHBOARD_URL}"
+# 421 = Misdirected Request: cert SAN still covers the host but no vhost is configured.
+assert_http_status 421 "${DASHBOARD_URL}"
