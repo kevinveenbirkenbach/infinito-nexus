@@ -7,10 +7,14 @@ import textwrap
 import unittest
 from pathlib import Path
 
+from utils.roles.mapping import ROLE_FILE_TASKS_MAIN
+
 from . import PROJECT_ROOT
 
 SCRIPT_REL = Path("scripts/meta/resolve/diff/affected_roles.sh")
 SCRIPT_PATH = PROJECT_ROOT / SCRIPT_REL
+
+ROLE_TASKS_MAIN_REL = f"roles/web-app-foo/{ROLE_FILE_TASKS_MAIN}"
 
 
 @unittest.skipUnless(shutil.which("git"), "git is required for this test")
@@ -106,11 +110,11 @@ class TestDiffAffectedRoles(unittest.TestCase):
     def test_md_outside_role_is_skipped_when_role_also_changed(self):
         repo, env = self._setup_repo(
             base_files={
-                "roles/web-app-foo/tasks/main.yml": "- debug: msg=v1\n",
+                ROLE_TASKS_MAIN_REL: "- debug: msg=v1\n",
                 "README.md": "v1\n",
             },
             feature_files={
-                "roles/web-app-foo/tasks/main.yml": "- debug: msg=v2\n",
+                ROLE_TASKS_MAIN_REL: "- debug: msg=v2\n",
                 "README.md": "v2\n",
                 "docs/contributing/x.md": "doc\n",
             },
@@ -120,9 +124,9 @@ class TestDiffAffectedRoles(unittest.TestCase):
 
     def test_rst_outside_role_is_skipped_when_role_also_changed(self):
         repo, env = self._setup_repo(
-            base_files={"roles/web-app-foo/tasks/main.yml": "- debug: msg=v1\n"},
+            base_files={ROLE_TASKS_MAIN_REL: "- debug: msg=v1\n"},
             feature_files={
-                "roles/web-app-foo/tasks/main.yml": "- debug: msg=v2\n",
+                ROLE_TASKS_MAIN_REL: "- debug: msg=v2\n",
                 "docs/foo.rst": "doc\n",
             },
             fake_resolver_stdout="web-app-foo",
@@ -131,9 +135,9 @@ class TestDiffAffectedRoles(unittest.TestCase):
 
     def test_non_md_outside_role_still_triggers_all(self):
         repo, env = self._setup_repo(
-            base_files={"roles/web-app-foo/tasks/main.yml": "- debug: msg=v1\n"},
+            base_files={ROLE_TASKS_MAIN_REL: "- debug: msg=v1\n"},
             feature_files={
-                "roles/web-app-foo/tasks/main.yml": "- debug: msg=v2\n",
+                ROLE_TASKS_MAIN_REL: "- debug: msg=v2\n",
                 "Makefile": "all:\n\t@true\n",
             },
         )
@@ -151,9 +155,9 @@ class TestDiffAffectedRoles(unittest.TestCase):
 
     def test_only_role_changes_pass_through_resolver(self):
         repo, env = self._setup_repo(
-            base_files={"roles/web-app-foo/tasks/main.yml": "- debug: msg=v1\n"},
+            base_files={ROLE_TASKS_MAIN_REL: "- debug: msg=v1\n"},
             feature_files={
-                "roles/web-app-foo/tasks/main.yml": "- debug: msg=v2\n",
+                ROLE_TASKS_MAIN_REL: "- debug: msg=v2\n",
             },
             fake_resolver_stdout="web-app-foo",
         )
