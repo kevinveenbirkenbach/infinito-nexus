@@ -16,7 +16,7 @@ email:
   shared: "{{ 'web-app-mailu' in group_names }}"
 postgres:
   enabled: true # nocheck: dynamic-flag
-  shared: true # nocheck: dynamic-flag
+  shared: "{{ 'svc-db-postgres' in group_names }}"
   extensions:
     - postgis
     - pg_trgm
