@@ -19,6 +19,14 @@ const { test, expect } = require("@playwright/test");
 const { normalizeUrl, readEnv, safeIsEnabled, assertCspInjections } = require("./utils");
 
 async function runGuestFlow(page = {}) {
+  if ((process.env.PERSONA_GUEST_BLOCKED || "").toLowerCase() === "true") {
+    test.skip(
+      true,
+      `guest persona is explicitly blocked by the role contract (PERSONA_GUEST_BLOCKED=true). See the role's TODO.md for the rationale and the path back to a runnable journey.`,
+    );
+    return;
+  }
+
   const appBaseUrl = normalizeUrl(process.env.APP_BASE_URL);
   const canonicalDomain = readEnv("CANONICAL_DOMAIN");
 
@@ -40,19 +48,6 @@ async function runGuestFlow(page = {}) {
       "Auth-less role with no public surface (no APP_BASE_URL) — guest persona scenario collapsed.",
     );
     return;
-  }
-
-  // Dashboard vhost is purged between variants; skip before any I/O
-  // when APP_BASE_URL routes through a disabled dashboard frame.
-  if (new URL(appBaseUrl).hostname.toLowerCase().startsWith("dashboard.")) {
-    const dashboardEnabled = (process.env.DASHBOARD_SERVICE_ENABLED || "").toLowerCase();
-    if (dashboardEnabled === "false") {
-      test.skip(
-        true,
-        "guest persona collapsed: APP_BASE_URL routes via the dashboard frame but DASHBOARD_SERVICE_ENABLED=false for this variant.",
-      );
-      return;
-    }
   }
 
   test.setTimeout(60_000);

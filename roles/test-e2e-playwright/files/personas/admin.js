@@ -60,7 +60,6 @@ async function runAdminFlow(page, opts = {}) {
   safeIsEnabled("oauth2");
   safeIsEnabled("logout");
   safeIsEnabled("matomo");
-  safeIsEnabled("dashboard");
 
   const canonicalDomain = readEnv("CANONICAL_DOMAIN");
   const appBaseUrl = normalizeUrl(process.env.APP_BASE_URL);
@@ -81,30 +80,6 @@ async function runAdminFlow(page, opts = {}) {
   await page.context().clearCookies();
 
   const oidcEnabled = safeIsEnabled("oidc");
-
-  // The administrator journey relies on the OIDC login chain to
-  // authenticate; when OIDC is off, no Keycloak round-trip happens
-  // and the persona cannot reach an authenticated surface.
-  if (!oidcEnabled) {
-    test.skip(
-      true,
-      "administrator persona requires OIDC, but OIDC_SERVICE_ENABLED=false for this role.",
-    );
-    return;
-  }
-
-  // Dashboard vhost is purged between variants; skip before any I/O
-  // when APP_BASE_URL routes through a disabled dashboard frame.
-  if (new URL(appBaseUrl).hostname.toLowerCase().startsWith("dashboard.")) {
-    const dashboardEnabled = (process.env.DASHBOARD_SERVICE_ENABLED || "").toLowerCase();
-    if (dashboardEnabled === "false") {
-      test.skip(
-        true,
-        "administrator persona collapsed: APP_BASE_URL routes via the dashboard frame but DASHBOARD_SERVICE_ENABLED=false for this variant.",
-      );
-      return;
-    }
-  }
 
   // Direct-app entry: bookmark-style navigation. The OAuth2-Proxy gate
   // fires on the first request, redirecting unauthenticated requests
