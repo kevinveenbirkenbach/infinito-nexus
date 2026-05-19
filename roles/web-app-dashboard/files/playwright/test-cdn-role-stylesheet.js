@@ -9,6 +9,7 @@ exports.register = function (shared) {
   test("dashboard CDN serves role-local stylesheet when cdn service is enabled", async ({ page }) => {
     shared.skipUnlessServiceEnabled("cdn");
     shared.skipUnlessServiceEnabled("asset");
+    shared.skipUnlessServiceEnabled("css");
 
     const diagnostics = shared.attachDiagnostics(page);
     const documentResponse = await page.goto("/");
