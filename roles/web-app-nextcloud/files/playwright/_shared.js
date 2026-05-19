@@ -22,7 +22,7 @@ const biberPassword = decodeDotenvQuotedValue(process.env.BIBER_PASSWORD);
 const nextcloudDirectLoginPassword = decodeDotenvQuotedValue(process.env.NEXTCLOUD_DIRECT_LOGIN_PASSWORD) || loginPassword;
 const oidcIssuerUrl = decodeDotenvQuotedValue(process.env.OIDC_ISSUER_URL);
 const nextcloudBaseUrl = decodeDotenvQuotedValue(process.env.NEXTCLOUD_BASE_URL);
-const nextcloudUsernameFieldPattern = /account name or email|username or email/i;
+const nextcloudUsernameFieldPattern = /account name(?: or email)?|username(?: or email)?/i;
 const nextcloudCredentialSubmitPattern = /^(sign in|log in)$/i;
 
 // Condition variables driving the login flavor. Ansible renders these from the

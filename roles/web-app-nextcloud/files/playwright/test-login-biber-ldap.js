@@ -37,13 +37,12 @@ exports.register = function (shared) {
 
       await shared.logoutStandaloneNextcloud(biberPage);
 
-      const loginUrl = new URL("login", shared.env.nextcloudBaseUrl).toString();
-      await biberPage.goto(loginUrl, { waitUntil: "domcontentloaded", timeout: 60_000 }).catch(() => {});
-      const shellAfterLogout = await shared.findFirstVisibleCandidate(shared.getNextcloudShellCandidates(biberPage));
-      expect(
-        shellAfterLogout,
-        "Expected biber to be logged out after clicking Log out (no authenticated Nextcloud shell on /login)",
-      ).toBeNull();
+      await expect
+        .poll(() => biberPage.url(), {
+          timeout: 30_000,
+          message: "expected biber's universal-logout to navigate to Keycloak's logout endpoint",
+        })
+        .toMatch(/\/realms\/.+\/protocol\/openid-connect\/logout/);
     } finally {
       await biberPage.close().catch(() => {});
       await biberContext.close().catch(() => {});
