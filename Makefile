@@ -25,7 +25,7 @@ endif
 .PHONY: apparmor-teardown apparmor-restore
 .PHONY: disable-ipv6 restore-ipv6
 .PHONY: trust-ca
-.PHONY: restart refresh exec up down stop
+.PHONY: restart refresh exec run up down stop
 .PHONY: build build-missing build-no-cache build-no-cache-all build-cleanup build-dependency
 .PHONY: act-all act-app act-workflow
 .PHONY: deploy-fresh-kept-apps container-refresh-inventory deploy-reuse-kept-all container-purge-entity container-purge-system
