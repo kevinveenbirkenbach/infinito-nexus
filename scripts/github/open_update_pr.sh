@@ -19,8 +19,15 @@ fi
 REPO="$(git remote get-url origin | sed 's|.*github\.com[:/]||' | sed 's|\.git$||')"
 OWNER="${REPO%/*}"
 
-git config user.name "github-actions[bot]"
-git config user.email "github-actions[bot]@users.noreply.github.com"
+if [[ -n "${APP_SLUG:-}" ]]; then
+	BOT_LOGIN="${APP_SLUG}[bot]"
+	BOT_USER_ID="$(gh api "/users/${BOT_LOGIN}" --jq .id)"
+	git config user.name "${BOT_LOGIN}"
+	git config user.email "${BOT_USER_ID}+${BOT_LOGIN}@users.noreply.github.com"
+else
+	git config user.name "github-actions[bot]"
+	git config user.email "github-actions[bot]@users.noreply.github.com"
+fi
 git checkout -B "${BRANCH}"
 
 if (($# > 0)); then

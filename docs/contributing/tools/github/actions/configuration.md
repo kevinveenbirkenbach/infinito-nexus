@@ -80,6 +80,8 @@ The gate is applied inside [push_ci_policy.sh](../../../../../scripts/meta/resol
 
 Controls whether automated update PRs are created. Covers both the workflow-driven jobs in [update.yml](../../../../../.github/workflows/update.yml) (Docker image versions, agent skills) and PRs opened by Dependabot (gated via [dependabot-close.yml](../../../../../.github/workflows/dependabot-close.yml), which auto-closes them).
 
+The workflow-driven jobs additionally require the `BOT_APP_ID` and `BOT_APP_PRIVATE_KEY` repository secrets, see [secrets.md](secrets.md). Without those secrets, runs fail at the token-minting step and no PR is opened.
+
 **Default behaviour (variable not set or set to any value other than `true`):**
 The `update-docker-image-versions` and `update-skills` jobs are skipped. Dependabot PRs are auto-closed on open with a comment pointing to this variable.
 
