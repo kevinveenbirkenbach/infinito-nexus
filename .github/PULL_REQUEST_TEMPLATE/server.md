@@ -71,7 +71,7 @@ Check the relevant rows and explain intentional omissions in `Additional Notes`.
 | [ ] | `README.md` | Usually | Documents role-specific usage, setup notes, and contributor context. |
 | [ ] | `meta/main.yml` | Usually | Declares Ansible Galaxy info and `dependencies:`. No project-internal `run_after:` / `lifecycle:` (those live on the primary entity in `meta/services.yml`). |
 | [ ] | `vars/main.yml` | Usually | Defines the shared fixed role variables as the main source of truth. |
-| [ ] | `meta/services.yml` | Usually | Per-entity service config (file root IS the services map keyed by `<entity_name>`). Holds image/version, `ports.{inter,local,public}`, `run_after`/`lifecycle` on the primary entity, plus inlined per-service settings. |
+| [ ] | `meta/services.yml` | Usually | Per-entity service config (file root IS the services map keyed by `<entity_name>`). Holds image/version, `ports.{internal,local,public}`, `run_after`/`lifecycle` on the primary entity, plus inlined per-service settings. |
 | [ ] | `meta/server.yml` | Usually | Server-level config (file root IS `applications.<app>.server`). CSP, `domains`, `status_codes`, plus the per-role `networks.local.{subnet,dns_resolver}`. |
 | [ ] | `meta/rbac.yml` | When the role declares RBAC | RBAC declarations (file root IS `applications.<app>.rbac`). |
 | [ ] | `meta/volumes.yml` | When the role declares Compose volumes | Volumes map (file root IS the volumes map; no `compose:`/`volumes:` wrapper). |
@@ -90,7 +90,7 @@ Check the relevant rows and explain intentional omissions in `Additional Notes`.
 
 | Check | Item | When to include | Purpose |
 |---|---|---|---|
-| [ ] | Per-entity ports in `meta/services.yml.<entity>.ports.{inter,local,public}` | When the app exposes a service | Confirms that the app's host-bound ports are declared on the entity that exposes them. Use `cli meta ports suggest` to pick free slots inside the appropriate `PORT_BANDS.<scope>.<category>` from `group_vars/all/08_networks.yml`. |
+| [ ] | Per-entity ports in `meta/services.yml.<entity>.ports.{internal,local,public}` | When the app exposes a service | Confirms that the app's host-bound ports are declared on the entity that exposes them. Use `cli meta ports suggest` to pick free slots inside the appropriate `PORT_BANDS.<scope>.<category>` from `group_vars/all/08_networks.yml`. |
 | [ ] | Per-role subnet in `meta/server.yml.networks.local.subnet` | When the app communicates over container networks | Confirms that the role's docker network CIDR is declared. Use `cli meta networks suggest --clients N` to pick a free subnet. |
 
 ---

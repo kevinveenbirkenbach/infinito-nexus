@@ -24,7 +24,7 @@
 #                                               under networks.local.dns_resolver
 #   * group_vars/all/09_ports.yml (entire file, deleted)
 #                                            → per-entity ports under
-#                                               roles/<role>/meta/services.yml.<entity>.ports.{inter,local,public}
+#                                               roles/<role>/meta/services.yml.<entity>.ports.{internal,local,public}
 #
 # See docs/contributing/design/role/services/layout.md for the full per-role meta
 # layout.

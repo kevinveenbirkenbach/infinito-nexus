@@ -32,7 +32,8 @@ listmonk:
     no_stop_required: true
   name: listmonk
   ports:
-    inter: 9000
+    internal:
+      http: 9000
     local:
       http: 8019
   public_api_activated: false

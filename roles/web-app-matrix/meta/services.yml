@@ -25,6 +25,8 @@ synapse:
   backup:
     no_stop_required: true
   ports:
+    internal:
+      http: 8008
     local:
       http: 8021
     public:

@@ -6,7 +6,7 @@ Walks every ``roles/*/meta/services.yml``, collects occupied
 and proposes the lowest free port(s) within
 ``PORT_BANDS.<scope>.<category>`` from ``group_vars/all/08_networks.yml``.
 
-`inter` is NOT supported: internal container ports are dictated by the
+`internal` is NOT supported: internal container ports are dictated by the
 upstream image, not by a project-managed pool.
 
 Usage:
@@ -152,7 +152,7 @@ def main(argv: list[str] | None = None) -> int:
         "--scope",
         required=True,
         choices=("local", "public"),
-        help="port scope; 'inter' is NOT supported.",
+        help="port scope; 'internal' is NOT supported.",
     )
     parser.add_argument(
         "--category",

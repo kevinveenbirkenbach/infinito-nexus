@@ -32,7 +32,8 @@ mig:
   name: mig
   min_storage: 1GB
   ports:
-    inter: 80
+    internal:
+      http: 80
     local:
       http: 8047
   lifecycle: alpha

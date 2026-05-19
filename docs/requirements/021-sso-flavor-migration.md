@@ -99,7 +99,7 @@ sso:
   oauth2:
     origin:
       host: application
-      port: "{{ lookup('config', application_id, 'services.<entity>.ports.inter') }}"
+      port: "{{ lookup('config', application_id, 'services.<entity>.ports.internal.http') }}"
 
 # Nextcloud's plugin-flavor sub-discriminator (currently services.oidc.flavor).
 sso:

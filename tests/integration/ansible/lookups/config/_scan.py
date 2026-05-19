@@ -70,7 +70,7 @@ def expr_to_wildcard_path(expr: str) -> str | None:
     path with `*` placeholders for every Jinja variable segment.
 
     Examples:
-      ``'services.' ~ entity_name ~ '.ports.inter'`` -> ``services.*.ports.inter``
+      ``'services.' ~ entity_name ~ '.ports.internal.http'`` -> ``services.*.ports.internal.http``
       ``'services.openldap.ports.local.' ~ _ldap_protocol`` -> ``services.openldap.ports.local.*``
 
     Returns ``None`` when the expression cannot be parsed (mismatched

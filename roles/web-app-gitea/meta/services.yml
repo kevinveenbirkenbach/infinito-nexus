@@ -39,7 +39,8 @@ gitea:
       default_private: last
       default_push_create_private: true
   ports:
-    inter: 3000
+    internal:
+      http: 3000
     local:
       oauth2: 16488
       http: 8002
@@ -63,7 +64,7 @@ redis:
 oauth2:
   origin:
     host: application
-    port: "{{ lookup('config', 'web-app-gitea', 'services.gitea.ports.inter') }}"
+    port: "{{ lookup('config', 'web-app-gitea', 'services.gitea.ports.internal.http') }}"
   acl:
     blacklist:
       - /user/login

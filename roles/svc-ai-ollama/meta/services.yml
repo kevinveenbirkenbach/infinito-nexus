@@ -13,7 +13,8 @@ ollama:
   mem_limit: 8g
   pids_limit: 2048
   ports:
-    inter: 11434
+    internal:
+      http: 11434
   preload_models:
     - llama3:latest
     - mistral:latest

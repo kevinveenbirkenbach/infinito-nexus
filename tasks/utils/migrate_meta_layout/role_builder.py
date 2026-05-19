@@ -169,13 +169,17 @@ def _normalise_service_entry(value: Any) -> Any:
     if "port" in entry:
         raw_port = entry.pop("port")
         try:
-            inter_port: Any = int(str(raw_port).strip())
+            internal_port: Any = int(str(raw_port).strip())
         except (TypeError, ValueError):
-            inter_port = raw_port
+            internal_port = raw_port
         ports_field = entry.get("ports")
         if not isinstance(ports_field, dict):
             ports_field = {}
-        ports_field["inter"] = inter_port
+        internal_map = ports_field.get("internal")
+        if not isinstance(internal_map, dict):
+            internal_map = {}
+        internal_map["http"] = internal_port
+        ports_field["internal"] = internal_map
         entry["ports"] = ports_field
     return entry
 

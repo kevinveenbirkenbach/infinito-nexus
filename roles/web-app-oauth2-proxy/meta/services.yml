@@ -19,7 +19,8 @@ oauth2-proxy:
   min_storage: 1GB
   configuration_file: oauth2-proxy-keycloak.cfg
   ports:
-    inter: 4180
+    internal:
+      http: 4180
   lifecycle: pre-alpha
   cpus: "0.25"
   mem_reservation: "64m"

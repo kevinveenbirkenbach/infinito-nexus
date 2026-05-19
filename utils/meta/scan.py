@@ -43,7 +43,7 @@ def iter_role_dirs() -> Iterable[Path]:
 def iter_port_assignments() -> Iterable[tuple[str, str, str, str, int]]:
     """Yield ``(role, entity, scope, category, port)`` for every single-int port.
 
-    `inter` is intentionally excluded — internal container ports live in
+    `internal` is intentionally excluded — internal container ports live in
     per-container network namespaces and never collide.
     """
     for role_dir in iter_role_dirs():
@@ -147,7 +147,7 @@ def host_bound_port_set() -> dict[int, list[tuple[str, str, str, str]]]:
 
     Returns ``{port: [(role, entity, scope, category), ...]}``. Single-int
     `local`/`public` categories AND every integer in each relay span are
-    included; ``inter`` is skipped.
+    included; ``internal`` is skipped.
     """
     out: dict[int, list[tuple[str, str, str, str]]] = {}
     for role, entity, scope, category, port in iter_port_assignments():

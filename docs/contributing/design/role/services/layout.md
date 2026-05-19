@@ -142,7 +142,8 @@ All port data lives under `<entity>.ports` in `meta/services.yml` (no `ports:` s
   image: ...
   version: ...
   ports:
-    inter: <int>                      # internal container port (single int)
+    internal:
+      <category>: <int>               # internal container port (category-keyed)
     local:
       <category>: <int>               # localhost-bound host port
     public:
@@ -152,26 +153,27 @@ All port data lives under `<entity>.ports` in `meta/services.yml` (no `ports:` s
         end:   <int>
 ```
 
-### `inter` / `local` / `public` Split 🧭
+### `internal` / `local` / `public` Split 🧭
 
-| Slot      | Meaning                                                                                                       |
-|-----------|---------------------------------------------------------------------------------------------------------------|
-| `inter`   | **Internal container port.** Lives inside the container's network namespace, addressed by other containers on the same role-local network. NOT a host-bound port. Multiple roles MAY legitimately declare the same `inter` value (e.g. several nginx-based apps with `inter: 80`). |
-| `local`   | **Localhost-bound host port.** Bound on `127.0.0.1` and only reachable through the front-proxy / SSH tunnels. The OS-level binding namespace is shared across all roles, so `local` values MUST be unique across the whole repo. |
-| `public`  | **Public-facing host port.** Bound on `0.0.0.0` and exposed to the public internet (or to whatever the operator's firewall allows). Same uniqueness rule as `local`. |
+| Slot       | Meaning                                                                                                       |
+|------------|---------------------------------------------------------------------------------------------------------------|
+| `internal` | **Internal container port.** Lives inside the container's network namespace, addressed by other containers on the same role-local network. NOT a host-bound port. Multiple roles MAY legitimately declare the same value (e.g. several nginx-based apps with `internal: { http: 80 }`). |
+| `local`    | **Localhost-bound host port.** Bound on `127.0.0.1` and only reachable through the front-proxy / SSH tunnels. The OS-level binding namespace is shared across all roles, so `local` values MUST be unique across the whole repo. |
+| `public`   | **Public-facing host port.** Bound on `0.0.0.0` and exposed to the public internet (or to whatever the operator's firewall allows). Same uniqueness rule as `local`. |
 
 ### Always Category-Keyed Maps 🗂️
 
-`ports.local` and `ports.public` are **always** category-keyed maps, even when the map has only one entry.
+`ports.internal`, `ports.local` and `ports.public` are **always** category-keyed maps, even when the map has only one entry.
 Polymorphic int-or-map values are NOT supported.
 The category names are: `http`, `database`, `websocket`, `oauth2`, `ldap`, `ssh`, `ldaps`, `stun_turn`, `stun_turn_tls`, `federation`, plus the structured `relay` block under `public:`.
 
 ```yaml
 gitea:
   ports:
-    inter: 3000
+    internal:
+      http: 3000          # category-keyed, even with one entry
     local:
-      http: 8002          # category-keyed, even with one entry
+      http: 8002
     public:
       ssh: 2201
 ```

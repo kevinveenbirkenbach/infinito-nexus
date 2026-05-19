@@ -11,14 +11,14 @@ Primary file:
 `cli meta ports suggest` proposes the next free host-bound port(s) inside a `PORT_BANDS.<scope>.<category>` band defined in [group_vars/all/08_networks.yml](../../../group_vars/all/08_networks.yml).
 It walks every `roles/*/meta/services.yml`, collects occupied `<entity>.ports.{local,public}.<category>` assignments across all roles and all entities, and proposes free slots gap-first then by increment.
 
-`inter` ports are NOT supported by the suggester; they are dictated by upstream container images (`gitea=3000`, `postgres=5432`, …) and not allocated from a project-managed pool.
-Inter ports are recorded in `services.<entity>.ports.inter` directly by the contributor.
+`internal` ports are NOT supported by the suggester; they are dictated by upstream container images (`gitea=3000`, `postgres=5432`, …) and not allocated from a project-managed pool.
+Internal ports are recorded in `services.<entity>.ports.internal.<category>` directly by the contributor.
 
 ## Inputs 🔧
 
 | Flag                      | Required | Default | Description                                                                                       |
 |---------------------------|:--------:|:-------:|---------------------------------------------------------------------------------------------------|
-| `--scope local\|public`   | yes      | n/a     | Which scope to allocate from. `inter` is NOT a supported value.                                  |
+| `--scope local\|public`   | yes      | n/a     | Which scope to allocate from. `internal` is NOT a supported value.                                |
 | `--category <name>`       | yes      | n/a     | Band category (`http`, `ssh`, `oauth2`, `relay`, …). Looked up in `PORT_BANDS.<scope>.<category>`. |
 | `--count N`               | no       | `1`     | How many free ports (or relay ranges) to return.                                                  |
 | `--range <start>-<end>`   | no       | n/a     | Override the band from `PORT_BANDS` for ad-hoc allocations.                                      |

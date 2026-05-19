@@ -14,7 +14,8 @@ The file root IS the services map keyed by `<service-name>` (no `compose:` and n
   image: <image-name>   # e.g. nextcloud, quay.io/keycloak/keycloak, mcr.microsoft.com/playwright
   version: <tag>        # e.g. latest, 31.0.0, v1.58.2-noble
   ports:
-    inter: 8080         # internal container port (per req-009)
+    internal:
+      http: 8080        # internal container port (category-keyed; see layout.md)
   # … other compose fields
 ```
 
