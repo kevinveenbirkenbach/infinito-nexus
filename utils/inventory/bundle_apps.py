@@ -14,15 +14,18 @@ from __future__ import annotations
 
 import argparse
 import sys
-from pathlib import Path
-from typing import Iterable
+from typing import TYPE_CHECKING
 
+from utils import PROJECT_ROOT
 from utils.cache.yaml import load_yaml
 
-REPO_ROOT = Path(__file__).resolve().parents[2]
+if TYPE_CHECKING:
+    from collections.abc import Iterable
+    from pathlib import Path
+
 SEARCH_DIRS = (
-    REPO_ROOT / "inventories" / "bundles" / "servers",
-    REPO_ROOT / "inventories" / "bundles" / "workstations",
+    PROJECT_ROOT / "inventories" / "bundles" / "servers",
+    PROJECT_ROOT / "inventories" / "bundles" / "workstations",
 )
 
 
