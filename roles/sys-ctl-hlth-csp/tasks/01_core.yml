@@ -57,6 +57,10 @@
           (HEALTH_CSP_IGNORE_NETWORK_BLOCKS_FROM | length > 0) | ternary(
             '--ignore-network-blocks-from ' ~ (HEALTH_CSP_IGNORE_NETWORK_BLOCKS_FROM | join(' ')),
             ''
+          ),
+          (HEALTH_CSP_SKIP_DOMAINS | length > 0) | ternary(
+            '--skip-domain ' ~ (HEALTH_CSP_SKIP_DOMAINS | join(' ')),
+            ''
           )
         ]
         | reject('equalto','')
