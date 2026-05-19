@@ -60,7 +60,7 @@
           --- container logs (last 200 lines) ---
           {{ moodle_logs.stdout | default('no output') }}
 
-- name: "Run Moodle install (idempotent — skips when already installed)"
+- name: "Run Moodle install (idempotent)"
   command: >
     container exec --user {{ MOODLE_RUNTIME_USER }} {{ MOODLE_CONTAINER }}
     php {{ MOODLE_CLI_DIR }}/install_database.php
