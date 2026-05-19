@@ -7,9 +7,9 @@
 #     .env file.
 #   - The application under test is still running.
 #
-# This script intentionally does NOT re-render .env and does NOT re-stage the
-# project. It only overwrites tests/playwright.spec.js from the repo and
-# reruns Playwright via the same container image the deploy-time runner uses.
+# This script intentionally does NOT re-render .env. It restages the
+# role-local Playwright files (spec + companions) from the repo and reruns
+# Playwright via the same container image the deploy-time runner uses.
 #
 # Usage:
 #   scripts/tests/e2e/rerun-spec.sh <role> [playwright args...]  # nocheck: self-path-reference

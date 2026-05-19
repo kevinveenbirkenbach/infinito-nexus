@@ -15,8 +15,8 @@
   notify: compose up
 
 - name: "deploy KIX-proxy nginx routing config for '{{ application_id }}'"
-  ansible.builtin.copy:
-    src: "kix-proxy.default.conf"
+  ansible.builtin.template:
+    src: "kix-proxy.default.conf.j2"
     dest: "{{ KIX_PROXY_NGINX_HOST_PATH }}"
     mode: "0644"
   notify: compose up

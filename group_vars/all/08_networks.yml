@@ -39,6 +39,18 @@ NETWORK_PUBLIC_DNS_RESOLVERS:
   - 1.1.1.1 # nocheck: hardcoded-dns-resolver
   - 8.8.8.8 # nocheck: hardcoded-dns-resolver
   - 1.0.0.1 # nocheck: hardcoded-dns-resolver
+# Docker's embedded DNS resolver. Used by per-app nginx gateways in
+# their `resolver` directive to re-resolve sibling-container hostnames
+# at request time instead of caching the upstream IP at startup, so a
+# sibling restart that yields a new container IP doesn't strand the
+# gateway on a dead address. Roles MUST template this constant rather
+# than hard-coding `127.0.0.11`.
+NETWORK_DOCKER_EMBEDDED_DNS_RESOLVER: "127.0.0.11" # nocheck: hardcoded-dns-resolver
+# Ready-to-render nginx `resolver` directive for the docker embedded DNS,
+# including the cache TTL and IPv6 toggle. Roles MUST emit this verbatim
+# in their nginx templates instead of repeating the directive form, so
+# the TTL and ipv6 stay consistent across the stack.
+NETWORK_DOCKER_DNS_NGINX_DIRECTIVE: "resolver {{ NETWORK_DOCKER_EMBEDDED_DNS_RESOLVER }} valid=30s ipv6={{ NETWORK_IPV6_ENABLED | on_off }};"
 defaults_networks:
   internet:
     ip4: "{{ lookup('env', 'IP4') | default('127.0.0.1', true) }}"
