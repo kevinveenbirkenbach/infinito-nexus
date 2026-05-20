@@ -7,8 +7,8 @@ if [[ -n "${VENV:-}" && -x "${VENV}/bin/python" && "${PYTHON:-}" != "${VENV}/bin
 	unset INFINITO_ENV_PYTHON_LOADED
 	unset PYTHON
 	unset PIP
-	# shellcheck source=scripts/meta/env/all.sh
-	source "${ENV_SH:-scripts/meta/env/all.sh}"
+	# shellcheck source=scripts/meta/env/load.sh
+	source "${ENV_SH:-scripts/meta/env/load.sh}"
 fi
 
 : "${PYTHON:?PYTHON not set}"

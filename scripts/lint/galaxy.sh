@@ -15,13 +15,13 @@
 # Per-role output is captured in /tmp/galaxy-importer-<role>.log so
 # failures point straight at the offending file.
 #
-# Per-role workers run concurrently by default. Set PARALLEL=0 (also
-# accepts `false`/`no`/`off`) to fall back to sequential execution.
+# Per-role workers run concurrently by default. Set INFINITO_PARALLEL=0
+# (also accepts `false`/`no`/`off`) to fall back to sequential execution.
 
 set -euo pipefail
 
-# Default: parallel. Override with `PARALLEL=0` for sequential.
-PARALLEL="${PARALLEL:-true}"
+# Default lives in env/static.env (SPOT); load.sh exports it.
+PARALLEL="${INFINITO_PARALLEL}"
 
 # Internal knob — change here when needed; not exposed as env var.
 NAMESPACE="infinito"

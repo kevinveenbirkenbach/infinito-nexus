@@ -428,25 +428,25 @@ checkbox that MUST be ticked once the corresponding step is
 complete:
 
 - [x] **Disabled services during iteration.** Deploys ran with
-  `SERVICES_DISABLED="matomo,email"` throughout.
+  `INFINITO_SERVICES_DISABLED="matomo,email"` throughout.
 - [x] **Auth-flow variants.** Every in-scope role with `OIDC` or
   `LDAP` set to ✅/🛠️ ran its Playwright suite in both V0 and V1
   variants. ❌ rows (bridgy-fed, libretranslate LDAP/RBAC, postmarks
   RBAC, bluesky RBAC, xmpp RBAC) carry the documented exception in
   the role README.
 - [x] **Per-role baseline.** Each in-scope role passed
-  `make deploy-fresh-kept-apps APPS=<role>` standalone, V0 and V1
+  `make deploy-fresh-kept-apps INFINITO_APPS=<role>` standalone, V0 and V1
   where applicable, all Playwright scenarios green. (The deploy
   command is the kept-app variant which mirrors `fresh-purged-apps`
   on a clean stack with the same matrix-init logic and the same
   Playwright gate, and with `RUNTIME=dev` baked into host vars.)
 - [x] **Multi-app fresh deploy.** Single
-  `make deploy-fresh-purged-apps APPS="<13 in-scope roles>"
-  FULL_CYCLE=true` run brought up every role on one host
+  `make deploy-fresh-purged-apps INFINITO_APPS="<13 in-scope roles>"
+  INFINITO_FULL_CYCLE=true` run brought up every role on one host
   concurrently with all Playwright suites green (Pass 1 sync,
   failed=0). See [/tmp/multi-app-capstone.log] for the run record.
 - [x] **Capstone full-cycle.** The same multi-app run included the
-  `FULL_CYCLE=true` Pass 2 (async) over the same `APPS` set, also
+  `INFINITO_FULL_CYCLE=true` Pass 2 (async) over the same `INFINITO_APPS` set, also
   green (failed=0). All Playwright suites finished green in both
   passes before any lifecycle flip.
 
@@ -481,7 +481,7 @@ that MUST be ticked before the next step starts:
   deploy invocation throughout.
 - [x] **Deploy cycle.** Per-role baselines, multi-app fresh deploy,
   capstone full-cycle all completed.
-- [x] **Final capstone.** Multi-app FULL_CYCLE=true Pass 1 + Pass 2
+- [x] **Final capstone.** Multi-app INFINITO_FULL_CYCLE=true Pass 1 + Pass 2
   both finished `failed=0` with all Playwright suites green.
 - [ ] **Single commit at the end.** Pending: to be created next.
 - [x] **Autonomous execution.** Whole procedure executed without

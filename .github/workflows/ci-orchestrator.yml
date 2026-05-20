@@ -70,7 +70,7 @@ jobs:
           PR_NUMBER: ${{ github.event.pull_request.number }}
           PR_HEAD_SHA: ${{ github.event.pull_request.head.sha }}
           PR_UPDATED_AT: ${{ github.event.pull_request.updated_at }}
-          DISTROS: "arch debian ubuntu fedora centos"
+          INFINITO_DISTROS: "arch debian ubuntu fedora centos"
           IMAGE_TAG: ci-${{ github.sha }}
           WAIT_ATTEMPTS: ${{ inputs.image_wait_attempts }}
           WAIT_SLEEP_SECONDS: ${{ inputs.image_wait_sleep_seconds }}

@@ -7,5 +7,5 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 source "${SCRIPT_DIR}/utils/common.sh"
 
 echo "Redeploying matomo (variant 1) while keeping inventory and packages to validate state reuse."
-make deploy-reuse-kept-apps APPS="${MATOMO_APP}" VARIANT=1
+make deploy-reuse-kept-apps INFINITO_APPS="${MATOMO_APP}" INFINITO_VARIANT=1
 inspect

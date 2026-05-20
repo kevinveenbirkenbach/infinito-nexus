@@ -194,9 +194,9 @@ fail explicitly if more than one canonical domain is configured.
 
 ### Idempotency & deploy
 
-- [x] `make deploy-fresh-purged-apps APPS=web-app-hugo FULL_CYCLE=true`
+- [x] `make deploy-fresh-purged-apps INFINITO_APPS=web-app-hugo INFINITO_FULL_CYCLE=true`
       succeeds end-to-end (`failed=0` in PLAY RECAP).
-- [x] Running `make deploy-reuse-kept-apps APPS=web-app-hugo` a
+- [x] Running `make deploy-reuse-kept-apps INFINITO_APPS=web-app-hugo` a
       second time reports zero changes for the Hugo build step: git
       pull `changed: false`, no compose-build / compose-up handler
       fires.
@@ -247,7 +247,7 @@ back to the bundled default (`gohugoio/hugoDocs`, see **Default
 site**) and renders the official Hugo documentation site.
 
 ```bash
-APPS="web-app-hugo" make deploy-fresh-purged-apps
+INFINITO_APPS="web-app-hugo" make deploy-fresh-purged-apps
 ```
 
 Expected outcome: the canonical domain serves the rendered Hugo docs

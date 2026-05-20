@@ -11,7 +11,7 @@ For what the `files/playwright/playwright.spec.js` of a role MUST contain, see
 
 - [Playwright](https://playwright.dev/) runs inside Docker via the shared `test-e2e-playwright` role.
 - There is no standalone `make` target for Playwright. Tests run as part of local deploy flows
-  (e.g. `make deploy-fresh-purged-apps APPS=web-app-matomo FULL_CYCLE=true`). For spec-only
+  (e.g. `make deploy-fresh-purged-apps INFINITO_APPS=web-app-matomo INFINITO_FULL_CYCLE=true`). For spec-only
   iteration after the first successful deploy, see [Playwright Spec Loop](../../../agents/action/iteration/playwright.md).
 
 ## When to Write ✍️

@@ -5,13 +5,13 @@ set -euo pipefail
 # optionally filtered by lifecycle and CI storage constraints.
 #
 # Inputs via env:
-#   TEST_DEPLOY_TYPE   = server|workstation|universal (required)
-#   WHITELIST          = optional space-separated list of app ids to keep
+#   INFINITO_TEST_DEPLOY_TYPE   = server|workstation|universal (required)
+#   INFINITO_WHITELIST = optional space-separated list of app ids to keep
 #
 # Output:
 #   JSON array to stdout (single line, always valid)
 
-: "${TEST_DEPLOY_TYPE:?TEST_DEPLOY_TYPE is required (server|workstation|universal)}"
+: "${INFINITO_TEST_DEPLOY_TYPE:?INFINITO_TEST_DEPLOY_TYPE is required (server|workstation|universal)}"
 
 PYTHON="${PYTHON:-python3}"
 
@@ -22,9 +22,9 @@ cd "$REPO_ROOT"
 # ------------------------------------------------------------
 # Load default environment (safe if already loaded via BASH_ENV)
 # ------------------------------------------------------------
-if [[ -f "scripts/meta/env/all.sh" ]]; then
-	# shellcheck source=scripts/meta/env/all.sh
-	source "scripts/meta/env/all.sh"
+if [[ -f "scripts/meta/env/load.sh" ]]; then
+	# shellcheck source=scripts/meta/env/load.sh
+	source "scripts/meta/env/load.sh"
 fi
 
 # ------------------------------------------------------------
@@ -61,7 +61,7 @@ jq_whitelist_filter() {
 }
 
 compose_ci_exec() {
-	local -a compose_args=(docker compose --env-file env.ci)
+	local -a compose_args=(docker compose --env-file env/ci.env)
 
 	if [[ -f "env.development" ]]; then
 		compose_args+=(--env-file env.development)
@@ -86,7 +86,7 @@ apps_json="$(
 	compose_ci_exec \
 		"${PYTHON}" -m cli.meta.roles.applications.type \
 		--format json \
-		--type "${TEST_DEPLOY_TYPE}" \
+		--type "${INFINITO_TEST_DEPLOY_TYPE}" \
 		"${lifecycles_args[@]}" |
 		json_compact_array
 )"
@@ -134,7 +134,7 @@ fi
 # ------------------------------------------------------------
 apps_json="$(
 	printf '%s\n' "${apps_json}" |
-		jq_whitelist_filter "${WHITELIST:-}"
+		jq_whitelist_filter "${INFINITO_WHITELIST:-}"
 )"
 
 # ------------------------------------------------------------

@@ -18,7 +18,7 @@
 # Env:
 #   NGINX_DIR  Base nginx config dir inside the container.
 #              Default: /etc/nginx (matches svc-prx-openresty/meta/volumes.yml).
-#   DOMAIN     DOMAIN_PRIMARY used to render Jinja in roles/<role>/meta/server.yml.
+#   DOMAIN              DOMAIN_PRIMARY used to render Jinja in roles/<role>/meta/server.yml.
 #              Default: infinito.example.
 
 set -euo pipefail
@@ -30,9 +30,9 @@ fi
 
 cd /opt/src/infinito
 
-if [[ -f "scripts/meta/env/python.sh" ]]; then
-	# shellcheck source=scripts/meta/env/python.sh
-	source "scripts/meta/env/python.sh"
+if [[ -f "scripts/meta/env/load.sh" ]]; then
+	# shellcheck source=scripts/meta/env/load.sh
+	source "scripts/meta/env/load.sh"
 fi
 python_bin="${PYTHON:-python3}"
 

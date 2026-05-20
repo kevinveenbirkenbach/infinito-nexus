@@ -49,7 +49,7 @@ make mark-development
 
 This step is optional. It creates an empty `env.development` file in the repository root.
 
-Several tools (e.g. `cli/administration/deploy/development/compose.py`, `scripts/meta/resolve/apps.sh`) pass `env.ci` as the base env-file to Docker Compose and then, when `env.development` exists, append it as a second `--env-file`. Because Docker Compose applies env-files in order, any variable defined in `env.development` overrides the corresponding value from `env.ci`. This lets you customize local settings (ports, image tags, flags) without modifying the shared `env.ci` file.
+Several tools (e.g. `cli/administration/deploy/development/compose.py`, `scripts/meta/resolve/apps.sh`) pass `env/ci.env` as the base env-file to Docker Compose and then, when `env.development` exists, append it as a second `--env-file`. Because Docker Compose applies env-files in order, any variable defined in `env.development` overrides the corresponding value from `env/ci.env`. This lets you customize local settings (ports, image tags, flags) without modifying the shared `env/ci.env` file.
 
 The `pre-commit` hooks are installed automatically by `make environment-bootstrap` and do not depend on this marker.
 
@@ -81,7 +81,7 @@ The repository already contains a modular environment test suite at [scripts/tes
 | 2 | `make environment-bootstrap` | Prepares the host machine for local development. |
 | 3 | `make up` | Starts the development stack. |
 | 4 | `make test` | Runs the main combined validation flow. |
-| 5 | `make deploy-fresh-purged-apps APPS=web-app-matomo` | Runs the baseline validation path for one concrete app. For the retry-loop policy, see [Role Loop](../../agents/action/iteration/role.md). |
+| 5 | `make deploy-fresh-purged-apps INFINITO_APPS=web-app-matomo` | Runs the baseline validation path for one concrete app. For the retry-loop policy, see [Role Loop](../../agents/action/iteration/role.md). |
 | 6 | `make trust-ca` | Makes the generated local certificates trusted by the host browser. |
 | 7 | `make down` | Stops the running development stack. |
 | 8 | `make environment-teardown` | Cleans up host-side development environment changes. |

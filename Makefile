@@ -2,8 +2,8 @@
 SHELL := /bin/bash
 .SHELLFLAGS := -euo pipefail -c
 
-# SPOT: Global environment is defined in scripts/meta/env/all.sh.
-ENV_SH ?= $(CURDIR)/scripts/meta/env/all.sh
+# SPOT: Global environment is defined in scripts/meta/env/load.sh.
+ENV_SH ?= $(CURDIR)/scripts/meta/env/load.sh
 export ENV_SH
 
 # For non-interactive bash, BASH_ENV is sourced so the env layer applies to *all* Make recipes.
@@ -13,7 +13,7 @@ else
 $(error Missing env file: $(ENV_SH))
 endif
 
-.PHONY: setup setup-clean install install-ansible install-lint install-venv install-python install-python-dev install-system-python install-skills update-skills agent-install
+.PHONY: setup setup-clean install install-force install-ansible install-lint install-venv install-python install-python-dev install-system-python install-skills update-skills agent-install
 .PHONY: test lint lint-action lint-ansible lint-python lint-shellcheck lint-markdown lint-galaxy lint-makefile lint-javascript autoformat test-lint test-unit test-integration test-external test-deploy test-deploy-app
 .PHONY: clean clean-sudo down cache-clean
 .PHONY: system-purge system-disk-usage
@@ -132,7 +132,7 @@ restart:
 refresh:
 	@bash scripts/system/network/docker/stack_refresh.sh
 
-# Run a shell (`make exec`) or command (`make exec CMD="..."`) in the running container.
+# Run a shell (`make exec`) or command (`make exec INFINITO_CMD="..."`) in the running container.
 exec:
 	@bash scripts/tests/deploy/local/exec/container.sh
 
@@ -192,7 +192,7 @@ build-no-cache: build-dependency
 # Build the no-cache image for every distro.
 build-no-cache-all:
 	@set -euo pipefail; \
-	for d in $${DISTROS}; do \
+	for d in $${INFINITO_DISTROS}; do \
 		echo "=== build-no-cache: $$d ==="; \
 		INFINITO_DISTRO="$$d" "$(MAKE)" build-no-cache; \
 	done
@@ -241,15 +241,30 @@ install-python-dev: install-python
 	@bash scripts/install/python.sh dev
 	@bash scripts/install/pre-commit.sh
 
-# Install all runtime dependencies.
-install: install-python install-ansible
+# Install all runtime dependencies, incremental via a stamp file.
+# The stamp logic + dependency list live in scripts/install/all.sh; this
+# target just delegates. Use `make install-force` to drop the stamp first.
+install:
+	@bash scripts/install/all.sh
+
+# Force a full reinstall (drop the stamp and rebuild it).
+install-force:
+	@bash scripts/install/all.sh --force
 
 # Install OS-level sandbox dependencies (bubblewrap, socat) required by the Claude Code sandbox.
 agent-install:
 	@bash scripts/install/sandbox.sh
 
+# Regenerate the root `.env` file from `env/static.env` plus the current
+# runtime context (distro, GHA/ACT detection, df/meminfo-derived cache
+# sizes, sha256 secrets, ...). Single source of truth consumed by
+# docker compose, shell scripts, and tests. `.env` is gitignored;
+# `env/static.env` is committed.
+dotenv:
+	@python3 -m cli.meta.env
+
 # Run the setup step after generating .dockerignore.
-setup: dockerignore
+setup: dockerignore dotenv
 	@bash scripts/setup.sh
 
 # Create the development setup marker.
@@ -308,27 +323,27 @@ test: test-lint test-unit test-integration test-deploy
 
 # Run the lint test suite.
 test-lint: install
-	@TEST_TYPE="lint" \
+	@INFINITO_TEST_TYPE="lint" \
 	INFINITO_COMPILE=0 \
-	bash scripts/tests/code.sh
+	bash scripts/tests/code/wrapper.sh
 
 # Run the unit test suite.
 test-unit: install
-	@TEST_TYPE="unit" \
+	@INFINITO_TEST_TYPE="unit" \
 	INFINITO_COMPILE=0 \
-	bash scripts/tests/code.sh
+	bash scripts/tests/code/wrapper.sh
 
 # Run the integration test suite.
 test-integration: install
-	@TEST_TYPE="integration" \
+	@INFINITO_TEST_TYPE="integration" \
 	INFINITO_COMPILE=0 \
-	bash scripts/tests/code.sh
+	bash scripts/tests/code/wrapper.sh
 
 # Run the external test suite.
 test-external: install
-	@TEST_TYPE="external" \
+	@INFINITO_TEST_TYPE="external" \
 	INFINITO_COMPILE=0 \
-	bash scripts/tests/code.sh
+	bash scripts/tests/code/wrapper.sh
 
 # Run all act-based deploy checks.
 act-all:
@@ -358,21 +373,21 @@ container-purge-system: container-purge-entity
 
 # Create a fresh inventory and deploy all apps.
 deploy-fresh-kept-all:
-	@echo "=== local full deploy (type=$${TEST_DEPLOY_TYPE}, distro=$${INFINITO_DISTRO}) ==="
+	@echo "=== local full deploy (type=$${INFINITO_TEST_DEPLOY_TYPE}, distro=$${INFINITO_DISTRO}) ==="
 	@bash scripts/tests/deploy/local/deploy/fresh-kept-all.sh
 
 # Create a fresh inventory and deploy one or more apps.
 deploy-fresh-kept-apps:
-	@: "$${APPS:?APPS must be set (e.g. APPS=web-app-nextcloud)}"
-	@bash scripts/tests/deploy/local/deploy/fresh-kept-app.sh "$${APPS}"
+	@: "$${INFINITO_APPS:?INFINITO_APPS must be set (e.g. INFINITO_APPS=web-app-nextcloud)}"
+	@bash scripts/tests/deploy/local/deploy/fresh-kept-app.sh "$${INFINITO_APPS}"
 
-# Deploy one or more apps with purged entities. Set FULL_CYCLE=true to also run the update pass.
+# Deploy one or more apps with purged entities. Set INFINITO_FULL_CYCLE=true to also run the update pass.
 deploy-fresh-purged-apps: down up
 	@bash scripts/tests/deploy/local/deploy/fresh-purged-app.sh
 
 # Redeploy one or more apps on an existing inventory.
 deploy-reuse-kept-apps:
-	@DEBUG=true bash scripts/tests/deploy/local/deploy/reuse-kept-app.sh
+	@INFINITO_DEBUG=true bash scripts/tests/deploy/local/deploy/reuse-kept-app.sh
 
 # Redeploy all apps on an existing inventory.
 deploy-reuse-kept-all:
@@ -382,7 +397,7 @@ deploy-reuse-kept-all:
 deploy-reuse-purged-apps: container-purge-entity
 	@$(MAKE) deploy-reuse-kept-apps
 
-# One-off deploy of all apps cumulated from one or more inventory bundles. Set FULL_CYCLE=true to also run the update pass (default: false).
+# One-off deploy of all apps cumulated from one or more inventory bundles. Set INFINITO_FULL_CYCLE=true to also run the update pass (default: false).
 deploy-bundles: down up
 	@bash scripts/tests/deploy/local/deploy/bundles.sh
 

@@ -51,7 +51,7 @@ rather than role by role.
   matching admin scenario uses (typically `oidc`, `ldap`, or both),
   via the `skipUnlessServiceEnabled` helper from
   [006](006-playwright-service-gated-tests.md). Operators running with
-  `SERVICES_DISABLED=oidc` MUST see the biber scenario as `skipped`
+  `INFINITO_SERVICES_DISABLED=oidc` MUST see the biber scenario as `skipped`
   with the canonical reason string, never as `failed`.
 - [ ] The biber scenario MUST end on a deterministic post-login
   surface (a URL, a heading, or a stable role-specific selector) that
@@ -135,7 +135,7 @@ shows up; in that case remove it.
 ### Verification
 
 - [ ] After every role-local change [test_playwright_env_keys_used.py](../../tests/lint/ansible/roles/web-app/playwright/test_env_keys_used.py) MUST be green.
-- [ ] A run with `SERVICES_DISABLED=oidc,ldap` MUST report every biber
+- [ ] A run with `INFINITO_SERVICES_DISABLED=oidc,ldap` MUST report every biber
   scenario as `skipped: <FLAG>=false` per
   [006](006-playwright-service-gated-tests.md), never as `failed`.
 - [ ] A grep `process.env\.BIBER_(USERNAME|PASSWORD)` over the role

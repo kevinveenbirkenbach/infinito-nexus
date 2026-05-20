@@ -36,8 +36,8 @@ run_local_build() {
 # ---------------------------------------------------------------------------
 # DEV mode: rebuild infinito
 # ---------------------------------------------------------------------------
-if [[ "${INFINITO_COMPILE:-0}" == "1" ]]; then
-	if [[ "${INFINITO_COMPILE_SILENCE:-0}" == "1" ]]; then
+if [[ "${INFINITO_COMPILE}" == "1" ]]; then
+	if [[ "${INFINITO_COMPILE_SILENCE}" == "1" ]]; then
 		run_local_build >/dev/null 2>&1
 	else
 		run_local_build

@@ -2,7 +2,7 @@
 set -euo pipefail
 
 # Open an interactive shell in the running infinito container, or execute a
-# one-off command inside it when CMD or positional arguments are set.
+# one-off command inside it when INFINITO_CMD or positional arguments are set.
 #
 # Usage:
 #   scripts/tests/deploy/local/exec/container.sh [command...]  # nocheck: self-path-reference
@@ -10,11 +10,11 @@ set -euo pipefail
 # Environment:
 #   INFINITO_DISTRO     arch|debian|ubuntu|fedora|centos
 #   INFINITO_CONTAINER  Optional explicit container name
-#   CMD                 One-off shell command to run instead of an interactive shell
+#   INFINITO_CMD        One-off shell command to run instead of an interactive shell
 #
 # Examples:
 #   scripts/tests/deploy/local/exec/container.sh whoami  # nocheck: self-path-reference
-#   CMD='whoami && id' scripts/tests/deploy/local/exec/container.sh  # nocheck: self-path-reference
+#   INFINITO_CMD='whoami && id' scripts/tests/deploy/local/exec/container.sh  # nocheck: self-path-reference
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "${SCRIPT_DIR}/../../../../../" && pwd)"
@@ -28,12 +28,12 @@ Usage:
 Environment:
   INFINITO_DISTRO     arch|debian|ubuntu|fedora|centos
   INFINITO_CONTAINER  Optional explicit container name
-  CMD                 One-off shell command to run instead of an interactive shell
+  INFINITO_CMD        One-off shell command to run instead of an interactive shell
 
 Examples:
   ${0}
   ${0} whoami
-  CMD='whoami && id' ${0}
+  INFINITO_CMD='whoami && id' ${0}
 EOF
 }
 
@@ -44,17 +44,17 @@ fi
 
 cd "${REPO_ROOT}"
 
-if [[ -f "scripts/meta/env/all.sh" ]]; then
-	# shellcheck source=scripts/meta/env/all.sh
-	source "scripts/meta/env/all.sh"
+if [[ -f "scripts/meta/env/load.sh" ]]; then
+	# shellcheck source=scripts/meta/env/load.sh
+	source "scripts/meta/env/load.sh"
 else
-	echo "ERROR: missing scripts/meta/env/all.sh" >&2
+	echo "ERROR: missing scripts/meta/env/load.sh" >&2
 	exit 2
 fi
 
 # defaults.sh exports INFINITO_CONTAINER from INFINITO_DISTRO (single SPOT
 # for the formula). Read strictly here — no local re-derivation.
-: "${INFINITO_CONTAINER:?INFINITO_CONTAINER not set after sourcing scripts/meta/env/all.sh — bug in defaults.sh?}"
+: "${INFINITO_CONTAINER:?INFINITO_CONTAINER not set after sourcing scripts/meta/env/load.sh — bug in defaults.sh?}"
 container="${INFINITO_CONTAINER}"
 
 docker_exec_flags=(-i)
@@ -73,8 +73,8 @@ if [[ $# -gt 0 ]]; then
 	exec docker exec "${docker_exec_flags[@]}" -w /opt/src/infinito "${container}" "$@"
 fi
 
-if [[ -n "${CMD:-}" ]]; then
-	exec docker exec "${docker_exec_flags[@]}" -w /opt/src/infinito "${container}" sh -lc "${CMD}"
+if [[ -n "${INFINITO_CMD:-}" ]]; then
+	exec docker exec "${docker_exec_flags[@]}" -w /opt/src/infinito "${container}" sh -lc "${INFINITO_CMD}"
 fi
 
 exec docker exec "${docker_exec_flags[@]}" -w /opt/src/infinito "${container}" sh

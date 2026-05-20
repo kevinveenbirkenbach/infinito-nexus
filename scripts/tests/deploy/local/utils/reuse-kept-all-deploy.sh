@@ -8,34 +8,34 @@
 # compose stack.
 #
 # Required env:
-#   INVENTORY_FILE   absolute path to <inv>/devices.yml
-#   PW_FILE          absolute path to <inv>/.password
-#   LIMIT_HOST       Ansible limit (typically "localhost")
-#   DEBUG            "true"|"false" — appends `--debug` when true
+#   INFINITO_INVENTORY_FILE   absolute path to <inv>/devices.yml
+#   INFINITO_INVENTORY_PASSWORD_FILE                   absolute path to <inv>/.password
+#   INFINITO_LIMIT_HOST       Ansible limit (typically "localhost")
+#   INFINITO_DEBUG            "true"|"false" — appends `--debug` when true
 set -euo pipefail
 cd /opt/src/infinito
 
-: "${INVENTORY_FILE:?INVENTORY_FILE must be set}"
-: "${PW_FILE:?PW_FILE must be set}"
-: "${LIMIT_HOST:?LIMIT_HOST must be set}"
-: "${DEBUG:?DEBUG must be set}"
+: "${INFINITO_INVENTORY_FILE:?INFINITO_INVENTORY_FILE must be set}"
+: "${INFINITO_INVENTORY_PASSWORD_FILE:?INFINITO_INVENTORY_PASSWORD_FILE must be set}"
+: "${INFINITO_LIMIT_HOST:?INFINITO_LIMIT_HOST must be set}"
+: "${INFINITO_DEBUG:?INFINITO_DEBUG must be set}"
 
 echo ">>> entry.sh bootstrap"
 ./scripts/docker/entry.sh true
 
-cmd=(infinito administration deploy dedicated "${INVENTORY_FILE}"
+cmd=(infinito administration deploy dedicated "${INFINITO_INVENTORY_FILE}"
 	--skip-backup
 	--skip-cleanup
-	-l "${LIMIT_HOST}"
+	-l "${INFINITO_LIMIT_HOST}"
 	--diff
 	-vv
-	--password-file "${PW_FILE}"
+	--password-file "${INFINITO_INVENTORY_PASSWORD_FILE}"
 	-e ASYNC_ENABLED=false
 	-e SYS_SERVICE_ALL_ENABLED=false
 	-e SYS_SERVICE_DEFAULT_STATE=started
 )
 
-if [[ "${DEBUG}" == "true" ]]; then
+if [[ "${INFINITO_DEBUG}" == "true" ]]; then
 	cmd+=(--debug)
 fi
 

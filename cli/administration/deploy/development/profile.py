@@ -12,7 +12,7 @@ class Profile:
         """True when any standard CI signal is set."""
         return (
             os.environ.get("GITHUB_ACTIONS") == "true"
-            or os.environ.get("RUNNING_ON_GITHUB") == "true"
+            or os.environ.get("INFINITO_RUNNING_ON_GITHUB") == "true"
             or os.environ.get("CI") == "true"
         )
 

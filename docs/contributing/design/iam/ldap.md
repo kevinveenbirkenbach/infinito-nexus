@@ -27,7 +27,7 @@ The high-level structure:
 Rules:
 
 - Roles MUST connect via `LDAP.SERVER.URI`. Building the URI from the
-  individual `DOMAIN`, `PORT`, and protocol parts is forbidden because the
+  individual `INFINITO_DOMAIN`, `PORT`, and protocol parts is forbidden because the
   helper variables in [12_ldap.yml](../../../../group_vars/all/12_ldap.yml)
   already pick the correct scheme based on Docker-network availability.
 - The data administrator DN MUST be used for adding, modifying, and removing

@@ -35,7 +35,7 @@ def _load_yaml_mapping_tolerant(path: Path) -> dict:
 
 
 class ServicesDisabledConflictError(RuntimeError):
-    """Raised when SERVICES_DISABLED conflicts with an existing inventory."""
+    """Raised when INFINITO_SERVICES_DISABLED conflicts with an existing inventory."""
 
 
 def parse_services_disabled(env_value: str) -> list[str]:
@@ -49,7 +49,7 @@ def find_roles_with_service(service_name: str, roles_dir: Path) -> set[str]:
     a consumer/provider — i.e. the entry carries at least one of
     ``enabled`` / ``shared`` / ``provides``. Pure metadata entries (e.g. a
     primary entity that only carries ``lifecycle``/``run_after``) are
-    intentionally excluded so SERVICES_DISABLED doesn't add bogus
+    intentionally excluded so INFINITO_SERVICES_DISABLED doesn't add bogus
     ``enabled: false`` overrides that turn metadata into spurious provider
     declarations downstream.
 
@@ -135,10 +135,12 @@ def remove_roles_from_inventory(
         if app_id in children:
             del children[app_id]
             changed = True
-            print(f"[INFO] SERVICES_DISABLED: removed '{app_id}' from inventory")
+            print(
+                f"[INFO] INFINITO_SERVICES_DISABLED: removed '{app_id}' from inventory"
+            )
         else:
             print(
-                f"[INFO] SERVICES_DISABLED: '{app_id}' not found in inventory — skipping"
+                f"[INFO] INFINITO_SERVICES_DISABLED: '{app_id}' not found in inventory — skipping"
             )
 
     if changed:
@@ -205,7 +207,7 @@ def apply_services_disabled(
             svc["shared"] = False
             changed = True
             print(
-                f"[INFO] SERVICES_DISABLED: {app_id}.services.{svc_name} "
+                f"[INFO] INFINITO_SERVICES_DISABLED: {app_id}.services.{svc_name} "
                 "→ enabled=false, shared=false"
             )
 
@@ -217,11 +219,13 @@ def apply_services_disabled(
     if inventory_file is not None:
         provider_map = find_provider_roles(services, roles_dir)
         if provider_map:
-            print(f"[INFO] SERVICES_DISABLED: provider roles found: {provider_map}")
+            print(
+                f"[INFO] INFINITO_SERVICES_DISABLED: provider roles found: {provider_map}"
+            )
             remove_roles_from_inventory(inventory_file, list(provider_map.values()))
         else:
             print(
-                "[INFO] SERVICES_DISABLED: no provider roles found for given services"
+                "[INFO] INFINITO_SERVICES_DISABLED: no provider roles found for given services"
             )
 
 
@@ -230,12 +234,12 @@ def apply_services_disabled_from_env(
     roles_dir: Path,
     inventory_file: Path | None = None,
 ) -> None:
-    """Read SERVICES_DISABLED from the environment and apply to host_vars and inventory."""
-    raw = os.environ.get("SERVICES_DISABLED", "").strip()
+    """Read INFINITO_SERVICES_DISABLED from the environment and apply to host_vars and inventory."""
+    raw = os.environ.get("INFINITO_SERVICES_DISABLED", "").strip()
     if not raw:
         return
     services = parse_services_disabled(raw)
-    print(f"[INFO] SERVICES_DISABLED={raw!r} → disabling: {services}")
+    print(f"[INFO] INFINITO_SERVICES_DISABLED={raw!r} → disabling: {services}")
     apply_services_disabled(
         host_vars_file, services, roles_dir=roles_dir, inventory_file=inventory_file
     )
@@ -256,7 +260,7 @@ def find_services_disabled_conflicts(
     roles_dir: Path,
 ) -> list[str]:
     """
-    Return human-readable conflicts when SERVICES_DISABLED disagrees with the
+    Return human-readable conflicts when INFINITO_SERVICES_DISABLED disagrees with the
     existing inventory/host_vars state.
     """
     if not services:
@@ -321,8 +325,8 @@ def assert_services_disabled_inventory_consistency_from_env(
     inventory_dir: Path,
     roles_dir: Path,
 ) -> None:
-    """Fail fast when SERVICES_DISABLED conflicts with the existing inventory."""
-    raw = os.environ.get("SERVICES_DISABLED", "").strip()
+    """Fail fast when INFINITO_SERVICES_DISABLED conflicts with the existing inventory."""
+    raw = os.environ.get("INFINITO_SERVICES_DISABLED", "").strip()
     if not raw:
         return
 
@@ -337,10 +341,10 @@ def assert_services_disabled_inventory_consistency_from_env(
 
     details = "\n  - ".join(conflicts)
     raise ServicesDisabledConflictError(
-        "SERVICES_DISABLED conflicts with the current inventory state.\n"
-        f"SERVICES_DISABLED={raw!r}\n"
+        "INFINITO_SERVICES_DISABLED conflicts with the current inventory state.\n"
+        f"INFINITO_SERVICES_DISABLED={raw!r}\n"
         "Conflicts:\n"
         f"  - {details}\n"
         "Recreate or clean the inventory, or remove the conflicting service from "
-        "SERVICES_DISABLED."
+        "INFINITO_SERVICES_DISABLED."
     )

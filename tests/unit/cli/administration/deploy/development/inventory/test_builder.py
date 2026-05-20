@@ -158,7 +158,7 @@ class TestBuildDevInventory(unittest.TestCase):
         first_kwargs = self.compose.exec.call_args_list[0].kwargs
         self.assertEqual(
             first_kwargs.get("extra_env"),
-            {"SERVICES_DISABLED": "svc-foo,svc-bar"},
+            {"INFINITO_SERVICES_DISABLED": "svc-foo,svc-bar"},
         )
 
     @patch(

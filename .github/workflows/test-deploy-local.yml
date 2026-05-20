@@ -27,8 +27,8 @@ permissions:
 # - For local `act`, prefer overriding via `--env`.
 # - For GitHub UI dispatch, inputs are used as fallback.
 env:
-  TEST_DEPLOY_TYPE: "server"
-  DISTROS: "debian"
+  INFINITO_TEST_DEPLOY_TYPE: "server"
+  INFINITO_DISTROS: "debian"
   NIX_CONFIG: ""
   INFINITO_IMAGE_TAG: "latest"
   PLAYWRIGHT_KEEP_ALL: ${{ vars.PLAYWRIGHT_KEEP_ALL }}
@@ -72,7 +72,7 @@ jobs:
         id: discover
         shell: bash
         env:
-          WHITELIST: ${{ inputs.whitelist }}
+          INFINITO_WHITELIST: ${{ inputs.whitelist }}
         run: ./scripts/github/resolve/output_apps.sh
 
   deploy:
@@ -119,9 +119,9 @@ jobs:
       - name: Deploy app (same as CI logic)
         shell: bash
         env:
-          TEST_DEPLOY_TYPE: ${{ needs.discover.outputs.test_deploy_type }}
-          DISTROS: ${{ needs.discover.outputs.distros }}
-          APPS: ${{ matrix.apps }}
+          INFINITO_TEST_DEPLOY_TYPE: ${{ needs.discover.outputs.test_deploy_type }}
+          INFINITO_DISTROS: ${{ needs.discover.outputs.distros }}
+          INFINITO_APPS: ${{ matrix.apps }}
         run: ./scripts/tests/deploy/ci/all.sh
 
       - name: Dump runner state (on failure)

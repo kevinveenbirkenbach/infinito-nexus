@@ -35,7 +35,7 @@ def detect_runtime(project_root: Path | None = None) -> str:
     # 3) GitHub Actions
     if (
         os.getenv("GITHUB_ACTIONS") == "true"
-        or os.getenv("RUNNING_ON_GITHUB") == "true"
+        or os.getenv("INFINITO_RUNNING_ON_GITHUB") == "true"
     ):
         return "github"
 

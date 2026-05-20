@@ -387,9 +387,9 @@ def main() -> int:
 
     parser.add_argument(
         "--inventory-dir",
-        default=os.environ.get("INVENTORY_DIR"),
-        required=os.environ.get("INVENTORY_DIR") is None,
-        help="Inventory directory to use (default: $INVENTORY_DIR).",
+        default=os.environ.get("INFINITO_INVENTORY_DIR"),
+        required=os.environ.get("INFINITO_INVENTORY_DIR") is None,
+        help="Inventory directory to use (default: $INFINITO_INVENTORY_DIR).",
     )
 
     args = parser.parse_args(container_argv)

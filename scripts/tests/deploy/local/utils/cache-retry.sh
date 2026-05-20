@@ -43,7 +43,7 @@ _cache_retry_list_apt_proxy_repos() {
 cache_retry_recover() {
 	# Defensive re-source: helper may be invoked outside the wrapping deploy script.
 	# shellcheck disable=SC1091  # path is runtime-resolved through REPO_ROOT
-	source "${REPO_ROOT:-${PWD}}/scripts/meta/env/cache/package.sh"
+	source "${REPO_ROOT:-${PWD}}/scripts/meta/env/load.sh"
 
 	local repos=()
 	local discovered

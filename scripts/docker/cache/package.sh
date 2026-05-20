@@ -5,10 +5,10 @@
 
 set -euo pipefail
 
-: "${INFINITO_PACKAGE_CACHE_HOST_PATH:?Source scripts/meta/env/cache/package.sh first}"
-: "${INFINITO_PACKAGE_CACHE_ADMIN_PASSWORD:?Source scripts/meta/env/cache/package.sh first}"
-: "${INFINITO_PACKAGE_CACHE_BLOBSTORE_MAX:?Source scripts/meta/env/cache/package.sh first}"
-: "${INFINITO_PACKAGE_CACHE_MAX_AGE_MIN:?Source scripts/meta/env/cache/package.sh first}"
+: "${INFINITO_PACKAGE_CACHE_HOST_PATH:?Source scripts/meta/env/load.sh first}"
+: "${INFINITO_PACKAGE_CACHE_ADMIN_PASSWORD:?Source scripts/meta/env/load.sh first}"
+: "${INFINITO_PACKAGE_CACHE_BLOBSTORE_MAX:?Source scripts/meta/env/load.sh first}"
+: "${INFINITO_PACKAGE_CACHE_MAX_AGE_MIN:?Source scripts/meta/env/load.sh first}"
 
 CACHE_MAX_AGE_MIN="${INFINITO_PACKAGE_CACHE_MAX_AGE_MIN}"
 

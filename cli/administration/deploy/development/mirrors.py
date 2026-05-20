@@ -27,9 +27,9 @@ def _require_bool_env(name: str) -> bool:
 
 def should_use_mirrors_on_ci() -> bool:
     """
-    Mirrors are enabled strictly based on RUNNING_ON_GITHUB.
+    Mirrors are enabled strictly based on INFINITO_RUNNING_ON_GITHUB.
     """
-    return _require_bool_env("RUNNING_ON_GITHUB")
+    return _require_bool_env("INFINITO_RUNNING_ON_GITHUB")
 
 
 def _exec_env() -> dict[str, str]:
@@ -37,7 +37,7 @@ def _exec_env() -> dict[str, str]:
     All variables are mandatory. No fallbacks.
     """
     return {
-        "RUNNING_ON_GITHUB": _require_env("RUNNING_ON_GITHUB"),
+        "INFINITO_RUNNING_ON_GITHUB": _require_env("INFINITO_RUNNING_ON_GITHUB"),
         "GITHUB_REPOSITORY_OWNER": _require_env("GITHUB_REPOSITORY_OWNER"),
         "GITHUB_REPOSITORY": _require_env("GITHUB_REPOSITORY"),
         "INFINITO_GHCR_MIRROR_PREFIX": _require_env("INFINITO_GHCR_MIRROR_PREFIX"),

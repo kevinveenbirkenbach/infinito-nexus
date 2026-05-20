@@ -6,7 +6,7 @@ This page defines the inner loop for iterating on a role-local `files/playwright
 
 - **Inner loop**: the edit-rerun cycle on `roles/<role>/files/playwright/playwright.spec.js` driven by `scripts/tests/e2e/rerun-spec.sh`, without a redeploy.
 - **Staging dir**: `TEST_E2E_PLAYWRIGHT_STAGE_BASE_DIR/<role>` (default `/tmp/test-e2e-playwright/<role>`). Contains the rendered `.env` and the Playwright project from the last deploy.
-- **Baseline deploy**: a successful `make deploy-fresh-purged-apps APPS=<role> FULL_CYCLE=true` run as defined in [Role Loop](role.md).
+- **Baseline deploy**: a successful `make deploy-fresh-purged-apps INFINITO_APPS=<role> INFINITO_FULL_CYCLE=true` run as defined in [Role Loop](role.md).
 - **Pass**: `scripts/tests/e2e/rerun-spec.sh <role>` exits `0` AND every MUST in [Contributing `playwright.spec.js`](../../../contributing/artefact/files/role/playwright.specs.js.md) holds for the resulting run.
 
 ## Preconditions
@@ -46,7 +46,7 @@ You MUST load the following pages before editing any file, in this order:
 
 ## Debugging in the nested docker daemon
 
-To validate a hypothesis without redeploying — e.g. rerun the Playwright image with a patched env or grep — use `make run IMAGE=<ref> [CMD=...] [RUN_FLAGS=...]`. You MAY hand-edit `/tmp/test-e2e-playwright/<role>/.env` for the diagnosis run only, but you MUST mirror any fix back into `roles/<role>/templates/playwright.env.j2` before the next deploy.
+To validate a hypothesis without redeploying — e.g. rerun the Playwright image with a patched env or grep — use `make run IMAGE=<ref> [INFINITO_CMD=...] [INFINITO_RUN_FLAGS=...]`. You MAY hand-edit `/tmp/test-e2e-playwright/<role>/.env` for the diagnosis run only, but you MUST mirror any fix back into `roles/<role>/templates/playwright.env.j2` before the next deploy.
 
 ## Exit
 
@@ -54,13 +54,13 @@ You MUST NOT report the task complete until all of the following hold:
 
 1. `scripts/tests/e2e/rerun-spec.sh <role>` has exited `0` on the current spec.
 2. Every MUST in [Contributing `playwright.spec.js`](../../../contributing/artefact/files/role/playwright.specs.js.md) holds, including the live-application assertion and the logged-out final state.
-3. A final `make deploy-fresh-purged-apps APPS=<role> FULL_CYCLE=true` run has completed with the spec passing against the freshly provisioned stack. Inner-loop passes alone do NOT satisfy this gate.
+3. A final `make deploy-fresh-purged-apps INFINITO_APPS=<role> INFINITO_FULL_CYCLE=true` run has completed with the spec passing against the freshly provisioned stack. Inner-loop passes alone do NOT satisfy this gate.
 
 ## Escape
 
 When the failure requires a change outside `files/playwright/playwright.spec.js`:
 
 1. You MUST stop the inner loop. Inner-loop runs do NOT pick up role changes.
-2. You SHOULD run `make deploy-reuse-kept-apps APPS=<role>` for the redeploy.
-3. You MUST NOT fall back to `make deploy-fresh-purged-apps APPS=<role> FULL_CYCLE=true` unless the reuse path has concrete evidence of a broken inventory or host stack, per [Role Loop](role.md).
+2. You SHOULD run `make deploy-reuse-kept-apps INFINITO_APPS=<role>` for the redeploy.
+3. You MUST NOT fall back to `make deploy-fresh-purged-apps INFINITO_APPS=<role> INFINITO_FULL_CYCLE=true` unless the reuse path has concrete evidence of a broken inventory or host stack, per [Role Loop](role.md).
 4. After the redeploy succeeds, return to [Procedure](#procedure) step 1.

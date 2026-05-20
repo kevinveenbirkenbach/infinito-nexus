@@ -10,7 +10,7 @@ class TestGenerateCiMirrorsFile(unittest.TestCase):
     @patch.dict(
         "os.environ",
         {
-            "RUNNING_ON_GITHUB": "true",
+            "INFINITO_RUNNING_ON_GITHUB": "true",
             "GITHUB_REPOSITORY_OWNER": "kevinveenbirkenbach",
             "GITHUB_REPOSITORY": "kevinveenbirkenbach/infinito-nexus",
             "INFINITO_GHCR_MIRROR_PREFIX": "mirror",

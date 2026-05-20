@@ -41,7 +41,7 @@ jobs:
         # because we install it above. PYTHONPATH=. is set explicitly so
         # `cli/build/include/__main__.py` can import the repo-local
         # `utils.*` modules — locally the Makefile env layer
-        # (scripts/meta/env/python.sh) does this, but here we invoke the
+        # (scripts/meta/env/load.sh) does this, but here we invoke the
         # script directly without going through `make`.
         run: PYTHON=python3 PYTHONPATH=. bash scripts/setup.sh
 

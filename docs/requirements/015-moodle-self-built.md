@@ -648,7 +648,7 @@ without login (both variants), and direct LDAP-bind login
       [006-playwright-service-gated-tests.md](006-playwright-service-gated-tests.md).
       It MUST skip the variant-0-only cases cleanly (not fail)
       when the OIDC shared service is disabled via
-      `SERVICES_DISABLED`, and skip the LDAP cases cleanly when
+      `INFINITO_SERVICES_DISABLED`, and skip the LDAP cases cleanly when
       the LDAP shared service is disabled.
 
 #### Variant 0: OIDC + LDAP sync (hybrid)
@@ -757,27 +757,27 @@ The implementing agent MUST iterate on this role per
 variant guidance from [variants.md](../contributing/design/variants.md)
 applied because the role ships two identity-integration variants.
 
-- [x] Propose `SERVICES_DISABLED="matomo,email"` once at the start
+- [x] Propose `INFINITO_SERVICES_DISABLED="matomo,email"` once at the start
       and persist that decision for every deploy in the iteration.
 - [x] First deploy MUST be a **FULL-matrix** baseline:
-      `make deploy-fresh-purged-apps APPS=web-app-moodle
-      FULL_CYCLE=true`. This iterates rounds 0 and 1 against
+      `make deploy-fresh-purged-apps INFINITO_APPS=web-app-moodle
+      INFINITO_FULL_CYCLE=true`. This iterates rounds 0 and 1 against
       both variants in order; the inter-round purge runs because
       the variant changes between them.
 - [x] Edit-fix-redeploy iterations MUST be done **per variant**.
-      The agent MUST pin `VARIANT=0` (or `VARIANT=1`) on every
+      The agent MUST pin `INFINITO_VARIANT=0` (or `INFINITO_VARIANT=1`) on every
       command for the variant it is currently iterating, and
       MUST state the choice explicitly before the first command:
-  - `VARIANT=<idx> make deploy-reuse-kept-apps APPS=web-app-moodle`
+  - `INFINITO_VARIANT=<idx> make deploy-reuse-kept-apps INFINITO_APPS=web-app-moodle`
     is the default reuse-deploy.
-  - `VARIANT=<idx> make deploy-reuse-purged-apps APPS=web-app-moodle`
+  - `INFINITO_VARIANT=<idx> make deploy-reuse-purged-apps INFINITO_APPS=web-app-moodle`
     MAY be used once when reuse-kept reproduces a failure and
     entity-state involvement is suspected, then the agent MUST
     return to reuse-kept.
 - [x] When debugging cross-variant interactions (e.g. variant 1
       breaks because variant-0 LDAP/OIDC state was not purged),
       the agent MUST first reproduce with the FULL matrix
-      (omit `VARIANT=`), then pin to the failing variant for
+      (omit `INFINITO_VARIANT=`), then pin to the failing variant for
       the focused fix loop, and re-run the FULL matrix once the
       fix is believed complete.
 - [ ] `make test` MUST pass before every deploy.

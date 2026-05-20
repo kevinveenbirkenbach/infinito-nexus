@@ -18,8 +18,8 @@ permissions:
   packages: read
 
 env:
-  TEST_DEPLOY_TYPE: universal
-  DISTROS: ${{ inputs.distros }}
+  INFINITO_TEST_DEPLOY_TYPE: universal
+  INFINITO_DISTROS: ${{ inputs.distros }}
   NIX_CONFIG: |
     access-tokens = github.com=${{ secrets.GITHUB_TOKEN }}
   INFINITO_IMAGE_TAG: ci-${{ github.sha }}
@@ -65,7 +65,7 @@ jobs:
         id: discover
         shell: bash
         env:
-          WHITELIST: ${{ steps.resolve_wl.outputs.whitelist }}
+          INFINITO_WHITELIST: ${{ steps.resolve_wl.outputs.whitelist }}
         run: ./scripts/github/resolve/output_apps.sh
 
   universal:
@@ -117,7 +117,7 @@ jobs:
       - name: Deploy app
         shell: bash
         env:
-          APPS: ${{ matrix.apps }}
+          INFINITO_APPS: ${{ matrix.apps }}
         run: ./scripts/tests/deploy/ci/all.sh
 
       - name: Dump runner state (on failure)

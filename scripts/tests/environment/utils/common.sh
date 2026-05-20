@@ -50,8 +50,8 @@ load_repo_env() {
 	unset INFINITO_ENV_GITHUB_LOADED
 	unset PYTHON
 	unset PIP
-	# shellcheck source=scripts/meta/env/all.sh
-	source scripts/meta/env/all.sh
+	# shellcheck source=scripts/meta/env/load.sh
+	source scripts/meta/env/load.sh
 	cd "${previous_pwd}"
 }
 
@@ -60,18 +60,18 @@ ensure_git_safe_directory
 
 # Print the generated inventory and host_vars for debugging and verification.
 #
-# Matrix-variant deploys write `${INVENTORY_DIR}-0/devices.yml`,
-# `${INVENTORY_DIR}-1/devices.yml`, ... never the unsuffixed
-# `${INVENTORY_DIR}/devices.yml`. Discover every variant inside the
+# Matrix-variant deploys write `${INFINITO_INVENTORY_DIR}-0/devices.yml`,
+# `${INFINITO_INVENTORY_DIR}-1/devices.yml`, ... never the unsuffixed
+# `${INFINITO_INVENTORY_DIR}/devices.yml`. Discover every variant inside the
 # infinito_nexus container (where the inventories actually live) and
 # print each one; fall back to the unsuffixed path when no variants
 # exist.
 #
-# CMD is executed via `sh -lc` (see scripts/tests/deploy/local/exec/container.sh)
+# INFINITO_CMD is executed via `sh -lc` (see scripts/tests/deploy/local/exec/container.sh)
 # — keep the inner shell strictly POSIX (no bash arrays, no `shopt`, no `(( ))`).
 inspect_glob_print() {
 	local glob_pattern="$1" fallback="$2"
-	make exec CMD="set -eu; \
+	make exec INFINITO_CMD="set -eu; \
 		any=; \
 		for f in ${glob_pattern}; do \
 			[ -f \"\$f\" ] || continue; \
@@ -87,9 +87,9 @@ inspect_glob_print() {
 
 inspect() {
 	echo "Printing the generated inventory to verify which roles were deployed."
-	inspect_glob_print "${INVENTORY_DIR}-*/devices.yml" "${INVENTORY_FILE}"
+	inspect_glob_print "${INFINITO_INVENTORY_DIR}-*/devices.yml" "${INFINITO_INVENTORY_FILE}"
 	echo "Printing host_vars to verify per-host configuration."
-	inspect_glob_print "${INVENTORY_DIR}-*/host_vars/localhost.yml" "${HOST_VARS_FILE}"
+	inspect_glob_print "${INFINITO_INVENTORY_DIR}-*/host_vars/localhost.yml" "${INFINITO_INVENTORY_HOST_VARS_FILE}"
 }
 
 # Check that a URL responds with the expected HTTP status code.

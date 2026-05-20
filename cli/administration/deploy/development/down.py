@@ -25,7 +25,7 @@ def _base_env(*, distro: str) -> dict[str, str]:
 
 
 def _compose_run(*, repo_root: Path, distro: str, args: list[str]) -> None:
-    cmd = ["docker", "compose", "--env-file", "env.ci"]
+    cmd = ["docker", "compose", "--env-file", "env/ci.env"]
     env_development = repo_root / "env.development"
     if env_development.exists():
         cmd += ["--env-file", "env.development"]
@@ -41,7 +41,7 @@ def _compose_run(*, repo_root: Path, distro: str, args: list[str]) -> None:
 def _cleanup_docker_root() -> None:
     docker_root = CI_DOCKER_ROOT
 
-    if os.environ.get("RUNNING_ON_GITHUB") != "true":
+    if os.environ.get("INFINITO_RUNNING_ON_GITHUB") != "true":
         print(f">>> Not on GitHub - No bind volumes will be deleted: {docker_root}")
         return
 

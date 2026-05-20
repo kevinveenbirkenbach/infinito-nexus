@@ -3,14 +3,14 @@
 The literal path "inventories/development/default.yml" is exposed in
 TWO places that must stay in lockstep:
 
-* `scripts/meta/env/inventory.sh` — `INVENTORY_VARS_FILE` (SPOT-of-record
-  for callers that go through the deploy chain; bash sources env first).
-* `cli/administration/deploy/development/common.DEV_INVENTORY_VARS_FILE` — fallback for
-  direct/test invocations that bypass the bash chain.
+* `env/static.env` — `INVENTORY_VARS_FILE` (SPOT-of-record for callers
+  that go through `make dotenv` / the bash deploy chain).
+* `cli/administration/deploy/development/common.DEV_INVENTORY_VARS_FILE`
+  — fallback for direct/test invocations that bypass the bash chain.
 
 If they ever drift, init.py and the shell deploy scripts would point at
 different files and CI would silently start producing the wrong inventory.
-This test parses the bash file and asserts the Python constant matches.
+This test parses the env file and asserts the Python constant matches.
 """
 
 from __future__ import annotations
@@ -24,33 +24,36 @@ from utils.cache.files import iter_project_files, read_text
 
 from . import PROJECT_ROOT
 
-INVENTORY_ENV_SH = PROJECT_ROOT / "scripts" / "meta" / "env" / "inventory.sh"
+STATIC_ENV = PROJECT_ROOT / "env" / "static.env"
 
 
-def _parse_bash_default(file_text: str) -> str:
-    # Match: INVENTORY_VARS_FILE="${INVENTORY_VARS_FILE:-<DEFAULT>}"
+def _parse_env_default(file_text: str) -> str:
+    # Match: INVENTORY_VARS_FILE=<DEFAULT>   (optional surrounding quotes)
     pattern = re.compile(
-        r'^\s*INVENTORY_VARS_FILE="\$\{INVENTORY_VARS_FILE:-(?P<value>[^}]+)\}"\s*$',
+        r'^\s*INVENTORY_VARS_FILE=(?P<value>"[^"]*"|\'[^\']*\'|[^\s#]+)\s*(#.*)?$',
         re.MULTILINE,
     )
     match = pattern.search(file_text)
     if not match:
         raise AssertionError(
-            "Could not find INVENTORY_VARS_FILE default assignment in "
-            f"{INVENTORY_ENV_SH}; pattern was tightened intentionally so "
-            "any rewrite of that line forces a matching update here."
+            "Could not find INVENTORY_VARS_FILE assignment in "
+            f"{STATIC_ENV}; pattern was tightened intentionally so any "
+            "rewrite of that line forces a matching update here."
         )
-    return match.group("value")
+    value = match.group("value")
+    if len(value) >= 2 and value[0] == value[-1] and value[0] in ('"', "'"):
+        value = value[1:-1]
+    return value
 
 
 class TestInventoryVarsFileSpotDriftGuard(unittest.TestCase):
-    def test_bash_default_matches_python_fallback(self):
-        bash_default = _parse_bash_default(read_text(str(INVENTORY_ENV_SH)))
+    def test_env_default_matches_python_fallback(self):
+        env_default = _parse_env_default(read_text(str(STATIC_ENV)))
         self.assertEqual(
-            bash_default,
+            env_default,
             DEV_INVENTORY_VARS_FILE,
-            "INVENTORY_VARS_FILE default in scripts/meta/env/inventory.sh "
-            "drifted from cli.administration.deploy.development.common.DEV_INVENTORY_VARS_FILE. "
+            "INVENTORY_VARS_FILE default in env/static.env drifted from "
+            "cli.administration.deploy.development.common.DEV_INVENTORY_VARS_FILE. "
             "Update both literals (or, better, rebase one on the other).",
         )
 
@@ -60,7 +63,7 @@ class TestInventoryVarsFileSpotDriftGuard(unittest.TestCase):
         # path is a missed SPOT migration.
         literal = "inventories/development/default.yml"
         allowed_relative = {
-            "scripts/meta/env/inventory.sh",
+            "env/static.env",
             "cli/administration/deploy/development/common.py",
             Path(__file__).relative_to(PROJECT_ROOT).as_posix(),
             # Documentation and historical/comment references stay as-is:
@@ -79,15 +82,8 @@ class TestInventoryVarsFileSpotDriftGuard(unittest.TestCase):
                 continue
             if rel in allowed_relative:
                 continue
-            # `iter_project_files` already prunes `.git`, `.venv`,
-            # `node_modules`, `__pycache__`, `.pytest_cache` etc., but
-            # `.mypy_cache` is not in the default skip set — keep the
-            # explicit fragment-prefix check for that one.
             if any(rel.startswith(prefix + "/") for prefix in (".mypy_cache",)):
                 continue
-            # Requirement docs are initial-creation-only snapshots and
-            # may legitimately mention the literal path as part of the
-            # original problem description.
             if rel.startswith("docs/requirements/"):
                 continue
             try:

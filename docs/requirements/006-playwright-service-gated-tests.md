@@ -20,7 +20,7 @@ for reference.
 ## User Story
 
 As a contributor who runs `make deploy-*` with a subset of shared
-services disabled (for example `SERVICES_DISABLED=matomo,email`), I want
+services disabled (for example `INFINITO_SERVICES_DISABLED=matomo,email`), I want
 Playwright specs to __skip__ the individual tests that depend on a
 disabled service instead of __failing__ them, so that a deliberately
 reduced deployment stays green and only real regressions surface in the
@@ -30,7 +30,7 @@ test output.
 
 Infinito.Nexus apps routinely declare shared-service integrations in
 their role config (`compose.services.<shared>.enabled`), and a deploy
-can turn individual shared services off with `SERVICES_DISABLED=<list>`
+can turn individual shared services off with `INFINITO_SERVICES_DISABLED=<list>`
 without breaking the rest of the stack. The per-role Playwright specs
 under `roles/<role>/files/playwright/playwright.spec.js` mix three classes of
 tests:
@@ -66,8 +66,8 @@ and retroactively migrates the existing specs onto it.
   string (e.g. `1`, `0`, `yes`, empty) is permitted.
 - [x] The rendered value MUST be derived deterministically from
   `applications[<role>].compose.services.<name>.enabled` minus every
-  identifier in `SERVICES_DISABLED`. Two runs with the same role
-  config and the same `SERVICES_DISABLED` MUST produce the same set
+  identifier in `INFINITO_SERVICES_DISABLED`. Two runs with the same role
+  config and the same `INFINITO_SERVICES_DISABLED` MUST produce the same set
   of flag values.
 - [x] The env template of the role under test
   (`roles/<role>/templates/playwright.env.j2`) IS the registry of
@@ -129,7 +129,7 @@ and retroactively migrates the existing specs onto it.
   way to trigger a skip. There is no global "disable everything"
   toggle; operators who want only baseline tests set each relevant
   flag to `false` in their staged env, or deploy with
-  `SERVICES_DISABLED=<list>` so Ansible renders them `false`
+  `INFINITO_SERVICES_DISABLED=<list>` so Ansible renders them `false`
   automatically.
 
 ### Refactoring the existing specs
@@ -174,9 +174,9 @@ case.
 - [x] [web-svc-cdn](../../roles/web-svc-cdn/): audit spec before adding any gate; CDN is a static-origin service and its spec is likely all-baseline. The audit outcome MUST be documented in the commit that closes this checkbox.
 - [x] [web-svc-simpleicons](../../roles/web-svc-simpleicons/): audit spec; baseline gate: `oidc` if the admin-facing scenario uses it; otherwise close this item with "all-baseline" and no gate added.
 - [x] After the refactor the following post-conditions MUST all hold:
-  - Baseline scenarios of every spec keep passing when `SERVICES_DISABLED`
+  - Baseline scenarios of every spec keep passing when `INFINITO_SERVICES_DISABLED`
     is empty.
-  - With `SERVICES_DISABLED=matomo,email,discourse` and a role under test
+  - With `INFINITO_SERVICES_DISABLED=matomo,email,discourse` and a role under test
     that touches all three, the related scenarios appear as `skipped`
     in the Playwright reporter with skip reasons naming the exact env
     flags, and the overall run is green.
@@ -279,7 +279,7 @@ accidental proxy with an explicit intent variable.
 - [x] A unit-level test on the test-e2e-playwright role MUST assert
   the env-rendering logic: given a synthetic
   `applications[<role>].compose.services` fact and a synthetic
-  `SERVICES_DISABLED` list, the rendered set of
+  `INFINITO_SERVICES_DISABLED` list, the rendered set of
   `<SERVICE>_SERVICE_ENABLED` lines MUST match an explicit expected
   set. At least three fixtures MUST be covered: nothing disabled,
   one service disabled, all service-gated flags disabled.
@@ -292,7 +292,7 @@ accidental proxy with an explicit intent variable.
   gated on a service known to be enabled (MUST execute) and one
   scenario gated on a service forced off via a locally-scoped env
   override (MUST report `skipped` with the expected reason).
-- [x] A CI smoke run with `SERVICES_DISABLED=matomo,email` MUST be
+- [x] A CI smoke run with `INFINITO_SERVICES_DISABLED=matomo,email` MUST be
   added (or extended from the existing deploy cycle) that deploys at
   least one matomo-using and one email-using role and asserts that
   the related Playwright tests report as `skipped`, not as `failed`.
@@ -305,7 +305,7 @@ accidental proxy with an explicit intent variable.
     produce `MODE_CI=true` via `INFINITO_MAKE_DEPLOY=1` and
     include the stage. This applies to the full family without
     exception: `deploy-fresh-purged-apps`, `deploy-reuse-kept-apps`,
-    any `FULL_CYCLE=true` wrapper, and any future
+    any `INFINITO_FULL_CYCLE=true` wrapper, and any future
     `deploy-<variant>` target added later. The verification MUST
     therefore not assert this for one named target; it MUST grep
     [Makefile](../../Makefile) for the full set of `deploy-*`

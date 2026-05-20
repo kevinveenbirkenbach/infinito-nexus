@@ -7,7 +7,7 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 source "${SCRIPT_DIR}/utils/common.sh"
 
 echo "Deploying matomo (full cycle: deploy + update pass) so it becomes reachable via its dedicated inventory entry."
-make deploy-fresh-purged-apps APPS="${MATOMO_APP}" FULL_CYCLE=true
+make deploy-fresh-purged-apps INFINITO_APPS="${MATOMO_APP}" INFINITO_FULL_CYCLE=true
 inspect
 
 echo "Re-trusting the CA after the fresh deploy rebuilt the certificates."

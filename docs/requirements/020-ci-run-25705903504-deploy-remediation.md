@@ -81,8 +81,8 @@ Roles: `web-app-mailu`, `web-app-opencloud`, `web-app-friendica`, `web-app-matte
 
 Per role:
 
-1. `make deploy-fresh-purged-apps APPS=<role> FULL_CYCLE=true`.
-2. On `uri` failure: `make exec CMD='docker logs <container>'` to capture the application-side trace.
+1. `make deploy-fresh-purged-apps INFINITO_APPS=<role> INFINITO_FULL_CYCLE=true`.
+2. On `uri` failure: `make exec INFINITO_CMD='docker logs <container>'` to capture the application-side trace.
 3. Either add a `wait_for` ahead of the `uri` probe (slow container) or widen the probe's `status_code` to document the upstream's actual healthy shape.
 
 Roles: `web-app-fusiondirectory`, `web-app-odoo`.

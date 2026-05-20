@@ -9,7 +9,7 @@ from unittest.mock import MagicMock, patch
 
 # deploy.handler reads the running container name strictly via
 # cli.administration.deploy.development.common.resolve_container (which is sourced from
-# scripts/meta/env/defaults.sh — the single SPOT for the formula). Patch
+# scripts/meta/env/load.sh — the single SPOT for the formula). Patch
 # that resolver for the whole test module instead of duplicating the
 # formula or hard-coding INFINITO_CONTAINER in os.environ. The tests
 # below do not assert on the returned value; the sentinel is purely an
@@ -339,7 +339,7 @@ class TestHandlerMatrixDeploy(unittest.TestCase):
 
 
 class TestHandlerVariantPin(unittest.TestCase):
-    """`--variant <idx>` (or VARIANT env-var) pins the deploy to one
+    """`--variant <idx>` (or INFINITO_VARIANT env-var) pins the deploy to one
     specific round's folder, skipping inter-round cleanup. Use case:
     redeploying one variant without iterating the whole matrix."""
 

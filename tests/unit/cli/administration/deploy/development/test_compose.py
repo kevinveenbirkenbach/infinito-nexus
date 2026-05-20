@@ -33,7 +33,15 @@ class TestComposeUpRetries(unittest.TestCase):
             ]
         )
 
-        args = ["--env-file", "env.ci", "up", "-d", "--no-build", "coredns", "infinito"]
+        args = [
+            "--env-file",
+            "env/ci.env",
+            "up",
+            "-d",
+            "--no-build",
+            "coredns",
+            "infinito",
+        ]
         compose._compose_up_with_retries(args, attempts=6, delay_s=30)
 
         # 3 calls: fail, fail, succeed
@@ -58,7 +66,7 @@ class TestComposeUpRetries(unittest.TestCase):
             )
         )
 
-        args = ["--env-file", "env.ci", "up", "-d", "coredns", "infinito"]
+        args = ["--env-file", "env/ci.env", "up", "-d", "coredns", "infinito"]
 
         with self.assertRaises(subprocess.CalledProcessError):
             compose._compose_up_with_retries(args, attempts=6, delay_s=30)
@@ -82,7 +90,7 @@ class TestComposeUpRetries(unittest.TestCase):
             )
         )
 
-        args = ["--env-file", "env.ci", "up", "-d", "coredns", "infinito"]
+        args = ["--env-file", "env/ci.env", "up", "-d", "coredns", "infinito"]
         compose._compose_up_with_retries(args, attempts=6, delay_s=30)
 
         self.assertEqual(compose.run.call_count, 1)
@@ -93,7 +101,7 @@ class TestComposeUpRetries(unittest.TestCase):
         {
             "INFINITO_IMAGE": "test-image/arch",
             "GITHUB_ACTIONS": "true",
-            "RUNNING_ON_GITHUB": "true",
+            "INFINITO_RUNNING_ON_GITHUB": "true",
             "CI": "true",
         },
         clear=False,
@@ -143,7 +151,7 @@ class TestComposeUpRetries(unittest.TestCase):
         {
             "INFINITO_IMAGE": "test-image/arch",
             "GITHUB_ACTIONS": "",
-            "RUNNING_ON_GITHUB": "",
+            "INFINITO_RUNNING_ON_GITHUB": "",
             "CI": "",
             # Tests bypass BASH_ENV; set explicitly so cache_env_overrides() passes.
             "INFINITO_PACKAGE_CACHE_FRONTEND_CA_DIR": "/var/cache/infinito/test/ca",
@@ -197,7 +205,7 @@ class TestComposeUpRetries(unittest.TestCase):
             # CI-pinned so cache stays inactive; this test asserts build behaviour only.
             "CI": "true",
             "GITHUB_ACTIONS": "true",
-            "RUNNING_ON_GITHUB": "true",
+            "INFINITO_RUNNING_ON_GITHUB": "true",
         },
         clear=False,
     )
@@ -210,7 +218,7 @@ class TestComposeUpRetries(unittest.TestCase):
         compose.up(run_entry_init=False)
 
         compose._compose_up_with_retries.assert_called_once_with(
-            ["--env-file", "env.ci", "up", "-d", "coredns", "infinito"],
+            ["--env-file", "env/ci.env", "up", "-d", "coredns", "infinito"],
             attempts=6,
             delay_s=30,
         )
@@ -223,7 +231,7 @@ class TestComposeUpRetries(unittest.TestCase):
             "INFINITO_IMAGE": "test-image/arch",
             "CI": "true",
             "GITHUB_ACTIONS": "true",
-            "RUNNING_ON_GITHUB": "true",
+            "INFINITO_RUNNING_ON_GITHUB": "true",
         },
         clear=False,
     )
@@ -236,7 +244,15 @@ class TestComposeUpRetries(unittest.TestCase):
         compose.up(run_entry_init=False)
 
         compose._compose_up_with_retries.assert_called_once_with(
-            ["--env-file", "env.ci", "up", "-d", "--no-build", "coredns", "infinito"],
+            [
+                "--env-file",
+                "env/ci.env",
+                "up",
+                "-d",
+                "--no-build",
+                "coredns",
+                "infinito",
+            ],
             attempts=6,
             delay_s=30,
         )
@@ -250,7 +266,7 @@ class TestComposeUpRetries(unittest.TestCase):
             "INFINITO_PULL_POLICY": "never",
             "CI": "",
             "GITHUB_ACTIONS": "",
-            "RUNNING_ON_GITHUB": "",
+            "INFINITO_RUNNING_ON_GITHUB": "",
             # Tests bypass BASH_ENV; set explicitly so cache_env_overrides() passes.
             "INFINITO_PACKAGE_CACHE_FRONTEND_CA_DIR": "/var/cache/infinito/test/ca",
         },
@@ -271,7 +287,7 @@ class TestComposeUpRetries(unittest.TestCase):
         compose._compose_up_with_retries.assert_called_once_with(
             [
                 "--env-file",
-                "env.ci",
+                "env/ci.env",
                 "up",
                 "-d",
                 "registry-cache",

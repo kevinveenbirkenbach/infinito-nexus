@@ -238,7 +238,7 @@ deploy end to end after the refactor:
 | `web-app-bluesky`    | Multi-entity role with `logo`; exercises the "primary entity vs. info file" distinction.    |
 
 ```bash
-APPS="web-app-dashboard web-app-nextcloud web-app-gitea web-app-bluesky" \
+INFINITO_APPS="web-app-dashboard web-app-nextcloud web-app-gitea web-app-bluesky" \
   make deploy-fresh-purged-apps
 ```
 

@@ -167,7 +167,7 @@ class TestMain(unittest.TestCase):
     @unittest.mock.patch("cli.administration.deploy.container.command.run_in_container")
     def test_main_requires_inventory_dir_when_env_missing(self, mock_run_in_container):
         """
-        main() must fail if neither --inventory-dir is provided nor INVENTORY_DIR env is set.
+        main() must fail if neither --inventory-dir is provided nor INFINITO_INVENTORY_DIR env is set.
         """
         argv = [
             "cli.administration.deploy.container",
@@ -192,7 +192,7 @@ class TestMain(unittest.TestCase):
     @unittest.mock.patch("cli.administration.deploy.container.command.run_in_container")
     def test_main_uses_inventory_dir_from_env_when_present(self, mock_run_in_container):
         """
-        If INVENTORY_DIR env is set, --inventory-dir should not be required and the env value
+        If INFINITO_INVENTORY_DIR env is set, --inventory-dir should not be required and the env value
         must be forwarded to run_in_container().
         """
         argv = [
@@ -208,7 +208,7 @@ class TestMain(unittest.TestCase):
 
         with (
             unittest.mock.patch.dict(
-                os.environ, {"INVENTORY_DIR": "/env/inventory"}, clear=True
+                os.environ, {"INFINITO_INVENTORY_DIR": "/env/inventory"}, clear=True
             ),
             unittest.mock.patch.object(sys, "argv", argv),
         ):

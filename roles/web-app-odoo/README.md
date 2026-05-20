@@ -65,13 +65,13 @@ Additional modules can be enabled via the `modules.optional` configuration in th
 Deploy Odoo using the standard Infinito.Nexus deployment command:
 
 ```bash
-APPS=web-app-odoo make deploy-fresh-purged-apps
+INFINITO_APPS=web-app-odoo make deploy-fresh-purged-apps
 ```
 
 For subsequent updates:
 
 ```bash
-APPS=web-app-odoo make deploy-reuse-kept-apps
+INFINITO_APPS=web-app-odoo make deploy-reuse-kept-apps
 ```
 
 ## Access

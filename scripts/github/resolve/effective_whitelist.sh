@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 #
-# Resolve the effective WHITELIST that the discover step should pass to
+# Resolve the effective INFINITO_WHITELIST that the discover step should pass to
 # scripts/github/resolve/output_apps.sh, and write it to GITHUB_OUTPUT.
 #
 # Inputs via env:

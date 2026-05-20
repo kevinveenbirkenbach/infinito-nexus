@@ -52,7 +52,7 @@ The `cache` decision is exposed via `Profile.registry_cache_active()` in [profil
 
 When inactive, the override is omitted: cache services do not exist, the runner has no cache mounts or DNS-hijack, package managers go direct to upstream.
 
-CI signals (`GITHUB_ACTIONS=true`, `RUNNING_ON_GITHUB=true`, `CI=true`) deactivate. Fresh runner disks per CI job give no cross-run amortization.
+CI signals (`GITHUB_ACTIONS=true`, `INFINITO_RUNNING_ON_GITHUB=true`, `CI=true`) deactivate. Fresh runner disks per CI job give no cross-run amortization.
 
 ## Coverage Matrix 📋
 
@@ -86,7 +86,7 @@ The runner's `compose` wrapper at [roles/sys-svc-compose/files/compose.py](../..
 
 ## Environment Variables 🌳
 
-The host-side env-vars live in [scripts/meta/env/cache/registry.sh](../../../scripts/meta/env/cache/registry.sh) and [scripts/meta/env/cache/package.sh](../../../scripts/meta/env/cache/package.sh). They are sourced via [scripts/meta/env/all.sh](../../../scripts/meta/env/all.sh), which `BASH_ENV` makes available to every Makefile recipe.
+The host-side env-vars (`INFINITO_REGISTRY_CACHE_*`, `INFINITO_PACKAGE_CACHE_*`) are declared in [env/static.env](../../../env/static.env) and the dynamic ones (cache sizes from `df`/`/proc/meminfo`, sha256 admin password) are computed by [utils/env/builder.py](../../../utils/env/builder.py). `make dotenv` writes them into `.env`, which Compose auto-loads and which `BASH_ENV` makes available to every Makefile recipe through [scripts/meta/env/load.sh](../../../scripts/meta/env/load.sh). See [variables.md](variables.md).
 
 Per-variable defaults and purposes are in [compose.yml.md](../artefact/files/compose.yml.md) under the cache section.
 
@@ -99,7 +99,7 @@ Per-variable defaults and purposes are in [compose.yml.md](../artefact/files/com
 | Start the stack with caches | `make up` |
 | Stop the stack | `make down` |
 | Wipe local cache state | `make cache-clean` |
-| Manually re-bootstrap Nexus repos | `bash scripts/docker/cache/package.sh` (after sourcing `scripts/meta/env/cache/package.sh`) |
+| Manually re-bootstrap Nexus repos | `bash scripts/docker/cache/package.sh` (after `make dotenv` or sourcing `scripts/meta/env/load.sh`) |
 | Manually regenerate frontend certs | `bash scripts/docker/cache/package-frontend-certs.sh` |
 | Reload nginx in the frontend | `docker exec infinito-package-cache-frontend nginx -s reload` |
 | Inspect cache hits | `docker logs -f infinito-package-cache` and `docker logs -f infinito-package-cache-frontend` |

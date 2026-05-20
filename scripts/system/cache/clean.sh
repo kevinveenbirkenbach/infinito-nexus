@@ -21,10 +21,10 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "${SCRIPT_DIR}/../../.." && pwd)"
 cd "${REPO_ROOT}"
 
-# shellcheck source=scripts/meta/env/cache/registry.sh
-source "scripts/meta/env/cache/registry.sh"
-# shellcheck source=scripts/meta/env/cache/package.sh
-source "scripts/meta/env/cache/package.sh"
+# shellcheck source=scripts/meta/env/load.sh
+source "scripts/meta/env/load.sh"
+# shellcheck source=scripts/meta/env/load.sh
+source "scripts/meta/env/load.sh"
 
 # Stop any running cache containers first so wipe is safe (a running
 # Nexus would re-create files mid-rm). `docker compose down` of the

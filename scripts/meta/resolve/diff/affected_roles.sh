@@ -42,13 +42,13 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "$SCRIPT_DIR/../../../.." && pwd)"
 cd "$REPO_ROOT"
 
-if [[ -f "scripts/meta/env/all.sh" ]]; then
-	# shellcheck source=scripts/meta/env/all.sh
-	source "scripts/meta/env/all.sh"
+if [[ -f "scripts/meta/env/load.sh" ]]; then
+	# shellcheck source=scripts/meta/env/load.sh
+	source "scripts/meta/env/load.sh"
 fi
 
 compose_ci_exec() {
-	local -a compose_args=(docker compose --env-file env.ci)
+	local -a compose_args=(docker compose --env-file env/ci.env)
 
 	if [[ -f "env.development" ]]; then
 		compose_args+=(--env-file env.development)

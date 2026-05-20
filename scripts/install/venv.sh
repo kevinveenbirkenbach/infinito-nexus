@@ -20,7 +20,7 @@ set -euo pipefail
 # ------------------------------------------------------------
 
 : "${VENV:?VENV not set (e.g. /opt/venvs/infinito)}"
-: "${VENV_BASE:?VENV_BASE not set (e.g. /opt/venvs)}"
+: "${INFINITO_VENV_BASE:?INFINITO_VENV_BASE not set (e.g. /opt/venvs)}"
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "${SCRIPT_DIR}/../.." && pwd)"
@@ -41,19 +41,25 @@ install_venv() {
 	local venv_python="${VENV}/bin/python"
 
 	echo "🐍 Virtualenv target  : ${VENV}"
-	echo "📁 Virtualenv base    : ${VENV_BASE}"
+	echo "📁 Virtualenv base    : ${INFINITO_VENV_BASE}"
 	echo "🛠 Bootstrap python   : ${bootstrap_python}"
 	echo "🎯 Venv python target : ${venv_python}"
 	echo
 
-	# Ensure base directory exists (e.g. /opt/venvs)
-	if [[ -z "${VIRTUAL_ENV:-}" ]]; then
-		if [[ "${EUID:-$(id -u)}" -eq 0 ]]; then
-			mkdir -p "${VENV_BASE}"
-		else
-			sudo mkdir -p "${VENV_BASE}"
-			sudo chown "${USER:-$(whoami)}" "${VENV_BASE}"
-		fi
+	# Ensure base directory exists and is writable for the current user.
+	# An active VIRTUAL_ENV only short-circuits the bootstrap when that
+	# venv IS the target -- otherwise we'd skip setup just because an
+	# unrelated venv (e.g. `pkgmgr`) happens to be sourced in the shell,
+	# and then crash later with "Permission denied" on the real target.
+	if [[ -n "${VIRTUAL_ENV:-}" && "${VIRTUAL_ENV}" == "${VENV}" ]]; then
+		: # active venv matches the target; nothing to prepare
+	elif [[ -d "${INFINITO_VENV_BASE}" && -w "${INFINITO_VENV_BASE}" ]]; then
+		: # base already exists and is writable; nothing to prepare
+	elif [[ "${EUID:-$(id -u)}" -eq 0 ]]; then
+		mkdir -p "${INFINITO_VENV_BASE}"
+	else
+		sudo mkdir -p "${INFINITO_VENV_BASE}"
+		sudo chown "${USER:-$(whoami)}" "${INFINITO_VENV_BASE}"
 	fi
 
 	# ------------------------------------------------------------

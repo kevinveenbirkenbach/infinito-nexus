@@ -12,9 +12,9 @@ set -euo pipefail
 #                      mcr.microsoft.com/playwright:v1.59.1-noble)
 #
 # Optional env:
-#   CMD                Command to execute inside the sidecar container.
+#   INFINITO_CMD       Command to execute inside the sidecar container.
 #                      When omitted, the image's default entrypoint runs.
-#   RUN_FLAGS          Extra flags forwarded verbatim to `docker run`
+#   INFINITO_RUN_FLAGS          Extra flags forwarded verbatim to `docker run`
 #                      (e.g. "--env-file /tmp/x.env -v /tmp/y:/y -w /e2e").
 #   INFINITO_DISTRO    arch|debian|ubuntu|fedora|centos — selects which
 #                      infinito host container we exec into.
@@ -22,11 +22,11 @@ set -euo pipefail
 #
 # Examples:
 #   IMAGE=alpine make run
-#   IMAGE=alpine CMD='env | grep PATH' make run
+#   IMAGE=alpine INFINITO_CMD='env | grep PATH' make run
 #   IMAGE=mcr.microsoft.com/playwright:v1.59.1-noble \
-#     RUN_FLAGS='--env-file /tmp/test-e2e-playwright/web-app-friendica/.env \
+#     INFINITO_RUN_FLAGS='--env-file /tmp/test-e2e-playwright/web-app-friendica/.env \
 #                -v /tmp/test-e2e-playwright/web-app-friendica:/e2e -w /e2e' \
-#     CMD='npx playwright test --grep dashboard' \
+#     INFINITO_CMD='npx playwright test --grep dashboard' \
 #     make run
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -35,14 +35,14 @@ REPO_ROOT="$(cd "${SCRIPT_DIR}/../../../../../" && pwd)"
 usage() {
 	cat <<EOF
 Usage:
-  IMAGE=<ref> [CMD='<shell>'] [RUN_FLAGS='<flags>'] ${0}
+  IMAGE=<ref> [INFINITO_CMD='<shell>'] [INFINITO_RUN_FLAGS='<flags>'] ${0}
 
 Examples:
   IMAGE=alpine ${0}
-  IMAGE=alpine CMD='env' ${0}
+  IMAGE=alpine INFINITO_CMD='env' ${0}
   IMAGE=mcr.microsoft.com/playwright:v1.59.1-noble \\
-    RUN_FLAGS='--env-file /tmp/.env -v /tmp/proj:/e2e -w /e2e' \\
-    CMD='npx playwright test' \\
+    INFINITO_RUN_FLAGS='--env-file /tmp/.env -v /tmp/proj:/e2e -w /e2e' \\
+    INFINITO_CMD='npx playwright test' \\
     ${0}
 EOF
 }
@@ -55,22 +55,22 @@ fi
 : "${IMAGE:?IMAGE must be set (e.g. IMAGE=alpine)}"
 
 cd "${REPO_ROOT}"
-# shellcheck source=scripts/meta/env/all.sh
-source "scripts/meta/env/all.sh"
-: "${INFINITO_CONTAINER:?INFINITO_CONTAINER not set after sourcing scripts/meta/env/all.sh}"
+# shellcheck source=scripts/meta/env/load.sh
+source "scripts/meta/env/load.sh"
+: "${INFINITO_CONTAINER:?INFINITO_CONTAINER not set after sourcing scripts/meta/env/load.sh}"
 
-# Build the nested `docker run` argv. Splitting RUN_FLAGS on whitespace is
-# intentional — same UX as RUN_FLAGS in any other Make wrapper. Callers that
+# Build the nested `docker run` argv. Splitting INFINITO_RUN_FLAGS on whitespace is
+# intentional — same UX as INFINITO_RUN_FLAGS in any other Make wrapper. Callers that
 # need single args containing spaces should pass them via the image entry-
 # point (-e VAR='spaced value' arrives intact because docker parses -e).
 docker_run_argv=(docker run --rm)
-if [[ -n "${RUN_FLAGS:-}" ]]; then
+if [[ -n "${INFINITO_RUN_FLAGS:-}" ]]; then
 	# shellcheck disable=SC2206
-	docker_run_argv+=(${RUN_FLAGS})
+	docker_run_argv+=(${INFINITO_RUN_FLAGS})
 fi
 docker_run_argv+=("${IMAGE}")
-if [[ -n "${CMD:-}" ]]; then
-	docker_run_argv+=(sh -lc "${CMD}")
+if [[ -n "${INFINITO_CMD:-}" ]]; then
+	docker_run_argv+=(sh -lc "${INFINITO_CMD}")
 fi
 
 exec_flags=(-i)

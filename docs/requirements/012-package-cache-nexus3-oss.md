@@ -24,8 +24,9 @@ introduced for `registry-cache`:
 - the strict `${VAR:?…}` env-var contract documented under the
   cache section of
   [docs/contributing/artefact/files/compose.yml.md](../contributing/artefact/files/compose.yml.md),
-- the per-cache env script under `scripts/meta/env/`, sourced via
-  [scripts/meta/env/all.sh](../../scripts/meta/env/all.sh).
+- the per-cache env defaults declared in
+  [env/static.env](../../env/static.env), materialised into `.env`
+  by `make dotenv`.
 
 The `registry-cache` service MUST remain in place after this
 requirement lands. See **Coexistence**.
@@ -164,7 +165,7 @@ A mix that exercises apt, pip, npm, and helm during deploy:
 | any helm-driven role | exercises the `helm-bitnami` proxy                              |
 
 ```bash
-APPS="web-app-mediawiki web-app-discourse <helm-driven-role>" \
+INFINITO_APPS="web-app-mediawiki web-app-discourse <helm-driven-role>" \
   make deploy-fresh-purged-apps
 ```
 

@@ -11,8 +11,8 @@ applications without hitting an external resolver.
   compose service.
 - The `Corefile.tmpl` MUST be the source of truth. It is rendered to
   `Corefile` by [coredns.py](../../cli/administration/deploy/development/coredns.py)
-  via `envsubst`, using values from `env.ci` (overridable through the
-  CLI's environment).
+  via `envsubst`, using values from `env/ci.env` (overridable through
+  the CLI's environment).
 - The rendered `Corefile` is build artefact and MUST stay in
   `.gitignore`.
 

@@ -389,7 +389,9 @@ class TestApplyServicesDisabledFromEnv(unittest.TestCase):
             }
         )
         self._make_role("web-app-foo", {"oidc": {"enabled": True, "shared": True}})
-        with unittest.mock.patch.dict(os.environ, {"SERVICES_DISABLED": "oidc"}):
+        with unittest.mock.patch.dict(
+            os.environ, {"INFINITO_SERVICES_DISABLED": "oidc"}
+        ):
             apply_services_disabled_from_env(self.host_vars, roles_dir=self.roles_dir)
         result = self._read()
         self.assertFalse(
@@ -398,7 +400,7 @@ class TestApplyServicesDisabledFromEnv(unittest.TestCase):
 
     def test_no_op_when_env_not_set(self):
         self._write({"applications": {}})
-        env = {k: v for k, v in os.environ.items() if k != "SERVICES_DISABLED"}
+        env = {k: v for k, v in os.environ.items() if k != "INFINITO_SERVICES_DISABLED"}
         with unittest.mock.patch.dict(os.environ, env, clear=True):
             apply_services_disabled_from_env(self.host_vars, roles_dir=self.roles_dir)
         self.assertEqual(self._read(), {"applications": {}})
@@ -519,7 +521,9 @@ class TestServicesDisabledConflicts(unittest.TestCase):
             }
         )
 
-        with unittest.mock.patch.dict(os.environ, {"SERVICES_DISABLED": "email"}):
+        with unittest.mock.patch.dict(
+            os.environ, {"INFINITO_SERVICES_DISABLED": "email"}
+        ):
             assert_services_disabled_inventory_consistency_from_env(
                 inventory_dir=self.inventory_dir,
                 roles_dir=self.roles_dir,

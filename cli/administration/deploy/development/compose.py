@@ -194,7 +194,7 @@ class Compose:
 
         no_build = env.get("INFINITO_NO_BUILD", "0") == "1"
         # Compose env-file precedence: later files override earlier ones.
-        args = ["--env-file", "env.ci"]
+        args = ["--env-file", "env/ci.env"]
 
         env_local = self.repo_root / "env.development"
         if env_local.exists():
@@ -297,7 +297,7 @@ class Compose:
     def wait_for_healthy(self, *, timeout_s: int | None = None) -> None:
         """Wait for the infinito container's healthcheck."""
         if timeout_s is None:
-            timeout_s = int(os.environ.get("INFINITO_WAIT_HEALTH_TIMEOUT_S", "200"))
+            timeout_s = int(os.environ["INFINITO_WAIT_HEALTH_TIMEOUT_S"])
 
         print(">>> Waiting for infinito container to become healthy")
 

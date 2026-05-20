@@ -10,7 +10,7 @@ if TYPE_CHECKING:
     from .compose import Compose
 
 
-# Mirrors INVENTORY_VARS_FILE from scripts/meta/env/inventory.sh; a unit
+# Mirrors INVENTORY_VARS_FILE from scripts/meta/env/load.sh; a unit
 # test locks the two literals together so they cannot drift.
 DEV_INVENTORY_VARS_FILE: str = os.environ.get(
     "INVENTORY_VARS_FILE", "inventories/development/default.yml"
@@ -40,9 +40,9 @@ def cache_env_overrides() -> dict[str, str]:
     ca_dir = os.environ.get("INFINITO_PACKAGE_CACHE_FRONTEND_CA_DIR", "").strip()
     if not ca_dir:
         raise SystemExit(
-            "INFINITO_PACKAGE_CACHE_FRONTEND_CA_DIR is not set. Source "
-            "scripts/meta/env/cache/package.sh (or scripts/meta/env/all.sh) "
-            "before invoking cli.administration.deploy.development."
+            "INFINITO_PACKAGE_CACHE_FRONTEND_CA_DIR is not set. Run "
+            "'make dotenv' (or source scripts/meta/env/load.sh) before "
+            "invoking cli.administration.deploy.development."
         )
     return {
         "INFINITO_REGISTRY_CACHE_PROXY_CONF": "./compose/registry-cache/proxy.conf",
@@ -58,7 +58,7 @@ def resolve_distro() -> str:
     distro = os.environ.get("INFINITO_DISTRO", "").strip()
     if not distro:
         raise SystemExit(
-            "INFINITO_DISTRO is not set. Source scripts/meta/env/defaults.sh "
+            "INFINITO_DISTRO is not set. Run 'make dotenv' (or source scripts/meta/env/load.sh) "
             "or export INFINITO_DISTRO=<arch|debian|ubuntu|fedora|centos> "
             "before invoking cli.administration.deploy.development."
         )
@@ -75,7 +75,7 @@ def resolve_container() -> str:
     container = os.environ.get("INFINITO_CONTAINER", "").strip()
     if not container:
         raise SystemExit(
-            "INFINITO_CONTAINER is not set. Source scripts/meta/env/defaults.sh "
+            "INFINITO_CONTAINER is not set. Run 'make dotenv' (or source scripts/meta/env/load.sh) "
             "before invoking cli.administration.deploy.development."
         )
     return container

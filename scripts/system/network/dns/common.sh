@@ -2,8 +2,8 @@
 
 DNS_SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 DNS_PROJECT_ROOT="$(cd "${DNS_SCRIPT_DIR}/../../../.." && pwd)"
-DNS_DOMAIN="${INFINITO_DNS_DOMAIN:-infinito.example}"
-DNS_HOSTS_FILE="${INFINITO_DNS_HOSTS_FILE:-/etc/hosts}"
+DNS_DOMAIN="${INFINITO_DNS_DOMAIN:-infinito.example}"   # nocheck: host-dns-override -- run with sudo outside load.sh context; tweak the host's /etc/hosts only
+DNS_HOSTS_FILE="${INFINITO_DNS_HOSTS_FILE:-/etc/hosts}" # nocheck: host-dns-override -- run with sudo outside load.sh context; tweak the host's /etc/hosts only
 DNS_HOSTS_BLOCK_BEGIN="# BEGIN infinito-dns-fallback"
 DNS_HOSTS_BLOCK_END="# END infinito-dns-fallback"
 DNS_HOSTS_GENERATOR="${DNS_PROJECT_ROOT}/cli/meta/domains/__main__.py"
@@ -19,7 +19,7 @@ DNS_NM_DNSMASQ_CONF="${DNS_NM_DNSMASQ_DIR}/${DNS_DOMAIN}.conf"
 DNS_SYS_DNSMASQ_CONF="/etc/dnsmasq.d/${DNS_DOMAIN}.conf"
 
 dns_systemd_is_operational() {
-	if [[ "${INFINITO_DNS_FORCE_HOSTS_FALLBACK:-0}" == "1" ]]; then
+	if [[ "${INFINITO_DNS_FORCE_HOSTS_FALLBACK:-0}" == "1" ]]; then # nocheck: host-dns-override -- run with sudo outside load.sh context
 		return 1
 	fi
 	command -v systemctl >/dev/null 2>&1 && [[ -d /run/systemd/system ]]

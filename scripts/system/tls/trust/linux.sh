@@ -8,9 +8,9 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 # Source project defaults so INFINITO_CONTAINER auto-derives from
-# INFINITO_DISTRO (single SPOT in scripts/meta/env/defaults.sh) — callers
+# INFINITO_DISTRO (single SPOT in scripts/meta/env/load.sh) — callers
 # only need to set INFINITO_DISTRO.
-# shellcheck source=scripts/meta/env/defaults.sh
+# shellcheck source=scripts/meta/env/load.sh
 source "${SCRIPT_DIR}/../../../meta/env/defaults.sh"
 
 CONTAINER_NAME="${INFINITO_CONTAINER}"

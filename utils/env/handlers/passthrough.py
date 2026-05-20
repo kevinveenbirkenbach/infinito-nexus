@@ -1,0 +1,70 @@
+"""Static-env passthrough: copy every declared key from env/static.env
+with caller-env-wins (setdefault) semantics. Comments come from
+``ctx.static_comments`` (parsed from env/static.env)."""
+
+from __future__ import annotations
+
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from utils.env.builder import BuildContext, EnvBuilder
+
+STATIC_KEYS = (
+    "INFINITO_SRC_DIR",
+    "INFINITO_BIND_IP",
+    "INFINITO_SUBNET",
+    "INFINITO_GATEWAY",
+    "INFINITO_DISTRO",
+    "INFINITO_CONTAINER",
+    "INFINITO_CONTAINER_NO_CA",
+    "INFINITO_RUNNING_ON_ACT",
+    "INFINITO_RUNNING_ON_GITHUB",
+    "INFINITO_IS_WSL2",
+    "INFINITO_COMPILE",
+    "INFINITO_COMPILE_SILENCE",
+    "INFINITO_PULL_POLICY",
+    "INFINITO_MEM_LIMIT",
+    "INFINITO_MEMSWAP_LIMIT",
+    "INFINITO_CPUS",
+    "INFINITO_WAIT_HEALTH_TIMEOUT_S",
+    "INFINITO_DOCKER_VOLUME",
+    "INFINITO_DOCKER_MOUNT",
+    "INFINITO_OUTER_NETWORK_MTU",
+    "INFINITO_TEST_DEPLOY_TYPE",
+    "INFINITO_TEST_PATTERN",
+    "INFINITO_TEST_RUNNER",
+    "INFINITO_DISTROS",
+    "INFINITO_APPS",
+    "INFINITO_SERVICES_DISABLED",
+    "INFINITO_CMD",
+    "INFINITO_DEBUG",
+    "INFINITO_WHITELIST",
+    "INFINITO_LIMIT_HOST",
+    "INFINITO_BUNDLES",
+    "INFINITO_FULL_CYCLE",
+    "INFINITO_VARIANT",
+    "INFINITO_RUN_FLAGS",
+    "INFINITO_PARALLEL",
+    "INFINITO_VENV_BASE",
+    "INFINITO_VENV_NAME",
+    "PYTHONPATH",
+    "INVENTORY_VARS_FILE",
+    "INFINITO_REGISTRY_CACHE_HOST_PATH",
+    "INFINITO_REGISTRY_CACHE_CA_HOST_PATH",
+    "INFINITO_PACKAGE_CACHE_HOST_PATH",
+    "INFINITO_PACKAGE_CACHE_PORT",
+    "INFINITO_PACKAGE_CACHE_FRONTEND_CA_DIR",
+    "INFINITO_PACKAGE_CACHE_FRONTEND_CERTS_DIR",
+    "INFINITO_PACKAGE_CACHE_FRONTEND_IP",
+    "INFINITO_PACKAGE_CACHE_FRONTEND_INIT_IMAGE",
+    "INFINITO_PACKAGE_CACHE_MAX_AGE_MIN",
+    "INFINITO_IMAGE_TAG",
+)
+
+
+def apply(eb: EnvBuilder, ctx: BuildContext) -> None:
+    for key in STATIC_KEYS:
+        if key in ctx.static:
+            eb.setdefault(
+                key, ctx.static[key], comment=ctx.static_comments.get(key, "")
+            )

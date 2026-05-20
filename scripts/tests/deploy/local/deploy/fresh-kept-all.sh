@@ -14,24 +14,23 @@ source "${SCRIPT_DIR}/../utils/cache-retry.sh"
 # Required environment
 # ---------------------------------------------------------------------------
 : "${INFINITO_DISTRO:?INFINITO_DISTRO must be set (arch|debian|ubuntu|fedora|centos)}"
-: "${TEST_DEPLOY_TYPE:?TEST_DEPLOY_TYPE must be set (server|workstation|universal)}"
-: "${INVENTORY_DIR:?INVENTORY_DIR must be set (e.g. /etc/inventories/local-full-server)}"
-: "${INVENTORY_FILE:?INVENTORY_FILE is not set — source scripts/meta/env/inventory.sh first}"
-: "${INVENTORY_VARS_FILE:?INVENTORY_VARS_FILE is not set — source scripts/meta/env/inventory.sh first}"
+: "${INFINITO_TEST_DEPLOY_TYPE:?INFINITO_TEST_DEPLOY_TYPE must be set (server|workstation|universal)}"
+: "${INFINITO_INVENTORY_DIR:?INFINITO_INVENTORY_DIR must be set (e.g. /etc/inventories/local-full-server)}"
+: "${INFINITO_INVENTORY_FILE:?INFINITO_INVENTORY_FILE is not set — source scripts/meta/env/load.sh first}"
+: "${INVENTORY_VARS_FILE:?INVENTORY_VARS_FILE is not set — source scripts/meta/env/load.sh first}"
 
 # Optional overrides
-LIMIT_HOST="${LIMIT_HOST:-localhost}"
-WHITELIST="${WHITELIST:-}"
+INFINITO_WHITELIST="${INFINITO_WHITELIST:-}"
 
 # This script always generates inventories for the development compose stack.
 RUNTIME_VARS_JSON='{"RUNTIME":"dev"}'
 
 echo "=== local full deploy (development compose stack) ==="
 echo "distro        = ${INFINITO_DISTRO}"
-echo "type          = ${TEST_DEPLOY_TYPE}"
-echo "limit         = ${LIMIT_HOST}"
-echo "inventory_dir = ${INVENTORY_DIR}"
-echo "whitelist     = ${WHITELIST}"
+echo "type          = ${INFINITO_TEST_DEPLOY_TYPE}"
+echo "limit         = ${INFINITO_LIMIT_HOST}"
+echo "inventory_dir = ${INFINITO_INVENTORY_DIR}"
+echo "whitelist     = ${INFINITO_WHITELIST}"
 echo
 
 # ---------------------------------------------------------------------------
@@ -44,7 +43,7 @@ echo ">>> Starting development compose stack (no build)"
 # ---------------------------------------------------------------------------
 # 2) Discover apps on HOST (needs docker compose)
 # ---------------------------------------------------------------------------
-echo ">>> Discovering apps on host via scripts/meta/resolve/apps.sh (TEST_DEPLOY_TYPE=${TEST_DEPLOY_TYPE})"
+echo ">>> Discovering apps on host via scripts/meta/resolve/apps.sh (INFINITO_TEST_DEPLOY_TYPE=${INFINITO_TEST_DEPLOY_TYPE})"
 
 # IMPORTANT:
 # - compose can emit warnings on STDOUT (depending on version/config)
@@ -52,8 +51,8 @@ echo ">>> Discovering apps on host via scripts/meta/resolve/apps.sh (TEST_DEPLOY
 # - PYTHON from host venv must NOT be used inside container exec calls
 discover_out="$(
 	set +e
-	TEST_DEPLOY_TYPE="${TEST_DEPLOY_TYPE}" \
-		WHITELIST="${WHITELIST}" \
+	INFINITO_TEST_DEPLOY_TYPE="${INFINITO_TEST_DEPLOY_TYPE}" \
+		INFINITO_WHITELIST="${INFINITO_WHITELIST}" \
 		PYTHON=python3 \
 		scripts/meta/resolve/apps.sh 2> >(cat >&2) |
 		jq -c 'if type=="array" then . else [] end' 2>/dev/null
@@ -64,7 +63,7 @@ discover_out="$(
 if [[ -z "${discover_out}" ]]; then
 	echo "ERROR: apps discovery produced empty output" >&2
 	echo "DEBUG: raw apps.sh output (first 50 lines):" >&2
-	TEST_DEPLOY_TYPE="${TEST_DEPLOY_TYPE}" WHITELIST="${WHITELIST}" PYTHON=python3 \
+	INFINITO_TEST_DEPLOY_TYPE="${INFINITO_TEST_DEPLOY_TYPE}" INFINITO_WHITELIST="${INFINITO_WHITELIST}" PYTHON=python3 \
 		scripts/meta/resolve/apps.sh 2>&1 | sed -n '1,50p' >&2
 	exit 2
 fi
@@ -107,12 +106,12 @@ echo ">>> Running entry/init + inventory + deploy inside infinito container via 
 
 deploy_with_cache_retry "fresh-kept-all" -- \
 	"${PYTHON}" -m cli.administration.deploy.development exec \
-	--env "INVENTORY_DIR=${INVENTORY_DIR}" \
-	--env "INVENTORY_FILE=${INVENTORY_FILE}" \
+	--env "INFINITO_INVENTORY_DIR=${INFINITO_INVENTORY_DIR}" \
+	--env "INFINITO_INVENTORY_FILE=${INFINITO_INVENTORY_FILE}" \
 	--env "INVENTORY_VARS_FILE=${INVENTORY_VARS_FILE}" \
 	--env "APPS_CSV=${apps_csv}" \
 	--env "APPS_COUNT=${apps_count}" \
-	--env "LIMIT_HOST=${LIMIT_HOST}" \
+	--env "INFINITO_LIMIT_HOST=${INFINITO_LIMIT_HOST}" \
 	--env "RUNTIME_VARS_JSON=${RUNTIME_VARS_JSON}" \
 	-- bash /opt/src/infinito/scripts/tests/deploy/local/utils/fresh-kept-all-init-and-deploy.sh
 

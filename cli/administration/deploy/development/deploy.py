@@ -23,19 +23,19 @@ if TYPE_CHECKING:
 
 
 def _env_variant() -> int | None:
-    raw = os.environ.get("VARIANT", "").strip()
+    raw = os.environ.get("INFINITO_VARIANT", "").strip()
     if not raw:
         return None
     try:
         return int(raw)
     except ValueError:
         raise SystemExit(
-            f"VARIANT environment variable must be an integer, got {raw!r}"
+            f"INFINITO_VARIANT environment variable must be an integer, got {raw!r}"
         ) from None
 
 
 def _env_full_cycle() -> bool:
-    return os.environ.get("FULL_CYCLE", "").strip().lower() == "true"
+    return os.environ.get("INFINITO_FULL_CYCLE", "").strip().lower() == "true"
 
 
 def _run_deploy(
@@ -84,9 +84,9 @@ def _run_deploy(
         "PY_COLORS": "1",
         "TERM": "xterm-256color",
     }
-    services_disabled = os.environ.get("SERVICES_DISABLED", "")
+    services_disabled = os.environ.get("INFINITO_SERVICES_DISABLED", "")
     if services_disabled:
-        extra_env["SERVICES_DISABLED"] = services_disabled
+        extra_env["INFINITO_SERVICES_DISABLED"] = services_disabled
 
     # The Playwright E2E gate now keys on `RUNTIME` from the inventory's
     # host_vars (baked at init time by `cli.administration.deploy.development.init`).
@@ -123,7 +123,7 @@ def _purge_app_entities(*, container: str, app_ids: list[str]) -> None:
         repo_root / "scripts" / "tests" / "deploy" / "local" / "purge" / "entity.sh"
     )
     env = os.environ.copy()
-    env["APPS"] = ",".join(app_ids)
+    env["INFINITO_APPS"] = ",".join(app_ids)
     env["INFINITO_CONTAINER"] = container
     print(
         "=== matrix-deploy: purging entities between rounds for "
@@ -143,10 +143,10 @@ def add_parser(sub: argparse._SubParsersAction) -> None:
     )
     p.add_argument(
         "--inventory-dir",
-        default=os.environ.get("INVENTORY_DIR"),
-        required=os.environ.get("INVENTORY_DIR") is None,
+        default=os.environ.get("INFINITO_INVENTORY_DIR"),
+        required=os.environ.get("INFINITO_INVENTORY_DIR") is None,
         help=(
-            "Inventory directory base (default: $INVENTORY_DIR). When the "
+            "Inventory directory base (default: $INFINITO_INVENTORY_DIR). When the "
             "primary apps declare more than one matrix-deploy variant, the "
             "wrapper iterates the sibling folders `<dir>-0`, `<dir>-1`, ... "
             "produced by the matching `init` step; otherwise the directory "
@@ -179,8 +179,8 @@ def add_parser(sub: argparse._SubParsersAction) -> None:
             "Pin the matrix deploy to a single round (zero-based index), "
             "skipping inter-round cleanup. Useful for redeploying one "
             "specific variant without iterating the whole matrix. Defaults "
-            "to the VARIANT environment variable when set, otherwise full-"
-            "matrix mode."
+            "to the INFINITO_VARIANT environment variable when set, otherwise "
+            "full-matrix mode."
         ),
     )
     p.add_argument(
@@ -193,7 +193,7 @@ def add_parser(sub: argparse._SubParsersAction) -> None:
             "Pass 1 + Pass 2 stay co-located on the SAME variant so the "
             "async re-deploy always runs against the host state the "
             "matching sync deploy just produced. Defaults to the "
-            "FULL_CYCLE environment variable (true|false) when set."
+            "INFINITO_FULL_CYCLE environment variable (true|false) when set."
         ),
     )
     p.add_argument(
@@ -214,9 +214,9 @@ def handler(args: argparse.Namespace) -> int:
     else:
         primary_app_ids = list(args.id or [])
 
-    # Remove any app IDs that were disabled via SERVICES_DISABLED so the
+    # Remove any app IDs that were disabled via INFINITO_SERVICES_DISABLED so the
     # deploy list stays consistent with the inventory created by init.
-    raw_disabled = os.environ.get("SERVICES_DISABLED", "").strip()
+    raw_disabled = os.environ.get("INFINITO_SERVICES_DISABLED", "").strip()
     disabled_app_ids: set[str] = set()
     if raw_disabled:
         services = parse_services_disabled(raw_disabled)
@@ -229,7 +229,7 @@ def handler(args: argparse.Namespace) -> int:
 
     if not primary_app_ids:
         raise SystemExit(
-            "All primary apps disabled by SERVICES_DISABLED — nothing to deploy"
+            "All primary apps disabled by INFINITO_SERVICES_DISABLED — nothing to deploy"
         )
 
     # argparse.REMAINDER includes the leading '--' if present; drop it

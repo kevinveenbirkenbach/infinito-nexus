@@ -56,8 +56,9 @@ class TestDiffAffectedRoles(unittest.TestCase):
         shutil.copy2(SCRIPT_PATH, script_target)
         script_target.chmod(0o755)
 
-        # compose_ci_exec passes --env-file env.ci; file just needs to exist.
-        (repo / "env.ci").write_text("", encoding="utf-8")
+        # compose_ci_exec passes --env-file env/ci.env; file just needs to exist.
+        (repo / "env").mkdir(parents=True, exist_ok=True)
+        (repo / "env" / "ci.env").write_text("", encoding="utf-8")
 
         for rel, content in base_files.items():
             dest = repo / rel

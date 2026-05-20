@@ -27,7 +27,7 @@ PKGMGR_IMAGE_TAG="stable" # can be overridden by env or future flag
 PKGMGR_IMAGE=""           # computed below (single build-arg for Dockerfile)
 
 usage() {
-	local repo_prefix="${REPO_PREFIX:-${INFINITO_IMAGE_REPOSITORY:-<repo>}}"
+	local repo_prefix="${REPO_PREFIX:-${INFINITO_IMAGE_REPOSITORY:-<repo>}}" # nocheck: usage-text-placeholder -- '<repo>' is a literal placeholder rendered into --help, not a runtime default
 
 	local default_tag="${repo_prefix}/${INFINITO_DISTRO}"
 	if [[ "${VARIANT}" == "slim" ]]; then

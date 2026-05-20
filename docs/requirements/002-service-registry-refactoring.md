@@ -25,7 +25,7 @@ self-describing.
       entries for services of a different deploy type. If a role declares such a
       cross-type dependency, `roles/sys-utils-service-loader` MUST fail hard with a
       clear error instead of ignoring it. Apps MUST NOT require the user to list
-      those dependencies explicitly in `APPS`.
+      those dependencies explicitly in `INFINITO_APPS`.
 - [x] The special `role_template: "svc-db-{type}"` database loading logic is removed;
       PostgreSQL and MariaDB are defined as regular services in their own
       `config/main.yml` (same as any other service). Because databases are a different
@@ -139,7 +139,7 @@ self-describing.
 - [x] All service dependencies, including databases (e.g. `svc-db-mariadb`,
       `svc-db-postgres`) and shared services (e.g. `web-app-keycloak`), are loaded
       automatically by `roles/sys-utils-service-loader` in the constructor stage.
-      No service dependency MUST ever require the user to list it explicitly in `APPS`.
+      No service dependency MUST ever require the user to list it explicitly in `INFINITO_APPS`.
 - [x] Every file that currently reads from `SERVICE_REGISTRY` or `20_services.yml`
       MUST be updated to discover service metadata from role `config/main.yml` files
       instead. This includes at minimum:
@@ -186,7 +186,7 @@ It covers all relevant service categories and dependency patterns:
 | `web-app-nextcloud` | Complex app with both MariaDB and Keycloak; depends on all of the above |
 
 ```bash
-APPS="web-svc-cdn web-svc-file web-app-dashboard svc-db-postgres svc-db-mariadb web-app-matomo web-app-gitea web-app-nextcloud" \
+INFINITO_APPS="web-svc-cdn web-svc-file web-app-dashboard svc-db-postgres svc-db-mariadb web-app-matomo web-app-gitea web-app-nextcloud" \
   make deploy-fresh-purged-apps
 ```
 
@@ -221,7 +221,7 @@ that app. Do not carry over assumptions from the previous app.
 
 1. Read [Role Loop](../agents/action/iteration/role.md) before starting each app.
 2. Implement the role-local changes for the current app.
-3. Deploy: `make deploy-fresh-purged-apps APPS=<role>`
+3. Deploy: `make deploy-fresh-purged-apps INFINITO_APPS=<role>`
 4. Follow the inspect-fix-redeploy loop from [Role Loop](../agents/action/iteration/role.md) until the app works end to end.
 5. Run `make test`. All tests MUST pass before moving to the next app.
 6. Check off the relevant Acceptance Criteria above if fully covered by this app.

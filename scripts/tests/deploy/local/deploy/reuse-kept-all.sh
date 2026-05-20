@@ -5,15 +5,15 @@ set -euo pipefail
 #
 # Required:
 #   INFINITO_DISTRO   (arch|debian|ubuntu|fedora|centos)
-#   TEST_DEPLOY_TYPE  (server|workstation|universal)
-#   INVENTORY_DIR     (e.g. /etc/inventories/local-full-server)
+#   INFINITO_TEST_DEPLOY_TYPE  (server|workstation|universal)
+#   INFINITO_INVENTORY_DIR     (e.g. /etc/inventories/local-full-server)
 #
 # Optional:
-#   LIMIT_HOST         (default: localhost)
-#   DEBUG              (default: false)
+#   INFINITO_LIMIT_HOST  (default: localhost)
+#   INFINITO_DEBUG       (default: false)
 #
 # Notes:
-# - This does NOT create the inventory. Run make deploy-fresh-kept-apps APPS=<role> first.
+# - This does NOT create the inventory. Run make deploy-fresh-kept-apps INFINITO_APPS=<role> first.
 # - We recompute the app list to keep behavior deterministic with filters.
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -27,27 +27,25 @@ REPO_ROOT="$(cd "${SCRIPT_DIR}/../../../../.." && pwd)"
 cd "${REPO_ROOT}"
 
 : "${INFINITO_DISTRO:?INFINITO_DISTRO must be set (arch|debian|ubuntu|fedora|centos)}"
-: "${TEST_DEPLOY_TYPE:?TEST_DEPLOY_TYPE must be set (server|workstation|universal)}"
-: "${INVENTORY_DIR:?INVENTORY_DIR must be set (e.g. /etc/inventories/local-full-server)}"
+: "${INFINITO_TEST_DEPLOY_TYPE:?INFINITO_TEST_DEPLOY_TYPE must be set (server|workstation|universal)}"
+: "${INFINITO_INVENTORY_DIR:?INFINITO_INVENTORY_DIR must be set (e.g. /etc/inventories/local-full-server)}"
 
-LIMIT_HOST="${LIMIT_HOST:-localhost}"
-
-DEBUG="$(normalize_bool_or_default "${DEBUG:-}" false DEBUG)"
+INFINITO_DEBUG="$(normalize_bool_or_default "${INFINITO_DEBUG:-}" false INFINITO_DEBUG)"
 
 # When the previous matrix init produced one folder per round
-# (`<INVENTORY_DIR>-0`, `<INVENTORY_DIR>-1`, ...), `VARIANT=<idx>` pins
-# this redeploy to the chosen round. Without VARIANT the unsuffixed
-# path is used, which is correct for single-variant deploys (N=1).
-inv_dir="${INVENTORY_DIR}"
-if [[ -n "${VARIANT:-}" ]]; then
-	inv_dir="${inv_dir}-${VARIANT}"
+# (`<INFINITO_INVENTORY_DIR>-0`, `<INFINITO_INVENTORY_DIR>-1`, ...), `INFINITO_VARIANT=<idx>`
+# pins this redeploy to the chosen round. Without INFINITO_VARIANT the
+# unsuffixed path is used, which is correct for single-variant deploys (N=1).
+inv_dir="${INFINITO_INVENTORY_DIR}"
+if [[ -n "${INFINITO_VARIANT:-}" ]]; then
+	inv_dir="${inv_dir}-${INFINITO_VARIANT}"
 fi
 inv_file="${inv_dir}/devices.yml"
 pw_file="${inv_dir}/.password"
 
 if [[ ! -f "${inv_file}" ]]; then
 	echo "ERROR: inventory not found: ${inv_file}" >&2
-	echo "Run: make deploy-fresh-kept-apps APPS=<role>" >&2
+	echo "Run: make deploy-fresh-kept-apps INFINITO_APPS=<role>" >&2
 	exit 2
 fi
 
@@ -58,9 +56,9 @@ fi
 
 echo "=== local run (ALL apps) ==="
 echo "distro        = ${INFINITO_DISTRO}"
-echo "type          = ${TEST_DEPLOY_TYPE}"
-echo "limit         = ${LIMIT_HOST}"
-echo "debug         = ${DEBUG}"
+echo "type          = ${INFINITO_TEST_DEPLOY_TYPE}"
+echo "limit         = ${INFINITO_LIMIT_HOST}"
+echo "debug         = ${INFINITO_DEBUG}"
 echo "inventory_dir = ${inv_dir}"
 echo "inv_file      = ${inv_file}"
 echo
@@ -72,8 +70,8 @@ echo
 
 # Recompute apps list (optional, but keeps filters consistent)
 apps_json="$(
-	TEST_DEPLOY_TYPE="${TEST_DEPLOY_TYPE}" \
-		WHITELIST="${WHITELIST:-}" \
+	INFINITO_TEST_DEPLOY_TYPE="${INFINITO_TEST_DEPLOY_TYPE}" \
+		INFINITO_WHITELIST="${INFINITO_WHITELIST:-}" \
 		scripts/meta/resolve/apps.sh
 )"
 
@@ -96,10 +94,10 @@ echo
 # Run deploy inside container
 deploy_with_cache_retry "reuse-all" -- \
 	"${PYTHON}" -m cli.administration.deploy.development exec \
-	--env "INVENTORY_FILE=${inv_file}" \
-	--env "PW_FILE=${pw_file}" \
-	--env "LIMIT_HOST=${LIMIT_HOST}" \
-	--env "DEBUG=${DEBUG}" \
+	--env "INFINITO_INVENTORY_FILE=${inv_file}" \
+	--env "INFINITO_INVENTORY_PASSWORD_FILE=${pw_file}" \
+	--env "INFINITO_LIMIT_HOST=${INFINITO_LIMIT_HOST}" \
+	--env "INFINITO_DEBUG=${INFINITO_DEBUG}" \
 	-- bash /opt/src/infinito/scripts/tests/deploy/local/utils/reuse-kept-all-deploy.sh
 
 echo
