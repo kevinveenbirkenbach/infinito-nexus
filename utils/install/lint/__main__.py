@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import hashlib
 import os
+import shutil
 import sys
 from pathlib import Path
 
@@ -36,6 +37,22 @@ _STAMP = f"build/install-lint-{_STAMP_KEY}.stamp"
 _STAMP_DEPS = (
     "scripts/install/lint.sh",
     "pyproject.toml",
+)
+
+# Tools the all-mode install must produce. Verified before trusting the
+# stamp so a container rebuild (which wipes the layer that held the
+# binaries but leaves the host-mounted build/ stamp intact) cannot trick
+# us into skipping the reinstall.
+_STAMP_TOOLS = (
+    "actionlint",
+    "ansible-lint",
+    "ansible-playbook",
+    "eslint",
+    "markdownlint-cli2",
+    "mbake",
+    "ruff",
+    "shellcheck",
+    "shfmt",
 )
 
 
@@ -103,7 +120,7 @@ def _stamp_is_fresh(repo_root: Path) -> bool:
             return False
         if dep_path.stat().st_mtime > stamp_mtime:
             return False
-    return True
+    return all(shutil.which(tool) is not None for tool in _STAMP_TOOLS)
 
 
 def _touch_stamp(repo_root: Path) -> None:

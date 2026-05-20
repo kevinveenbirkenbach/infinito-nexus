@@ -33,11 +33,24 @@ class TestStampLogic(unittest.TestCase):
             root = _make_repo_root(tmp, stamp_age_offset=60.0)
             with (
                 mock.patch.object(cli, "PROJECT_ROOT", root),
+                mock.patch.object(cli.shutil, "which", return_value="/usr/bin/x"),
                 mock.patch.object(cli, "_install_all") as inst,
             ):
                 rc = cli.main([])
             self.assertEqual(rc, 0)
             inst.assert_not_called()
+
+    def test_missing_tool_invalidates_stamp(self) -> None:
+        with TemporaryDirectory() as tmp:
+            root = _make_repo_root(tmp, stamp_age_offset=60.0)
+            with (
+                mock.patch.object(cli, "PROJECT_ROOT", root),
+                mock.patch.object(cli.shutil, "which", return_value=None),
+                mock.patch.object(cli, "_install_all") as inst,
+            ):
+                rc = cli.main([])
+            self.assertEqual(rc, 0)
+            inst.assert_called_once()
 
     def test_stale_stamp_triggers_install(self) -> None:
         with TemporaryDirectory() as tmp:
