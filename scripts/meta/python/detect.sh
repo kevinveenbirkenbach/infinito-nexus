@@ -8,7 +8,7 @@ VENV_NAME=infinito
 
 if [[ -n "${VIRTUAL_ENV:-}" ]]; then
 	VENV_BASE="$(dirname "${VIRTUAL_ENV}")"
-elif [[ -d /opt/venvs && -w /opt/venvs ]]; then
+elif [[ -d /opt && -w /opt ]]; then
 	VENV_BASE=/opt/venvs
 else
 	VENV_BASE="${HOME}/.venvs"
