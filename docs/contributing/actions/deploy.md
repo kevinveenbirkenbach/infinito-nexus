@@ -85,7 +85,7 @@ For TLS-enabled local sites, run [`make trust-ca`](../../../Makefile) once after
 |---|---|
 | [Makefile](../../../Makefile) | All `deploy-*` and `make exec` / `make trust-ca` targets. |
 | [dev CLI tree](../../../cli/administration/deploy/development/) | Python CLI for init, deploy, up, down, exec, etc. |
-| [`make dotenv`](../../../Makefile) | Resolves `INFINITO_INVENTORY_DIR`, `INFINITO_INVENTORY_FILE`, and `INVENTORY_VARS_FILE` into `.env` for the dev CLI (see [variables.md](../environment/variables.md)). |
+| [`make dotenv`](../../../Makefile) | Resolves `INFINITO_INVENTORY_DIR`, `INFINITO_INVENTORY_FILE`, and `INFINITO_INVENTORY_VARS_FILE` into `.env` for the dev CLI (see [variables.md](../environment/variables.md)). |
 | [local deploy scripts](../../../scripts/tests/deploy/local/) | Bash glue behind the make targets (fresh / reuse / purge variants). |
 | [variants.md](../design/variants.md) | Matrix-variant deep dive. |
 | [role.md](../../agents/action/iteration/role.md) | Role-iteration loop for agents. Recommended reading even for human contributors. |

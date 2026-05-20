@@ -20,7 +20,6 @@ set -euo pipefail
 # ------------------------------------------------------------
 
 : "${VENV:?VENV not set (e.g. /opt/venvs/infinito)}"
-: "${INFINITO_VENV_BASE:?INFINITO_VENV_BASE not set (e.g. /opt/venvs)}"
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "${SCRIPT_DIR}/../.." && pwd)"
@@ -41,12 +40,11 @@ install_venv() {
 	local venv_python="${VENV}/bin/python"
 
 	echo "🐍 Virtualenv target  : ${VENV}"
-	echo "📁 Virtualenv base    : ${INFINITO_VENV_BASE}"
 	echo "🛠 Bootstrap python   : ${bootstrap_python}"
 	echo "🎯 Venv python target : ${venv_python}"
 	echo
 
-	# Probe dirname(VENV), not INFINITO_VENV_BASE: VENV may live outside the legacy base, and a non-writable legacy path triggers a spurious sudo (fatal under no_new_privs sandboxes).
+	# Probe dirname(VENV) so a non-writable legacy path can't trigger a spurious sudo (fatal under no_new_privs sandboxes).
 	local venv_parent
 	venv_parent="$(dirname "${VENV}")"
 	if [[ -n "${VIRTUAL_ENV:-}" && "${VIRTUAL_ENV}" == "${VENV}" ]]; then

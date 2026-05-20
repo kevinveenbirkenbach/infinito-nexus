@@ -11,7 +11,7 @@
 # Required env:
 #   INFINITO_INVENTORY_DIR    absolute base inventory dir (no trailing slash)
 #   INFINITO_INVENTORY_FILE   absolute path to <INFINITO_INVENTORY_DIR>/devices.yml
-#   INVENTORY_VARS_FILE       repo-relative dev vars file (SPOT)
+#   INFINITO_INVENTORY_VARS_FILE       repo-relative dev vars file (SPOT)
 #   APPS_CSV                  comma-separated app id list for `--include`
 #   APPS_COUNT                length of APPS_CSV (echoed for log clarity)
 #   INFINITO_LIMIT_HOST       Ansible host (typically "localhost")
@@ -21,7 +21,7 @@ cd /opt/src/infinito
 
 : "${INFINITO_INVENTORY_DIR:?INFINITO_INVENTORY_DIR must be set}"
 : "${INFINITO_INVENTORY_FILE:?INFINITO_INVENTORY_FILE must be set}"
-: "${INVENTORY_VARS_FILE:?INVENTORY_VARS_FILE must be set}"
+: "${INFINITO_INVENTORY_VARS_FILE:?INFINITO_INVENTORY_VARS_FILE must be set}"
 : "${APPS_CSV:?APPS_CSV must be set}"
 : "${APPS_COUNT:?APPS_COUNT must be set}"
 : "${INFINITO_LIMIT_HOST:?INFINITO_LIMIT_HOST must be set}"
@@ -48,7 +48,7 @@ infinito administration inventory provision "${inv_dir}" \
 	--host "${INFINITO_LIMIT_HOST}" \
 	--ssl-disabled \
 	--vars "${RUNTIME_VARS_JSON}" \
-	--vars-file "${INVENTORY_VARS_FILE}" \
+	--vars-file "${INFINITO_INVENTORY_VARS_FILE}" \
 	--include "${APPS_CSV}"
 
 echo ">>> Deploying against ${INFINITO_INVENTORY_FILE}"

@@ -12,7 +12,7 @@ set -euo pipefail
 : "${INFINITO_TEST_DEPLOY_TYPE:?INFINITO_TEST_DEPLOY_TYPE must be set (server|workstation|universal)}"
 : "${INFINITO_INVENTORY_DIR:?INFINITO_INVENTORY_DIR must be set (e.g. /etc/inventories/local-full-server)}"
 : "${INFINITO_INVENTORY_FILE:?INFINITO_INVENTORY_FILE is not set — source scripts/meta/env/load.sh first}"
-: "${INVENTORY_VARS_FILE:?INVENTORY_VARS_FILE is not set — source scripts/meta/env/load.sh first}"
+: "${INFINITO_INVENTORY_VARS_FILE:?INFINITO_INVENTORY_VARS_FILE is not set — source scripts/meta/env/load.sh first}"
 
 # This script always generates inventories for the development compose stack.
 RUNTIME_VARS_JSON='{"RUNTIME":"dev","SYS_SERVICE_RUNNER_RETRIES":1}'
@@ -99,7 +99,7 @@ echo ">>> Initializing inventory inside container"
       --vars '${RUNTIME_VARS_JSON}' \
       --host 'localhost' \
       --ssl-disabled \
-      --vars-file '${INVENTORY_VARS_FILE}' \
+      --vars-file '${INFINITO_INVENTORY_VARS_FILE}' \
       --include '${apps_csv}'
 
     echo '✅ Inventory initialized.'

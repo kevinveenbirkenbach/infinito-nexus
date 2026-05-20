@@ -46,6 +46,7 @@ _NOCHECK_RE = re.compile(r"#\s*nocheck\b")
 _EXCLUDED_PREFIXES = (
     "tests/lint/",
     "utils/env/handlers/",
+    "scripts/meta/python/",
     "env/",
 )
 
@@ -62,6 +63,13 @@ def _registered_keys() -> set[str]:
     env_dir = PROJECT_ROOT / "env"
     for env_file in sorted(env_dir.glob("*.env")):
         for line in read_text(str(env_file)).splitlines():
+            match = _DEFAULT_ENV_KEY_RE.match(line)
+            if match is not None:
+                keys.add(match.group("key"))
+
+    python_detect = PROJECT_ROOT / "scripts" / "meta" / "python" / "detect.sh"
+    if python_detect.is_file():
+        for line in read_text(str(python_detect)).splitlines():
             match = _DEFAULT_ENV_KEY_RE.match(line)
             if match is not None:
                 keys.add(match.group("key"))

@@ -3,7 +3,7 @@
 The literal path "inventories/development/default.yml" is exposed in
 TWO places that must stay in lockstep:
 
-* `env/default.env` — `INVENTORY_VARS_FILE` (SPOT-of-record for callers
+* `env/default.env` — `INFINITO_INVENTORY_VARS_FILE` (SPOT-of-record for callers
   that go through `make dotenv` / the bash deploy chain).
 * `cli/administration/deploy/development/common.DEV_INVENTORY_VARS_FILE`
   — fallback for direct/test invocations that bypass the bash chain.
@@ -28,15 +28,15 @@ STATIC_ENV = PROJECT_ROOT / "env" / "default.env"
 
 
 def _parse_env_default(file_text: str) -> str:
-    # Match: INVENTORY_VARS_FILE=<DEFAULT>   (optional surrounding quotes)
+    # Match: INFINITO_INVENTORY_VARS_FILE=<DEFAULT>   (optional surrounding quotes)
     pattern = re.compile(
-        r'^\s*INVENTORY_VARS_FILE=(?P<value>"[^"]*"|\'[^\']*\'|[^\s#]+)\s*(#.*)?$',
+        r'^\s*INFINITO_INVENTORY_VARS_FILE=(?P<value>"[^"]*"|\'[^\']*\'|[^\s#]+)\s*(#.*)?$',
         re.MULTILINE,
     )
     match = pattern.search(file_text)
     if not match:
         raise AssertionError(
-            "Could not find INVENTORY_VARS_FILE assignment in "
+            "Could not find INFINITO_INVENTORY_VARS_FILE assignment in "
             f"{STATIC_ENV}; pattern was tightened intentionally so any "
             "rewrite of that line forces a matching update here."
         )
@@ -52,7 +52,7 @@ class TestInventoryVarsFileSpotDriftGuard(unittest.TestCase):
         self.assertEqual(
             env_default,
             DEV_INVENTORY_VARS_FILE,
-            "INVENTORY_VARS_FILE default in env/default.env drifted from "
+            "INFINITO_INVENTORY_VARS_FILE default in env/default.env drifted from "
             "cli.administration.deploy.development.common.DEV_INVENTORY_VARS_FILE. "
             "Update both literals (or, better, rebase one on the other).",
         )

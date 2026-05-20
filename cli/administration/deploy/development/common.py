@@ -10,10 +10,10 @@ if TYPE_CHECKING:
     from .compose import Compose
 
 
-# Mirrors INVENTORY_VARS_FILE from scripts/meta/env/load.sh; a unit
-# test locks the two literals together so they cannot drift.
-DEV_INVENTORY_VARS_FILE: str = os.environ.get(
-    "INVENTORY_VARS_FILE", "inventories/development/default.yml"
+# Mirrors INFINITO_INVENTORY_VARS_FILE from env/default.env; drift-guarded.
+DEV_INVENTORY_VARS_FILE: str = (
+    os.environ.get("INFINITO_INVENTORY_VARS_FILE")
+    or "inventories/development/default.yml"
 )
 
 

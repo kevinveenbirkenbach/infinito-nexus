@@ -24,15 +24,10 @@ from . import (
     infinito_registry_cache_max_size,
     infinito_running_on_act,
     infinito_running_on_github,
-    infinito_venv_base,
-    infinito_venv_fallback,
     infinito_worker_cpu,
     infinito_worker_fetch,
     nix_config,
     passthrough,
-    pip,
-    python,
-    venv,
 )
 
 ORDERED_HANDLERS = [
@@ -43,11 +38,6 @@ ORDERED_HANDLERS = [
     infinito_running_on_act,
     infinito_running_on_github,
     infinito_is_wsl2,
-    infinito_venv_base,
-    infinito_venv_fallback,
-    venv,
-    python,
-    pip,
     infinito_inventory,
     gha_passthrough,
     infinito_pull_policy,

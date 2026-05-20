@@ -1,15 +1,6 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# 🔁 Reload env after venv.sh: first env-gen runs before the venv exists, so PYTHON is the system fallback.
-if [[ -n "${VENV:-}" && -x "${VENV}/bin/python" && "${PYTHON:-}" != "${VENV}/bin/python" ]]; then
-	unset INFINITO_ENV_LOADED
-	unset PYTHON
-	unset PIP
-	# shellcheck source=scripts/meta/env/load.sh
-	source "${ENV_SH:-scripts/meta/env/load.sh}"
-fi
-
 echo "📦 Installing Ansible collections"
 
 : "${PYTHON:?PYTHON not set}"

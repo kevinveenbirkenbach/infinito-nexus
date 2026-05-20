@@ -17,7 +17,7 @@ source "${SCRIPT_DIR}/../utils/cache-retry.sh"
 : "${INFINITO_TEST_DEPLOY_TYPE:?INFINITO_TEST_DEPLOY_TYPE must be set (server|workstation|universal)}"
 : "${INFINITO_INVENTORY_DIR:?INFINITO_INVENTORY_DIR must be set (e.g. /etc/inventories/local-full-server)}"
 : "${INFINITO_INVENTORY_FILE:?INFINITO_INVENTORY_FILE is not set — source scripts/meta/env/load.sh first}"
-: "${INVENTORY_VARS_FILE:?INVENTORY_VARS_FILE is not set — source scripts/meta/env/load.sh first}"
+: "${INFINITO_INVENTORY_VARS_FILE:?INFINITO_INVENTORY_VARS_FILE is not set — source scripts/meta/env/load.sh first}"
 
 # Optional overrides
 INFINITO_WHITELIST="${INFINITO_WHITELIST:-}"
@@ -108,7 +108,7 @@ deploy_with_cache_retry "fresh-kept-all" -- \
 	"${PYTHON}" -m cli.administration.deploy.development exec \
 	--env "INFINITO_INVENTORY_DIR=${INFINITO_INVENTORY_DIR}" \
 	--env "INFINITO_INVENTORY_FILE=${INFINITO_INVENTORY_FILE}" \
-	--env "INVENTORY_VARS_FILE=${INVENTORY_VARS_FILE}" \
+	--env "INFINITO_INVENTORY_VARS_FILE=${INFINITO_INVENTORY_VARS_FILE}" \
 	--env "APPS_CSV=${apps_csv}" \
 	--env "APPS_COUNT=${apps_count}" \
 	--env "INFINITO_LIMIT_HOST=${INFINITO_LIMIT_HOST}" \
