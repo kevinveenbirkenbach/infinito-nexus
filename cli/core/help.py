@@ -252,6 +252,20 @@ def print_global_help(cli_dir: Path) -> None:
     print(color_text("    e.g. infinito build tree", Fore.CYAN))
     print(color_text("    corresponds to cli/build/tree/__main__.py.", Fore.CYAN))
     print()
+    print(color_text("More help:", Style.BRIGHT))
+    print(
+        color_text(
+            "  make help                    List all Make targets with descriptions",
+            Fore.YELLOW,
+        )
+    )
+    print(
+        color_text(
+            "  https://docs.infinito.nexus  Full project documentation",
+            Fore.YELLOW,
+        )
+    )
+    print()
     print(
         color_text(
             "Infinito.Nexus is a product of Kevin Veen-Birkenbach, https://cybermaster.space .\n",

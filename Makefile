@@ -17,7 +17,7 @@ endif
 .PHONY: test lint lint-action lint-ansible lint-python lint-shellcheck lint-markdown lint-makefile lint-javascript autoformat test-lint test-unit test-integration test-external test-signed
 .PHONY: clean clean-sudo down cache-clean
 .PHONY: system-purge system-disk-usage
-.PHONY: list tree mig dockerignore chmod-scripts
+.PHONY: list tree mig dockerignore chmod-scripts help
 .PHONY: print-python
 .PHONY: dns-setup dns-remove
 .PHONY: environment-bootstrap environment-teardown
@@ -217,6 +217,10 @@ environment-teardown: apparmor-restore dns-remove restore-ipv6
 # Run a shell (`make exec`) or command (`make exec INFINITO_CMD="..."`) in the running container.
 exec:
 	@bash scripts/tests/deploy/local/exec/container.sh
+
+# Print every Make target with the description from its preceding comment line.
+help:
+	@bash scripts/make/help.sh
 
 # Install all runtime dependencies, incremental via a stamp file (see scripts/install/all.sh).
 install:
