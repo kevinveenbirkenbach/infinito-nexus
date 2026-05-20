@@ -135,29 +135,27 @@ jobs:
     steps:
       - run: echo "code gate passed"
 
-  # Build Docker Images
-  build-ci-images:
-    needs:
-      - fork-prereqs-ready
-      - test-code-gate
-    uses: ./.github/workflows/images-build-ci.yml
-    with:
-      distros: "arch debian ubuntu fedora centos"
-      concurrency_channel: ci-orchestrator-build-consumer
-    secrets: inherit
-
   # Gate for the code Quality
   code-quality-gate:
     needs: [lint-gate, test-code-gate, security-codeql]
     runs-on: ubuntu-latest
     steps:
       - run: echo "Quality Checks passed"
+
+  # Build Docker Images
+  build-ci-images:
+    needs:
+      - code-quality-gate
+    uses: ./.github/workflows/images-build-ci.yml
+    with:
+      distros: "arch debian ubuntu fedora centos"
+      concurrency_channel: ci-orchestrator-build-consumer
+    secrets: inherit
   
   # Test DNS configuration
   test-dns:
     needs: 
       - build-ci-images
-      - code-quality-gate
     uses: ./.github/workflows/test-dns.yml
     with:
       distros: "arch debian ubuntu fedora centos"
