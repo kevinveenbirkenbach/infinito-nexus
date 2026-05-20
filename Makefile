@@ -13,7 +13,7 @@ else
 $(error Missing env file: $(ENV_SH))
 endif
 
-.PHONY: setup setup-clean install install-force install-ansible install-lint install-venv install-python install-python-dev install-system-python install-skills update-skills agent-install
+.PHONY: setup setup-clean install install-force install-ansible install-lint install-lint-force install-venv install-python install-python-dev install-system-python install-skills update-skills agent-install
 .PHONY: test lint lint-action lint-ansible lint-python lint-shellcheck lint-markdown lint-galaxy lint-makefile lint-javascript autoformat test-lint test-unit test-integration test-external test-deploy test-deploy-app
 .PHONY: clean clean-sudo down cache-clean
 .PHONY: system-purge system-disk-usage
@@ -212,9 +212,17 @@ install-ansible:
 	@ANSIBLE_COLLECTIONS_DIR="$(HOME)/.ansible/collections" \
 	bash scripts/install/ansible.sh
 
-# Install lint dependencies.
+# Install lint dependencies in the environment where lint will run.
+# scripts/install/wrapper.sh dispatches host vs docker based on
+# INFINITO_LINT_RUNNER, so installing always matches the runner.
+# Per-environment stamp (build/install-lint-<hash>.stamp) keeps host and
+# container tracked independently even though `build/` is bind-mounted.
 install-lint:
-	@bash scripts/install/lint.sh
+	@bash scripts/install/wrapper.sh
+
+# Force a full lint reinstall (drop the per-env stamp and rebuild it).
+install-lint-force:
+	@bash scripts/install/wrapper.sh --force
 
 # Install agent skills from skills-lock.json.
 install-skills:
@@ -278,44 +286,46 @@ bootstrap: install setup
 setup-clean: clean setup
 	@echo "Full build with cleanup before was executed."
 
-# Run all lint checks.
+# Run all lint checks. Each delegates to scripts/lint/wrapper.sh which
+# dispatches host vs docker based on INFINITO_LINT_RUNNER (default: host).
+# Lint targets depend on install-lint so missing tools auto-install on first run.
 lint: lint-action lint-ansible lint-python lint-shellcheck lint-markdown lint-galaxy lint-makefile lint-javascript
 
 # Run the GitHub Actions lint checks.
-lint-action:
-	@bash scripts/lint/action.sh
+lint-action: install-lint
+	@bash scripts/lint/wrapper.sh action
 
 # Run Ansible lint checks (syntax-check + ansible-lint).
-lint-ansible:
-	@bash scripts/lint/ansible.sh
+lint-ansible: install-lint
+	@bash scripts/lint/wrapper.sh ansible
 
 # Run Python lint checks.
-lint-python:
-	@bash scripts/lint/python.sh
+lint-python: install-lint
+	@bash scripts/lint/wrapper.sh python
 
 # Run shellcheck lint checks.
-lint-shellcheck:
-	@bash scripts/lint/shellcheck.sh
+lint-shellcheck: install-lint
+	@bash scripts/lint/wrapper.sh shellcheck
 
 # Run Markdown lint checks via markdownlint-cli2.
-lint-markdown:
-	@bash scripts/lint/markdown.sh
+lint-markdown: install-lint
+	@bash scripts/lint/wrapper.sh markdown
 
 # Run galaxy-importer schema validation across roles/.
-lint-galaxy:
-	@bash scripts/lint/galaxy.sh
+lint-galaxy: install-lint
+	@bash scripts/lint/wrapper.sh galaxy
 
 # Run checkmake against the Makefile.
-lint-makefile:
-	@bash scripts/lint/makefile.sh
+lint-makefile: install-lint
+	@bash scripts/lint/wrapper.sh makefile
 
 # Run ESLint over the project's JavaScript files (Playwright specs + persona helpers).
-lint-javascript:
-	@bash scripts/lint/javascript.sh
+lint-javascript: install-lint
+	@bash scripts/lint/wrapper.sh javascript
 
 # Auto-format all source files (skips tools that are not installed).
-autoformat:
-	@bash scripts/lint/autoformat.sh
+autoformat: install-lint
+	@bash scripts/lint/wrapper.sh autoformat
 
 # Run the full test suite.
 test: test-lint test-unit test-integration test-deploy
