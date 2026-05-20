@@ -46,20 +46,18 @@ install_venv() {
 	echo "🎯 Venv python target : ${venv_python}"
 	echo
 
-	# Ensure base directory exists and is writable for the current user.
-	# An active VIRTUAL_ENV only short-circuits the bootstrap when that
-	# venv IS the target -- otherwise we'd skip setup just because an
-	# unrelated venv (e.g. `pkgmgr`) happens to be sourced in the shell,
-	# and then crash later with "Permission denied" on the real target.
+	# Probe dirname(VENV), not INFINITO_VENV_BASE: VENV may live outside the legacy base, and a non-writable legacy path triggers a spurious sudo (fatal under no_new_privs sandboxes).
+	local venv_parent
+	venv_parent="$(dirname "${VENV}")"
 	if [[ -n "${VIRTUAL_ENV:-}" && "${VIRTUAL_ENV}" == "${VENV}" ]]; then
 		: # active venv matches the target; nothing to prepare
-	elif [[ -d "${INFINITO_VENV_BASE}" && -w "${INFINITO_VENV_BASE}" ]]; then
-		: # base already exists and is writable; nothing to prepare
+	elif [[ -d "${venv_parent}" && -w "${venv_parent}" ]]; then
+		: # venv parent exists and is writable; nothing to prepare
 	elif [[ "${EUID:-$(id -u)}" -eq 0 ]]; then
-		mkdir -p "${INFINITO_VENV_BASE}"
+		mkdir -p "${venv_parent}"
 	else
-		sudo mkdir -p "${INFINITO_VENV_BASE}"
-		sudo chown "${USER:-$(whoami)}" "${INFINITO_VENV_BASE}"
+		sudo mkdir -p "${venv_parent}"
+		sudo chown "${USER:-$(whoami)}" "${venv_parent}"
 	fi
 
 	# ------------------------------------------------------------
