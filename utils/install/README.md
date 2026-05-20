@@ -5,7 +5,7 @@ For the general rules that govern READMEs in code directories see [documentation
 
 ## Purpose
 
-The package installs the lint toolchain (actionlint, shfmt, ruff, ansible-lint, mbake, markdownlint-cli2, eslint, shellcheck, ansible-playbook, ansible-galaxy, galaxy-importer) using the right channel per tool (system package manager, pip, npm, or GitHub release).
+The package installs the lint toolchain (actionlint, shfmt, ruff, ansible-lint, mbake, markdownlint-cli2, eslint, shellcheck, ansible-playbook, ansible-galaxy) using the right channel per tool (system package manager, pip, npm, or GitHub release).
 Modules at this level are channel-agnostic primitives; per-tool policy lives one level down in [lint/](lint/).
 
 ## Structure

@@ -113,13 +113,11 @@ class TestGroupDispatch(unittest.TestCase):
                 mock.patch.object(cli.ansible_commands, "ensure") as a,
                 mock.patch.object(cli.ansible_collections, "ensure") as b,
                 mock.patch.object(cli.ansible_lint, "ensure") as c,
-                mock.patch.object(cli.galaxy_importer, "ensure") as d,
             ):
                 cli.main(["ansible"])
             a.assert_called_once()
             b.assert_called_once()
             c.assert_called_once()
-            d.assert_called_once()
 
     def test_unknown_group_returns_1(self) -> None:
         with TemporaryDirectory() as tmp:

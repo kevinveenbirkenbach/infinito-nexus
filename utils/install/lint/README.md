@@ -49,7 +49,7 @@ def ensure() -> None:
 | Group | Modules called (in order) |
 |---|---|
 | `action` | `actionlint` |
-| `ansible` | `ansible_commands`, `ansible_collections`, `ansible_lint`, `galaxy_importer` |
+| `ansible` | `ansible_commands`, `ansible_collections`, `ansible_lint` |
 | `python` | `shfmt`, `ruff` |
 | `shellcheck` | `shellcheck` |
 | `markdown` | `markdownlint_cli2` |

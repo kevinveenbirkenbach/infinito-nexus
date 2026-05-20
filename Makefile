@@ -14,7 +14,7 @@ $(error Missing env file: $(ENV_SH))
 endif
 
 .PHONY: setup setup-clean install install-force install-ansible install-lint install-lint-force install-venv install-python install-python-dev install-system-python install-skills update-skills agent-install
-.PHONY: test lint lint-action lint-ansible lint-python lint-shellcheck lint-markdown lint-galaxy lint-makefile lint-javascript autoformat test-lint test-unit test-integration test-external test-deploy test-deploy-app
+.PHONY: test lint lint-action lint-ansible lint-python lint-shellcheck lint-markdown lint-makefile lint-javascript autoformat test-lint test-unit test-integration test-external test-deploy test-deploy-app
 .PHONY: clean clean-sudo down cache-clean
 .PHONY: system-purge system-disk-usage
 .PHONY: list tree mig dockerignore chmod-scripts
@@ -289,7 +289,7 @@ setup-clean: clean setup
 # Run all lint checks. Each delegates to scripts/lint/wrapper.sh which
 # dispatches host vs docker based on INFINITO_LINT_RUNNER (default: host).
 # Lint targets depend on install-lint so missing tools auto-install on first run.
-lint: lint-action lint-ansible lint-python lint-shellcheck lint-markdown lint-galaxy lint-makefile lint-javascript
+lint: lint-action lint-ansible lint-python lint-shellcheck lint-markdown lint-makefile lint-javascript
 
 # Run the GitHub Actions lint checks.
 lint-action: install-lint
@@ -310,10 +310,6 @@ lint-shellcheck: install-lint
 # Run Markdown lint checks via markdownlint-cli2.
 lint-markdown: install-lint
 	@bash scripts/lint/wrapper.sh markdown
-
-# Run galaxy-importer schema validation across roles/.
-lint-galaxy: install-lint
-	@bash scripts/lint/wrapper.sh galaxy
 
 # Run checkmake against the Makefile.
 lint-makefile: install-lint

@@ -88,7 +88,6 @@ For rules on how to write and structure the `Makefile` itself, see [makefile.md]
 | Lint Python | `make lint-python` | Runs the Python lint checks. | Use this when you changed Python code. |
 | Lint shell | `make lint-shellcheck` | Runs shellcheck lint checks. | Use this when you changed shell scripts. |
 | Lint Markdown | `make lint-markdown` | Runs markdownlint-cli2 against the repository per `.markdownlint-cli2.jsonc`. | Use this when you changed Markdown files. |
-| Lint Galaxy | `make lint-galaxy` | Runs galaxy-importer schema validation against every role. Workers run concurrently by default; set `INFINITO_PARALLEL=0` for sequential execution. | Use this when you changed any `roles/<role>/meta/main.yml` file. |
 | Lint Makefile | `make lint-makefile` | Runs `mbake format --check` against the project Makefile. | Use this when you changed the Makefile. |
 
 ### Test 🧪

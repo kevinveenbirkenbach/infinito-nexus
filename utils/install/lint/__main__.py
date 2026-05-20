@@ -19,7 +19,6 @@ from utils.install.lint import (
     ansible_commands,
     ansible_lint,
     eslint,
-    galaxy_importer,
     markdownlint_cli2,
     mbake,
     ruff,
@@ -48,7 +47,6 @@ def _install_ansible_tools() -> None:
     ansible_commands.ensure()
     ansible_collections.ensure()
     ansible_lint.ensure()
-    galaxy_importer.ensure()
 
 
 def _install_python_tools() -> None:

@@ -47,13 +47,6 @@ repos:
         pass_filenames: false
         files: \.md$|^\.markdownlint-cli2\.jsonc$
         stages: [pre-commit]
-      - id: make-lint-galaxy
-        name: Run make lint-galaxy
-        entry: make lint-galaxy
-        language: system
-        pass_filenames: false
-        files: ^roles/[^/]+/meta/main\.yml$
-        stages: [pre-commit]
       - id: make-lint-makefile
         name: Run make lint-makefile
         entry: make lint-makefile
