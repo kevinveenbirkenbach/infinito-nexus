@@ -39,6 +39,9 @@ ensure_git_safe_directory() {
 }
 
 load_repo_env() {
+	if ! command -v python3 >/dev/null 2>&1; then
+		return 0
+	fi
 	local previous_pwd
 	previous_pwd="$(pwd)"
 	cd "${REPO_ROOT}"
