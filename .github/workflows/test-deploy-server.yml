@@ -25,6 +25,7 @@ env:
   INFINITO_IMAGE_TAG: ci-${{ github.sha }}
   INFINITO_GHCR_MIRROR_PREFIX: mirror
   PLAYWRIGHT_KEEP_ALL: ${{ vars.PLAYWRIGHT_KEEP_ALL }}
+  INFINITO_APP_DISCOVERY_RUNNER: host
 jobs:
   discover:
     name: 🌐 Discover apps
@@ -52,11 +53,14 @@ jobs:
         shell: bash
         run: ./scripts/install/apt.sh jq gettext-base
 
-      - name: Start stack for discovery
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install project (host venv)
         shell: bash
-        run: |
-          set -euo pipefail
-          make up
+        run: make install
 
       - name: Resolve effective whitelist (diff vs origin/main)
         id: resolve_wl

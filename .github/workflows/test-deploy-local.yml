@@ -32,6 +32,7 @@ env:
   NIX_CONFIG: ""
   INFINITO_IMAGE_TAG: "latest"
   PLAYWRIGHT_KEEP_ALL: ${{ vars.PLAYWRIGHT_KEEP_ALL }}
+  INFINITO_APP_DISCOVERY_RUNNER: host
 
 jobs:
   discover:
@@ -62,11 +63,14 @@ jobs:
         shell: bash
         run: ./scripts/install/apt.sh jq gettext-base
 
-      - name: Start stack for discovery
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install project (host venv)
         shell: bash
-        run: |
-          set -euo pipefail
-          make up
+        run: make install
 
       - name: Discover apps
         id: discover
