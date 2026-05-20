@@ -3,7 +3,7 @@ set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 # shellcheck source=scripts/meta/env/load.sh
-source "${SCRIPT_DIR}/../../../meta/env/runtime.sh"
+source "${SCRIPT_DIR}/../../../meta/env/load.sh"
 [[ "${INFINITO_IS_WSL2}" == "true" ]] || exit 0
 
 # /run/systemd/system only exists when systemd is actually running as PID 1

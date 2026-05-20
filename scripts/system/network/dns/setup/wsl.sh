@@ -3,7 +3,7 @@ set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 # shellcheck source=scripts/meta/env/load.sh
-source "${SCRIPT_DIR}/../../../../meta/env/runtime.sh"
+source "${SCRIPT_DIR}/../../../../meta/env/load.sh"
 [[ "${INFINITO_IS_WSL2}" == "true" ]] || exit 0
 
 UPSTREAM_CONF="/etc/dnsmasq.d/00-wsl2-upstream.conf"

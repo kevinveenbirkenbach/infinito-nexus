@@ -7,11 +7,8 @@ set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
-# Source project defaults so INFINITO_CONTAINER auto-derives from
-# INFINITO_DISTRO (single SPOT in scripts/meta/env/load.sh) — callers
-# only need to set INFINITO_DISTRO.
 # shellcheck source=scripts/meta/env/load.sh
-source "${SCRIPT_DIR}/../../../meta/env/defaults.sh"
+source "${SCRIPT_DIR}/../../../meta/env/load.sh"
 
 CONTAINER_NAME="${INFINITO_CONTAINER}"
 CA_SRC_PATH="/etc/infinito.nexus/ca/root-ca.crt"
