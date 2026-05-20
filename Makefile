@@ -14,7 +14,7 @@ $(error Missing env file: $(ENV_SH))
 endif
 
 .PHONY: setup setup-clean install install-force install-ansible install-lint install-lint-force install-venv install-python install-python-dev install-system-python install-skills update-skills agent-install
-.PHONY: test lint lint-action lint-ansible lint-python lint-shellcheck lint-markdown lint-makefile lint-javascript autoformat test-lint test-unit test-integration test-external test-deploy test-deploy-app
+.PHONY: test lint lint-action lint-ansible lint-python lint-shellcheck lint-markdown lint-makefile lint-javascript autoformat test-lint test-unit test-integration test-external
 .PHONY: clean clean-sudo down cache-clean
 .PHONY: system-purge system-disk-usage
 .PHONY: list tree mig dockerignore chmod-scripts
@@ -212,11 +212,7 @@ install-ansible:
 	@ANSIBLE_COLLECTIONS_DIR="$(HOME)/.ansible/collections" \
 	bash scripts/install/ansible.sh
 
-# Install lint dependencies in the environment where lint will run.
-# scripts/install/wrapper.sh dispatches host vs docker based on
-# INFINITO_LINT_RUNNER, so installing always matches the runner.
-# Per-environment stamp (build/install-lint-<hash>.stamp) keeps host and
-# container tracked independently even though `build/` is bind-mounted.
+# Install lint deps (host/docker via INFINITO_LINT_RUNNER, per-env stamp).
 install-lint:
 	@bash scripts/install/wrapper.sh
 
@@ -249,9 +245,7 @@ install-python-dev: install-python
 	@bash scripts/install/python.sh dev
 	@bash scripts/install/pre-commit.sh
 
-# Install all runtime dependencies, incremental via a stamp file.
-# The stamp logic + dependency list live in scripts/install/all.sh; this
-# target just delegates. Use `make install-force` to drop the stamp first.
+# Install all runtime dependencies, incremental via a stamp file (see scripts/install/all.sh).
 install:
 	@bash scripts/install/all.sh
 
@@ -263,11 +257,7 @@ install-force:
 agent-install:
 	@bash scripts/install/sandbox.sh
 
-# Regenerate the root `.env` file from `env/static.env` plus the current
-# runtime context (distro, GHA/ACT detection, df/meminfo-derived cache
-# sizes, sha256 secrets, ...). Single source of truth consumed by
-# docker compose, shell scripts, and tests. `.env` is gitignored;
-# `env/static.env` is committed.
+# Regenerate .env (SPOT) from env/static.env + runtime context (distro, cache sizes, secrets, ...).
 dotenv:
 	@python3 -m cli.meta.env
 
@@ -286,10 +276,15 @@ bootstrap: install setup
 setup-clean: clean setup
 	@echo "Full build with cleanup before was executed."
 
-# Run all lint checks. Each delegates to scripts/lint/wrapper.sh which
-# dispatches host vs docker based on INFINITO_LINT_RUNNER (default: host).
-# Lint targets depend on install-lint so missing tools auto-install on first run.
-lint: lint-action lint-ansible lint-python lint-shellcheck lint-markdown lint-makefile lint-javascript
+# Run all lint checks in parallel (per-check host/docker via INFINITO_LINT_RUNNER).
+lint: install-lint
+	@bash scripts/make/parallel.sh lint-action \
+		lint-ansible \
+		lint-javascript \
+		lint-makefile \
+		lint-markdown \
+		lint-python \
+		lint-shellcheck
 
 # Run the GitHub Actions lint checks.
 lint-action: install-lint
@@ -323,9 +318,9 @@ lint-javascript: install-lint
 autoformat: install-lint
 	@bash scripts/lint/wrapper.sh autoformat
 
-# Run the full test suite.
-test: test-lint test-unit test-integration test-deploy
-	@echo "✅ Full test (setup + tests) executed."
+# Run the full test pipeline (lint + tests) in parallel; fail-fast.
+test: install install-lint
+	@bash scripts/make/parallel.sh lint test-lint test-unit test-integration
 
 # Run the lint test suite.
 test-lint: install
