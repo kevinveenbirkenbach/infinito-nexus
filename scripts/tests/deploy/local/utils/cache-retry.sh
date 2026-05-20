@@ -18,7 +18,7 @@ _cache_retry_nexus_invalidate() {
 	local rest="http://127.0.0.1:8081/service/rest/v1/repositories/${repo}/invalidate-cache"
 	local code
 	code="$(docker exec infinito-package-cache curl -sS -o /dev/null -w '%{http_code}' \
-		-u "admin:${INFINITO_PACKAGE_CACHE_ADMIN_PASSWORD}" \
+		-u "admin:${INFINITO_CACHE_PACKAGE_ADMIN_PASSWORD}" \
 		-X POST "${rest}" 2>/dev/null || echo 000)"
 	if [[ "${code}" =~ ^2[0-9][0-9]$ ]]; then
 		echo "[cache-retry] invalidate-cache OK (${code}): ${repo}"
@@ -30,7 +30,7 @@ _cache_retry_nexus_invalidate() {
 _cache_retry_list_apt_proxy_repos() {
 	local json
 	json="$(docker exec infinito-package-cache curl -sS \
-		-u "admin:${INFINITO_PACKAGE_CACHE_ADMIN_PASSWORD}" \
+		-u "admin:${INFINITO_CACHE_PACKAGE_ADMIN_PASSWORD}" \
 		"http://127.0.0.1:8081/service/rest/v1/repositories" 2>/dev/null)" || return 1
 	[[ -z "${json}" ]] && return 1
 	printf '%s' "${json}" |

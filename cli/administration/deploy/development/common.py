@@ -30,32 +30,9 @@ def compose_file_args() -> list[str]:
     return out
 
 
-def cache_env_overrides() -> dict[str, str]:
-    """Env vars consumed strictly by compose/cache.override.yml."""
-    from .profile import Profile
-
-    if not Profile().registry_cache_active():
-        return {}
-
-    ca_dir = os.environ.get("INFINITO_PACKAGE_CACHE_FRONTEND_CA_DIR", "").strip()
-    if not ca_dir:
-        raise SystemExit(
-            "INFINITO_PACKAGE_CACHE_FRONTEND_CA_DIR is not set. Run "
-            "'make dotenv' (or source scripts/meta/env/load.sh) before "
-            "invoking cli.administration.deploy.development."
-        )
-    return {
-        "INFINITO_REGISTRY_CACHE_PROXY_CONF": "./compose/registry-cache/proxy.conf",
-        "INFINITO_PACKAGE_CACHE_PIP_CONF": "./compose/package-cache/pip.conf",
-        "INFINITO_PACKAGE_CACHE_NPMRC": "./compose/package-cache/npmrc",
-        "INFINITO_PACKAGE_CACHE_APT_LIST": "./compose/package-cache/apt.list",
-        "INFINITO_PACKAGE_CACHE_FRONTEND_CA_FILE": f"{ca_dir}/ca.crt",
-    }
-
-
 def resolve_distro() -> str:
     """Return INFINITO_DISTRO; raise SystemExit if missing or invalid."""
-    distro = os.environ.get("INFINITO_DISTRO", "").strip()
+    distro = os.environ["INFINITO_DISTRO"].strip()
     if not distro:
         raise SystemExit(
             "INFINITO_DISTRO is not set. Run 'make dotenv' (or source scripts/meta/env/load.sh) "
@@ -72,7 +49,7 @@ def resolve_distro() -> str:
 
 def resolve_container() -> str:
     """Return INFINITO_CONTAINER; raise SystemExit if unset."""
-    container = os.environ.get("INFINITO_CONTAINER", "").strip()
+    container = os.environ["INFINITO_CONTAINER"].strip()
     if not container:
         raise SystemExit(
             "INFINITO_CONTAINER is not set. Run 'make dotenv' (or source scripts/meta/env/load.sh) "

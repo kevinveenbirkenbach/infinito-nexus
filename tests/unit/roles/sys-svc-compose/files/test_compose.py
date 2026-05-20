@@ -31,7 +31,7 @@ class TestInfinitoComposeWrapper(unittest.TestCase):
     def setUp(self):
         # Disable the wrapper's cache-override branch; tests use mocked is_file.
         self._env_patch = patch.dict(
-            os.environ, {"INFINITO_PACKAGE_CACHE_FRONTEND_IP": ""}, clear=False
+            os.environ, {"INFINITO_CACHE_PACKAGE_FRONTEND_IP": ""}, clear=False
         )
         self._env_patch.start()
 

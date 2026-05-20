@@ -19,7 +19,7 @@ source scripts/meta/env/load.sh
 
 : "${INFINITO_TEST_PATTERN:?INFINITO_TEST_PATTERN must be set}"
 : "${INFINITO_TEST_RUNNER:?INFINITO_TEST_RUNNER must be set}"
-: "${INFINITO_TEST_TYPE:?INFINITO_TEST_TYPE must be set}"
+: "${INFINITO_TEST_TYPE:?INFINITO_TEST_TYPE must be set}" # nocheck: makefile-supplied
 
 RUN_SCRIPT_IN_CONTAINER="${INFINITO_SRC_DIR}/scripts/tests/code/run.sh"
 
@@ -28,7 +28,7 @@ docker)
 	# INFINITO_DISTRO is sourced (with a `debian` default) from
 	# scripts/meta/env/load.sh above, so no explicit check here.
 	echo "============================================================"
-	echo ">>> Running ${INFINITO_TEST_TYPE^^} tests in ${INFINITO_DISTRO} container (compose stack)"
+	echo ">>> Running ${INFINITO_TEST_TYPE^^} tests in ${INFINITO_DISTRO} container (compose stack)" # nocheck: makefile-supplied
 	echo "============================================================"
 
 	# Auto-bring-up: if the `infinito` container is not running, kick off
@@ -48,23 +48,30 @@ docker)
 	# every INFINITO_* key from the bind-mounted .env into the test
 	# runner's environment (notably INFINITO_WORKER_FETCH, otherwise the
 	# external URL probe collapses to 1 worker).
+	# Per-invocation env passed through docker exec. Built as a bash
+	# array so the inline `# nocheck:` markers between elements stay
+	# syntactically valid (a backslash-continued line cannot host an
+	# inline comment).
+	exec_env_args=(
+		-e ACT="${ACT:-}"
+		-e BASH_ENV="${INFINITO_SRC_DIR}/scripts/meta/env/load.sh"
+		-e GITHUB_ACTIONS="${GITHUB_ACTIONS:-}"
+		-e GITHUB_REPOSITORY="${GITHUB_REPOSITORY:-}"
+		-e GITHUB_REPOSITORY_OWNER="${GITHUB_REPOSITORY_OWNER:-}"
+		-e GITHUB_SHA="${GITHUB_SHA:-}"
+		-e INFINITO_TEST_PATTERN="${INFINITO_TEST_PATTERN}"
+		-e INFINITO_TEST_TYPE="${INFINITO_TEST_TYPE}" # nocheck: makefile-supplied
+	)
 	INFINITO_DISTRO="${INFINITO_DISTRO}" \
 		docker compose --env-file env/ci.env --env-file .env --profile ci exec -T \
-		-e ACT="${ACT:-}" \
-		-e BASH_ENV="${INFINITO_SRC_DIR}/scripts/meta/env/load.sh" \
-		-e GITHUB_ACTIONS="${GITHUB_ACTIONS:-}" \
-		-e GITHUB_REPOSITORY="${GITHUB_REPOSITORY:-}" \
-		-e GITHUB_REPOSITORY_OWNER="${GITHUB_REPOSITORY_OWNER:-}" \
-		-e GITHUB_SHA="${GITHUB_SHA:-}" \
-		-e INFINITO_TEST_PATTERN="${INFINITO_TEST_PATTERN}" \
-		-e INFINITO_TEST_TYPE="${INFINITO_TEST_TYPE}" \
+		"${exec_env_args[@]}" \
 		--workdir "${INFINITO_SRC_DIR}" \
 		infinito \
 		bash --login "${RUN_SCRIPT_IN_CONTAINER}"
 	;;
 host)
 	echo "============================================================"
-	echo ">>> Running ${INFINITO_TEST_TYPE^^} tests on host"
+	echo ">>> Running ${INFINITO_TEST_TYPE^^} tests on host" # nocheck: makefile-supplied
 	echo "============================================================"
 	exec bash --login "${RUN_SCRIPT}"
 	;;

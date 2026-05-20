@@ -7,7 +7,7 @@ from pathlib import Path
 from typing import TYPE_CHECKING
 
 from . import PROJECT_ROOT
-from .common import cache_env_overrides, compose_file_args, resolve_distro
+from .common import compose_file_args, resolve_distro
 from .profile import Profile
 
 if TYPE_CHECKING:
@@ -20,7 +20,6 @@ CI_DOCKER_ROOT_STR = str(CI_DOCKER_ROOT)
 def _base_env(*, distro: str) -> dict[str, str]:
     env = dict(os.environ)
     env["INFINITO_DISTRO"] = distro
-    env.update(cache_env_overrides())
     return env
 
 
@@ -45,7 +44,7 @@ def _cleanup_docker_root() -> None:
         print(f">>> Not on GitHub - No bind volumes will be deleted: {docker_root}")
         return
 
-    docker_root_env = os.environ.get("INFINITO_DOCKER_VOLUME", "").strip().rstrip("/")
+    docker_root_env = os.environ["INFINITO_DOCKER_VOLUME"].strip().rstrip("/")
 
     if docker_root_env and docker_root_env != CI_DOCKER_ROOT_STR:
         raise RuntimeError(

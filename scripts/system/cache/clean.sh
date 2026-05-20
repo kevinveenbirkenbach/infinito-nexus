@@ -37,9 +37,9 @@ if docker ps --format '{{.Names}}' | grep -qE '^infinito-(registry|package)-cach
 fi
 
 PATHS=(
-	"${INFINITO_REGISTRY_CACHE_HOST_PATH}"
-	"${INFINITO_REGISTRY_CACHE_CA_HOST_PATH}"
-	"${INFINITO_PACKAGE_CACHE_HOST_PATH}"
+	"${INFINITO_CACHE_REGISTRY_HOST_PATH}"
+	"${INFINITO_CACHE_REGISTRY_CA_HOST_PATH}"
+	"${INFINITO_CACHE_PACKAGE_HOST_PATH}"
 )
 
 # Remove each cache path individually (keeps the parent /var/cache/

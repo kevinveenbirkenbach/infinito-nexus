@@ -48,7 +48,7 @@ class TestDevelopmentExec(unittest.TestCase):
         compose = unittest.mock.Mock()
         compose.exec.return_value.returncode = 0
 
-        env = {k: v for k, v in os.environ.items() if k != "INFINITO_SERVICES_DISABLED"}
+        env = {**os.environ, "INFINITO_SERVICES_DISABLED": ""}
         with (
             unittest.mock.patch(
                 "cli.administration.deploy.development.exec.make_compose",
@@ -71,7 +71,7 @@ class TestDevelopmentExec(unittest.TestCase):
         compose = unittest.mock.Mock()
         compose.exec.return_value.returncode = 0
 
-        env = {k: v for k, v in os.environ.items() if k != "INFINITO_SERVICES_DISABLED"}
+        env = {**os.environ, "INFINITO_SERVICES_DISABLED": ""}
         with (
             unittest.mock.patch(
                 "cli.administration.deploy.development.exec.make_compose",
@@ -103,7 +103,7 @@ class TestDevelopmentExec(unittest.TestCase):
         compose = unittest.mock.Mock()
         compose.exec.return_value.returncode = 0
 
-        env = {k: v for k, v in os.environ.items() if k != "INFINITO_SERVICES_DISABLED"}
+        env = {**os.environ, "INFINITO_SERVICES_DISABLED": ""}
         with (
             unittest.mock.patch(
                 "cli.administration.deploy.development.exec.make_compose",

@@ -67,4 +67,4 @@ def latest_semver(tags: list[str], depth: int, flavor: str = "") -> str | None:
 
 
 def resolve_max_fetch_workers() -> int:
-    return int(os.environ.get("INFINITO_WORKER_FETCH", "1"))
+    return int(os.environ["INFINITO_WORKER_FETCH"])

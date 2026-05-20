@@ -377,9 +377,7 @@ def main() -> int:
         help="Container mode: run, start, stop, exec, remove.",
     )
 
-    parser.add_argument(
-        "--image", default=os.environ.get("INFINITO_IMAGE", "infinito:latest")
-    )
+    parser.add_argument("--image", default=os.environ.get("INFINITO_IMAGE"))
     parser.add_argument("--build", action="store_true")
     parser.add_argument("--rebuild", action="store_true")
     parser.add_argument("--no-cache", action="store_true")

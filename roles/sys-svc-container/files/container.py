@@ -447,7 +447,7 @@ def main() -> int:
         return 2
 
     if cmd == "run":
-        no_ca = os.environ.get("INFINITO_CONTAINER_NO_CA", "").lower() in {
+        no_ca = os.environ["INFINITO_CONTAINER_NO_CA"].lower() in {
             "1",
             "true",
             "yes",

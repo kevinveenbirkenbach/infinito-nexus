@@ -42,7 +42,7 @@ class TestComposeCaInject(unittest.TestCase):
                     "!",
                     "grep",
                     "-qF",
-                    "INFINITO_TAIGA_AUTH_CONFIG",
+                    "INFINITO_TAIGA_AUTH_CONFIG",  # nocheck: test-fixture
                     "/taiga-back/settings/config.py",
                     ";",
                     "then",
@@ -501,7 +501,7 @@ class TestComposeCaInject(unittest.TestCase):
             "!",
             "grep",
             "-qF",
-            "INFINITO_TAIGA_AUTH_CONFIG",
+            "INFINITO_TAIGA_AUTH_CONFIG",  # nocheck: test-fixture
             "/taiga-back/settings/config.py",
             ";",
             "then",

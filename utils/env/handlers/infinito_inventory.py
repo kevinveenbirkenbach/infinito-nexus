@@ -27,7 +27,9 @@ HOST_VARS_FILE_COMMENT = (
 
 
 def apply(eb: EnvBuilder, ctx: BuildContext) -> None:
-    inventory_dir = os.environ.get("INFINITO_INVENTORY_DIR", "").strip()
+    inventory_dir = os.environ.get(
+        "INFINITO_INVENTORY_DIR", ""
+    ).strip()  # nocheck: handler-bootstrap-read
     if not inventory_dir:
         inventory_dir = run_helper(
             ["bash", "scripts/inventory/resolve.sh"],

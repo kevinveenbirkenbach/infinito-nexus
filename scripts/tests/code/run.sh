@@ -6,7 +6,7 @@
 set -euo pipefail
 
 : "${INFINITO_TEST_PATTERN:?INFINITO_TEST_PATTERN must be set}"
-: "${INFINITO_TEST_TYPE:?INFINITO_TEST_TYPE must be set}"
+: "${INFINITO_TEST_TYPE:?INFINITO_TEST_TYPE must be set}" # nocheck: makefile-supplied
 
 NIX_CONFIG_EFFECTIVE="$(
 	printf "%s\n%s\n" \
@@ -25,4 +25,4 @@ if [ -n "${PYTHON:-}" ]; then
 fi
 
 make setup
-"${PYTHON:-python3}" -m unittest discover -s "tests/${INFINITO_TEST_TYPE}" -t . -p "${INFINITO_TEST_PATTERN}"
+"${PYTHON:-python3}" -m unittest discover -s "tests/${INFINITO_TEST_TYPE}" -t . -p "${INFINITO_TEST_PATTERN}" # nocheck: makefile-supplied

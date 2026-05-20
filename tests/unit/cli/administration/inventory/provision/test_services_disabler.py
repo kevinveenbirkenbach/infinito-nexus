@@ -400,7 +400,7 @@ class TestApplyServicesDisabledFromEnv(unittest.TestCase):
 
     def test_no_op_when_env_not_set(self):
         self._write({"applications": {}})
-        env = {k: v for k, v in os.environ.items() if k != "INFINITO_SERVICES_DISABLED"}
+        env = {**os.environ, "INFINITO_SERVICES_DISABLED": ""}
         with unittest.mock.patch.dict(os.environ, env, clear=True):
             apply_services_disabled_from_env(self.host_vars, roles_dir=self.roles_dir)
         self.assertEqual(self._read(), {"applications": {}})

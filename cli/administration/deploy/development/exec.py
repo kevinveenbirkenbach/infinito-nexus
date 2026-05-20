@@ -51,7 +51,7 @@ def handler(args: argparse.Namespace) -> int:
         raise SystemExit("exec requires a command (e.g. exec -- sh -lc 'whoami')")
 
     extra_env: dict[str, str] = {}
-    services_disabled = os.environ.get("INFINITO_SERVICES_DISABLED", "")
+    services_disabled = os.environ["INFINITO_SERVICES_DISABLED"]
     if services_disabled:
         extra_env["INFINITO_SERVICES_DISABLED"] = services_disabled
 

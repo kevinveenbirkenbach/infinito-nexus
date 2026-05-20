@@ -47,7 +47,7 @@ The `cache` decision is exposed via `Profile.registry_cache_active()` in [profil
 - The runner's `infinito` service receives:
   - bind-mounts for the registry-cache CA, the package-cache client snippets (`pip.conf`, `npmrc`, `apt.list`), and the frontend CA file
   - `extra_hosts` entries DNS-hijacking the HTTPS upstream hostnames to the frontend's static IP
-  - `INFINITO_PACKAGE_CACHE_FRONTEND_IP` env var for the inner compose wrapper
+  - `INFINITO_CACHE_PACKAGE_FRONTEND_IP` env var for the inner compose wrapper
 - Cert generation, Nexus repo bootstrap, and runner trust-store install run from [compose.py](../../../cli/administration/deploy/development/compose.py).
 
 When inactive, the override is omitted: cache services do not exist, the runner has no cache mounts or DNS-hijack, package managers go direct to upstream.
@@ -80,17 +80,17 @@ The runner's `compose` wrapper at [roles/sys-svc-compose/files/compose.py](../..
 | `compose.yml` | always |
 | `compose.override.yml` | when present (role provides it) |
 | `compose.ca.override.yml` | when present (TLS self-signed CA-inject runs) |
-| `compose.cache.override.yml` | generated on the fly when `INFINITO_PACKAGE_CACHE_FRONTEND_IP` is set; emits `build.extra_hosts` for every service that has a `build:` key |
+| `compose.cache.override.yml` | generated on the fly when `INFINITO_CACHE_PACKAGE_FRONTEND_IP` is set; emits `build.extra_hosts` for every service that has a `build:` key |
 
 [pull.py](../../../roles/sys-svc-compose/files/pull.py) delegates to the same wrapper so `pull` and `build --pull` operations see the identical `-f` set.
 
 ## Environment Variables 🌳
 
-The host-side env-vars (`INFINITO_REGISTRY_CACHE_*`, `INFINITO_PACKAGE_CACHE_*`) are declared in [env/default.env](../../../env/default.env) and the dynamic ones (cache sizes from `df`/`/proc/meminfo`, sha256 admin password) are computed by [utils/env/builder.py](../../../utils/env/builder.py). `make dotenv` writes them into `.env`, which Compose auto-loads and which `BASH_ENV` makes available to every Makefile recipe through [scripts/meta/env/load.sh](../../../scripts/meta/env/load.sh). See [variables.md](variables.md).
+The host-side env-vars (`INFINITO_CACHE_REGISTRY_*`, `INFINITO_CACHE_PACKAGE_*`) are declared in [env/default.env](../../../env/default.env) and the dynamic ones (cache sizes from `df`/`/proc/meminfo`, sha256 admin password) are computed by [utils/env/builder.py](../../../utils/env/builder.py). `make dotenv` writes them into `.env`, which Compose auto-loads and which `BASH_ENV` makes available to every Makefile recipe through [scripts/meta/env/load.sh](../../../scripts/meta/env/load.sh). See [variables.md](variables.md).
 
 Per-variable defaults and purposes are in [compose.yml.md](../artefact/files/compose.yml.md) under the cache section.
 
-`INFINITO_PACKAGE_CACHE_MAX_AGE_MIN` (default `8640` = 6 days) controls how long every Nexus proxy repo holds an upstream response before revalidating. The bootstrap helper applies it as `contentMaxAge`, `metadataMaxAge`, and `negativeCache.timeToLive`. The default is intentionally one day below the 7-day `Valid-Until` window Debian and Ubuntu generate in their apt `Release` files, so Nexus always refreshes the manifest before `apt-get update` would see it expired. Raise it for slow-moving upstreams when staleness is preferable to upstream load; lower it further for fast-moving feeds (`apt-debian-security`, branch-pinned tarballs) when staleness becomes visible.
+`INFINITO_CACHE_PACKAGE_MAX_AGE_MIN` (default `8640` = 6 days) controls how long every Nexus proxy repo holds an upstream response before revalidating. The bootstrap helper applies it as `contentMaxAge`, `metadataMaxAge`, and `negativeCache.timeToLive`. The default is intentionally one day below the 7-day `Valid-Until` window Debian and Ubuntu generate in their apt `Release` files, so Nexus always refreshes the manifest before `apt-get update` would see it expired. Raise it for slow-moving upstreams when staleness is preferable to upstream load; lower it further for fast-moving feeds (`apt-debian-security`, branch-pinned tarballs) when staleness becomes visible.
 
 ## Operations 🛠️
 

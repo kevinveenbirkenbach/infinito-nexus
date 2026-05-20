@@ -20,7 +20,9 @@ COMMENT = (
 def apply(eb: EnvBuilder, ctx: BuildContext) -> None:
     if not ctx.on_gha:
         return
-    repo_name = os.environ.get("INFINITO_IMAGE_REPOSITORY", "").strip()
+    repo_name = os.environ.get(
+        "INFINITO_IMAGE_REPOSITORY", ""
+    ).strip()  # nocheck: handler-bootstrap-read
     if not repo_name:
         repo_name = run_helper(
             ["bash", "scripts/meta/resolve/repository/name.sh"],

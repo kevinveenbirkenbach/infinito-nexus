@@ -93,10 +93,10 @@ Therefore:
 ### Env defaults
 
 - [ ] `scripts/meta/env/cache/package.sh` exists and exports
-      `INFINITO_PACKAGE_CACHE_HOST_PATH`, `INFINITO_PACKAGE_CACHE_HEAP`,
-      `INFINITO_PACKAGE_CACHE_DIRECT_MEM`,
-      `INFINITO_PACKAGE_CACHE_BLOBSTORE_MAX`, and
-      `INFINITO_PACKAGE_CACHE_ADMIN_PASSWORD`.
+      `INFINITO_CACHE_PACKAGE_HOST_PATH`, `INFINITO_CACHE_PACKAGE_HEAP`,
+      `INFINITO_CACHE_PACKAGE_DIRECT_MEM`,
+      `INFINITO_CACHE_PACKAGE_BLOBSTORE_MAX`, and
+      `INFINITO_CACHE_PACKAGE_ADMIN_PASSWORD`.
 - [ ] `scripts/meta/env/cache/package.sh` is sourced by
       `scripts/meta/env/all.sh`.
 - [ ] `compose/cache.override.yml` consumes every package-cache env
@@ -109,11 +109,11 @@ Therefore:
       (repeated runs MUST NOT error on already-existing repos), and is
       invoked once on first start under the `cache` profile.
 - [ ] On first start, the auto-generated Nexus admin password is
-      rotated to the value of `INFINITO_PACKAGE_CACHE_ADMIN_PASSWORD`.
+      rotated to the value of `INFINITO_CACHE_PACKAGE_ADMIN_PASSWORD`.
 - [ ] On first start, the proxy repositories listed in
       [cache.md](../contributing/environment/cache.md) are created.
 - [ ] The blobstore `default` is created with quota
-      `INFINITO_PACKAGE_CACHE_BLOBSTORE_MAX`.
+      `INFINITO_CACHE_PACKAGE_BLOBSTORE_MAX`.
 
 ### Client wiring
 

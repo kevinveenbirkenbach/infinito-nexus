@@ -1,5 +1,5 @@
-"""INFINITO_REGISTRY_CACHE_MAX_SIZE: registry-cache soft cap (half of
-free disk at INFINITO_REGISTRY_CACHE_HOST_PATH, floor 1g)."""
+"""INFINITO_CACHE_REGISTRY_MAX_SIZE: registry-cache soft cap (half of
+free disk at INFINITO_CACHE_REGISTRY_HOST_PATH, floor 1g)."""
 
 from __future__ import annotations
 
@@ -11,15 +11,15 @@ from utils.env.runtime import df_avail_gb
 if TYPE_CHECKING:
     from utils.env.builder import BuildContext, EnvBuilder
 
-KEY = "INFINITO_REGISTRY_CACHE_MAX_SIZE"
+KEY = "INFINITO_CACHE_REGISTRY_MAX_SIZE"
 COMMENT = (
     "Registry-cache soft cap (half of free disk at "
-    "INFINITO_REGISTRY_CACHE_HOST_PATH, floor 1g)."
+    "INFINITO_CACHE_REGISTRY_HOST_PATH, floor 1g)."
 )
 
 
 def apply(eb: EnvBuilder, ctx: BuildContext) -> None:
-    host_path = eb.get("INFINITO_REGISTRY_CACHE_HOST_PATH")
+    host_path = eb.get("INFINITO_CACHE_REGISTRY_HOST_PATH")
     if not host_path:
         return
     existing = os.environ.get(KEY, "").strip()

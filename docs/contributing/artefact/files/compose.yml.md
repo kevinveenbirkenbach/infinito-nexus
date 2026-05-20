@@ -66,24 +66,24 @@ The env-var contracts each service expects strictly via `${VAR:?…}` (consumed 
 
 | Variable | Purpose |
 |---|---|
-| `INFINITO_REGISTRY_CACHE_HOST_PATH` | Host path bind-mounted into `registry-cache` for blob/manifest persistence. |
-| `INFINITO_REGISTRY_CACHE_CA_HOST_PATH` | Host path holding the proxy MITM CA bundle. Mounted writable into `registry-cache`, read-only into `infinito`. |
-| `INFINITO_REGISTRY_CACHE_MAX_SIZE` | Maximum on-disk size. Computed by [infinito_registry_cache_max_size.py](../../../../utils/env/handlers/infinito_registry_cache_max_size.py) as half the free disk at the cache path, floor `1g`, fallback `2g`. |
-| `INFINITO_REGISTRY_CACHE_PROXY_CONF` | Bind source for the systemd drop-in inside `infinito`. Set by the dev tooling to the real `proxy.conf` under the `cache` profile. Driver-injected; not produced by `make dotenv`. |
-| `INFINITO_PACKAGE_CACHE_HOST_PATH` | Host path bind-mounted at `/nexus-data`. |
-| `INFINITO_PACKAGE_CACHE_HEAP` | JVM heap (`-Xms`/`-Xmx`). Computed as half free RAM, capped `2g`, floor `1g`. |
-| `INFINITO_PACKAGE_CACHE_DIRECT_MEM` | `MaxDirectMemorySize`. Mirrors `INFINITO_PACKAGE_CACHE_HEAP`. |
-| `INFINITO_PACKAGE_CACHE_BLOBSTORE_MAX` | Soft quota for the default blobstore. Computed as half free disk at the cache path, floor `2g`. |
-| `INFINITO_PACKAGE_CACHE_MAX_AGE_MIN` | Cache freshness window in minutes, applied to every Nexus proxy repo (`contentMaxAge`/`metadataMaxAge`/negative-cache TTL). Stays strictly below the 7-day `Valid-Until` window Debian / Ubuntu generate in their apt `Release` files, so `apt-get update` never aborts with "Release file ... is expired". |
-| `INFINITO_PACKAGE_CACHE_ADMIN_PASSWORD` | Target value for the rotated Nexus admin password. Default is a stable per-host hash. |
-| `INFINITO_PACKAGE_CACHE_PORT` | Host-side port mapped to Nexus REST/UI. Bound to `${INFINITO_BIND_IP}` only. |
-| `INFINITO_PACKAGE_CACHE_PIP_CONF` | Bind source for `/etc/pip.conf`. Driver-injected by `make up` under the `cache` profile. |
-| `INFINITO_PACKAGE_CACHE_NPMRC` | Bind source for `/root/.npmrc`. Driver-injected. |
-| `INFINITO_PACKAGE_CACHE_APT_LIST` | Bind source for `/etc/apt/sources.list.d/package-cache.list`. Driver-injected. |
-| `INFINITO_PACKAGE_CACHE_FRONTEND_CA_DIR` | Host directory for the frontend CA. |
-| `INFINITO_PACKAGE_CACHE_FRONTEND_CERTS_DIR` | Host directory for per-hostname leaf certs. |
-| `INFINITO_PACKAGE_CACHE_FRONTEND_IP` | Static IPv4 address for the frontend on the compose default network. |
-| `INFINITO_PACKAGE_CACHE_FRONTEND_CA_FILE` | Bind source for `/opt/package-frontend-ca.crt` inside the runner. Driver-injected. |
+| `INFINITO_CACHE_REGISTRY_HOST_PATH` | Host path bind-mounted into `registry-cache` for blob/manifest persistence. |
+| `INFINITO_CACHE_REGISTRY_CA_HOST_PATH` | Host path holding the proxy MITM CA bundle. Mounted writable into `registry-cache`, read-only into `infinito`. |
+| `INFINITO_CACHE_REGISTRY_MAX_SIZE` | Maximum on-disk size. Computed by [infinito_registry_cache_max_size.py](../../../../utils/env/handlers/infinito_registry_cache_max_size.py) as half the free disk at the cache path, floor `1g`, fallback `2g`. |
+| `INFINITO_CACHE_REGISTRY_PROXY_CONF` | Bind source for the systemd drop-in inside `infinito`. Set by the dev tooling to the real `proxy.conf` under the `cache` profile. Driver-injected; not produced by `make dotenv`. |
+| `INFINITO_CACHE_PACKAGE_HOST_PATH` | Host path bind-mounted at `/nexus-data`. |
+| `INFINITO_CACHE_PACKAGE_HEAP` | JVM heap (`-Xms`/`-Xmx`). Computed as half free RAM, capped `2g`, floor `1g`. |
+| `INFINITO_CACHE_PACKAGE_DIRECT_MEM` | `MaxDirectMemorySize`. Mirrors `INFINITO_CACHE_PACKAGE_HEAP`. |
+| `INFINITO_CACHE_PACKAGE_BLOBSTORE_MAX` | Soft quota for the default blobstore. Computed as half free disk at the cache path, floor `2g`. |
+| `INFINITO_CACHE_PACKAGE_MAX_AGE_MIN` | Cache freshness window in minutes, applied to every Nexus proxy repo (`contentMaxAge`/`metadataMaxAge`/negative-cache TTL). Stays strictly below the 7-day `Valid-Until` window Debian / Ubuntu generate in their apt `Release` files, so `apt-get update` never aborts with "Release file ... is expired". |
+| `INFINITO_CACHE_PACKAGE_ADMIN_PASSWORD` | Target value for the rotated Nexus admin password. Default is a stable per-host hash. |
+| `INFINITO_CACHE_PACKAGE_PORT` | Host-side port mapped to Nexus REST/UI. Bound to `${INFINITO_BIND_IP}` only. |
+| `INFINITO_CACHE_PACKAGE_PIP_CONF` | Bind source for `/etc/pip.conf`. Driver-injected by `make up` under the `cache` profile. |
+| `INFINITO_CACHE_PACKAGE_NPMRC` | Bind source for `/root/.npmrc`. Driver-injected. |
+| `INFINITO_CACHE_PACKAGE_APT_LIST` | Bind source for `/etc/apt/sources.list.d/package-cache.list`. Driver-injected. |
+| `INFINITO_CACHE_PACKAGE_FRONTEND_CA_DIR` | Host directory for the frontend CA. |
+| `INFINITO_CACHE_PACKAGE_FRONTEND_CERTS_DIR` | Host directory for per-hostname leaf certs. |
+| `INFINITO_CACHE_PACKAGE_FRONTEND_IP` | Static IPv4 address for the frontend on the compose default network. |
+| `INFINITO_CACHE_PACKAGE_FRONTEND_CA_FILE` | Bind source for `/opt/package-frontend-ca.crt` inside the runner. Driver-injected. |
 
 ### Networking
 

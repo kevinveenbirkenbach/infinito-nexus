@@ -82,7 +82,7 @@ _WARNING_STATUS_CODES = {
 }
 _REQUEST_TIMEOUT_SECONDS = 10
 _USER_AGENT = "infinito-nexus-url-reachability-check"
-_MAX_WORKERS = int(os.environ.get("INFINITO_WORKER_FETCH", "1"))
+_MAX_WORKERS = int(os.environ["INFINITO_WORKER_FETCH"])
 # Hard ceiling for the whole probe loop. After this elapses, any probe
 # still in flight is marked as a Timeout warning so the test never hangs
 # indefinitely on a slow / trickling server. 5h30m matches the longest

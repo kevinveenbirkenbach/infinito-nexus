@@ -30,10 +30,10 @@
 #   short-circuit here when we see it, so subprocesses skip the load
 #   entirely during generation.
 
-if [[ "${INFINITO_ENV_LOADED:-}" == "1" ]]; then
+if [[ "${INFINITO_ENV_LOADED:-}" == "1" ]]; then # nocheck: env-loader-internal-guard
 	return 0
 fi
-if [[ "${INFINITO_ENV_GENERATING:-}" == "1" ]]; then
+if [[ "${INFINITO_ENV_GENERATING:-}" == "1" ]]; then # nocheck: env-loader-internal-guard
 	return 0
 fi
 

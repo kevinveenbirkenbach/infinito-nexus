@@ -65,7 +65,8 @@ services:
     volumes:
       - /sys/fs/cgroup:/sys/fs/cgroup:rw
       - .:/opt/src/infinito
-      - ${INFINITO_DOCKER_VOLUME:?Run 'make dotenv' to generate the .env single source of truth}:${INFINITO_DOCKER_MOUNT:?Run 'make dotenv' to generate the .env single source of truth}
+      - ${INFINITO_DOCKER_VOLUME:?Run 'make dotenv' to generate the .env single source of truth}:${INFINITO_DOCKER_MOUNT:?Run 'make dotenv' to generate the .env
+        single source of truth}
       - infinito:/var/lib/infinito/
       - letsencrypt:/etc/letsencrypt/
 

@@ -19,7 +19,7 @@ def detect_outer_network_mtu(
     daemon_config_path: Path = DOCKER_DAEMON_CONFIG_PATH,
 ) -> str | None:
     current_env = os.environ if env is None else env
-    explicit_mtu = current_env.get("INFINITO_OUTER_NETWORK_MTU", "").strip()
+    explicit_mtu = current_env["INFINITO_OUTER_NETWORK_MTU"].strip()
     if explicit_mtu:
         return explicit_mtu
 

@@ -1,4 +1,4 @@
-"""INFINITO_PACKAGE_CACHE_HEAP: Nexus JVM heap size (half of MemAvailable,
+"""INFINITO_CACHE_PACKAGE_HEAP: Nexus JVM heap size (half of MemAvailable,
 cap 2g, floor 1g)."""
 
 from __future__ import annotations
@@ -11,7 +11,7 @@ from utils.env.runtime import mem_available_mb
 if TYPE_CHECKING:
     from utils.env.builder import BuildContext, EnvBuilder
 
-KEY = "INFINITO_PACKAGE_CACHE_HEAP"
+KEY = "INFINITO_CACHE_PACKAGE_HEAP"
 COMMENT = "Nexus JVM heap size (half of MemAvailable, cap 2g, floor 1g)."
 
 

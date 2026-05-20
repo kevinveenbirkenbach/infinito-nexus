@@ -5,7 +5,7 @@ import subprocess
 import time
 from typing import TYPE_CHECKING
 
-from .common import cache_env_overrides, compose_file_args
+from .common import compose_file_args
 from .coredns import CoreDNSCorefileRenderer
 from .network import detect_outer_network_mtu
 from .proc import run_streaming
@@ -42,7 +42,6 @@ class Compose:
                 check=True,
             )
             env["INFINITO_IMAGE"] = result.stdout.strip()
-        env.update(cache_env_overrides())
         return env
 
     def run(
@@ -192,7 +191,7 @@ class Compose:
         print(">>> env:", {k: env.get(k) for k in keys})
         print(">>> NIX_CONFIG:", "<set>" if env.get("NIX_CONFIG") else "<empty>")
 
-        no_build = env.get("INFINITO_NO_BUILD", "0") == "1"
+        no_build = env["INFINITO_NO_BUILD"] == "1"
         # Compose env-file precedence: later files override earlier ones.
         args = ["--env-file", "env/ci.env"]
 

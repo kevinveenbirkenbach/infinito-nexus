@@ -34,7 +34,7 @@ Already-set env vars take precedence over `default.env` defaults.
 
 A handful of variables are documented next to their consumer because they cannot have a static default:
 
-- **Driver-injected** by `make up` and the dev CLI (cache override paths like `INFINITO_REGISTRY_CACHE_PROXY_CONF`, the package-cache config paths, the frontend CA file).
+- **Driver-injected** by `make up` and the dev CLI (cache override paths like `INFINITO_CACHE_REGISTRY_PROXY_CONF`, the package-cache config paths, the frontend CA file).
   See [common.py](../../../cli/administration/deploy/development/common.py) and [compose.yml.md](../artefact/files/compose.yml.md).
 - **Computed at container start** for `INFINITO_PATH`, set by [entry.sh](../../../scripts/docker/entry.sh).
 - **Persisted on the deploy target** for `INFINITO_VERSION`, written by the [sys-version](../../../roles/sys-version/) role.

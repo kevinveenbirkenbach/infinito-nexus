@@ -235,7 +235,7 @@ def apply_services_disabled_from_env(
     inventory_file: Path | None = None,
 ) -> None:
     """Read INFINITO_SERVICES_DISABLED from the environment and apply to host_vars and inventory."""
-    raw = os.environ.get("INFINITO_SERVICES_DISABLED", "").strip()
+    raw = os.environ["INFINITO_SERVICES_DISABLED"].strip()
     if not raw:
         return
     services = parse_services_disabled(raw)
@@ -326,7 +326,7 @@ def assert_services_disabled_inventory_consistency_from_env(
     roles_dir: Path,
 ) -> None:
     """Fail fast when INFINITO_SERVICES_DISABLED conflicts with the existing inventory."""
-    raw = os.environ.get("INFINITO_SERVICES_DISABLED", "").strip()
+    raw = os.environ["INFINITO_SERVICES_DISABLED"].strip()
     if not raw:
         return
 

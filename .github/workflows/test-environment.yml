@@ -37,13 +37,13 @@ jobs:
       # post-prune in-run re-pulls: large enough to fit one deploy's
       # in-use image set (rpardini) plus pip/npm/apt artefacts (Nexus),
       # leaving ~62g headroom for Docker layer storage on /mnt.
-      INFINITO_REGISTRY_CACHE_MAX_SIZE: 8g
-      INFINITO_REGISTRY_CACHE_HOST_PATH: /mnt/cache/registry/mirror
-      INFINITO_REGISTRY_CACHE_CA_HOST_PATH: /mnt/cache/registry/ca
-      INFINITO_PACKAGE_CACHE_BLOBSTORE_MAX: 4g
-      INFINITO_PACKAGE_CACHE_HEAP: 1g
-      INFINITO_PACKAGE_CACHE_DIRECT_MEM: 1g
-      INFINITO_PACKAGE_CACHE_HOST_PATH: /mnt/cache/package/data
+      INFINITO_CACHE_REGISTRY_MAX_SIZE: 8g
+      INFINITO_CACHE_REGISTRY_HOST_PATH: /mnt/cache/registry/mirror
+      INFINITO_CACHE_REGISTRY_CA_HOST_PATH: /mnt/cache/registry/ca
+      INFINITO_CACHE_PACKAGE_BLOBSTORE_MAX: 4g
+      INFINITO_CACHE_PACKAGE_HEAP: 1g
+      INFINITO_CACHE_PACKAGE_DIRECT_MEM: 1g
+      INFINITO_CACHE_PACKAGE_HOST_PATH: /mnt/cache/package/data
 
     steps:
       - name: Checkout repository
@@ -69,13 +69,13 @@ jobs:
             -e INFINITO_PULL_POLICY=never \
             -e INFINITO_NO_BUILD=0 \
             -e NIX_CONFIG \
-            -e INFINITO_REGISTRY_CACHE_MAX_SIZE \
-            -e INFINITO_REGISTRY_CACHE_HOST_PATH \
-            -e INFINITO_REGISTRY_CACHE_CA_HOST_PATH \
-            -e INFINITO_PACKAGE_CACHE_BLOBSTORE_MAX \
-            -e INFINITO_PACKAGE_CACHE_HEAP \
-            -e INFINITO_PACKAGE_CACHE_DIRECT_MEM \
-            -e INFINITO_PACKAGE_CACHE_HOST_PATH \
+            -e INFINITO_CACHE_REGISTRY_MAX_SIZE \
+            -e INFINITO_CACHE_REGISTRY_HOST_PATH \
+            -e INFINITO_CACHE_REGISTRY_CA_HOST_PATH \
+            -e INFINITO_CACHE_PACKAGE_BLOBSTORE_MAX \
+            -e INFINITO_CACHE_PACKAGE_HEAP \
+            -e INFINITO_CACHE_PACKAGE_DIRECT_MEM \
+            -e INFINITO_CACHE_PACKAGE_HOST_PATH \
             --network host \
             -v "${HOST_WORKDIR}:${HOST_WORKDIR}" \
             -v "/mnt/docker:/var/lib/docker" \

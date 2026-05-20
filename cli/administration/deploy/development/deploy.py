@@ -23,7 +23,7 @@ if TYPE_CHECKING:
 
 
 def _env_variant() -> int | None:
-    raw = os.environ.get("INFINITO_VARIANT", "").strip()
+    raw = os.environ["INFINITO_VARIANT"].strip()
     if not raw:
         return None
     try:
@@ -35,7 +35,7 @@ def _env_variant() -> int | None:
 
 
 def _env_full_cycle() -> bool:
-    return os.environ.get("INFINITO_FULL_CYCLE", "").strip().lower() == "true"
+    return os.environ["INFINITO_FULL_CYCLE"].strip().lower() == "true"
 
 
 def _run_deploy(
@@ -84,7 +84,7 @@ def _run_deploy(
         "PY_COLORS": "1",
         "TERM": "xterm-256color",
     }
-    services_disabled = os.environ.get("INFINITO_SERVICES_DISABLED", "")
+    services_disabled = os.environ["INFINITO_SERVICES_DISABLED"]
     if services_disabled:
         extra_env["INFINITO_SERVICES_DISABLED"] = services_disabled
 
@@ -216,7 +216,7 @@ def handler(args: argparse.Namespace) -> int:
 
     # Remove any app IDs that were disabled via INFINITO_SERVICES_DISABLED so the
     # deploy list stays consistent with the inventory created by init.
-    raw_disabled = os.environ.get("INFINITO_SERVICES_DISABLED", "").strip()
+    raw_disabled = os.environ["INFINITO_SERVICES_DISABLED"].strip()
     disabled_app_ids: set[str] = set()
     if raw_disabled:
         services = parse_services_disabled(raw_disabled)

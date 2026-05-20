@@ -20,7 +20,7 @@ def _resolved_repo_root() -> Path:
     (used by some CI fixtures); otherwise the canonical ``PROJECT_ROOT``
     constant from the package ``__init__.py`` is returned.
     """
-    env = os.environ.get("INFINITO_REPO_ROOT")
+    env = os.environ.get("INFINITO_REPO_ROOT")  # nocheck: test-fixture
     if env:
         return Path(env).expanduser().resolve()
     return PROJECT_ROOT

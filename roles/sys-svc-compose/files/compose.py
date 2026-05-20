@@ -89,7 +89,7 @@ _CACHE_HTTP_HOSTNAMES = (
 
 def generate_cache_override(project_dir: Path, base_compose: Path) -> Path | None:
     """Emit transient build.extra_hosts override when cache profile active."""
-    cache_ip = (os.environ.get("INFINITO_PACKAGE_CACHE_FRONTEND_IP") or "").strip()
+    cache_ip = (os.environ.get("INFINITO_CACHE_PACKAGE_FRONTEND_IP") or "").strip()
     if not cache_ip or not base_compose.is_file():
         return None
 

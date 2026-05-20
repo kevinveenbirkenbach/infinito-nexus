@@ -24,7 +24,7 @@ def add_parser(sub: argparse._SubParsersAction) -> None:
 
 def _maybe_build_missing() -> int:
     # CI: never build (image is pulled). Local: build if missing.
-    if os.environ.get("INFINITO_NO_BUILD", "0") == "1":
+    if os.environ["INFINITO_NO_BUILD"] == "1":
         return 0
 
     build_args = argparse.Namespace(

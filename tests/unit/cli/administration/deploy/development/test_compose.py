@@ -144,7 +144,6 @@ class TestComposeUpRetries(unittest.TestCase):
         )
         self.assertEqual(env["INFINITO_DISTRO"], "arch")
         self.assertNotIn("COMPOSE_PROFILES", env)
-        self.assertNotIn("INFINITO_REGISTRY_CACHE_PROXY_CONF", env)
 
     @patch.dict(
         os.environ,
@@ -153,8 +152,6 @@ class TestComposeUpRetries(unittest.TestCase):
             "GITHUB_ACTIONS": "",
             "INFINITO_RUNNING_ON_GITHUB": "",
             "CI": "",
-            # Tests bypass BASH_ENV; set explicitly so cache_env_overrides() passes.
-            "INFINITO_PACKAGE_CACHE_FRONTEND_CA_DIR": "/var/cache/infinito/test/ca",
         },
         clear=False,
     )
@@ -189,11 +186,13 @@ class TestComposeUpRetries(unittest.TestCase):
             ],
         )
         self.assertEqual(
-            env["INFINITO_REGISTRY_CACHE_PROXY_CONF"],
+            env["INFINITO_CACHE_REGISTRY_PROXY_CONF"],  # nocheck: test-fixture
             "./compose/registry-cache/proxy.conf",
         )
         self.assertTrue(
-            env["INFINITO_PACKAGE_CACHE_FRONTEND_CA_FILE"].endswith("/ca.crt")
+            env["INFINITO_CACHE_PACKAGE_FRONTEND_CA_FILE"].endswith(
+                "/ca.crt"
+            )  # nocheck: test-fixture
         )
 
     @patch.dict(
@@ -267,8 +266,6 @@ class TestComposeUpRetries(unittest.TestCase):
             "CI": "",
             "GITHUB_ACTIONS": "",
             "INFINITO_RUNNING_ON_GITHUB": "",
-            # Tests bypass BASH_ENV; set explicitly so cache_env_overrides() passes.
-            "INFINITO_PACKAGE_CACHE_FRONTEND_CA_DIR": "/var/cache/infinito/test/ca",
         },
         clear=False,
     )

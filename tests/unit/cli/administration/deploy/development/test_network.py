@@ -12,7 +12,7 @@ class TestDetectOuterNetworkMtu(unittest.TestCase):
     def test_prefers_explicit_outer_network_mtu_env(self) -> None:
         self.assertEqual(detect_outer_network_mtu(), "1300")
 
-    @patch.dict(os.environ, {}, clear=True)
+    @patch.dict(os.environ, {"INFINITO_OUTER_NETWORK_MTU": ""}, clear=True)
     @patch("cli.administration.deploy.development.network.Path.exists", autospec=True)
     @patch(
         "cli.administration.deploy.development.network.Path.read_text", autospec=True
@@ -27,7 +27,7 @@ class TestDetectOuterNetworkMtu(unittest.TestCase):
 
         self.assertEqual(detect_outer_network_mtu(), "1400")
 
-    @patch.dict(os.environ, {}, clear=True)
+    @patch.dict(os.environ, {"INFINITO_OUTER_NETWORK_MTU": ""}, clear=True)
     @patch("cli.administration.deploy.development.network.Path.exists", autospec=True)
     @patch(
         "cli.administration.deploy.development.network.Path.read_text", autospec=True

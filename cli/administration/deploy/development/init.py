@@ -82,7 +82,7 @@ def add_parser(sub: argparse._SubParsersAction) -> None:
 
 
 def _env_variant() -> int | None:
-    raw = os.environ.get("INFINITO_VARIANT", "").strip()
+    raw = os.environ["INFINITO_VARIANT"].strip()
     if not raw:
         return None
     try:
@@ -117,7 +117,7 @@ def handler(args: argparse.Namespace) -> int:
     # the inventory step strip it back out — leaving the round's
     # include list inconsistent with what the inventory actually
     # contains.
-    raw_disabled = os.environ.get("INFINITO_SERVICES_DISABLED", "").strip()
+    raw_disabled = os.environ["INFINITO_SERVICES_DISABLED"].strip()
     disabled_app_ids: set[str] = set()
     if raw_disabled:
         services = parse_services_disabled(raw_disabled)
@@ -159,7 +159,7 @@ def handler(args: argparse.Namespace) -> int:
         raise SystemExit(f"--variant: {exc}") from exc
 
     runtime = os.environ.get("RUNTIME") or detect_runtime()
-    services_disabled = os.environ.get("INFINITO_SERVICES_DISABLED", "")
+    services_disabled = os.environ["INFINITO_SERVICES_DISABLED"]
     for _round_index, inv_dir, round_variants, include_R, _purge_set in plan:
         round_include = tuple(
             role for role in include_R if role not in disabled_app_ids
