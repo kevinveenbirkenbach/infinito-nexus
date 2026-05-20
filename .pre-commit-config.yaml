@@ -14,3 +14,11 @@ repos:
         stages:
           - pre-commit
           - pre-push
+      - id: make-test-signed
+        name: Run make test-signed (pre-push gate)
+        entry: make test-signed
+        language: system
+        pass_filenames: false
+        always_run: true
+        stages:
+          - pre-push

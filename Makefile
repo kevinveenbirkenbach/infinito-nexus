@@ -14,7 +14,7 @@ $(error Missing env file: $(ENV_SH))
 endif
 
 .PHONY: setup setup-clean install install-force install-ansible install-lint install-lint-force install-venv install-python install-python-dev install-system-python install-skills update-skills agent-install
-.PHONY: test lint lint-action lint-ansible lint-python lint-shellcheck lint-markdown lint-makefile lint-javascript autoformat test-lint test-unit test-integration test-external
+.PHONY: test lint lint-action lint-ansible lint-python lint-shellcheck lint-markdown lint-makefile lint-javascript autoformat test-lint test-unit test-integration test-external test-signed
 .PHONY: clean clean-sudo down cache-clean
 .PHONY: system-purge system-disk-usage
 .PHONY: list tree mig dockerignore chmod-scripts
@@ -201,11 +201,10 @@ build-no-cache-all:
 build-cleanup:
 	@bash scripts/image/cleanup.sh
 
-# Regenerate .dockerignore from .gitignore.
+# Regenerate .dockerignore from .gitignore (which carries the .git entry Docker needs). Race-safe under parallel make setup invocations.
 dockerignore:
 	@echo "Create dockerignore"
 	cat .gitignore > .dockerignore
-	echo ".git" >> .dockerignore
 
 # Install Ansible dependencies.
 install-ansible:
@@ -357,6 +356,17 @@ test-external: install
 	@INFINITO_TEST_TYPE="external" \
 	INFINITO_COMPILE=0 \
 	bash scripts/tests/code/wrapper.sh
+
+# Verify HEAD is signed. `%G?` returns N when no signature is attached
+# (all other codes -- G/U/E/B/X/Y/R -- mean some signature exists).
+# Gate the pre-push hook so unsigned tips never reach the remote.
+test-signed:
+	@status="$$(git log -1 --pretty=%G?)"; \
+	if [ "$$status" = "N" ]; then \
+		echo "❌ HEAD commit is not signed. Use 'git-sign-push' or 'git commit -S'." >&2; \
+		exit 1; \
+	fi; \
+	echo "✅ HEAD commit signature status: $$status"
 
 # Run all act-based deploy checks.
 act-all:

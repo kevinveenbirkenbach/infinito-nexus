@@ -28,6 +28,9 @@ job-logs.txt
 *.lock
 node_modules/
 
+# No-op for Git (ignored implicitly), but Docker needs .git in its ignore-list — keeps make dockerignore as a pure cat of this file.
+.git
+
 # Host shell / editor / tooling state accidentally surfaced inside this working copy
 .bash_profile
 .bashrc
@@ -40,4 +43,3 @@ node_modules/
 .vscode
 .zprofile
 .zshrc
-.git
