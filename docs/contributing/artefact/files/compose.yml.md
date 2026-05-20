@@ -32,8 +32,6 @@ All variables consumed by [compose.yml](../../../../compose.yml). The per-variab
 | `INFINITO_IMAGE` | Image reference used by the `infinito` service. Composed at runtime by the env generator on GHA, empty locally so the `build:` block builds from source. |
 | `INFINITO_PULL_POLICY` | Compose `pull_policy`. Defaults to `never` for local builds, generator overrides to `always` on GHA. |
 | `INFINITO_CONTAINER` | Used directly as `container_name`. Derived from `INFINITO_DISTRO` by [infinito_container.py](../../../../utils/env/handlers/infinito_container.py). |
-| `INFINITO_COMPILE` | Toggles in-container compilation steps on entry. |
-| `INFINITO_COMPILE_SILENCE` | `1` silences the in-container rebuild log when `INFINITO_COMPILE=1`. |
 | `NIX_CONFIG` | Build-arg forwarded to the Dockerfile for Nix configuration. Pass-through if set in the calling shell. |
 
 ### Resource Caps (OOM Reproduction)

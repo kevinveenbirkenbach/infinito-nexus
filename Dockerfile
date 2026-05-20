@@ -60,7 +60,7 @@ RUN set -euo pipefail; \
   pkgmgr install infinito --clone-mode shallow; \
   echo "[docker-infinito] Installed Infinito.Nexus Version:"; \
   pkgmgr version infinito; \
-  INFINITO_COMPILE=1 /opt/src/infinito/scripts/docker/entry.sh true
+  /opt/src/infinito/scripts/docker/entry.sh --compile -- true
 
 # Set workdir to / to avoid ambiguous commands
 WORKDIR /

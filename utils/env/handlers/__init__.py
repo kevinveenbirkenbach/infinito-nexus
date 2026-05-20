@@ -10,7 +10,6 @@ from __future__ import annotations
 from . import (
     gha_passthrough,
     github_repository_owner,
-    infinito_compile,
     infinito_container,
     infinito_docker_volume,
     infinito_image,
@@ -56,7 +55,6 @@ ORDERED_HANDLERS = [
     github_repository_owner,
     infinito_image_repository,
     infinito_image,
-    infinito_compile,
     nix_config,
     infinito_registry_cache_max_size,
     infinito_package_cache_heap,

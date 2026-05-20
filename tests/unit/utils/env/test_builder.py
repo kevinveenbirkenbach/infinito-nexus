@@ -228,12 +228,10 @@ class TestBuildEnvOrchestration(unittest.TestCase):
                 "INFINITO_GHCR_MIRROR_PREFIX": "mirror",
                 "INFINITO_NO_BUILD": "1",
                 "INFINITO_IMAGE_TAG": "latest",
-                "INFINITO_COMPILE": "1",
             }
             eb = build_env(static, repo_root=Path("/repo"))
         self.assertEqual(eb.values["INFINITO_PULL_POLICY"], "always")
         self.assertEqual(eb.values["INFINITO_DOCKER_VOLUME"], "/mnt/docker")
-        self.assertEqual(eb.values["INFINITO_COMPILE"], "0")
         self.assertEqual(eb.values["GITHUB_REPOSITORY_OWNER"], "owner")
         self.assertIn("INFINITO_IMAGE", eb.values)
         self.assertTrue(eb.values["INFINITO_IMAGE"].startswith("ghcr.io/owner/repo/"))

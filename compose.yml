@@ -74,8 +74,6 @@ services:
       INFINITO_DNS_IP: ${INFINITO_DNS_IP}
       INFINITO_DOMAIN: ${INFINITO_DOMAIN}
       INFINITO_IP4: ${INFINITO_IP4}
-      INFINITO_COMPILE: "${INFINITO_COMPILE:?Run 'make dotenv' to generate the .env single source of truth}"
-      INFINITO_COMPILE_SILENCE: "${INFINITO_COMPILE_SILENCE:?Run 'make dotenv' to generate the .env single source of truth}"
       INFINITO_SRC_DIR: /opt/src/infinito
       PYTHONHTTPSVERIFY: "1"
       GIT_SSL_NO_VERIFY: "0"
