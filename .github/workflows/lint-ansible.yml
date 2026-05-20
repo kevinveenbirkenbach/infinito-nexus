@@ -47,8 +47,5 @@ jobs:
         # script directly without going through `make`.
         run: PYTHON=python3 PYTHONPATH=. bash scripts/setup.sh
 
-      - name: Show Docker version
-        run: docker version
-
       - name: Run lint-ansible via make
         run: make lint-ansible
