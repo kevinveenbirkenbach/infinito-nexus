@@ -8,10 +8,7 @@ from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from utils.env.builder import BuildContext, EnvBuilder
 
-STATIC_KEYS = (
-    "INFINITO_GHCR_MIRROR_PREFIX",
-    "INFINITO_NO_BUILD",
-)
+STATIC_KEYS = ("INFINITO_GHCR_MIRROR_PREFIX",)
 
 
 def apply(eb: EnvBuilder, ctx: BuildContext) -> None:

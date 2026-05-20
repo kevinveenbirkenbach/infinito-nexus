@@ -201,11 +201,15 @@ class TestBuildEnvOrchestration(unittest.TestCase):
             patch("utils.env.builder.detect_gha_act", return_value=(False, False)),
             patch("utils.env.handlers.infinito_inventory.run_helper", return_value=""),
         ):
-            eb = build_env({"INFINITO_DISTRO": "debian"}, repo_root=Path("/repo"))
+            eb = build_env(
+                {"INFINITO_BUILD": "1", "INFINITO_DISTRO": "debian"},
+                repo_root=Path("/repo"),
+            )
         # GHA-only static keys must NOT show up locally.
         self.assertNotIn("INFINITO_GHCR_MIRROR_PREFIX", eb.values)
-        self.assertNotIn("INFINITO_NO_BUILD", eb.values)
         self.assertNotIn("INFINITO_IMAGE", eb.values)
+        # Always-emitted static key: present locally with its default.
+        self.assertEqual(eb.values["INFINITO_BUILD"], "1")
 
     def test_gha_branch_emits_overrides(self) -> None:
         env = {
@@ -222,11 +226,11 @@ class TestBuildEnvOrchestration(unittest.TestCase):
             patch("utils.env.handlers.infinito_inventory.run_helper", return_value=""),
         ):
             static = {
+                "INFINITO_BUILD": "0",
                 "INFINITO_DISTRO": "debian",
                 "INFINITO_PULL_POLICY": "never",
                 "INFINITO_DOCKER_VOLUME": "docker",
                 "INFINITO_GHCR_MIRROR_PREFIX": "mirror",
-                "INFINITO_NO_BUILD": "1",
                 "INFINITO_IMAGE_TAG": "latest",
             }
             eb = build_env(static, repo_root=Path("/repo"))

@@ -198,7 +198,7 @@ class TestComposeUpRetries(unittest.TestCase):
     @patch.dict(
         os.environ,
         {
-            "INFINITO_NO_BUILD": "0",
+            "INFINITO_BUILD": "1",
             "INFINITO_IMAGE": "infinito-debian",
             "INFINITO_PULL_POLICY": "never",
             # CI-pinned so cache stays inactive; this test asserts build behaviour only.
@@ -208,7 +208,7 @@ class TestComposeUpRetries(unittest.TestCase):
         },
         clear=False,
     )
-    def test_up_builds_when_no_build_flag_is_disabled(self) -> None:
+    def test_up_builds_when_build_flag_is_enabled(self) -> None:
         compose = self._compose()
         compose._render_coredns_corefile = MagicMock()
         compose._compose_up_with_retries = MagicMock()
@@ -226,7 +226,7 @@ class TestComposeUpRetries(unittest.TestCase):
     @patch.dict(
         os.environ,
         {
-            "INFINITO_NO_BUILD": "1",
+            "INFINITO_BUILD": "0",
             "INFINITO_IMAGE": "test-image/arch",
             "CI": "true",
             "GITHUB_ACTIONS": "true",
@@ -234,7 +234,7 @@ class TestComposeUpRetries(unittest.TestCase):
         },
         clear=False,
     )
-    def test_up_skips_build_when_no_build_flag_is_enabled(self) -> None:
+    def test_up_skips_build_when_build_flag_is_disabled(self) -> None:
         compose = self._compose()
         compose._render_coredns_corefile = MagicMock()
         compose._compose_up_with_retries = MagicMock()
@@ -260,7 +260,7 @@ class TestComposeUpRetries(unittest.TestCase):
     @patch.dict(
         os.environ,
         {
-            "INFINITO_NO_BUILD": "0",
+            "INFINITO_BUILD": "1",
             "INFINITO_IMAGE": "infinito-debian",
             "INFINITO_PULL_POLICY": "never",
             "CI": "",

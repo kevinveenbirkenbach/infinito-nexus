@@ -181,17 +181,17 @@ class Compose:
         print(">>> Starting compose stack (coredns + infinito)")
         env = self._base_env()
         keys = [
+            "INFINITO_BUILD",
             "INFINITO_DISTRO",
             "INFINITO_IMAGE",
             "INFINITO_IMAGE_TAG",
             "INFINITO_PULL_POLICY",
-            "INFINITO_NO_BUILD",
             "GITHUB_SHA",
         ]
         print(">>> env:", {k: env.get(k) for k in keys})
         print(">>> NIX_CONFIG:", "<set>" if env.get("NIX_CONFIG") else "<empty>")
 
-        no_build = env["INFINITO_NO_BUILD"] == "1"
+        no_build = env["INFINITO_BUILD"] != "1"
         # Compose env-file precedence: later files override earlier ones.
         args = ["--env-file", "env/ci.env"]
 

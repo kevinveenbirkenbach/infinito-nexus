@@ -67,7 +67,7 @@ jobs:
             -e INFINITO_DISTRO=debian \
             -e INFINITO_IMAGE=infinito-debian \
             -e INFINITO_PULL_POLICY=never \
-            -e INFINITO_NO_BUILD=0 \
+            -e INFINITO_BUILD=1 \
             -e NIX_CONFIG \
             -e INFINITO_CACHE_REGISTRY_MAX_SIZE \
             -e INFINITO_CACHE_REGISTRY_HOST_PATH \
