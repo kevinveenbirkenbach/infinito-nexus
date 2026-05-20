@@ -3,7 +3,7 @@
 # Auto-format all source files using available tools.
 # Missing tools are reported and skipped rather than aborting the run.
 #
-# Per-tool workers run concurrently by default. Set INFINITO_PARALLEL=0
+# Per-tool workers run concurrently by default. Set INFINITO_WORKER_ENABLED=0
 # (also accepts `false`/`no`/`off`) to fall back to sequential execution.
 # Tools that touch the same files are kept on the same worker (the
 # shfmt+shellcheck pair both writes to scripts/*.sh, so they share a
@@ -12,7 +12,7 @@
 set -euo pipefail
 
 # Default lives in env/static.env (SPOT); load.sh exports it.
-PARALLEL="${INFINITO_PARALLEL}"
+PARALLEL="${INFINITO_WORKER_ENABLED}"
 
 SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd -- "${SCRIPT_DIR}/../.." && pwd)"

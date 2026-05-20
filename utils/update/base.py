@@ -14,6 +14,7 @@ to ``5.4.6`` (different depth).
 
 from __future__ import annotations
 
+import os
 import re
 
 _SEMVER_CORE = r"v?\d+(?:\.\d+){0,3}"
@@ -63,3 +64,7 @@ def latest_semver(tags: list[str], depth: int, flavor: str = "") -> str | None:
         and version_flavor(tag) == flavor
     ]
     return max(candidates, key=version_key, default=None)
+
+
+def resolve_max_fetch_workers() -> int:
+    return int(os.environ.get("INFINITO_WORKER_FETCH", "1"))

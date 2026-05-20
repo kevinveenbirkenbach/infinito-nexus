@@ -27,6 +27,8 @@ from . import (
     infinito_running_on_github,
     infinito_venv_base,
     infinito_venv_fallback,
+    infinito_worker_cpu,
+    infinito_worker_fetch,
     nix_config,
     passthrough,
     pip,
@@ -36,6 +38,8 @@ from . import (
 
 ORDERED_HANDLERS = [
     passthrough,
+    infinito_worker_cpu,
+    infinito_worker_fetch,
     infinito_container,
     infinito_running_on_act,
     infinito_running_on_github,

@@ -21,6 +21,7 @@ line directly above the `ref:` key.
 
 from __future__ import annotations
 
+import concurrent.futures
 import re
 import subprocess
 from dataclasses import dataclass
@@ -33,6 +34,7 @@ from utils.roles.mapping import ROLE_FILE_META_SERVICES
 from utils.update.base import (
     is_semver,
     latest_semver,
+    resolve_max_fetch_workers,
     version_depth,
     version_flavor,
     version_key,
@@ -195,11 +197,17 @@ def find_outdated_updates(repo_root: Path) -> list[RepositoryRefUpdate]:
     --tags`` and return the entries whose ref is older than the latest
     semver tag with the same depth and flavor."""
     entries = collect_entries(repo_root)
-    repo_tags: dict[str, list[str]] = {}
-    for entry in entries:
-        if entry.repository in repo_tags:
-            continue
-        repo_tags[entry.repository] = git_ls_remote_tags(entry.repository)
+    unique_repos = {entry.repository for entry in entries}
+    with concurrent.futures.ThreadPoolExecutor(
+        max_workers=resolve_max_fetch_workers()
+    ) as pool:
+        repo_tags: dict[str, list[str]] = dict(
+            zip(
+                unique_repos,
+                pool.map(git_ls_remote_tags, unique_repos),
+                strict=True,
+            )
+        )
 
     updates: list[RepositoryRefUpdate] = []
     for entry in entries:

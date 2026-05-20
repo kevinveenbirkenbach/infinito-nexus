@@ -12,6 +12,7 @@ directly above the ``version:`` key.
 
 from __future__ import annotations
 
+import concurrent.futures
 import json
 import re
 import time
@@ -36,6 +37,7 @@ from utils.roles.mapping import ROLE_FILE_META_SERVICES
 from utils.update.base import (
     is_semver,
     latest_semver,
+    resolve_max_fetch_workers,
     version_depth,
     version_flavor,
     version_key,
@@ -272,18 +274,26 @@ def collect_entries(repo_root: Path) -> list[DockerImageVersionEntry]:
 
 def find_outdated_updates(repo_root: Path) -> list[DockerImageVersionUpdate]:
     entries = collect_entries(repo_root)
-    image_tags: dict[str, list[str]] = {}
     updates: list[DockerImageVersionUpdate] = []
 
-    for entry in entries:
-        if entry.image in image_tags:
-            continue
-        if is_dockerhub(entry.image):
-            image_tags[entry.image] = fetch_dockerhub_tags(entry.image)
-        elif is_ghcr(entry.image):
-            image_tags[entry.image] = fetch_ghcr_tags(entry.image)
-        elif is_mcr(entry.image):
-            image_tags[entry.image] = fetch_mcr_tags(entry.image)
+    def _fetch(image: str) -> tuple[str, list[str]]:
+        if is_dockerhub(image):
+            return image, fetch_dockerhub_tags(image)
+        if is_ghcr(image):
+            return image, fetch_ghcr_tags(image)
+        if is_mcr(image):
+            return image, fetch_mcr_tags(image)
+        return image, []
+
+    unique_images = {
+        entry.image
+        for entry in entries
+        if is_dockerhub(entry.image) or is_ghcr(entry.image) or is_mcr(entry.image)
+    }
+    with concurrent.futures.ThreadPoolExecutor(
+        max_workers=resolve_max_fetch_workers()
+    ) as pool:
+        image_tags: dict[str, list[str]] = dict(pool.map(_fetch, unique_images))
 
     for entry in entries:
         tags = image_tags.get(entry.image, [])
