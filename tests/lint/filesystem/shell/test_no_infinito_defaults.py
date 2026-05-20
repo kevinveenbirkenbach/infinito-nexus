@@ -1,6 +1,6 @@
 """Lint guard: `.sh` files MUST NOT declare INFINITO_* defaults.
 
-The single source of truth for INFINITO_* defaults is ``env/static.env``
+The single source of truth for INFINITO_* defaults is ``env/default.env``
 (materialised into ``.env`` by ``make dotenv``). Shell-side defaults
 duplicate that contract and drift silently the moment the static
 default changes.
@@ -20,7 +20,7 @@ Forbidden:
 
 Suppress on a per-line basis with a same-line ``# nocheck: <reason>``
 marker. Use it only when the shell context genuinely cannot consume
-``env/static.env`` (e.g. GHA workflow-input bridges, script-internal
+``env/default.env`` (e.g. GHA workflow-input bridges, script-internal
 overrides not exposed as a stack-wide variable).
 """
 
@@ -104,7 +104,7 @@ def _scan_file(path: Path) -> list[Violation]:
                     idx,
                     "inline-default",
                     f"${{{key}{op}{default}}} declares a shell-side default; "
-                    f"move the default to env/static.env (SPOT) and read as "
+                    f"move the default to env/default.env (SPOT) and read as "
                     f"bare ${{{key}}} or required ${{{key}:?msg}}",
                 )
             )
@@ -119,7 +119,7 @@ def _scan_file(path: Path) -> list[Violation]:
                     idx,
                     "setdefault",
                     f"${{{key}{op}{default}}} sets a shell-side default; "
-                    f"move it to env/static.env (SPOT)",
+                    f"move it to env/default.env (SPOT)",
                 )
             )
     return violations
@@ -145,7 +145,7 @@ class TestShellNoInfinitoDefaults(unittest.TestCase):
                 f"({len(all_violations)} violations across "
                 f"{len(grouped)} file(s)):",
                 "",
-                "INFINITO_* defaults belong in env/static.env (SPOT); the "
+                "INFINITO_* defaults belong in env/default.env (SPOT); the "
                 "generated .env then carries them. Shell-side defaults are "
                 "a second source that drifts silently. Read bare "
                 "${INFINITO_VAR} or use ${INFINITO_VAR:?msg}; the empty-form "

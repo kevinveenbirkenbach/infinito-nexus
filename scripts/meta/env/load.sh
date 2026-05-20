@@ -4,7 +4,7 @@
 # Project env loader -- the single entry point that pulls the generated
 # `.env` file into the current shell. `.env` is produced by
 # `python -m cli.meta.env` (a.k.a. `make dotenv`) from the committed
-# `env/static.env` plus runtime context (distro, GHA/Act flags,
+# `env/default.env` plus runtime context (distro, GHA/Act flags,
 # df/meminfo-derived sizes, sha256 secrets, etc.). `.env` is the single
 # source of truth for both static defaults and runtime-resolved values.
 #

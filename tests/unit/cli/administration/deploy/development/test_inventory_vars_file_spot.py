@@ -3,7 +3,7 @@
 The literal path "inventories/development/default.yml" is exposed in
 TWO places that must stay in lockstep:
 
-* `env/static.env` — `INVENTORY_VARS_FILE` (SPOT-of-record for callers
+* `env/default.env` — `INVENTORY_VARS_FILE` (SPOT-of-record for callers
   that go through `make dotenv` / the bash deploy chain).
 * `cli/administration/deploy/development/common.DEV_INVENTORY_VARS_FILE`
   — fallback for direct/test invocations that bypass the bash chain.
@@ -24,7 +24,7 @@ from utils.cache.files import iter_project_files, read_text
 
 from . import PROJECT_ROOT
 
-STATIC_ENV = PROJECT_ROOT / "env" / "static.env"
+STATIC_ENV = PROJECT_ROOT / "env" / "default.env"
 
 
 def _parse_env_default(file_text: str) -> str:
@@ -52,7 +52,7 @@ class TestInventoryVarsFileSpotDriftGuard(unittest.TestCase):
         self.assertEqual(
             env_default,
             DEV_INVENTORY_VARS_FILE,
-            "INVENTORY_VARS_FILE default in env/static.env drifted from "
+            "INVENTORY_VARS_FILE default in env/default.env drifted from "
             "cli.administration.deploy.development.common.DEV_INVENTORY_VARS_FILE. "
             "Update both literals (or, better, rebase one on the other).",
         )
@@ -63,7 +63,7 @@ class TestInventoryVarsFileSpotDriftGuard(unittest.TestCase):
         # path is a missed SPOT migration.
         literal = "inventories/development/default.yml"
         allowed_relative = {
-            "env/static.env",
+            "env/default.env",
             "cli/administration/deploy/development/common.py",
             Path(__file__).relative_to(PROJECT_ROOT).as_posix(),
             # Documentation and historical/comment references stay as-is:

@@ -86,7 +86,7 @@ The runner's `compose` wrapper at [roles/sys-svc-compose/files/compose.py](../..
 
 ## Environment Variables 🌳
 
-The host-side env-vars (`INFINITO_REGISTRY_CACHE_*`, `INFINITO_PACKAGE_CACHE_*`) are declared in [env/static.env](../../../env/static.env) and the dynamic ones (cache sizes from `df`/`/proc/meminfo`, sha256 admin password) are computed by [utils/env/builder.py](../../../utils/env/builder.py). `make dotenv` writes them into `.env`, which Compose auto-loads and which `BASH_ENV` makes available to every Makefile recipe through [scripts/meta/env/load.sh](../../../scripts/meta/env/load.sh). See [variables.md](variables.md).
+The host-side env-vars (`INFINITO_REGISTRY_CACHE_*`, `INFINITO_PACKAGE_CACHE_*`) are declared in [env/default.env](../../../env/default.env) and the dynamic ones (cache sizes from `df`/`/proc/meminfo`, sha256 admin password) are computed by [utils/env/builder.py](../../../utils/env/builder.py). `make dotenv` writes them into `.env`, which Compose auto-loads and which `BASH_ENV` makes available to every Makefile recipe through [scripts/meta/env/load.sh](../../../scripts/meta/env/load.sh). See [variables.md](variables.md).
 
 Per-variable defaults and purposes are in [compose.yml.md](../artefact/files/compose.yml.md) under the cache section.
 

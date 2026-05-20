@@ -34,7 +34,7 @@ if TYPE_CHECKING:
     from utils.env.builder import BuildContext, EnvBuilder
 
 KEY = "INFINITO_..."
-COMMENT = "<single-line per-key comment, mirrors env/static.env style>"
+COMMENT = "<single-line per-key comment, mirrors env/default.env style>"
 
 
 def apply(eb: EnvBuilder, ctx: BuildContext) -> None:
@@ -60,4 +60,4 @@ def apply(eb: EnvBuilder, ctx: BuildContext) -> None:
 - [__init__.py](__init__.py) MUST list every handler module in `ORDERED_HANDLERS`.
 - The order in `ORDERED_HANDLERS` MUST respect data dependencies.
   Example: `infinito_container` runs after `passthrough` so it can read the resolved `INFINITO_DISTRO`.
-- Adding a handler MUST also bump the relevant baseline test in [test_dotenv_generator.py](../../../tests/integration/meta/env/test_dotenv_generator.py) when the new key is a static-default in [static.env](../../../env/static.env), so the drift test stays honest.
+- Adding a handler MUST also bump the relevant baseline test in [test_dotenv_generator.py](../../../tests/integration/meta/env/test_dotenv_generator.py) when the new key is a static-default in [default.env](../../../env/default.env), so the drift test stays honest.

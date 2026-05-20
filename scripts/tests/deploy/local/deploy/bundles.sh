@@ -10,7 +10,7 @@ set -euo pipefail
 #   - Aggregates and deduplicates all role groups declared in each bundle's
 #     inventory.yml (see utils.inventory.bundle_apps).
 #   - Exports INFINITO_APPS=<csv> and delegates to fresh-purged-app.sh.
-#   - Defaults INFINITO_FULL_CYCLE=false (override via env/static.env or by
+#   - Defaults INFINITO_FULL_CYCLE=false (override via env/default.env or by
 #     exporting INFINITO_FULL_CYCLE=true).
 #
 # Required env:

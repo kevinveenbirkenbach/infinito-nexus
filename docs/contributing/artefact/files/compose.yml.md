@@ -16,14 +16,14 @@ It MUST NOT host application roles, fixtures, or test harnesses.
 ## Structure 📐
 
 - You MUST keep every service in `compose.yml` behind a `profiles:` entry so that `docker compose up` without a profile stays a no-op.
-- You MUST consume tunable runtime parameters via strict substitution `${VAR:?Run 'make dotenv' to generate the .env single source of truth}`; the default lives in [static.env](../../../../env/static.env). Inline `${VAR:-default}` forms are forbidden and enforced by [test_no_default_substitutions.py](../../../../tests/integration/infrastructure/compose/test_no_default_substitutions.py).
+- You MUST consume tunable runtime parameters via strict substitution `${VAR:?Run 'make dotenv' to generate the .env single source of truth}`; the default lives in [default.env](../../../../env/default.env). Inline `${VAR:-default}` forms are forbidden and enforced by [test_no_default_substitutions.py](../../../../tests/integration/infrastructure/compose/test_no_default_substitutions.py).
 - You MUST NOT hardcode values that differ between operators (paths, image tags, CPU or memory caps).
 - You SHOULD annotate non-obvious keys with a short inline comment that explains why they exist, not what they do.
-- You MUST document every new env var by adding the row below AND committing a one-line `# ...` comment above its key in [static.env](../../../../env/static.env).
+- You MUST document every new env var by adding the row below AND committing a one-line `# ...` comment above its key in [default.env](../../../../env/default.env).
 
 ## Environment Variables 📋
 
-All variables consumed by [compose.yml](../../../../compose.yml). The per-variable default + comment lives next to the key in [static.env](../../../../env/static.env) (or [ci.env](../../../../env/ci.env) for CI-stack network defaults); the tables below stay scoped to "what role does this variable play in compose.yml" and stop duplicating the default.
+All variables consumed by [compose.yml](../../../../compose.yml). The per-variable default + comment lives next to the key in [default.env](../../../../env/default.env) (or [ci.env](../../../../env/ci.env) for CI-stack network defaults); the tables below stay scoped to "what role does this variable play in compose.yml" and stop duplicating the default.
 
 ### Image and Runtime
 
@@ -101,7 +101,7 @@ The env-var contracts each service expects strictly via `${VAR:?…}` (consumed 
 
 When you introduce a new env var in `compose.yml`, you MUST:
 
-1. Add the default + one-line `# ...` comment to [static.env](../../../../env/static.env) (or [ci.env](../../../../env/ci.env) for the CI network block). Defaults never live in `compose.yml`.
+1. Add the default + one-line `# ...` comment to [default.env](../../../../env/default.env) (or [ci.env](../../../../env/ci.env) for the CI network block). Defaults never live in `compose.yml`.
 2. Consume the variable strictly via `${VAR:?Run 'make dotenv' to generate the .env single source of truth}`; bare `${VAR}` is acceptable only when the value is optional (e.g. `NIX_CONFIG`).
 3. Add a row to the matching table above with its compose-side purpose.
 4. Cross-link the variable from the relevant workflow page when it exists only to drive a specific workflow (e.g. resource caps link to [ci.md](../../actions/debugging/ci.md)).

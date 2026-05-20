@@ -15,7 +15,7 @@ from utils.env.parser import parse_static_env, parse_static_env_with_comments
 
 
 def _write(td: str, body: str) -> Path:
-    p = Path(td) / "static.env"
+    p = Path(td) / "default.env"
     p.write_text(body, encoding="utf-8")
     return p
 

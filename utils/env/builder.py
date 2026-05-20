@@ -71,10 +71,10 @@ def build_env(
     *,
     comments: dict[str, str] | None = None,
 ) -> EnvBuilder:
-    """Compose the full env-set from ``static`` (parsed env/static.env) +
+    """Compose the full env-set from ``static`` (parsed env/default.env) +
     runtime context resolved against ``repo_root``.
 
-    ``comments`` is the parsed per-key comment map from env/static.env
+    ``comments`` is the parsed per-key comment map from env/default.env
     (see :func:`utils.env.parser.parse_static_env_with_comments`).
     Dynamic keys carry their comments via each handler's ``COMMENT``
     constant.

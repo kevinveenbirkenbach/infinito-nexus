@@ -17,7 +17,7 @@ fi
 # shellcheck source=scripts/meta/env/load.sh
 source scripts/meta/env/load.sh
 
-: "${INFINITO_WORKER_CPU:?INFINITO_WORKER_CPU must be set (provided by env/static.env via the env loader)}"
+: "${INFINITO_WORKER_CPU:?INFINITO_WORKER_CPU must be set (provided by env/default.env via the env loader)}"
 
 n_targets=$#
 if ((n_targets < INFINITO_WORKER_CPU)); then

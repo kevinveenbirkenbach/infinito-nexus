@@ -13,14 +13,14 @@ Why:
   which value won (the env-file, the env override, or the compose
   default). Debugging the resulting drift is painful.
 * **Single source of truth** -- the project keeps the canonical
-  default for every variable in ``env/static.env`` (consumed by
+  default for every variable in ``env/default.env`` (consumed by
   ``make dotenv`` into ``.env``). Inline compose defaults duplicate
   that contract in a second place and drift the moment the static
   default changes.
 
 Fix when this test fails:
 
-* Move the default to ``env/static.env`` so ``make dotenv`` materialises
+* Move the default to ``env/default.env`` so ``make dotenv`` materialises
   it into ``.env`` (which Docker Compose auto-loads).
 * Replace the inline ``${VAR:-fallback}`` with ``${VAR:?Run 'make dotenv'
   to generate the .env single source of truth}`` so the failure mode
@@ -115,8 +115,8 @@ class TestComposeNoDefaultSubstitutions(unittest.TestCase):
             lines.append("")
             lines.append(
                 "Inline defaults make the effective value ambiguous and "
-                "duplicate the SPOT that env/static.env owns. Move the "
-                "default into env/static.env and replace the substitution "
+                "duplicate the SPOT that env/default.env owns. Move the "
+                "default into env/default.env and replace the substitution "
                 "with ${VAR:?Run 'make dotenv' to generate the .env single "
                 "source of truth}."
             )

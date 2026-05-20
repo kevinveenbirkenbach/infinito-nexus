@@ -2,18 +2,18 @@
 
 This directory hosts the Python implementation behind `make dotenv`.
 For the general rules that govern READMEs in code directories see [documentation.md](../../docs/contributing/documentation.md).
-For the per-variable defaults that this code consumes see [static.env](../../env/static.env).
+For the per-variable defaults that this code consumes see [default.env](../../env/default.env).
 
 ## Purpose 🎯
 
-The package converts the committed [static.env](../../env/static.env) plus a small runtime context into the gitignored `.env` at the repo root.
+The package converts the committed [default.env](../../env/default.env) plus a small runtime context into the gitignored `.env` at the repo root.
 Every module here belongs to one of four roles: parse, resolve, orchestrate, write.
 
 ## Structure 🗂️
 
 | File | Role |
 |---|---|
-| `parser.py` | Read [static.env](../../env/static.env) into `(values, comments)` tuples. |
+| `parser.py` | Read [default.env](../../env/default.env) into `(values, comments)` tuples. |
 | `runtime.py` | Resolve host-context lookups (disk, RAM, hostname, GHA/Act flags, `/proc/version`, helper-script invocation). |
 | `builder.py` | Thin orchestrator that defines `EnvBuilder`, `BuildContext`, and `build_env()`. Walks the handler registry. |
 | `writer.py` | Serialise an `EnvBuilder` into a docker-compose-compatible `.env` on disk. |

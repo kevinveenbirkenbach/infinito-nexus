@@ -11,7 +11,7 @@
 
 set -euo pipefail
 
-# Default lives in env/static.env (SPOT); load.sh exports it.
+# Default lives in env/default.env (SPOT); load.sh exports it.
 PARALLEL="${INFINITO_WORKER_ENABLED}"
 
 SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"

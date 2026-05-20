@@ -2,7 +2,7 @@
 
 1. An active VIRTUAL_ENV pins the base to its parent (caller is already
    inside a managed venv, respect it).
-2. The static.env default (typically ``/opt/venvs``) wins when it is
+2. The default.env default (typically ``/opt/venvs``) wins when it is
    user-writable -- this is the container path.
 3. Otherwise fall back to ``$HOME/.venvs`` so a non-root host user can
    create the venv without sudo.

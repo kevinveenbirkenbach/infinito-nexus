@@ -25,7 +25,7 @@ introduced for `registry-cache`:
   cache section of
   [docs/contributing/artefact/files/compose.yml.md](../contributing/artefact/files/compose.yml.md),
 - the per-cache env defaults declared in
-  [env/static.env](../../env/static.env), materialised into `.env`
+  [env/default.env](../../env/default.env), materialised into `.env`
   by `make dotenv`.
 
 The `registry-cache` service MUST remain in place after this

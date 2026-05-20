@@ -1,6 +1,6 @@
 """`infinito meta env` subcommand -- generate the project's `.env`.
 
-Reads `env/static.env` plus the current runtime context (distro, GHA/Act
+Reads `env/default.env` plus the current runtime context (distro, GHA/Act
 flags, df/meminfo-derived sizes, sha256 secrets, ...) and writes the
 resulting `.env` at the repo root. Implementation lives in
 `utils.env`; this package is the CLI entry point.

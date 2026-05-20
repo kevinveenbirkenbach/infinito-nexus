@@ -1,4 +1,4 @@
-"""GHA-only static-env passthrough: keys from env/static.env that are
+"""GHA-only static-env passthrough: keys from env/default.env that are
 only seeded when running on real GitHub Actions."""
 
 from __future__ import annotations

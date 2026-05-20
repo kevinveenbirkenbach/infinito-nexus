@@ -1,4 +1,4 @@
-"""Parse the project's `env/static.env`.
+"""Parse the project's `env/default.env`.
 
 The format is the docker-compose `.env`-subset: flat `KEY=value` lines,
 `#` for comments, optional surrounding double/single quotes for values

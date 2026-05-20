@@ -1,6 +1,6 @@
-"""Static-env passthrough: copy every declared key from env/static.env
+"""Static-env passthrough: copy every declared key from env/default.env
 with caller-env-wins (setdefault) semantics. Comments come from
-``ctx.static_comments`` (parsed from env/static.env)."""
+``ctx.static_comments`` (parsed from env/default.env)."""
 
 from __future__ import annotations
 
