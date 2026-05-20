@@ -11,6 +11,8 @@ jobs:
     name: 🧹 Lint Makefile
     runs-on: ubuntu-latest
     timeout-minutes: 5
+    env:
+      INFINITO_LINT_RUNNER: host
 
     steps:
       - name: Checkout repository
