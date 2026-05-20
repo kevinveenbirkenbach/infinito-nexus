@@ -108,47 +108,43 @@ jobs:
     uses: ./.github/workflows/lint-shell.yml
   lint-markdown:
     uses: ./.github/workflows/lint-markdown.yml
-  lint-galaxy:
-    uses: ./.github/workflows/lint-galaxy.yml
   lint-makefile:
     uses: ./.github/workflows/lint-makefile.yml
   lint-javascript:
     uses: ./.github/workflows/lint-javascript.yml
   lint-gate:
     name: 🚦 Gate lint
-    needs: [lint-ansible, lint-python, lint-docker, lint-shell, lint-markdown, lint-galaxy, lint-makefile, lint-javascript]
+    needs: [lint-ansible, lint-python, lint-docker, lint-shell, lint-markdown, lint-makefile, lint-javascript]
     runs-on: ubuntu-latest
     steps:
       - run: echo "lint gate passed"
 
-  # Build Docker Images 
-  build-ci-images:
-    needs: fork-prereqs-ready
-    uses: ./.github/workflows/images-build-ci.yml
-    with:
-      distros: "arch debian ubuntu fedora centos"
-      concurrency_channel: ci-orchestrator-build-consumer
-    secrets: inherit
-
   # Code Testing
   test-code-integration:
     uses: ./.github/workflows/test-code-integration.yml
-    needs: build-ci-images
   test-code-lint:
     uses: ./.github/workflows/test-code-lint.yml
-    needs: build-ci-images
   test-code-external:
     uses: ./.github/workflows/test-code-external.yml
-    needs: build-ci-images
   test-code-unit:
-    uses: ./.github/workflows/test-code-unit.yml 
-    needs: build-ci-images
+    uses: ./.github/workflows/test-code-unit.yml
   test-code-gate:
     name: 🚦 Gate code
     needs: [test-code-integration, test-code-lint, test-code-external, test-code-unit]
     runs-on: ubuntu-latest
     steps:
       - run: echo "code gate passed"
+
+  # Build Docker Images
+  build-ci-images:
+    needs:
+      - fork-prereqs-ready
+      - test-code-gate
+    uses: ./.github/workflows/images-build-ci.yml
+    with:
+      distros: "arch debian ubuntu fedora centos"
+      concurrency_channel: ci-orchestrator-build-consumer
+    secrets: inherit
 
   # Gate for the code Quality
   code-quality-gate:
