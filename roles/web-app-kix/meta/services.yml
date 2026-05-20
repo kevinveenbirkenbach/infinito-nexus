@@ -45,7 +45,7 @@ kix:
       oauth2: 16500
   run_after:
     - web-app-keycloak
-  lifecycle: pre-alpha
+  lifecycle: beta
   cpus: "0.5"
   mem_reservation: 512m
   mem_limit: 1g
