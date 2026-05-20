@@ -10,7 +10,7 @@ permissions:
 
 jobs:
   test-install-make:
-    name: 🛠️ Test make install
+    name: 🛠️ Makefile
     runs-on: ubuntu-latest
     timeout-minutes: 15
     env:

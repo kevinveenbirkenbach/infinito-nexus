@@ -77,7 +77,7 @@ jobs:
         run: ./scripts/meta/wait/images.sh
 
   fork-prereqs-ready:
-    name: 🚦 Gate fork prerequisites
+    name: 🚦 Gate Dependencies
     needs: wait-fork-prereq-run
     if: ${{ always() }}
     runs-on: ubuntu-latest
@@ -114,7 +114,14 @@ jobs:
     uses: ./.github/workflows/lint-javascript.yml
   lint-gate:
     name: 🚦 Gate lint
-    needs: [lint-ansible, lint-python, lint-docker, lint-shell, lint-markdown, lint-makefile, lint-javascript]
+    needs: 
+      - lint-ansible
+      - lint-python
+      - lint-docker
+      - lint-shell
+      - lint-markdown
+      - lint-makefile
+      - lint-javascript
     runs-on: ubuntu-latest
     steps:
       - run: echo "lint gate passed"
@@ -137,7 +144,11 @@ jobs:
 
   # Gate for the code Quality
   code-quality-gate:
-    needs: [lint-gate, test-code-gate, security-codeql]
+    name: 🚦 Gate Quality
+    needs: 
+      - lint-gate
+      - test-code-gate
+      - security-codeql
     runs-on: ubuntu-latest
     steps:
       - run: echo "Quality Checks passed"

@@ -60,7 +60,7 @@ jobs:
           echo "Using image tag: ${image_tag}"
 
   build:
-    name: 🏗️ Build image (${{ matrix.distro }})
+    name: 🏗️ Build (${{ matrix.distro }})
     needs: prepare
     runs-on: ubuntu-latest
 
