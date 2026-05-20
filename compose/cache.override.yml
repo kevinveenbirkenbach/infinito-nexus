@@ -39,7 +39,9 @@ services:
     # Run as root: fresh bind-mount is root:root and Nexus aborts otherwise.
     user: "0:0"
     environment:
-      INSTALL4J_ADD_VM_PARAMS: "-Xms${INFINITO_PACKAGE_CACHE_HEAP:?Run 'make dotenv' to generate the .env single source of truth} -Xmx${INFINITO_PACKAGE_CACHE_HEAP:?Run 'make dotenv' to generate the .env single source of truth} -XX:MaxDirectMemorySize=${INFINITO_PACKAGE_CACHE_DIRECT_MEM:?Run 'make dotenv' to generate the .env single source of truth}"
+      INSTALL4J_ADD_VM_PARAMS: "-Xms${INFINITO_PACKAGE_CACHE_HEAP:?Run 'make dotenv' to generate the .env single source of truth} -Xmx${INFINITO_PACKAGE_CACHE_HEAP:?Run
+        'make dotenv' to generate the .env single source of truth} -XX:MaxDirectMemorySize=${INFINITO_PACKAGE_CACHE_DIRECT_MEM:?Run 'make dotenv' to generate the
+        .env single source of truth}"
       # Random-password mode leaves no readable secret for the bootstrap.
       NEXUS_SECURITY_RANDOMPASSWORD: "false"
     volumes:
@@ -49,7 +51,8 @@ services:
         bind:
           create_host_path: true
     ports:
-      - "${INFINITO_BIND_IP:?Run 'make dotenv' to generate the .env single source of truth}:${INFINITO_PACKAGE_CACHE_PORT:?Run 'make dotenv' to generate the .env single source of truth}:8081"
+      - "${INFINITO_BIND_IP:?Run 'make dotenv' to generate the .env single source of truth}:${INFINITO_PACKAGE_CACHE_PORT:?Run 'make dotenv' to generate the .env
+        single source of truth}:8081"
     healthcheck:
       test:
         - CMD-SHELL
@@ -124,10 +127,13 @@ services:
         read_only: true
         bind:
           create_host_path: true
-      - ${INFINITO_REGISTRY_CACHE_PROXY_CONF:?Set by 'cli deploy development up' / 'make up' (driver-injected, not produced by 'make dotenv')}:/etc/systemd/system/docker.service.d/registry-cache-proxy.conf:ro
+      - ${INFINITO_REGISTRY_CACHE_PROXY_CONF:?Set by 'cli deploy development up' / 'make up' (driver-injected, not produced by 'make
+        dotenv')}:/etc/systemd/system/docker.service.d/registry-cache-proxy.conf:ro
       - ./scripts/docker/cache/registry-ca.sh:/usr/local/bin/registry-cache-ca.sh:ro
       - ${INFINITO_PACKAGE_CACHE_PIP_CONF:?Set by 'cli deploy development up' / 'make up' (driver-injected, not produced by 'make dotenv')}:/etc/pip.conf:ro
       - ${INFINITO_PACKAGE_CACHE_NPMRC:?Set by 'cli deploy development up' / 'make up' (driver-injected, not produced by 'make dotenv')}:/root/.npmrc:ro
-      - ${INFINITO_PACKAGE_CACHE_APT_LIST:?Set by 'cli deploy development up' / 'make up' (driver-injected, not produced by 'make dotenv')}:/etc/apt/sources.list.d/package-cache.list:ro
-      - ${INFINITO_PACKAGE_CACHE_FRONTEND_CA_FILE:?Set by 'cli deploy development up' / 'make up' (driver-injected, not produced by 'make dotenv')}:/opt/package-frontend-ca.crt:ro
+      - ${INFINITO_PACKAGE_CACHE_APT_LIST:?Set by 'cli deploy development up' / 'make up' (driver-injected, not produced by 'make
+        dotenv')}:/etc/apt/sources.list.d/package-cache.list:ro
+      - ${INFINITO_PACKAGE_CACHE_FRONTEND_CA_FILE:?Set by 'cli deploy development up' / 'make up' (driver-injected, not produced by 'make
+        dotenv')}:/opt/package-frontend-ca.crt:ro
       - ./scripts/docker/cache/package-frontend-ca.sh:/usr/local/bin/package-frontend-ca.sh:ro

@@ -261,6 +261,13 @@ agent-install:
 dotenv:
 	@python3 -m cli.meta.env
 
+# Force a clean .env regeneration. Runs in a stripped env so the Makefile's
+# BASH_ENV-pre-loaded INFINITO_* values do not bleed into setdefault and
+# pin stale numbers (e.g. INFINITO_WORKER_FETCH after a factor change).
+dotenv-force:
+	@rm -f .env
+	@env -i HOME="$${HOME}" PATH="$${PATH}" python3 -m cli.meta.env
+
 # Run the setup step after generating .dockerignore.
 setup: dockerignore dotenv
 	@bash scripts/setup.sh
@@ -320,7 +327,12 @@ autoformat: install-lint
 
 # Run the full test pipeline (lint + tests) in parallel; fail-fast.
 test: install install-lint
-	@bash scripts/make/parallel.sh lint test-lint test-unit test-integration
+	@bash scripts/make/parallel.sh \
+		lint \
+		test-external \
+		test-integration \
+		test-lint \
+		test-unit
 
 # Run the lint test suite.
 test-lint: install

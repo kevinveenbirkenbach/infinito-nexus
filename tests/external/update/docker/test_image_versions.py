@@ -30,57 +30,17 @@ from __future__ import annotations
 import unittest
 
 from utils.annotations.message import warning
-from utils.docker.image.discovery import iter_role_images
-from utils.roles.mapping import ROLE_FILE_META_SERVICES
-from utils.update.base import (
-    is_semver,
-    latest_semver,
-    version_depth,
-    version_flavor,
-    version_key,
-)
 from utils.update.docker import (
-    fetch_dockerhub_tags,
-    fetch_ghcr_tags,
-    fetch_mcr_tags,
+    collect_entries,
+    find_outdated_updates,
     is_dockerhub,
     is_ghcr,
     is_mcr,
-    suppressed_services,
 )
 
 from . import PROJECT_ROOT
 
 _REPO_ROOT = PROJECT_ROOT
-_ROLES_ROOT = _REPO_ROOT / "roles"
-
-
-def _collect_entries() -> list[dict]:
-    """Collect (role, service, image, version, config_path) for semver versions across all roles."""
-    entries: list[dict] = []
-    for ref in iter_role_images(_REPO_ROOT):
-        # Only semver versions (pure or `<semver>-<flavor>`)
-        if not is_semver(ref.version):
-            continue
-        cfg_path = _ROLES_ROOT / ref.role / ROLE_FILE_META_SERVICES
-        # Check nocheck suppression
-        if ref.service in suppressed_services(cfg_path):
-            continue
-        # Reconstruct full image reference for registry API calls
-        if ref.registry == "docker.io":
-            image = ref.name
-        else:
-            image = f"{ref.registry}/{ref.name}"
-        entries.append(
-            {
-                "role": ref.role,
-                "service": ref.service,
-                "image": image,
-                "version": ref.version,
-                "config_path": str(cfg_path.relative_to(_REPO_ROOT)),
-            }
-        )
-    return entries
 
 
 def _emit_annotation(
@@ -112,63 +72,45 @@ class TestDockerImageVersions(unittest.TestCase):
     """Warn about outdated live Docker image versions in roles/*/meta/services.yml."""
 
     def test_image_versions_are_current(self) -> None:
-        entries = _collect_entries()
+        entries = collect_entries(_REPO_ROOT)
         self.assertTrue(entries, "No semver-versioned config entries found")
 
-        # Deduplicate registry queries per image
-        image_tags: dict[str, list[str]] = {}
-        for e in entries:
-            img = e["image"]
-            if img in image_tags:
-                continue
-            if is_dockerhub(img):
-                image_tags[img] = fetch_dockerhub_tags(img)
-            elif is_ghcr(img):
-                image_tags[img] = fetch_ghcr_tags(img)
-            elif is_mcr(img):
-                image_tags[img] = fetch_mcr_tags(img)
+        # find_outdated_updates fans the registry queries out via a
+        # ThreadPoolExecutor sized to INFINITO_WORKER_FETCH and returns
+        # only entries whose live tag is newer than the pinned semver.
+        updates = find_outdated_updates(_REPO_ROOT)
 
-        outdated: list[dict] = []
-        unchecked: list[dict] = []
-        for e in entries:
-            img = e["image"]
-            if not is_dockerhub(img) and not is_ghcr(img) and not is_mcr(img):
-                unchecked.append(e)
-                continue
-            tags = image_tags.get(img, [])
-            if not tags:
-                unchecked.append(e)
-                continue
-            latest = latest_semver(
-                tags,
-                version_depth(e["version"]),
-                version_flavor(e["version"]),
-            )
-            if latest and version_key(e["version"]) < version_key(latest):
-                outdated.append({**e, "latest": latest})
+        # "Unchecked" entries are those whose registry is not yet
+        # supported by the update walker (currently: dockerhub / ghcr /
+        # mcr). The check is purely structural — no live fetch needed.
+        unchecked = [
+            e
+            for e in entries
+            if not (is_dockerhub(e.image) or is_ghcr(e.image) or is_mcr(e.image))
+        ]
 
-        if outdated:
+        if updates:
             col_w = (35, 20, 40, 15)
             header = (
                 f"{'Role':<{col_w[0]}} {'Service':<{col_w[1]}} "
                 f"{'Image':<{col_w[2]}} {'Current':<{col_w[3]}} Latest"
             )
             rows = "\n".join(
-                f"{o['role']:<{col_w[0]}} {o['service']:<{col_w[1]}} "
-                f"{o['image']:<{col_w[2]}} {o['version']:<{col_w[3]}} {o['latest']}"
-                for o in outdated
+                f"{u.entry.role:<{col_w[0]}} {u.entry.service:<{col_w[1]}} "
+                f"{u.entry.image:<{col_w[2]}} {u.entry.version:<{col_w[3]}} {u.latest}"
+                for u in updates
             )
             print(
                 f"\n⚠️  Outdated Docker image versions:\n{header}\n{'-' * 120}\n{rows}\n\n💡 To suppress a warning add above the version: key:\n  # nocheck: docker-version"
             )
-            for o in outdated:
+            for u in updates:
                 _emit_annotation(
-                    o["config_path"],
-                    o["role"],
-                    o["service"],
-                    o["image"],
-                    o["version"],
-                    o["latest"],
+                    str(u.entry.config_path.relative_to(_REPO_ROOT)),
+                    u.entry.role,
+                    u.entry.service,
+                    u.entry.image,
+                    u.entry.version,
+                    u.latest,
                 )
 
         if unchecked:
@@ -178,20 +120,20 @@ class TestDockerImageVersions(unittest.TestCase):
                 f"{'Image':<{col_w[2]}} Current"
             )
             rows = "\n".join(
-                f"{o['role']:<{col_w[0]}} {o['service']:<{col_w[1]}} "
-                f"{o['image']:<{col_w[2]}} {o['version']}"
-                for o in unchecked
+                f"{e.role:<{col_w[0]}} {e.service:<{col_w[1]}} "
+                f"{e.image:<{col_w[2]}} {e.version}"
+                for e in unchecked
             )
             print(
                 f"\n🔍 Unchecked Docker image versions (registry not supported):\n"
                 f"{header}\n{'-' * 100}\n{rows}"
             )
-            for o in unchecked:
+            for e in unchecked:
                 _emit_unchecked_annotation(
-                    o["config_path"],
-                    o["role"],
-                    o["service"],
-                    o["image"],
+                    str(e.config_path.relative_to(_REPO_ROOT)),
+                    e.role,
+                    e.service,
+                    e.image,
                 )
 
         # Always pass - outdated images are warnings, not hard failures

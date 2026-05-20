@@ -11,14 +11,6 @@ repos:
         entry: make test
         language: system
         pass_filenames: false
-        stages: 
+        stages:
           - pre-commit
-          - pre-push
-      - id: make-test-external
-        name: Run make test-external (pre-push gate)
-        entry: make test-external
-        language: system
-        pass_filenames: false
-        always_run: true
-        stages: 
           - pre-push

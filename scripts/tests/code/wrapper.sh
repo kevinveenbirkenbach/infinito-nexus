@@ -44,9 +44,14 @@ docker)
 	# and the generated keys (INFINITO_CONTAINER, INFINITO_SUBNET, ...)
 	# from `.env`. Compose otherwise auto-loads only `.env`, which would
 	# leave the ci.env keys unset when this wrapper is the entry point.
+	# BASH_ENV makes `bash --login` source load.sh on startup, pulling
+	# every INFINITO_* key from the bind-mounted .env into the test
+	# runner's environment (notably INFINITO_WORKER_FETCH, otherwise the
+	# external URL probe collapses to 1 worker).
 	INFINITO_DISTRO="${INFINITO_DISTRO}" \
 		docker compose --env-file env/ci.env --env-file .env --profile ci exec -T \
 		-e ACT="${ACT:-}" \
+		-e BASH_ENV="${INFINITO_SRC_DIR}/scripts/meta/env/load.sh" \
 		-e GITHUB_ACTIONS="${GITHUB_ACTIONS:-}" \
 		-e GITHUB_REPOSITORY="${GITHUB_REPOSITORY:-}" \
 		-e GITHUB_REPOSITORY_OWNER="${GITHUB_REPOSITORY_OWNER:-}" \
