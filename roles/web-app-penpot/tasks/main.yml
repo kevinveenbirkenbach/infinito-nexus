@@ -1,0 +1,20 @@
+---
+# Default: Loading Docker, Database and Reverse Proxy
+- name: "load docker, db and proxy for '{{ application_id }}'"
+  include_role:
+    name: sys-stk-full
+  when: run_once_docker_web_app_penpot is not defined
+
+- name: run the web-app-penpot tasks once
+  set_fact:
+    run_once_docker_web_app_penpot: true
+  when: run_once_docker_web_app_penpot is not defined
+
+# Deploy compose stack
+- name: deploy penpot compose stack
+  include_role:
+    name: sys-svc-compose
+
+- name: Clear web-app-penpot from Playwright failures on role success
+  ansible.builtin.set_fact:
+    _playwright_failures: "{{ (_playwright_failures | default([])) | difference([application_id]) }}"
