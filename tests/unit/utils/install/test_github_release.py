@@ -27,22 +27,23 @@ class TestResolveLatestTag(unittest.TestCase):
         with mock.patch.object(
             gr,
             "urlopen",
-            return_value=_FakeResp("https://github.com/x/y/releases/tag/v1.2.3"),
+            return_value=_FakeResp("https://example.com/x/y/releases/tag/v1.2.3"),
         ):
             self.assertEqual(
-                gr.resolve_latest_tag("https://github.com/x/y/releases/latest"), "1.2.3"
+                gr.resolve_latest_tag("https://example.com/x/y/releases/latest"),
+                "1.2.3",
             )
 
     def test_handles_trailing_slash(self) -> None:
         with mock.patch.object(
             gr,
             "urlopen",
-            return_value=_FakeResp("https://github.com/x/y/releases/tag/v9.0.0/"),
+            return_value=_FakeResp("https://example.com/x/y/releases/tag/v9.0.0/"),
         ):
             self.assertEqual(gr.resolve_latest_tag("https://example/latest"), "9.0.0")
 
     def test_raises_when_unresolved(self) -> None:
-        latest = "https://github.com/x/y/releases/latest"
+        latest = "https://example.com/x/y/releases/latest"
         with mock.patch.object(gr, "urlopen", return_value=_FakeResp(latest)):
             self.assertRaises(RuntimeError, gr.resolve_latest_tag, latest)
 
@@ -50,7 +51,7 @@ class TestResolveLatestTag(unittest.TestCase):
         with mock.patch.object(
             gr,
             "urlopen",
-            return_value=_FakeResp("https://github.com/x/y/releases/tag/latest"),
+            return_value=_FakeResp("https://example.com/x/y/releases/tag/latest"),
         ):
             self.assertRaises(
                 RuntimeError, gr.resolve_latest_tag, "https://example/latest"

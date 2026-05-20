@@ -20,6 +20,7 @@ from __future__ import annotations
 
 import concurrent.futures
 import ipaddress
+import os
 import re
 import subprocess
 import unittest
@@ -77,8 +78,28 @@ _WARNING_STATUS_CODES = {
     451,  # Unavailable For Legal Reasons: jurisdiction-specific block.
 }
 _REQUEST_TIMEOUT_SECONDS = 10
-_MAX_WORKERS = 8
 _USER_AGENT = "infinito-nexus-url-reachability-check"
+
+
+def _is_parallel_enabled() -> bool:
+    return os.environ.get("INFINITO_PARALLEL", "true").strip().lower() in {
+        "1",
+        "true",
+        "yes",
+        "on",
+    }
+
+
+def _resolve_max_workers() -> int:
+    # URL probing is I/O-bound: CPU sits idle during TCP/TLS waits, so
+    # cpu_count() is the wrong proxy. Multiply by 20 for network-bound
+    # work; INFINITO_PARALLEL=false falls back to sequential.
+    if not _is_parallel_enabled():
+        return 1
+    return (os.cpu_count() or 4) * 20
+
+
+_MAX_WORKERS = _resolve_max_workers()
 
 
 class UrlOccurrence(NamedTuple):
