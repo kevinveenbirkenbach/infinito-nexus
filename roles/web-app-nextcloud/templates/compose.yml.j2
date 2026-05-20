@@ -14,8 +14,7 @@
     volumes_from:
       - {{ NEXTCLOUD_SERVICE }}
 {% include 'roles/sys-svc-container/templates/healthcheck/curl.yml.j2'  %}
-    networks:
-      - default
+{% include 'roles/sys-svc-container/templates/networks.yml.j2' %}
 {% if NEXTCLOUD_HPB_NETWORK_MODE == 'host' %}
     extra_hosts:
       - "host.docker.internal:host-gateway"
@@ -61,10 +60,9 @@
 {% endif %}
     expose:
       - "{{ container_port }}"
-    networks:
-      - default
+{% include 'roles/sys-svc-container/templates/networks.yml.j2' %}
 {% else %}
-  network_mode: {{ NEXTCLOUD_HPB_NETWORK_MODE }}
+    network_mode: {{ NEXTCLOUD_HPB_NETWORK_MODE }}
 {% endif %}
 {% endif %}
 
@@ -88,8 +86,7 @@
     expose:
       - "{{ container_port }}"
     shm_size: 1g
-    networks:
-      - default
+{% include 'roles/sys-svc-container/templates/networks.yml.j2' %}
     depends_on:
       redis:
         condition: service_healthy
@@ -130,8 +127,7 @@
       - TZ={{ HOST_TIMEZONE }}
     expose:
       - "{{ NEXTCLOUD_RECORDING_PORT }}"
-    networks:
-      - default
+{% include 'roles/sys-svc-container/templates/networks.yml.j2' %}
     volumes:
       - talk_recording_tmp:/tmp
 {% endif %}

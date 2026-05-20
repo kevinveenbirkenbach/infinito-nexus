@@ -8,8 +8,7 @@
     volumes:
       - kix_db:/var/lib/postgresql/data
     shm_size: '2gb'
-    networks:
-      default:
+{% include 'roles/sys-svc-container/templates/networks.yml.j2' %}
 
   {{ KIX_BACKEND_CONTAINER }}:
     image: "{{ KIX_BACKEND_IMAGE }}:{{ KIX_BACKEND_VERSION }}"
@@ -26,9 +25,7 @@
       - kix_shared:/mnt/shared
       - kix_backend:/mnt/data
       - "{{ KIX_AUTH_LDAP_HOST_PATH }}:{{ KIX_AUTH_LDAP_CONTAINER_PATH }}:ro"
-    networks:
-      default:
-      openldap:
+{% include 'roles/sys-svc-container/templates/networks.yml.j2' %}
 
   {{ KIX_FRONTEND_CONTAINER }}:
     image: "{{ KIX_FRONTEND_IMAGE }}:{{ KIX_FRONTEND_VERSION }}"
@@ -51,8 +48,7 @@
     volumes:
       - kix_shared:/mnt/shared
       - kix_frontend:/mnt/data
-    networks:
-      default:
+{% include 'roles/sys-svc-container/templates/networks.yml.j2' %}
 
   {{ KIX_PROXY_CONTAINER }}:
     image: "{{ KIX_PROXY_IMAGE }}:{{ KIX_PROXY_VERSION }}"
@@ -65,8 +61,7 @@
       - "{{ KIX_PROXY_NGINX_HOST_PATH }}:{{ KIX_PROXY_NGINX_CONTAINER_PATH }}:ro"
     ports:
       - "{{ DOCKER_BIND_HOST }}:{{ lookup('config', application_id, 'services.kix.ports.local.http') }}:80"
-    networks:
-      default:
+{% include 'roles/sys-svc-container/templates/networks.yml.j2' %}
 
 {{ lookup('applications') | compose_volumes(
     application_id,
