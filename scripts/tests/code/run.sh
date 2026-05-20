@@ -20,7 +20,8 @@ echo "PWD=$(pwd)"
 echo "PYTHON=${PYTHON:-<unset>}"
 
 if [ -n "${PYTHON:-}" ]; then
-	export PATH="$(dirname "$PYTHON"):$PATH"
+	PATH="$(dirname "$PYTHON"):$PATH"
+	export PATH
 fi
 
 make setup
