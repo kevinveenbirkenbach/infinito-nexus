@@ -13,6 +13,6 @@ COMMENT = "Pass-through of the caller's NIX_CONFIG, when present."
 
 
 def apply(eb: EnvBuilder, ctx: BuildContext) -> None:
-    nix_config = os.environ.get("NIX_CONFIG", "")
+    nix_config = os.environ.get("NIX_CONFIG", "").strip()
     if nix_config:
         eb.set(KEY, nix_config, comment=COMMENT)
