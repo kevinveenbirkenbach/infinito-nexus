@@ -259,8 +259,10 @@ fi
 echo "------------------------------------------------------------"
 
 # Common build args
+: "${INFINITO_SRC_DIR:?INFINITO_SRC_DIR must be set; source scripts/meta/env/load.sh}"
 build_args=(
 	--build-arg "INFINITO_PARENT_IMAGE=${PKGMGR_IMAGE}"
+	--build-arg "INFINITO_SRC_DIR=${INFINITO_SRC_DIR}"
 	--build-arg "NIX_CONFIG=${NIX_CONFIG:-}"
 )
 
