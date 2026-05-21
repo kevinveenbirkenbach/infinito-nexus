@@ -1,2 +1,6 @@
+---
 test-e2e-playwright:
   lifecycle: beta
+playwright:
+  image: mcr.microsoft.com/playwright
+  version: "v1.60.0-noble"

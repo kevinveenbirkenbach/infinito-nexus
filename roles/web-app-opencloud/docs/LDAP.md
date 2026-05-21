@@ -22,5 +22,5 @@ OpenCloud uses the central `svc-db-openldap` instance for user and group lookups
 ## Inspect LDAP Entries 🩺
 
 ```bash
-make exec CMD="container exec opencloud opencloud users list"
+make exec INFINITO_CMD="container exec opencloud opencloud users list"
 ```

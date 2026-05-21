@@ -4,7 +4,7 @@ set -euo pipefail
 # ------------------------------------------------------------
 # Load environment (Single Source of Truth)
 # ------------------------------------------------------------
-ENV_FILE="${ENV_FILE:-env.ci}"
+ENV_FILE="${ENV_FILE:-env/ci.env}"
 
 if [ ! -f "${ENV_FILE}" ]; then
 	echo "ERROR: env file not found: ${ENV_FILE}"
@@ -18,21 +18,21 @@ source "${ENV_FILE}"
 set +a
 
 # Source project defaults so INFINITO_CONTAINER auto-derives from
-# INFINITO_DISTRO (single SPOT in scripts/meta/env/defaults.sh) — callers
+# INFINITO_DISTRO (single SPOT in scripts/meta/env/load.sh) — callers
 # only need to set INFINITO_DISTRO.
-# shellcheck source=scripts/meta/env/defaults.sh
-source scripts/meta/env/defaults.sh
+# shellcheck source=scripts/meta/env/load.sh
+source scripts/meta/env/load.sh
 
 # ------------------------------------------------------------
 # Required variables (fail hard if missing)
 # ------------------------------------------------------------
-: "${DNS_IP:?Missing DNS_IP in env file}"
-: "${DOMAIN:?Missing DOMAIN in env file}"
-: "${IP4:?Missing IP4 in env file}"
+: "${INFINITO_DNS_IP:?Missing INFINITO_DNS_IP in env file}"
+: "${INFINITO_DOMAIN:?Missing INFINITO_DOMAIN in env file}"
+: "${INFINITO_IP4:?Missing INFINITO_IP4 in env file}"
 : "${INFINITO_CONTAINER:?Missing INFINITO_CONTAINER env (e.g. infinito_nexus_arch)}"
 
-SUBDOMAIN="foo.${DOMAIN}"
-IP4_EXPECTED="${IP4}"
+SUBDOMAIN="foo.${INFINITO_DOMAIN}"
+IP4_EXPECTED="${INFINITO_IP4}"
 
 # ------------------------------------------------------------
 # Output helpers
@@ -58,8 +58,8 @@ echo "============================================================"
 echo " DNS TEST SUITE"
 echo "============================================================"
 echo "ENV_FILE   = ${ENV_FILE}"
-echo "DNS_IP     = ${DNS_IP}"
-echo "DOMAIN     = ${DOMAIN}"
+echo "INFINITO_DNS_IP     = ${INFINITO_DNS_IP}"
+echo "INFINITO_DOMAIN     = ${INFINITO_DOMAIN}"
 echo "SUBDOMAIN  = ${SUBDOMAIN}"
 echo "EXPECT IP  = ${IP4_EXPECTED}"
 echo "INFINITO   = ${INFINITO_CONTAINER}"
@@ -71,13 +71,13 @@ echo
 section "Host -> CoreDNS (direct queries)"
 
 if command -v dig >/dev/null 2>&1; then
-	a1="$(dig @"${DNS_IP}" "${DOMAIN}" A +short | head -n1 || true)"
-	a2="$(dig @"${DNS_IP}" "${SUBDOMAIN}" A +short | head -n1 || true)"
+	a1="$(dig @"${INFINITO_DNS_IP}" "${INFINITO_DOMAIN}" A +short | head -n1 || true)"
+	a2="$(dig @"${INFINITO_DNS_IP}" "${SUBDOMAIN}" A +short | head -n1 || true)"
 
 	if [ "${a1}" = "${IP4_EXPECTED}" ]; then
-		ok "${DOMAIN} A -> ${a1}"
+		ok "${INFINITO_DOMAIN} A -> ${a1}"
 	else
-		fail "${DOMAIN} A failed (got '${a1}')"
+		fail "${INFINITO_DOMAIN} A failed (got '${a1}')"
 	fi
 
 	if [ "${a2}" = "${IP4_EXPECTED}" ]; then
@@ -95,10 +95,10 @@ fi
 section "Host -> CoreDNS (AAAA sanity check)"
 
 if command -v dig >/dev/null 2>&1; then
-	aaaa1="$(dig @"${DNS_IP}" "${DOMAIN}" AAAA +comments +noall +answer || true)"
-	aaaa2="$(dig @"${DNS_IP}" "${SUBDOMAIN}" AAAA +comments +noall +answer || true)"
+	aaaa1="$(dig @"${INFINITO_DNS_IP}" "${INFINITO_DOMAIN}" AAAA +comments +noall +answer || true)"
+	aaaa2="$(dig @"${INFINITO_DNS_IP}" "${SUBDOMAIN}" AAAA +comments +noall +answer || true)"
 
-	echo "AAAA ${DOMAIN}:"
+	echo "AAAA ${INFINITO_DOMAIN}:"
 	echo "${aaaa1:-<empty>}"
 	echo
 
@@ -107,13 +107,13 @@ if command -v dig >/dev/null 2>&1; then
 	echo
 
 	# dig exits 0 even on NXDOMAIN, so we check for SERVFAIL explicitly
-	status1="$(dig @"${DNS_IP}" "${DOMAIN}" AAAA +comments 2>&1 | grep -i status || true)"
-	status2="$(dig @"${DNS_IP}" "${SUBDOMAIN}" AAAA +comments 2>&1 | grep -i status || true)"
+	status1="$(dig @"${INFINITO_DNS_IP}" "${INFINITO_DOMAIN}" AAAA +comments 2>&1 | grep -i status || true)"
+	status2="$(dig @"${INFINITO_DNS_IP}" "${SUBDOMAIN}" AAAA +comments 2>&1 | grep -i status || true)"
 
 	echo "${status1}"
 	echo "${status2}"
 
-	echo "${status1}" | grep -qi "SERVFAIL" && fail "AAAA lookup returned SERVFAIL for ${DOMAIN}"
+	echo "${status1}" | grep -qi "SERVFAIL" && fail "AAAA lookup returned SERVFAIL for ${INFINITO_DOMAIN}"
 	echo "${status2}" | grep -qi "SERVFAIL" && fail "AAAA lookup returned SERVFAIL for ${SUBDOMAIN}"
 
 	ok "AAAA sanity check passed (no SERVFAIL)"
@@ -147,10 +147,10 @@ docker exec "${INFINITO_CONTAINER}" sh -lc "
   echo
 
   echo '>>> getent hosts'
-  h1=\$(getent hosts ${DOMAIN} | awk '{print \$1}' || true)
+  h1=\$(getent hosts ${INFINITO_DOMAIN} | awk '{print \$1}' || true)
   h2=\$(getent hosts ${SUBDOMAIN} | awk '{print \$1}' || true)
 
-  echo \"${DOMAIN} -> \${h1}\"
+  echo \"${INFINITO_DOMAIN} -> \${h1}\"
   echo \"${SUBDOMAIN} -> \${h2}\"
 
   [ \"\${h1}\" = \"${IP4_EXPECTED}\" ] || exit 11

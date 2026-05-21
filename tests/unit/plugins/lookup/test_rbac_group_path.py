@@ -1,6 +1,7 @@
 import unittest
 
 from ansible.errors import AnsibleError
+
 from plugins.lookup.rbac_group_path import LookupModule
 
 
@@ -68,7 +69,7 @@ class TestRbacGroupPathLookup(unittest.TestCase):
 
     def test_non_tenant_app_implicit_administrator_always_valid(self):
         # Even if an app does not explicitly declare administrator in its
-        # rbac.roles, requirement 004 auto-adds it; the lookup MUST accept
+        # rbac.roles, the auto-add rule provides it; the lookup MUST accept
         # that without failing.
         apps = {
             "web-app-gitea": {

@@ -27,7 +27,6 @@
 
 {{ lookup('applications') | compose_volumes(
     application_id,
-    database_volume=lookup('database', application_id, 'volume'),
     extra_volumes={
       'uploads': {'name': DECIDIM_VOLUME_UPLOADS},
       'logs':    {'name': DECIDIM_VOLUME_LOGS},

@@ -1,9 +1,12 @@
-import unittest
-import types
-from pathlib import Path
-from unittest.mock import patch
-import subprocess
 import os
+import subprocess
+import types
+import unittest
+from unittest.mock import patch
+
+from utils.cache.files import read_text
+
+from . import PROJECT_ROOT
 
 
 def load_module():
@@ -12,16 +15,13 @@ def load_module():
     roles/svc-bkp-rmt-2-loc/files/pull-specific-host.py
     relative to this test file.
     """
-    here = Path(__file__).resolve()
-    # tests/unit/roles/svc-bkp-rmt-2-loc/files -> up 5 levels to repo root
-    repo_root = here.parents[5]
     target_path = (
-        repo_root / "roles" / "svc-bkp-rmt-2-loc" / "files" / "pull-specific-host.py"
+        PROJECT_ROOT / "roles" / "svc-bkp-rmt-2-loc" / "files" / "pull-specific-host.py"
     )
     if not target_path.exists():
         raise FileNotFoundError(f"Cannot find script at {target_path}")
     spec = types.ModuleType("pull_specific_host_module")
-    code = target_path.read_text(encoding="utf-8")
+    code = read_text(str(target_path))
     exec(compile(code, str(target_path), "exec"), spec.__dict__)
     return spec
 

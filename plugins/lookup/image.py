@@ -1,10 +1,14 @@
 from __future__ import annotations
 
-from typing import Any, Dict, List, Optional
+from pathlib import Path
+from typing import Any
 
 from ansible.errors import AnsibleError
 from ansible.plugins.lookup import LookupBase
 
+from utils.cache.yaml import load_yaml_any
+from utils.roles import PROJECT_ROOT
+from utils.roles.mapping import ROLE_FILE_META_SERVICES
 
 _VALID_WANTS = frozenset({"all", "image", "version", "ref"})
 
@@ -19,48 +23,52 @@ class LookupModule(LookupBase):
     """
     Resolve role-local image declarations with optional inventory overrides.
 
-    Supported forms:
-      - lookup('image', service_name[, want])
+    Supported form:
       - lookup('image', role_id, service_name[, want])
 
-    The lookup prefers images_overrides.<role>.<service> over local defaults
-    from images.<service>, falling back field-wise when an override is absent.
+    ``role_id`` is mandatory. Inferring it from the calling role's
+    ``role_name`` is intentionally not supported: the inference silently
+    targets the wrong role whenever the calling expression is re-evaluated
+    in a different role's context (e.g. a default that ends up rendered
+    inside another role's template), which is impossible to detect at
+    write time. Pass the owning role id explicitly to keep resolution
+    stable regardless of where the expression is later rendered.
+
+    Defaults are sourced from ``roles/<role_id>/meta/services.yml`` under
+    the matching ``<service_name>`` entry's ``image`` and ``version``
+    fields. Inventory overrides at
+    ``images_overrides.<role_id>.<service_name>`` win field-wise over the
+    role default.
     """
 
     def run(
         self,
-        terms: List[Any],
-        variables: Optional[Dict[str, Any]] = None,
+        terms: list[Any],
+        variables: dict[str, Any] | None = None,
         **kwargs: Any,
-    ) -> List[Any]:
+    ) -> list[Any]:
         terms = terms or []
-        if len(terms) not in (1, 2, 3):
-            raise AnsibleError(
-                "image: requires service_name[, want] or role_id, service_name[, want]"
-            )
+        if len(terms) not in (2, 3):
+            raise AnsibleError("image: requires role_id, service_name[, want]")
 
         vars_ = (
             variables if variables is not None else self._templar.available_variables
         )
 
-        if len(terms) == 1:
-            role_id = self._infer_role_id(vars_)
-            service_name = _non_blank_string(terms[0])
-            want = "all"
-        elif len(terms) == 2:
-            inferred_want = _non_blank_string(terms[1]).lower()
-            if inferred_want in _VALID_WANTS:
-                role_id = self._infer_role_id(vars_)
-                service_name = _non_blank_string(terms[0])
-                want = inferred_want
-            else:
-                role_id = _non_blank_string(terms[0])
-                service_name = _non_blank_string(terms[1])
-                want = "all"
-        else:
-            role_id = _non_blank_string(terms[0])
-            service_name = _non_blank_string(terms[1])
-            want = _non_blank_string(terms[2]).lower() or "all"
+        role_id = _non_blank_string(terms[0])
+        service_name = _non_blank_string(terms[1])
+        want = _non_blank_string(terms[2]).lower() if len(terms) == 3 else "all"
+
+        if len(terms) == 2 and _non_blank_string(terms[1]).lower() in _VALID_WANTS:
+            # Catch callers still using the removed
+            # ``lookup('image', service_name, want)`` form; without this guard
+            # the call would silently try to load
+            # ``roles/<service_name>/meta/services.yml`` and produce a confusing
+            # "missing file" error.
+            raise AnsibleError(
+                "image: requires role_id, service_name[, want]; "
+                "the form 'lookup(\"image\", service_name, want)' is no longer supported"
+            )
 
         if not role_id:
             raise AnsibleError("image: role_id must not be empty")
@@ -69,9 +77,7 @@ class LookupModule(LookupBase):
         if want not in _VALID_WANTS:
             raise AnsibleError("image: want must be one of all, image, version, ref")
 
-        defaults = vars_.get("images", {}) or {}
-        if not isinstance(defaults, dict):
-            raise AnsibleError("image: Ansible variable 'images' must be a mapping")
+        defaults = self._load_role_services(role_id)
 
         overrides_root = vars_.get("images_overrides", {}) or {}
         if not isinstance(overrides_root, dict):
@@ -106,29 +112,31 @@ class LookupModule(LookupBase):
         return [value]
 
     @staticmethod
-    def _infer_role_id(vars_: Dict[str, Any]) -> str:
-        role_name = _non_blank_string(vars_.get("role_name"))
-        if role_name:
-            return role_name
-
-        raise AnsibleError(
-            "image: could not infer role_id; set role_name or pass role_id explicitly"
-        )
+    def _load_role_services(role_id: str) -> dict[str, Any]:
+        services_path = Path(PROJECT_ROOT) / "roles" / role_id / ROLE_FILE_META_SERVICES
+        if not services_path.is_file():
+            raise AnsibleError(f"image: missing {services_path} for role '{role_id}'")
+        loaded = load_yaml_any(str(services_path), default_if_missing={}) or {}
+        if not isinstance(loaded, dict):
+            raise AnsibleError(
+                f"image: {services_path} must be a YAML mapping at the file root"
+            )
+        return loaded
 
     @staticmethod
     def _merge_entry(
         *,
         role_id: str,
         service_name: str,
-        defaults: Dict[str, Any],
-        overrides_root: Dict[str, Any],
-    ) -> Dict[str, str]:
-        merged: Dict[str, str] = {}
+        defaults: dict[str, Any],
+        overrides_root: dict[str, Any],
+    ) -> dict[str, str]:
+        merged: dict[str, str] = {}
 
         default_entry = defaults.get(service_name, {})
         if default_entry is not None and not isinstance(default_entry, dict):
             raise AnsibleError(
-                f"image: images.{service_name} must be a mapping in role '{role_id}'"
+                f"image: meta/services.yml entry '{service_name}' must be a mapping in role '{role_id}'"
             )
         if isinstance(default_entry, dict):
             for key in ("image", "version"):

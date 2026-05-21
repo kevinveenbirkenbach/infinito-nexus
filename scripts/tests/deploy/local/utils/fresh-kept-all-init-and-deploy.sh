@@ -3,31 +3,33 @@
 #
 # Called from the host wrapper at
 # scripts/tests/deploy/local/deploy/fresh-kept-all.sh via
-# `cli.deploy.development exec --env KEY=VAL`, which injects the env-vars
+# `cli.administration.deploy.development exec --env KEY=VAL`, which injects the env-vars
 # asserted below. Performs entry bootstrap, creates the inventory and
 # runs the dedicated deploy in one in-container session. The repo is
-# mounted at /opt/src/infinito by the dev compose stack.
+# mounted at ${INFINITO_SRC_DIR} by the dev compose stack.
 #
 # Required env:
-#   INVENTORY_DIR        absolute base inventory dir (no trailing slash)
-#   INVENTORY_FILE       absolute path to <INVENTORY_DIR>/devices.yml
-#   INVENTORY_VARS_FILE  repo-relative dev vars file (SPOT)
-#   APPS_CSV             comma-separated app id list for `--include`
-#   APPS_COUNT           length of APPS_CSV (echoed for log clarity)
-#   LIMIT_HOST           Ansible host (typically "localhost")
-#   RUNTIME_VARS_JSON    JSON object passed verbatim to `--vars`
+#   INFINITO_INVENTORY_DIR    absolute base inventory dir (no trailing slash)
+#   INFINITO_INVENTORY_FILE   absolute path to <INFINITO_INVENTORY_DIR>/devices.yml
+#   INFINITO_INVENTORY_VARS_FILE       repo-relative dev vars file (SPOT)
+#   APPS_CSV                  comma-separated app id list for `--include`
+#   APPS_COUNT                length of APPS_CSV (echoed for log clarity)
+#   INFINITO_LIMIT_HOST       Ansible host (typically "localhost")
+#   INFINITO_SRC_DIR          absolute path to the bind-mounted repo root in the container
+#   RUNTIME_VARS_JSON         JSON object passed verbatim to `--vars`
 set -euo pipefail
-cd /opt/src/infinito
+: "${INFINITO_SRC_DIR:?INFINITO_SRC_DIR must be set by the container environment}"
+cd "${INFINITO_SRC_DIR}"
 
-: "${INVENTORY_DIR:?INVENTORY_DIR must be set}"
-: "${INVENTORY_FILE:?INVENTORY_FILE must be set}"
-: "${INVENTORY_VARS_FILE:?INVENTORY_VARS_FILE must be set}"
+: "${INFINITO_INVENTORY_DIR:?INFINITO_INVENTORY_DIR must be set}"
+: "${INFINITO_INVENTORY_FILE:?INFINITO_INVENTORY_FILE must be set}"
+: "${INFINITO_INVENTORY_VARS_FILE:?INFINITO_INVENTORY_VARS_FILE must be set}"
 : "${APPS_CSV:?APPS_CSV must be set}"
 : "${APPS_COUNT:?APPS_COUNT must be set}"
-: "${LIMIT_HOST:?LIMIT_HOST must be set}"
+: "${INFINITO_LIMIT_HOST:?INFINITO_LIMIT_HOST must be set}"
 : "${RUNTIME_VARS_JSON:?RUNTIME_VARS_JSON must be set}"
 
-inv_dir="${INVENTORY_DIR}"
+inv_dir="${INFINITO_INVENTORY_DIR}"
 pw_file="${inv_dir}/.password"
 
 echo ">>> Running entry.sh bootstrap"
@@ -40,24 +42,24 @@ if [[ ! -f "${pw_file}" ]]; then
 	chmod 600 "${pw_file}" || true
 fi
 
-echo ">>> Creating inventory at ${INVENTORY_FILE}"
+echo ">>> Creating inventory at ${INFINITO_INVENTORY_FILE}"
 echo ">>> Include apps (${APPS_COUNT}): ${APPS_CSV}"
 
-infinito create inventory "${inv_dir}" \
-	--inventory-file "${INVENTORY_FILE}" \
-	--host "${LIMIT_HOST}" \
+infinito administration inventory provision "${inv_dir}" \
+	--inventory-file "${INFINITO_INVENTORY_FILE}" \
+	--host "${INFINITO_LIMIT_HOST}" \
 	--ssl-disabled \
 	--vars "${RUNTIME_VARS_JSON}" \
-	--vars-file "${INVENTORY_VARS_FILE}" \
+	--vars-file "${INFINITO_INVENTORY_VARS_FILE}" \
 	--include "${APPS_CSV}"
 
-echo ">>> Deploying against ${INVENTORY_FILE}"
+echo ">>> Deploying against ${INFINITO_INVENTORY_FILE}"
 
-infinito deploy dedicated "${INVENTORY_FILE}" \
+infinito administration deploy dedicated "${INFINITO_INVENTORY_FILE}" \
 	--skip-backup \
 	--debug \
-	--log /opt/src/infinito/logs \
-	-l "${LIMIT_HOST}" \
+	--log "${INFINITO_SRC_DIR}/logs" \
+	-l "${INFINITO_LIMIT_HOST}" \
 	--diff \
 	-vv \
 	--password-file "${pw_file}"

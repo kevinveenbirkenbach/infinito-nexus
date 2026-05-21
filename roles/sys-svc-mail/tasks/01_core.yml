@@ -1,3 +1,4 @@
+---
 - include_tasks: utils/once/flag.yml
 
 - name: Include dependencies
@@ -27,5 +28,5 @@
 - name: Setup msmtp client
   include_role:
     name: sys-svc-mail-msmtp
-  when: 
+  when:
     - run_once_sys_svc_mail_msmtp is not defined

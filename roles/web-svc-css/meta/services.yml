@@ -1,0 +1,17 @@
+---
+# nocheck: playwright-service-flag — self-provider
+css:
+  enabled: true
+  shared: true
+  lifecycle: beta
+# nocheck: playwright-service-flag — provider role; no consumer surface to gate
+cdn:
+  enabled: "{{ 'web-svc-cdn' in group_names }}"
+  shared: "{{ 'web-svc-cdn' in group_names }}"
+# nocheck: playwright-service-flag — provider role; no consumer surface to gate
+matomo:
+  enabled: "{{ 'web-app-matomo' in group_names }}"
+  shared: "{{ 'web-app-matomo' in group_names }}"
+prometheus:
+  enabled: "{{ 'web-app-prometheus' in group_names }}"
+  shared: "{{ 'web-app-prometheus' in group_names }}"

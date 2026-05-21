@@ -20,12 +20,13 @@ introduced for `registry-cache`:
 
 - the `cache` compose profile,
 - the `Profile` gate in
-  [cli/deploy/development/profile.py](../../cli/deploy/development/profile.py),
+  [cli/administration/deploy/development/profile.py](../../cli/administration/deploy/development/profile.py),
 - the strict `${VAR:?…}` env-var contract documented under the
   cache section of
   [docs/contributing/artefact/files/compose.yml.md](../contributing/artefact/files/compose.yml.md),
-- the per-cache env script under `scripts/meta/env/`, sourced via
-  [scripts/meta/env/all.sh](../../scripts/meta/env/all.sh).
+- the per-cache env defaults declared in
+  [env/default.env](../../env/default.env), materialised into `.env`
+  by `make dotenv`.
 
 The `registry-cache` service MUST remain in place after this
 requirement lands. See **Coexistence**.
@@ -82,7 +83,7 @@ Therefore:
       Nexus's REST API responds 200 on `/service/rest/v1/status`.
 - [ ] `package-cache` and `registry-cache` can be active concurrently
       in the same override without port or volume conflict.
-- [ ] The `Profile` class in `cli/deploy/development/profile.py`
+- [ ] The `Profile` class in `cli/administration/deploy/development/profile.py`
       activates the `cache` stack for local dev (status quo) and
       inactivates it for CI; the same gate applies to all cache
       services.
@@ -92,10 +93,10 @@ Therefore:
 ### Env defaults
 
 - [ ] `scripts/meta/env/cache/package.sh` exists and exports
-      `INFINITO_PACKAGE_CACHE_HOST_PATH`, `INFINITO_PACKAGE_CACHE_HEAP`,
-      `INFINITO_PACKAGE_CACHE_DIRECT_MEM`,
-      `INFINITO_PACKAGE_CACHE_BLOBSTORE_MAX`, and
-      `INFINITO_PACKAGE_CACHE_ADMIN_PASSWORD`.
+      `INFINITO_CACHE_PACKAGE_HOST_PATH`, `INFINITO_CACHE_PACKAGE_HEAP`,
+      `INFINITO_CACHE_PACKAGE_DIRECT_MEM`,
+      `INFINITO_CACHE_PACKAGE_BLOBSTORE_MAX`, and
+      `INFINITO_CACHE_PACKAGE_ADMIN_PASSWORD`.
 - [ ] `scripts/meta/env/cache/package.sh` is sourced by
       `scripts/meta/env/all.sh`.
 - [ ] `compose/cache.override.yml` consumes every package-cache env
@@ -108,11 +109,11 @@ Therefore:
       (repeated runs MUST NOT error on already-existing repos), and is
       invoked once on first start under the `cache` profile.
 - [ ] On first start, the auto-generated Nexus admin password is
-      rotated to the value of `INFINITO_PACKAGE_CACHE_ADMIN_PASSWORD`.
+      rotated to the value of `INFINITO_CACHE_PACKAGE_ADMIN_PASSWORD`.
 - [ ] On first start, the proxy repositories listed in
       [cache.md](../contributing/environment/cache.md) are created.
 - [ ] The blobstore `default` is created with quota
-      `INFINITO_PACKAGE_CACHE_BLOBSTORE_MAX`.
+      `INFINITO_CACHE_PACKAGE_BLOBSTORE_MAX`.
 
 ### Client wiring
 
@@ -124,7 +125,7 @@ Therefore:
       inside the runner pulls through
       `http://package-cache:8081/repository/apt-…/`.
 - [ ] When the `cache` profile is INACTIVE, the override is omitted
-      and package managers default to upstream — no failed deploys.
+      and package managers default to upstream (no failed deploys).
 
 ### Coexistence with `registry-cache`
 
@@ -164,7 +165,7 @@ A mix that exercises apt, pip, npm, and helm during deploy:
 | any helm-driven role | exercises the `helm-bitnami` proxy                              |
 
 ```bash
-APPS="web-app-mediawiki web-app-discourse <helm-driven-role>" \
+INFINITO_APPS="web-app-mediawiki web-app-discourse <helm-driven-role>" \
   make deploy-fresh-purged-apps
 ```
 

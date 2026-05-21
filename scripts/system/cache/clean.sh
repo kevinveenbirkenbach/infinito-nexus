@@ -21,10 +21,10 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "${SCRIPT_DIR}/../../.." && pwd)"
 cd "${REPO_ROOT}"
 
-# shellcheck source=scripts/meta/env/cache/registry.sh
-source "scripts/meta/env/cache/registry.sh"
-# shellcheck source=scripts/meta/env/cache/package.sh
-source "scripts/meta/env/cache/package.sh"
+# shellcheck source=scripts/meta/env/load.sh
+source "scripts/meta/env/load.sh"
+# shellcheck source=scripts/meta/env/load.sh
+source "scripts/meta/env/load.sh"
 
 # Stop any running cache containers first so wipe is safe (a running
 # Nexus would re-create files mid-rm). `docker compose down` of the
@@ -37,9 +37,9 @@ if docker ps --format '{{.Names}}' | grep -qE '^infinito-(registry|package)-cach
 fi
 
 PATHS=(
-	"${INFINITO_REGISTRY_CACHE_HOST_PATH}"
-	"${INFINITO_REGISTRY_CACHE_CA_HOST_PATH}"
-	"${INFINITO_PACKAGE_CACHE_HOST_PATH}"
+	"${INFINITO_CACHE_REGISTRY_HOST_PATH}"
+	"${INFINITO_CACHE_REGISTRY_CA_HOST_PATH}"
+	"${INFINITO_CACHE_PACKAGE_HOST_PATH}"
 )
 
 # Remove each cache path individually (keeps the parent /var/cache/

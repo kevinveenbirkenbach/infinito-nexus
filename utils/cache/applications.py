@@ -4,18 +4,18 @@ Owns `_APPLICATIONS_DEFAULTS_CACHE`, `_VARIANTS_CACHE`, and
 `_MERGED_APPLICATIONS_CACHE`. Public API: `get_application_defaults`,
 `get_variants`, `get_merged_applications`. Strictly ansible-free at
 import time so the GitHub Actions runner-host CLI path
-(`cli.deploy.development.init` -> `plan_dev_inventory_matrix` ->
+(`cli.administration.deploy.development.init` -> `plan_dev_inventory_matrix` ->
 `get_variants`) keeps working without ansible installed.
 """
 
 from __future__ import annotations
 
 import copy
-import os
-from pathlib import Path
-from typing import Any, Mapping, Optional
+from collections.abc import Mapping
+from typing import TYPE_CHECKING, Any
 
 from plugins.filter.merge_with_defaults import merge_with_defaults
+from utils.roles.mapping import ROLE_FILE_META_VARIANTS
 
 from .base import (
     _RENDER_GUARD,
@@ -29,17 +29,20 @@ from .base import (
 from .yaml import load_yaml as _load_yaml_cached
 from .yaml import load_yaml_any as _load_yaml_any_cached
 
+if TYPE_CHECKING:
+    import os
+    from pathlib import Path
 
 _APPLICATIONS_DEFAULTS_CACHE: dict[str, dict[str, Any]] = {}
 _VARIANTS_CACHE: dict[str, dict[str, list[Any]]] = {}
 _MERGED_APPLICATIONS_CACHE: dict[tuple, dict[str, Any]] = {}
 
-# Per req-008, every role's metadata lives under these `meta/<topic>.yml`
-# files. The file root IS the value of `applications.<app>.<topic>` — there
+# Every role's metadata lives under these `meta/<topic>.yml` files.
+# The file root IS the value of `applications.<app>.<topic>` — there
 # is NO wrapping key matching the filename.
 _META_TOPICS: tuple[str, ...] = ("server", "rbac", "services", "volumes")
 
-# `meta/info.yml` is descriptive role-level metadata (req-011). Loaded into
+# `meta/info.yml` is descriptive role-level metadata. Loaded into
 # `applications.<role>.info` like the other meta files, but does NOT mark a
 # role as an application by itself — a metadata-only `info.yml` next to a
 # bare `meta/main.yml` is just documentation, not config.
@@ -50,8 +53,8 @@ def _extract_default_credentials(creds_node: Any) -> dict[str, Any]:
     """Walk a `meta/schema.yml` `credentials:` tree and return the subset of
     leaves that carry a literal `default:` Jinja string.
 
-    The shape mirrors the schema tree: nested keys stay nested. Per req-008
-    the literal string is preserved verbatim — no rendering, no validation.
+    The shape mirrors the schema tree: nested keys stay nested. The
+    literal string is preserved verbatim — no rendering, no validation.
     Leaves WITHOUT `default:` are intentionally absent so the inventory's
     apply_schema-generated values win the merge.
     """
@@ -84,7 +87,7 @@ def _extract_default_credentials(creds_node: Any) -> dict[str, Any]:
 
 
 def _has_application_metadata(role_dir: Path) -> bool:
-    """Detect whether a role behaves as an application after req-008.
+    """Detect whether a role behaves as an application.
 
     A role is an "application" iff at least one of its `meta/<topic>.yml`
     files exists (plus `meta/schema.yml` and `meta/users.yml` for the
@@ -99,9 +102,7 @@ def _has_application_metadata(role_dir: Path) -> bool:
             return True
     if (meta_dir / "schema.yml").is_file():
         return True
-    if (meta_dir / "users.yml").is_file():
-        return True
-    return False
+    return bool((meta_dir / "users.yml").is_file())
 
 
 def _build_role_base_config(
@@ -115,7 +116,7 @@ def _build_role_base_config(
     `meta/rbac.yml`     → `rbac`
     `meta/services.yml` → `services`
     `meta/volumes.yml`  → `volumes`
-    `meta/info.yml`     → `info`     (descriptive role-level metadata per req-011)
+    `meta/info.yml`     → `info`     (descriptive role-level metadata)
     `meta/schema.yml`   → `credentials` (only the literal `default:` values;
                          non-default credentials are filled by the
                          inventory's apply_schema step and merged in by the
@@ -127,7 +128,7 @@ def _build_role_base_config(
     # Pure-Python GID resolver — does NOT pull ansible. The previous
     # `ApplicationGidLookup().run([...])` call dragged
     # `ansible.plugins.lookup.LookupBase` into this code path and broke
-    # `cli.deploy.development init` on the GitHub Actions runner host
+    # `cli.administration.deploy.development init` on the GitHub Actions runner host
     # (CI run 24935979190) where the runner Python ships without
     # ansible. The split lives in plugins/lookup/application_gid.py:
     # `compute_application_gid` is the pure helper, `LookupModule` is
@@ -194,7 +195,7 @@ def _load_variants_overrides(path: Path) -> list[dict[str, Any]]:
     if raw in (None, {}):
         return [{}]
     if not isinstance(raw, list):
-        raise ValueError(
+        raise TypeError(
             f"{path} must contain a YAML list of override mappings (or be empty)."
         )
     if not raw:
@@ -227,7 +228,7 @@ def _build_variants(roles_dir: Path) -> dict[str, list[Any]]:
     for role_dir in _iter_application_role_dirs(roles_dir):
         application_id = role_dir.name
         base_config = _build_role_base_config(role_dir, roles_dir)
-        meta_path = role_dir / "meta" / "variants.yml"
+        meta_path = role_dir / ROLE_FILE_META_VARIANTS
         override_list = _load_variants_overrides(meta_path)
         role_variants: list[Any] = []
         for override in override_list:
@@ -255,7 +256,7 @@ def _build_application_defaults(roles_dir: Path) -> dict[str, Any]:
 
 
 def get_application_defaults(
-    *, roles_dir: Optional[str | os.PathLike[str]] = None
+    *, roles_dir: str | os.PathLike[str] | None = None
 ) -> dict[str, Any]:
     resolved_roles_dir = _resolve_roles_dir(roles_dir=roles_dir)
     key = _cache_key(resolved_roles_dir)
@@ -267,7 +268,7 @@ def get_application_defaults(
 
 
 def get_variants(
-    *, roles_dir: Optional[str | os.PathLike[str]] = None
+    *, roles_dir: str | os.PathLike[str] | None = None
 ) -> dict[str, list[Any]]:
     """Return ``{application_id: [variant_0, ...]}`` cached per
     ``roles_dir``. Each variant is the role's effective configuration
@@ -284,8 +285,8 @@ def get_variants(
 
 def get_merged_applications(
     *,
-    variables: Optional[dict[str, Any]] = None,
-    roles_dir: Optional[str | os.PathLike[str]] = None,
+    variables: dict[str, Any] | None = None,
+    roles_dir: str | os.PathLike[str] | None = None,
     templar: Any = None,
 ) -> dict[str, Any]:
     # Late import: `get_merged_users` lives in the sibling `users` module
@@ -309,7 +310,7 @@ def get_merged_applications(
     # Defaults always come from variant 0 (= the legacy `meta/services.yml`
     # payload, deep-merged with the empty `{}` entry). Per-round variant
     # overrides are baked into the inventory's `applications.<app>` block at
-    # init time (see `cli.deploy.development.inventory.build_dev_inventory`)
+    # init time (see `cli.administration.deploy.development.inventory.build_dev_inventory`)
     # and applied below as overrides on top of these defaults, so the deploy
     # stage needs no runtime variant selector: the inventory itself is
     # variant-resolved.

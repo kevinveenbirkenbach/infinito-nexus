@@ -1,6 +1,7 @@
+---
 domains:
   canonical:
-  - xmpp.{{ DOMAIN_PRIMARY }}
+    - xmpp.{{ DOMAIN_PRIMARY }}
   aliases: []
 networks:
   local:

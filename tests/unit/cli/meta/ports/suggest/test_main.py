@@ -1,4 +1,4 @@
-"""Unit tests for `cli meta ports suggest` (req-009 AC).
+"""Unit tests for `cli meta ports suggest`.
 
 Covers gap-first / increment-fallback behaviour against synthetic
 role-tree fixtures plus the relay-range allocator.
@@ -63,9 +63,9 @@ class TestSuggestSinglePorts(unittest.TestCase):
             patch.object(portsuggest, "lookup_band", return_value=None),
             patch.object(portsuggest, "available_categories", return_value=["http"]),
             patch("sys.argv", ["suggest", "--scope", "local", "--category", "metrics"]),
+            self.assertRaises(SystemExit) as ctx,
         ):
-            with self.assertRaises(SystemExit) as ctx:
-                portsuggest.main()
+            portsuggest.main()
         self.assertIn("metrics", str(ctx.exception.code))
 
     def test_explicit_range_overrides_band(self):

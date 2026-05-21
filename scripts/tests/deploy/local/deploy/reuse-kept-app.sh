@@ -3,55 +3,62 @@ set -euo pipefail
 
 # Reuse-kept deploy for a single app inside the running infinito container.
 # Expects (ALL required):
-#   APPS               e.g. web-app-nextcloud
-#   TEST_DEPLOY_TYPE   server|workstation|universal
+#   INFINITO_APPS      e.g. web-app-nextcloud
+#   INFINITO_TEST_DEPLOY_TYPE   server|workstation|universal
 #   INFINITO_CONTAINER e.g. infinito_nexus_arch
-#   DEBUG              true|false
-#   INVENTORY_DIR      e.g. /etc/inventories/local-full-server
+#   INFINITO_DEBUG     true|false
+#   INFINITO_INVENTORY_DIR      e.g. /etc/inventories/local-full-server
 
-: "${APPS:?APPS is not set (e.g. APPS=web-app-nextcloud)}"
-: "${TEST_DEPLOY_TYPE:?TEST_DEPLOY_TYPE is not set (server|workstation|universal)}"
+: "${INFINITO_APPS:?INFINITO_APPS is not set (e.g. INFINITO_APPS=web-app-nextcloud)}"
+: "${INFINITO_TEST_DEPLOY_TYPE:?INFINITO_TEST_DEPLOY_TYPE is not set (server|workstation|universal)}"
 : "${INFINITO_CONTAINER:?INFINITO_CONTAINER is not set (e.g. infinito_nexus_arch)}"
-: "${DEBUG:?DEBUG is not set (true|false)}"
-: "${INVENTORY_DIR:?INVENTORY_DIR is not set (e.g. INVENTORY_DIR=/etc/inventories/local-full-server)}"
-: "${INVENTORY_FILE:?INVENTORY_FILE is not set — source scripts/meta/env/inventory.sh first}"
+: "${INFINITO_DEBUG:?INFINITO_DEBUG is not set (true|false)}"
+: "${INFINITO_INVENTORY_DIR:?INFINITO_INVENTORY_DIR is not set (e.g. INFINITO_INVENTORY_DIR=/etc/inventories/local-full-server)}"
+: "${INFINITO_INVENTORY_FILE:?INFINITO_INVENTORY_FILE is not set — source scripts/meta/env/load.sh first}"
 
 # When the previous matrix init produced one folder per round
-# (`<INVENTORY_DIR>-0`, `<INVENTORY_DIR>-1`, ...), `VARIANT=<idx>` pins
-# this redeploy to the chosen round so the operator can iterate one
-# specific variant without re-running the full matrix. Without VARIANT
-# the unsuffixed path is used, which is correct for single-variant
-# deploys (N=1). See docs/contributing/design/variants.md.
-if [[ -n "${VARIANT:-}" ]]; then
-	INVENTORY_DIR="${INVENTORY_DIR}-${VARIANT}"
-	INVENTORY_FILE="${INVENTORY_DIR}/devices.yml"
+# (`<INFINITO_INVENTORY_DIR>-0`, `<INFINITO_INVENTORY_DIR>-1`, ...), `INFINITO_VARIANT=<idx>`
+# pins this redeploy to the chosen round so the operator can iterate one
+# specific variant without re-running the full matrix. Without
+# INFINITO_VARIANT the unsuffixed path is used, which is correct for
+# single-variant deploys (N=1). See docs/contributing/design/variants.md.
+if [[ -n "${INFINITO_VARIANT:-}" ]]; then
+	INFINITO_INVENTORY_DIR="${INFINITO_INVENTORY_DIR}-${INFINITO_VARIANT}"
+	INFINITO_INVENTORY_FILE="${INFINITO_INVENTORY_DIR}/devices.yml"
 fi
 
-case "${TEST_DEPLOY_TYPE}" in
+case "${INFINITO_TEST_DEPLOY_TYPE}" in
 server | workstation | universal) ;;
 *)
-	echo "Invalid TEST_DEPLOY_TYPE: ${TEST_DEPLOY_TYPE}" >&2
+	echo "Invalid INFINITO_TEST_DEPLOY_TYPE: ${INFINITO_TEST_DEPLOY_TYPE}" >&2
 	echo "Allowed: server | workstation | universal" >&2
 	exit 2
 	;;
 esac
 
-case "${DEBUG}" in
+case "${INFINITO_DEBUG}" in
 true | false) ;;
 *)
-	echo "Invalid DEBUG: ${DEBUG}" >&2
+	echo "Invalid INFINITO_DEBUG: ${INFINITO_DEBUG}" >&2
 	echo "Allowed: true | false" >&2
 	exit 2
 	;;
 esac
 
-echo "=== rapid deploy: type=${TEST_DEPLOY_TYPE} app=${APPS} container=${INFINITO_CONTAINER} debug=${DEBUG} ==="
-echo "inventory_dir=${INVENTORY_DIR}"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+REPO_ROOT="$(cd "${SCRIPT_DIR}/../../../../.." && pwd)"
 
-docker exec \
-	-e SERVICES_DISABLED="${SERVICES_DISABLED:-}" \
-	-e INVENTORY_FILE="${INVENTORY_FILE}" \
-	-e APPS="${APPS}" \
-	-e DEBUG="${DEBUG}" \
+# shellcheck source=scripts/tests/deploy/local/utils/cache-retry.sh
+source "${SCRIPT_DIR}/../utils/cache-retry.sh"
+
+echo "=== rapid deploy: type=${INFINITO_TEST_DEPLOY_TYPE} app=${INFINITO_APPS} container=${INFINITO_CONTAINER} debug=${INFINITO_DEBUG} ==="
+echo "inventory_dir=${INFINITO_INVENTORY_DIR}"
+
+deploy_with_cache_retry "reuse-${INFINITO_APPS//[^A-Za-z0-9._-]/-}" -- \
+	docker exec \
+	-e INFINITO_SERVICES_DISABLED="${INFINITO_SERVICES_DISABLED:-}" \
+	-e INFINITO_INVENTORY_FILE="${INFINITO_INVENTORY_FILE}" \
+	-e INFINITO_APPS="${INFINITO_APPS}" \
+	-e INFINITO_DEBUG="${INFINITO_DEBUG}" \
 	"${INFINITO_CONTAINER}" \
-	bash /opt/src/infinito/scripts/tests/deploy/local/utils/reuse-kept-app-deploy.sh
+	bash "${INFINITO_SRC_DIR}/scripts/tests/deploy/local/utils/reuse-kept-app-deploy.sh"

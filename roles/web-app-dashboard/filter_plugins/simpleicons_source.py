@@ -1,11 +1,8 @@
-from __future__ import absolute_import, division, print_function
-
-__metaclass__ = type
-
-import certifi
 import os
 import re
+from pathlib import Path
 
+import certifi
 import requests
 from ansible.errors import AnsibleFilterError
 
@@ -14,7 +11,7 @@ def get_requests_verify():
     """Return a CA bundle path for outbound HTTPS verification."""
     for env_var in ("REQUESTS_CA_BUNDLE", "SSL_CERT_FILE", "CA_TRUST_CERT_HOST"):
         candidate = os.environ.get(env_var, "").strip()
-        if candidate and os.path.isfile(candidate):
+        if candidate and Path(candidate).is_file():
             return candidate
     return certifi.where()
 
@@ -110,7 +107,7 @@ def add_simpleicon_source(
     return enhanced
 
 
-class FilterModule(object):
+class FilterModule:
     """Ansible filter plugin to add simpleicons source URLs to portfolio cards"""
 
     def filters(self):

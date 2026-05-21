@@ -7,7 +7,6 @@ from ansible.errors import AnsibleError
 
 from plugins.lookup.service import LookupModule
 
-
 _SERVICE_REGISTRY = {
     "matomo": {"role": "web-app-matomo"},
     "cdn": {"role": "web-svc-cdn"},
@@ -258,12 +257,14 @@ class TestServiceCycleGuard(unittest.TestCase):
 
 class TestServiceErrors(unittest.TestCase):
     def test_raises_when_group_names_not_list(self):
-        with patch("plugins.lookup.service.get_merged_applications", return_value={}):
-            with self.assertRaises(AnsibleError):
-                LookupModule().run(
-                    ["matomo"],
-                    variables={"group_names": "not-a-list"},
-                )
+        with (
+            patch("plugins.lookup.service.get_merged_applications", return_value={}),
+            self.assertRaises(AnsibleError),
+        ):
+            LookupModule().run(
+                ["matomo"],
+                variables={"group_names": "not-a-list"},
+            )
 
     def test_raises_when_term_empty(self):
         with self.assertRaises(AnsibleError):

@@ -9,7 +9,7 @@ Create or refresh the inventory first, then deploy against the generated invento
 ### Create or Refresh the Inventory 📝
 
 ```bash
-infinito create inventory /etc/infinito.nexus/inventories/prod \
+infinito administration inventory provision /etc/infinito.nexus/inventories/prod \
   --inventory-file /etc/infinito.nexus/inventories/prod/devices.yml \
   --host localhost \
   --ssl-disabled \
@@ -20,7 +20,7 @@ infinito create inventory /etc/infinito.nexus/inventories/prod \
 ### Run the Deploy 🛠️
 
 ```bash
-infinito deploy dedicated /etc/infinito.nexus/inventories/prod/devices.yml \
+infinito administration deploy dedicated /etc/infinito.nexus/inventories/prod/devices.yml \
   --password-file /etc/infinito.nexus/inventories/prod/.password \
   --log /etc/infinito.nexus/logs \
   --diff \
@@ -31,8 +31,8 @@ infinito deploy dedicated /etc/infinito.nexus/inventories/prod/devices.yml \
 
 When you need to redeploy after changes, repeat the same two `infinito` commands:
 
-1. Re-run `infinito create inventory ...` to refresh the inventory file and included app list.
-2. Re-run `infinito deploy dedicated ...` against the same inventory file.
+1. Re-run `infinito administration inventory provision ...` to refresh the inventory file and included app list.
+2. Re-run `infinito administration deploy dedicated ...` against the same inventory file.
 
 ## Inventory Notes 📒
 

@@ -1,18 +1,17 @@
 #!/usr/bin/env bash
-# scripts/meta/resolve/apps.sh
 set -euo pipefail
 
 # Purpose (SRP): Return JSON list of apps based on deployment type,
 # optionally filtered by lifecycle and CI storage constraints.
 #
 # Inputs via env:
-#   TEST_DEPLOY_TYPE   = server|workstation|universal (required)
-#   WHITELIST          = optional space-separated list of app ids to keep
+#   INFINITO_TEST_DEPLOY_TYPE   = server|workstation|universal (required)
+#   INFINITO_WHITELIST = optional space-separated list of app ids to keep
 #
 # Output:
 #   JSON array to stdout (single line, always valid)
 
-: "${TEST_DEPLOY_TYPE:?TEST_DEPLOY_TYPE is required (server|workstation|universal)}"
+: "${INFINITO_TEST_DEPLOY_TYPE:?INFINITO_TEST_DEPLOY_TYPE is required (server|workstation|universal)}"
 
 PYTHON="${PYTHON:-python3}"
 
@@ -23,9 +22,9 @@ cd "$REPO_ROOT"
 # ------------------------------------------------------------
 # Load default environment (safe if already loaded via BASH_ENV)
 # ------------------------------------------------------------
-if [[ -f "scripts/meta/env/all.sh" ]]; then
-	# shellcheck source=scripts/meta/env/all.sh
-	source "scripts/meta/env/all.sh"
+if [[ -f "scripts/meta/env/load.sh" ]]; then
+	# shellcheck source=scripts/meta/env/load.sh
+	source "scripts/meta/env/load.sh"
 fi
 
 # ------------------------------------------------------------
@@ -61,18 +60,29 @@ jq_whitelist_filter() {
 	jq -c --argjson wl "${wl_json}" 'map(select(. as $a | ($wl | index($a)) != null))'
 }
 
-compose_ci_exec() {
-	local -a compose_args=(docker compose --env-file env.ci)
-
-	if [[ -f "env.development" ]]; then
-		compose_args+=(--env-file env.development)
-	fi
-
-	compose_args+=(--profile ci exec -T infinito)
-
-	NIX_CONFIG="${NIX_CONFIG:-}" \
-		INFINITO_DISTRO="${INFINITO_DISTRO}" \
-		"${compose_args[@]}" "$@"
+run_meta_cli() {
+	# Dispatch on INFINITO_APP_DISCOVERY_RUNNER:
+	#   host   -- invoke the venv python directly (no container overhead)
+	#   docker -- exec inside the running infinito compose container
+	case "${INFINITO_APP_DISCOVERY_RUNNER:?INFINITO_APP_DISCOVERY_RUNNER must be set}" in
+	host)
+		"${PYTHON}" "$@"
+		;;
+	docker)
+		local -a compose_args=(docker compose --env-file env/ci.env)
+		if [[ -f "env.development" ]]; then
+			compose_args+=(--env-file env.development)
+		fi
+		compose_args+=(--profile ci exec -T infinito)
+		NIX_CONFIG="${NIX_CONFIG:-}" \
+			INFINITO_DISTRO="${INFINITO_DISTRO}" \
+			"${compose_args[@]}" "${PYTHON}" "$@"
+		;;
+	*)
+		echo "apps.sh: unknown INFINITO_APP_DISCOVERY_RUNNER='${INFINITO_APP_DISCOVERY_RUNNER}' (expected: host|docker)" >&2
+		exit 2
+		;;
+	esac
 }
 
 # ------------------------------------------------------------
@@ -84,10 +94,10 @@ lifecycles_args=(--lifecycles alpha beta rc stable)
 # 1) Get JSON list from container (keep as JSON)
 # ------------------------------------------------------------
 apps_json="$(
-	compose_ci_exec \
-		"${PYTHON}" -m cli.meta.applications.type \
+	run_meta_cli \
+		-m cli.meta.roles.applications.type \
 		--format json \
-		--type "${TEST_DEPLOY_TYPE}" \
+		--type "${INFINITO_TEST_DEPLOY_TYPE}" \
 		"${lifecycles_args[@]}" |
 		json_compact_array
 )"
@@ -110,8 +120,8 @@ if [[ -n "${GITHUB_ACTIONS:-}" && -z "${ACT:-}" ]]; then
 	mapfile -t roles < <(printf '%s\n' "${apps_json}" | jq -r '.[]')
 	if [[ "${#roles[@]}" -gt 0 ]]; then
 		# Warnings pass (best-effort)
-		compose_ci_exec \
-			"${PYTHON}" -m cli.meta.applications.sufficient_storage \
+		run_meta_cli \
+			-m cli.meta.roles.applications.sufficient_storage \
 			--roles "${roles[@]}" \
 			--required-storage "${required_storage}" \
 			--warnings \
@@ -120,8 +130,8 @@ if [[ -n "${GITHUB_ACTIONS:-}" && -z "${ACT:-}" ]]; then
 
 		# Real filter (JSON output)
 		apps_json="$(
-			compose_ci_exec \
-				"${PYTHON}" -m cli.meta.applications.sufficient_storage \
+			run_meta_cli \
+				-m cli.meta.roles.applications.sufficient_storage \
 				--roles "${roles[@]}" \
 				--required-storage "${required_storage}" \
 				--format json |
@@ -135,7 +145,7 @@ fi
 # ------------------------------------------------------------
 apps_json="$(
 	printf '%s\n' "${apps_json}" |
-		jq_whitelist_filter "${WHITELIST:-}"
+		jq_whitelist_filter "${INFINITO_WHITELIST:-}"
 )"
 
 # ------------------------------------------------------------

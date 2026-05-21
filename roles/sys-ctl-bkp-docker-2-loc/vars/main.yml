@@ -1,3 +1,4 @@
+---
 # Mapping logic for baudolo CLI arguments
 #
 # - BKP_DOCKER_2_LOC_DB_ROUTINE:       All service names where backup.database_routine is set (for --database-containers)

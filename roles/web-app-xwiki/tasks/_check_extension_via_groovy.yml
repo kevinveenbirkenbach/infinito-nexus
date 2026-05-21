@@ -1,3 +1,4 @@
+---
 # PUT a temporary Groovy page that checks installed extensions, call it, then delete it.
 
 - name: "XWIKI | Fetch REST session + form token (extension check write ops)"
@@ -43,7 +44,7 @@
     url_password: "{{ XWIKI_SUPERADMIN_PASSWORD }}"
     force_basic_auth: true
     status_code: [200]
-    return_content: yes
+    return_content: true
   register: _check_output
   changed_when: false
 

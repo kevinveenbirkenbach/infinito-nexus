@@ -1,3 +1,4 @@
+---
 domains:
   canonical:
     - open.cloud.{{ DOMAIN_PRIMARY }}
@@ -18,7 +19,7 @@ csp:
       - "{{ lookup('tls', 'web-app-keycloak', 'url.base') }}"
       - "{{ lookup('domain', 'web-app-opentalk') }}"
     worker-src:
-      - 'blob:'
+      - "blob:"
 networks:
   local:
     subnet: 192.168.105.48/28

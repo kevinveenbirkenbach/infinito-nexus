@@ -1,9 +1,10 @@
+---
 csp:
   whitelist: {}
   flags: {}
 domains:
   canonical:
-  - libretranslate.{{ DOMAIN_PRIMARY }}
+    - libretranslate.{{ DOMAIN_PRIMARY }}
   aliases: []
 networks:
   local:

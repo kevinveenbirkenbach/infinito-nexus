@@ -4,18 +4,18 @@ set -euo pipefail
 # ------------------------------------------------------------
 # Optional env overrides (with safe defaults)
 # ------------------------------------------------------------
-: "${BUSYBOX_IMAGE:=busybox:1.36}"
-: "${NODE_IMAGE:=node:20-alpine}"
+: "${BUSYBOX_IMAGE:=busybox:1.37}"
+: "${NODE_IMAGE:=node:26-alpine}"
 
 # ------------------------------------------------------------
 # Required env (must already be present in the container)
 # ------------------------------------------------------------
-: "${DNS_IP:?Missing env DNS_IP}"
-: "${DOMAIN:?Missing env DOMAIN}"
-: "${IP4:?Missing env IP4}"
+: "${INFINITO_DNS_IP:?Missing env INFINITO_DNS_IP}"
+: "${INFINITO_DOMAIN:?Missing env INFINITO_DOMAIN}"
+: "${INFINITO_IP4:?Missing env INFINITO_IP4}"
 
-SUBDOMAIN="foo.${DOMAIN}"
-IP4_EXPECTED="${IP4}"
+SUBDOMAIN="foo.${INFINITO_DOMAIN}"
+IP4_EXPECTED="${INFINITO_IP4}"
 
 section() {
   echo
@@ -49,7 +49,7 @@ container info >/dev/null 2>&1 || fail "container info still failing after waiti
 # ------------------------------------------------------------
 section "Docker-in-Docker DNS (busybox: A + no SERVFAIL)"
 
-container run --rm --dns "${DNS_IP}" "${BUSYBOX_IMAGE}" sh -lc "
+container run --rm --dns "${INFINITO_DNS_IP}" "${BUSYBOX_IMAGE}" sh -lc "
   set -e
 
   test_lookup_a() {
@@ -73,10 +73,10 @@ container run --rm --dns "${DNS_IP}" "${BUSYBOX_IMAGE}" sh -lc "
     fi
   }
 
-  test_lookup_a \"${DOMAIN}\"
+  test_lookup_a \"${INFINITO_DOMAIN}\"
   test_lookup_a \"${SUBDOMAIN}\"
 
-  test_lookup_no_servfail \"${DOMAIN}\"
+  test_lookup_no_servfail \"${INFINITO_DOMAIN}\"
   test_lookup_no_servfail \"${SUBDOMAIN}\"
 "
 
@@ -87,11 +87,11 @@ ok "Inner container DNS works (A present; no SERVFAIL)"
 # ------------------------------------------------------------
 section "Docker-in-Docker DNS (node/getaddrinfo)"
 
-container run --rm --dns "${DNS_IP}" "${NODE_IMAGE}" sh -lc "
+container run --rm --dns "${INFINITO_DNS_IP}" "${NODE_IMAGE}" sh -lc "
   set -e
   node -e \"
     const dns = require('dns');
-    dns.lookup('${DOMAIN}', { all: true }, (e, a) => {
+    dns.lookup('${INFINITO_DOMAIN}', { all: true }, (e, a) => {
       console.log('err', e && e.code, e && e.message);
       console.log('addrs', a);
       process.exit(e ? 1 : 0);

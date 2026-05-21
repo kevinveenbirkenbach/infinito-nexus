@@ -1,22 +1,22 @@
-# tests/unit/roles/sys-ctl-bkp-docker-2-loc/library/test_file_has_content.py
-
 from __future__ import annotations
 
-import os
+import contextlib
+import importlib.util
 import tempfile
 import unittest
 from pathlib import Path
 from unittest.mock import patch
-import importlib.util
+
+from . import PROJECT_ROOT
 
 
-class _ExitJson(Exception):
+class _ExitJsonError(Exception):
     def __init__(self, payload: dict):
         super().__init__("exit_json called")
         self.payload = payload
 
 
-class _FailJson(Exception):
+class _FailJsonError(Exception):
     def __init__(self, payload: dict):
         super().__init__("fail_json called")
         self.payload = payload
@@ -34,33 +34,20 @@ class FakeAnsibleModule:
         self.params = params or {}
 
     def exit_json(self, **kwargs):
-        raise _ExitJson(kwargs)
+        raise _ExitJsonError(kwargs)
 
     def fail_json(self, **kwargs):
-        raise _FailJson(kwargs)
+        raise _FailJsonError(kwargs)
 
 
 def _import_module_under_test():
     """
     Load the module under test via file path computed by walking parents only.
 
-    Test file:
-      tests/unit/roles/sys-ctl-bkp-docker-2-loc/library/test_file_has_content.py
-    Repo root is parents[5] from the test file path.
+    Repo root is ``parents[5]`` from this test file's location.
     """
-    this_file = Path(__file__).resolve()
-
-    # parents:
-    # [0]=.../library
-    # [1]=.../sys-ctl-bkp-docker-2-loc
-    # [2]=.../roles
-    # [3]=.../unit
-    # [4]=.../tests
-    # [5]=.../ (repo root)
-    repo_root = this_file.parents[5]
-
     module_path = (
-        repo_root
+        PROJECT_ROOT
         / "roles"
         / "sys-ctl-bkp-docker-2-loc"
         / "library"
@@ -91,9 +78,9 @@ class TestFileHasContentModule(unittest.TestCase):
         with patch.object(self.mod, "AnsibleModule", return_value=fake):
             try:
                 self.mod.run_module()
-            except _ExitJson as e:
+            except _ExitJsonError as e:
                 return e.payload
-            except _FailJson as e:
+            except _FailJsonError as e:
                 raise AssertionError(
                     f"Expected exit_json, got fail_json: {e.payload}"
                 ) from e
@@ -104,9 +91,9 @@ class TestFileHasContentModule(unittest.TestCase):
         with patch.object(self.mod, "AnsibleModule", return_value=fake):
             try:
                 self.mod.run_module()
-            except _FailJson as e:
+            except _FailJsonError as e:
                 return e.payload
-            except _ExitJson as e:
+            except _ExitJsonError as e:
                 raise AssertionError(
                     f"Expected fail_json, got exit_json: {e.payload}"
                 ) from e
@@ -114,11 +101,9 @@ class TestFileHasContentModule(unittest.TestCase):
 
     def test_missing_file_fails(self):
         missing = "/tmp/this-file-should-not-exist-ansible-test-12345"
-        try:
-            os.remove(missing)
-        except FileNotFoundError:
-            # If the file is already absent, that's the state this test requires.
-            pass
+        # Already-absent is the state this test requires; either way we proceed.
+        with contextlib.suppress(FileNotFoundError):
+            Path(missing).unlink()
 
         payload = self._run_expect_fail(missing)
 

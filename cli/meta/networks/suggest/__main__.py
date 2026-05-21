@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Suggest free per-role subnets based on the live role tree (req-009).
+"""Suggest free per-role subnets based on the live role tree.
 
 Walks every ``roles/*/meta/server.yml``, collects occupied
 ``networks.local.subnet`` assignments, picks the smallest CIDR prefix that
@@ -17,14 +17,16 @@ from __future__ import annotations
 import argparse
 import ipaddress
 import sys
-from typing import Iterable, List, Optional, Tuple
+from typing import TYPE_CHECKING
 
 from utils.meta.scan import iter_subnets
 
+if TYPE_CHECKING:
+    from collections.abc import Iterable
 
 # Prefix length thresholds — smallest prefix that still fits N clients.
 # Each entry is (max_clients, prefix_length).
-_PREFIX_THRESHOLDS: Tuple[Tuple[int, int], ...] = (
+_PREFIX_THRESHOLDS: tuple[tuple[int, int], ...] = (
     (2, 30),
     (6, 29),
     (14, 28),
@@ -51,7 +53,7 @@ def smallest_prefix(clients: int) -> int:
     )
 
 
-def umbrella_blocks_for(prefix: int) -> List[ipaddress.IPv4Network]:
+def umbrella_blocks_for(prefix: int) -> list[ipaddress.IPv4Network]:
     """Return the set of /24 (or coarser) umbrella blocks already in use for
     sub-allocations of the requested prefix length.
     """
@@ -80,8 +82,8 @@ def gap_first_subnets(
 def suggest_subnets(
     clients: int,
     count: int,
-    explicit_block: Optional[ipaddress.IPv4Network],
-) -> Tuple[List[ipaddress.IPv4Network], int]:
+    explicit_block: ipaddress.IPv4Network | None,
+) -> tuple[list[ipaddress.IPv4Network], int]:
     prefix = smallest_prefix(clients)
     occupied = sorted(
         {net for _r, net in iter_subnets() if net.prefixlen == prefix},
@@ -103,7 +105,7 @@ def suggest_subnets(
                 f"--block <cidr> to bootstrap a new one manually."
             )
 
-    suggestions: List[ipaddress.IPv4Network] = []
+    suggestions: list[ipaddress.IPv4Network] = []
     gaps_filled = 0
     for block in candidate_blocks:
         for sub in gap_first_subnets(block, prefix, occupied):
@@ -130,7 +132,7 @@ def capacity_for(network: ipaddress.IPv4Network) -> int:
     return network.num_addresses - 2
 
 
-def main(argv: Optional[List[str]] = None) -> int:
+def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(
         prog="cli meta networks suggest",
         description=(
@@ -164,7 +166,7 @@ def main(argv: Optional[List[str]] = None) -> int:
     if args.count < 1:
         raise SystemExit("--count must be >= 1")
 
-    explicit_block: Optional[ipaddress.IPv4Network] = None
+    explicit_block: ipaddress.IPv4Network | None = None
     if args.block:
         try:
             explicit_block = ipaddress.IPv4Network(args.block)

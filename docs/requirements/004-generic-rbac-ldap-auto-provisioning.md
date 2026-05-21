@@ -105,7 +105,7 @@ stay in lockstep without a per-role manual provisioning step.
 ### Verification - Playwright test for WordPress
 
 - [x] The existing [web-app-wordpress Playwright
-  spec](../../roles/web-app-wordpress/files/playwright.spec.js) is extended
+  spec](../../roles/web-app-wordpress/files/playwright/playwright.spec.js) is extended
   (not replaced) to cover RBAC-auto-provisioning end-to-end. The baseline
   playwright requirements from
   [playwright.specs.js.md](../contributing/artefact/files/role/playwright.specs.js.md)
@@ -153,17 +153,17 @@ stay in lockstep without a per-role manual provisioning step.
 
 - [x] This work uses the Role Loop from
   [role.md](../agents/action/iteration/role.md) against
-  `web-app-wordpress` with `SERVICES_DISABLED="matomo,email"` unless
+  `web-app-wordpress` with `INFINITO_SERVICES_DISABLED="matomo,email"` unless
   otherwise agreed, and uses the Playwright Spec Loop from
   [playwright.md](../agents/action/iteration/playwright.md) for inner
   iteration on the extended spec.
 - [x] The agent MUST start with
-  `make deploy-fresh-purged-apps APPS=web-app-wordpress FULL_CYCLE=true
-  SERVICES_DISABLED=matomo,email` to establish a baseline. Subsequent
-  role-code changes use `make deploy-reuse-kept-apps APPS=web-app-wordpress`.
+  `make deploy-fresh-purged-apps INFINITO_APPS=web-app-wordpress INFINITO_FULL_CYCLE=true
+  INFINITO_SERVICES_DISABLED=matomo,email` to establish a baseline. Subsequent
+  role-code changes use `make deploy-reuse-kept-apps INFINITO_APPS=web-app-wordpress`.
   Subsequent spec-only changes use
   [scripts/tests/e2e/rerun-spec.sh](../../scripts/tests/e2e/rerun-spec.sh).
 - [x] Final confirmation uses
-  `make deploy-fresh-purged-apps APPS=web-app-wordpress FULL_CYCLE=true
-  SERVICES_DISABLED=matomo,email` with the extended Playwright spec
+  `make deploy-fresh-purged-apps INFINITO_APPS=web-app-wordpress INFINITO_FULL_CYCLE=true
+  INFINITO_SERVICES_DISABLED=matomo,email` with the extended Playwright spec
   passing in the same run.

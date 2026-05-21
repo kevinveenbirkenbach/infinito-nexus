@@ -1,4 +1,4 @@
-"""Unit tests for `cli meta networks suggest` (req-009 AC).
+"""Unit tests for `cli meta networks suggest`.
 
 Covers the gap-first / increment-fallback path for synthetic role-tree
 fixtures.
@@ -26,7 +26,7 @@ class TestNetworksSuggest(unittest.TestCase):
             return iter(iter_subnets_yield)
 
         with (
-            patch.object(netsuggest, "iter_subnets", side_effect=lambda: _factory()),
+            patch.object(netsuggest, "iter_subnets", side_effect=_factory),
             patch("sys.argv", ["suggest", *argv]),
         ):
             buf_out = io.StringIO()

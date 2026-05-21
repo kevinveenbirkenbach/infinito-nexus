@@ -3,8 +3,8 @@
 ## User Story
 
 As an operator, I want a `web-app-hugo` role that builds and serves
-[Hugo](https://gohugo.io/) static sites — one per canonical domain
-configured for the role — so that I can host fast, dependency-free
+[Hugo](https://gohugo.io/) static sites (one per canonical domain
+configured for the role) so that I can host fast, dependency-free
 HTML/CSS/JS websites (blogs, marketing pages, documentation portals)
 on infinito-nexus with the same lifecycle, deploy, and observability
 guarantees as every other `web-app-*` role.
@@ -30,7 +30,7 @@ build step:
   the `builder` stage runs `hugo --minify` against the cloned source;
   the `serve` stage is a pinned `nginx:<version>-alpine` that COPYs
   the builder's `/public/` into `/usr/share/nginx/html`. There is no
-  separate long-running build container — `compose build` re-bakes
+  separate long-running build container; `compose build` re-bakes
   the static output whenever the cloned source changes, and `compose
   up` restarts nginx with the new image.
 
@@ -51,7 +51,7 @@ hash is unchanged.
 ## Scope
 
 V1 (this requirement) implements **single canonical domain** per
-deploy — the most common shape for a Hugo site, matching every
+deploy, the most common shape for a Hugo site, matching every
 existing simple `web-app-*` role in the tree. Multi-canonical-domain
 support (one role deploy serving N independent Hugo sites with
 distinct `--baseURL`s) is **out of scope** for V1; if needed, a
@@ -65,14 +65,14 @@ fail explicitly if more than one canonical domain is configured.
   [requirement 008](008-role-meta-layout.md).
 - Reuses the standard compose includes
   (`sys-svc-compose/templates/base.yml.j2`,
-  `sys-svc-container/templates/...`) — see
+  `sys-svc-container/templates/...`); see
   [roles/web-app-yourls/templates/compose.yml.j2](../../roles/web-app-yourls/templates/compose.yml.j2)
   as the structural reference.
 - Pulls Hugo from upstream via the `package-cache` profile when active
   (requirement [012](012-package-cache-nexus3-oss.md)). When the
   profile is inactive, the role MUST still deploy by going to upstream
   directly.
-- Does NOT require a database, OIDC, or LDAP — the served output is
+- Does NOT require a database, OIDC, or LDAP; the served output is
   fully static.
 
 ## Acceptance Criteria
@@ -100,8 +100,8 @@ fail explicitly if more than one canonical domain is configured.
 - [x] The serving image is pinned (`nginx:1.28.0-alpine`) in
       `meta/services.yml`, surfaced through `vars/main.yml`.
 - [x] Both image references go through
-      `lookup('config', application_id, 'services.hugo.{image,version,builder_image,builder_version}')`
-      — same path used by every other `web-app-*` role — so they
+      `lookup('config', application_id, 'services.hugo.{image,version,builder_image,builder_version}')`,
+      the same path used by every other `web-app-*` role, so they
       appear in the global image-version drift report.
 
 ### Configuration surface
@@ -113,25 +113,25 @@ fail explicitly if more than one canonical domain is configured.
 - [x] Inventory configuration under
       `applications.web-app-hugo.services.hugo`:
       - `source_repository` (HTTPS Git URL, OPTIONAL; default
-        `https://github.com/gohugoio/hugoDocs.git` — see **Default
+        `https://github.com/gohugoio/hugoDocs.git`; see **Default
         site** below)
       - `source_version` (branch, tag, or commit; OPTIONAL; default
         value is the pinned tag from **Default site**)
       - `hugo_environment` (OPTIONAL; default `production`)
       - `hugo_minify` (OPTIONAL boolean; default `true`)
       - Hugo `--baseURL` is derived from
-        `lookup('tls', application_id, 'url.base')` — the role's TLS
+        `lookup('tls', application_id, 'url.base')`; the role's TLS
         URL is single-source-of-truth for the canonical scheme+host
         and an inventory override would silently fight that lookup.
 - [x] Theme handling: theme is whatever the upstream content repo
       ships in `themes/` or `go.mod` (Hugo modules). The role does
-      NOT clone a separate theme repo in V1 — keeping theme + content
+      NOT clone a separate theme repo in V1; keeping theme + content
       bundled mirrors how `web-app-littlejs` consumes its upstream
       and avoids per-site theme version drift. A separate theme
       override is deferred to the multi-site follow-up.
 - [x] Defaults live in `meta/services.yml` (read via
       `lookup('config', application_id, …)` from `vars/main.yml`),
-      not in a role-level schema validator — same convention as
+      not in a role-level schema validator; same convention as
       every other `web-app-*` role.
 
 ### Default site
@@ -154,7 +154,7 @@ fail explicitly if more than one canonical domain is configured.
 ### Build pipeline
 
 - [x] `tasks/01_core.yml` includes `sys-stk-full` and sets
-      `docker_git_repository_address` / `docker_git_repository_version`
+      `compose_repository_url` / `compose_repository_ref`
       to the inventory-resolved `source_repository` / `source_version`.
       The clone path is the standard `services/repository/` under the
       role's container directory.
@@ -172,7 +172,7 @@ fail explicitly if more than one canonical domain is configured.
       `compose build` / `compose up` handler fires.
 - [x] Build failures (Hugo non-zero exit) fail `compose build` and
       therefore the play. Because the new image is never produced,
-      `compose up` keeps serving the previous image — content never
+      `compose up` keeps serving the previous image, so content never
       flips to a half-built state. Observed during this iteration:
       an npm-modules build error (`Could not resolve "alpinejs"`)
       failed the play with no image swap.
@@ -187,23 +187,23 @@ fail explicitly if more than one canonical domain is configured.
       (BusyBox wget; the pinned `nginx:1.28.0-alpine` ships no curl).
       Container reports `Up (healthy)` after first deploy.
 - [x] CSP (`content-security-policy: default-src 'self'; …`),
-      `server: openresty/…` (no version leak from the role's nginx —
+      `server: openresty/…` (no version leak from the role's nginx,
       reverse-proxy strips server header), and HSTS
       (`strict-transport-security: max-age=15768000`) are emitted by
       the front proxy. Validated by `curl -sk -I https://hugo.infinito.example/`.
 
 ### Idempotency & deploy
 
-- [x] `make deploy-fresh-purged-apps APPS=web-app-hugo FULL_CYCLE=true`
+- [x] `make deploy-fresh-purged-apps INFINITO_APPS=web-app-hugo INFINITO_FULL_CYCLE=true`
       succeeds end-to-end (`failed=0` in PLAY RECAP).
-- [x] Running `make deploy-reuse-kept-apps APPS=web-app-hugo` a
+- [x] Running `make deploy-reuse-kept-apps INFINITO_APPS=web-app-hugo` a
       second time reports zero changes for the Hugo build step: git
       pull `changed: false`, no compose-build / compose-up handler
       fires.
 
 ### Tests
 
-- [x] `roles/web-app-hugo/files/playwright.spec.js` exercises:
+- [x] `roles/web-app-hugo/files/playwright/playwright.spec.js` exercises:
       - front-page reachability of the canonical domain (HTTP < 400,
         canonical-domain check, HSTS present),
       - non-empty `<title>` + Hugo content sentinel (rejects nginx
@@ -227,7 +227,7 @@ fail explicitly if more than one canonical domain is configured.
 
 - Authoring UI (Hugo has none; content lives in Git).
 - Server-side comments, search-as-a-service, or any dynamic backend.
-- OIDC / LDAP integration — the served content is public-by-design.
+- OIDC / LDAP integration; the served content is public-by-design.
   A future requirement MAY add an oauth2-proxy wrapper for staging
   sites; this requirement does NOT.
 - Multi-tenant theme marketplace. Themes are bundled with the
@@ -247,7 +247,7 @@ back to the bundled default (`gohugoio/hugoDocs`, see **Default
 site**) and renders the official Hugo documentation site.
 
 ```bash
-APPS="web-app-hugo" make deploy-fresh-purged-apps
+INFINITO_APPS="web-app-hugo" make deploy-fresh-purged-apps
 ```
 
 Expected outcome: the canonical domain serves the rendered Hugo docs

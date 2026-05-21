@@ -1,6 +1,6 @@
 # Makefile Commands 🛠️
 
-Use these commands from the repository root. This is the SPOT for `make` targets in Infinito Nexus.
+Use these commands from the repository root. This page indexes the `make` targets in Infinito Nexus.
 Use the dedicated script READMEs for the underlying shell helpers, and use the development/testing guides for deeper workflow details.
 
 For rules on how to write and structure the `Makefile` itself, see [makefile.md](../artefact/files/makefile.md).
@@ -12,7 +12,7 @@ For rules on how to write and structure the `Makefile` itself, see [makefile.md]
 | Build | `make build` | Builds the local image for the active `INFINITO_DISTRO`. | Use this after Dockerfile changes or whenever you want a fresh local image. |
 | Build if missing | `make build-missing` | Builds the image only when it is not already present locally. | Use this for a quick local check when you do not want to rebuild unnecessarily. |
 | No-cache build | `make build-no-cache` | Rebuilds the image without Docker cache. | Use this when cache reuse might hide a change or when you are debugging the build. |
-| No-cache all distros | `make build-no-cache-all` | Rebuilds the no-cache image for every distro in `DISTROS`. | Use this for release-level validation or when you need to verify all distro variants. |
+| No-cache all distros | `make build-no-cache-all` | Rebuilds the no-cache image for every distro in `INFINITO_DISTROS`. | Use this for release-level validation or when you need to verify all distro variants. |
 | Build dependency image | `make build-dependency` | Pulls the `pkgmgr` base image used by the build. | Use this when you want to refresh the base image or debug build inputs. |
 | Cleanup CI images | `make build-cleanup` | Removes Docker images created for CI-style build workflows. | Use this when local disk usage grows or old CI images accumulate. |
 | Regenerate Docker ignore | `make dockerignore` | Regenerates `.dockerignore` from `.gitignore`. | Use this when the Docker ignore file needs to be refreshed. |
@@ -26,7 +26,7 @@ For rules on how to write and structure the `Makefile` itself, see [makefile.md]
 | Python tooling | `make install-python` | Installs the Python tooling. | Use this when you need the Python toolchain after creating the virtual environment. |
 | Python dev tooling | `make install-python-dev` | Installs Python tooling including lint and dev dependencies, and registers the pre-commit hooks. | Use this when setting up a local development environment. Called automatically by `make environment-bootstrap`. |
 | Ansible dependencies | `make install-ansible` | Installs the Ansible dependencies. | Use this when you changed Ansible-related code or need the Ansible collections. |
-| Lint dependencies | `make install-lint` | Installs lint-related tooling. | Use this when you only need the lint stack. |
+| Lint dependencies | `make install-lint` | Installs lint-related tooling into the environment where lint will run (host or container, dispatched via `INFINITO_LINT_RUNNER`). Incremental via a per-interpreter stamp under `build/install-lint-<hash>.stamp`. Use `make install-lint-force` to drop the stamp first. | Use this when you only need the lint stack. |
 | Install agent skills | `make install-skills` | Restores all agent skills from `skills-lock.json` via `scripts/install/skills/install.sh`. Works universally for Claude Code, Codex, Gemini CLI, Cursor, Copilot, Windsurf, Cline, and more. Skipped gracefully when `npx` is absent. | Use this when setting up a local AI coding agent environment. Not part of `make environment-bootstrap`. Intended for IDE-specific setup. |
 | Update agent skills | `make update-skills` | Updates all agent skills to their latest versions by re-running `skills add` for each source in `skills-lock.json` via `scripts/install/skills/update.sh`. Requires `npx` and `jq`. | Use this to pull the latest skill versions and refresh `skills-lock.json`. |
 | Agent sandbox dependencies | `make agent-install` | Installs the OS-level dependencies (`bubblewrap`, `socat`) that the Claude Code sandbox backend requires, via `scripts/install/sandbox.sh`. Supports Debian, Ubuntu, Fedora, CentOS/RHEL/Rocky/Alma, and Arch. | Use this on a fresh host before running Claude Code so the sandbox backend is present. Needs root or `sudo`. |
@@ -80,13 +80,15 @@ For rules on how to write and structure the `Makefile` itself, see [makefile.md]
 | Category | Command | What it does | When to use it |
 |---|---|---|---|
 | Install lint tooling | `make install-lint` | Installs lint-related tooling. | Use this when you only need the lint stack. |
-| Auto-format | `make autoformat` | Runs all available auto-formatters (`ruff`, `shfmt`, `shellcheck`). Skips any tool that is not installed and reports which ones were skipped. | Use this to apply automatic formatting fixes before committing. |
+| Auto-format | `make autoformat` | Runs every available auto-formatter (`ruff`, `shfmt`, `shellcheck`, `markdownlint-cli2`, `ansible-lint`, `mbake`, `sort-claude-settings`). Skips any tool that is not installed and reports which ones were skipped. Workers run concurrently by default; set `INFINITO_WORKER_ENABLED=0` (also accepts `false`/`no`/`off`) to fall back to sequential execution. | Use this to apply automatic formatting fixes before committing. |
 | Lint | `make lint` | Runs the main lint checks for the repository. | Use this when you want a broad lint pass before pushing. |
 | Lint test suite | `make test-lint` | Runs the lint test suite inside the development environment. | Use this when you want CI-like lint validation. |
 | Lint action | `make lint-action` | Runs the GitHub Actions lint checks. | Use this when you changed workflow files or workflow logic. |
-| Lint Ansible | `make lint-ansible` | Runs the Ansible lint checks. | Use this when you changed Ansible roles, inventories, or playbook-related files. |
+| Lint Ansible | `make lint-ansible` | Runs the Ansible lint checks (`ansible-playbook --syntax-check` plus `ansible-lint`). | Use this when you changed Ansible roles, inventories, or playbook-related files. |
 | Lint Python | `make lint-python` | Runs the Python lint checks. | Use this when you changed Python code. |
 | Lint shell | `make lint-shellcheck` | Runs shellcheck lint checks. | Use this when you changed shell scripts. |
+| Lint Markdown | `make lint-markdown` | Runs markdownlint-cli2 against the repository per `.markdownlint-cli2.jsonc`. | Use this when you changed Markdown files. |
+| Lint Makefile | `make lint-makefile` | Runs `mbake format --check` against the project Makefile. | Use this when you changed the Makefile. |
 
 ### Test 🧪
 
@@ -126,13 +128,13 @@ For rules on how to write and structure the `Makefile` itself, see [makefile.md]
 | Category | Command | What it does | When to use it |
 |---|---|---|---|
 | Fresh kept apps | `make deploy-fresh-kept-apps` | Creates a new inventory and deploys one or more apps. | Use this for a fresh deploy of a specific app set. |
-| Fresh purged apps | `make deploy-fresh-purged-apps` | Recreates the stack, purges app state, and deploys (pass 1 only by default). Set `FULL_CYCLE=true` to also run the async update pass (pass 2). | Default: deploy only. `make deploy-fresh-purged-apps FULL_CYCLE=true` for the full cycle. |
+| Fresh purged apps | `make deploy-fresh-purged-apps` | Recreates the stack, purges app state, and deploys (pass 1 only by default). Set `INFINITO_FULL_CYCLE=true` to also run the async update pass (pass 2). | Default: deploy only. `make deploy-fresh-purged-apps INFINITO_FULL_CYCLE=true` for the full cycle. |
 | Reuse kept apps | `make deploy-reuse-kept-apps` | Reuses an existing inventory and redeploys one or more apps quickly. | Use this for the fast reuse path. |
 | Reuse purged apps | `make deploy-reuse-purged-apps` | Reuses an existing inventory, purges the app state first, and redeploys one or more apps quickly. | Use this when you want a fast reset-and-redeploy path. |
 | Fresh kept all | `make deploy-fresh-kept-all` | Builds the broader local deployment flow across apps. | Use this when you explicitly need broad coverage. |
 | Reuse kept all | `make deploy-reuse-kept-all` | Reuses the existing inventory and redeploys the broad app set. | Use this for the faster broad reuse path. |
-| Bundle deploy | `BUNDLES="<bundle>[,<bundle>]" make deploy-bundles` | Resolves the role groups declared in one or more [inventories/bundles/](../../../inventories/bundles/) entries, deduplicates them into `APPS`, and runs the fresh-purged deploy flow. Set `FULL_CYCLE=true` to also run the async update pass. | Use this to deploy a curated app shape (e.g. `education-suite,startup-essentials`) in a single command. |
-| Bundle redeploy | `BUNDLES="<bundle>[,<bundle>]" make redeploy-bundles` | Same bundle resolution as `deploy-bundles`, but routes through the reuse-kept path: no stack down/up and no entity purge. | Use this for the fast iteration loop after a bundle's first `deploy-bundles` run. |
+| Bundle deploy | `INFINITO_BUNDLES="<bundle>[,<bundle>]" make deploy-bundles` | Resolves the role groups declared in one or more [inventories/bundles/](../../../inventories/bundles/) entries, deduplicates them into `INFINITO_APPS`, and runs the fresh-purged deploy flow. Set `INFINITO_FULL_CYCLE=true` to also run the async update pass. | Use this to deploy a curated app shape (e.g. `education-suite,startup-essentials`) in a single command. |
+| Bundle redeploy | `INFINITO_BUNDLES="<bundle>[,<bundle>]" make redeploy-bundles` | Same bundle resolution as `deploy-bundles`, but routes through the reuse-kept path: no stack down/up and no entity purge. | Use this for the fast iteration loop after a bundle's first `deploy-bundles` run. |
 
 ## Git 🔐
 

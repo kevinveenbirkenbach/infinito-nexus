@@ -1,4 +1,5 @@
-config_upstream_url: https://ip.bsky.app/config  # nocheck: url
+---
+config_upstream_url: https://ip.bsky.app/config # nocheck: url
 status_codes:
   web: 405
 domains:
@@ -10,22 +11,22 @@ domains:
 csp:
   whitelist:
     connect-src:
-    - "{{ lookup('config', 'web-app-bluesky', 'server.domains.canonical.api') }}"
-    - https://plc.directory
-    - https://bsky.social
-    - https://api.bsky.app
-    - https://public.api.bsky.app
-    - https://events.bsky.app
-    - https://statsigapi.net  # nocheck: url
-    - https://ip.bsky.app  # nocheck: url
-    - https://video.bsky.app
-    - https://bsky.app
-    - wss://bsky.network
-    - wss://*.bsky.app
+      - "{{ lookup('config', 'web-app-bluesky', 'server.domains.canonical.api') }}"
+      - https://plc.directory
+      - https://bsky.social
+      - https://api.bsky.app
+      - https://public.api.bsky.app
+      - https://events.bsky.app
+      - https://statsigapi.net # nocheck: url
+      - https://ip.bsky.app # nocheck: url
+      - https://video.bsky.app
+      - https://bsky.app
+      - wss://bsky.network
+      - wss://*.bsky.app
     media-src:
-    - 'blob:'
+      - "blob:"
     worker-src:
-    - 'blob:'
+      - "blob:"
 networks:
   local:
     subnet: 192.168.101.64/28

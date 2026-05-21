@@ -57,8 +57,7 @@ jobs:
         run: |
           set -euo pipefail
           distros="${{ inputs.distros }}"
-          distros="${distros:-debian}"
-          json="$(printf '%s' "${distros}" | jq -Rc 'split(" ") | map(select(length>0))')"
+          json="$(scripts/github/runner/distros_matrix.sh "${distros:-debian}")"
           echo "matrix=${json}" >> "$GITHUB_OUTPUT"
           echo "Using matrix: ${json}"
 
@@ -98,7 +97,7 @@ jobs:
       - name: DNS test suite
         shell: bash
         env:
-          ENV_FILE: env.ci
+          ENV_FILE: env/ci.env
           INFINITO_DISTRO: ${{ matrix.distro }}
         run: |
           set -euo pipefail
@@ -118,6 +117,6 @@ jobs:
           INFINITO_DISTRO: ${{ matrix.distro }}
         run: |
           set -euo pipefail
-          # shellcheck source=scripts/meta/env/defaults.sh
-          source scripts/meta/env/defaults.sh
+          # shellcheck source=scripts/meta/env/load.sh
+          source scripts/meta/env/load.sh
           docker logs "${INFINITO_CONTAINER}" --tail=200 || true

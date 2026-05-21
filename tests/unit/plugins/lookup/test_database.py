@@ -1,19 +1,14 @@
-# tests/unit/plugins/lookup/test_database.py
 import importlib.util
 import unittest
-from pathlib import Path
 from unittest.mock import patch
 
 from ansible.errors import AnsibleError
 
-
-def _repo_root() -> Path:
-    # __file__ = tests/unit/plugins/lookup/test_database.py
-    return Path(__file__).resolve().parents[4]
+from . import PROJECT_ROOT
 
 
 def _load_module(rel_path: str, name: str):
-    path = _repo_root() / rel_path
+    path = PROJECT_ROOT / rel_path
     spec = importlib.util.spec_from_file_location(name, str(path))
     mod = importlib.util.module_from_spec(spec)
     assert spec and spec.loader
@@ -103,6 +98,7 @@ class DatabaseLookupTests(unittest.TestCase):
         self.assertEqual(out["name"], "foo")
         self.assertEqual(out["username"], "foo")
         self.assertEqual(out["host"], "")
+        self.assertEqual(out["network"], "")
         self.assertEqual(out["port"], "")
         self.assertEqual(out["env"], "")
         self.assertEqual(out["url_jdbc"], "")
@@ -124,8 +120,6 @@ class DatabaseLookupTests(unittest.TestCase):
 
     def test_postgres_dedicated_matches_helper_variables_definition(self):
         # Consumer config: postgres enabled locally (shared=false).
-        # Per req-009 the database port is hung on the database role's own
-        # services.<type>.ports.local.database entry.
         applications = {
             "web-app-foo": {
                 "services": {"postgres": {"enabled": True, "shared": False}},
@@ -136,8 +130,9 @@ class DatabaseLookupTests(unittest.TestCase):
                 "services": {
                     "postgres": {
                         "name": "postgres-central",
+                        "image": "postgis/postgis",
                         "version": "16",
-                        "ports": {"local": {"database": "5432"}},
+                        "ports": {"local": {"postgres": "5432"}},
                     }
                 }
             },
@@ -171,13 +166,16 @@ class DatabaseLookupTests(unittest.TestCase):
         self.assertEqual(out["username"], "foo")
         self.assertEqual(out["host"], "database")
         self.assertEqual(out["container"], "foo-database")
+        self.assertEqual(out["network"], "foo")
         self.assertEqual(out["password"], "pw")
         self.assertEqual(out["port"], "5432")
         self.assertEqual(out["env"], "/opt/compose/foo/.env/postgres.env")
+        self.assertEqual(out["initdb_dir"], "/opt/compose/foo/.initdb.d/")
+        self.assertEqual(out["build_dir"], "/opt/compose/foo/.postgres-build/")
         self.assertEqual(out["url_jdbc"], "jdbc:postgresql://database:5432/foo")
         self.assertEqual(out["url_full"], "postgres://foo:pw@database:5432/foo")
         self.assertEqual(out["volume"], "foo_database")
-        self.assertEqual(out["image"], "postgres")
+        self.assertEqual(out["image"], "postgis/postgis")
         self.assertEqual(out["version"], "16")
         self.assertEqual(out["reach_host"], "127.0.0.1")
         self.assertEqual(out["instance"], "foo")
@@ -208,7 +206,7 @@ class DatabaseLookupTests(unittest.TestCase):
                     "postgres": {
                         "name": "postgres-central",
                         "version": "16",
-                        "ports": {"local": {"database": "5432"}},
+                        "ports": {"local": {"postgres": "5432"}},
                     }
                 }
             },
@@ -242,6 +240,7 @@ class DatabaseLookupTests(unittest.TestCase):
 
         # database_container = _dbtype when central_enabled
         self.assertEqual(out["container"], "postgres")
+        self.assertEqual(out["network"], "postgres")
 
         # database_volume: no "<entity>_" prefix when shared, just host
         self.assertEqual(out["volume"], "postgres-central")
@@ -261,7 +260,7 @@ class DatabaseLookupTests(unittest.TestCase):
                     "mariadb": {
                         "name": "mariadb-central",
                         "version": "11.4",
-                        "ports": {"local": {"database": "3306"}},
+                        "ports": {"local": {"mariadb": "3306"}},
                     }
                 }
             },

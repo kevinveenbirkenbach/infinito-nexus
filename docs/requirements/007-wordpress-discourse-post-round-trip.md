@@ -34,7 +34,7 @@ re-provisioning, or the category-mapping defaults can ship silently.
 ### Scope
 
 - [x] A new scenario MUST be added to
-  [roles/web-app-wordpress/files/playwright.spec.js](../../roles/web-app-wordpress/files/playwright.spec.js)
+  [roles/web-app-wordpress/files/playwright/playwright.spec.js](../../roles/web-app-wordpress/files/playwright/playwright.spec.js)
   that publishes a WordPress post via the WP admin UI and asserts
   that the corresponding Discourse topic exists.
 - [x] The scenario MUST be gated on the `discourse` shared service
@@ -122,7 +122,7 @@ re-provisioning, or the category-mapping defaults can ship silently.
   same mechanism as every other gate from
   [006-playwright-service-gated-tests.md](006-playwright-service-gated-tests.md)
   (derived from `applications[web-app-wordpress].compose.services.discourse.enabled`
-  minus `SERVICES_DISABLED`).
+  minus `INFINITO_SERVICES_DISABLED`).
 
 ### Teardown
 
@@ -155,11 +155,11 @@ re-provisioning, or the category-mapping defaults can ship silently.
 
 ### Verification
 
-- [x] A fresh `make deploy-fresh-purged-apps APPS=web-app-wordpress
-  FULL_CYCLE=true` with Discourse enabled MUST produce a green
+- [x] A fresh `make deploy-fresh-purged-apps INFINITO_APPS=web-app-wordpress
+  INFINITO_FULL_CYCLE=true` with Discourse enabled MUST produce a green
   run including this scenario.
-- [x] A `make deploy-fresh-purged-apps APPS=web-app-wordpress
-  FULL_CYCLE=true SERVICES_DISABLED=discourse` MUST produce a
+- [x] A `make deploy-fresh-purged-apps INFINITO_APPS=web-app-wordpress
+  INFINITO_FULL_CYCLE=true INFINITO_SERVICES_DISABLED=discourse` MUST produce a
   green run with the scenario reported as `skipped` rather than
   failing, proving the gate from
   [006-playwright-service-gated-tests.md](006-playwright-service-gated-tests.md)

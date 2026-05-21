@@ -1,3 +1,4 @@
+---
 - name: "Load {{ service_key }} in shared service preload context"
   block:
     - name: "Mark shared service preload context for {{ service_key }}"

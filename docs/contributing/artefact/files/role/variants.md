@@ -15,14 +15,14 @@ For how the file is consumed at runtime (folder-per-round model, `--variant` / `
 - The top-level node MUST be a YAML list. A non-list root is a hard error.
 - Each list entry MUST be either:
   - the empty mapping `{}` (the canonical no-override entry), or
-  - a YAML mapping that mirrors the assembled application payload — i.e. it can override anything reachable under `applications.<app>.{server,rbac,services,volumes,credentials}` (see [layout.md](../../../design/services/layout.md)).
+  - a YAML mapping that mirrors the assembled application payload, so it can override anything reachable under `applications.<app>.{server,rbac,services,volumes,credentials}` (see [layout.md](../../../design/role/services/layout.md)).
 - The literal `null` is normalised to `{}` so a bare `- ` list item stays valid.
 - Scalars at entry level (numbers, strings, lists) are rejected.
 - Variants are addressed by their **zero-based index** in the list.
 
 ## Entry Semantics 🧩
 
-A **variant** is the role's assembled per-role meta payload (the same payload `applications.<app>` exposes — see [layout.md](../../../design/services/layout.md)) deep-merged with the matching list entry. The deep-merge follows the same rules as the [`applications`](../plugins/lookup/applications.md) lookup: dictionaries merge recursively, scalars and lists are replaced, and the entry has precedence.
+A **variant** is the role's assembled per-role meta payload (the same payload `applications.<app>` exposes; see [layout.md](../../../design/role/services/layout.md)) deep-merged with the matching list entry. The deep-merge follows the same rules as the [`applications`](../plugins/lookup/applications.md) lookup: dictionaries merge recursively, scalars and lists are replaced, and the entry has precedence.
 
 - Entry `{}` produces the unchanged assembled payload, which becomes variant 0.
 - An entry with overrides produces a derived shape (for example WordPress Multisite domains).

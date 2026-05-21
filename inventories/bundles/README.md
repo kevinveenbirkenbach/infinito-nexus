@@ -94,8 +94,8 @@ all:
 
 Deploy target is derived from the parent folder:
 
-* inventories/server → server bundle
-* inventories/workstation → workstation bundle
+- inventories/server → server bundle
+- inventories/workstation → workstation bundle
 
 Do not define deploy_target inside the inventory file.
 
@@ -131,11 +131,11 @@ all.vars.infinito.bundle
 
 Required fields:
 
-* title
-* description
-* logo.class
-* tags
-* categories
+- title
+- description
+- logo.class
+- tags
+- categories
 
 The logo must use a valid Font Awesome class string, e.g.:
 
@@ -157,9 +157,9 @@ Role configuration belongs inside roles or runtime overlays.
 
 An inventory in Infinito.Nexus is:
 
-* a bundle definition
-* a role activation map
-* a deployable unit
+- a bundle definition
+- a role activation map
+- a deployable unit
 
 No additional bundle file format is required.
 
@@ -173,13 +173,13 @@ Two `make` targets resolve one or more bundles into the role groups declared und
 
 | Command | Path | Behavior |
 |---|---|---|
-| `BUNDLES="<a>[,<b>]" make deploy-bundles` | fresh-purged | Brings the stack down/up, purges entities, then deploys every role group from the listed bundles. Set `FULL_CYCLE=true` to also run the async update pass. |
-| `BUNDLES="<a>[,<b>]" make redeploy-bundles` | reuse-kept | No down/up, no entity purge. Requires a prior `deploy-bundles` run that initialized the inventory. |
+| `INFINITO_BUNDLES="<a>[,<b>]" make deploy-bundles` | fresh-purged | Brings the stack down/up, purges entities, then deploys every role group from the listed bundles. Set `INFINITO_FULL_CYCLE=true` to also run the async update pass. |
+| `INFINITO_BUNDLES="<a>[,<b>]" make redeploy-bundles` | reuse-kept | No down/up, no entity purge. Requires a prior `deploy-bundles` run that initialized the inventory. |
 
 Example:
 
 ```bash
-BUNDLES="education-suite,startup-essentials" make deploy-bundles FULL_CYCLE=true
+INFINITO_BUNDLES="education-suite,startup-essentials" make deploy-bundles INFINITO_FULL_CYCLE=true
 ```
 
 See [docs/contributing/tools/make.md](../../docs/contributing/tools/make.md) and [docs/contributing/actions/testing.md](../../docs/contributing/actions/testing.md) for the full deploy-target reference.

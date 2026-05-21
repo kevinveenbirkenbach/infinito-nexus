@@ -1,5 +1,11 @@
+---
 loc-2-usb:
-  mount: ''
-  target: ''
-  source: ''
+  mount: ""
+  target: ""
+  source: ""
   lifecycle: pre-alpha
+  min_storage: "200MB"
+  cpus: "0.5"
+  mem_reservation: "256m"
+  mem_limit: "512m"
+  pids_limit: 256

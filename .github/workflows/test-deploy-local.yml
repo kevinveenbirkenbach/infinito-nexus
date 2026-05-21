@@ -27,10 +27,12 @@ permissions:
 # - For local `act`, prefer overriding via `--env`.
 # - For GitHub UI dispatch, inputs are used as fallback.
 env:
-  TEST_DEPLOY_TYPE: "server"
-  DISTROS: "debian"
+  INFINITO_TEST_DEPLOY_TYPE: "server"
+  INFINITO_DISTROS: "debian"
   NIX_CONFIG: ""
   INFINITO_IMAGE_TAG: "latest"
+  INFINITO_PLAYWRIGHT_KEEP: ${{ vars.INFINITO_PLAYWRIGHT_KEEP }}
+  INFINITO_APP_DISCOVERY_RUNNER: host
 
 jobs:
   discover:
@@ -61,18 +63,21 @@ jobs:
         shell: bash
         run: ./scripts/install/apt.sh jq gettext-base
 
-      - name: Start stack for discovery
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install project (host venv)
         shell: bash
-        run: |
-          set -euo pipefail
-          make up
+        run: make install
 
       - name: Discover apps
         id: discover
         shell: bash
         env:
-          WHITELIST: ${{ inputs.whitelist }}
-        run: ./scripts/github/output_apps.sh
+          INFINITO_WHITELIST: ${{ inputs.whitelist }}
+        run: ./scripts/github/resolve/output_apps.sh
 
   deploy:
     name: 🚀 Deploy ${{ needs.discover.outputs.test_deploy_type }} app (${{ matrix.apps }})
@@ -109,7 +114,7 @@ jobs:
       # the host OOM-killer. Script picks / or /mnt based on live free space.
       - name: Enlarge swap space
         shell: bash
-        run: ./scripts/github/enlarge_swap.sh
+        run: ./scripts/github/runner/enlarge_swap.sh
 
       - name: Install deps (jq + envsubst)
         shell: bash
@@ -118,12 +123,12 @@ jobs:
       - name: Deploy app (same as CI logic)
         shell: bash
         env:
-          TEST_DEPLOY_TYPE: ${{ needs.discover.outputs.test_deploy_type }}
-          DISTROS: ${{ needs.discover.outputs.distros }}
-          APPS: ${{ matrix.apps }}
+          INFINITO_TEST_DEPLOY_TYPE: ${{ needs.discover.outputs.test_deploy_type }}
+          INFINITO_DISTROS: ${{ needs.discover.outputs.distros }}
+          INFINITO_APPS: ${{ matrix.apps }}
         run: ./scripts/tests/deploy/ci/all.sh
 
       - name: Dump runner state (on failure)
         if: failure()
         shell: bash
-        run: ./scripts/github/dump_runner_state.sh "post-deploy failure (${{ matrix.apps }})"
+        run: ./scripts/github/runner/dump_state.sh "post-deploy failure (${{ matrix.apps }})"

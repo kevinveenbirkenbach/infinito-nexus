@@ -1,16 +1,18 @@
+---
 - name: Define per-role paths
   ansible.builtin.set_fact:
     _playwright_env_template: "{{ playbook_dir }}/roles/{{ application_id }}/templates/playwright.env.j2"
-    _playwright_spec_src: "{{ playbook_dir }}/roles/{{ application_id }}/files/playwright.spec.js"
+    _playwright_files_dir: "{{ playbook_dir }}/roles/{{ application_id }}/files/playwright"
+    _playwright_spec_src: "{{ playbook_dir }}/roles/{{ application_id }}/files/playwright/playwright.spec.js"
     _playwright_stage_dir: "{{ TEST_E2E_PLAYWRIGHT_STAGE_BASE_DIR }}/{{ application_id }}"
     _playwright_stage_tests_dir: "{{ TEST_E2E_PLAYWRIGHT_STAGE_BASE_DIR }}/{{ application_id }}/tests"
     _playwright_reports_dir: "{{ TEST_E2E_PLAYWRIGHT_REPORTS_BASE_DIR }}/{{ application_id }}"
     _playwright_default_package_template: "{{ playbook_dir }}/roles/test-e2e-playwright/templates/package.json.j2"
     _playwright_default_config_js: "{{ playbook_dir }}/roles/test-e2e-playwright/files/playwright.config.js"
-    _playwright_ca_required: "{{ (TLS_MODE | default('') | lower) == 'self_signed' }}"
-    _playwright_ca_cert_host: "{{ (CA_TRUST | default({})).cert_host | default('') }}"
-    _playwright_ca_wrapper_host: "{{ (CA_TRUST | default({})).wrapper_host | default('') }}"
-    _playwright_ca_trust_name: "{{ (CA_TRUST | default({})).trust_name | default('') }}"
+    _playwright_ca_required: "{{ (TLS_MODE | lower) == 'self_signed' }}"
+    _playwright_ca_cert_host: "{{ CA_TRUST.cert_host }}"
+    _playwright_ca_wrapper_host: "{{ CA_TRUST.wrapper_host }}"
+    _playwright_ca_trust_name: "{{ CA_TRUST.trust_name }}"
 
 - name: Validate CA_TRUST configuration for self-signed TLS
   ansible.builtin.fail:
@@ -109,15 +111,6 @@
     msg: "Missing central Playwright package.json template: {{ _playwright_default_package_template }}"
   when: not _default_package_stat.stat.exists
 
-- name: Resolve Playwright image
-  ansible.builtin.set_fact:
-    _playwright_image: >-
-      {{
-        TEST_E2E_PLAYWRIGHT_IMAGE
-        if (TEST_E2E_PLAYWRIGHT_IMAGE | default('') | trim | length > 0)
-        else lookup('image', 'playwright', 'ref')
-      }}
-
 # The `container` wrapper insists the image is present locally before
 # `run`. Pull it explicitly so a pruned cache doesn't fail the stage.
 - name: Pull Playwright image if missing
@@ -125,7 +118,7 @@
     argv:
       - container
       - pull
-      - "{{ _playwright_image }}"
+      - "{{ TEST_E2E_PLAYWRIGHT_IMAGE }}"
   register: _playwright_pull
   changed_when: false
   failed_when: false
@@ -155,19 +148,56 @@
     dest: "{{ _playwright_stage_dir }}/playwright.config.js"
     mode: "0644"
 
-- name: Copy role Playwright spec into staging tests directory
+- name: Copy role Playwright files (spec + companion modules) into staging tests directory
   ansible.builtin.copy:
-    src: "{{ _playwright_spec_src }}"
-    dest: "{{ _playwright_stage_tests_dir }}/playwright.spec.js"
+    src: "{{ item }}"
+    dest: "{{ _playwright_stage_tests_dir }}/{{ item | basename }}"
     mode: "0644"
+  with_fileglob:
+    - "{{ _playwright_files_dir }}/*.js"
 
 # Stage the shared service-gating helper next to the spec so the spec can
-# `require("./service-gating")`. See docs/requirements/006 for the contract.
+# `require("./service-gating")`.
 - name: Copy shared service-gating helper into staging tests directory
   ansible.builtin.copy:
     src: "{{ playbook_dir }}/roles/test-e2e-playwright/files/service-gating.js"
     dest: "{{ _playwright_stage_tests_dir }}/service-gating.js"
     mode: "0644"
+
+# Stage the shared persona-flow helpers.
+# The personas/ tree ships every persona flow runner at the top level
+# (biber.js, admin.js, guest.js, index.js) and every helper under
+# personas/utils/. We use ansible.builtin.copy with `directory_mode`
+# semantics by listing the tree explicitly via fileglob; the recursive
+# variant is achieved by chaining one task per depth level so we keep
+# Ansible-idempotent file copies (no `synchronize`/rsync dependency).
+- name: Create staging personas directory
+  ansible.builtin.file:
+    path: "{{ _playwright_stage_tests_dir }}/personas"
+    state: directory
+    mode: "0755"
+
+- name: Create staging personas/utils directory
+  ansible.builtin.file:
+    path: "{{ _playwright_stage_tests_dir }}/personas/utils"
+    state: directory
+    mode: "0755"
+
+- name: Copy persona-flow runners into staging personas directory
+  ansible.builtin.copy:
+    src: "{{ item }}"
+    dest: "{{ _playwright_stage_tests_dir }}/personas/{{ item | basename }}"
+    mode: "0644"
+  with_fileglob:
+    - "{{ playbook_dir }}/roles/test-e2e-playwright/files/personas/*.js"
+
+- name: Copy persona helper modules into staging personas/utils directory
+  ansible.builtin.copy:
+    src: "{{ item }}"
+    dest: "{{ _playwright_stage_tests_dir }}/personas/utils/{{ item | basename }}"
+    mode: "0644"
+  with_fileglob:
+    - "{{ playbook_dir }}/roles/test-e2e-playwright/files/personas/utils/*.js"
 
 # Keep /volume mount stable even if the source project does not define one.
 - name: Ensure staging volume directory exists
@@ -212,25 +242,7 @@
     mode: "0755"
 
 - name: Collect host disk diagnostics before Playwright
-  ansible.builtin.shell: |
-    set -o pipefail
-
-    echo "== findmnt -T /mnt/docker =="
-    findmnt -T /mnt/docker || true
-    echo
-
-    echo "== df -h / /mnt /mnt/docker /var/lib/docker =="
-    df -h / /mnt /mnt/docker /var/lib/docker || true
-    echo
-
-    echo '== container info | grep "Docker Root Dir" =='
-    container info | grep "Docker Root Dir" || true
-    echo
-
-    echo "== du -xhd1 /usr /usr/local /usr/share /opt /mnt /var | sort -h =="
-    du -xhd1 /usr /usr/local /usr/share /opt /mnt /var 2>/dev/null | sort -h || true
-  args:
-    executable: /bin/bash
+  ansible.builtin.script: "{{ role_path }}/files/dump_disk_diagnostics.sh"
   changed_when: false
   when: MODE_DEBUG | bool
 
@@ -244,6 +256,8 @@
       - --shm-size=1g
       - --env-file
       - "{{ _playwright_stage_dir }}/.env"
+      - -e
+      - "INFINITO_PLAYWRIGHT_KEEP={{ TEST_E2E_PLAYWRIGHT_KEEP }}"
       - -v
       - "{{ _playwright_stage_dir }}:/e2e"
       - -v
@@ -252,10 +266,11 @@
       - "{{ _playwright_reports_dir }}:/reports"
       - -w
       - /e2e
-      - "{{ _playwright_image }}"
+      - "{{ TEST_E2E_PLAYWRIGHT_IMAGE }}"
       - /bin/bash
       - -lc
       - "{{ TEST_E2E_PLAYWRIGHT_COMMAND }}"
+  timeout: "{{ TEST_E2E_PLAYWRIGHT_RUN_TIMEOUT | int }}"
   environment: >-
     {{
       {
@@ -283,3 +298,11 @@
   ansible.builtin.set_fact:
     _playwright_failures: "{{ (_playwright_failures | default([])) + [application_id] }}"
   when: _playwright_run.rc != 0
+
+- name: Archive Playwright reports for this variant + pass
+  ansible.builtin.script: >-
+    {{ role_path }}/files/archive_playwright_reports.sh
+    {{ _playwright_reports_dir | quote }}
+    {{ VARIANT_INDEX | int }}
+    {{ ASYNC_ENABLED | bool | string | lower }}
+  changed_when: true

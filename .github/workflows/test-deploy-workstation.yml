@@ -18,12 +18,14 @@ permissions:
   packages: read
 
 env:
-  TEST_DEPLOY_TYPE: workstation
-  DISTROS: ${{ inputs.distros }}
+  INFINITO_TEST_DEPLOY_TYPE: workstation
+  INFINITO_DISTROS: ${{ inputs.distros }}
   NIX_CONFIG: |
     access-tokens = github.com=${{ secrets.GITHUB_TOKEN }}
   INFINITO_IMAGE_TAG: ci-${{ github.sha }}
   INFINITO_GHCR_MIRROR_PREFIX: mirror
+  INFINITO_PLAYWRIGHT_KEEP: ${{ vars.INFINITO_PLAYWRIGHT_KEEP }}
+  INFINITO_APP_DISCOVERY_RUNNER: host
 jobs:
   discover:
     name: 🖥️ Discover apps
@@ -47,25 +49,28 @@ jobs:
         shell: bash
         run: ./scripts/install/apt.sh jq
 
-      - name: Start stack for discovery
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install project (host venv)
         shell: bash
-        run: |
-          set -euo pipefail
-          make up
+        run: make install
 
       - name: Resolve effective whitelist (diff vs origin/main)
         id: resolve_wl
         shell: bash
         env:
           INPUT_WHITELIST: ${{ inputs.whitelist }}
-        run: ./scripts/github/resolve_effective_whitelist.sh
+        run: ./scripts/github/resolve/effective_whitelist.sh
 
       - name: Discover apps
         id: discover
         shell: bash
         env:
-          WHITELIST: ${{ steps.resolve_wl.outputs.whitelist }}
-        run: ./scripts/github/output_apps.sh
+          INFINITO_WHITELIST: ${{ steps.resolve_wl.outputs.whitelist }}
+        run: ./scripts/github/resolve/output_apps.sh
 
   workstation:
     name: 🖥️ Deploy ${{ matrix.apps }}
@@ -101,7 +106,7 @@ jobs:
       # the host OOM-killer. Script picks / or /mnt based on live free space.
       - name: Enlarge swap space
         shell: bash
-        run: ./scripts/github/enlarge_swap.sh
+        run: ./scripts/github/runner/enlarge_swap.sh
 
       - name: Resolve repository owner
         shell: bash
@@ -116,10 +121,10 @@ jobs:
       - name: Deploy app
         shell: bash
         env:
-          APPS: ${{ matrix.apps }}
+          INFINITO_APPS: ${{ matrix.apps }}
         run: ./scripts/tests/deploy/ci/all.sh
 
       - name: Dump runner state (on failure)
         if: failure()
         shell: bash
-        run: ./scripts/github/dump_runner_state.sh "post-deploy failure (${{ matrix.apps }})"
+        run: ./scripts/github/runner/dump_state.sh "post-deploy failure (${{ matrix.apps }})"

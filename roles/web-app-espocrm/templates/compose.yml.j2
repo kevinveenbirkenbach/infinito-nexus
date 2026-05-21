@@ -37,7 +37,7 @@
 {% include 'roles/sys-svc-container/templates/networks.yml.j2' %}
     volumes:
       - data:/var/www/html/
-    depends_on:
+{% include 'roles/sys-svc-container/templates/depends_on/dmbs_incl.yml.j2' %}
       {{ ESPOCRM_SERVICE }}:
         condition: service_healthy
     healthcheck:
@@ -62,19 +62,17 @@
       - ESPOCRM_CONFIG_WEB_SOCKET_ZERO_M_Q_SUBSCRIBER_DSN=tcp://*:7777
       - ESPOCRM_CONFIG_WEB_SOCKET_ZERO_M_Q_SUBMISSION_DSN=tcp://websocket:7777
     entrypoint: docker-websocket.sh
-{% include 'roles/sys-svc-container/templates/depends_on/dmbs_excl.yml.j2' %}
 {% include 'roles/sys-svc-container/templates/networks.yml.j2' %}
     volumes:
       - data:/var/www/html/
     ports:
       - "{{ DOCKER_BIND_HOST }}:{{ lookup('config', application_id, 'services.espocrm.ports.local.websocket') }}:8080"
-    depends_on:
+{% include 'roles/sys-svc-container/templates/depends_on/dmbs_incl.yml.j2' %}
       {{ ESPOCRM_SERVICE }}:
         condition: service_healthy
 
 {{ lookup('applications') | compose_volumes(
     application_id,
-    database_volume=lookup('database', application_id, 'volume'),
     extra_volumes={'data': {'name': ESPOCRM_DATA_VOLUME}}
 ) }}
 {% include 'roles/sys-svc-compose/templates/networks.yml.j2' %}

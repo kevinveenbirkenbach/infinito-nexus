@@ -233,7 +233,7 @@ updates and another does not.
   cover all three shapes (non-tenant, tenant-aware per-tenant,
   tenant-aware global) and all three failure modes (unknown role,
   tenant-on-global, missing-tenant-on-per-tenant).
-- [x] [tests/integration/lookups/test_usage.py](../../tests/integration/lookups/test_usage.py),
+- [x] [tests/integration/ansible/lookups/test_usage.py](../../tests/integration/ansible/lookups/test_usage.py),
   which already asserts that every defined lookup plugin is actually
   referenced in production code, MUST stay green after the plugin is
   added. The callsite migration above guarantees that `rbac_group_path`
@@ -403,7 +403,7 @@ updates and another does not.
   task produces exactly the expected hierarchical DNs while
   preserving group members.
 - [x] The existing Playwright spec
-  [playwright.spec.js](../../roles/web-app-yourls/files/playwright.spec.js)
+  [playwright.spec.js](../../roles/web-app-yourls/files/playwright/playwright.spec.js)
   in [web-app-yourls](../../roles/web-app-yourls/) MUST verify the
   new RBAC layout end to end for a non-tenant single-role app. YOURLS
   is the smallest meaningful consumer of the scheme: it has one

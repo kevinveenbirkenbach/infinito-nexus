@@ -7,6 +7,7 @@ This role sets up and manages the host as a backup provider. It establishes the 
 ## Overview
 
 Optimized for automated backup processes, this role:
+
 - Configures the host to provide backup services.
 - Integrates seamlessly with the [user-backup](../user-backup/README.md) and [sys-timer-cln-bkps](../sys-timer-cln-bkps/README.md) roles.
 - Lays the foundation for secure and extensible backup operations.
@@ -33,3 +34,10 @@ The primary purpose of this role is to enable the host to act as a backup provid
 - [Chrootd Rsync Setup](https://serverfault.com/questions/287578/trying-to-setup-chrootd-rsync)
 - [Using Rsync with SSH](http://ramblings.narrabilis.com/using-rsync-with-ssh)
 - [Rsync on Arch Linux](https://wiki.archlinux.org/index.php/rsync)
+
+## Credits
+
+Developed and maintained by **Kevin Veen-Birkenbach**.
+Learn more at [veen.world](https://www.veen.world).
+Part of the [Infinito.Nexus Project](https://s.infinito.nexus/code).
+Licensed under the [Infinito.Nexus Community License (Non-Commercial)](https://s.infinito.nexus/license).

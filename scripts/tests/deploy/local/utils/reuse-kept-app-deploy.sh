@@ -4,24 +4,39 @@
 # Called from the host wrapper at
 # scripts/tests/deploy/local/deploy/reuse-kept-app.sh via `docker exec`,
 # which is responsible for injecting the env-vars asserted below. The
-# repo is mounted at /opt/src/infinito by the dev compose stack.
+# repo is mounted at ${INFINITO_SRC_DIR} by the dev compose stack.
 #
 # Required env:
-#   INVENTORY_FILE   absolute path to <inv>/devices.yml
-#   APPS             space-separated app id list for `--id`
-#   DEBUG            "true"|"false" — appends `--debug` when true
+#   INFINITO_INVENTORY_FILE   absolute path to <inv>/devices.yml
+#   INFINITO_APPS    space-separated app id list for `--id`
+#   INFINITO_DEBUG   "true"|"false" — appends `--debug` when true
+#   INFINITO_SRC_DIR absolute path to the bind-mounted repo root in the container
 set -euo pipefail
-cd /opt/src/infinito
+: "${INFINITO_SRC_DIR:?INFINITO_SRC_DIR must be set by the container environment}"
+cd "${INFINITO_SRC_DIR}"
 
-: "${INVENTORY_FILE:?INVENTORY_FILE must be set}"
-: "${APPS:?APPS must be set}"
-: "${DEBUG:?DEBUG must be set}"
+: "${INFINITO_INVENTORY_FILE:?INFINITO_INVENTORY_FILE must be set}"
+: "${INFINITO_APPS:?INFINITO_APPS must be set}"
+: "${INFINITO_DEBUG:?INFINITO_DEBUG must be set}"
 
-inv_dir="$(dirname "${INVENTORY_FILE}")"
+inv_dir="$(dirname "${INFINITO_INVENTORY_FILE}")"
 pw_file="${inv_dir}/.password"
 
-if [[ ! -f "${INVENTORY_FILE}" ]]; then
-	echo "ERROR: inventory not found: ${INVENTORY_FILE}" >&2
+if [[ ! -f "${INFINITO_INVENTORY_FILE}" ]]; then
+	echo "ERROR: inventory not found: ${INFINITO_INVENTORY_FILE}" >&2
+	parent_dir="$(dirname "${inv_dir}")"
+	if [[ -d "${parent_dir}" ]]; then
+		shopt -s nullglob
+		suggestions=()
+		for sibling in "${parent_dir}"/*/devices.yml; do
+			[[ "${sibling}" != "${INFINITO_INVENTORY_FILE}" ]] && suggestions+=("${sibling}")
+		done
+		shopt -u nullglob
+		if ((${#suggestions[@]} > 0)); then
+			echo "Did you mean one of:" >&2
+			printf '  - %s\n' "${suggestions[@]}" >&2
+		fi
+	fi
 	exit 2
 fi
 
@@ -34,11 +49,11 @@ echo ">>> Running entry.sh"
 ./scripts/docker/entry.sh true
 
 echo ">>> Starting rapid deploy"
-# `--id` accepts multiple positional ids; split APPS on whitespace into a
+# `--id` accepts multiple positional ids; split INFINITO_APPS on whitespace into a
 # proper array instead of relying on shell word-splitting at expansion time
 # (which shellcheck SC2206 rightly flags as fragile).
-read -ra app_ids <<<"${APPS}"
-cmd=(infinito deploy dedicated "${INVENTORY_FILE}"
+read -ra app_ids <<<"${INFINITO_APPS}"
+cmd=(infinito administration deploy dedicated "${INFINITO_INVENTORY_FILE}"
 	--skip-backup
 	--skip-cleanup
 	--id "${app_ids[@]}"
@@ -51,7 +66,7 @@ cmd=(infinito deploy dedicated "${INVENTORY_FILE}"
 	-e SYS_SERVICE_DEFAULT_STATE=started
 )
 
-if [[ "${DEBUG}" == "true" ]]; then
+if [[ "${INFINITO_DEBUG}" == "true" ]]; then
 	cmd+=(--debug)
 fi
 

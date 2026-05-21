@@ -1,3 +1,4 @@
+---
 - name: Execute OIDC Setup Routine
   include_tasks: setup/oidc.yml
   when: GITEA_OIDC_ENABLED | bool
