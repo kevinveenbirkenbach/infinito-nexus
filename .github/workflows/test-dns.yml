@@ -57,8 +57,7 @@ jobs:
         run: |
           set -euo pipefail
           distros="${{ inputs.distros }}"
-          distros="${distros:-debian}"
-          json="$(printf '%s' "${distros}" | jq -Rc 'split(" ") | map(select(length>0))')"
+          json="$(scripts/github/runner/distros_matrix.sh "${distros:-debian}")"
           echo "matrix=${json}" >> "$GITHUB_OUTPUT"
           echo "Using matrix: ${json}"
 

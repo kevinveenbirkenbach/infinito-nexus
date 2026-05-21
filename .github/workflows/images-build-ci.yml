@@ -46,18 +46,7 @@ jobs:
 
       - name: Compute matrix JSON
         id: out
-        run: |
-          set -euo pipefail
-          distros="${{ inputs.distros }}"
-          json="$(printf '%s' "$distros" | jq -Rc 'split(" ") | map(select(length>0))')"
-          image_tag="${{ inputs.image_tag }}"
-          if [ -z "${image_tag}" ]; then
-            image_tag="ci-${GITHUB_SHA}"
-          fi
-          echo "matrix=${json}" >> "$GITHUB_OUTPUT"
-          echo "image_tag=${image_tag}" >> "$GITHUB_OUTPUT"
-          echo "Using matrix: ${json}"
-          echo "Using image tag: ${image_tag}"
+        run: scripts/github/runner/images_build_outputs.sh "${{ inputs.distros }}" "${{ inputs.image_tag }}"
 
   build:
     name: 🏗️ Build (${{ matrix.distro }})
@@ -100,14 +89,7 @@ jobs:
 
       - name: Disk pressure (pre-build)
         shell: bash
-        run: |
-          set -euo pipefail
-          echo "=== Disk pressure: PRE-BUILD ==="
-          df -h
-          echo
-          docker system df || true
-          echo
-          docker buildx du || true
+        run: bash scripts/github/runner/disk_pressure_report.sh PRE-BUILD
 
       - name: Resolve repository owner
         id: owner
@@ -133,14 +115,7 @@ jobs:
       - name: Disk pressure (post-build)
         if: always()
         shell: bash
-        run: |
-          set -euo pipefail
-          echo "=== Disk pressure: POST-BUILD ==="
-          df -h
-          echo
-          docker system df || true
-          echo
-          docker buildx du || true
+        run: bash scripts/github/runner/disk_pressure_report.sh POST-BUILD
 
       - name: Cleanup (always)
         if: always()
