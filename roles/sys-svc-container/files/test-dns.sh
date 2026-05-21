@@ -15,7 +15,7 @@ set -euo pipefail
 : "${INFINITO_IP4:?Missing env INFINITO_IP4}"
 
 SUBDOMAIN="foo.${INFINITO_DOMAIN}"
-INFINITO_IP4_EXPECTED="${INFINITO_IP4}"
+IP4_EXPECTED="${INFINITO_IP4}"
 
 section() {
   echo
@@ -56,8 +56,8 @@ container run --rm --dns "${INFINITO_DNS_IP}" "${BUSYBOX_IMAGE}" sh -lc "
     name=\"\$1\"
     out=\$(nslookup \"\$name\" 2>&1 || true)
     echo \"\$out\"
-    echo \"\$out\" | grep -q \"Address: ${INFINITO_IP4_EXPECTED}\" || {
-      echo \"A lookup failed for \$name (expected ${INFINITO_IP4_EXPECTED})\"
+    echo \"\$out\" | grep -q \"Address: ${IP4_EXPECTED}\" || {
+      echo \"A lookup failed for \$name (expected ${IP4_EXPECTED})\"
       exit 1
     }
   }
