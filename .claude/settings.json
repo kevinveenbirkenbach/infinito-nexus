@@ -411,6 +411,7 @@
         "*.amazonaws.com",
         "*.ansible.com",
         "*.docker.com",
+        "*.docker.io",
         "*.gitea.com",
         "*.github.com",
         "*.githubusercontent.com",
