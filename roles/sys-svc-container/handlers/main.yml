@@ -20,3 +20,6 @@
   environment:
     BUSYBOX_IMAGE: "{{ lookup('image', 'sys-svc-container', 'busybox', 'ref') }}"
     NODE_IMAGE: "{{ lookup('image', 'sys-svc-container', 'node', 'ref') }}"
+    INFINITO_DNS_IP: "{{ networks.internet.dns }}"
+    INFINITO_DOMAIN: "{{ DOMAIN_PRIMARY }}"
+    INFINITO_IP4: "{{ networks.internet.ip4 }}"
