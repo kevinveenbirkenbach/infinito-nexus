@@ -446,6 +446,7 @@
         "~/.cache/gh",
         "~/.cache/pip",
         "~/.cache/pre-commit",
+        "~/.docker/buildx",
         "~/.venvs"
       ],
       "denyRead": [
