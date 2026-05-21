@@ -53,9 +53,9 @@ NETWORK_DOCKER_EMBEDDED_DNS_RESOLVER: "127.0.0.11" # nocheck: hardcoded-dns-reso
 NETWORK_DOCKER_DNS_NGINX_DIRECTIVE: "resolver {{ NETWORK_DOCKER_EMBEDDED_DNS_RESOLVER }} valid=30s ipv6={{ NETWORK_IPV6_ENABLED | on_off }};"
 defaults_networks:
   internet:
-    ip4: "{{ lookup('env', 'IP4') | default('127.0.0.1', true) }}"
-    ip6: "{{ lookup('env', 'IP6') | default('::1', true) }}"
-    dns: "{{ lookup('env', 'DNS_IP') | default('') }}"
+    ip4: "{{ lookup('env', 'INFINITO_IP4') | default('127.0.0.1', true) }}"
+    ip6: "{{ lookup('env', 'INFINITO_IP6') | default('::1', true) }}"
+    dns: "{{ lookup('env', 'INFINITO_DNS_IP') | default('') }}"
 PORT_BANDS: # nocheck: unused-var  # consumed by the port-allocation plugin outside the YAML/Jinja scope
   local:
     http:

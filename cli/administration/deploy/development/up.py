@@ -12,7 +12,7 @@ def add_parser(sub: argparse._SubParsersAction) -> None:
     p.add_argument(
         "--skip-entry-init",
         action="store_true",
-        help="Do not run /opt/src/infinito/scripts/docker/entry.sh true after stack is up.",
+        help="Do not run ${INFINITO_SRC_DIR}/scripts/docker/entry.sh true after stack is up.",
     )
     p.add_argument(
         "--when-down",

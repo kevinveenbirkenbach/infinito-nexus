@@ -30,7 +30,7 @@ while true; do
 		--push \
 		--tag "ghcr.io/${ghcr_owner}/${repo_name}/${MATRIX_DISTRO}:${IMAGE_TAG}" \
 		--label "org.opencontainers.image.source=https://github.com/${GITHUB_REPOSITORY}" \
-		--build-arg "PKGMGR_IMAGE=ghcr.io/kevinveenbirkenbach/pkgmgr-${MATRIX_DISTRO}:stable" \
+		--build-arg "INFINITO_PARENT_IMAGE=ghcr.io/kevinveenbirkenbach/pkgmgr-${MATRIX_DISTRO}:stable" \
 		"${nix_arg[@]}" \
 		--cache-from "type=gha,scope=${repo_name}-${MATRIX_DISTRO}" \
 		--cache-to "type=gha,mode=max,scope=${repo_name}-${MATRIX_DISTRO}" \

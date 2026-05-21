@@ -61,4 +61,4 @@ deploy_with_cache_retry "reuse-${INFINITO_APPS//[^A-Za-z0-9._-]/-}" -- \
 	-e INFINITO_APPS="${INFINITO_APPS}" \
 	-e INFINITO_DEBUG="${INFINITO_DEBUG}" \
 	"${INFINITO_CONTAINER}" \
-	bash /opt/src/infinito/scripts/tests/deploy/local/utils/reuse-kept-app-deploy.sh
+	bash "${INFINITO_SRC_DIR}/scripts/tests/deploy/local/utils/reuse-kept-app-deploy.sh"

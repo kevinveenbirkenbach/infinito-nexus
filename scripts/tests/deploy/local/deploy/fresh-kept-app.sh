@@ -103,7 +103,7 @@ echo ">>> Ensuring development stack is up (when-down)"
 
 echo ">>> Running entry.sh bootstrap inside container"
 "${PYTHON}" -m cli.administration.deploy.development exec \
-	-- bash /opt/src/infinito/scripts/tests/deploy/local/utils/entry-bootstrap.sh
+	-- bash "${INFINITO_SRC_DIR}/scripts/tests/deploy/local/utils/entry-bootstrap.sh"
 
 echo ">>> Creating inventory for app '${INFINITO_APPS}'"
 # RUNTIME MUST be `dev` here: the host process running this script lives

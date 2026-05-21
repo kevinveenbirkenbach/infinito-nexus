@@ -2,7 +2,7 @@ const { defineConfig } = require("@playwright/test");
 
 const baseURL = process.env.APP_BASE_URL || "http://127.0.0.1";
 
-const keepAll = (process.env.PLAYWRIGHT_KEEP_ALL || "").toLowerCase() === "true";
+const keepAll = (process.env.INFINITO_PLAYWRIGHT_KEEP || "").toLowerCase() === "true";
 
 module.exports = defineConfig({
   testDir: "./tests",

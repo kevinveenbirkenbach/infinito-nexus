@@ -4,14 +4,16 @@
 # Called from the host wrapper at
 # scripts/tests/deploy/local/deploy/reuse-kept-app.sh via `docker exec`,
 # which is responsible for injecting the env-vars asserted below. The
-# repo is mounted at /opt/src/infinito by the dev compose stack.
+# repo is mounted at ${INFINITO_SRC_DIR} by the dev compose stack.
 #
 # Required env:
 #   INFINITO_INVENTORY_FILE   absolute path to <inv>/devices.yml
 #   INFINITO_APPS    space-separated app id list for `--id`
 #   INFINITO_DEBUG   "true"|"false" — appends `--debug` when true
+#   INFINITO_SRC_DIR absolute path to the bind-mounted repo root in the container
 set -euo pipefail
-cd /opt/src/infinito
+: "${INFINITO_SRC_DIR:?INFINITO_SRC_DIR must be set by the container environment}"
+cd "${INFINITO_SRC_DIR}"
 
 : "${INFINITO_INVENTORY_FILE:?INFINITO_INVENTORY_FILE must be set}"
 : "${INFINITO_APPS:?INFINITO_APPS must be set}"

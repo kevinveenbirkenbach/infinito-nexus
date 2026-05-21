@@ -52,22 +52,22 @@ The `test-e2e-playwright` role discovers Playwright-enabled roles through the pr
 
 ## Artefact Retention 🎞️
 
-The runner keeps Playwright traces, screenshots, and videos for every test only when the resolved environment variable `PLAYWRIGHT_KEEP_ALL` evaluates to `true` (case-insensitive).
+The runner keeps Playwright traces, screenshots, and videos for every test only when the resolved environment variable `INFINITO_PLAYWRIGHT_KEEP` evaluates to `true` (case-insensitive).
 Any other value, including unset or empty, keeps artefacts only when a test fails.
 
 The propagation chain has four hops:
 
-1. The host environment variable `PLAYWRIGHT_KEEP_ALL` (set on the host shell, by `act --env PLAYWRIGHT_KEEP_ALL=true`, or by the GitHub Actions repository variable forwarded into each `test-deploy-*.yml` workflow as `PLAYWRIGHT_KEEP_ALL: ${{ vars.PLAYWRIGHT_KEEP_ALL }}`).
-2. `roles/test-e2e-playwright/defaults/main.yml` reads the host value into `TEST_E2E_PLAYWRIGHT_KEEP_ALL` via `lookup('env', 'PLAYWRIGHT_KEEP_ALL')`. Inventory MAY override the role variable per environment in `group_vars` or `host_vars`.
-3. `roles/test-e2e-playwright/tasks/run_one.yml` forwards the resolved value into the Playwright container as `-e PLAYWRIGHT_KEEP_ALL={{ TEST_E2E_PLAYWRIGHT_KEEP_ALL }}`.
+1. The host environment variable `INFINITO_PLAYWRIGHT_KEEP` (set on the host shell, by `act --env INFINITO_PLAYWRIGHT_KEEP=true`, or by the GitHub Actions repository variable forwarded into each `test-deploy-*.yml` workflow as `INFINITO_PLAYWRIGHT_KEEP: ${{ vars.INFINITO_PLAYWRIGHT_KEEP }}`).
+2. `roles/test-e2e-playwright/defaults/main.yml` reads the host value into `TEST_E2E_PLAYWRIGHT_KEEP` via `lookup('env', 'INFINITO_PLAYWRIGHT_KEEP')`. Inventory MAY override the role variable per environment in `group_vars` or `host_vars`.
+3. `roles/test-e2e-playwright/tasks/run_one.yml` forwards the resolved value into the Playwright container as `-e INFINITO_PLAYWRIGHT_KEEP={{ TEST_E2E_PLAYWRIGHT_KEEP }}`.
 4. `roles/test-e2e-playwright/files/playwright.config.js` switches `trace`, `screenshot`, and `video` to `on` when the container value is `true`. It otherwise leaves the failure-only defaults (`retain-on-failure` for trace and video, `only-on-failure` for screenshot).
 
 Set the variable for the contexts you need:
 
-- **Local deploy**: prefix every `make deploy-*` invocation with `PLAYWRIGHT_KEEP_ALL=true`.
-- **Local `act` runs**: append `--env PLAYWRIGHT_KEEP_ALL=true` to the `act` command.
-- **CI**: set the `PLAYWRIGHT_KEEP_ALL` repository variable. For the GitHub click path see [CI Configuration](../../tools/github/actions/configuration.md#playwright_keep_all-).
-- **Inventory pin**: set `TEST_E2E_PLAYWRIGHT_KEEP_ALL: "true"` in `group_vars` or `host_vars` of the target environment.
+- **Local deploy**: prefix every `make deploy-*` invocation with `INFINITO_PLAYWRIGHT_KEEP=true`.
+- **Local `act` runs**: append `--env INFINITO_PLAYWRIGHT_KEEP=true` to the `act` command.
+- **CI**: set the `INFINITO_PLAYWRIGHT_KEEP` repository variable. For the GitHub click path see [CI Configuration](../../tools/github/actions/configuration.md#infinito_playwright_keep-).
+- **Inventory pin**: set `TEST_E2E_PLAYWRIGHT_KEEP: "true"` in `group_vars` or `host_vars` of the target environment.
 
 | Resolved container value | Trace | Screenshot | Video |
 |---|---|---|---|

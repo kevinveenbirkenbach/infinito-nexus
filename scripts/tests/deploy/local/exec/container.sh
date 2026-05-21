@@ -70,11 +70,11 @@ if [[ $# -gt 0 ]]; then
 		usage
 		exit 2
 	fi
-	exec docker exec "${docker_exec_flags[@]}" -w /opt/src/infinito "${container}" "$@"
+	exec docker exec "${docker_exec_flags[@]}" -w "${INFINITO_SRC_DIR}" "${container}" "$@"
 fi
 
 if [[ -n "${INFINITO_CMD:-}" ]]; then
-	exec docker exec "${docker_exec_flags[@]}" -w /opt/src/infinito "${container}" sh -lc "${INFINITO_CMD}"
+	exec docker exec "${docker_exec_flags[@]}" -w "${INFINITO_SRC_DIR}" "${container}" sh -lc "${INFINITO_CMD}"
 fi
 
-exec docker exec "${docker_exec_flags[@]}" -w /opt/src/infinito "${container}" sh
+exec docker exec "${docker_exec_flags[@]}" -w "${INFINITO_SRC_DIR}" "${container}" sh

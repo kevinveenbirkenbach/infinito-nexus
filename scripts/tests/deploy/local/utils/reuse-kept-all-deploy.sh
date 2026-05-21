@@ -4,7 +4,7 @@
 # Called from the host wrapper at
 # scripts/tests/deploy/local/deploy/reuse-kept-all.sh via
 # `cli.administration.deploy.development exec --env KEY=VAL`, which injects the env-vars
-# asserted below. The repo is mounted at /opt/src/infinito by the dev
+# asserted below. The repo is mounted at ${INFINITO_SRC_DIR} by the dev
 # compose stack.
 #
 # Required env:
@@ -12,8 +12,10 @@
 #   INFINITO_INVENTORY_PASSWORD_FILE                   absolute path to <inv>/.password
 #   INFINITO_LIMIT_HOST       Ansible limit (typically "localhost")
 #   INFINITO_DEBUG            "true"|"false" — appends `--debug` when true
+#   INFINITO_SRC_DIR          absolute path to the bind-mounted repo root in the container
 set -euo pipefail
-cd /opt/src/infinito
+: "${INFINITO_SRC_DIR:?INFINITO_SRC_DIR must be set by the container environment}"
+cd "${INFINITO_SRC_DIR}"
 
 : "${INFINITO_INVENTORY_FILE:?INFINITO_INVENTORY_FILE must be set}"
 : "${INFINITO_INVENTORY_PASSWORD_FILE:?INFINITO_INVENTORY_PASSWORD_FILE must be set}" # nocheck: driver-injected-per-invocation

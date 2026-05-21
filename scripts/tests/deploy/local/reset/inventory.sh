@@ -76,7 +76,7 @@ echo ">>> Initializing inventory inside container"
 	-- \
 	bash -c "
     set -euo pipefail
-    cd /opt/src/infinito
+    cd \"${INFINITO_SRC_DIR}\"
 
     echo '>>> entry.sh bootstrap'
     ./scripts/docker/entry.sh true

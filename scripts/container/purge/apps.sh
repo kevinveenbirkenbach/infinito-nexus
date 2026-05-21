@@ -12,10 +12,11 @@
 #
 # Designed to be invoked from the host via:
 #   docker exec -e INFINITO_APPS="${INFINITO_APPS}" <container> \
-#     bash /opt/src/infinito/scripts/container/purge/apps.sh  # nocheck: self-path-reference
+#     bash ${INFINITO_SRC_DIR}/scripts/container/purge/apps.sh  # nocheck: self-path-reference
 
 set -euo pipefail
-cd /opt/src/infinito
+: "${INFINITO_SRC_DIR:?INFINITO_SRC_DIR must be set by the container environment}"
+cd "${INFINITO_SRC_DIR}"
 
 : "${INFINITO_APPS:?INFINITO_APPS is not set (e.g. INFINITO_APPS=web-app-nextcloud)}"
 

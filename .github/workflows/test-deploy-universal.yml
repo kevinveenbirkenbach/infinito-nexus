@@ -24,7 +24,7 @@ env:
     access-tokens = github.com=${{ secrets.GITHUB_TOKEN }}
   INFINITO_IMAGE_TAG: ci-${{ github.sha }}
   INFINITO_GHCR_MIRROR_PREFIX: mirror
-  PLAYWRIGHT_KEEP_ALL: ${{ vars.PLAYWRIGHT_KEEP_ALL }}
+  INFINITO_PLAYWRIGHT_KEEP: ${{ vars.INFINITO_PLAYWRIGHT_KEEP }}
   INFINITO_APP_DISCOVERY_RUNNER: host
 jobs:
   discover:

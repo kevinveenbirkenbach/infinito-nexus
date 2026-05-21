@@ -12,7 +12,8 @@ echo "[docker-infinito] before pkgmgr path"
 INFINITO_PATH="$(pkgmgr path infinito)"
 echo "[docker-infinito] after pkgmgr path: ${INFINITO_PATH}" # nocheck: container-bootstrap
 
-INFINITO_SRC_DIR="/opt/src/infinito"
+# INFINITO_SRC_DIR is provided by compose / Dockerfile ENV. Assert strictly.
+: "${INFINITO_SRC_DIR:?INFINITO_SRC_DIR must be set by the container environment}"
 export INFINITO_PATH
 export INFINITO_SRC_DIR
 

@@ -19,5 +19,7 @@ set -euo pipefail
 
 echo "=== local cleanup: INFINITO_APPS=${INFINITO_APPS} container=${INFINITO_CONTAINER} ==="
 
+: "${INFINITO_SRC_DIR:?INFINITO_SRC_DIR is not set; source scripts/meta/env/load.sh}"
+
 docker exec -e INFINITO_APPS="${INFINITO_APPS}" "${INFINITO_CONTAINER}" \
-	bash /opt/src/infinito/scripts/container/purge/apps.sh
+	bash "${INFINITO_SRC_DIR}/scripts/container/purge/apps.sh"

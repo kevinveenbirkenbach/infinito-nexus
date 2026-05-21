@@ -28,6 +28,8 @@ services:
       dockerfile: Dockerfile
       network: host
       args:
+        INFINITO_PARENT_IMAGE: ${INFINITO_PARENT_IMAGE}
+        INFINITO_SRC_DIR: ${INFINITO_SRC_DIR}
         NIX_CONFIG: ${NIX_CONFIG}
     image: "${INFINITO_IMAGE}"
     pull_policy: "${INFINITO_PULL_POLICY:?Run 'make dotenv' to generate the .env single source of truth}"
@@ -64,7 +66,7 @@ services:
     <<: *ci_defaults
     volumes:
       - /sys/fs/cgroup:/sys/fs/cgroup:rw
-      - .:/opt/src/infinito
+      - .:${INFINITO_SRC_DIR}
       - ${INFINITO_DOCKER_VOLUME:?Run 'make dotenv' to generate the .env single source of truth}:${INFINITO_DOCKER_MOUNT:?Run 'make dotenv' to generate the .env
         single source of truth}
       - infinito:/var/lib/infinito/
@@ -74,7 +76,9 @@ services:
       INFINITO_DNS_IP: ${INFINITO_DNS_IP}
       INFINITO_DOMAIN: ${INFINITO_DOMAIN}
       INFINITO_IP4: ${INFINITO_IP4}
-      INFINITO_SRC_DIR: /opt/src/infinito
+      INFINITO_IP6: ${INFINITO_IP6}
+      INFINITO_PLAYWRIGHT_KEEP: ${INFINITO_PLAYWRIGHT_KEEP}
+      INFINITO_SRC_DIR: ${INFINITO_SRC_DIR}
       PYTHONHTTPSVERIFY: "1"
       GIT_SSL_NO_VERIFY: "0"
 

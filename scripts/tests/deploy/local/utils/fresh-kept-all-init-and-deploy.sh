@@ -6,7 +6,7 @@
 # `cli.administration.deploy.development exec --env KEY=VAL`, which injects the env-vars
 # asserted below. Performs entry bootstrap, creates the inventory and
 # runs the dedicated deploy in one in-container session. The repo is
-# mounted at /opt/src/infinito by the dev compose stack.
+# mounted at ${INFINITO_SRC_DIR} by the dev compose stack.
 #
 # Required env:
 #   INFINITO_INVENTORY_DIR    absolute base inventory dir (no trailing slash)
@@ -15,9 +15,11 @@
 #   APPS_CSV                  comma-separated app id list for `--include`
 #   APPS_COUNT                length of APPS_CSV (echoed for log clarity)
 #   INFINITO_LIMIT_HOST       Ansible host (typically "localhost")
+#   INFINITO_SRC_DIR          absolute path to the bind-mounted repo root in the container
 #   RUNTIME_VARS_JSON         JSON object passed verbatim to `--vars`
 set -euo pipefail
-cd /opt/src/infinito
+: "${INFINITO_SRC_DIR:?INFINITO_SRC_DIR must be set by the container environment}"
+cd "${INFINITO_SRC_DIR}"
 
 : "${INFINITO_INVENTORY_DIR:?INFINITO_INVENTORY_DIR must be set}"
 : "${INFINITO_INVENTORY_FILE:?INFINITO_INVENTORY_FILE must be set}"
@@ -56,7 +58,7 @@ echo ">>> Deploying against ${INFINITO_INVENTORY_FILE}"
 infinito administration deploy dedicated "${INFINITO_INVENTORY_FILE}" \
 	--skip-backup \
 	--debug \
-	--log /opt/src/infinito/logs \
+	--log "${INFINITO_SRC_DIR}/logs" \
 	-l "${INFINITO_LIMIT_HOST}" \
 	--diff \
 	-vv \

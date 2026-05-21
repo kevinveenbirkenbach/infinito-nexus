@@ -260,7 +260,7 @@ echo "------------------------------------------------------------"
 
 # Common build args
 build_args=(
-	--build-arg "PKGMGR_IMAGE=${PKGMGR_IMAGE}"
+	--build-arg "INFINITO_PARENT_IMAGE=${PKGMGR_IMAGE}"
 	--build-arg "NIX_CONFIG=${NIX_CONFIG:-}"
 )
 

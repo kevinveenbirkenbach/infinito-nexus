@@ -51,15 +51,15 @@ _ENV_REF_RE = re.compile(
 # * Playwright runner: PLAYWRIGHT_*, PW_*, CI, DEBUG.
 # * Test-harness flags injected by the deploy task (see
 #   `roles/test-e2e-playwright/tasks/run_one.yml`, e.g.
-#   `PLAYWRIGHT_KEEP_ALL`).
+#   `INFINITO_PLAYWRIGHT_KEEP`).
 _RUNTIME_ENV_NAMES: frozenset[str] = frozenset(
     {
         "CI",
         "DEBUG",
+        "INFINITO_PLAYWRIGHT_KEEP",
         "NODE_DEBUG",
         "NODE_ENV",
         "NODE_TLS_REJECT_UNAUTHORIZED",
-        "PLAYWRIGHT_KEEP_ALL",
         "PLAYWRIGHT_BROWSERS_PATH",
         "PLAYWRIGHT_HTML_REPORT",
         "PLAYWRIGHT_JSON_REPORT",

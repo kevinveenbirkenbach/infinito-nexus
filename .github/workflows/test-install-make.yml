@@ -25,12 +25,19 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v6
 
+      - name: Resolve INFINITO_SRC_DIR from env/default.env (SPOT)
+        run: |
+          src_dir="$(awk -F= '/^INFINITO_SRC_DIR=/{print $2; exit}' env/default.env)"
+          test -n "${src_dir}" || { echo "INFINITO_SRC_DIR not found in env/default.env" >&2; exit 1; }
+          echo "INFINITO_SRC_DIR=${src_dir}" >> "$GITHUB_ENV"
+
       - name: Install & test in pkgmgr virgin container
         run: |
           docker run --rm \
             -e NIX_CONFIG="${NIX_CONFIG}" \
-            -v "$(pwd):/opt/src/infinito" \
-            -w "/opt/src/infinito" \
+            -e INFINITO_SRC_DIR="${INFINITO_SRC_DIR}" \
+            -v "$(pwd):${INFINITO_SRC_DIR}" \
+            -w "${INFINITO_SRC_DIR}" \
             "ghcr.io/kevinveenbirkenbach/pkgmgr-${{ matrix.distro }}-virgin:stable" \
             bash -lc '
               set -euo pipefail

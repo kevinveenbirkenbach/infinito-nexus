@@ -98,7 +98,7 @@ deploy_with_cache_retry "reuse-all" -- \
 	--env "INFINITO_INVENTORY_PASSWORD_FILE=${pw_file}" \
 	--env "INFINITO_LIMIT_HOST=${INFINITO_LIMIT_HOST}" \
 	--env "INFINITO_DEBUG=${INFINITO_DEBUG}" \
-	-- bash /opt/src/infinito/scripts/tests/deploy/local/utils/reuse-kept-all-deploy.sh
+	-- bash "${INFINITO_SRC_DIR}/scripts/tests/deploy/local/utils/reuse-kept-all-deploy.sh"
 
 echo
 echo "✅ Local run finished."

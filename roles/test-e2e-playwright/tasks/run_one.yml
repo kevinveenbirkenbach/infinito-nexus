@@ -257,7 +257,7 @@
       - --env-file
       - "{{ _playwright_stage_dir }}/.env"
       - -e
-      - "PLAYWRIGHT_KEEP_ALL={{ TEST_E2E_PLAYWRIGHT_KEEP_ALL }}"
+      - "INFINITO_PLAYWRIGHT_KEEP={{ TEST_E2E_PLAYWRIGHT_KEEP }}"
       - -v
       - "{{ _playwright_stage_dir }}:/e2e"
       - -v
@@ -303,6 +303,6 @@
   ansible.builtin.script: >-
     {{ role_path }}/files/archive_playwright_reports.sh
     {{ _playwright_reports_dir | quote }}
-    {{ VARIANT_INDEX | default(0) | int }}
+    {{ VARIANT_INDEX | int }}
     {{ ASYNC_ENABLED | bool | string | lower }}
   changed_when: true

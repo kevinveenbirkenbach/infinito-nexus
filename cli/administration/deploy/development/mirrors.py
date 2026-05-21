@@ -4,7 +4,7 @@ import os
 import shlex
 from pathlib import Path
 
-CONTAINER_REPO_ROOT = Path("/opt/src/infinito")
+CONTAINER_REPO_ROOT = Path(os.environ["INFINITO_SRC_DIR"])
 
 
 def _require_env(name: str) -> str:

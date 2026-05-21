@@ -54,7 +54,7 @@ INFINITO_APPS='matomo' scripts/tests/deploy/local/purge/entity.sh
 
 echo ">>> Running entry.sh inside container"
 "${PYTHON}" -m cli.administration.deploy.development exec \
-	-- bash /opt/src/infinito/scripts/tests/deploy/local/utils/entry-bootstrap.sh
+	-- bash "${INFINITO_SRC_DIR}/scripts/tests/deploy/local/utils/entry-bootstrap.sh"
 
 deploy_args=(
 	--apps "${INFINITO_APPS}"

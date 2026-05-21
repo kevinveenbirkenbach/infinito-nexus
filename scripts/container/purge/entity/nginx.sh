@@ -28,7 +28,8 @@ if [[ "$#" -lt 1 ]]; then
 	exit 2
 fi
 
-cd /opt/src/infinito
+: "${INFINITO_SRC_DIR:?INFINITO_SRC_DIR must be set by the container environment}"
+cd "${INFINITO_SRC_DIR}"
 
 if [[ -f "scripts/meta/env/load.sh" ]]; then
 	# shellcheck source=scripts/meta/env/load.sh

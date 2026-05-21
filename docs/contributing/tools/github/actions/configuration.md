@@ -11,7 +11,7 @@ Repository variables are set under **Settings → Secrets and variables → Acti
 | `CI_CANCEL_IN_PROGRESS` | [entry-push-latest.yml](../../../../../.github/workflows/entry-push-latest.yml) | Cancels in-progress runs on new push | `false` to keep in-progress runs alive |
 | `CI_RUN_ON_MAIN` | [entry-push-latest.yml](../../../../../.github/workflows/entry-push-latest.yml) | Pushes to `main` skip CI | `true` to run CI on `main` pushes too |
 | `CI_ENABLE_AUTO_UPDATES` | [update.yml](../../../../../.github/workflows/update.yml), [dependabot-close.yml](../../../../../.github/workflows/dependabot-close.yml) | Update jobs skipped; Dependabot PRs auto-closed | `true` to allow update PRs (workflow-driven and Dependabot) |
-| `PLAYWRIGHT_KEEP_ALL` | [test-deploy-server.yml](../../../../../.github/workflows/test-deploy-server.yml), [test-deploy-universal.yml](../../../../../.github/workflows/test-deploy-universal.yml), [test-deploy-workstation.yml](../../../../../.github/workflows/test-deploy-workstation.yml), [test-deploy-local.yml](../../../../../.github/workflows/test-deploy-local.yml) | Playwright keeps trace, screenshot and video only when a test fails | `true` to keep them for every test (passing runs included) |
+| `INFINITO_PLAYWRIGHT_KEEP` | [test-deploy-server.yml](../../../../../.github/workflows/test-deploy-server.yml), [test-deploy-universal.yml](../../../../../.github/workflows/test-deploy-universal.yml), [test-deploy-workstation.yml](../../../../../.github/workflows/test-deploy-workstation.yml), [test-deploy-local.yml](../../../../../.github/workflows/test-deploy-local.yml) | Playwright keeps trace, screenshot and video only when a test fails | `true` to keep them for every test (passing runs included) |
 
 ## `CI_CANCEL_IN_PROGRESS` 🛑
 
@@ -114,7 +114,7 @@ Dependabot cannot read repository variables itself, so [dependabot-close.yml](..
 | `true` | Run ✓ | Stay open ✓ |
 | any other value | Skipped ✓ | Auto-closed on open ✓ |
 
-## `PLAYWRIGHT_KEEP_ALL` 🎬
+## `INFINITO_PLAYWRIGHT_KEEP` 🎬
 
 Controls whether Playwright keeps trace, screenshot, and video for every test or only for failing tests across the four deploy-test workflows ([test-deploy-server.yml](../../../../../.github/workflows/test-deploy-server.yml), [test-deploy-universal.yml](../../../../../.github/workflows/test-deploy-universal.yml), [test-deploy-workstation.yml](../../../../../.github/workflows/test-deploy-workstation.yml), [test-deploy-local.yml](../../../../../.github/workflows/test-deploy-local.yml)).
 For the full propagation chain, the inventory override, and the local equivalents, see [Playwright Tests](../../../actions/testing/playwright.md#artefact-retention-).
@@ -128,7 +128,7 @@ Artefacts are retained only when a test fails.
 2. Go to **Settings → Secrets and variables → Actions**.
 3. Switch to the **Variables** tab.
 4. Click **New repository variable**.
-5. Set **Name** to `PLAYWRIGHT_KEEP_ALL` and **Value** to `true`.
+5. Set **Name** to `INFINITO_PLAYWRIGHT_KEEP` and **Value** to `true`.
 6. Save.
 
 **To disable again:**
@@ -140,7 +140,7 @@ Delete the variable or change its value to anything other than `true`.
 Each deploy-test workflow forwards the variable into its own `env:` block:
 
 ```yaml
-PLAYWRIGHT_KEEP_ALL: ${{ vars.PLAYWRIGHT_KEEP_ALL }}
+INFINITO_PLAYWRIGHT_KEEP: ${{ vars.INFINITO_PLAYWRIGHT_KEEP }}
 ```
 
 | Variable value | Behaviour |

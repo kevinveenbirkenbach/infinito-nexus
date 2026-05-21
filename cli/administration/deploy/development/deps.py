@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import os
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
@@ -32,7 +33,9 @@ def resolve_run_after(
     ]
     if services_overrides_container_path:
         cmd.extend(["--services-overrides", services_overrides_container_path])
-    r = compose.exec(cmd, check=False, workdir="/opt/src/infinito", capture=True)
+    r = compose.exec(
+        cmd, check=False, workdir=os.environ["INFINITO_SRC_DIR"], capture=True
+    )
 
     if r.returncode != 0:
         raise RuntimeError(

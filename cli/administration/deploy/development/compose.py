@@ -222,9 +222,10 @@ class Compose:
 
         if run_entry_init:
             print(">>> Running infinito entry.sh init")
+            src_dir = os.environ["INFINITO_SRC_DIR"]
             r = self.exec(
-                ["sh", "-lc", "/opt/src/infinito/scripts/docker/entry.sh true"],
-                workdir="/opt/src/infinito",
+                ["sh", "-lc", f"{src_dir}/scripts/docker/entry.sh true"],
+                workdir=src_dir,
                 check=False,
                 live=True,
                 extra_env={

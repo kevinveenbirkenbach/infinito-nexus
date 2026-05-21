@@ -20,7 +20,7 @@ TEST_E2E_PLAYWRIGHT_WAIT_DELAY: 5
 TEST_E2E_PLAYWRIGHT_ONLY_ROLES: "{{ lookup('status').groups }}"
 TEST_E2E_PLAYWRIGHT_SKIP_ROLES: [] # e.g. ["svc-something"]
 
-TEST_E2E_PLAYWRIGHT_KEEP_ALL: "{{ lookup('env', 'PLAYWRIGHT_KEEP_ALL') }}"
+TEST_E2E_PLAYWRIGHT_KEEP: "{{ lookup('env', 'INFINITO_PLAYWRIGHT_KEEP') }}"
 
 # 0-based matrix-deploy round id. Pushed as an Ansible extra var by
 # `cli/administration/deploy/development/deploy.py` when the matrix

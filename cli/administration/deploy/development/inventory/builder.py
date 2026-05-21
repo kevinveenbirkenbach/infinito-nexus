@@ -9,6 +9,7 @@ runs the planner and builds every round's folder.
 from __future__ import annotations
 
 import json
+import os
 from typing import TYPE_CHECKING, Any
 
 from cli.administration.deploy.development.common import DEV_INVENTORY_VARS_FILE
@@ -73,7 +74,7 @@ def build_dev_inventory(compose: Compose, spec: DevInventorySpec) -> None:
     compose.exec(
         cmd,
         check=True,
-        workdir="/opt/src/infinito",
+        workdir=os.environ["INFINITO_SRC_DIR"],
         extra_env=extra_env or None,
     )
     _ensure_vault_password_file(compose, inventory_dir=inv_root)

@@ -113,7 +113,7 @@ deploy_with_cache_retry "fresh-kept-all" -- \
 	--env "APPS_COUNT=${apps_count}" \
 	--env "INFINITO_LIMIT_HOST=${INFINITO_LIMIT_HOST}" \
 	--env "RUNTIME_VARS_JSON=${RUNTIME_VARS_JSON}" \
-	-- bash /opt/src/infinito/scripts/tests/deploy/local/utils/fresh-kept-all-init-and-deploy.sh
+	-- bash "${INFINITO_SRC_DIR}/scripts/tests/deploy/local/utils/fresh-kept-all-init-and-deploy.sh"
 
 echo
 echo "=== local full deploy finished ==="

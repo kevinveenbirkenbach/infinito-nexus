@@ -10,7 +10,7 @@ import uuid
 
 from . import PROJECT_ROOT
 
-INFINITO_SRC_DIR = "/opt/src/infinito"
+INFINITO_SRC_DIR = os.environ["INFINITO_SRC_DIR"]
 
 
 def ensure_image(image: str, rebuild: bool = False, no_cache: bool = False) -> None:
