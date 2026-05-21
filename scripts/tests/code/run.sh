@@ -12,7 +12,8 @@ NIX_CONFIG_EFFECTIVE="$(
 	printf "%s\n%s\n" \
 		"${NIX_CONFIG:-}" \
 		"accept-flake-config = true" |
-		sed -e "s/[[:space:]]\+$//" -e "/^$/d"
+		sed -e "s/[[:space:]]\+$//" -e "/^$/d" |
+		awk '!seen[$0]++'
 )"
 export NIX_CONFIG="${NIX_CONFIG_EFFECTIVE}"
 

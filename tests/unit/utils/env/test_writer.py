@@ -41,11 +41,13 @@ class TestQuoteForDotenv(unittest.TestCase):
     def test_backslash_then_quote(self) -> None:
         self.assertEqual(quote_for_dotenv('a\\"b'), '"a\\\\\\"b"')
 
-    def test_newline_is_escaped(self) -> None:
-        self.assertEqual(quote_for_dotenv("line1\nline2"), '"line1\\nline2"')
+    def test_newline_raises(self) -> None:
+        with self.assertRaises(ValueError):
+            quote_for_dotenv("line1\nline2")
 
-    def test_carriage_return_is_escaped(self) -> None:
-        self.assertEqual(quote_for_dotenv("a\rb"), '"a\\rb"')
+    def test_carriage_return_raises(self) -> None:
+        with self.assertRaises(ValueError):
+            quote_for_dotenv("a\rb")
 
     def test_unicode_passes_through_quoted(self) -> None:
         self.assertEqual(quote_for_dotenv("naïve"), '"naïve"')
@@ -117,18 +119,11 @@ class TestWriteDotenv(unittest.TestCase):
             text = read_text(str(dest))
             self.assertIn('K="with space"', text)
 
-    def test_multiline_value_escaped_to_single_line(self) -> None:
-        """docker-compose's .env loader cannot read multi-line values;
-        the writer collapses \\n into a literal escape."""
+    def test_multiline_value_raises(self) -> None:
         with TemporaryDirectory() as td:
             dest = Path(td) / ".env"
-            write_dotenv(self._build({"K": "a\nb"}), dest)
-            text = read_text(str(dest))
-            # Verify no literal newline inside the K=... entry.
-            entry_line = next(
-                line for line in text.splitlines() if line.startswith("K=")
-            )
-            self.assertEqual(entry_line, 'K="a\\nb"')
+            with self.assertRaises(ValueError):
+                write_dotenv(self._build({"K": "a\nb"}), dest)
 
     def test_trailing_newline(self) -> None:
         with TemporaryDirectory() as td:

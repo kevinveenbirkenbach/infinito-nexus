@@ -25,16 +25,14 @@ _SAFE_VALUE_RE = re.compile(r"^[A-Za-z0-9_/.@:%+=-]+$")
 def quote_for_dotenv(value: str) -> str:
     if value != "" and _SAFE_VALUE_RE.match(value):
         return value
-    escaped = (
-        value.replace("\\", "\\\\")
-        .replace('"', '\\"')
-        # Escape newlines so multi-line values (e.g. NIX_CONFIG) collapse
-        # into a single env-file line. docker-compose's .env loader does
-        # not support multi-line values, and the env-file schema lint
-        # would otherwise see each continuation line as a separate entry.
-        .replace("\r", "\\r")
-        .replace("\n", "\\n")
-    )
+    if "\n" in value or "\r" in value:
+        raise ValueError(
+            "Multi-line env values cannot be written to .env "
+            "(bash `source` and docker-compose `--env-file` both fail "
+            "to round-trip them). Collapse to a single line at the "
+            f"producer. Offending value: {value!r}"
+        )
+    escaped = value.replace("\\", "\\\\").replace('"', '\\"')
     return f'"{escaped}"'
 
 
