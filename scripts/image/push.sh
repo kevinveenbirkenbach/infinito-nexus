@@ -1,13 +1,16 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# shellcheck source=scripts/meta/env/load.sh
+source "${script_dir}/../meta/env/load.sh"
+
 : "${BUILD_CONTEXT_DIR:?Missing BUILD_CONTEXT_DIR}"
 : "${MATRIX_DISTRO:?Missing MATRIX_DISTRO}"
 : "${IMAGE_TAG:?Missing IMAGE_TAG}"
 : "${GITHUB_REPOSITORY:?Missing GITHUB_REPOSITORY}"
 : "${USE_NIX_TOKEN:?Missing USE_NIX_TOKEN}"
 ghcr_owner="$(scripts/meta/resolve/repository/owner.sh)"
-script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 repo_name="$("${script_dir}/../meta/resolve/repository/name.sh")"
 
 max_attempts="${MAX_ATTEMPTS:-7}"
